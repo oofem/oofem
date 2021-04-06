@@ -1852,7 +1852,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
 
 
     // Export nodal variables from primary fields        
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
     FloatArray u(3);
     std::vector<FloatArray> values;
@@ -1867,14 +1867,14 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     u = updatedNodeCoords[j-1];
                     u.subtract(nodeCoords[j-1]);
-                    vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, u);
+                    vtkPiece.setPrimaryVarInNode(type, nodeNum, u);
                     nodeNum += 1;        
                 }
 
             } else {
                 NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                 for ( int j = 1; j <= numCellNodes; j++ ) {
-                    vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
+                    vtkPiece.setPrimaryVarInNode(type, nodeNum, values[j-1]);
                     nodeNum += 1;
                 }
             }
@@ -1883,7 +1883,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
 
     // Export nodal variables from internal fields
     
-    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
+    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport, numTotalNodes );
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
@@ -1896,7 +1896,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
         for ( int layer = 1; layer <= numCells; layer++ ) {            
             recoverValuesFromIP(values, layer, type, tStep);        
             for ( int j = 1; j <= numCellNodes; j++ ) {
-                vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                vtkPiece.setInternalVarInNode( type, nodeNum, values[j-1] );
                 //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);
                 nodeNum += 1;
             }
@@ -1906,7 +1906,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
 
     // Export cell variables
     FloatArray average;
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport, numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
 
@@ -1915,9 +1915,9 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
             VTKBaseExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
             
             if ( average.giveSize() == 6 ) {
-                vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );
+                vtkPiece.setCellVar(type, layer, convV6ToV9Stress(average) );
             } else {
-                vtkPiece.setCellVar(i, layer, average );
+                vtkPiece.setCellVar(type, layer, average );
             }
         }
     }

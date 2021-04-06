@@ -218,7 +218,7 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
         this->exportPrimaryVars(vtkPiece, region, primaryVarsToExport, *primVarSmoother, tStep);
         this->exportIntVars (vtkPiece, region, internalVarsToExport, *smoother, tStep);
 
-        this->exportCellVars(vtkPiece, cellVarsToExport, tStep);
+        this->exportCellVars(vtkPiece, region, cellVarsToExport, tStep);
 
     } // end of default piece for simple geometry elements
 }
@@ -450,7 +450,7 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& re
 
     //const IntArray& mapG2L = vtkPiece.getMapG2L();
     const IntArray& mapL2G = vtkPiece.getMapL2G();
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, mapL2G.giveSize() );
 
     //Get the macroscopic field (deformation gradients, curvatures etc.)
     DofManager *controlNode = d->giveNode(nnodes);   //assuming the control node is last
@@ -473,7 +473,7 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& re
                 DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
                 this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region, smoother);
-                vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(type, inode, std :: move(valueArray) );
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
@@ -553,7 +553,7 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& re
                     valueArray.resize(3);
                 }
 
-                vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(type, inode, std :: move(valueArray) );
             }
         }
     }
@@ -572,7 +572,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, Set& region, Int
     const IntArray& mapL2G = vtkPiece.getMapL2G();
 
     // Export of Internal State Type fields
-    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport, mapL2G.giveSize() );
     for ( int field = 1; field <= internalVarsToExport.giveSize(); field++ ) {
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
@@ -580,7 +580,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, Set& region, Int
             if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes && mapL2G.at(nodeNum) != 0 ) { //no special treatment for master nodes
                 Node *node = d->giveNode(mapL2G.at(nodeNum) );
                 this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
-                vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
@@ -591,7 +591,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, Set& region, Int
                 if ( pos ) {
                     Node *node = d->giveNode(periodicMap.at(pos) );
                     this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
-                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                    vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
                 } else { //fill with zeroes
                     InternalStateValueType valType = giveInternalStateValueType(isType);
                     int ncomponents = giveInternalStateTypeSize(valType);
@@ -602,7 +602,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, Set& region, Int
                     }
 
                     answer.zero();
-                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                    vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
                 }
             }
         }

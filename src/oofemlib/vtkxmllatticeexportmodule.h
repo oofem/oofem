@@ -100,7 +100,7 @@ public:
 
     void writeCellVarsCross(VTKPiece &vtkPiece);
 
-    void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, int region);
+    void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, Set& region);
 
     int initRegionNodeNumbering(VTKPiece& piece, Domain *domain, TimeStep *tStep, Set& region) override;
 

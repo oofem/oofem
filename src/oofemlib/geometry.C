@@ -603,7 +603,7 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 
 
     FloatArray p1pProj;
-    p1pProj.beDifferenceOf(pProj, mVertices [ 0 ]);
+    p1pProj.beDifferenceOf(pProj, mVertices [ 0 ], mVertices[0].giveSize());
     if ( p1pProj.dotProduct(a1) < 0.0 ) {
         return false;
     }
@@ -611,13 +611,13 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 
 
     FloatArray p2pProj;
-    p2pProj.beDifferenceOf(pProj, mVertices [ 1 ]);
+    p2pProj.beDifferenceOf(pProj, mVertices [ 1 ], mVertices[1].giveSize());
     if ( p2pProj.dotProduct(a2) < 0.0 ) {
         return false;
     }
 
     FloatArray p3pProj;
-    p3pProj.beDifferenceOf(pProj, mVertices [ 2 ]);
+    p3pProj.beDifferenceOf(pProj, mVertices [ 2 ], mVertices[2].giveSize());
     if ( p3pProj.dotProduct(a3) < 0.0 ) {
         return false;
     }

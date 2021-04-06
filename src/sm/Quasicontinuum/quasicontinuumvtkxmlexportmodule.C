@@ -160,7 +160,7 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
         this->exportPrimaryVars(this->defaultVTKPiece, region, primaryVarsToExport, *primVarSmoother, tStep);
         this->exportIntVars(this->defaultVTKPiece, region, internalVarsToExport, *smoother, tStep);
         this->exportExternalForces(this->defaultVTKPiece, region, externalForcesToExport, tStep);
-        this->exportCellVars(this->defaultVTKPiece, cellVarsToExport, tStep);
+        this->exportCellVars(this->defaultVTKPiece, region, cellVarsToExport, tStep);
     } // end of default piece for simple geometry elements
 }
 

@@ -235,13 +235,13 @@ VTKXMLLatticeExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Se
 
 
 void
-VTKXMLLatticeExportModule::setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep, int region)
+VTKXMLLatticeExportModule::setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep, Set& region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
     Domain *domain  = emodel->giveDomain(1);
 
-    IntArray elements = this->giveRegionSet(region)->giveElementList();
+    IntArray elements = region.giveElementList();
     int numberOfElements = elements.giveSize();
 
     //Loop over the elements and get crossSectionNodes
@@ -319,7 +319,7 @@ VTKXMLLatticeExportModule::setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep 
         vtkPieceCross.setOffset(ei, offset);
     }
 
-    this->exportCellVars(vtkPieceCross, elements, tStep);
+    this->exportCellVars(vtkPieceCross, region, cellVarsToExport, tStep);
 }
 
 
@@ -330,6 +330,8 @@ VTKXMLLatticeExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     if ( crossSectionExportFlag ) {
         this->doOutputCross(tStep, forcedOutput);
     }
+    this->defaultVTKPiece.clear();
+
 }
 
 
@@ -354,8 +356,9 @@ VTKXMLLatticeExportModule::doOutputCross(TimeStep *tStep, bool forcedOutput)
     int anyPieceNonEmpty = 0;
 
     for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
+        Set* region = this->giveRegionSet(pieceNum);
         // Fills a data struct (VTKPiece) with all the necessary data.
-        this->setupVTKPieceCross(this->defaultVTKPieceCross, tStep, pieceNum);
+        this->setupVTKPieceCross(this->defaultVTKPieceCross, tStep, *region);
 
         // Write the VTK piece to file.
         anyPieceNonEmpty += this->writeVTKPieceCross(this->defaultVTKPieceCross, tStep);
@@ -405,14 +408,15 @@ VTKXMLLatticeExportModule::doOutputNormal(TimeStep *tStep, bool forcedOutput)
         // Fills a data struct (VTKPiece) with all the necessary data.
         Set *region = this->giveRegionSet(pieceNum);
         this->setupVTKPiece(this->defaultVTKPiece, tStep, *region);
+        this->writeVTKPieceProlog(this->defaultVTKPiece, tStep);  
         // Export primary, internal and XFEM variables as nodal quantities
         this->exportPrimaryVars(this->defaultVTKPiece, *region, primaryVarsToExport, *primVarSmoother, tStep);
         this->exportIntVars(this->defaultVTKPiece, *region, internalVarsToExport, *smoother, tStep);
         //const IntArray &elements = region.giveElementList();
-        this->exportCellVars(this->defaultVTKPiece, cellVarsToExport, tStep);
+        this->exportCellVars(this->defaultVTKPiece, *region, cellVarsToExport, tStep);
         // Write the VTK piece to file.
-        anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPiece, tStep);
-        this->defaultVTKPiece.clear();
+        anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPiece, tStep);
+        this->writeVTKPieceEpilog(this->defaultVTKPiece, tStep);  
     }
 
     /*
@@ -434,7 +438,9 @@ VTKXMLLatticeExportModule::doOutputNormal(TimeStep *tStep, bool forcedOutput)
                 this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
                 for ( int j = 0; j < ( int ) this->defaultVTKPieces.size(); j++ ) {
-                    anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPieces [ j ], tStep);
+                    this->writeVTKPieceProlog(this->defaultVTKPieces[j], tStep);  
+                    anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPieces [ j ], tStep);
+                    this->writeVTKPieceEpilog(this->defaultVTKPieces[j], tStep);  
                 }
             }
         }
@@ -586,10 +592,11 @@ VTKXMLLatticeExportModule::initRegionNodeNumbering(VTKPiece& vtkPiece, Domain *d
         }
     }
 
-    vtkPiece.setNumberOfNodes(regionDofMans);   
-    vtkPiece.setNumberOfCells(regionSingleCells);
     uniqueNodeTable.resizeWithData(nnodes + uniqueNodes, 3);
     regionDofMans = nnodes + uniqueNodes;
+    vtkPiece.setNumberOfNodes(regionDofMans);   
+    vtkPiece.setNumberOfCells(regionSingleCells);
+
     regionG2LNodalNumbers.resizeWithValues(regionDofMans);
     regionL2GNodalNumbers.resize(regionDofMans);
 
@@ -614,7 +621,7 @@ VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set& region, In
     //const IntArray& mapG2L = vtkPiece.getMapG2L();
     const IntArray& mapL2G = vtkPiece.getMapL2G();
 
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, mapL2G.giveSize() );
 
     //Get the macroscopic field (deformation gradients, curvatures etc.)
     DofManager *controlNode = d->giveNode(nnodes);   //assuming the control node is last
@@ -637,7 +644,7 @@ VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set& region, In
                 DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
                 this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region, smoother);
-                vtkPiece.setPrimaryVarInNode(i, inode, std::move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(type, inode, std::move(valueArray) );
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
@@ -677,7 +684,7 @@ VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set& region, In
                 } else {
                     valueArray.resize(3);
                 }
-                vtkPiece.setPrimaryVarInNode(i, inode, std::move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(type, inode, std::move(valueArray) );
             }
         }
     }
@@ -696,7 +703,7 @@ VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArr
     //const IntArray& mapG2L = vtkPiece.getMapG2L();
     const IntArray& mapL2G = vtkPiece.getMapL2G();
     // Export of Internal State Type fields
-    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport, mapL2G.giveSize() );
     for ( int field = 1; field <= internalVarsToExport.giveSize(); field++ ) {
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
@@ -704,7 +711,7 @@ VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArr
             if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes && mapL2G.at(nodeNum) != 0 ) { //no special treatment for master nodes
                 Node *node = d->giveNode(mapL2G.at(nodeNum) );
                 this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
-                vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
@@ -715,7 +722,7 @@ VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArr
                 if ( pos ) {
                     Node *node = d->giveNode(periodicMap.at(pos) );
                     this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
-                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                    vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
                 } else { //fill with zeroes
                     InternalStateValueType valType = giveInternalStateValueType(isType);
                     int ncomponents = giveInternalStateTypeSize(valType);
@@ -726,7 +733,7 @@ VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArr
                     }
 
                     answer.zero();
-                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                    vtkPiece.setInternalVarInNode(isType, nodeNum, answer);
                 }
             }
         }
@@ -829,7 +836,7 @@ VTKXMLLatticeExportModule::writeCellVarsCross(VTKPiece &vtkPiece)
         this->fileStreamCross << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
         valueArray.resize(ncomponents);
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
-            valueArray = vtkPiece.giveCellVar(i, ielem);
+            valueArray = vtkPiece.giveCellVar(type, ielem);
             for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
                 this->fileStreamCross << valueArray.at(i) << " ";
             }

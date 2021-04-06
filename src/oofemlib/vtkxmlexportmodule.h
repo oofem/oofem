@@ -114,29 +114,30 @@ public:
     void setNodeCoords(int nodeNum, const FloatArray &coords);
     FloatArray &giveNodeCoords(int nodeNum) { return this->nodeCoords [ nodeNum - 1 ]; }
 
-    void setNumberOfPrimaryVarsToExport(int numVars, int numNodes);
+    void setNumberOfPrimaryVarsToExport(const IntArray& primVars, int numNodes);
     void setNumberOfLoadsToExport(int numVars, int numNodes);
-    void setNumberOfInternalVarsToExport(int numVars, int numNodes);
+    void setNumberOfInternalVarsToExport(const IntArray& ists, int numNodes);
     void setNumberOfInternalXFEMVarsToExport(int numVars, int numEnrichmentItems, int numNodes);
-    void setNumberOfCellVarsToExport(int numVars, int numCells);
+    void setNumberOfCellVarsToExport(const IntArray& cellVars, int numCells);
 
-    void setPrimaryVarInNode(int varNum, int nodeNum, FloatArray valueArray);
-    FloatArray &givePrimaryVarInNode(int varNum, int nodeNum) { return this->nodeVars [ varNum - 1 ] [ nodeNum - 1 ]; }
+    void setPrimaryVarInNode(UnknownType  type, int nodeNum, FloatArray valueArray);
+    FloatArray &givePrimaryVarInNode(UnknownType type, int nodeNum) { return this->nodeVars [ type ] [ nodeNum - 1 ]; }
 
     void setLoadInNode(int varNum, int nodeNum, FloatArray valueArray);
     FloatArray &giveLoadInNode(int varNum, int nodeNum) { return this->nodeLoads [ varNum - 1 ] [ nodeNum - 1 ]; }
 
-    void setInternalVarInNode(int varNum, int nodeNum, FloatArray valueArray);
-    FloatArray &giveInternalVarInNode(int varNum, int nodeNum) { return this->nodeVarsFromIS [ varNum - 1 ] [ nodeNum - 1 ]; }
+    void setInternalVarInNode(InternalStateType type, int nodeNum, FloatArray valueArray);
+    FloatArray &giveInternalVarInNode (InternalStateType type, int nodeNum) { return this->nodeVarsFromIS [ type ] [ nodeNum - 1 ]; }
 
     void setInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum, FloatArray valueArray);
     FloatArray &giveInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum) { return this->nodeVarsFromXFEMIS [ varNum - 1 ] [ eiNum - 1 ] [ nodeNum - 1 ]; }
 
-    void setCellVar(int varNum, int cellNum, FloatArray valueArray);
-    FloatArray &giveCellVar(int field, int cellNum) { return this->elVars [ field - 1 ] [ cellNum - 1 ]; }
+    void setCellVar(InternalStateType type, int cellNum, FloatArray valueArray);
+    FloatArray &giveCellVar(InternalStateType type, int cellNum) { return this->cellVars [ type ] [ cellNum - 1 ]; }
 
     IntArray& getMapG2L () {return this->mapG2L;}
     IntArray& getMapL2G () {return this->mapL2G;}
+    //void setRegionCells(IntArray& cells) {this->regionElInd = cells;}
     IntArray& getRegionCells () {return this->regionElInd;}
 private:
     int numCells;
@@ -151,11 +152,11 @@ private:
 
     std::vector< FloatArray >nodeCoords;   // all the nodes in the piece [node][coords]
     std::vector< IntArray >connectivity;   // cell connectivity [cell][nodes]
-    std::vector< std::vector< FloatArray > >nodeVars;     // [field][node][valArray]
+    std::map< UnknownType, std::vector< FloatArray > >nodeVars;     // [field][node][valArray]
     std::vector< std::vector< FloatArray > >nodeLoads;     // [field][node][valArray]
-    std::vector< std::vector< FloatArray > >nodeVarsFromIS;     // [field][node][valArray]
+    std::map< InternalStateType, std::vector< FloatArray > >nodeVarsFromIS;     // [field][node][valArray]
     std::vector< std::vector< std::vector< FloatArray > > >nodeVarsFromXFEMIS;       // [field][ei][node][valArray]
-    std::vector< std::vector< FloatArray > >elVars;     // [el][field][valArray]
+    std::map< InternalStateType, std::vector< FloatArray > >cellVars;     // [el][field][valArray]
 };
 
 /**
@@ -202,7 +203,7 @@ protected:
     
     void exportXFEMVarAs(XFEMStateType xfemstype, int regionDofMans, int ireg, TimeStep *tStep, EnrichmentItem *ei);
     ///  Exports cell variables (typically internal variables).
-    void exportCellVars(VTKPiece &piece, IntArray &cellVarsToExport, TimeStep *tStep);
+    void exportCellVars(VTKPiece &piece, Set& region, IntArray &cellVarsToExport, TimeStep *tStep);
     /**
      * Export external forces.
      */
@@ -311,7 +312,7 @@ public:
      * Prints point data header.
      */
     void exportPointDataHeader(std::ofstream fileStream, TimeStep *tStep);
-    void giveDataHeaders(std::string &pointHeader, std::string &cellHeader);     // returns the headers
+    virtual void giveDataHeaders(std::string &pointHeader, std::string &cellHeader);     // returns the headers
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).
@@ -361,9 +362,20 @@ protected:
     void writeCellVars(VTKPiece &vtkPiece);
     void writeExternalForces(VTKPiece &vtkPiece);
     /**
+     * Writes Piece header+geometry
      * @return true if piece is not empty and thus written
      */
-    bool writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep);
+    bool writeVTKPieceEpilog(VTKPiece &vtkPiece, TimeStep *tStep);
+    /**
+     * Writes Piece variables
+     * @return true if piece is not empty and thus written
+     */
+    bool writeVTKPieceVariables(VTKPiece &vtkPiece, TimeStep *tStep);
+    /**
+     * Writes piece epiloque
+     * @return true if piece is not empty and thus written
+     */
+    bool writeVTKPieceProlog(VTKPiece &vtkPiece, TimeStep *tStep);
     /**
      * Exports given internal variables directly in integration points (raw data, no smoothing)
      * @param valIDs the UnknownType values identifying the internal variables to export
@@ -434,6 +446,50 @@ public:
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     std::vector< VTKPiece>& getVTKPieces(); 
 protected:
+};
+
+///@name Input fields for VTK XML export module
+//@{
+#define _IFT_VTKXMLXFemExportModule_Name "vtkxmlxfem"
+//@}
+
+/**
+ * Represents VTK (Visualization Toolkit) export module for Xfem. 
+ * It uses VTK (.vtu) file format, Unstructured grid dataset.
+ * The export of data is done on Region By Region basis, possibly taking care about possible
+ * nonsmooth character of some internal variables at region boundaries.
+ * The exported variables are dermined by XFemManager (FemMan->vtkExportFields).
+ * Each region and each enrichment item is exported as a single piece. 
+ * When region contains composite cells, these are assumed to be
+ * exported in individual subsequent pieces after the default one for the particular region.
+ */
+class OOFEM_EXPORT VTKXMLXFemExportModule : public VTKXMLExportModule
+{
+protected:
+
+public:
+    /// Constructor. Creates empty Output Manager. By default all components are selected.
+    VTKXMLXFemExportModule(int n, EngngModel *e);
+    /// Destructor
+    virtual ~VTKXMLXFemExportModule();
+
+    void initializeFrom(InputRecord &ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void terminate() override {}
+    const char *giveClassName() const override { return "VTKXMLXFemExportModule"; }
+
+protected:
+
+    /// Returns the filename for the given time step.
+    std::string giveOutputFileName(TimeStep *tStep);
+
+    /// Returns the output stream for given solution step.
+    std::ofstream giveOutputStream(TimeStep *tStep);
+
+    bool writeXFEMVars(VTKPiece &vtkPiece, int field, int enrItIndex);
+    void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep, XFEMStateType xfemstype, Set &region, EnrichmentItem *ei);
+    void exportIntVars(VTKPiece &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
+    void giveDataHeaders(std::string &pointHeader, std::string &cellHeader) override;     // returns the headers
 };
 
 
