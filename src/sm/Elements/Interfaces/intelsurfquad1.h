@@ -60,7 +60,7 @@ public:
     //bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
     void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
-    int computeNumberOfDofs() override { return 18; }
+    int computeNumberOfDofs() override { return 24; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     double computeAreaAround(IntegrationPoint *ip) override;

@@ -36,6 +36,7 @@
 #define entityrenumberingscheme_h
 
 #include <map>
+#include <unordered_map>
 
 #include "oofemcfg.h"
 #include "error.h"
