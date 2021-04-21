@@ -128,8 +128,8 @@ void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const Flo
 double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
-    normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind) );
+    normal.at(1) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
+    normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind) );
 
     return normal.normalize() * 0.5;
 }

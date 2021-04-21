@@ -61,10 +61,10 @@ class GaussPoint;
 class Domain;
 
 /**
- * Implementation of the material model for steel relaxation given in Eurocode 2 
+ * Implementation of the material model for steel relaxation given in Eurocode 2
  * (the same as in Model Code 2010) and in Ba\v{z}ant and Yu (J. of Eng. Mech, 2013)
- * which reduces to the first model under constant strain. At variable strain history 
- * the first model uses the approach employing the so-called {\sl{equivalent time}} 
+ * which reduces to the first model under constant strain. At variable strain history
+ * the first model uses the approach employing the so-called {\sl{equivalent time}}
  * approach described in Annex D in the Eurocode 2.
  * The current implementation takes into account only prestress losses
  * due to steel relaxation, other losses (e.g. slip at anchorage,
@@ -74,7 +74,7 @@ class Domain;
  * losses due to sequential prestressing, elastic deformation and both
  * short-time and long-time creep and shrinkage are taken into account
  * automatically provided that a suitable material model is chosen for
- * concrete. 
+ * concrete.
  * See material manual and the above-mentioned documents for details.
  */
 class SteelRelaxMat : public StructuralMaterial
@@ -118,7 +118,7 @@ protected:
     double relRelaxBound = 0.;
 
     /**
-     * 0 = approach according to Ba\v{z}ant and Yu, 
+     * 0 = approach according to Ba\v{z}ant and Yu,
      * 1 = equivalent time approach according to Eurocode 2 and {\sl{fib}} Model Code 2010
      */
     enum approachType { Bazant_EC2, EquivTime_EC2 } Approach = Bazant_EC2;
@@ -126,16 +126,16 @@ protected:
 public:
     SteelRelaxMat(int n, Domain *d);
 
-    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &reducedE, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<SteelRelaxMat*>(this)->giveRealStressVector(answer, gp, reducedE, tStep);
+        const_cast< SteelRelaxMat * >( this )->giveRealStressVector(answer, gp, reducedE, tStep);
         return answer;
     }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     /**
      * evaluates stress-related strain - subtracts not only temperature strains but also strains caused by steel relaxation
@@ -162,6 +162,8 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
+    bool hasCastingTimeSupport() const override { return true; }
+
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
@@ -187,6 +189,9 @@ protected:
     double tempRelaxIntVariable = 0.;
 
     double prestress = 0.;
+    double tempPrestress = 0.;
+    // becomes activated at the end of the time step when the material becomes prestressed
+    //    bool prestressedFlag = false;
 
 public:
     SteelRelaxMatStatus(GaussPoint *g);
@@ -195,7 +200,8 @@ public:
     double giveTempRelaxIntVariable() const { return tempRelaxIntVariable; }
     double giveRelaxIntVariable() const { return relaxIntVariable; }
 
-    void setPrestress(double src) { prestress = src; }
+    void setTempPrestress(double src) { tempPrestress = src; }
+    double giveTempPrestress() const { return tempPrestress; }
     double givePrestress() const { return prestress; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
