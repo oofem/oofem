@@ -49,7 +49,6 @@
 #include "mathfem.h"
 #include "crosssection.h"
 #include "Elements/structuralelement.h"
-#include "fei2dquadlin.h"
 
 
 namespace oofem {
@@ -229,13 +228,9 @@ void PrescribedDispSlipBCNeumannRC::assembleVectorStress( FloatArray &answer, Ti
             fe_v.beProductOf(Ke, e_u);
             fe_s.beTProductOf(Ke, sigmaHom);
 
-            //TODO: temporary hack for inconsistent normal vectors
-            auto interp = dynamic_cast< FEI2dQuadLin * >( e->giveInterpolation());
-            if ( interp != nullptr ) {
-            } else {
-                fe_v.negated();
-                fe_s.negated();
-            }
+            // Note: The terms appear negative in the equations:
+            fe_v.negated();
+            fe_s.negated();
 
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
@@ -440,14 +435,6 @@ void PrescribedDispSlipBCNeumannRC::assembleVectorRStress( FloatArray &answer, T
             //Compute the contribution to internal force vector
             fe_u.beTProductOf(Ksig, sigmaS);
             fe_sig.beProductOf(Ksig, u_c);
-
-            // temporary hack for inconsistent normal vectors
-            auto interp = dynamic_cast< FEI2dQuadLin * >( ec->giveInterpolation());
-            if ( interp != nullptr ) {
-                fe_u.negated();
-                fe_sig.negated();
-            } else {
-            }
 
             // Note: The terms appear negative in the equations:
             fe_u.negated();
@@ -940,13 +927,7 @@ void PrescribedDispSlipBCNeumannRC::assembleOnStress( SparseMtrx &answer, const 
 
         this->integrateTangentStress(Ke, e, boundary);
 
-        //TODO: temporary hack for inconsistent normal vectors
-        auto interp = dynamic_cast< FEI2dQuadLin * >( e->giveInterpolation() );
-        if ( interp != nullptr ) {
-        } else {
-            Ke.negated();
-        }
-
+        Ke.negated();
         Ke.times(scale);
         KeT.beTranspositionOf(Ke);
 
@@ -1067,12 +1048,6 @@ void PrescribedDispSlipBCNeumannRC::assembleOnReinfStress( SparseMtrx &answer, c
         ec->giveLocationArray(loc_c, c_s);
 
         this->integrateTangentRStressConcrete(Ke, ec, boundary);
-
-        //TODO: temporary hack for inconsistent normal vectors
-        auto interp = dynamic_cast< FEI2dQuadLin * >( ec->giveInterpolation() );
-        if ( interp != nullptr ) {
-            Ke.negated();
-        }
 
         Ke.times(1/omegaBox);
         Ke.negated();

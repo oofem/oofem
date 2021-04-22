@@ -61,9 +61,17 @@ namespace oofem {
  * Works with 2D RVEs comprising solid elements (concrete), reinforcement (beam/truss elements) and interface elements in between.
  * Used in multiscale analyses of reinforced concrete structures. Currently, only orthogonal reinforcement in X and Y direction is supported.
  *
- * This BC is applied to the set of nodes lying at the concrete boundary (either node set or elementboundaries set will work).
- * If the optional reinfxbound and reinfybound sets are specified, the fields/gradients are prescribed on both concrete and steel.
- * If only the conboundset input record is specified, the displacement gradient is prescribed only on concrete.
+ * This BC can be applied to the set of:
+ *      - nodes lying at the concrete boundary. In order to prescribe macroscopic displacement gradient on both concrete and steel,
+ *          the node set this BC is applied to must include the end (boundary) nodes of the reinforcement bars as well. conboundset should contain only elementboundaries of concrete elements, e.g.
+ *          PrescribedDispSlipBCDirichletRC 1 loadTimeFunction 1 dofs 2 1 2 ccoord 3 0.0 0.0 0.0 dispGrad 2 2 {0 0; 0 0} set 5 conboundset 6
+ *          where set 5 contains all boundary nodes (concrete+steel) and set 6 contains boundary of concrete elements
+ *      - elementboundaries of concrete elements. In this case displacement gradient is not prescribed on the reinforcement.
+ *          PrescribedDispSlipBCDirichletRC 1 loadTimeFunction 1 dofs 2 1 2 ccoord 3 0.0 0.0 0.0 dispGrad 2 2 {0 0; 0 0} set 5 conboundset 5
+ *          where set 5 contains boundary of concrete elements
+ *
+ * If the macroscopic slip/slip gradient field is to be prescribed onto the RVE, the optional node sets reinfxbound and reinfybound must be specified.
+ * These node sets contain the boundary nodes of the horizontal and vertical reinforcement, respectively.
  *
  * @author Adam Sciegaj
  */
