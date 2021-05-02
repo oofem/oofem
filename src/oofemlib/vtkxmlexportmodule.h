@@ -35,7 +35,7 @@
 #ifndef vtkxmlexportmodule_h
 #define vtkxmlexportmodule_h
 
-#include "exportmodule.h"
+#include "vtkbaseexportmodule.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
@@ -54,6 +54,7 @@
 #ifdef _PYBIND_BINDINGS
  #include <pybind11/pybind11.h>
  #include <pybind11/stl.h>   //Conversion for lists
+ #include "pybind11/numpy.h"
 namespace py = pybind11;
 #endif
 
@@ -76,185 +77,11 @@ namespace py = pybind11;
 #define _IFT_VTKXMLExportModule_externalForces "externalforces"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
-//#define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
 using namespace std;
 namespace oofem {
 class Node;
-
-///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
-/// Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
-class OOFEM_EXPORT VTKPiece
-{
-public:
-    VTKPiece()
-    {
-        numCells = 0;
-        numNodes = 0;
-    }
-
-    void clear();
-
-    void setNumberOfNodes(int numNodes);
-    int giveNumberOfNodes() { return this->numNodes; }
-
-    void setNumberOfCells(int numCells);
-    int giveNumberOfCells() { return this->numCells; }
-
-    void setConnectivity(int cellNum, IntArray &nodes);
-    IntArray &giveCellConnectivity(int cellNum) { return this->connectivity [ cellNum - 1 ]; }
-
-    void setCellType(int cellNum, int type) { this->elCellTypes.at(cellNum) = type; }
-    int giveCellType(int cellNum) { return this->elCellTypes.at(cellNum); }
-
-    void setOffset(int cellNum, int offset) { this->elOffsets.at(cellNum) = offset; }
-    int giveCellOffset(int cellNum) { return this->elOffsets.at(cellNum); }
-
-    void setNodeCoords(int nodeNum, const FloatArray &coords);
-    FloatArray &giveNodeCoords(int nodeNum) { return this->nodeCoords [ nodeNum - 1 ]; }
-
-    void setNumberOfPrimaryVarsToExport(const IntArray& primVars, int numNodes);
-    void setNumberOfLoadsToExport(int numVars, int numNodes);
-    void setNumberOfInternalVarsToExport(const IntArray& ists, int numNodes);
-    void setNumberOfInternalXFEMVarsToExport(int numVars, int numEnrichmentItems, int numNodes);
-    void setNumberOfCellVarsToExport(const IntArray& cellVars, int numCells);
-
-    void setPrimaryVarInNode(UnknownType  type, int nodeNum, FloatArray valueArray);
-    FloatArray &givePrimaryVarInNode(UnknownType type, int nodeNum) { return this->nodeVars [ type ] [ nodeNum - 1 ]; }
-
-    void setLoadInNode(int varNum, int nodeNum, FloatArray valueArray);
-    FloatArray &giveLoadInNode(int varNum, int nodeNum) { return this->nodeLoads [ varNum - 1 ] [ nodeNum - 1 ]; }
-
-    void setInternalVarInNode(InternalStateType type, int nodeNum, FloatArray valueArray);
-    FloatArray &giveInternalVarInNode (InternalStateType type, int nodeNum) { return this->nodeVarsFromIS [ type ] [ nodeNum - 1 ]; }
-
-    void setInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum, FloatArray valueArray);
-    FloatArray &giveInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum) { return this->nodeVarsFromXFEMIS [ varNum - 1 ] [ eiNum - 1 ] [ nodeNum - 1 ]; }
-
-    void setCellVar(InternalStateType type, int cellNum, FloatArray valueArray);
-    FloatArray &giveCellVar(InternalStateType type, int cellNum) { return this->cellVars [ type ] [ cellNum - 1 ]; }
-
-    IntArray& getMapG2L () {return this->mapG2L;}
-    IntArray& getMapL2G () {return this->mapL2G;}
-    //void setRegionCells(IntArray& cells) {this->regionElInd = cells;}
-    IntArray& getRegionCells () {return this->regionElInd;}
-private:
-    int numCells;
-    int numNodes;
-    IntArray elCellTypes;
-    IntArray elOffsets;
-    // dofman local->global and global->local region map 
-    IntArray mapG2L, mapL2G;
-    // region elements 
-    IntArray regionElInd;
-
-
-    std::vector< FloatArray >nodeCoords;   // all the nodes in the piece [node][coords]
-    std::vector< IntArray >connectivity;   // cell connectivity [cell][nodes]
-    std::map< UnknownType, std::vector< FloatArray > >nodeVars;     // [field][node][valArray]
-    std::vector< std::vector< FloatArray > >nodeLoads;     // [field][node][valArray]
-    std::map< InternalStateType, std::vector< FloatArray > >nodeVarsFromIS;     // [field][node][valArray]
-    std::vector< std::vector< std::vector< FloatArray > > >nodeVarsFromXFEMIS;       // [field][ei][node][valArray]
-    std::map< InternalStateType, std::vector< FloatArray > >cellVars;     // [el][field][valArray]
-};
-
-/**
- * Base class for VTK related export modules. Defines commmon methods.
- */
-class OOFEM_EXPORT VTKBaseExportModule : public ExportModule
-{
-protected:
-    /// Map from Voigt to full tensor.
-    static IntArray redToFull;
-
-public:
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKBaseExportModule(int n, EngngModel *e);
-    /// Destructor
-    virtual ~VTKBaseExportModule();
-
-    void initialize() override;
-    void terminate() override;
-    const char *giveClassName() const override { return "VTKBaseExportModule"; }
-    /**
-     * Computes a cell average of an InternalStateType varible based on the weights
-     * in the integrationpoints (=> volume/area/length average)
-     */
-    static void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
-
-    
-protected:
-
-    virtual void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region);
-       
-    /**
-     * Export primary variables.
-     */
-    virtual void exportPrimaryVars(VTKPiece &piece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
-    /**
-     * Export internal variables by smoothing.
-     */
-    virtual void exportIntVars(VTKPiece &piece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
-    /**
-     * Export external forces.
-     */
-    void exportExternalForces(VTKPiece &piece, int region, TimeStep *tStep);
-    
-    void exportXFEMVarAs(XFEMStateType xfemstype, int regionDofMans, int ireg, TimeStep *tStep, EnrichmentItem *ei);
-    ///  Exports cell variables (typically internal variables).
-    void exportCellVars(VTKPiece &piece, Set& region, IntArray &cellVarsToExport, TimeStep *tStep);
-    /**
-     * Export external forces.
-     */
-    void exportExternalForces(VTKPiece &piece, Set& region, IntArray& externalForcesToExport, TimeStep *tStep);
-
-
-    //  Tries to find the value of a primary field on the given DofManager.
-    //  Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
-    void getNodalVariableFromPrimaryField(FloatArray &answer, DofManager *dman, TimeStep *tStep, UnknownType type, Set& region, NodalRecoveryModel& smoother);
-    //
-    //  Exports single internal variable by smoothing.
-    //
-    void getNodalVariableFromIS(FloatArray &answer, Node *node, TimeStep *tStep, InternalStateType type, Set& region, NodalRecoveryModel& smoother);
-    void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep, XFEMStateType xfemstype,Set& region, EnrichmentItem *ei);
-    //
-    //  Exports a single cell variable (typically an internal variable).
-    //
-    void getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep);
- 
-
-    /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    static void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype);
-    /**
-     * Returns corresponding element cell_type.
-     * Some common element types are supported, others can be supported via interface concept.
-    */
-    int giveCellType(Element *element);
-    /**
-     * Returns number of nodes corresponding to cell type
-     */
-    int giveNumberOfNodesPerCell(int cellType);
-    /**
-     * Returns the element cell geometry.
-     */
-    void giveElementCell(IntArray &answer, Element *elem);
-    /**
-     * Assembles the region node map. Also computes the total number of nodes in region.
-     * The region are numbered starting from offset+1.
-     * If mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
-     * The i-th value contains the corresponding local region number (or zero, if global number is not in region).
-     * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
-     * The i-th value contains the corresponding global node number.
-     */
-    virtual int initRegionNodeNumbering(VTKPiece& vtkPiece,
-                                        Domain *domain, TimeStep *tStep, Set& region); 
-
-    // Export of composite elements (built up from several subcells)
-    bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
-    void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
-    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
-};
 
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
@@ -406,92 +233,6 @@ protected:
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
     void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
-
-class OOFEM_EXPORT VTKPFEMXMLExportModule : public VTKBaseExportModule
-{
-protected:
-    std::ofstream fileStream;
-public:
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKPFEMXMLExportModule(int n, EngngModel *e);
-    /// Destructor
-    virtual ~VTKPFEMXMLExportModule();
-
-    void initializeFrom(InputRecord &ir) override;
-
-    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
-protected:
-    /// Returns the filename for the given time step.
-    std::string giveOutputFileName(TimeStep *tStep);
-
-    /// Returns the output stream for given solution step.
-    std::ofstream giveOutputStream(TimeStep *tStep);
-
-};
-
-/** 
- * VTK-like export class intended mainly to provide easy to use Pythonic interface by providing 
- * acccess to VTKPieces.
- */  
-class OOFEM_EXPORT VTKMemoryExportModule : public VTKBaseExportModule
-{
-protected:
-    std::vector< VTKPiece > vtkPieces;
-public:
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKMemoryExportModule(int n, EngngModel *e);
-    /// Destructor
-    virtual ~VTKMemoryExportModule();
-    void initializeFrom(InputRecord &ir) override;
-    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
-    std::vector< VTKPiece>& getVTKPieces(); 
-protected:
-};
-
-///@name Input fields for VTK XML export module
-//@{
-#define _IFT_VTKXMLXFemExportModule_Name "vtkxmlxfem"
-//@}
-
-/**
- * Represents VTK (Visualization Toolkit) export module for Xfem. 
- * It uses VTK (.vtu) file format, Unstructured grid dataset.
- * The export of data is done on Region By Region basis, possibly taking care about possible
- * nonsmooth character of some internal variables at region boundaries.
- * The exported variables are dermined by XFemManager (FemMan->vtkExportFields).
- * Each region and each enrichment item is exported as a single piece. 
- * When region contains composite cells, these are assumed to be
- * exported in individual subsequent pieces after the default one for the particular region.
- */
-class OOFEM_EXPORT VTKXMLXFemExportModule : public VTKXMLExportModule
-{
-protected:
-
-public:
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLXFemExportModule(int n, EngngModel *e);
-    /// Destructor
-    virtual ~VTKXMLXFemExportModule();
-
-    void initializeFrom(InputRecord &ir) override;
-    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
-    void terminate() override {}
-    const char *giveClassName() const override { return "VTKXMLXFemExportModule"; }
-
-protected:
-
-    /// Returns the filename for the given time step.
-    std::string giveOutputFileName(TimeStep *tStep);
-
-    /// Returns the output stream for given solution step.
-    std::ofstream giveOutputStream(TimeStep *tStep);
-
-    bool writeXFEMVars(VTKPiece &vtkPiece, int field, int enrItIndex);
-    void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep, XFEMStateType xfemstype, Set &region, EnrichmentItem *ei);
-    void exportIntVars(VTKPiece &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
-    void giveDataHeaders(std::string &pointHeader, std::string &cellHeader) override;     // returns the headers
-};
-
 
 /**
  * Elements with geometry defined as EGT_Composite are exported using individual pieces.
