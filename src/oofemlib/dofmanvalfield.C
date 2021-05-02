@@ -44,7 +44,7 @@
 #include "feinterpol.h"
 #include "problemmode.h"
 #include "nodalrecoverymodel.h"
-#include "vtkxmlexportmodule.h"
+#include "vtkbaseexportmodule.h"
 #include "octreelocalizer.h"
 
 

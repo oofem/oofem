@@ -1235,7 +1235,7 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
 
     InternalStateType isttype;
     int n = internalVarsToExport.giveSize();
-    vtkPieces [ 0 ].setNumberOfInternalVarsToExport(n, nNodes);
+    vtkPieces [ 0 ].setNumberOfInternalVarsToExport(internalVarsToExport, nNodes);
     for ( int i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
         for ( int nN = 1; nN <= nNodes; nN++ ) {
@@ -1243,7 +1243,7 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
                 FloatArray coords = vtkPieces [ 0 ].giveNodeCoords(nN);
                 FloatArray endForces;
                 this->giveInternalForcesVectorAtPoint(endForces, tStep, coords);
-                vtkPieces [ 0 ].setInternalVarInNode(i, nN, endForces);
+                vtkPieces [ 0 ].setInternalVarInNode(isttype, nN, endForces);
             } else {
                 fprintf( stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
@@ -1251,7 +1251,7 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
     }
 
     n = primaryVarsToExport.giveSize();
-    vtkPieces [ 0 ].setNumberOfPrimaryVarsToExport(n, nNodes);
+    vtkPieces [ 0 ].setNumberOfPrimaryVarsToExport(primaryVarsToExport, nNodes);
     for ( int i = 1; i <= n; i++ ) {
         UnknownType utype = ( UnknownType ) primaryVarsToExport.at(i);
         if ( utype == DisplacementVector ) {
@@ -1269,7 +1269,7 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
                 d.at(1) = dg.at(1);
                 d.at(2) = dg.at(2);
                 d.at(3) = dg.at(3);
-                vtkPieces [ 0 ].setPrimaryVarInNode(i, nN, d);
+                vtkPieces [ 0 ].setPrimaryVarInNode(utype, nN, d);
             }
         } else {
             fprintf( stderr, "VTKXMLExportModule::exportPrimaryVars: unsupported variable type %s\n", __UnknownTypeToString(utype) );

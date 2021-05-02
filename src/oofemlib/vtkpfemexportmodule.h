@@ -32,69 +32,59 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef quasicontinuumvtkxmlexportmodule_h
-#define quasicontinuumvtkxmlexportmodule_h
+#ifndef vtkpfemexportmodule_h
+#define vtkpfemexportmodule_h
 
-#include "vtkxmlexportmodule.h"
-//#include "exportmodule.h"
+#include "vtkbaseexportmodule.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
 #include "xfem/xfemmanager.h"
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
-
-#ifdef __VTK_MODULE
- #include <vtkUnstructuredGrid.h>
- #include <vtkSmartPointer.h>
+#ifdef _WIN32
+ #define NULL_DEVICE "NUL:"
+#else
+ #define NULL_DEVICE "/dev/null"
 #endif
+
 
 #include <string>
 #include <list>
 
-///@name Input fields for QcVTK XML export module
-//@{
-#define _IFT_QuasicontinuumVTKXMLExportModule_Name "qcvtkxml"
-#define _IFT_QuasicontinuumVTKXMLExportModule_ExportDeactivatedElements "expdeaktelem"
-//@}
+///@name Input fields for VTK XML export module
 
+using namespace std;
 namespace oofem {
-class OOFEM_EXPORT QuasicontinuumVTKXMLExportModule : public VTKXMLExportModule
+class Node;
+
+#define _IFT_VTKPFEMXMLExportModule_Name "vtkpfem"          
+
+class OOFEM_EXPORT VTKPFEMXMLExportModule : public VTKBaseExportModule
 {
 protected:
-    int deactivatedElementsExportFlag;
-
-    /// List of InternalStateType values, identifying the selected vars for export.
-    IntArray internalVarsToExport;
-    /// List of primary unknowns to export.
-    IntArray primaryVarsToExport;
-    /// List of cell data to export.
-    IntArray cellVarsToExport;
-
+    std::ofstream fileStream;
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    QuasicontinuumVTKXMLExportModule(int n, EngngModel * e);
+    VTKPFEMXMLExportModule(int n, EngngModel *e);
     /// Destructor
-    virtual ~QuasicontinuumVTKXMLExportModule();
+    virtual ~VTKPFEMXMLExportModule();
 
     void initializeFrom(InputRecord &ir) override;
 
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
 protected:
-    //
-    //  Exports single internal variable by smoothing.
-    //
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
-    /**
-     * Assembles the region node map. Also computes the total number of nodes in region.
-     * The region are numbered starting from offset+1.
-     * If mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
-     * The i-th value contains the corresponding local region number (or zero, if global number is not in region).
-     * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
-     * The i-th value contains the corresponding global node number.
-     */
-    int initRegionNodeNumbering(VTKPiece& p, 
-                                Domain *domain, TimeStep *tStep, Set& region) override;
+    /// Returns the filename for the given time step.
+    std::string giveOutputFileName(TimeStep *tStep);
+
+    /// Returns the output stream for given solution step.
+    std::ofstream giveOutputStream(TimeStep *tStep);
+
 };
+
 } // end namespace oofem
-#endif // quasicontinuumvtkxmlexportmodule_h
+#endif // vtkxmlexportmodule_h
