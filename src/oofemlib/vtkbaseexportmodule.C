@@ -176,6 +176,7 @@ VTKPiece::clear()
     this->nodeVarsFromXFEMIS.clear();
 }
 
+#ifdef _PYBIND_BINDINGS
 
 py::array_t<double>
 VTKPiece::getVertices () {
@@ -286,7 +287,7 @@ VTKPiece::getCellValues(InternalStateType u) {
   }
 }
 
-
+#endif
 
 
 // End of VTKPiece class implementation
