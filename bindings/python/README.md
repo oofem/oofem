@@ -1,37 +1,11 @@
-#/*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2013   Borek Patzak
-
-         Czech Technical University, Faculty of Civil Engineering,
-          Department of Mechanics, 166 29 Prague, Czech Republic
-                www.oofem.org    e-mail: info@oofem.org
-     
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
-
 # Welcome to OOFEM Python Bindings
+
+OOFEM is parallel, object-oriented finite element code for solving mechanical, transport and fluid mechanics problems. 
+
+OOFEM is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+
+Copyright (C) 1993 - 2021   Borek Patzak
+
 
 This directory contains sources to generate OOFEM bindings to Python programming language using Pybind11.
 To generate the binding, the pybind11 is required to be installed. Python module pytest is required as well.
