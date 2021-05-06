@@ -45,6 +45,14 @@
 #define _IFT_QElementEdgeContactSegment_Name "qelementedgecontactsegment"
 #define _IFT_QElementEdgeContactSegment_edgeSet "edgeset"
 
+/**
+ * Implementation of the quadratic contact edge
+ * This class provides implementation of all the required functions for normal, i.e., frictionless contact
+ * Extension to the contact with friction is planned in the near future
+ */
+
+
+
 namespace oofem {
 class QElementEdgeContactSegment : public ContactSegment
 {

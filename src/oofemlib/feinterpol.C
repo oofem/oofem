@@ -65,21 +65,15 @@ FEIElementDeformedGeometryWrapper :: giveNumberOfVertices() const
 
 const FloatArray&
 FEIElementDeformedGeometryWrapper :: giveVertexCoordinates(int i) const
-{
-  
-  if(tStep != NULL) {
-    FloatArray u;
+{  
     actualCoords = elem->giveNode(i)->giveCoordinates();
-    elem->giveNode(i)->giveUnknownVector(u, {D_u, D_v, D_w}, VM_Total, tStep);
-    u.times(alpha);
-    actualCoords.add(u);
-  } else {
-    actualCoords = elem->giveNode(i)->giveCoordinates();
-  }
-  
-  return actualCoords;
-    
-  
+    if(tStep != NULL) {
+      FloatArray u;    
+      elem->giveNode(i)->giveUnknownVector(u, {D_u, D_v, D_w}, VM_Total, tStep);
+      u.times(alpha);
+      actualCoords.add(u);
+    }  
+    return actualCoords;
 }
 
 

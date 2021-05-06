@@ -73,6 +73,17 @@ namespace oofem {
  * class ContactElement;
  * class Node;
  */
+/**
+ * Boundary condition class for node-to-segment penalty contact. Maintains set of corresponding pairs of nodes and segments that are checked for contact. Size of penalty is user-defined. All operations are always iterated over all pairs.
+ * The impenetrability condition is enforced by set of lagrangian multipliers.
+ *
+ * Tasks:
+ * - managing its node set and segment set.
+ * - calculating contact contributions to the stiffness matrix and to the force vector.
+ * - calculating location arrays to determine DOFs interacting as a result of contact.
+ */
+
+  
 class OOFEM_EXPORT Node2SegmentLagrangianMultiplierContact : public ActiveBoundaryCondition
 {
 private:

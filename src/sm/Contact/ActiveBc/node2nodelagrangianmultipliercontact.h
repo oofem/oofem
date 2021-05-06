@@ -64,6 +64,19 @@ class IntegrationRule;
 class ContactElement;
 class Node;
 
+/**
+ * Boundary condition class for node-to-node contact. Maintains set of corresponding pairs of nodes that are checked for contact. The impenetrability condition is enforced by set of lagrangian multipliers.
+ * All operations are always iterated over all node pairs.
+ *
+ * Tasks:
+ * - managing its node sets (master and slave).
+ * - calculating contact contributions to the stiffness matrix and to the force vector.
+ * - calculating location arrays to determine DOFs interacting as a result of contact.
+ */
+
+
+
+  
 class OOFEM_EXPORT Node2NodeLagrangianMultiplierContact : public ActiveBoundaryCondition
 {
 protected:

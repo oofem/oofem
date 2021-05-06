@@ -41,6 +41,13 @@
 
 #define _IFT_ContactSegment_normMode "normmode"
 
+
+/**
+ * Base class for all contact segments, e.g., edges, surfaces, or analytical functions
+ * Note that implementation of contact is the early stage of the development; thus, the structure of this class may change in the near future
+ */
+
+
 namespace oofem {
   class ContactSegment : public FEMComponent
   {
