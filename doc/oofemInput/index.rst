@@ -1808,8 +1808,8 @@ The crossSectType keyword can be one from following possibilities
      omit some (or all) parameters (refer to documentation of individual
      elements for required cross section properties). Parameter ``area``
      allows to set cross section area, parameters ``iz``, ``iz``, and
-     ``ik`` represent inertia moment along y and z axis and torsion
-     inertia moment. Parameter ``beamshearcoeff`` allows to set shear
+     ``ik`` represent inertia moment along y and z axis and Saint-Venant torsional
+     constant. Parameter ``beamshearcoeff`` allows to set shear
      correction factor, or equivalent shear areas (``shearareay`` and
      ``shearareaz`` parameters) can be provided. These cross section
      properties are assumed to be defined in local coordinate system of
@@ -1827,8 +1827,8 @@ The crossSectType keyword can be one from following possibilities
      many (or some) parameters (refer to documentation of individual
      elements for required cross section properties). Parameter ``area``
      allows to set cross section area, parameters ``iz``, ``iz``, and
-     ``ik`` represent inertia moment along y and z axis and torsion
-     inertia moment. Parameters (``shearareay`` and ``shearareaz``
+     ``ik`` represent inertia moment along y and z axis and Saint-Venant torsional
+     constant. Parameters (``shearareay`` and ``shearareaz``
      determine shear area, which is required by beam and plate elements.
      All cross section properties are assumed to be defined in local
      coordinate system of element.
