@@ -62,7 +62,7 @@ enum CrossSectionProperty {
     CS_Area,           ///< Area
     CS_InertiaMomentY, ///< Moment of inertia around y-axis
     CS_InertiaMomentZ, ///< Moment of inertia around z-axis
-    CS_TorsionMomentX, ///< Moment of inertia around x-axis
+    CS_TorsionConstantX, ///< Saint-Venant torsional constant (J)
     CS_ShearAreaY,     ///< Shear area in y direction
     CS_ShearAreaZ,     ///< Shear area in z direction
     CS_DrillingStiffness, ///< Penalty stiffness for drilling DOFs.

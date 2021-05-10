@@ -1030,7 +1030,7 @@ Shell7BasePhFi :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
 
     // Export nodal variables from primary fields        
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
     std::vector<FloatArray> updatedNodeCoords;
     FloatArray u(3), damage(1);
@@ -1078,7 +1078,7 @@ Shell7BasePhFi :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
     // Export nodal variables from internal fields
     
-    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
+    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport, numTotalNodes );
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
@@ -1096,7 +1096,7 @@ Shell7BasePhFi :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
     // Export cell variables
     FloatArray average;
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport, numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
       

@@ -350,7 +350,7 @@ SimpleCrossSection :: give3dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp,
     double area = this->give(CS_Area, gp);
     double Iy   = this->give(CS_InertiaMomentY, gp);
     double Iz   = this->give(CS_InertiaMomentZ, gp);
-    double Ik   = this->give(CS_TorsionMomentX, gp);
+    double Ik   = this->give(CS_TorsionConstantX, gp); // St. Venant torsional constant
 
     //shearCoeff = this->give(CS_BeamShearCoeff);
     double shearAreay = this->give(CS_ShearAreaY, gp);
@@ -497,7 +497,7 @@ SimpleCrossSection :: initializeFrom(InputRecord &ir)
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_ik);
-    propertyDictionary.add(CS_TorsionMomentX, value);
+    propertyDictionary.add(CS_TorsionConstantX, value);
 
     double beamshearcoeff = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_SimpleCrossSection_shearcoeff);
@@ -565,8 +565,8 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->propertyDictionary.at(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
-    if ( this->propertyDictionary.includes(CS_TorsionMomentX) ) {
-        input.setField(this->propertyDictionary.at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    if ( this->propertyDictionary.includes(CS_TorsionConstantX) ) {
+        input.setField(this->propertyDictionary.at(CS_TorsionConstantX), _IFT_SimpleCrossSection_ik);
     }
 
     if ( this->propertyDictionary.includes(CS_InertiaMomentY) ) {

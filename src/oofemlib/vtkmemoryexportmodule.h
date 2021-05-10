@@ -32,69 +32,73 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef quasicontinuumvtkxmlexportmodule_h
-#define quasicontinuumvtkxmlexportmodule_h
+#ifndef vtkmemoryexportmodule_h
+#define vtkmemoryexportmodule_h
 
-#include "vtkxmlexportmodule.h"
-//#include "exportmodule.h"
+#include "vtkbaseexportmodule.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
-#include "interface.h"
 #include "internalstatevaluetype.h"
-#include "integrationrule.h"
-#include "xfem/xfemmanager.h"
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
-
-#ifdef __VTK_MODULE
- #include <vtkUnstructuredGrid.h>
- #include <vtkSmartPointer.h>
+#ifdef _PYBIND_BINDINGS
+ #include <pybind11/pybind11.h>
+ #include <pybind11/stl.h>   //Conversion for lists
+ #include "pybind11/numpy.h"
+namespace py = pybind11;
 #endif
 
-#include <string>
-#include <list>
+#ifdef _WIN32
+ #define NULL_DEVICE "NUL:"
+#else
+ #define NULL_DEVICE "/dev/null"
+#endif
 
-///@name Input fields for QcVTK XML export module
+///@name Input fields for VTK XML export module
 //@{
-#define _IFT_QuasicontinuumVTKXMLExportModule_Name "qcvtkxml"
-#define _IFT_QuasicontinuumVTKXMLExportModule_ExportDeactivatedElements "expdeaktelem"
+#define _IFT_VTKXMLExportModule_cellvars "cellvars"
+#define _IFT_VTKXMLExportModule_vars "vars"
+#define _IFT_VTKXMLExportModule_primvars "primvars"
+#define _IFT_VTKXMLExportModule_externalForces "externalforces"
+#define _IFT_VTKXMLExportModule_ipvars "ipvars"
+#define _IFT_VTKMemoryExportModule_Name "vtkmemory"
 //@}
 
+using namespace std;
 namespace oofem {
-class OOFEM_EXPORT QuasicontinuumVTKXMLExportModule : public VTKXMLExportModule
+
+
+/** 
+ * VTK-like export class intended mainly to provide easy to use Pythonic interface by providing 
+ * acccess to VTKPieces.
+ */  
+class OOFEM_EXPORT VTKMemoryExportModule : public VTKBaseExportModule
 {
 protected:
-    int deactivatedElementsExportFlag;
-
     /// List of InternalStateType values, identifying the selected vars for export.
     IntArray internalVarsToExport;
     /// List of primary unknowns to export.
     IntArray primaryVarsToExport;
+    /// List of primary unknowns to export.
+    IntArray externalForcesToExport;
     /// List of cell data to export.
     IntArray cellVarsToExport;
+    /// List of internal variables to export directly in Integration Points (no smoothing to nodes)
+    IntArray ipInternalVarsToExport;
 
+
+  std::vector< VTKPiece > vtkPieces;
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    QuasicontinuumVTKXMLExportModule(int n, EngngModel * e);
+    VTKMemoryExportModule(int n, EngngModel *e);
     /// Destructor
-    virtual ~QuasicontinuumVTKXMLExportModule();
-
+    virtual ~VTKMemoryExportModule();
     void initializeFrom(InputRecord &ir) override;
-
-protected:
-    //
-    //  Exports single internal variable by smoothing.
-    //
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
-    /**
-     * Assembles the region node map. Also computes the total number of nodes in region.
-     * The region are numbered starting from offset+1.
-     * If mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
-     * The i-th value contains the corresponding local region number (or zero, if global number is not in region).
-     * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
-     * The i-th value contains the corresponding global node number.
-     */
-    int initRegionNodeNumbering(VTKPiece& p, 
-                                Domain *domain, TimeStep *tStep, Set& region) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    std::vector< VTKPiece>& getVTKPieces(); 
 };
+
 } // end namespace oofem
-#endif // quasicontinuumvtkxmlexportmodule_h
+#endif // vtkmemoryexportmodule_h

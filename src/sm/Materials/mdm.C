@@ -449,17 +449,18 @@ MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDam
 
 
 void
-MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep) const
+MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatMatrixF<6,6> de;
+    //FloatMatrixF<6,6> de;
+    FloatMatrix de;
     if ( mdmMode == mdm_3d ) {
         // PDC components in 3d mode are in full 3d format, even in planeStrain situation
         de = linearElasticMaterial.give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
     } else {
-        de = linearElasticMaterial.give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
+        linearElasticMaterial.giveStiffnessMatrix(de, TangentStiffness, gp, tStep);
     }
 
-    stressPDC = dot(de, FloatArrayF<6>(strainPDC));
+    stressPDC.beProductOf(de, strainPDC);
 }
 
 
@@ -1093,6 +1094,12 @@ MDM :: initializeData(int numberOfMicroplanes)
         FloatArray n(3), m(3), l(3);
 
         int ij [ 6 ] [ 2 ] = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 2, 3 }, { 3, 1 }, { 1, 2 } };
+        
+        microplaneNormals.resize(numberOfMicroplanes);
+        microplaneWeights.resize(numberOfMicroplanes);
+        M.resize(numberOfMicroplanes);
+        N.resize(numberOfMicroplanes);
+        L.resize(numberOfMicroplanes);
 
         for ( int iplane = 0; iplane < numberOfMicroplanes; iplane++ ) {
             microplaneWeights [ iplane ] = alpha;
