@@ -187,7 +187,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_NormalStress, 137) \
     ENUM_ITEM_WITH_VALUE(IST_LatticeStrain, 138) \
     ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139) \
-    ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140)
+    ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140) \
+    ENUM_ITEM_WITH_VALUE(IST_InternalSource, 141)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

@@ -212,6 +212,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_EquivalentTime:
     case IST_MoistureContent:
     case IST_IncrementCreepModulus:
+    case IST_InternalSource:
         return ISVT_SCALAR;
 
     default:
