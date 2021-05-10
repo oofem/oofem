@@ -426,6 +426,25 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
         this->assemble(*this->stiffnessMatrix, tStep, TangentAssembler(this->stiffMode), EModelDefaultEquationNumbering(), d);
+    } else if ( cmpn == ExternalRhs) {
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Updating external forces\n");
+#endif
+	// Update external load
+	int di = 1;
+	int neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
+	FloatArray externalForces(neq);
+	this->assembleVector(externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+	this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
+
+	// Build reference load (for CALM solver)
+	FloatArray referenceForces;
+	if ( this->nMethod->referenceLoad() ) {
+	    // This check is pretty much only here as to avoid unnecessarily trying to integrate all the loads.
+	  referenceForces.resize(neq);
+	  this->assembleVector(referenceForces, tStep, ReferenceForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
+	  this->updateSharedDofManagers(referenceForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
+	}
     } else {
         OOFEM_ERROR("Unknown component");
     }
