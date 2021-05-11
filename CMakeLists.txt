@@ -79,6 +79,7 @@ set (PYBIND_DIR CACHE PATH "Manual pybind11 directory")
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_SHARED_LIB "Build shared library" ON)
+option (USE_MFRONT "Build shared library" OFF)
 
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -635,6 +636,11 @@ else ()
 endif ()
 
 install (TARGETS oofem DESTINATION bin)
+
+if (USE_MFRONT)
+    find_package (MFrontGenericInterface REQUIRED)
+    target_link_libraries(oofem mgis::MFrontGenericInterface)
+endif ()
 
 if (USE_OOFEG)
     #  OOFEG target:
