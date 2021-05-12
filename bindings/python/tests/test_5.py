@@ -49,7 +49,7 @@ def test_5():
     vtkxml = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,), primvars=(6,), stype=1, pythonExport=0)
     
     # add export module for outputting python lists with values - automatically registered
-    vtkxmlPy = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,37), primvars=(6,), cellvars = (47,103), stype=1, pythonExport=1)
+    vtkPy = oofempy.vtkmemory(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,37), primvars=(6,), cellvars = (47,103), stype=1, pythonExport=1)
     
     #add homogenization module - automatically registered
     homPy1 = oofempy.homExport(3, problem, tstep_all=True, ists=(1,4), regionsets=(1,))
@@ -82,19 +82,15 @@ def test_5():
         problem.updateYourself( currentStep )
         problem.terminate( currentStep )
         print("TimeStep %d finished" % (timeStep))
-        
-        #get results at nodes and domain
-        primVars = vtkxmlPy.getPrimaryVars()
-        print("PrimaryVars Temperature", primVars['Temperature'])
-        intVars = vtkxmlPy.getInternalVars()
-        print("InternalVars IST_Temperature", intVars['IST_Temperature'])
-        cellVars = vtkxmlPy.getCellVars()
-        print("CellVars", cellVars)
-        nodesVTK = vtkxmlPy.getNodes()
-        print("Nodes", nodesVTK)
-        elementsVTK = vtkxmlPy.getElementsConnectivity()
-        print("Elements", elementsVTK)
-        
+
+        for p in vtkPy.getVTKPieces():
+                print ("Piece:", p)
+                print("Vertices:", p.getVertices())
+                print("Cells:", p.getCellConnectivity())
+                print("CellTypes:", p.getCellTypes(vtkPy))
+                temperature = p.getPrimaryVertexValues(oofempy.UnknownType.Temperature);
+                print ("Temperature:", temperature)
+
     problem.terminateAnalysis()
 
     ##check solution
@@ -102,7 +98,7 @@ def test_5():
     assert (round (v3-4.608e-4, 8) == 0), "Node 3 dof 2 displacement check failed"
     
     
-    t1 = primVars['Temperature'][0][0]
+    t1 = temperature[0][0]
     assert (round (t1-48.0000, 4) == 0), "Export of primary field failed"
     
     problem.terminateAnalysis()

@@ -91,6 +91,7 @@ namespace py = pybind11;
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 #include "vtkxmlexportmodule.h"
+#include "vtkmemoryexportmodule.h"
 #include "homexportmodule.h"
 
 #include "uniformgridfield.h"
@@ -1050,17 +1051,45 @@ PYBIND11_MODULE(oofempy, m) {
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
-    py::class_<oofem::HOMExportModule>(m, "HOMExportModule")
-    ;
+    py::class_<oofem::ExportModule>(m, "ExportModule")
+      .def("initialize", &oofem::ExportModule::initialize)
+      .def("doOutput", &oofem::ExportModule::doOutput)
+      .def("terminate", &oofem::ExportModule::terminate)
+      ;
     
-    py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
-    .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
-    .def("getInternalVars", &oofem::VTKXMLExportModule::getInternalVars)
-    .def("getCellVars", &oofem::VTKXMLExportModule::getCellVars)
-    .def("getNodes", &oofem::VTKXMLExportModule::getNodes)
-    .def("getElementsConnectivity", &oofem::VTKXMLExportModule::getElementsConnectivity)
-    ;
+    py::class_<oofem::HOMExportModule, oofem::ExportModule>(m, "HOMExportModule")
+      ;
+
+    py::class_<oofem::VTKPiece>(m, "VTKPiece")
+      .def("giveNumberOfNodes", &oofem::VTKPiece::giveNumberOfNodes)
+      .def("giveNodeCoords", &oofem::VTKPiece::giveNodeCoords)
+      .def("giveNumberOfCells", &oofem::VTKPiece::giveNumberOfCells)
+      .def("giveCellConnectivity", &oofem::VTKPiece::giveCellConnectivity)
+      .def("giveCellType", &oofem::VTKPiece::giveCellType)
+      .def("giveCellOffset", &oofem::VTKPiece::giveCellOffset)
+      .def("givePrimaryVarInNode", &oofem::VTKPiece::givePrimaryVarInNode)
+      .def("giveInternalVarInNode", &oofem::VTKPiece::giveInternalVarInNode)
+      .def("giveCellVar", &oofem::VTKPiece::giveCellVar)
+
+      .def("getVertices", &oofem::VTKPiece::getVertices, py::return_value_policy::move)
+      .def("getCellConnectivity", &oofem::VTKPiece::getCellConnectivity, py::return_value_policy::move)
+      .def("getCellTypes", &oofem::VTKPiece::getCellTypes, py::return_value_policy::move)
+      .def("getPrimaryVertexValues", &oofem::VTKPiece::getPrimaryVertexValues, py::return_value_policy::move)
+      .def("getInternalVertexValues", &oofem::VTKPiece::getInternalVertexValues, py::return_value_policy::move)
+      .def("getCellValues", &oofem::VTKPiece::getCellValues, py::return_value_policy::move)
+      ;
+
+    py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
+      ;
     
+    py::class_<oofem::VTKXMLExportModule, oofem::VTKBaseExportModule>(m, "VTKXMLExportModule")
+      .def("getVTKPieces", &oofem::VTKXMLExportModule::getVTKPieces,  py::return_value_policy::reference)
+      ;
+
+    py::class_<oofem::VTKMemoryExportModule, oofem::VTKBaseExportModule>(m, "VTKMemoryExportModule")
+      .def("getVTKPieces", &oofem::VTKMemoryExportModule::getVTKPieces,  py::return_value_policy::reference)
+      ;
+
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
@@ -1083,6 +1112,12 @@ PYBIND11_MODULE(oofempy, m) {
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
     ;
 
+
+    py::enum_<oofem::UnknownType>(m, "UnknownType")
+      .value("DisplacementVector", oofem::UnknownType::DisplacementVector)
+      .value("Temperature", oofem::UnknownType::Temperature)
+      ;
+    
     py::enum_<oofem::ValueModeType>(m, "ValueModeType")
         .value("VM_Unknown", oofem::ValueModeType::VM_Unknown)
         .value("VM_Total", oofem::ValueModeType::VM_Total)
@@ -1415,6 +1450,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
     m.def("vtkxml", &vtkxml, py::return_value_policy::move);
+    m.def("vtkmemory", &vtkmemory, py::return_value_policy::move);
     m.def("homExport", &homExport, py::return_value_policy::move);
     m.def("createSet", &createSet, py::return_value_policy::move);
 

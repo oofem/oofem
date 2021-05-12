@@ -1835,8 +1835,8 @@ The crossSectType keyword can be one from following possibilities
      omit some (or all) parameters (refer to documentation of individual
      elements for required cross section properties). Parameter ``area``
      allows to set cross section area, parameters ``iz``, ``iz``, and
-     ``ik`` represent inertia moment along y and z axis and torsion
-     inertia moment. Parameter ``beamshearcoeff`` allows to set shear
+     ``ik`` represent inertia moment along y and z axis and Saint-Venant torsional
+     constant. Parameter ``beamshearcoeff`` allows to set shear
      correction factor, or equivalent shear areas (``shearareay`` and
      ``shearareaz`` parameters) can be provided. These cross section
      properties are assumed to be defined in local coordinate system of
@@ -1854,8 +1854,8 @@ The crossSectType keyword can be one from following possibilities
      many (or some) parameters (refer to documentation of individual
      elements for required cross section properties). Parameter ``area``
      allows to set cross section area, parameters ``iz``, ``iz``, and
-     ``ik`` represent inertia moment along y and z axis and torsion
-     inertia moment. Parameters (``shearareay`` and ``shearareaz``
+     ``ik`` represent inertia moment along y and z axis and Saint-Venant torsional
+     constant. Parameters (``shearareay`` and ``shearareaz``
      determine shear area, which is required by beam and plate elements.
      All cross section properties are assumed to be defined in local
      coordinate system of element.
@@ -2920,19 +2920,39 @@ Export modules
   following:
 | ``EntType`` [``tstep_all``] [``tstep_step #(in)``] [``tsteps_out #(rl)``]
   [``subtsteps_out #(in)``] [``domain_all``]
-  [``domain_mask #(in)``]
+  [``domain_mask #(in)``] [``regionsets #(ia)``]
+  [``timeScale #(rn)``]
 
-To select all solution steps, in which output will be performed, use
-``tstep_all``. To select each ``tstep_step``-nth step, use
-``tstep_step`` parameter. In order to select only specific solution
-steps, the ``tsteps_out`` list can be specified, supplying solution step
-number list in which output will be done. To select output for all
-domain of the problem the ``domain_all`` keyword can be used. To select
-only specific domains, ``domain_mask`` array can be used, where the
-values of the array specify the domain numbers to be exported. If the
-parameter ``subtsteps_out`` = 1, it turns on the export of intermediate
-results, for example during the substepping or individual equilibrium
-iterations. This option requires support from the solver.
+| To select all solution steps, in which output will be performed, use
+   ``tstep_all``. To select each ``tstep_step``-nth step, use
+   ``tstep_step`` parameter. In order to select only specific solution
+   steps, the ``tsteps_out`` list can be specified, supplying solution step
+   number list in which output will be done. To select output for all
+   domain of the problem the ``domain_all`` keyword can be used. To select
+   only specific domains, ``domain_mask`` array can be used, where the
+   values of the array specify the domain numbers to be exported. If the
+   parameter ``subtsteps_out`` = 1, it turns on the export of intermediate
+   results, for example during the substepping or individual equilibrium
+   iterations. This option requires support from the solver.
+
+The export is done on region basis, on each region, the nodal
+   recovery is performed independently and results are exported in a
+   separate piece. This allows to take into account for
+   discntinuities, or to export variables defined only by particular
+   material model. The region volumes are defined using sets
+   containing individual elements. By default the one region is
+   created, containing all element in the problem domain. The
+   optional parameter ``regionsets`` allows to use user-defined. The
+   individual values refer to numbers (ids) of domain sets. Note,
+   that regions are determined solely using elements.
+
+   vtkxml tstep_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2
+   regionsets 2 1 2
+
+Optional parameter ``timeScale`` scales time in output. In transport problem, basic
+   units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.)
+   converts all time data in vtkXML from seconds to hours.
+
 
 Currently, the supported export modules are following
 
@@ -2942,8 +2962,7 @@ Currently, the supported export modules are following
    [``stype #(in)``] [``regionstoskip #(ia)``]
 
    ``vtkxml`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
-   [``ipvars #(ia)``] [``stype #(in)``] [``regionsets #(ia)``]
-   [``timeScale #(rn)``]
+   [``ipvars #(ia)``] [``stype #(in)``] 
 
    -  The vtk module is obsolete, use vtkxml instead. Vtkxml allows to
       export results recovered on region by region basis and has more
@@ -2983,29 +3002,20 @@ Currently, the supported export modules are following
       Zhu recovery (default), and :math:`2` for Superconvergent Patch
       Recovery (SPR, based on least square fitting).
 
-   -  The export is done on region basis, on each region, the nodal
-      recovery is performed independently and results are exported in a
-      separate piece. This allows to take into account for
-      discntinuities, or to export variables defined only by particular
-      material model. The region volumes are defined using sets
-      containing individual elements. By default the one region is
-      created, containing all element in the problem domain. The
-      optional parameter ``regionsets`` allows to use user-defined. The
-      individual values refer to numbers (ids) of domain sets. Note,
-      that regions are determined solely using elements.
+   
+-  VTK pfem (particle FEM) export. Exports particle positions to vtk as a point dataset.
 
-      vtkxml tstep_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2
-      regionsets 2 1 2
+   ``vtkpfem`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
+   [``ipvars #(ia)``] [``stype #(in)``] 
 
-   -  ``timeScale`` scales time in output. In transport problem, basic
-      units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.)
-      converts all time data in vtkXML from seconds to hours.
+-  VTK memory export. This module is not producing any output, but prepares necessary data structures to suport vtk export or vtk visualization. It is used by Python interface to access vtk datasets.   
+  
+   ``vtkmemory`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``] [``ipvars #(ia)``] 
 
-   By default vtk and vtkxml modules perform recovery over the whole
-   domain. The VTKXML module can operate in region-by-region mode (see
-   ``nvr`` and ``vrmap`` parameters). In this case, the smoothing is
-   performed only over particular virtual region, where only elements in
-   this virtual region participate.
+-  VTK xfem export module. Exports xfem related data. The data exported are determined
+   by XfemManager vtkExportFields parameter (see ``exportfields`` keyword).
+
+   ``vtkxmlxfem``   
 
 -  Homogenization of IP quantities in the global coordinate system (such
    as stress, strain, damage, heat flow). Corresponding IP quantities

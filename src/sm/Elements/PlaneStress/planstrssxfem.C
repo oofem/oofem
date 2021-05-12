@@ -352,7 +352,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
 
         // Export nodal variables from primary fields
-        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
         for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
             UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -385,7 +385,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
                             u = {uTemp[0], uTemp[1], 0.0};
                         }
 
-                        vtkPieces[0].setPrimaryVarInNode(fieldNum, nodeInd, u);
+                        vtkPieces[0].setPrimaryVarInNode(type, nodeInd, u);
                 } else {
                     printf("fieldNum: %d\n", fieldNum);
                     // TODO: Implement
@@ -400,11 +400,11 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
 
         // Export nodal variables from internal fields
-        vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
+        vtkPieces[0].setNumberOfInternalVarsToExport(internalVarsToExport, numTotalNodes);
 
 
         // Export cell variables
-        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
+        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport, 1);
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
@@ -431,7 +431,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
                 }
             }
 
-            vtkPieces[0].setCellVar( i, 1, averageVoigt );
+            vtkPieces[0].setCellVar( type, 1, averageVoigt );
         }
 
 

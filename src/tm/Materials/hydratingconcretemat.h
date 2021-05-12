@@ -70,6 +70,8 @@
 #define _IFT_HydratingConcreteMat_timeSet "timeset"
 #define _IFT_HydratingConcreteMat_alphaCrit0 "alphacrit0"
 #define _IFT_HydratingConcreteMat_B0 "b0"
+#define _IFT_HydratingConcreteMat_timeToSeconds "timetoseconds"
+
 
 //@}
 
@@ -156,7 +158,8 @@ public:
     double alphaCrit;
     ///Basic diffusivity (about 1.1e-11 m2/day for Portland cements)
     double B0;
-    
+    ///timeToSeconds, =1 when running in seconds (default), =86400 when time in days
+    double timeToSeconds;
 
 protected:
     double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const;

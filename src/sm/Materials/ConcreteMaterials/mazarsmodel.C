@@ -66,6 +66,7 @@ MazarsMaterial :: initializeFrom(InputRecord &ir)
     // IsotropicDamageMaterial1 :: initializeFrom(ir);
 
     this->equivStrainType = EST_Mazars;
+    this->softType = ST_Mazars;
 
     IsotropicDamageMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);

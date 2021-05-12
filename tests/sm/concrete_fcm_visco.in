@@ -3,6 +3,7 @@ concrete_fcm_visco.out
 Single element creep test
 #
 nonlinearstatic nsteps 25 rtolv 1.e-8 MaxIter 5000 controllmode 1 stiffMode 0 updateelasticstiffnessflag manrmsteps 1 deltatfunction 3 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 1 vars 3 1 4 114 stype 2
 #
 errorcheck
 #
@@ -31,7 +32,7 @@ SimpleCS 1 thick 1.0 material 2
 #
 mps 1 d 0. n 0.2 talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1000. relMatAge 28. CoupledAnalysisType 0
 #
-ConcreteFcmViscoelastic 2 d 0.0 talpha 0. E 20000. n 0.2 Gf 150.e-6 ft 3. softtype 1 sheartype 2 sf 20. multiplecrackshear shearstrengthtype 1 ncracks 2 shearCoeffNumer 0.001 normalCoeffNumer 0.001 viscomat 1 
+ConcreteFcmViscoelastic 2 d 0.0 talpha 0. E 1. n 0.2 Gf 150.e-6 ft 3. softtype 1 sheartype 2 sf 20. multiplecrackshear shearstrengthtype 1 ncracks 2 shearCoeffNumer 0.001 normalCoeffNumer 0.001 viscomat 1
 #
 # BOUNDARY CONDITIONS
 #

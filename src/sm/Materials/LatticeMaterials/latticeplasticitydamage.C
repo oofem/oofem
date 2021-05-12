@@ -411,7 +411,7 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
 
                     OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
                 }
-                printf("subincrementation required\n");
+
                 subIncrementFlag = 1;
                 deltaStrain *= 0.5;
                 tempStrain = convergedStrain + deltaStrain;

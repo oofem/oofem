@@ -301,7 +301,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiec
 
 
         // Export nodal variables from primary fields
-        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
         for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
             UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -334,7 +334,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiec
                             u = {uTemp[0], uTemp[1], 0.0};
                         }
 
-                        vtkPieces[0].setPrimaryVarInNode(fieldNum, nodeInd, u);
+                        vtkPieces[0].setPrimaryVarInNode(type, nodeInd, u);
                 } else {
                     printf("fieldNum: %d\n", fieldNum);
                     // TODO: Implement
@@ -349,11 +349,11 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiec
 
 
         // Export nodal variables from internal fields
-        vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
+        vtkPieces[0].setNumberOfInternalVarsToExport(internalVarsToExport, numTotalNodes);
 
 
         // Export cell variables
-        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
+        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport, 1);
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
@@ -364,7 +364,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiec
             }
 
             if(average.giveSize() == 1) {
-				vtkPieces[0].setCellVar( i, 1, average );
+				vtkPieces[0].setCellVar( type, 1, average );
             }
 
             if(average.giveSize() == 6) {
@@ -376,7 +376,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiec
 				averageV9.at(3) = averageV9.at(7) = average.at(5);
 				averageV9.at(2) = averageV9.at(4) = average.at(6);
 
-				vtkPieces[0].setCellVar( i, 1, averageV9 );
+				vtkPieces[0].setCellVar( type, 1, averageV9 );
             }
         }
 

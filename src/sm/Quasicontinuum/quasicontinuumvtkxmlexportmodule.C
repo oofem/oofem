@@ -73,22 +73,21 @@ QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord &ir)
 
 
 void
-QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
+QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set & region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
 
-    this->giveSmoother(); // make sure smoother is created
-
-    // output nodes Region By Region
-    int numNodes, numRegionEl;
-    IntArray mapG2L, mapL2G;
-
     // Assemble local->global and global->local region map and get number of
     // single cells to process, the composite cells exported individually.
-    this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, tStep, region);
+    this->initRegionNodeNumbering(vtkPiece, d, tStep, region);
+    const IntArray& mapG2L = vtkPiece.getMapG2L();
+    const IntArray& mapL2G = vtkPiece.getMapL2G();
+    const int numNodes = vtkPiece.giveNumberOfNodes();
+    const int numRegionEl = vtkPiece.giveNumberOfCells();
+
     if ( numNodes > 0 && numRegionEl > 0 ) {
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
@@ -106,7 +105,7 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
 
         int offset = 0;
         int cellNum = 0;
-        IntArray elems = this->giveRegionSet(region)->giveElementList();
+        IntArray elems = region.giveElementList();
         for ( int ei = 1; ei <= elems.giveSize(); ei++ ) {
             int elNum = elems.at(ei);
             elem = d->giveElement(elNum);
@@ -154,13 +153,14 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
             vtkPiece.setOffset(cellNum, offset);
         }
 
+        NodalRecoveryModel *smoother = giveSmoother();
+        NodalRecoveryModel *primVarSmoother = givePrimVarSmoother();
 
         // Export primary, internal and XFEM variables as nodal quantities
-        this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, region, tStep);
-        this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
-        this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
-
-        this->exportCellVars(vtkPiece, elems, tStep);
+        this->exportPrimaryVars(this->defaultVTKPiece, region, primaryVarsToExport, *primVarSmoother, tStep);
+        this->exportIntVars(this->defaultVTKPiece, region, internalVarsToExport, *smoother, tStep);
+        this->exportExternalForces(this->defaultVTKPiece, region, externalForcesToExport, tStep);
+        this->exportCellVars(this->defaultVTKPiece, region, cellVarsToExport, tStep);
     } // end of default piece for simple geometry elements
 }
 
@@ -169,11 +169,8 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
 
 
 int
-QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
-                                                            IntArray &regionL2GNodalNumbers,
-                                                            int &regionDofMans,
-                                                            int &regionSingleCells,
-                                                            Domain *domain, TimeStep *tStep, int reg)
+QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(VTKPiece& piece,
+                                                            Domain *domain, TimeStep *tStep, Set& region)
 {
     // regionG2LNodalNumbers is array with mapping from global numbering to local region numbering.
     // The i-th value contains the corresponding local region number (or zero, if global numbar is not in region).
@@ -188,12 +185,15 @@ QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LN
     int currOffset = 1;
     Element *element;
 
+    IntArray &regionG2LNodalNumbers = piece.getMapG2L();
+    IntArray &regionL2GNodalNumbers = piece.getMapL2G();
+
     regionG2LNodalNumbers.resize(nnodes);
     regionG2LNodalNumbers.zero();
-    regionDofMans = 0;
-    regionSingleCells = 0;
+    int regionDofMans = 0;
+    int regionSingleCells = 0;
 
-    IntArray elements = this->giveRegionSet(reg)->giveElementList();
+    const IntArray& elements = region.giveElementList();
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
         int ielem = elements.at(ie);
         element = domain->giveElement(ielem);
@@ -238,6 +238,9 @@ QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LN
             }
         }
     }
+
+    piece.setNumberOfCells(regionSingleCells);
+    piece.setNumberOfNodes(regionDofMans);
 
     regionL2GNodalNumbers.resize(regionDofMans);
 
