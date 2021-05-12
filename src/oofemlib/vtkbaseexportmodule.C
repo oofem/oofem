@@ -722,6 +722,15 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
         }
 
         iState = IST_DirectorField;
+    } else if ( type == MacroSlipVector ) {
+        for ( Dof *dof : * dman ) {
+            DofIDItem id = dof->giveDofID();
+            if ( ( id == S_u ) || ( id == S_v ) || ( id == S_w ) ) {
+                dofIDMask.followedBy(id);
+            }
+            answer.resize(3);
+        }
+        iState = IST_MacroSlipVector;
     } else {
         OOFEM_ERROR("unsupported unknownType %s", __UnknownTypeToString(type) );
     }

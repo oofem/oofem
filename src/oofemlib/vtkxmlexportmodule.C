@@ -509,7 +509,7 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
 
     for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
-        if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
+        if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField || type == MacroSlipVector ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
         } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {

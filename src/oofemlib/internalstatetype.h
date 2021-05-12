@@ -188,7 +188,11 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_LatticeStrain, 138) \
     ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139) \
     ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140) \
-    ENUM_ITEM_WITH_VALUE(IST_InternalSource, 141)
+    ENUM_ITEM_WITH_VALUE(IST_InternalSource, 141) \
+    ENUM_ITEM_WITH_VALUE(IST_MacroSlipVector, 142) \
+    ENUM_ITEM_WITH_VALUE(IST_TransferStress, 143) \
+    ENUM_ITEM_WITH_VALUE(IST_MacroSlipGradient, 144) \
+    ENUM_ITEM_WITH_VALUE(IST_ReinfMembraneStress, 145)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

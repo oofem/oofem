@@ -456,11 +456,21 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& re
     DofManager *controlNode = d->giveNode(nnodes);   //assuming the control node is last
     IntArray dofIdArray;
     controlNode->giveCompleteMasterDofIDArray(dofIdArray);
+    std::vector<int> dofIDVector;
+    dofIDVector.assign(dofIdArray.begin(), dofIdArray.end());
 
     FloatArray macroField(controlNode->giveNumberOfDofs() );
     for ( int j = 1; j <= controlNode->giveNumberOfDofs(); j++ ) {
         macroField.at(j) = controlNode->giveDofWithID(dofIdArray.at(j) )->giveUnknown(VM_Total, tStep);
     }
+
+    std::vector<int> macroTrussIDs = { E_xx };
+    std::vector<int> macroMembraneIDs = { E_xx, E_yy, E_xy, E_yx };
+    std::vector<int> macroBeamIDs = { E_xx, E_zx, K_xx };
+    std::vector<int> macroPlateIDs = { E_xx, E_yy, E_zy, E_zx, E_xy, E_yx, K_xx, K_yy, K_xy, K_yx };
+    std::vector<int> macro3DVoigtIDs = { E_xx, E_yy, E_zz, G_yz, G_xz, G_xy };
+    std::vector<int> macro3DIDs = { E_xx, E_yy, E_zz, E_yz, E_zy, E_xz, E_zx, E_xy, E_yx };
+    std::vector<int> macro2DIDs = { E_xx, E_yy, G_xy  };
 
     //Get unit cell size
     const auto unitCellSize = controlNode->giveCoordinates();
@@ -489,56 +499,50 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& re
                     this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region, smoother);
                     //recalculate the image unknown
                     if ( type == DisplacementVector ) {
-                        if ( dofIdArray.giveSize() == 9 ) { //Macroscale: 3D SOLID, LTRSpaceBoundary
+                        if ( dofIDVector == macro3DIDs ) { //Macroscale: 3D SOLID, LTRSpaceBoundary
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(3) * switches.at(3) * macroField.at(3);
-                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(4) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(5) + unitCellSize.at(3) * switches.at(3) * macroField.at(6);
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(8) + unitCellSize.at(3) * switches.at(3) * macroField.at(6);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(9) +
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(3) * switches.at(3) * macroField.at(4);
                             valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(7) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(8) + unitCellSize.at(3) * switches.at(3) * macroField.at(9);
-                        } else if ( dofIdArray.giveSize() == 1 ) { //Macroscale: TRUSS
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(5) + unitCellSize.at(3) * switches.at(3) * macroField.at(3);
+                        } else if ( dofIDVector == macroTrussIDs ) { //Macroscale: TRUSS
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
                             valueArray.at(2) = helpArray.at(2);
                             valueArray.at(3) = helpArray.at(3);
-                        } else if ( dofIdArray.giveSize() == 4 ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
+                        } else if ( dofIDVector == macroMembraneIDs ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(3);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(4) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(2);
-                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(4);
                             valueArray.at(3) = helpArray.at(3);
-                        } else if ( dofIdArray.giveSize() == 3 ) { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam OR old 2D
-                            //Debug: We need to change this. If we use 2D elements then 3, something different.
-                            //We can do this by looking at the IDs of Dofs? If it is 1,2,6 it is a 2d beam element. If it
-                            //is 2d then this is the old approach. We know the control DOF ID Array. So, we can solve this already?
-                            if ( dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == G_xy ) {//Old 2d approach
-                                valueArray.resize(helpArray.giveSize() );
-                                valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
-                                valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
-                                valueArray.at(3) = helpArray.at(3);
-                            } else   {
+                        } else if ( dofIDVector == macro2DIDs ) { //Macroscale: 2D plane stress
+                            valueArray.resize(helpArray.giveSize() );
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
+                            valueArray.at(3) = helpArray.at(3);
+                        } else if ( dofIDVector == macroBeamIDs )  { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam
                                 valueArray.resize(helpArray.giveSize() );
                                 valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) -
                                                    dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(3);
                                 valueArray.at(2) = helpArray.at(2);
                                 valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(2);
-                            }
-                        } else if ( dofIdArray.giveSize() == 10 ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
+                        } else if ( dofIDVector == macroPlateIDs ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(2) -
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(5) -
                                                dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(7) -
                                                dman->giveCoordinate(3) * unitCellSize.at(2) * switches.at(2) * macroField.at(9);
-                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(4) -
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(6) +
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(2) -
                                                dman->giveCoordinate(3) * unitCellSize.at(2) * switches.at(2) * macroField.at(8) -
                                                dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(10);
-                            ;
-                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(5) +
-                                               unitCellSize.at(2) * switches.at(2) * macroField.at(6);
-                        } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt, Lattice3dBoundary
+                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(4) +
+                                               unitCellSize.at(2) * switches.at(2) * macroField.at(3);
+                        } else if ( dofIDVector == macro3DVoigtIDs ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt, Lattice3dBoundary
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(3) * switches.at(3) * macroField.at(5) + unitCellSize.at(2) * switches.at(2) * macroField.at(6);

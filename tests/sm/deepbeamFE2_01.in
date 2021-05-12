@@ -98,7 +98,6 @@ Set 3 nodes 1 19
 Set 4 nodes 5 3 4 15 16 17
 SimpleCS 1 thick 0.2 material 1 set 1
 structslipfe2material 1 d 1.0 filename deepbeamfe2_01.in.rve use_ext_stiffness dSdE 3 3 {3.625158673e+10	6.935152559e+9	2.470103608e+4; 6.935152559e+9	3.492710863e+10	2.987504531e+4; 2.470103608e+4	2.987504531e+4	1.387079737e+10} output_selected_el_gps 6 22 4 21 2 20 3
-#structfe2material 1 d 1.0 filename deepbeamfe2_01.in.rve
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 4
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 2
 Boundarycondition 3 loadTimeFunction 2 dofs 1 2 values 1 -1e-4 set 3
