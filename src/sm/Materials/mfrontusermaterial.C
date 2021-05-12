@@ -79,7 +79,6 @@ using namespace mgis::behaviour;
     std :: string modelname;
     IR_GIVE_FIELD(ir, libname, _IFT_MFrontUserMaterial_libpath);
     IR_GIVE_FIELD(ir, modelname, _IFT_MFrontUserMaterial_modelname);
-    libname.append("libBehaviour.so");
     strncpy(this->libname, libname.c_str(), 199);
     strncpy(this->modelname, modelname.c_str(), 199);
     // loading the MFront library using MGIS
