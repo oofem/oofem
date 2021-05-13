@@ -150,7 +150,7 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
         * expr = & widthExpr;
     } else if ( aProperty == CS_Area ) {
         * expr = & areaExpr;
-    } else if ( aProperty == CS_TorsionMomentX ) {
+    } else if ( aProperty == CS_TorsionConstantX ) {
         * expr = & ixExpr;
     } else if ( aProperty == CS_InertiaMomentY ) {
         * expr = & iyExpr;
