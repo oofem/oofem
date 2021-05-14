@@ -66,8 +66,8 @@ MFrontUserMaterial :: ~MFrontUserMaterial()
 
 void MFrontUserMaterial :: initializeFrom(InputRecord &ir)
 {
-using namespace mgis::behaviour;
-//    std :: string umatname;
+    using namespace mgis::behaviour;
+    //    std :: string umatname;
 
     StructuralMaterial :: initializeFrom(ir);
 
@@ -90,16 +90,16 @@ using namespace mgis::behaviour;
     const auto nprops = mgis::behaviour::getArraySize(
         this->behaviour->mps, this->behaviour->hypothesis);
     if (this->properties.giveSize() != nprops) {
-      throw(std::runtime_error("wrong number of material properties"));
+        throw(std::runtime_error("wrong number of material properties"));
     }
     // treating the case for external state variables
     const auto nesvs = mgis::behaviour::getArraySize(
         this->behaviour->esvs, this->behaviour->hypothesis);
     if (nesvs != 1) {
-      throw(std::runtime_error("wrong number of external state variables"));
+        throw(std::runtime_error("wrong number of external state variables"));
     }
     if (this->behaviour->esvs[0].name != "Temperature") {
-      throw(std::runtime_error("the temperature is the only external state variable supported so far"));
+        throw(std::runtime_error("the temperature is the only external state variable supported so far"));
     }
 
 }
@@ -169,7 +169,6 @@ MFrontUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode, G
     this->giveFirstPKStressVector_3d(vF, gp, tStep);
 
     return En;
-
 }
 
 FloatMatrixF<5,5>
@@ -219,26 +218,39 @@ MFrontUserMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, Gaus
 
     mgis::behaviour::BehaviourDataView v;
     v.dt = dtime;
+
+// modifications du to API changes in MGIS
+#ifdef MGIS_BEHAVIOUR_API_VERSION
+#if MGIS_BEHAVIOUR_API_VERSION == 1
+    auto rdt = double{};
+    v.rdt = &rdt;
+    v.speed_of_sound = nullptr;
+#else /* MGIS_BEHAVIOUR_API_VERSION == 1 */
+#error "Unsupported MGIS' behaviour API"
+#endif  /* MGIS_BEHAVIOUR_API_VERSION == 1 */
+#else /* MGIS_BEHAVIOUR_API_VERSION */
     v.rdt = 1;
+#endif /* MGIS_BEHAVIOUR_API_VERSION */
+
     v.K = &mfront_jacobian(0, 0);
     // perform an integration with computation of the consistent tangent operator
     v.K[0] = 4;
     // setting the initial state
-    v.s0.gradients = &mfront_old_strain[0];
-    v.s0.thermodynamic_forces = &old_stress[0];
-    v.s0.material_properties = nullptr; // &(this->properties[0])
+    v.s0.gradients                = &mfront_old_strain[0];
+    v.s0.thermodynamic_forces     = &old_stress[0];
+    v.s0.material_properties      = nullptr; // &(this->properties[0])
     v.s0.internal_state_variables = &old_state[0]; // shall be null if numState==0
     v.s0.external_state_variables = externalStateVariables;
-    v.s0.stored_energy = &stored_energy;
-    v.s0.dissipated_energy = &dissipated_energy;
+    v.s0.stored_energy            = &stored_energy;
+    v.s0.dissipated_energy        = &dissipated_energy;
     // setting the state at the end of the time step
-    v.s1.gradients = &mfront_new_strain[0];
-    v.s1.thermodynamic_forces = &mfront_stress[0];
-    v.s1.material_properties = nullptr; // &(this->properties[0])
+    v.s1.gradients                = &mfront_new_strain[0];
+    v.s1.thermodynamic_forces     = &mfront_stress[0];
+    v.s1.material_properties      = nullptr; // &(this->properties[0])
     v.s1.internal_state_variables = &new_state[0]; // shall be null if numState==0
     v.s1.external_state_variables = externalStateVariables;
-    v.s1.stored_energy = &stored_energy;
-    v.s1.dissipated_energy = &dissipated_energy;
+    v.s1.stored_energy            = &stored_energy;
+    v.s1.dissipated_energy        = &dissipated_energy;
 
     integrate(v, *(this->behaviour));
 
@@ -396,7 +408,7 @@ void MFrontUserMaterialStatus :: initTempStatus()
 }
 
 MFrontUserMaterialStatus :: MFrontUserMaterialStatus(GaussPoint *gp, const mgis::behaviour::Behaviour &b) :
-StructuralMaterialStatus(gp), hasTangentFlag(false)
+    StructuralMaterialStatus(gp), hasTangentFlag(false)
 {
     strainVector.resize(6);
     strainVector.zero();
