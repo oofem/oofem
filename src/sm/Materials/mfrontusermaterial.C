@@ -200,16 +200,15 @@ MFrontUserMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, Gaus
     auto mfront_new_strain = strain[mfront2oo6];
 
     // Beware of MFront conventions here !!!!
-    constexpr auto sqrt2 = M_SQRT2;
-    mfront_stress[3] *= sqrt2;
-    mfront_stress[4] *= sqrt2;
-    mfront_stress[5] *= sqrt2;
-    mfront_old_strain[3] /= sqrt2;
-    mfront_old_strain[4] /= sqrt2;
-    mfront_old_strain[5] /= sqrt2;
-    mfront_new_strain[3] /= sqrt2;
-    mfront_new_strain[4] /= sqrt2;
-    mfront_new_strain[5] /= sqrt2;
+    mfront_stress[3] *= 2.;
+    mfront_stress[4] *= 2.;
+    mfront_stress[5] *= 2.;
+    mfront_old_strain[3] /= 2.;
+    mfront_old_strain[4] /= 2.;
+    mfront_old_strain[5] /= 2.;
+    mfront_new_strain[3] /= 2.;
+    mfront_new_strain[4] /= 2.;
+    mfront_new_strain[5] /= 2.;
 
     //
     double externalStateVariables[1] = {293.15};
