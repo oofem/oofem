@@ -118,9 +118,9 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     XfemElementInterface_createEnrBmatrixAt(answer, * gp, * this);
 }
 
-void PlaneStress2dXfem :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+void PlaneStress2dXfem :: computeBHmatrixAt(const FloatArray& ncoords, FloatMatrix &answer)
 {
-    XfemElementInterface_createEnrBHmatrixAt(answer, * gp, * this);
+    XfemElementInterface_createEnrBHmatrixAt(answer, ncoords, * this);
 }
 
 

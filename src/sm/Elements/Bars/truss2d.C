@@ -106,6 +106,14 @@ Truss2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     this->computeBmatrixAt(gp, answer);
 }
 
+void Truss2d::computeBHmatrixAt( const FloatArray &ncoords, FloatMatrix &answer )
+{
+    // Will be the same as the regular B-matrix
+	// neither coordinates nor Gauss Point really needed in this element
+    GaussPoint* gp = nullptr;
+    this->computeBmatrixAt( gp, answer );
+}
+
 
 
 void Truss2d :: computeGaussPoints()

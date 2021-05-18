@@ -1122,11 +1122,11 @@ tet21ghostsolid :: computeDeformationGradientVectorAt(FloatArray &answer, FloatA
 }
 
 void
-tet21ghostsolid :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+tet21ghostsolid ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, ncoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 30);
     answer.zero();

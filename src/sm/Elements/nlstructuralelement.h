@@ -36,6 +36,7 @@
 #define nlstructuralelement_h
 
 #include "sm/Elements/structuralelement.h"
+#include "gausspoint.h"
 
 ///@name Input fields for NLStructuralElement
 //@{
@@ -201,10 +202,22 @@ public:
      * step tStep. Computes the displacement gradient and adds an identitiy tensor.
      *
      * @param answer Deformation gradient vector
+     * @param ncoords Natural coordinates
+     * @param tStep Time step.
+     */
+    virtual void computeDeformationGradientVector(FloatArray &answer, const FloatArray &ncoords, TimeStep *tStep);
+
+    /**
+     * Computes the deformation gradient in Voigt form at integration point ip and at time
+     * step tStep. Computes the displacement gradient and adds an identitiy tensor.
+     *
+     * @param answer Deformation gradient vector
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint * gp, TimeStep *tStep) {
+        computeDeformationGradientVector(answer, gp->giveNaturalCoordinates(), tStep);
+    };
 
     /**
      * Computes the current volume of element
@@ -218,8 +231,32 @@ public:
     // definition
     const char *giveClassName() const override { return "NLStructuralElement"; }
 
-protected:
+public:
     int checkConsistency() override;
+
+    /**
+     * Computes a matrix which, multiplied by the column matrix of nodal displacements,
+     * gives the displacement gradient stored by columns.
+     * The components of this matrix are derivatives of the shape functions,
+     * but they are arranged in a somewhat different way from the usual B matrix.
+     * @param ncoords The natural coordinates where the matrix shall be computed.
+     * @param answer BF matrix at this point.
+     */
+    virtual void computeBHmatrixAt(const FloatArray& ncoords, FloatMatrix &answer) {
+        OOFEM_ERROR("method not implemented for this element");
+        return;
+    }
+
+    /**
+     * Computes a matrix which, multiplied by the column matrix of nodal displacements
+     * of a given edge, gives the displacement gradient stored by columns.
+     * The components of this matrix are derivatives of the shape functions,
+     * but they are arranged in a somewhat different way from the usual B matrix.
+     * @param ncoords The natural coordinates where the matrix shall be computed.
+     * @param answer BF matrix at this point.
+     */
+    void computeEdgeBHmatrixAt(FloatMatrix& answer, int edge, const FloatArray& ncoords); 
+
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.
@@ -229,7 +266,7 @@ protected:
      * @param answer BF matrix at this point.
      */
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
-        OOFEM_ERROR("method not implemented for this element");
+        this->computeBHmatrixAt(gp->giveNaturalCoordinates(), answer);
         return;
     }
     friend class GradientDamageElement;

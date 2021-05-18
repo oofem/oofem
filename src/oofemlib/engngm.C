@@ -69,6 +69,7 @@
 #include "parallelcontext.h"
 #include "unknownnumberingscheme.h"
 #include "contact/contactmanager.h"
+#include "../sm/Contact/ContactSegment/contactsegment.h"
 
 
 #ifdef __PARALLEL_MODE
@@ -635,6 +636,13 @@ EngngModel :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
+
+      for ( auto &contactSegment : domain->giveContactSegment() ) {
+	  contactSegment->updateYourself(tStep);
+      }
+	  
+
+	  
     }
 
     // if there is an error estimator, it should be updated so that values can be exported.

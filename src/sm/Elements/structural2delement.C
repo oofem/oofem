@@ -257,14 +257,14 @@ PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
 
 void
-PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+PlaneStressElement ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 {
     // Returns the [ 4 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
     /// @todo not checked if correct
 
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx( dNdx, ncoords, * this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -361,14 +361,14 @@ PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
 
 void
-PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+PlaneStrainElement ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 {
     // Returns the [ 5 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
     /// @todo not checked if correct
 
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx( dNdx, ncoords, * this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -501,7 +501,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 
 
 void
-AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+AxisymElement ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 // Returns the [ 9 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
@@ -511,8 +511,8 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatMatrix dnx;
     FEInterpolation2d *interp = static_cast< FEInterpolation2d * >( this->giveInterpolation() );
 
-    interp->evalN( n, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
-    interp->evaldNdx( dnx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evalN( n, ncoords, * this->giveCellGeometryWrapper() );
+    interp->evaldNdx( dnx, ncoords, * this->giveCellGeometryWrapper() );
 
 
     int nRows = dnx.giveNumberOfRows();

@@ -1620,16 +1620,18 @@ double FloatMatrix :: computeNorm(char p) const
 
 void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 {
-    // Revrites the vector on matrix form (symmetrized matrix used if size is 6),
+    // Rewrites the vector on matrix form (symmetrized matrix used if size is 6,
+    // 2D matrix used if size is 4, symmetrized 2D if size is 3),
     // order: 11, 22, 33, 23, 13, 12
     // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // order: 11, 22, 12, 21
 #  ifndef NDEBUG
-    if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
-        OOFEM_ERROR("matrix dimension is not 3x3");
+    if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 && aArray.giveSize() != 4 && aArray.giveSize() != 3) {
+        OOFEM_ERROR("vector size is neither 3 nor 4 nor 6 nor 9, but rather %d", aArray.giveSize());
     }
 #  endif
-    this->resize(3, 3);
     if ( aArray.giveSize() == 9 ) {
+        this->resize(3, 3);
         this->at(1, 1) = aArray.at(1);
         this->at(2, 2) = aArray.at(2);
         this->at(3, 3) = aArray.at(3);
@@ -1640,6 +1642,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
         this->at(3, 1) = aArray.at(8);
         this->at(2, 1) = aArray.at(9);
     } else if ( aArray.giveSize() == 6 ) {
+        this->resize(3, 3);
         this->at(1, 1) = aArray.at(1);
         this->at(2, 2) = aArray.at(2);
         this->at(3, 3) = aArray.at(3);
@@ -1649,6 +1652,20 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
         this->at(3, 2) = aArray.at(4);
         this->at(3, 1) = aArray.at(5);
         this->at(2, 1) = aArray.at(6);
+    }
+    else if ( aArray.giveSize() == 3 ) {
+        this->resize(2, 2);
+        this->at(1, 1) = aArray.at(1);
+        this->at(2, 2) = aArray.at(2);
+        this->at(1, 2) = aArray.at(3);
+        this->at(2, 1) = aArray.at(3);
+    }
+    else if ( aArray.giveSize() == 4 ) {
+        this->resize(2, 2);
+        this->at(1, 1) = aArray.at(1);
+        this->at(2, 2) = aArray.at(2);
+        this->at(1, 2) = aArray.at(3);
+        this->at(2, 1) = aArray.at(4);
     }
 }
 
@@ -1872,6 +1889,20 @@ FloatMatrix :: givePackSize(DataStream &buff) const
            buff.givePackSizeOfDouble(nRows * nColumns);
 }
 
+void FloatMatrix::beLeviCivitaTensor()
+{
+
+    this->resize(9, 3);
+    this->zero();
+    this->at(4, 1) = 1.;
+    this->at(5, 2) = -1.;
+    this->at(6, 3) = 1.;
+    this->at(7, 1) = -1.;
+    this->at(8, 2) = 1.;
+    this->at(9, 3) = -1.;
+
+
+}
 
 bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {

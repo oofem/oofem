@@ -97,7 +97,8 @@ public:
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
-    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    using NLStructuralElement::computeBHmatrixAt;
+    void computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer) override;
 
     int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
 };

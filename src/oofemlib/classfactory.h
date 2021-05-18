@@ -99,7 +99,8 @@ class FailureCriteria;
 
 class ContactManager;
 class ContactDefinition;
-
+class ContactSegment;
+ 
 #ifdef _GNUC
 #define OOFEM_ATTR_UNUSED __attribute__((unused))
 #else
@@ -163,6 +164,7 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, CTOR< ContactManager, class, Domain* > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, CTOR< ContactDefinition, class, ContactManager* > );
+ #define REGISTER_ContactSegment(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactSegment(_IFT_ ## class ## _Name, CTOR< ContactSegment, class, int, Domain* >);
 ///@todo What is this? Doesn't seem needed / Mikael
 #define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
 //@}
@@ -252,6 +254,8 @@ private:
     /// Associative container containing ContactManager creators
     std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
     std :: map < std :: string, std::unique_ptr<ContactDefinition> ( * )(ContactManager *) > contactDefList;
+    /// Associative container containing contact segment creators with name as key.
+    std :: map < std :: string, std::unique_ptr<ContactSegment> ( * )(int, Domain *) > contactSegmentList;
 
 public:
     /// Creates empty factory
@@ -527,6 +531,11 @@ public:
 
     std::unique_ptr<ContactDefinition> createContactDefinition(const char *name, ContactManager *cMan);
     bool registerContactDefinition( const char *name, std::unique_ptr<ContactDefinition> ( *creator )( ContactManager * ) );
+
+    std::unique_ptr<ContactSegment> createContactSegment(const char *name, int num, Domain *domain);
+    bool registerContactSegment( const char *name, std::unique_ptr<ContactSegment> ( *creator )( int, Domain * ) );
+
+
 
     // Failure module (in development!)
     std::unique_ptr<FailureCriteria> createFailureCriteria(const char *name, int num, FractureManager *fracManager);

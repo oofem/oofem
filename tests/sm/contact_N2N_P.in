@@ -1,0 +1,76 @@
+contact_N2N_P.out
+test of node-to-node contact of two elements with penalty
+###########################################
+NonLinearStatic nsteps 1 renumber 0 nmodules 1 controllmode 1  rtolv 1.e-4 stiffMode 0 manrmsteps 1 maxiter 25 refloadmode 1 soldepextforces
+errorcheck
+###########################################
+Domain PlaneStrain
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 2 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 2 nset 4
+### Nodes
+# Nodes of Element 1
+node 1 coords 2 0.0 0.0
+node 2 coords 2 1.0 0.0
+node 3 coords 2 1.0 1.0
+#node 4 coords 2 0.0 1.0
+SlaveNode 4 coords 2 0.0 1.00 doftype 2 2 2 masterDofMan 1 3 weights 1 1
+# Nodes of Element 2
+node 5 coords 2 0.0 1.1
+node 6 coords 2 1.0 1.1
+node 7 coords 2 1.0 2.1
+node 8 coords 2 0.0 2.1
+### Elements
+planestress2d 1 nodes 4 1 2 3 4 crossSect 1 mat 1
+planestress2d 2 nodes 4 5 6 7 8 crossSect 1 mat 1
+### CrossSection
+SimpleCS 1 thick 1
+### Materials
+isoLE 1 d 0. E 1e8 n 0.0 talpha 0.
+BoundaryCondition 1 loadTimeFunction 1 values 2 0.0 0.00 dofs 2 1 2 set 1
+BoundaryCondition 2 loadTimeFunction 1 values 2 0.0 0.00 dofs 2 1 2 set 2
+BoundaryCondition 3 loadTimeFunction 1 values 1 0.0 dofs 1 1 set 3
+n2npenaltycontact 4  loadTimeFunction 1 penalty 1.e10 masterset 3 slaveset 4 usetangent
+BoundaryCondition 5 loadTimeFunction 1 values 2 0.0 -0.2 dofs 2 1 2 set 4
+#usetangent
+### Load Time Functions
+PiecewiseLinFunction 1 npoints 3 t 3 -1 0. 500 f(t) 3 0 1 501
+ConstantFunction 2 f(t) 1. 
+### Sets
+#bottom nodes
+Set 1 nodes 2 1 2
+#top nodes
+Set 2 nodes 2 7 8
+# master set
+Set 3 nodes 2 4 3 ordered_nodes
+# slave set 
+Set 4 nodes 2 5 6
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-1
+## check reactions at final step
+#REACTION tStep 1 number 1 dof 2 value 4.97512438e+06
+#REACTION tStep 1 number 2 dof 2 value 4.97512438e+06
+#REACTION tStep 1 number 5 dof 2 value -1.49751244e+07
+#REACTION tStep 1 number 6 dof 2 value -1.49751244e+07
+#REACTION tStep 1 number 7 dof 2 value 1.0000e+07
+#REACTION tStep 1 number 8 dof 2 value 1.0000e+07
+#REACTION tStep 1 number 1 dof 1 value 0.0
+#REACTION tStep 1 number 2 dof 1 value 0.0
+#REACTION tStep 1 number 3 dof 1 value 0.0
+#REACTION tStep 1 number 5 dof 1 value 0.0
+#REACTION tStep 1 number 6 dof 1 value 0.0
+#REACTION tStep 1 number 7 dof 1 value 0.0
+#REACTION tStep 1 number 8 dof 1 value 0.0
+## check contact node displacements throughout computation
+#NODE tStep 1 number 3 dof 2 unknown d value -9.95024876e-02
+#NODE tStep 1 number 4 dof 2 unknown d value -9.95024876e-02
+## check element no. 1 and 2 strain vector at final step
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2 value -9.95024876e-02
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 2 value 2.0000e-01
+## check element no. 1 stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2 value -9.95024876e+06
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 2 value 2.0000e+07
+#%END_CHECK%
+
+
