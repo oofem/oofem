@@ -1,5 +1,6 @@
 # OOFEM.org
 ![Build workflow](https://github.com/oofem/oofem/actions/workflows/build.yml/badge.svg)
+[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4339630.svg)](https://doi.org/10.5281/zenodo.4339630)
 
 
