@@ -1,5 +1,7 @@
 # OOFEM.org
 ![Build workflow](https://github.com/oofem/oofem/actions/workflows/build.yml/badge.svg)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4339630.svg)](https://doi.org/10.5281/zenodo.4339630)
+
 
 OOFEM is parallel, object-oriented finite element code for solving mechanical, transport and fluid mechanics problems. 
 
