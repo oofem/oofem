@@ -13,7 +13,6 @@ html:
 
 ps:
 	cd elementlibmanual; make ps
-	cd oofemInput; make ps
 	cd paper-actap; make ps
 	cd extractorInput; make ps
 	cd matlibmanual; make ps
@@ -22,7 +21,7 @@ ps:
 
 pdf:
 	cd elementlibmanual; make pdf
-	cd oofemInput; make pdf
+	cd oofemInput; make latexpdf
 	cd paper-actap; make pdf
 	cd extractorInput; make pdf
 	cd matlibmanual; make pdf

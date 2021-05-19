@@ -61,3 +61,8 @@ html_theme_options = {'body_max_width': '100%'}
 #]
 
 master_doc = 'index'
+
+latex_elements = {
+
+  'preamble': r'''\usepackage{lscape}'''
+}
