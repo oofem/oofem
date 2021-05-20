@@ -78,6 +78,7 @@ set (sm_element
     Elements/PlaneStress/basicelement.C
     Elements/PlaneStress/trplanestressrotallman3d.C
     Elements/PlaneStress/linquad3d_planestress.C
+<<<<<<< HEAD
     Elements/Fsb/FsbLinearStatic.C
     Elements/Fsb/FsbLinearStatic2D.C
     Elements/Fsb/FsbPlaneStress.C
@@ -94,6 +95,10 @@ set (sm_element
     Elements/Perleta/pplate.C
     Elements/Perleta/qcshell.C
     Elements/Perleta/qshell.C
+=======
+    Elements/PlaneStress/qtrplstrslip.C
+    Elements/PlaneStress/qplanstrssslip.C
+>>>>>>> 161402866344ad5890595a31a597b4c3213eee6c
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/lumpedmasselement.C
@@ -165,6 +170,11 @@ set (sm_interface_elements
 
 set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
+        prescribeddispsliphomogenization.C
+        prescribeddispslipbcdirichletrc.C
+        prescribeddispslipbcneumannrc.C
+        prescribeddispslipmultiple.C
+        transversereinfconstraint.C
     )
 
 set (sm_crosssection
@@ -248,6 +258,7 @@ set (sm_material
     Materials/RheoChainMaterials/mpsdammat.C
     Materials/RheoChainMaterials/eurocode2creep.C
     Materials/structuralfe2material.C
+    Materials/structuralslipfe2material.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C

@@ -1,7 +1,7 @@
 steelRelaxMat2.out
 relaxation of prestressing reinforcement, all dofs fixed
 #
-StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000.  nmodules 1
+StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
 #
 errorcheck
 #
@@ -52,8 +52,8 @@ HeavisideLTF 2 origin 0.0 value 1.0
 #
 #TIME
 #%BEGIN_CHECK% tolerance 5.e-3
-#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.702400e+02
-#ELEMENT tStep 10 number 2 gp 1 keyword 1 component 1 value 7.703100e+02
-#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.326700e+02
-#ELEMENT tStep 25 number 2 gp 1 keyword 1 component 1 value 6.330400e+02
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.70247029e+02
+#ELEMENT tStep 10 number 2 gp 1 keyword 1 component 1 value 7.70313864e+02
+#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.32667344e+02
+#ELEMENT tStep 25 number 2 gp 1 keyword 1 component 1 value 6.33037535e+02
 #%END_CHECK%

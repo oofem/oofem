@@ -383,7 +383,7 @@ py::object createExportModuleOfType(const char* type, py::args args, py::kwargs 
 
 py::object vtkxml(py::args args, py::kwargs kw) { return createExportModuleOfType("vtkxml",args,kw); }
 py::object homExport(py::args args, py::kwargs kw) { return createExportModuleOfType("hom",args,kw); }
-
+py::object vtkmemory(py::args args, py::kwargs kw) { return createExportModuleOfType("vtkmemory",args,kw); }
 
 /*****************************************************
 * Sets

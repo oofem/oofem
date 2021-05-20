@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "fei2dlinelin.h"
 #include "classfactory.h"
+#include "nodalaveragingrecoverymodel.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -202,6 +203,48 @@ FEInterpolation *
 IntElLine1 :: giveInterpolation() const
 {
     return & interp;
+}
+
+
+Interface *IntElLine1::giveInterface( InterfaceType interface )
+{
+    if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return static_cast<NodalAveragingRecoveryModelInterface *>(this);
+    } else {
+        return nullptr;
+    }
+}
+
+void IntElLine1::NodalAveragingRecoveryMI_computeNodalValue( FloatArray &answer, int node, InternalStateType type, TimeStep *tStep )
+{
+    FloatArray nodeMap, gpValsA, gpValsB, N, locCoord;
+    nodeMap.resize(1);
+
+    FEInterpolation *interp = this->giveInterpolation();
+
+    //Since it's linear interpolation, it suffices to take first and last Gauss point
+    //and recover nodal values using only them.
+
+    GaussPoint* gpA = integrationRulesArray[0]->getIntegrationPoint(0);
+    GaussPoint* gpB = integrationRulesArray[0]->getIntegrationPoint(numberOfGaussPoints-1);
+
+    //Get internal values at Gauss Points A and B
+    this->giveIPValue(gpValsA, gpA, type, tStep);
+    this->giveIPValue(gpValsB, gpB, type, tStep);
+
+    if ( (node == 1 ) || (node == 3) ) { //nodes 1 and 3 pertain to gpA
+        locCoord = gpA->giveNaturalCoordinates();
+    } else if ( (node == 2 ) || (node == 4) ) { //nodes 2 and 4 pertain to gpB
+        locCoord = gpB->giveNaturalCoordinates();
+    }
+
+    nodeMap.at(1) = 1/locCoord.at(1);
+    //Evaluate shape functions (associated with Gauss Points) at element nodes
+    interp->evalN( N, nodeMap, FEIElementGeometryWrapper(this) );
+    answer.resize( gpValsA.giveSize() );
+    answer.at(1)= N.at(1)*gpValsA.at(1) + N.at(2)*gpValsB.at(1);
+    answer.at(2)= N.at(1)*gpValsA.at(2) + N.at(2)*gpValsB.at(2);
+    answer.at(3)= N.at(1)*gpValsA.at(3) + N.at(2)*gpValsB.at(3);
 }
 
 

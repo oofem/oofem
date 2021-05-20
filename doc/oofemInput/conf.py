@@ -59,3 +59,10 @@ html_theme_options = {'body_max_width': '100%'}
 #html_css_files = [
 #    'custom.css',
 #]
+
+master_doc = 'index'
+
+latex_elements = {
+
+  'preamble': r'''\usepackage{lscape}'''
+}

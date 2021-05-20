@@ -2200,7 +2200,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     }
 
     // Export nodal variables from primary fields        
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
     std::vector<FloatArray> updatedNodeCoords;
     FloatArray u(3);
@@ -2229,14 +2229,14 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         u = updatedNodeCoords[j-1];
                         u.subtract(nodeCoords[j-1]);
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, u);
+                        vtkPiece.setPrimaryVarInNode(type, nodeNum, u);
                         nodeNum += 1;
                     }
 
                 } else {
                     NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                     for ( int j = 1; j <= numCellNodes; j++ ) {
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
+                        vtkPiece.setPrimaryVarInNode(type, nodeNum, values[j-1]);
                         nodeNum += 1;
                     }
                 }
@@ -2248,7 +2248,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
     // Export nodal variables from internal fields
 
-    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
+    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport, numTotalNodes );
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
@@ -2261,7 +2261,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                 recoverValuesFromIP(values, layer, type, tStep);
 
                 for ( int j = 1; j <= numCellNodes; j++ ) {
-                    vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                    vtkPiece.setInternalVarInNode( type, nodeNum, values[j-1] );
                     //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);
                     nodeNum += 1;
                 }
@@ -2271,7 +2271,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
     // Export cell variables
     FloatArray average;
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport, numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         InternalStateValueType valueType = giveInternalStateValueType(type);
@@ -2282,9 +2282,9 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                 std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
                 VTKXMLExportModule :: computeIPAverage(average, iRuleL.get(), this, type, tStep);
                 if ( valueType == ISVT_TENSOR_S3 ) {
-                    vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );
+                    vtkPiece.setCellVar(type, currentCell, convV6ToV9Stress(average) );
                 } else {
-                    vtkPiece.setCellVar(i, currentCell, average);
+                    vtkPiece.setCellVar(type, currentCell, average);
                 }
                 currentCell += 1;
             }
@@ -2656,7 +2656,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     }
 
     // Export nodal variables from primary fields        
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
@@ -2675,14 +2675,14 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         auto u = updatedNodeCoords[j-1] - nodeCoords[j-1];
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, u);
+                        vtkPiece.setPrimaryVarInNode(type, nodeNum, u);
                         nodeNum += 1;
                     }
 
                 } else {
                     NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                     for ( int j = 1; j <= numCellNodes; j++ ) {
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
+                        vtkPiece.setPrimaryVarInNode(type, nodeNum, values[j-1]);
                         nodeNum += 1;
                     }
                 }
@@ -2694,7 +2694,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
     // Export nodal variables from internal fields
 
-    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
+    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport, numTotalNodes );
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
@@ -2705,7 +2705,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                 this->recoverValuesFromCZIP(values, layer, type, tStep);
 
                 for ( int j = 1; j <= numCellNodes; j++ ) {
-                    vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                    vtkPiece.setInternalVarInNode( type, nodeNum, values[j-1] );
                     //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);
                     nodeNum += 1;
                 }
@@ -2716,7 +2716,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
     // Export cell variables
     FloatArray average;
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport, numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         InternalStateValueType valueType = giveInternalStateValueType(type);
@@ -2730,9 +2730,9 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                     VTKXMLExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
                 }
                 if ( valueType == ISVT_TENSOR_S3 ) {
-                    vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );
+                    vtkPiece.setCellVar(type, currentCell, convV6ToV9Stress(average) );
                 } else {
-                    vtkPiece.setCellVar(i, currentCell, average);
+                    vtkPiece.setCellVar(type, currentCell, average);
                 }
                 currentCell += 1;
             }

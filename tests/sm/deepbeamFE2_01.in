@@ -1,0 +1,112 @@
+deepbeamFE2_01.out
+FE2 analysis of a reinforced concrete deep beam - Dirichlet-Dirichlet BC. Added by Adam Sciegaj
+StaticStructural nsteps 2 deltat 1.0 constrainednrminiter 5 rtolf 1.0e-3 MaxIter 20 minIter 1 initialguess 1 nmodules 1
+errorcheck
+#vtkxml tstep_all domain_all vars 4 1 4 5 12 cellvars 1 47 stype 2
+#vtkxml tstep_all domain_all vars 4 1 4 5 12 ipvars 3 1 4 5
+#matlab tstep_all mesh data specials reactionforces integrationpoints internalvars 2 1 4
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+ndofman 58 nelem 23 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 4
+rigidarmnode 1 coords 3 3.32 4.0 0.0 master 19 dofidmask 3 1 2 6 doftype 3 2 2 2 masterMask 3 1 1 1
+rigidarmnode 2 coords 3 4.08 4.0 0.0 master 19 dofidmask 3 1 2 6 doftype 3 2 2 2 masterMask 3 1 1 1
+node 3 coords 3 5.7 4.0 0.0
+node 4 coords 3 5.7 0.0 0.0
+rigidarmnode 5 coords 3 0.9 0.0 0.0 master 11 dofidmask 3 1 2 6 doftype 3 2 2 2 masterMask 3 1 1 1
+rigidarmnode 6 coords 3 0.0 0.0 0.0 master 11 dofidmask 3 1 2 6 doftype 3 2 2 2 masterMask 3 1 1 1
+node 7 coords 3 0.0 4.0 0.0
+node 8 coords 3 0.0 2.0 0.0
+node 9 coords 3 0.0 3.0 0.0
+node 10 coords 3 0.0 1.0 0.0
+node 11 coords 3 0.45 0.0 0.0 dofidmask 3 1 2 6
+node 12 coords 3 3.3 0.0 0.0
+node 13 coords 3 2.1 0.0 0.0
+node 14 coords 3 4.5 0.0 0.0
+node 15 coords 3 5.7 2.0 0.0
+node 16 coords 3 5.7 1.0 0.0
+node 17 coords 3 5.7 3.0 0.0
+node 18 coords 3 4.89 4.0 0.0
+node 19 coords 3 3.7 4.0 0.0 dofidmask 3 1 2 6
+node 20 coords 3 1.66 4.0 0.0
+node 21 coords 3 2.49 4.0 0.0
+node 22 coords 3 0.83 4.0 0.0
+node 23 coords 3 0.903826 1.23156 0.0
+node 24 coords 3 4.23313 1.48258 0.0
+node 25 coords 3 3.60783 2.82575 0.0
+node 26 coords 3 2.43967 1.44487 0.0
+node 27 coords 3 1.30010 2.53433 0.0
+node 28 coords 3 2.55749 3.04749 0.0
+node 29 coords 3 4.65873 2.91318 0.0
+node 30 coords 3 3.46391 3.41287 0.0
+node 31 coords 3 2.93875 3.52375 0.0
+node 32 coords 3 3.84391 3.41287 0.0
+node 33 coords 3 4.36937 3.45659 0.0
+node 34 coords 3 5.17937 3.45659 0.0
+node 35 coords 3 4.96656 0.741292 0.0
+node 36 coords 3 0.901913 0.61578 0.0
+node 37 coords 3 1.66983 0.722433 0.0
+node 38 coords 3 0.451913 0.61578 0.0
+node 39 coords 3 0.650049 3.26717 0.0
+node 40 coords 3 0.451913 1.61578 0.0
+node 41 coords 3 0.650049 2.26717 0.0
+node 42 coords 3 3.76656 0.741292 0.0
+node 43 coords 3 2.86983 0.722433 0.0
+node 44 coords 3 4.96656 1.74129 0.0
+node 45 coords 3 5.17937 2.45659 0.0
+node 46 coords 3 1.48005 3.26717 0.0
+node 47 coords 3 2.10875 3.52375 0.0
+node 48 coords 3 1.67175 1.33821 0.0
+node 49 coords 3 1.10196 1.88295 0.0
+node 50 coords 3 3.92048 2.15417 0.0
+node 51 coords 3 3.33640 1.46372 0.0
+node 52 coords 3 4.44593 2.19788 0.0
+node 53 coords 3 3.02375 2.13531 0.0
+node 54 coords 3 3.08266 2.93662 0.0
+node 55 coords 3 4.13328 2.86947 0.0
+node 56 coords 3 1.86988 1.98960 0.0
+node 57 coords 3 2.49858 2.24618 0.0
+node 58 coords 3 1.92879 2.79091 0.0
+qtrplstr 1  nodes 6   8    27     7    41    39     9
+qtrplstr 2  nodes 6  29    25    24    55    50    52
+qtrplstr 3  nodes 6  29    15     3    45    17    34
+qtrplstr 4  nodes 6  27     8    23    41    40    49
+qtrplstr 5  nodes 6  25     2     1    32    19    30
+qtrplstr 6  nodes 6  28     1    20    31    21    47
+qtrplstr 7  nodes 6  28    20    27    47    46    58
+qtrplstr 8  nodes 6  28    27    26    58    56    57
+qtrplstr 9  nodes 6  26    12    24    43    42    51
+qtrplstr 10  nodes 6  28    25     1    54    30    31
+qtrplstr 11  nodes 6  26    24    25    51    50    53
+qtrplstr 12  nodes 6  24     4    15    35    16    44
+qtrplstr 13  nodes 6  29     3     2    34    18    33
+qtrplstr 14  nodes 6  23     5    26    36    37    48
+qtrplstr 15  nodes 6  29     2    25    33    32    55
+qtrplstr 16  nodes 6  23     8     6    40    10    38
+qtrplstr 17  nodes 6  23     6     5    38    11    36
+qtrplstr 18  nodes 6  23    26    27    48    56    49
+qtrplstr 19  nodes 6  27    20     7    46    22    39
+qtrplstr 20  nodes 6  24    12     4    42    14    35
+qtrplstr 21  nodes 6  29    24    15    52    44    45
+qtrplstr 22  nodes 6  26     5    12    37    13    43
+qtrplstr 23  nodes 6  28    26    25    57    53    54
+Set 1 elementranges { (1 23) }
+#support
+Set 2 nodes 1 11
+#point load
+Set 3 nodes 1 19
+#symmetry line nodes
+Set 4 nodes 5 3 4 15 16 17
+SimpleCS 1 thick 0.2 material 1 set 1
+structslipfe2material 1 d 1.0 filename deepbeamfe2_01.in.rve use_ext_stiffness dSdE 3 3 {3.625158673e+10	6.935152559e+9	2.470103608e+4; 6.935152559e+9	3.492710863e+10	2.987504531e+4; 2.470103608e+4	2.987504531e+4	1.387079737e+10} output_selected_el_gps 6 22 4 21 2 20 3
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 4
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 2
+Boundarycondition 3 loadTimeFunction 2 dofs 1 2 values 1 -1e-4 set 3
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 2 1.0 3.0 f(t) 2 1.0 3.0
+
+#%BEGIN_CHECK% tolerance 1.e-2
+#NODE tStep 1 number 19 dof 2 unknown d value -1.00000e-4
+#REACTION tStep 1 number 19 dof 2 value -7.29535322e+04
+#NODE tStep 2 number 19 dof 2 unknown d value -2.00000e-4
+#REACTION tStep 2 number 19 dof 2 value -1.45907064e+05
+#%END_CHECK%
