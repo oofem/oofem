@@ -39,11 +39,13 @@
 #include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "sm/ErrorEstimators/huertaerrorestimator.h"
+#include "sm/CrossSections/layeredcrosssection.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "mmashapefunctprojection.h"
+
 
 #define _IFT_TrPlaneStress2d_Name "trplanestress2d"
 
@@ -61,7 +63,8 @@ class TrPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelIn
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public ZZErrorEstimatorInterface,
-public HuertaErrorEstimatorInterface
+public HuertaErrorEstimatorInterface,
+public LayeredCrossSectionInterface
 {
 protected:
     static FEI2dTrLin interp;
@@ -103,6 +106,8 @@ public:
                                                           IntArray &controlNode, IntArray &controlDof,
                                                           HuertaErrorEstimator :: AnalysisMode aMode) override;
     void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    // Methods to implement LayeredCrossSectionInterface
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
 protected:
 
