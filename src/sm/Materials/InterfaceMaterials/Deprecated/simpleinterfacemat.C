@@ -98,10 +98,14 @@ SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, Gaus
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
         if ( normalJump + normalClearance <= 0. ) {
             answer.at(1, 1) = kn;
-            if ( status->giveShearYieldingFlag() )
-                answer.at(2, 2) = answer.at(3, 3) = 0;
-            else
+            if ( status->giveShearYieldingFlag() ) {
+	        FloatArray jump = status->giveTempJump();
+	        FloatArray traction = status->giveTempTraction();
+
+                answer.at(2, 2) = answer.at(3, 3) = traction.at(2)/jump.at(2);
+            } else {
                 answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
+	    }
         } else {
             answer.at(1, 1) = this->kn * this->stiffCoeff;
             answer.at(2, 2) = answer.at(3, 3) = 0;
