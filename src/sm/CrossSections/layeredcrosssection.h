@@ -215,7 +215,7 @@ public:
     void printYourself() override;
 
     static MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode mode);
-    GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex) const;
+    GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int layer, int igp) const;
 
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
     void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
