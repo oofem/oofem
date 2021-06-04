@@ -61,11 +61,18 @@ Set 3 nodes 4 1 4 11 14
 #NODE tStep 2 number 1 dof 2 unknown d value 0.0
 #NODE tStep 2 number 2 dof 2 unknown d value 1.66286569e-03 
 #NODE tStep 2 number 3 dof 2 unknown d value 4.83735409e-03
+NODE tStep 2 number 11 dof 2 unknown d value 0.0
+#NODE tStep 2 number 12 dof 2 unknown d value 1.66286569e-03
+#NODE tStep 2 number 13 dof 2 unknown d value 4.83735409e-03
 ## check some arbitrary element
 #ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value 9.18229549e+05 tolerance 1.e-2
 #ELEMENT tStep 2 number 2 gp 1 keyword 1 component 1  value -9.18229549e+05 tolerance 1.e-2
 #ELEMENT tStep 2 number 3 gp 1 keyword 1 component 1  value 3.03073976e+05 tolerance 1.e-2
 #ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1  value -3.03073976e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 1 component 1  value 9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 12 gp 1 keyword 1 component 1  value -9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 13 gp 1 keyword 1 component 1  value 3.03073976e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 14 gp 1 keyword 1 component 1  value -3.03073976e+05 tolerance 1.e-2
 ##
 #REACTION tStep 2 number 1 dof 2 value 1.26541636e+03 tolerance 1.e-4
 #REACTION tStep 2 number 4 dof 2 value -3.26541636e+03 tolerance 1.e-4
