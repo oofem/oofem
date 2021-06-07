@@ -26,14 +26,14 @@ Boundarycondition 3 loadTimeFunction 1 dofs 4 1 2 51 52 values 4 1e-4 -2e-4 1e-5
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-3
-#REACTION tStep 1 number 1 dof 2 value 6.73810164e+04
-#REACTION tStep 1 number 1 dof 52 value -2.10515553e+03
-#REACTION tStep 1 number 3 dof 1 value -6.83392776e+04
-#REACTION tStep 1 number 3 dof 51 value -2.46049126e+03
-#ELEMENT tStep 1 number 1 gp 1 keyword 143 component 1 value -6.73044804e+04
-#ELEMENT tStep 1 number 1 gp 1 keyword 143 component 2 value -2.93848813e+05
-#ELEMENT tStep 1 number 1 gp 1 keyword 145 component 1 value 1.32312923e+04
-#ELEMENT tStep 1 number 1 gp 1 keyword 145 component 2 value -6.81715957e+03
+#REACTION tStep 1 number 1 dof 2 value 6.73810087e+04
+#REACTION tStep 1 number 1 dof 52 value -2.10514358e+03
+#REACTION tStep 1 number 3 dof 1 value -6.83392699e+04
+#REACTION tStep 1 number 3 dof 51 value -2.46048334e+03
+#ELEMENT tStep 1 number 1 gp 1 keyword 143 component 1 value -6.73043484e+04  
+#ELEMENT tStep 1 number 1 gp 1 keyword 143 component 2 value -2.93847031e+05
+#ELEMENT tStep 1 number 1 gp 1 keyword 145 component 1 value 1.32312659e+04
+#ELEMENT tStep 1 number 1 gp 1 keyword 145 component 2 value -6.81714789e+03
 #ELEMENT tStep 1 number 1 gp 1 keyword 145 component 3 value 0.0
 #ELEMENT tStep 1 number 1 gp 1 keyword 145 component 4 value 0.0
 #%END_CHECK%
