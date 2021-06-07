@@ -290,7 +290,7 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(const FloatArrayF<3> &strain
 
         answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw; //Nx
         answer.at(2) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw * layerZCoord;//My
-        answer.at(3) += reducedLayerStress.at(2) * layerWidth * layerThick * lgpw; //Vz
+        answer.at(3) += reducedLayerStress.at(2) * layerWidth * layerThick * lgpw * (5./6.); //Vz
       }
     }
 
@@ -375,8 +375,8 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(const FloatArrayF<5> &strain,
         answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw * layerZCoord;
         answer.at(2) += reducedLayerStress.at(2) * layerWidth * layerThick * lgpw * layerZCoord;
         answer.at(3) += reducedLayerStress.at(5) * layerWidth * layerThick * lgpw * layerZCoord;
-        answer.at(4) += reducedLayerStress.at(4) * layerWidth * layerThick * lgpw;
-        answer.at(5) += reducedLayerStress.at(3) * layerWidth * layerThick * lgpw;
+        answer.at(4) += reducedLayerStress.at(4) * layerWidth * layerThick * lgpw * (5./6.);
+        answer.at(5) += reducedLayerStress.at(3) * layerWidth * layerThick * lgpw * (5./6.);
       }
     }
 
@@ -459,8 +459,8 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain,
         answer.at(5) += reducedLayerStress.at(2) * layerWidth * layerThick * layerZCoord * lgpw;
         answer.at(6) += reducedLayerStress.at(5) * layerWidth * layerThick * layerZCoord * lgpw;
         // 3) shear terms qx, qy
-        answer.at(7) += reducedLayerStress.at(4) * layerWidth * layerThick *lgpw;
-        answer.at(8) += reducedLayerStress.at(3) * layerWidth * layerThick *lgpw;
+        answer.at(7) += reducedLayerStress.at(4) * layerWidth * layerThick *lgpw * (5./6.);
+        answer.at(8) += reducedLayerStress.at(3) * layerWidth * layerThick *lgpw * (5./6.);
       }
     }
 
@@ -636,10 +636,10 @@ LayeredCrossSection :: give2dPlateStiffMtrx(MatResponseMode rMode, GaussPoint *g
         answer.at(3, 3) += layerMatrix.at(5, 5) *lgpw* layerWidth * layerThick * layerZCoord2;
 
         // 2) shear terms qx = qxz, qy = qyz
-        answer.at(4, 4) += layerMatrix.at(4, 4) *lgpw* layerWidth * layerThick;
-        answer.at(4, 5) += layerMatrix.at(4, 3) *lgpw* layerWidth * layerThick;
-        answer.at(5, 4) += layerMatrix.at(3, 4) *lgpw* layerWidth * layerThick;
-        answer.at(5, 5) += layerMatrix.at(3, 3) *lgpw* layerWidth * layerThick;
+        answer.at(4, 4) += layerMatrix.at(4, 4) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(4, 5) += layerMatrix.at(4, 3) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(5, 4) += layerMatrix.at(3, 4) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(5, 5) += layerMatrix.at(3, 3) *lgpw* layerWidth * layerThick * (5./6.);
       }
     }
     return answer;
@@ -954,6 +954,7 @@ LayeredCrossSection :: initializeFrom(InputRecord &ir)
     numberOfIntegrationPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
 
+    this->totalThick = layerThicks.sum();
     // read z-coordinate of mid-surface measured from bottom layer
     midSurfaceZcoordFromBottom = 0.5 * this->computeIntegralThick();  // Default: geometric midplane
     midSurfaceXiCoordFromBottom = 1.0; // add to IR
@@ -962,7 +963,6 @@ LayeredCrossSection :: initializeFrom(InputRecord &ir)
     this->setupLayerMidPlanes();
     
     this->area = this->layerThicks.dotProduct(this->layerWidths);
-    this->totalThick = layerThicks.sum();
 }
 
 void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
@@ -1125,6 +1125,7 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int ilayer, int
             }
 
             zCoord.at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
+            printf("SGP %d: currentZTopCoord %e, currentZCoord %e\n", j*numberOfIntegrationPoints+k, currentZTopCoord, currentZCoord);
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
             masterGp->gaussPoints [ j*numberOfIntegrationPoints+k ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, sgpw(k)/2.0, slaveMode);
 
