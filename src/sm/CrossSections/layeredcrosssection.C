@@ -1111,10 +1111,11 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int ilayer, int
         GaussIntegrationRule::giveLineCoordsAndWeights(numberOfIntegrationPoints, sgpc, sgpw);
         double currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
+          currentZTopCoord += this->layerThicks.at(j + 1);
           for (int k = 0; k < numberOfIntegrationPoints; k++) { 
             FloatArray zCoord(3);
-            currentZTopCoord += this->layerThicks.at(j + 1);
-            double currentZCoord = currentZTopCoord - sgpc(k)* (1+this->layerThicks.at(j + 1)) / 2.0; // z-coord of layer gp
+
+            double currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) * (1+sgpc(k)) / 2.0; // z-coord of layer gp
             if ( masterCoords.giveSize() > 0 ) {
                 zCoord.at(1) = masterCoords.at(1); // gp x-coord of mid surface
             }
