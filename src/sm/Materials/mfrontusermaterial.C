@@ -67,7 +67,6 @@ MFrontUserMaterial :: ~MFrontUserMaterial()
 void MFrontUserMaterial :: initializeFrom(InputRecord &ir)
 {
     using namespace mgis::behaviour;
-    //    std :: string umatname;
 
     StructuralMaterial :: initializeFrom(ir);
 
@@ -82,19 +81,16 @@ void MFrontUserMaterial :: initializeFrom(InputRecord &ir)
     strncpy(this->libname, libname.c_str(), 199);
     strncpy(this->modelname, modelname.c_str(), 199);
     // loading the MFront library using MGIS
-    this->behaviour = std::make_unique<Behaviour>(
-        load(this->libname, this->modelname, Hypothesis::TRIDIMENSIONAL));
+    this->behaviour = std::make_unique<Behaviour>(load(this->libname, this->modelname, Hypothesis::TRIDIMENSIONAL));
     // initialize material properties from user data
     IR_GIVE_FIELD(ir, this->properties, _IFT_MFrontUserMaterial_properties);
     // check that the number of material properties given by the user is correct
-    const auto nprops = mgis::behaviour::getArraySize(
-        this->behaviour->mps, this->behaviour->hypothesis);
+    const auto nprops = mgis::behaviour::getArraySize(this->behaviour->mps, this->behaviour->hypothesis);
     if (this->properties.giveSize() != nprops) {
         throw(std::runtime_error("wrong number of material properties"));
     }
     // treating the case for external state variables
-    const auto nesvs = mgis::behaviour::getArraySize(
-        this->behaviour->esvs, this->behaviour->hypothesis);
+    const auto nesvs = mgis::behaviour::getArraySize(this->behaviour->esvs, this->behaviour->hypothesis);
     if (nesvs != 1) {
         throw(std::runtime_error("wrong number of external state variables"));
     }
@@ -253,8 +249,6 @@ MFrontUserMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, Gaus
 
     integrate(v, *(this->behaviour));
 
-    // here was the fortran function
-
     // Change to OOFEM's component order
     auto jacobian = mfront_jacobian(mfront2oo6, mfront2oo6);
     // subtracking the initial stress
@@ -338,8 +332,6 @@ MFrontUserMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, Gauss
 //    mfront_stress[3] = m.s1.thermodynamic_forces[3];
 //    mfront_stress[4] = m.s1.thermodynamic_forces[4];
 //    mfront_stress[5] = m.s1.thermodynamic_forces[5];
-//
-//    // here was the fortran function
 //
 //    // Change to OOFEM's component order
 //    auto jacobian = mfront_jacobian(mfront2oo9, mfront2oo9);

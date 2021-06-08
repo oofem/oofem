@@ -808,6 +808,13 @@ if (USE_FM AND USE_PFEM)
     endforeach (case)
 endif()
 
+if (USE_SM AND USE_MFRONT)
+    file (GLOB smmfront_tests RELATIVE "${oofem_TEST_DIR}/smmfront" "${oofem_TEST_DIR}/smmfront/*.in")
+    foreach (case ${smmfront_tests})
+        add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/smmfront COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
 
 ######################## Benchmarks ########################################
 

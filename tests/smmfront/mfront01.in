@@ -1,0 +1,49 @@
+plasticity_mfront.out
+test of MFront interface
+#
+StaticStructural nsteps 5 nmodules 1 maxiter 20
+#
+errorcheck
+#
+#vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 nsteps 5
+#
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 3 nset 5
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  1.0   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  0.0   1.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  1.0   0.0   1.0
+node 7 coords 3  1.0   1.0   1.0
+node 8 coords 3  0.0   1.0   1.0
+lspace 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1
+SimpleCS 1 material 1 set 1
+#
+mfrontusermaterial 1 d 0. modelname "IsotropicLinearHardeningPlasticity" libpath "./plasticity/src/libBehaviour.so" properties 0
+#
+BoundaryCondition 1 loadTimeFunction 2 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 2 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 4
+BoundaryCondition 4 loadTimeFunction 2 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 5
+BoundaryCondition 5 loadTimeFunction 3 dofs 3 1 2 3 values 3 0.4 0.2 1.0 set 1
+#
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 0.0
+PiecewiseLinFunction 3 t 2 0. 1000. f(t) 2 0. 1.
+Set 1 nodes 4 5 6 7 8
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+Set 5 nodes 1 4
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+#REACTION tStep 1 number 1 dof 1 value -1.11111111e+00
+#REACTION tStep 1 number 1 dof 2 value -9.02777778e-01
+#REACTION tStep 1 number 1 dof 3 value -3.40277778e+00
+#REACTION tStep 5 number 1 dof 1 value -6.24620228e+00
+#REACTION tStep 5 number 1 dof 2 value -5.72252065e+00
+#REACTION tStep 5 number 1 dof 3 value -1.20067002e+01
+#%END_CHECK%
