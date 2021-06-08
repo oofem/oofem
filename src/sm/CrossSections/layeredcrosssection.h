@@ -57,6 +57,7 @@
 #define _IFT_LayeredCrossSection_midsurf "midsurf"
 #define _IFT_LayeredCrossSection_nintegrationpoints "nintegrationpoints"
 #define _IFT_LayeredCrossSection_initiationlimits "initiationlimits"
+#define _IFT_LayeredCrossSection_shearcoeff_xz "beamshearcoeffxz"
 //@}
 
 namespace oofem {
@@ -103,7 +104,7 @@ protected:
     double midSurfaceXiCoordFromBottom = 0.;
     double totalThick = 0.;
     double area = 0.;
-
+  double beamShearCoeffxz = 1.0;
 public:
     LayeredCrossSection(int n, Domain * d) : 
         StructuralCrossSection(n, d)
