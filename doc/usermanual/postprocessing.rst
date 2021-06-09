@@ -13,7 +13,7 @@ VTK is a widely used format for storing simulation results. The vtk files can be
 The export of results in vtk format can be done using ``vtkxml`` export module. 
 The number of export modules is defined in analysis record using ``nmodules`` keyword. The records for export modules should immediately follow analysis record.
 The detailed syntax of ``vtkxml`` record is described in oofem input manual. 
-As an example, consider an example of 3 point bending test input file (located in tests/benchmark/sm/concrete_3point.in).
+As an example, consider an example of 3-point bending test input file (located in `tests/benchmark/sm/concrete_3point.in <https://github.com/oofem/oofem/blob/master/tests/benchmark/sm/concrete_3point.in>`_) which we modify to add vtk export:
  
 ::
 
@@ -23,14 +23,14 @@ As an example, consider an example of 3 point bending test input file (located i
     vtkxml tstep_all dofman_all element_all primvars 1 1 vars 2 1 4         
     ...
 
-The export has been requested for all solution steps ``tstep_all``, all dof managers (nodes) ``dofman_all`` and all elements ``element_all``. The primary variables exported consists of displacement vector: ``primvars 1 1``, where ``primvars`` is the keyword for primary variable export, what follows is an array of primary variables IDs (defined in src/oofemlib/unknowntype.h), first number determines the array size.
-The export of secondary (internal) variables consists of strain and stress tensors (``vars 2 1 4``, where internal variable codes are defined in src/oofemlib/internalstatetype.h).
+The export has been requested for all solution steps ``tstep_all``, all dof managers (nodes) ``dofman_all`` and all elements ``element_all``. The primary variables exported consists of displacement vector: ``primvars 1 1``, where ``primvars`` is the keyword for primary variable export, what follows is an array of primary variables IDs (defined in `src/oofemlib/unknowntype.h <https://github.com/oofem/oofem/blob/master/src/oofemlib/unknowntype.h>`_), first number determines the array size.
+The export of secondary (internal) variables consists of strain and stress tensors (``vars 2 1 4``, where internal variable codes are defined in `src/oofemlib/internalstatetype.h <https://github.com/oofem/oofem/blob/master/src/oofemlib/internalstatetype.h>`_).
 
 After running the modified, extended  input the solver will produce for each solution step ``vtu`` file.
 
 Postprocessing in paraview
 --------------------------
-In this example, we will use Paraview (Open-source, multi-platform data analysis and visualization application, www.paraview.org).
+In this example, we will use Paraview (Open-source, multi-platform data analysis and visualization application, `www.paraview.org <https://www.paraview.org/>`_).
 After installation of this tool, simply launch paraview and open one or all vtu files produced.
 
 .. image:: figs/concrete_3point.png
