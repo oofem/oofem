@@ -1,4 +1,4 @@
-/*
+ /*
  *
  *                 #####    #####   ######  ######  ###   ###
  *               ##   ##  ##   ##  ##      ##      ## ### ##
@@ -126,26 +126,31 @@ LayeredCrossSection :: giveRealStress_PlaneStress(const FloatArrayF<3> &strain, 
     //double top = this->give(CS_TopZCoord, masterGp);
     
     auto element = dynamic_cast< StructuralElement * >( masterGp->giveElement() );
+    double totThick = 0.0;
     
     FloatArrayF<3> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1);
+      for (int igp = 0; igp < numberOfIntegrationPoints; igp++) {
+        auto layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1, igp);
         auto layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
         auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+        auto lgpw = layerGp->giveWeight();
         
         // resolve current layer z-coordinate
         double layerThick = this->layerThicks.at(layer);
+        totThick += layerThick * lgpw;
         //double layerZeta = layerGp->giveNaturalCoordinate(3);
         //double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, masterGp, layerGp, tStep);
         auto reducedLayerStress = dynamic_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlaneStress(layerStrain, layerGp, tStep);
-        answer.at(1) += reducedLayerStress.at(1) * layerThick;
-        answer.at(2) += reducedLayerStress.at(2) * layerThick;
-        answer.at(3) += reducedLayerStress.at(3) * layerThick * ( 5. / 6. );
+        answer.at(1) += reducedLayerStress.at(1) * layerThick* lgpw;
+        answer.at(2) += reducedLayerStress.at(2) * layerThick* lgpw;
+        answer.at(3) += reducedLayerStress.at(3) * layerThick* lgpw; // * ( 5. / 6. );
+      }
     }
-    
+    answer*=(1./totThick);
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(masterGp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
@@ -213,15 +218,18 @@ LayeredCrossSection :: giveStiffnessMatrix_PlaneStress(MatResponseMode rMode, Ga
     
     //Average stiffness over all layers
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto slaveGP = this->giveSlaveGaussPoint(masterGp, layer - 1);
+      for (int igp=0; igp< numberOfIntegrationPoints; igp++) {
+        auto slaveGP = this->giveSlaveGaussPoint(masterGp, layer - 1, igp);
         auto layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        auto sgpw = slaveGP->giveWeight();
         double layerThick = this->layerThicks.at(layer);
-        totThick += layerThick;
+        totThick += layerThick * sgpw;
         auto subAnswer = dynamic_cast< StructuralMaterial * >(layerMat)->givePlaneStressStiffMtrx(rMode, slaveGP, tStep);
-        answer += layerThick * subAnswer;
+        answer += layerThick * sgpw * subAnswer;
+      }
     }
-    answer.at(3,3) *= (5./6.);
-    return answer; //  * (1./totThick);
+    //answer.at(3,3) *= (5./6.);
+    return answer * (1./totThick);
 }
 
 
@@ -259,8 +267,10 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(const FloatArrayF<3> &strain
 
     FloatArrayF<3> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+      for (int igp=0; igp< numberOfIntegrationPoints; igp++) {
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1, igp);
         auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto lgpw = layerGp->giveWeight();
 
         // resolve current layer z-coordinate
         double layerThick = this->layerThicks.at(layer);
@@ -278,9 +288,10 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(const FloatArrayF<3> &strain
             reducedLayerStress = layerMat->giveRealStressVector_2dBeamLayer(layerStrain, layerGp, tStep);
         }
 
-        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick; //Nx
-        answer.at(2) += reducedLayerStress.at(1) * layerWidth * layerThick * layerZCoord;//My
-        answer.at(3) += reducedLayerStress.at(2) * layerWidth * layerThick; //Vz
+        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw; //Nx
+        answer.at(2) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw * layerZCoord;//My
+        answer.at(3) += reducedLayerStress.at(2) * layerWidth * layerThick * lgpw * beamShearCoeffxz; //Vz
+      }
     }
 
     // Create material status according to the first layer material
@@ -320,8 +331,10 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(const FloatArrayF<5> &strain,
 
     FloatArrayF<5> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+      for (int igp = 0; igp < numberOfIntegrationPoints; igp++ ) {
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1, igp);
         auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto lgpw = layerGp->giveWeight();
 
         // resolve current layer z-coordinate
         double layerThick = this->layerThicks.at(layer);
@@ -359,11 +372,12 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(const FloatArrayF<5> &strain,
             reducedLayerStress = layerMat->giveRealStressVector_PlateLayer(layerStrain, layerGp, tStep);
         }
 
-        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * layerZCoord;
-        answer.at(2) += reducedLayerStress.at(2) * layerWidth * layerThick * layerZCoord;
-        answer.at(3) += reducedLayerStress.at(5) * layerWidth * layerThick * layerZCoord;
-        answer.at(4) += reducedLayerStress.at(4) * layerWidth * layerThick;
-        answer.at(5) += reducedLayerStress.at(3) * layerWidth * layerThick;
+        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * lgpw * layerZCoord;
+        answer.at(2) += reducedLayerStress.at(2) * layerWidth * layerThick * lgpw * layerZCoord;
+        answer.at(3) += reducedLayerStress.at(5) * layerWidth * layerThick * lgpw * layerZCoord;
+        answer.at(4) += reducedLayerStress.at(4) * layerWidth * layerThick * lgpw * (5./6.);
+        answer.at(5) += reducedLayerStress.at(3) * layerWidth * layerThick * lgpw * (5./6.);
+      }
     }
 
     // now we must update master gp
@@ -395,8 +409,10 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain,
 
     FloatArrayF<8> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+      for (int igp=0; igp<numberOfIntegrationPoints; igp++) {
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1, igp);
         auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto lgpw = layerGp->giveWeight();
 
         // resolve current layer z-coordinate
         double layerThick = this->layerThicks.at(layer);
@@ -435,18 +451,20 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain,
         }
 
         // 1) membrane terms sx, sy, sxy
-        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick;
-        answer.at(2) += reducedLayerStress.at(2) * layerWidth * layerThick;
-        answer.at(3) += reducedLayerStress.at(5) * layerWidth * layerThick;
+        answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick *lgpw;
+        answer.at(2) += reducedLayerStress.at(2) * layerWidth * layerThick *lgpw;
+        answer.at(3) += reducedLayerStress.at(5) * layerWidth * layerThick * lgpw;
         // 2) bending terms mx, my, mxy
-        answer.at(4) += reducedLayerStress.at(1) * layerWidth * layerThick * layerZCoord;
-        answer.at(5) += reducedLayerStress.at(2) * layerWidth * layerThick * layerZCoord;
-        answer.at(6) += reducedLayerStress.at(5) * layerWidth * layerThick * layerZCoord;
+        answer.at(4) += reducedLayerStress.at(1) * layerWidth * layerThick * layerZCoord *lgpw;
+        answer.at(5) += reducedLayerStress.at(2) * layerWidth * layerThick * layerZCoord * lgpw;
+        answer.at(6) += reducedLayerStress.at(5) * layerWidth * layerThick * layerZCoord * lgpw;
         // 3) shear terms qx, qy
-        answer.at(7) += reducedLayerStress.at(4) * layerWidth * layerThick;
-        answer.at(8) += reducedLayerStress.at(3) * layerWidth * layerThick;
+        answer.at(7) += reducedLayerStress.at(4) * layerWidth * layerThick *lgpw * (5./6.);
+        answer.at(8) += reducedLayerStress.at(3) * layerWidth * layerThick *lgpw * (5./6.);
+      }
     }
 
+   
     // now we must update master gp
     ///@todo This should be replaced with a general "CrossSectionStatus"
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
@@ -473,15 +491,19 @@ LayeredCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &s
     //double top = this->give(CS_TopZCoord, masterGp);
     
     auto element = dynamic_cast< StructuralElement * >( masterGp->giveElement() );
+    double totThick = 0.0;
     
     FloatArrayF<4> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1);
+      for (int igp=0; igp<numberOfIntegrationPoints; igp++) {
+        auto layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1, igp);
         auto layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
         auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+        auto lgpw = layerGp->giveWeight();
         
         // resolve current layer z-coordinate
         double layerThick = this->layerThicks.at(layer);
+        totThick += layerThick * lgpw;
         //double layerZeta = layerGp->giveNaturalCoordinate(3);
         //double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -490,14 +512,16 @@ LayeredCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &s
 	// extract membrane part only
 	FloatArrayF<3> layerStrainMembrane(layerStrain.at(1), layerStrain.at(2), layerStrain.at(3));
         auto reducedLayerStress = dynamic_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlaneStress(layerStrainMembrane, layerGp, tStep);
-        answer.at(1) += reducedLayerStress.at(1) * layerThick;
-        answer.at(2) += reducedLayerStress.at(2) * layerThick;
-        answer.at(3) += reducedLayerStress.at(3) * layerThick * ( 5. / 6. );
+        answer.at(1) += reducedLayerStress.at(1) * layerThick *lgpw;
+        answer.at(2) += reducedLayerStress.at(2) * layerThick *lgpw;
+        answer.at(3) += reducedLayerStress.at(3) * layerThick *lgpw;
+      }
     }
     
     // assume rotation term elastic response
     auto de= this->giveMembraneRotStiffMtrx(ElasticStiffness, masterGp, tStep);
-    answer.at(4)=strain.at(4)*de.at(4,4);
+    answer.at(4)=strain.at(4)*de.at(4,4) * totThick;
+    answer*=(1./totThick);
 
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(masterGp) );
     status->letTempStrainVectorBe(strain);
@@ -565,7 +589,9 @@ LayeredCrossSection :: give2dPlateStiffMtrx(MatResponseMode rMode, GaussPoint *g
 
     FloatMatrixF<5,5> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = giveSlaveGaussPoint(gp, layer - 1);
+      for (int igp=0; igp< numberOfIntegrationPoints; igp++) {
+        auto layerGp = giveSlaveGaussPoint(gp, layer - 1, igp);
+        auto lgpw = layerGp->giveWeight();
 
         ///@todo Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
         auto mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
@@ -597,23 +623,24 @@ LayeredCrossSection :: give2dPlateStiffMtrx(MatResponseMode rMode, GaussPoint *g
         // perform integration
         //
         // 1) bending terms mx, my, mxy
-        answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 1) += layerMatrix.at(1, 1) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 2) += layerMatrix.at(1, 2) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 3) += layerMatrix.at(1, 5) *lgpw* layerWidth * layerThick * layerZCoord2;
 
-        answer.at(2, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2, 2) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2, 3) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 1) += layerMatrix.at(2, 1) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 2) += layerMatrix.at(2, 2) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 3) += layerMatrix.at(2, 5) *lgpw* layerWidth * layerThick * layerZCoord2;
 
-        answer.at(3, 1) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3, 2) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3, 3) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 1) += layerMatrix.at(5, 1) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 2) += layerMatrix.at(5, 2) *lgpw* layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 3) += layerMatrix.at(5, 5) *lgpw* layerWidth * layerThick * layerZCoord2;
 
         // 2) shear terms qx = qxz, qy = qyz
-        answer.at(4, 4) += layerMatrix.at(4, 4) * layerWidth * layerThick;
-        answer.at(4, 5) += layerMatrix.at(4, 3) * layerWidth * layerThick;
-        answer.at(5, 4) += layerMatrix.at(3, 4) * layerWidth * layerThick;
-        answer.at(5, 5) += layerMatrix.at(3, 3) * layerWidth * layerThick;
+        answer.at(4, 4) += layerMatrix.at(4, 4) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(4, 5) += layerMatrix.at(4, 3) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(5, 4) += layerMatrix.at(3, 4) *lgpw* layerWidth * layerThick * (5./6.);
+        answer.at(5, 5) += layerMatrix.at(3, 3) *lgpw* layerWidth * layerThick * (5./6.);
+      }
     }
     return answer;
 }
@@ -637,7 +664,9 @@ LayeredCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *g
 
     FloatMatrixF<8,8> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        auto layerGp = giveSlaveGaussPoint(gp, layer - 1);
+      for (int igp=0; igp<numberOfIntegrationPoints; igp++) {
+        auto layerGp = giveSlaveGaussPoint(gp, layer - 1, igp);
+        auto lgpw = layerGp->giveWeight();
 
         ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
         /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
@@ -670,37 +699,38 @@ LayeredCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *g
         // perform integration
         //
         // 1) membrane terms sx, sy, sxy
-        answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
-        answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick;
-        answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick;
+        answer.at(1, 1) += layerMatrix.at(1, 1) * lgpw * layerWidth * layerThick;
+        answer.at(1, 2) += layerMatrix.at(1, 2) * lgpw * layerWidth * layerThick;
+        answer.at(1, 3) += layerMatrix.at(1, 5) * lgpw * layerWidth * layerThick;
 
-        answer.at(2, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
-        answer.at(2, 2) += layerMatrix.at(2, 2) * layerWidth * layerThick;
-        answer.at(2, 3) += layerMatrix.at(2, 5) * layerWidth * layerThick;
+        answer.at(2, 1) += layerMatrix.at(2, 1) * lgpw * layerWidth * layerThick;
+        answer.at(2, 2) += layerMatrix.at(2, 2) * lgpw * layerWidth * layerThick;
+        answer.at(2, 3) += layerMatrix.at(2, 5) * lgpw * layerWidth * layerThick;
 
-        answer.at(3, 1) += layerMatrix.at(5, 1) * layerWidth * layerThick;
-        answer.at(3, 2) += layerMatrix.at(5, 2) * layerWidth * layerThick;
-        answer.at(3, 3) += layerMatrix.at(5, 5) * layerWidth * layerThick;
+        answer.at(3, 1) += layerMatrix.at(5, 1) * lgpw * layerWidth * layerThick;
+        answer.at(3, 2) += layerMatrix.at(5, 2) * lgpw * layerWidth * layerThick;
+        answer.at(3, 3) += layerMatrix.at(5, 5) * lgpw * layerWidth * layerThick;
 
         // 2) bending terms mx, my, mxy
 
-        answer.at(4, 4) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(4, 5) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(4, 6) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(4, 4) += layerMatrix.at(1, 1) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(4, 5) += layerMatrix.at(1, 2) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(4, 6) += layerMatrix.at(1, 5) * lgpw * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(5, 4) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(5, 5) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(5, 6) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(5, 4) += layerMatrix.at(2, 1) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(5, 5) += layerMatrix.at(2, 2) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(5, 6) += layerMatrix.at(2, 5) * lgpw * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(6, 4) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 5) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 6) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 4) += layerMatrix.at(5, 1) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 5) += layerMatrix.at(5, 2) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 6) += layerMatrix.at(5, 5) * lgpw * layerWidth * layerThick * layerZCoord2;
 
         // 3) shear terms qx, qy
-        answer.at(7, 7) += layerMatrix.at(4, 4) * layerWidth * layerThick;
-        answer.at(7, 8) += layerMatrix.at(4, 3) * layerWidth * layerThick;
-        answer.at(8, 7) += layerMatrix.at(3, 4) * layerWidth * layerThick;
-        answer.at(8, 8) += layerMatrix.at(3, 3) * layerWidth * layerThick;
+        answer.at(7, 7) += layerMatrix.at(4, 4) * lgpw * layerWidth * layerThick;
+        answer.at(7, 8) += layerMatrix.at(4, 3) * lgpw * layerWidth * layerThick;
+        answer.at(8, 7) += layerMatrix.at(3, 4) * lgpw * layerWidth * layerThick;
+        answer.at(8, 8) += layerMatrix.at(3, 3) * lgpw * layerWidth * layerThick;
+      }
     }
     return answer;
 }
@@ -732,7 +762,9 @@ LayeredCrossSection :: give2dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp
 
     FloatMatrixF<3,3> answer;
     for ( int i = 1; i <= numberOfLayers; i++ ) {
-        auto layerGp = giveSlaveGaussPoint(gp, i - 1);
+      for (int igp=0; igp<numberOfIntegrationPoints; igp++) {
+        auto layerGp = giveSlaveGaussPoint(gp, i - 1, igp);
+        auto lgpw = layerGp->giveWeight();
 
         ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
         /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
@@ -754,14 +786,15 @@ LayeredCrossSection :: give2dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp
         // perform integration
         //
         // 1) membrane terms sx
-        answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
-        answer.at(1, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick;
+        answer.at(1, 1) += layerMatrix.at(1, 1) * lgpw * layerWidth * layerThick;
+        answer.at(1, 3) += layerMatrix.at(1, 2) * lgpw * layerWidth * layerThick;
         // 2) bending terms my
-        answer.at(2, 2) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 2) += layerMatrix.at(1, 1) * lgpw * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 3) += layerMatrix.at(1, 2) * lgpw * layerWidth * layerThick * layerZCoord2;
         // 3) shear terms qx
-        answer.at(3, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
-        answer.at(3, 3) += layerMatrix.at(2, 2) * layerWidth * layerThick;
+        answer.at(3, 1) += layerMatrix.at(2, 1) * lgpw * layerWidth * layerThick * beamShearCoeffxz;
+        answer.at(3, 3) += layerMatrix.at(2, 2) * lgpw * layerWidth * layerThick * beamShearCoeffxz;
+      }
     }
     return answer;
 }
@@ -921,6 +954,7 @@ LayeredCrossSection :: initializeFrom(InputRecord &ir)
     numberOfIntegrationPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
 
+    this->totalThick = layerThicks.sum();
     // read z-coordinate of mid-surface measured from bottom layer
     midSurfaceZcoordFromBottom = 0.5 * this->computeIntegralThick();  // Default: geometric midplane
     midSurfaceXiCoordFromBottom = 1.0; // add to IR
@@ -929,7 +963,7 @@ LayeredCrossSection :: initializeFrom(InputRecord &ir)
     this->setupLayerMidPlanes();
     
     this->area = this->layerThicks.dotProduct(this->layerWidths);
-    this->totalThick = layerThicks.sum();
+    IR_GIVE_OPTIONAL_FIELD(ir, beamShearCoeffxz, _IFT_LayeredCrossSection_shearcoeff_xz);
 }
 
 void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
@@ -949,10 +983,12 @@ void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
 void LayeredCrossSection :: createMaterialStatus(GaussPoint &iGP)
 {
     for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = giveSlaveGaussPoint(& iGP, i - 1);
+      for (int k=0; k<numberOfIntegrationPoints; k++) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(& iGP, i - 1, k);
         StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(i) ) );
         MaterialStatus *matStat = mat->CreateStatus(layerGp);
         layerGp->setMaterialStatus(matStat);
+      }
     }
 }
 
@@ -1043,17 +1079,18 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int nPoint
 
 
 GaussPoint *
-LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i) const
+LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int ilayer, int igp) const
 //
 // return the i-th slave gauss point of master gp
 // if slave gp don't exists - create them
+// ilayer and igp numbered from 0
 //
 {
-    auto slave = masterGp->giveSlaveGaussPoint(i);
+    auto slave = masterGp->giveSlaveGaussPoint(ilayer*numberOfIntegrationPoints+igp);
     if ( slave == nullptr ) {
         // check for proper dimensions - slave can be NULL if index too high or if not
         // slaves previously defined
-        if ( i > this->numberOfLayers ) {
+        if ( ilayer > this->numberOfLayers*numberOfIntegrationPoints ) {
             OOFEM_ERROR("no such layer defined");
         }
 
@@ -1068,12 +1105,18 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i) const
         double top = this->give(CS_TopZCoord, masterGp);
 
         ///@todo Generalize to multiple integration points per layer
-        masterGp->gaussPoints.resize( numberOfLayers );
+        masterGp->gaussPoints.resize( numberOfLayers * numberOfIntegrationPoints);
+        // helper 1d rule
+        FloatArray sgpc(numberOfIntegrationPoints);
+        FloatArray sgpw(numberOfIntegrationPoints);
+        GaussIntegrationRule::giveLineCoordsAndWeights(numberOfIntegrationPoints, sgpc, sgpw);
         double currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
+          currentZTopCoord += this->layerThicks.at(j + 1);
+          for (int k = 0; k < numberOfIntegrationPoints; k++) { 
             FloatArray zCoord(3);
-            currentZTopCoord += this->layerThicks.at(j + 1);
-            double currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
+
+            double currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) * (1+sgpc(k)) / 2.0; // z-coord of layer gp
             if ( masterCoords.giveSize() > 0 ) {
                 zCoord.at(1) = masterCoords.at(1); // gp x-coord of mid surface
             }
@@ -1083,14 +1126,16 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i) const
             }
 
             zCoord.at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
+            //printf("SGP %d: currentZTopCoord %e, currentZCoord %e\n", j*numberOfIntegrationPoints+k, currentZTopCoord, currentZCoord);
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
+            masterGp->gaussPoints [ j*numberOfIntegrationPoints+k ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, sgpw(k)/2.0, slaveMode);
 
             // test - remove!
 //             masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 1.0, slaveMode);
+          }
         }
 
-        slave = masterGp->gaussPoints [ i ];
+        slave = masterGp->gaussPoints [ ilayer*numberOfIntegrationPoints + igp ];
     }
 
     return slave;
@@ -1130,9 +1175,11 @@ LayeredCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, Gauss
     // saved master gp record;
     // and now save slave gp of master:
     for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
+      for (int k=0; k<numberOfIntegrationPoints; k++) {
+        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1, k);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
         mat->saveIPContext(stream, mode, slaveGP);
+      }
     }
 }
 
@@ -1144,10 +1191,12 @@ LayeredCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, Ga
 
     // and now save slave gp of master:
     for ( int i = 1; i <= numberOfLayers; i++ ) {
+      for (int k=0; k<numberOfIntegrationPoints; k++) {
         // creates also slaves if they don't exists
-        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
+        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1, k);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
         mat->restoreIPContext(stream, mode, slaveGP);
+      }
     }
 }
 
