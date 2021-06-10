@@ -153,7 +153,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(const FloatArray &reduc
 
     // Iterate to find full vE.
     FloatArray answer;
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 1000; k++ ) { // Allow for a generous 1000 iterations.
         vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
@@ -161,7 +161,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(const FloatArray &reduc
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e-6 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e-3 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -2359,14 +2359,14 @@ StructuralMaterial :: initializeFrom(InputRecord &ir)
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 
-    double alpha = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_StructuralMaterial_talpha);
     if ( !propertyDictionary.includes(tAlpha) ) {
         //    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
         // put isotropic thermal expansion coeff into dictionary, if provided
         // and not previosly defined
         propertyDictionary.add(tAlpha, alpha);
     }
+    
+    
 }
 
 
