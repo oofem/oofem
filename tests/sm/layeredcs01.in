@@ -1,0 +1,82 @@
+layeredcs01.out
+Comparing plane stress response for integral and layered cs
+#
+NonLinearStatic nmodules 1 nmsteps 1 nsteps 1 profileopt 1
+nsteps 2 controllmode 1 rtolf 1e-3 rtold 1e-3 MaxIter 2000 refloadmode 1
+#linearstatic nsteps 1 nmodules 1
+#
+errorcheck
+#
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 8 ncrosssect 2 nmat 1 nbc 2 nic 0 nltf 2 nset 3 nxfemman 0
+#
+node      1 coords 3  0.00  0.	0. 
+node      2 coords 3  0.50  0.	0. 
+node      3 coords 3  1.00  0.	0. load 1 2
+node      4 coords 3  0.00  0.2	0.
+node      5 coords 3  0.50  0.2	0.
+node      6 coords 3  1.00  0.2	0. load 1 2
+#
+node     11 coords 3  0.00  0.	0. 
+node     12 coords 3  0.50  0.	0. 
+node     13 coords 3  1.00  0.	0. load 1 2
+node     14 coords 3  0.00  0.2	0.
+node     15 coords 3  0.50  0.2	0.
+node     16 coords 3  1.00  0.2	0. load 1 2
+#
+trplanestress2d 1 nodes 3 1 2 5 
+trplanestress2d 2 nodes 3 5 4 1 
+trplanestress2d 3 nodes 3 2 3 6 
+trplanestress2d 4 nodes 3 6 5 2
+
+trplanestress2d 11 nodes 3 11 12 15 
+trplanestress2d 12 nodes 3 15 14 11 
+trplanestress2d 13 nodes 3 12 13 16 
+trplanestress2d 14 nodes 3 16 15 12  
+#
+#CROSS SECTIONS
+SimpleCS 1 thick 0.02 material 1 set 1 drillstiffness 1.0e+09
+LayeredCS 2 nlayers 2 layermaterials 2 1 1 widths 2 1 1 thicks 2  0.01 0.01 nintegrationpoints 2 set 2
+#
+#MATERIALS
+IsoLE 1 d 1. E 1e9 n 0.0 tAlpha 0.
+#
+#BOUNDARY CONDITIONS
+	BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 3
+	nodalload 2 loadTimeFunction 2 components 2 0. 1.e3 
+#
+#FUNCTIONS
+	ConstantFunction 1 f(t) 1.
+	PiecewiseLinFunction 2 nPoints 3 t 3 -1. 0. 10. f(t) 3 0. 0. 10.
+#
+#SETS
+Set 1 elementranges {(1 4)}
+Set 2 elementranges {(11 14)}
+Set 3 nodes 4 1 4 11 14
+#
+#%BEGIN_CHECK% tolerance 1.e-10
+## check load levels
+## check node displacement at final step
+#NODE tStep 2 number 1 dof 2 unknown d value 0.0
+#NODE tStep 2 number 2 dof 2 unknown d value 1.66286569e-03 
+#NODE tStep 2 number 3 dof 2 unknown d value 4.83735409e-03
+NODE tStep 2 number 11 dof 2 unknown d value 0.0
+#NODE tStep 2 number 12 dof 2 unknown d value 1.66286569e-03
+#NODE tStep 2 number 13 dof 2 unknown d value 4.83735409e-03
+## check some arbitrary element
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value 9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 2 gp 1 keyword 1 component 1  value -9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 3 gp 1 keyword 1 component 1  value 3.03073976e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1  value -3.03073976e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 1 component 1  value 9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 12 gp 1 keyword 1 component 1  value -9.18229549e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 13 gp 1 keyword 1 component 1  value 3.03073976e+05 tolerance 1.e-2
+#ELEMENT tStep 2 number 14 gp 1 keyword 1 component 1  value -3.03073976e+05 tolerance 1.e-2
+##
+#REACTION tStep 2 number 1 dof 2 value 1.26541636e+03 tolerance 1.e-4
+#REACTION tStep 2 number 4 dof 2 value -3.26541636e+03 tolerance 1.e-4
+
+#%END_CHECK%
+
+
