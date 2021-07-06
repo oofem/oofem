@@ -98,17 +98,6 @@ public:
         ConcreteDPM2_VertexTensionDamage
     };
 
-    enum ConcreteDPM2_ReturnType {
-        RT_Regular,
-        RT_Tension,
-        RT_Compression,
-        RT_Auxiliary
-    };
-
-    enum ConcreteDPM2_ReturnResult {
-        RR_NotConverged,
-        RR_Converged
-    };
 
 
 protected:
@@ -185,12 +174,6 @@ protected:
     /// Indicates the state (i.e. elastic, unloading, plastic, damage, vertex) of the Gauss point
     int state_flag = ConcreteDPM2Status::ConcreteDPM2_Elastic;
     int temp_state_flag = ConcreteDPM2Status::ConcreteDPM2_Elastic;
-
-    int returnType = ConcreteDPM2Status::RT_Regular;
-    int tempReturnType = ConcreteDPM2Status::RT_Regular;
-
-    int returnResult = ConcreteDPM2Status::RR_NotConverged;
-    int tempReturnResult = ConcreteDPM2Status::RR_NotConverged;
 
 
 #ifdef keep_track_of_dissipated_energy
@@ -471,9 +454,6 @@ public:
     int giveTempStateFlag() const
     { return temp_state_flag; }
 
-    int giveTempReturnType() const { return tempReturnType; }
-    int giveTempReturnResult() const { return tempReturnResult; }
-
     // letTemp...be :
     // Functions used by the material to assign a new value to a temp variable.
     /**
@@ -603,10 +583,6 @@ public:
     void letTempStateFlagBe(const int v)
     { temp_state_flag = v; }
 
-    void letTempReturnTypeBe(const int type) { tempReturnType = type; }
-
-    void letTempReturnResultBe(const int result) { tempReturnResult = result; }
-
     void letKappaPPeakBe(double kappa)
     { kappaPPeak = kappa; }
 #ifdef keep_track_of_dissipated_energy
@@ -651,6 +627,21 @@ public:
 class ConcreteDPM2 : public StructuralMaterial
 {
 public:
+
+    enum ConcreteDPM2_ReturnResult {
+        RR_Unknown,
+        RR_NotConverged,
+        RR_Converged
+    };
+
+    enum ConcreteDPM2_ReturnType {
+        RT_Unknown,
+        RT_Regular,
+        RT_Tension,
+        RT_Compression,
+        RT_Auxiliary
+    };
+
 
 protected:
     /// Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
@@ -782,6 +773,7 @@ public:
      * @param gp Gauss point
      */
     void checkForVertexCase(double &answer,
+                            ConcreteDPM2_ReturnType &returnType,
                             double sig,
                             double tempKappa,
                             GaussPoint *gp) const;
@@ -794,6 +786,8 @@ public:
      * @param theta Load angle of trial stress (remains constant throughout return).
      */
     double performRegularReturn(FloatArrayF< 6 > &stress,
+                                ConcreteDPM2_ReturnResult &returnResult,
+                                ConcreteDPM2_ReturnType &returnType,
                                 double kappaP,
                                 GaussPoint *gp,
                                 double theta) const;
@@ -823,6 +817,8 @@ public:
      * @returns updated temporary cummulative plastic strain
      */
     double performVertexReturn(FloatArrayF< 6 > &stress,
+                               ConcreteDPM2_ReturnResult &returnResult,
+                               ConcreteDPM2_ReturnType &returnType,
                                double apexStress,
                                double tempKappaP,
                                GaussPoint *gp) const;
@@ -1126,6 +1122,7 @@ public:
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
+
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

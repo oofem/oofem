@@ -103,11 +103,9 @@ class LatticeBondPlasticity : public LatticeLinearElastic
 {
 protected:
 
-    enum LatticeBondPlasticity_SurfaceType { ST_Vertex, ST_Shear, ST_Compression };
-    mutable LatticeBondPlasticity_SurfaceType surfaceType; // FIXME: Must be removed. Not thread safe. Shouldn't be stored at all.
+    enum LatticeBondPlasticity_SurfaceType { ST_Unknown, ST_Vertex, ST_Shear, ST_Compression };
 
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
-    mutable LatticeBondPlasticity_ReturnResult returnResult; // FIXME: Must be removed. Not thread safe. Shouldn't be stored at all.
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
@@ -199,6 +197,8 @@ public:
     FloatArrayF< 3 >performPlasticityReturn(GaussPoint *gp, const FloatArrayF< 3 > &totalStrain, TimeStep *) const;
 
     double performRegularReturn(FloatArrayF< 3 > &stress,
+                                LatticeBondPlasticity_ReturnResult &returnResult,
+                                LatticeBondPlasticity_SurfaceType &surfaceType,
                                 double yieldValue,
                                 int transitionFlag,
                                 GaussPoint *gp) const;

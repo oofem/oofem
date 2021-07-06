@@ -50,33 +50,33 @@ namespace oofem {
 REGISTER_Material(LatticeBondPlasticity);
 
 
-LatticeBondPlasticity :: LatticeBondPlasticity(int n, Domain *d) : LatticeLinearElastic(n, d)
+LatticeBondPlasticity::LatticeBondPlasticity(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
 bool
-LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode) const
+LatticeBondPlasticity::hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dLattice;
 }
 
 double
-LatticeBondPlasticity :: computeHardening(double kappa) const
+LatticeBondPlasticity::computeHardening(double kappa) const
 {
-    return exp(pow(kappa / this->ef, 2.) );
+    return exp( pow(kappa / this->ef, 2.) );
 }
 
 double
-LatticeBondPlasticity :: computeDHardeningDKappa(double kappa) const
+LatticeBondPlasticity::computeDHardeningDKappa(double kappa) const
 {
-    return 2. * kappa / ( pow(this->ef, 2.) ) * exp(pow(kappa / this->ef, 2.) );
+    return 2. * kappa / ( pow(this->ef, 2.) ) * exp( pow(kappa / this->ef, 2.) );
 }
 
 
 void
-LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
+LatticeBondPlasticity::initializeFrom(InputRecord &ir)
 {
-    LatticeLinearElastic :: initializeFrom(ir);
+    LatticeLinearElastic::initializeFrom(ir);
 
     this->yieldTol = 1.e-6;
     IR_GIVE_OPTIONAL_FIELD(ir, this->yieldTol, _IFT_LatticeBondPlasticity_tol);
@@ -101,13 +101,13 @@ LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 }
 
 MaterialStatus *
-LatticeBondPlasticity :: CreateStatus(GaussPoint *gp) const
+LatticeBondPlasticity::CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeBondPlasticityStatus(1, LatticeBondPlasticity :: domain, gp);
+    return new LatticeBondPlasticityStatus(1, LatticeBondPlasticity::domain, gp);
 }
 
 double
-LatticeBondPlasticity :: computeShift(const double kappa) const
+LatticeBondPlasticity::computeShift(const double kappa) const
 {
     double hardening = computeHardening(kappa);
 
@@ -120,20 +120,20 @@ LatticeBondPlasticity :: computeShift(const double kappa) const
 
 
 double
-LatticeBondPlasticity :: computeParamA(const double kappa) const
+LatticeBondPlasticity::computeParamA(const double kappa) const
 {
     double hardening = computeHardening(kappa);
 
     double paramA = this->frictionAngleTwo * this->frictionAngleOne * this->fc * hardening /
                     ( this->frictionAngleTwo * this->frictionAngleOne +
-                      sqrt(1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) ) );
+                      sqrt( 1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) ) );
 
     return paramA;
 }
 
 
 double
-LatticeBondPlasticity :: computeDShiftDKappa(const double kappa) const
+LatticeBondPlasticity::computeDShiftDKappa(const double kappa) const
 {
     double dHardeningDKappa = computeDHardeningDKappa(kappa);
 
@@ -146,11 +146,11 @@ LatticeBondPlasticity :: computeDShiftDKappa(const double kappa) const
 
 
 double
-LatticeBondPlasticity :: computeDParamADKappa(const double kappa) const
+LatticeBondPlasticity::computeDParamADKappa(const double kappa) const
 {
     double dHardeningDKappa = computeDHardeningDKappa(kappa);
 
-    double A2 = this->frictionAngleTwo * this->frictionAngleOne + sqrt(1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) );
+    double A2 = this->frictionAngleTwo * this->frictionAngleOne + sqrt( 1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) );
 
     double dA1DKappa = this->frictionAngleTwo * this->frictionAngleOne * this->fc * dHardeningDKappa;
 
@@ -161,7 +161,7 @@ LatticeBondPlasticity :: computeDParamADKappa(const double kappa) const
 
 
 FloatArrayF< 6 >
-LatticeBondPlasticity :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const
+LatticeBondPlasticity::giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
     return status->giveReducedLatticeStrain();
@@ -169,11 +169,13 @@ LatticeBondPlasticity :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) cons
 
 
 FloatArrayF< 3 >
-LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
-                                                 const FloatArrayF< 3 > &strain,
-                                                 TimeStep *tStep) const
+LatticeBondPlasticity::performPlasticityReturn(GaussPoint *gp,
+                                               const FloatArrayF< 3 > &strain,
+                                               TimeStep *tStep) const
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
+
+    LatticeBondPlasticity_SurfaceType surfaceType = ST_Unknown;
 
     //Get tempKappa from the status
     double tempKappa = status->giveTempKappaP();
@@ -222,10 +224,10 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
             auto tempStrain = strain;
             auto deltaStrain = strain - oldStrain;
             //To get into the loop
-            returnResult = RR_NotConverged;
+            LatticeBondPlasticity_ReturnResult returnResult = RR_NotConverged;
             while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
                 stress = mult(tangent, tempStrain - tempPlasticStrain);
-                tempKappa = performRegularReturn(stress, yieldValue, transitionFlag, gp);
+                tempKappa = performRegularReturn(stress, returnResult, surfaceType, yieldValue, transitionFlag, gp);
 
                 if ( returnResult == RR_NotConverged ) {
                     subIncrementFlag = 1;
@@ -243,7 +245,7 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
                     tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                     tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-                    status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+                    status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
 
                     status->setTempKappaP(tempKappa);
 
@@ -281,18 +283,18 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-    status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
-    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
+    status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+    status->letTempLatticeStressBe( assemble< 6 >(stress, { 0, 1, 2 }) );
     status->setSurfaceValue(surfaceType);
 
     return stress;
 }
 
 int
-LatticeBondPlasticity :: giveIPValue(FloatArray &answer,
-                                     GaussPoint *gp,
-                                     InternalStateType type,
-                                     TimeStep *atTime)
+LatticeBondPlasticity::giveIPValue(FloatArray &answer,
+                                   GaussPoint *gp,
+                                   InternalStateType type,
+                                   TimeStep *atTime)
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
 
@@ -300,15 +302,17 @@ LatticeBondPlasticity :: giveIPValue(FloatArray &answer,
         answer = status->givePlasticLatticeStrain();
         return 1;
     } else {
-        return LatticeLinearElastic :: giveIPValue(answer, gp, type, atTime);
+        return LatticeLinearElastic::giveIPValue(answer, gp, type, atTime);
     }
 }
 
 double
-LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
-                                              double yieldValue,
-                                              int transitionFlag,
-                                              GaussPoint *gp) const
+LatticeBondPlasticity::performRegularReturn(FloatArrayF< 3 > &stress,
+                                            LatticeBondPlasticity_ReturnResult &returnResult,
+                                            LatticeBondPlasticity_SurfaceType &surfaceType,
+                                            double yieldValue,
+                                            int transitionFlag,
+                                            GaussPoint *gp) const
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
 
@@ -323,7 +327,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
     auto plasticStrain = status->givePlasticLatticeStrain() [ { 0, 1, 2 } ];
     auto tempPlasticStrain = plasticStrain;
 
-    double thetaTrial = atan2(stress.at(3), stress.at(2) );
+    double thetaTrial = atan2( stress.at(3), stress.at(2) );
 
     // Do the same for kappa
     double kappa = status->giveTempKappaP();
@@ -424,7 +428,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
                     tempPlasticStrain = plasticStrain;
                     iterationCount = 0;
                 } else {  //Accept the stress return
-                    this->surfaceType = ST_Shear;
+                    surfaceType = ST_Shear;
                     returnResult = RR_Converged;
                 }
             } else if ( transitionFlag == 1 ) {
@@ -432,7 +436,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
                     returnResult = RR_NotConverged;
                     return kappa;
                 } else {  //accept stress return
-                    this->surfaceType = ST_Compression;
+                    surfaceType = ST_Compression;
                     returnResult = RR_Converged;
                 }
             }
@@ -446,11 +450,11 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
 
 
 FloatMatrixF< 4, 4 >
-LatticeBondPlasticity :: computeJacobian(const FloatArrayF< 3 > &stress,
-                                         const double kappa,
-                                         const double deltaLambda,
-                                         int transitionFlag,
-                                         GaussPoint *gp) const
+LatticeBondPlasticity::computeJacobian(const FloatArrayF< 3 > &stress,
+                                       const double kappa,
+                                       const double deltaLambda,
+                                       int transitionFlag,
+                                       GaussPoint *gp) const
 {
     auto dMMatrix = computeDMMatrix(stress, kappa, transitionFlag, gp);
     auto mVector = computeMVector(stress, kappa, transitionFlag, gp);
@@ -483,10 +487,10 @@ LatticeBondPlasticity :: computeJacobian(const FloatArrayF< 3 > &stress,
 
 
 double
-LatticeBondPlasticity :: computeYieldValue(const FloatArrayF< 3 > &stress,
-                                           const double kappa,
-                                           const int transitionFlag,
-                                           GaussPoint *gp) const
+LatticeBondPlasticity::computeYieldValue(const FloatArrayF< 3 > &stress,
+                                         const double kappa,
+                                         const int transitionFlag,
+                                         GaussPoint *gp) const
 {
     double shift = computeShift(kappa);
     double paramA = computeParamA(kappa);
@@ -502,23 +506,23 @@ LatticeBondPlasticity :: computeYieldValue(const FloatArrayF< 3 > &stress,
 
 
 double
-LatticeBondPlasticity :: computeTransition(const double kappa,
-                                           GaussPoint *gp) const
+LatticeBondPlasticity::computeTransition(const double kappa,
+                                         GaussPoint *gp) const
 {
     double paramA = computeParamA(kappa);
 
     double transition = -paramA / ( this->frictionAngleTwo * this->frictionAngleOne *
-                                    sqrt(1. + pow(this->frictionAngleTwo, 2.) *
-                                         pow(this->frictionAngleOne, 2.) ) );
+                                    sqrt( 1. + pow(this->frictionAngleTwo, 2.) *
+                                          pow(this->frictionAngleOne, 2.) ) );
     return transition;
 }
 
 
 FloatArrayF< 3 >
-LatticeBondPlasticity :: computeFVector(const FloatArrayF< 3 > &stress,
-                                        const double kappa,
-                                        const int transitionFlag,
-                                        GaussPoint *gp) const
+LatticeBondPlasticity::computeFVector(const FloatArrayF< 3 > &stress,
+                                      const double kappa,
+                                      const int transitionFlag,
+                                      GaussPoint *gp) const
 {
     double shearNorm = norm(stress [ { 1, 2 } ]);
 
@@ -545,10 +549,10 @@ LatticeBondPlasticity :: computeFVector(const FloatArrayF< 3 > &stress,
 
 
 FloatArrayF< 3 >
-LatticeBondPlasticity :: computeMVector(const FloatArrayF< 3 > &stress,
-                                        const double kappa,
-                                        const int transitionFlag,
-                                        GaussPoint *gp) const
+LatticeBondPlasticity::computeMVector(const FloatArrayF< 3 > &stress,
+                                      const double kappa,
+                                      const int transitionFlag,
+                                      GaussPoint *gp) const
 {
     double shearNorm = norm(stress [ { 1, 2 } ]);
 
@@ -564,7 +568,7 @@ LatticeBondPlasticity :: computeMVector(const FloatArrayF< 3 > &stress,
         m.at(1) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.);
         m.at(2) = 2. * shearNorm;
         if ( stress.at(1) < -shift - this->yieldTol ) {
-            m.at(3) = fabs(m.at(1) );
+            m.at(3) = fabs( m.at(1) );
         } else {
             m.at(3) = 0;
         }
@@ -575,10 +579,10 @@ LatticeBondPlasticity :: computeMVector(const FloatArrayF< 3 > &stress,
 
 
 FloatMatrixF< 3, 3 >
-LatticeBondPlasticity :: computeDMMatrix(const FloatArrayF< 3 > &stress,
-                                         const double kappa,
-                                         const int transitionFlag,
-                                         GaussPoint *gp) const
+LatticeBondPlasticity::computeDMMatrix(const FloatArrayF< 3 > &stress,
+                                       const double kappa,
+                                       const int transitionFlag,
+                                       GaussPoint *gp) const
 {
     auto mVector = computeMVector(stress, kappa, transitionFlag, gp);
     double dShiftDKappa = computeDShiftDKappa(kappa);
@@ -612,11 +616,11 @@ LatticeBondPlasticity :: computeDMMatrix(const FloatArrayF< 3 > &stress,
 
 
 FloatMatrixF< 3, 3 >
-LatticeBondPlasticity ::  computeAMatrix(const FloatArrayF< 3 > &stress,
-                                         const double kappa,
-                                         const double deltaLambda,
-                                         const int transitionFlag,
-                                         GaussPoint *gp) const
+LatticeBondPlasticity::computeAMatrix(const FloatArrayF< 3 > &stress,
+                                      const double kappa,
+                                      const double deltaLambda,
+                                      const int transitionFlag,
+                                      GaussPoint *gp) const
 {
     auto dMMatrix = computeDMMatrix(stress, kappa, transitionFlag, gp);
     /* Compute matrix*/
@@ -637,7 +641,7 @@ LatticeBondPlasticity ::  computeAMatrix(const FloatArrayF< 3 > &stress,
 
 
 bool
-LatticeBondPlasticity :: checkForVertexCase(FloatArrayF< 3 > &stress, GaussPoint *gp) const
+LatticeBondPlasticity::checkForVertexCase(FloatArrayF< 3 > &stress, GaussPoint *gp) const
 {
     double shearNorm = norm(stress [ { 1, 2 } ]);
 
@@ -657,7 +661,7 @@ LatticeBondPlasticity :: checkForVertexCase(FloatArrayF< 3 > &stress, GaussPoint
 
 
 void
-LatticeBondPlasticity :: performVertexReturn(FloatArrayF< 3 > &stress, GaussPoint *gp) const
+LatticeBondPlasticity::performVertexReturn(FloatArrayF< 3 > &stress, GaussPoint *gp) const
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( giveStatus(gp) );
 
@@ -675,7 +679,7 @@ LatticeBondPlasticity :: performVertexReturn(FloatArrayF< 3 > &stress, GaussPoin
 
 
 FloatArrayF< 6 >
-LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
+LatticeBondPlasticity::giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
@@ -701,22 +705,22 @@ LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
 }
 
 
-LatticeBondPlasticityStatus :: LatticeBondPlasticityStatus(int n, Domain *d, GaussPoint *gp)
+LatticeBondPlasticityStatus::LatticeBondPlasticityStatus(int n, Domain *d, GaussPoint *gp)
     : LatticeMaterialStatus(gp)
 { }
 
 
 void
-LatticeBondPlasticityStatus :: initTempStatus()
+LatticeBondPlasticityStatus::initTempStatus()
 {
-    LatticeMaterialStatus :: initTempStatus();
+    LatticeMaterialStatus::initTempStatus();
     this->tempKappaP = this->kappaP;
 }
 
 void
-LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
+LatticeBondPlasticityStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    LatticeMaterialStatus :: printOutputAt(file, tStep);
+    LatticeMaterialStatus::printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "plasticStrains ");
     for ( double s : this->plasticLatticeStrain ) {
@@ -730,17 +734,17 @@ LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 
 
 void
-LatticeBondPlasticityStatus :: updateYourself(TimeStep *atTime)
+LatticeBondPlasticityStatus::updateYourself(TimeStep *atTime)
 {
-    LatticeMaterialStatus :: updateYourself(atTime);
+    LatticeMaterialStatus::updateYourself(atTime);
     this->kappaP = this->tempKappaP;
 }
 
 
 void
-LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
+LatticeBondPlasticityStatus::saveContext(DataStream &stream, ContextMode mode)
 {
-    LatticeMaterialStatus :: saveContext(stream, mode);
+    LatticeMaterialStatus::saveContext(stream, mode);
 
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -749,9 +753,9 @@ LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 
 
 void
-LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mode)
+LatticeBondPlasticityStatus::restoreContext(DataStream &stream, ContextMode mode)
 {
-    LatticeMaterialStatus :: restoreContext(stream, mode);
+    LatticeMaterialStatus::restoreContext(stream, mode);
 
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);

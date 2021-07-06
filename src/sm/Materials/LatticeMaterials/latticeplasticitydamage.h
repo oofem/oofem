@@ -82,6 +82,7 @@ protected:
 
     int compressionFlag = 0;
 
+
 public:
 
     /// Constructor
@@ -93,7 +94,7 @@ public:
 
     double giveKappaDOne() const { return kappaDOne; }
     double giveKappaDTwo() const { return kappaDTwo; }
-    //   double giveKappaDThree() { return kappaDThree; }
+
     double giveTempKappaDOne() const { return tempKappaDOne; }
     double giveTempKappaDTwo() const { return tempKappaDTwo; }
 
@@ -102,8 +103,6 @@ public:
     void   setTempKappaDOne(double newKappa) { tempKappaDOne = newKappa; }
 
     void   setTempKappaDTwo(double newKappa) { tempKappaDTwo = newKappa; }
-
-    //void   setTempKappaDThree(double newKappa) { tempKappaDThree = newKappa; }
 
     double giveDamage() const { return damage; }
 
@@ -128,6 +127,7 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
+
 /**
  * This class implements a local random plasticity damage model for concrete for lattice elements.
  */
@@ -135,8 +135,11 @@ class LatticePlasticityDamage : public LatticeLinearElastic
 {
 protected:
 
-    enum LatticePlasticityDamage_ReturnResult { RR_NotConverged, RR_Converged };
-    mutable LatticePlasticityDamage_ReturnResult returnResult = RR_NotConverged; /// FIXME: This must be removed. Not thread safe. Shouldn't be stored at all.
+    enum LatticePlasticityDamage_ReturnResult {
+        RR_Unknown,
+        RR_NotConverged,
+        RR_Converged
+    };
 
     double initialYieldStress = 0.;
 
@@ -171,11 +174,12 @@ protected:
 
     /// yield tolerance
     double yieldTol = 0.;
+
     /// maximum number of iterations for stress return
     int newtonIter = 0;
     int numberOfSubIncrements = 0;
 
-    //damageFlag
+    ///damageFlag
     int damageFlag = 0;
 
     virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(ft_strength, gp) * this->ft; }
@@ -201,11 +205,6 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    // Doesn't exist? old code:
-    //FloatMatrix<X,X> computeBMatrix(const FloatArrayF<3> &sigma, const double deltaLambda) const;
-
-    /* FloatMatrixF< 3, 3 >computeAMatrix(const FloatArrayF< 3 > &sigma, const double tempKappa, */
-    /*                                    const double deltaLambda, GaussPoint *gp) const; */
 
     FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
                                    GaussPoint *gp, TimeStep *tStep) const;
@@ -232,7 +231,7 @@ public:
                                  FloatArrayF< 6 > &reducedStrain,
                                  TimeStep *tStep) const;
 
-    double performRegularReturn(FloatArrayF< 3 > &stress, double yieldValue, GaussPoint *gp, TimeStep *tStep) const;
+    double performRegularReturn(FloatArrayF< 3 > &stress, LatticePlasticityDamage_ReturnResult &returnResult, double yieldValue, GaussPoint *gp, TimeStep *tStep) const;
 
     double computeYieldValue(const FloatArrayF< 3 > &sigma,
                              const double tempKappa,
