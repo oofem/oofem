@@ -5969,13 +5969,13 @@ relaxation.
 \hline
 Description & SteelRelaxMat model for relaxation of prestressing reinforcement\\
 \hline
-Record Format & \descitem{SteelRelaxMat}  
+Record Format & \descitem{SteelRelaxMat}
 \elemparam{d}{rn}
 \elemparam{E}{rn}
 \elemparam{reinfClass}{in}
 \optelemparam{timeFactor}{rn}
-\elemparam{charStrength}{rn} 
-\elemparam{approach}{in} 
+\elemparam{charStrength}{rn}
+\elemparam{approach}{in}
 \optelemparam{k1}{rn}
 \optelemparam{k2}{rn}
 \optelemparam{rho1000}{rn}
@@ -6013,6 +6013,51 @@ Supported modes& 1dMat\\
 \label{steelRelax_table}
 %\end{center}
 \end{table}
+
+
+
+\subsection{User-defined material models using MFront}
+A user-defined material created with MFront can be used if MGIS is installed
+\newline
+(https://github.com/thelfer/MFrontGenericInterfaceSupport) and linked to OOFEM with cmake before the compilation.
+Run cmake with following flags and specify the location of the MGIS cmake files:
+\newline
+\verb|-DUSE_MFRONT=ON -DMFrontGenericInterface_DIR=/path/to/mgis/cmake/|
+\newline
+Once OOFEM is compiled with this setting, the file /tests/smmfront/mfront01.in will be included in the tests.
+It requires the file
+\newline
+/tests/smmfront/plasticityIsotropicLinearHardeningPlasticity.mfront to be processed by MFront before the tests are run.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & MFrontUserMaterial allows use of user-defined material models based on MFront\\
+\hline
+Record Format & \descitem{MFrontUserMaterial}
+\elemparam{d}{rn}
+\elemparam{modelname}{s}
+\elemparam{libpath}{s}
+\elemparam{properties}{dc}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} specific weight\\
+&- \param{modelname} name of the material model from the shared library to be used \\
+&- \param{libpath} path to the shared library of the material created with MFront \\
+&- \param{properties} are not used now, which yields in "properties~0" on input for now \\
+
+Supported modes& 3dMat\\
+\hline
+\end{mmt}
+\caption{MFrontUserMaterial material model -- summary.}
+\label{MFrontUserMaterial_table}
+%\end{center}
+\end{table}
+
+
+
+
+
 
 
 \clearpage
