@@ -79,6 +79,7 @@ set (PYBIND_DIR CACHE PATH "Manual pybind11 directory")
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_SHARED_LIB "Build shared library" ON)
+option (USE_MFRONT "Build shared library" OFF)
 
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -636,6 +637,11 @@ endif ()
 
 install (TARGETS oofem DESTINATION bin)
 
+if (USE_MFRONT)
+    find_package (MFrontGenericInterface REQUIRED)
+    target_link_libraries(oofem mgis::MFrontGenericInterface)
+endif ()
+
 if (USE_OOFEG)
     #  OOFEG target:
     if (USE_SHARED_LIB)
@@ -799,6 +805,13 @@ if (USE_FM AND USE_PFEM)
     file (GLOB fmpfem_tests RELATIVE "${oofem_TEST_DIR}/fmpfem" "${oofem_TEST_DIR}/fmpfem/*.in")
     foreach (case ${fmpfem_tests})
         add_test (NAME "test_fm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fmpfem COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_SM AND USE_MFRONT)
+    file (GLOB smmfront_tests RELATIVE "${oofem_TEST_DIR}/smmfront" "${oofem_TEST_DIR}/smmfront/*.in")
+    foreach (case ${smmfront_tests})
+        add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/smmfront COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif()
 

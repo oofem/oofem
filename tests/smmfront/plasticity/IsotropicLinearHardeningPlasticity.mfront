@@ -1,0 +1,78 @@
+@DSL DefaultDSL;
+@Behaviour IsotropicLinearHardeningPlasticity;
+@Author Thomas Helfer;
+@Date   14/10/2016;
+
+@Description{
+  An implicit implementation of a simple
+  isotropic plasticity behaviour with
+  isotropic linear hardening.
+
+  The yield surface is defined by:
+  "\["
+  "  f(\sigmaeq,p) = \sigmaeq-s_{0}-H\,p"
+  "\]"
+}
+
+@Parameter young = 10e3;
+young.setGlossaryName("YoungModulus");
+@Parameter nu    = 0.2;
+nu.setGlossaryName("PoissonRatio");
+@Parameter H = 1e3;
+H.setEntryName("HardeningSlope");
+@Parameter s0 = 20.;
+s0.setGlossaryName("YieldStress");
+
+@StateVariable StrainStensor eel;
+eel.setGlossaryName("ElasticStrain");
+@StateVariable strain p;
+p.setGlossaryName("EquivalentPlasticStrain");
+
+/*!
+ * computation of the prediction operator: we only provide the elastic
+ * operator.
+ *
+ * We could also provide a tangent operator, but this would mean
+ * saving an auxiliary state variable stating if a plastic loading
+ * occured at the previous time step.
+ */
+@PredictionOperator{
+  // silent "unused parameter" warning
+  static_cast<void>(smt);
+  const auto lambda = computeLambda(young,nu);
+  const auto mu     = computeMu(young,nu);
+  Dt = lambda*Stensor4::IxI()+2*mu*Stensor4::Id();
+}
+
+/*!
+ * behaviour integration using a fully implicit Euler-backwark scheme.
+ */
+@ProvidesSymmetricTangentOperator;
+@Integrator{
+  const auto lambda = computeLambda(young,nu);
+  const auto mu     = computeMu(young,nu);
+  eel += deto;
+  const auto se     = 2*mu*deviator(eel);
+  const auto seq_e  = sigmaeq(se);
+  const auto b      = seq_e-s0-H*p>stress{0};
+  if(b){
+    const auto iseq_e = 1/seq_e;
+    const auto n      = eval(3*se/(2*seq_e));
+    const auto cste   = 1/(H+3*mu);
+    dp   = (seq_e-s0-H*p)*cste;
+    eel -= dp*n;
+    if(computeTangentOperator_){
+      if(smt==CONSISTENTTANGENTOPERATOR){
+	Dt = (lambda*Stensor4::IxI()+2*mu*Stensor4::Id()
+	      -4*mu*mu*(dp*iseq_e*(Stensor4::M()-(n^n))+cste*(n^n)));
+      } else {
+	Dt = lambda*Stensor4::IxI()+2*mu*Stensor4::Id();
+      }
+    }
+  } else {
+    if(computeTangentOperator_){
+      Dt = lambda*Stensor4::IxI()+2*mu*Stensor4::Id();
+    }
+  }
+  sig = lambda*trace(eel)*Stensor::Id()+2*mu*eel;
+}
