@@ -48,7 +48,8 @@ set (sm_element
     Elements/Plates/dkt3d.C
     Elements/Shells/rershell.C 
     Elements/Shells/tr_shell01.C 
-    Elements/Shells/tr_shell02.C 
+    Elements/Shells/tr_shell02.C
+    Elements/Shells/tr_shell11.C
     Elements/Shells/cct3d.C
     Elements/Shells/quad1mindlinshell3d.C
     Elements/Shells/shell7base.C
