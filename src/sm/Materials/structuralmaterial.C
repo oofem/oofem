@@ -153,12 +153,13 @@ StructuralMaterial :: giveRealStressVector_StressControl(const FloatArray &reduc
 
     // Iterate to find full vE.
     FloatArray answer;
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 1000; k++ ) { // Allow for a generous 100 iterations.
         vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
         //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
+        //printf("%3d: %e\n", k, reducedvS.computeNorm());
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
         if ( reducedvS.computeNorm() <= 1e-6 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
@@ -171,6 +172,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(const FloatArray &reduc
 
         tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        //reducedTangent.printYourself();
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
@@ -209,8 +211,9 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(const FloatArray &
     // step n: vE = {., ., sum(ve(n)), ., ., .}
 
     // Iterate to find full vE.
+    //vE.printYourself("vE");
     FloatArray answer;
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 1000; k++ ) { // Allow for a generous 100 iterations.
         answer = this->giveRealStressVector_3d(vE, gp, tStep);
         // step 0: answer = full stress vector
         // step n: answer = {., ., ->0, ., ., .}
@@ -218,12 +221,15 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(const FloatArray &
         if ( reducedvS.computeNorm() < 1e-6 ) {
             return answer;
         }
-
+	//reducedvS.printYourself("Vs");
         tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+	//reducedTangent.printYourself("d");
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
+	//increment_vE.printYourself("iVe");
         vE.assemble(increment_vE, stressControl);
+	//vE.printYourself("vE");
     }
 
     OOFEM_WARNING("Iteration did not converge");
@@ -847,6 +853,10 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
     case _3dShell:
         answer.enumerate(8);
         return 8;
+
+    case _3dShellRot:
+        answer.enumerate(9);
+        return 9;
 
     case _PlaneStressRot:
         answer = {
