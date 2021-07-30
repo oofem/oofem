@@ -784,7 +784,7 @@ LayeredCrossSection :: give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint
   answer.zero();
   answer.assemble(d, {1,2,3,4,5,6,7,8});
   answer.at(9,9) = this->give(CS_DrillingStiffness, gp);
-  answer.printYourself("De");
+  //answer.printYourself("De");
 
   return answer;
 
