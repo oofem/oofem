@@ -53,6 +53,7 @@ namespace oofem {
     ENUM_ITEM(_2dBeam) \
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
+    ENUM_ITEM(_3dShellRot) \
     ENUM_ITEM(_3dDegeneratedShell) \
     ENUM_ITEM(_3dBeamSubSoil) /* Subsoil model for beams */ \
   \
