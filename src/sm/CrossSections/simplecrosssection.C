@@ -266,6 +266,36 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain, 
 }
 
 
+FloatArrayF<9>
+SimpleCrossSection :: giveGeneralizedStress_ShellRot(const FloatArrayF<9> &strain, GaussPoint *gp, TimeStep *tStep) const
+{
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: See earlier response to comment
+     */
+
+  FloatArrayF<9> answer;
+  FloatArrayF<8> rstrain;
+  for (int i=1; i<=8; i++) {
+    rstrain.at(i)=strain.at(i);
+  }
+  FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep);
+  for (int i=1; i<=8; i++) {
+    answer.at(i)=ra.at(i);
+  }
+  answer.at(9) = this->give(CS_DrillingStiffness, gp)*strain.at(9);
+
+  auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );  
+  auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
+  status->letTempStrainVectorBe(strain);
+  status->letTempStressVectorBe(answer);
+    
+  return answer;
+}
+
+
 FloatArrayF<4>
 SimpleCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
@@ -420,6 +450,20 @@ SimpleCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp
 
     answer.at(8, 8) = answer.at(7, 7) = mat2d.at(3, 3) * thickness * ( 5. / 6. );
     return answer;
+}
+
+
+FloatMatrixF<9,9>
+SimpleCrossSection :: give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+  FloatMatrix d, answer;
+  d = this->give3dShellStiffMtrx(rMode, gp, tStep);
+  answer.resize(9,9);
+  answer.zero();
+  answer.assemble(d, {1,2,3,4,5,6,7,8});
+  answer.at(9,9) = this->give(CS_DrillingStiffness, gp);
+  return answer;
+
 }
 
 
