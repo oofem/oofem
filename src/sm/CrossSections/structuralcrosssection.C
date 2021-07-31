@@ -52,6 +52,8 @@ StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint 
         return this->giveGeneralizedStress_Plate(strain, gp, tStep);
     } else if ( mode == _3dShell ) {
         return this->giveGeneralizedStress_Shell(strain, gp, tStep);
+    } else if ( mode == _3dShellRot ) {
+      return this->giveGeneralizedStress_ShellRot(strain, gp, tStep);
     } else if ( mode == _3dMat ) {
         return this->giveRealStress_3d(strain, gp, tStep);
     } else if ( mode == _PlaneStrain ) {

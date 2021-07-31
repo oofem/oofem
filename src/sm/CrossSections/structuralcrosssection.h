@@ -132,6 +132,7 @@ public:
     virtual FloatArrayF<6> giveGeneralizedStress_Beam3d(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual FloatArrayF<5> giveGeneralizedStress_Plate(const FloatArrayF<5> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual FloatArrayF<8> giveGeneralizedStress_Shell(const FloatArrayF<8> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF<9> giveGeneralizedStress_ShellRot(const FloatArrayF<9> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual FloatArrayF<4> giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual FloatArrayF<3> giveGeneralizedStress_PlateSubSoil(const FloatArrayF<3> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual FloatArrayF<6> giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const;
@@ -262,6 +263,14 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual FloatMatrixF<8,8> give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+        /**
+     * Method for computing 3d shell (with normal rotation) stiffness matrix.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual FloatMatrixF<9,9> give3dShellRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing 3d shell stiffness matrix on degenerated shell elements.
      * @param answer Stiffness matrix.

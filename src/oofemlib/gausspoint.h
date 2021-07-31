@@ -222,6 +222,7 @@ public:
      * @return Slave gp.
      */
     GaussPoint *giveSlaveGaussPoint(int index);
+    std::vector< GaussPoint * > &giveSlaveGaussPoints() {return this->gaussPoints;}
 
     /**
      * True if gauss point has slave points. Otherwise false.

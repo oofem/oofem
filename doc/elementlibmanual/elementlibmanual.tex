@@ -913,7 +913,7 @@ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sig
 
 
 
-\subsubsection {tr\_shell01 element}
+\subsubsection {tr\_shell11  element}
 Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. It comes with complete set of 6 DOFs per node. 
 The element features are summarized in Table~\ref{trshell01summary}.
@@ -922,14 +922,14 @@ The element features are summarized in Table~\ref{trshell01summary}.
  \begin{makeimage}
   \input{trshell_lin.tikz}
  \end{makeimage}
- \caption{Geometry of tr\_shell01 element.}
+ \caption{Geometry of tr\_shell11 element.}
 \end{figure}
 
-\begin{elementsummary}{tr\_shell01}{Triangular shell element combining CCT3D plate element (Mindlin hypothesis) with triangular plane stress element with rotational DOFs}{-}{tr\_shell01 element summary}{trshell01summary}
+\begin{elementsummary}{tr\_shell11}{Triangular shell element combining CCT3D plate element (Mindlin hypothesis) with triangular plane stress element with rotational DOFs}{-}{tr\_shell01 element summary}{trshell01summary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
 \elementDescription{Approximation}{See description of cct and trplanstrrot elements}
-\elementDescription{Integration}{Integration of all terms using one point formula.}
+\elementDescription{Integration}{Four point integration, reduced integration of strain associated to normal rotation and shear terms.}
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are supported (only surface loads).}
@@ -944,6 +944,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests}{sm/trshell11_1.in}
 \end{elementsummary}
 
 
@@ -970,6 +971,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Note}{Works only with linear material models, as bending and membrane actions are uncoupled}
 \end{elementsummary}
 
 
