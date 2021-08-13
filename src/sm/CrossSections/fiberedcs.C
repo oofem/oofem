@@ -195,6 +195,13 @@ FiberedCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain,
     return zeros<8>();
 }
 
+FloatArrayF<9>
+FiberedCrossSection :: giveGeneralizedStress_ShellRot(const FloatArrayF<9> &strain, GaussPoint *gp, TimeStep *tStep) const
+{
+    OOFEM_ERROR("Not supported");
+    return zeros<9>();
+}
+
 
 FloatArrayF<4>
 FiberedCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
@@ -308,6 +315,13 @@ FiberedCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *g
 {
     OOFEM_ERROR("Not implemented");
     return FloatMatrixF<8,8>();
+}
+
+FloatMatrixF<9,9>
+FiberedCrossSection :: give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+    OOFEM_ERROR("Not implemented");
+    return FloatMatrixF<9,9>();
 }
 
 FloatMatrixF<4,4>

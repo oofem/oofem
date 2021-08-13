@@ -153,15 +153,16 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
 
     // Iterate to find full vE.
     FloatArray answer;
-    for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 10000 iterations.
+    for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 100000 iterations.
         vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
         //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
+        //printf("%3d: %e\n", k, reducedvS.computeNorm());
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e-3 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( (reducedvS.computeNorm() <= this->SCRelTol * vS.computeNorm() && k >= 1 ) || (reducedvS.computeNorm() < this->SCAbsTol)){ // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -169,15 +170,15 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
             return answer;
         }
 
-        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix(this->SCStiffMode, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        //reducedTangent.printYourself();
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
         //vE.printYourself("vE");
     }
-
-    OOFEM_ERROR( "Iteration did not converge after 100000 iterations. The error is %e", reducedvS.computeNorm() );
+    OOFEM_ERROR( "Iteration did not converge after 100000 iterations\nS.norm=%e, err=%e, relErr=%e", vS.computeNorm(), reducedvS.computeNorm(), reducedvS.computeNorm()/vS.computeNorm());
     return FloatArray();
 }
 
@@ -209,21 +210,25 @@ StructuralMaterial::giveRealStressVector_ShellStressControl(const FloatArray &st
     // step n: vE = {., ., sum(ve(n)), ., ., .}
 
     // Iterate to find full vE.
+    //vE.printYourself("vE");
     FloatArray answer;
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 100 iterations.
         answer = this->giveRealStressVector_3d(vE, gp, tStep);
         // step 0: answer = full stress vector
         // step n: answer = {., ., ->0, ., ., .}
         reducedvS.beSubArrayOf(answer, stressControl);
-        if ( reducedvS.computeNorm() < 1e-6 ) {
-            return answer;
+        if ( (reducedvS.computeNorm() <= this->SCRelTol * answer.computeNorm() && k >= 1 ) || (reducedvS.computeNorm() < this->SCAbsTol)){ // Absolute tolerance right now (with at least one iteration)
+          return answer;
         }
-
-        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
+	//reducedvS.printYourself("Vs");
+        tangent = this->give3dMaterialStiffnessMatrix(this->SCStiffMode, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+	//reducedTangent.printYourself("d");
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
+	//increment_vE.printYourself("iVe");
         vE.assemble(increment_vE, stressControl);
+	//vE.printYourself("vE");
     }
 
     OOFEM_WARNING("Iteration did not converge");
@@ -846,6 +851,10 @@ StructuralMaterial::giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmode)
     case _3dShell:
         answer.enumerate(8);
         return 8;
+
+    case _3dShellRot:
+        answer.enumerate(9);
+        return 9;
 
     case _PlaneStressRot:
         answer = {
@@ -2365,6 +2374,13 @@ StructuralMaterial::initializeFrom(InputRecord &ir)
         // and not previosly defined
         propertyDictionary.add(tAlpha, alpha);
     }
+    int stiffmode = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffmode, _IFT_StructuralMaterial_StressControl_stiffmode);
+    this->SCStiffMode = (MatResponseMode) stiffmode;
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->SCRelTol, _IFT_StructuralMaterial_StressControl_reltol);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->SCAbsTol, _IFT_StructuralMaterial_StressControl_abstol);
+    
 }
 
 
@@ -2373,5 +2389,8 @@ StructuralMaterial::giveInputRecord(DynamicInputRecord &input)
 {
     Material::giveInputRecord(input);
     input.setField(this->referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
+    input.setField((int)this->SCStiffMode, _IFT_StructuralMaterial_StressControl_stiffmode);
+    input.setField(this->SCRelTol, _IFT_StructuralMaterial_StressControl_reltol);
+    input.setField(this->SCAbsTol, _IFT_StructuralMaterial_StressControl_abstol);
 }
 } // end namespace oofem

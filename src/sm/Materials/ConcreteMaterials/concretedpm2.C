@@ -1122,6 +1122,7 @@ ConcreteDPM2::computeRateFactor(double alpha,
     const auto &strain = status->giveTempReducedStrain();
 
     //Determine the principal values of the strain
+
     auto principalStrain = StructuralMaterial::computePrincipalValues( from_voigt_strain(strain) );    ///@todo CHECK
 
     //Determine max and min value;
@@ -2784,9 +2785,15 @@ ConcreteDPM2::assignStateFlag(GaussPoint *gp) const
              tempDamageCompression > damageCompression || tempDamageCompression == 1. ) {
             if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension ) {
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexTensionDamage);
+<<<<<<< HEAD
             } else if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension ) {
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompressionDamage);
             } else {
+=======
+            } else if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension )      {
+                status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompressionDamage);
+            } else   {
+>>>>>>> f0bd88c3ea78b54f4a75e0d80531bce1778098b2
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_PlasticDamage);
             }
         } else {
