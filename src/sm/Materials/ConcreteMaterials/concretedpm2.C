@@ -2785,15 +2785,9 @@ ConcreteDPM2::assignStateFlag(GaussPoint *gp) const
              tempDamageCompression > damageCompression || tempDamageCompression == 1. ) {
             if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension ) {
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexTensionDamage);
-<<<<<<< HEAD
-            } else if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension ) {
-                status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompressionDamage);
-            } else {
-=======
             } else if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension )      {
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompressionDamage);
             } else   {
->>>>>>> f0bd88c3ea78b54f4a75e0d80531bce1778098b2
                 status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_PlasticDamage);
             }
         } else {
