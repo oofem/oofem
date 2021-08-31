@@ -516,8 +516,8 @@ endif()
 
 if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
-    #find_package(PythonInterp 3.0 REQUIRED)
-    #find_package(pybind11 REQUIRED CONFIG)
+    find_package(Python COMPONENTS Interpreter Development)
+    #find_package(pybind11 CONFIG)
     add_subdirectory(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
