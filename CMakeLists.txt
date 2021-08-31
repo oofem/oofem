@@ -515,8 +515,9 @@ endif()
 
 if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
-    find_package(PythonInterp 3.0 REQUIRED)
-    find_package(pybind11 REQUIRED CONFIG)
+    #find_package(PythonInterp 3.0 REQUIRED)
+    #find_package(pybind11 REQUIRED CONFIG)
+    add_subdirectory(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
@@ -584,6 +585,7 @@ set (oofempy)
 if (USE_BOOSTPYTHON_BINDINGS)
     set (oofempy ${oofem_SOURCE_DIR}/bindings/Deprecated/python/oofemlib.cpp)
 endif ()
+
 
 # Main targets
 if (USE_SHARED_LIB)
