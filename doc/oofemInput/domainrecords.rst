@@ -480,7 +480,7 @@ The crossSectType keyword can be one from following possibilities
 
 -  | Layered cross section
    | ``LayeredCS`` ``nLayers #(in)`` ``LayerMaterials #(ia)``
-     ``Thicks #(ra)`` ``Widths #(ra)``  ``midSurf #(rn)``
+     ``Thicks #(ra)`` ``Widths #(ra)``  [``midSurf #(rn)``] [``nintegrationpoints #(in)``] [``beamshearcoeffxz #(rn)``]
    | Represents the layered cross section model, based on geometrical
      hypothesis, that cross sections remain planar after deformation.
      Number of layers is determined by ``nLayers`` parameter. Materials
@@ -489,8 +489,12 @@ The crossSectType keyword can be one from following possibilities
      using ``Thicks`` array, and width - using ``Widths`` array.
      Position of mid surface is determined by its distance from bottom
      of cross section using ``midSurf`` parameter (normal and momentum
-     forces are then computed with regard to it’s position). Elements
-     using this cross section model must implement layered cross section
+     forces are then computed with regard to it’s position, by default it is located at average thickness position). 
+     The number of integration points per layer can be specified using ``nintegrationpoints`` parameter, default is one integration point. 
+     Gauss integration rule is used for setting up integration points in each layer.
+     The optional parameter ``beamshearcoeffxz`` allows to set shear correction factor for 2D beam sections, 
+     controlling shear effective area used to evaluate shear force (default value is 1.0).
+     Elements using this cross section model must implement layered cross section
      extension. For information see element library manual.
 
 -  | Fibered cross section

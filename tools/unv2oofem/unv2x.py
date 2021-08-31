@@ -36,7 +36,7 @@ class UNVParser:
         """Returns mapping for .unv elements"""
         #Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
     
-        # TODO: Use a linked list where each oofem element is linked to the type of element and use the linked list when mapping occurs. In that way, we only need to specify each type of element (discritization) once.
+        # TODO: Use a linked list where each oofem element is linked to the type of element and use the linked list when mapping occurs. In that way, we only need to specify each type of element (discretization) once.
     
         oofem_elemProp = []
         oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
@@ -103,6 +103,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("qtrspace", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],[4,3,2,1,0,5],[0,6,9,8,5,4]]))
         oofem_elemProp.append(oofem_elementProperties("tet21ghostsolid", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],[4,3,2,1,0,5],[0,6,9,8,5,4]]))
         oofem_elemProp.append(oofem_elementProperties("Tet1BubbleStokes", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
+        oofem_elemProp.append(oofem_elementProperties("Qwedge", [0,2,4,9,11,13,1,3,5,10,12,14,6,7,8], [[0,1,2],[2,3,4],[4,5,0],[9,10,11],[11,12,13],[13,14,9],[0,6,9],[2,7,11],[4,8,13]], [[0,1,2,3,4,5],[9,10,11,12,13,14],[0,1,2,7,11,10,9,6],[2,3,4,8,13,12,11,7],[0,6,9,14,13,8,4,5]]))
         return oofem_elemProp
 
 
@@ -166,6 +167,15 @@ class UNVParser:
                         # 1D elements have an additionnal line in their definition
                         line3=file.readline()
                         cntvt=Line2Int(line3)
+                    elif eltype==113:#Quadratic wedge have nodes on 2 lines
+                        line3=file.readline()
+                        cntvt = Line2Int(line2) + Line2Int(line3)
+                        print(cntvt, type(cntvt))
+                    elif eltype==116:#Quadratic brick element have nodes on 3 lines
+                        line3=file.readline()
+                        line4=file.readline()
+                        cntvt = Line2Int(line2) + Line2Int(line3) + Line2Int(line4)
+                        #print(cntvt, type(cntvt))
                     elif eltype==118: # Quadratic tetrahedron has nodes on two lines
                         line3=file.readline()
                         cntvt=Line2Int(line2) + Line2Int(line3)
@@ -174,13 +184,8 @@ class UNVParser:
                         FEM.nodes[cntvt[0]-1].quadratic=0
                         FEM.nodes[cntvt[4]-1].quadratic=0
                         # 9, 2, 0, 4
-                    elif eltype==116:#Quadratic brick element has data on 4 lines
-                        line3=file.readline()
-                        line4=file.readline()
-                        cntvt = Line2Int(line2) + Line2Int(line3) + Line2Int(line4)
-                        #print cntvt, type(cntvt)
                     else:
-                        # standard elements have their connectivities on second line
+                        # standard elements have their connectivities on the second line
                         cntvt=Line2Int(line2)
                     if(len(dataline)<6):
                         print ("I need at least 6 entries on dataline %s" % dataline)

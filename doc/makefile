@@ -10,6 +10,7 @@ html:
 	cd programmer; make html
 	cd refman; make html
 	cd theorymanual; make html
+	cd usermanual; make html
 
 ps:
 	cd elementlibmanual; make ps
@@ -27,6 +28,7 @@ pdf:
 	cd matlibmanual; make pdf
 	cd programmer; make pdf
 	cd theorymanual; make pdf
+	cd usermanual; make latexpdf
 
 www-install:
 ifdef INSTALLDIR
@@ -39,6 +41,7 @@ ifdef INSTALLDIR
 	cd programmer; make www-install
 	cd refman; make www-install
 	cd theorymanual; make www-install
+	cd usermanual; make www-install
 else
 	echo "INSTALLDIR not defined"
 endif

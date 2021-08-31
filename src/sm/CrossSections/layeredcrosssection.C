@@ -48,6 +48,7 @@
 #include "lobattoir.h"
 #include "dynamicinputrecord.h"
 #include "cltypes.h"
+#include "simplecrosssection.h"
 
 namespace oofem {
 REGISTER_CrossSection(LayeredCrossSection);
@@ -477,6 +478,35 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain,
     return answer;
 }
 
+FloatArrayF<9>
+LayeredCrossSection :: giveGeneralizedStress_ShellRot(const FloatArrayF<9> &strain, GaussPoint *gp, TimeStep *tStep) const
+{
+
+
+  FloatArrayF<9> answer;
+  FloatArrayF<8> rstrain;
+  for (int i=1; i<=8; i++) {
+    rstrain.at(i)=strain.at(i);
+  }
+  FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep);
+  for (int i=1; i<=8; i++) {
+    answer.at(i)=ra.at(i);
+  }
+  answer.at(9) = this->give(CS_DrillingStiffness, gp)*strain.at(9);
+
+  
+  ///@todo This should be replaced with a general "CrossSectionStatus"
+  //CrossSectionStatus *status = new CrossSectionStatus(gp);
+  //gp->setMaterialStatus(status);
+  // Create material status according to the first layer material
+  auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
+  status->letTempStrainVectorBe(strain);
+  status->letTempStressVectorBe(answer);
+
+  return answer;
+}
+
+
 
 FloatArrayF<4>
 LayeredCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &strain, GaussPoint *masterGp, TimeStep *tStep) const
@@ -661,7 +691,8 @@ LayeredCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *g
     // perform integration over layers
     double bottom = this->give(CS_BottomZCoord, gp);
     double top = this->give(CS_TopZCoord, gp);
-
+    double shearcoeff = 5./6.;
+    
     FloatMatrixF<8,8> answer;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
       for (int igp=0; igp<numberOfIntegrationPoints; igp++) {
@@ -726,15 +757,38 @@ LayeredCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *g
         answer.at(6, 6) += layerMatrix.at(5, 5) * lgpw * layerWidth * layerThick * layerZCoord2;
 
         // 3) shear terms qx, qy
-        answer.at(7, 7) += layerMatrix.at(4, 4) * lgpw * layerWidth * layerThick;
-        answer.at(7, 8) += layerMatrix.at(4, 3) * lgpw * layerWidth * layerThick;
-        answer.at(8, 7) += layerMatrix.at(3, 4) * lgpw * layerWidth * layerThick;
-        answer.at(8, 8) += layerMatrix.at(3, 3) * lgpw * layerWidth * layerThick;
+        answer.at(7, 7) += layerMatrix.at(4, 4) * lgpw * layerWidth * layerThick * shearcoeff;
+        answer.at(7, 8) += layerMatrix.at(4, 3) * lgpw * layerWidth * layerThick * shearcoeff;
+        answer.at(8, 7) += layerMatrix.at(3, 4) * lgpw * layerWidth * layerThick * shearcoeff;
+        answer.at(8, 8) += layerMatrix.at(3, 3) * lgpw * layerWidth * layerThick * shearcoeff;
       }
     }
     return answer;
 }
 
+FloatMatrixF<9,9>
+LayeredCrossSection :: give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+//
+// assumption sigma_z = 0.
+//
+// General strain layer vector has one of the following forms:
+// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
+//
+// returned strain or stress vector has the form:
+// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy, eps_normalRotation}
+//
+{
+  FloatMatrix d, answer;
+  d = this->give3dShellStiffMtrx(rMode, gp, tStep);
+  answer.resize(9,9);
+  answer.zero();
+  answer.assemble(d, {1,2,3,4,5,6,7,8});
+  answer.at(9,9) = this->give(CS_DrillingStiffness, gp);
+  //answer.printYourself("De");
+
+  return answer;
+
+}
 
 FloatMatrixF<6,6>
 LayeredCrossSection :: give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
@@ -964,6 +1018,19 @@ LayeredCrossSection :: initializeFrom(InputRecord &ir)
     
     this->area = this->layerThicks.dotProduct(this->layerWidths);
     IR_GIVE_OPTIONAL_FIELD(ir, beamShearCoeffxz, _IFT_LayeredCrossSection_shearcoeff_xz);
+
+    double value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
+    propertyDictionary.add(CS_DrillingStiffness, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_relDrillStiffness);
+    propertyDictionary.add(CS_RelDrillingStiffness, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillType);
+    propertyDictionary.add(CS_DrillingType, value);
+
 }
 
 void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
@@ -1213,7 +1280,7 @@ LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
         return _2dBeamLayer;
     } else if (( masterMode == _PlaneStress ) || ( masterMode == _PlaneStressRot )) {
         return _PlaneStress;    
-    } else if ( masterMode == _3dShell ) {
+    } else if (( masterMode == _3dShell ) || (masterMode == _3dShellRot)) {
         return _PlateLayer;
     } else if ( masterMode == _3dDegeneratedShell ) {
         return _3dDegeneratedShell;
