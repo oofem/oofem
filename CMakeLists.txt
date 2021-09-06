@@ -29,6 +29,25 @@ if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE Debug)
 endif ()
 
+function(add_git_submodule dir)
+# add a Git submodule directory to CMake, assuming the
+# Git submodule directory is a CMake project.
+#
+# Usage: in CMakeLists.txt
+# 
+# include(AddGitSubmodule.cmake)
+# add_git_submodule(mysubmod_dir)
+  find_package(Git REQUIRED)
+  if(NOT EXISTS ${dir}/CMakeLists.txt)
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- ${dir}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      #COMMAND_ERROR_IS_FATAL ANY #cmake 3.19
+      )
+  endif()
+  add_subdirectory(${dir})
+endfunction(add_git_submodule)
+
+
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
@@ -518,7 +537,7 @@ if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
     find_package(Python COMPONENTS Interpreter Development)
     #find_package(pybind11 CONFIG)
-    add_subdirectory(extern/pybind11)
+    add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
