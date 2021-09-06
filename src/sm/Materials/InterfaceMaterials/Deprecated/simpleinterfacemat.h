@@ -46,6 +46,8 @@
 #define _IFT_SimpleInterfaceMaterial_frictCoeff "fc"
 #define _IFT_SimpleInterfaceMaterial_stiffCoeff "stiffcoeff"
 #define _IFT_SimpleInterfaceMaterial_normalClearance "normalclearance"
+#define _IFT_SimpleInterfaceMaterial_regularizedModel "regularized"
+#define _IFT_SimpleInterfaceMaterial_regularizationCoeff "m"
 //@}
 
 namespace oofem {
@@ -94,6 +96,9 @@ protected:
     /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
     double normalClearance = 0.;
 
+  bool regularizedModel = false;
+  double m = 15.0;
+  
 public:
     /// Constructor
     SimpleInterfaceMaterial(int n, Domain * d);
