@@ -810,7 +810,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
     RESIZE(src.nRows, src.nColumns);
 
     if ( nRows == 1 ) {
-        if (fabs(src.at(1,1)) > 1.e-20) {
+        if (fabs(src.at(1,1)) > 1.e-30) {
             this->at(1, 1) = 1. / src.at(1, 1);
             return true;
         } else {
@@ -818,7 +818,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
         }
     } else if ( nRows == 2 ) {
         det = src.at(1, 1) * src.at(2, 2) - src.at(1, 2) * src.at(2, 1);
-        if (fabs(det)>1.e-20) {
+        if (fabs(det)>1.e-30) {
             this->at(1, 1) =  src.at(2, 2) / det;
             this->at(2, 1) = -src.at(2, 1) / det;
             this->at(1, 2) = -src.at(1, 2) / det;
@@ -831,7 +831,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
         det = src.at(1, 1) * src.at(2, 2) * src.at(3, 3) + src.at(1, 2) * src.at(2, 3) * src.at(3, 1) +
               src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
               src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
-        if (fabs(det)>1.e-20) {
+        if (fabs(det)>1.e-30) {
             this->at(1, 1) = ( src.at(2, 2) * src.at(3, 3) - src.at(2, 3) * src.at(3, 2) ) / det;
             this->at(2, 1) = ( src.at(2, 3) * src.at(3, 1) - src.at(2, 1) * src.at(3, 3) ) / det;
             this->at(3, 1) = ( src.at(2, 1) * src.at(3, 2) - src.at(2, 2) * src.at(3, 1) ) / det;
@@ -883,7 +883,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
         // lower triangle elimination by columns
         for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
-            if ( fabs(piv) < 1.e-20 ) {
+            if ( fabs(piv) < 1.e-30 ) {
                 OOFEM_WARNING("pivot (%d,%d) to close to small (< 1.e-20)", i, i);
                 return false;
             }
