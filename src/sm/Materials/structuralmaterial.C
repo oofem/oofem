@@ -153,6 +153,8 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
 
     // Iterate to find full vE.
     FloatArray answer;
+    int SCManrSteps = 10;
+    FloatMatrix reducedTangentInverse;
     for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 100000 iterations.
         vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
@@ -170,10 +172,19 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
             return answer;
         }
 
-        tangent = this->give3dMaterialStiffnessMatrix(this->SCStiffMode, gp, tStep);
-        reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        if ((k==0) || (((this->SCStiffMode==TangentStiffness)||(this->SCStiffMode==SecantStiffness)) && (k%SCManrSteps == 0))) {
+            tangent = this->give3dMaterialStiffnessMatrix(this->SCStiffMode, gp, tStep);
+            reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+            if (reducedTangentInverse.beInverseOf(reducedTangent) == false) {
+                // in case of singularity revert to safe elastic stiffness
+                tangent = this->give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
+                reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+                reducedTangentInverse.beInverseOf(reducedTangent);
+            }
+        }
         //reducedTangent.printYourself();
-        reducedTangent.solveForRhs(reducedvS, increment_vE);
+        //reducedTangent.solveForRhs(reducedvS, increment_vE);
+        increment_vE.beProductOf(reducedTangentInverse, reducedvS);
         increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
         //vE.printYourself("vE");
