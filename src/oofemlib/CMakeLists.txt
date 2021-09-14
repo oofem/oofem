@@ -209,6 +209,7 @@ set (core_arrays
 set (core_engng
     engngm.C
     staggeredproblem.C
+    dummyengngm.C
     )
 
 set (core_element
