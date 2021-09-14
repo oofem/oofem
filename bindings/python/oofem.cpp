@@ -620,7 +620,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("beDyadicProductOf", &oofem::FloatMatrix::beDyadicProductOf)
         .def("beInverseOf", &oofem::FloatMatrix::beInverseOf)
         .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatArray &, FloatArray &, bool)) &oofem::FloatMatrix::solveForRhs)
-        .def("solveForRhs", (void (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
         .def("plusProductSymmUpper", &oofem::FloatMatrix::plusProductSymmUpper)
         .def("plusDyadSymmUpper", &oofem::FloatMatrix::plusDyadSymmUpper)
         .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
