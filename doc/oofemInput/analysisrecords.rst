@@ -95,6 +95,8 @@ analysis types are
 
 -  Non-linear static analysis, see section :ref:`NonLinearStatic`.
 
+-  Dymmy problem, see section :ref:`DummyEngngModel` 
+
 Structural Problems
 -------------------
 
@@ -1098,3 +1100,13 @@ performed, if not specified by ``maxiter``.
 Note: This problem type **is included in PFEM module** and it can be
 used only when this module is configured.
 
+.. _DummyEngngModel:
+
+DummyEngngModel
+~~~~~~~~~~~~~~~~
+
+``Dummy``  ``nnmodules #(in)`` 
+
+Represents a dummy model, whch is not capable to perform any analysis. 
+Its intended use is to invoke the configured export modules, 
+so that the problem geometry can be exported without requiring to actually solve the problem.
