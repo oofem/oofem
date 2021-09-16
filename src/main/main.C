@@ -93,6 +93,10 @@ void oofem_print_epilog();
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
 
+#define LOG_ERR_HEADER "_______________________________________________________"
+#define LOG_ERR_TAIL   "_______________________________________________________\a\n"
+
+
 // Handler for uncaught exceptions
 void exception_handler() {
     try {
@@ -100,6 +104,15 @@ void exception_handler() {
         if (eptr) {
             std::rethrow_exception(eptr);
         }
+    } catch (const RuntimeException& e) {
+
+        fprintf(stderr, "%s\nOOFEM Error exception: %s\n%s", LOG_ERR_HEADER, e.what(), LOG_ERR_TAIL);
+    #ifdef __GNUC__
+        print_stacktrace();
+    #endif
+        oofem_logger.incrementErrorCounter();
+        oofem_logger.printStatistics();
+
     } catch(const std::exception& e) {
         fprintf(stderr, "Caught exception: %s\n", e.what());
 #ifdef __GNUC__
