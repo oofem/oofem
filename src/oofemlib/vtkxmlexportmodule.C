@@ -78,13 +78,10 @@ REGISTER_ExportModule(VTKXMLExportModule)
 
 
 VTKXMLExportModule::VTKXMLExportModule(int n, EngngModel *e) : VTKBaseExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
-#ifdef _PYBIND_BINDINGS
-,Py_PrimaryVars(), Py_IntVars(), Py_CellVars(), Py_Nodes(), Py_Elements()
-#endif
 {}
 
 
-VTKXMLExportModule::~VTKXMLExportModule() { }
+VTKXMLExportModule::~VTKXMLExportModule() {}
 
 
 void
@@ -153,18 +150,7 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
-
-
-#ifdef _PYBIND_BINDINGS
-//clear all dictionaries so they can be filled during export
-Py_PrimaryVars.clear();
-Py_IntVars.clear();
-Py_CellVars.clear();
-Py_Nodes.clear();
-Py_Elements.clear();
-#endif
-    
-    
+  
 #ifdef __VTK_MODULE
     this->fileStream = vtkSmartPointer< vtkUnstructuredGrid >::New();
     this->nodes = vtkSmartPointer< vtkPoints >::New();
@@ -633,18 +619,6 @@ VTKXMLExportModule::writeIntVars(VTKPiece &vtkPiece)
         this->fileStream << "</DataArray>\n";
 #endif
     
-#ifdef _PYBIND_BINDINGS
-#if 0
-        if ( pythonExport ) {
-            py::list vals;
-            for ( int inode = 1; inode <= numNodes; inode++ ) {
-                valueArray = vtkPiece.giveInternalVarInNode(i, inode);
-                vals.append(valueArray);
-            }
-            this->Py_IntVars[name] = vals;
-        }
-#endif
-#endif
     } //end of for
 }
 
@@ -757,18 +731,6 @@ VTKXMLExportModule::writePrimaryVars(VTKPiece &vtkPiece)
         }
         this->fileStream << "</DataArray>\n";
 
- #ifdef _PYBIND_BINDINGS
-   #if 0
-        if ( pythonExport ) {
-            py::list vals;
-            for ( int inode = 1; inode <= numNodes; inode++ ) {
-                FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
-                vals.append(valueArray);
-            }
-            this->Py_PrimaryVars[name] = vals;
-        }
-  #endif
- #endif
 #endif
     }
 }
@@ -849,16 +811,6 @@ VTKXMLExportModule::writeCellVars(VTKPiece &vtkPiece)
         this->fileStream << "</DataArray>\n";
 #endif
     
-#ifdef _PYBIND_BINDINGS
-        if ( pythonExport ) {
-            py::list vals;
-            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
-                valueArray = vtkPiece.giveCellVar(type, ielem);
-                vals.append(valueArray);
-            }
-            this->Py_CellVars[name] = vals;
-        }
- #endif        
     }//end of for
 }
 
