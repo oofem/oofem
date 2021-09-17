@@ -361,7 +361,7 @@ where
   level, where equilibrium is searched. The implementation supports also
   displacement control - it is possible to prescribe one or more
   displacements by applying “quasi prescribed” boundary
-  condition(s) [1]_ The load level then represents the time, where the
+  condition(s). The load level then represents the time, where the
   equilibrium has been found. The Newton-Raphson solver parameters
   (``solverParams``) for load-control are:
 | ``maxiter #(in)`` [``minsteplength #(in)``]
