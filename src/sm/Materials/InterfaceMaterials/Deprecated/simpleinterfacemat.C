@@ -57,12 +57,20 @@ SimpleInterfaceMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussP
     double normalStress, maxShearStress;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
-    if ( normalStrain + normalClearance <= 0. ) {
+    if (regularizedModel) {
+        normalStress = 0.5*this->kn*(normalClearance+normalStrain)-
+            ((this->kn*0.5)/(m))*log(fabs(cosh(m*(normalClearance+normalStrain))))+
+            0.5*this->stiffCoeff*this->kn*(normalClearance+normalStrain)+
+            ((this->stiffCoeff*this->kn*0.5)/(m))*log(fabs(cosh(m*(normalClearance+normalStrain))));
+            maxShearStress = fabs(normalStress) * this->frictCoeff;
+    } else {
+      if ( normalStrain + normalClearance <= 0. ) {
         normalStress = this->kn * ( normalStrain + normalClearance ) + shift; //in compression and after the clearance gap closed
         maxShearStress = fabs(normalStress) * this->frictCoeff;
-    } else {
+      } else {
         normalStress = this->kn * this->stiffCoeff * ( normalStrain + normalClearance ) + shift;
         maxShearStress = 0.;
+      }
     }
 
     FloatArrayF<2> tempShearStressShift = status->giveShearStressShift();
@@ -95,24 +103,37 @@ SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, Gaus
     double normalJump = status->giveTempJump().at(1);
 
     FloatMatrixF<3,3> answer;
-    if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-        if ( normalJump + normalClearance <= 0. ) {
-            answer.at(1, 1) = kn;
-            if ( status->giveShearYieldingFlag() ) {
-	        FloatArray jump = status->giveTempJump();
-	        FloatArray traction = status->giveTempTraction();
 
-                answer.at(2, 2) = answer.at(3, 3) = traction.at(2)/jump.at(2);
-            } else {
-                answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
-	    }
-        } else {
-            answer.at(1, 1) = this->kn * this->stiffCoeff;
-            answer.at(2, 2) = answer.at(3, 3) = 0;
-        }
+    if (regularizedModel) {
+      answer.at(1, 1) = this->kn+0.5*tanh(m*(normalJump+this->normalClearance))*(this->kn*this->stiffCoeff-this->kn);
+      if ( status->giveShearYieldingFlag() ) {
+        FloatArray jump = status->giveTempJump();
+        FloatArray traction = status->giveTempTraction();
+        answer.at(2, 2) = answer.at(3, 3) = traction.at(2)/jump.at(2);
+      } else {
+        answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
+      }
     } else {
+
+      if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+        if ( normalJump + normalClearance <= 0. ) {
+          answer.at(1, 1) = kn;
+          if ( status->giveShearYieldingFlag() ) {
+            FloatArray jump = status->giveTempJump();
+            FloatArray traction = status->giveTempTraction();
+            
+            answer.at(2, 2) = answer.at(3, 3) = traction.at(2)/jump.at(2);
+          } else {
+            answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
+          }
+        } else {
+          answer.at(1, 1) = this->kn * this->stiffCoeff;
+          answer.at(2, 2) = answer.at(3, 3) = 0;
+        }
+      } else {
         answer.at(1, 1) = kn;
         answer.at(2, 2) = answer.at(3, 3) = this->ks;
+      }
     }
     return answer;
 }
@@ -139,6 +160,9 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
+    IR_GIVE_OPTIONAL_FIELD(ir, regularizedModel, _IFT_SimpleInterfaceMaterial_regularizedModel);
+    IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_SimpleInterfaceMaterial_regularizationCoeff);
+
 }
 
 
@@ -150,6 +174,10 @@ SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     input.setField(this->stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     input.setField(this->normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
+
+    input.setField(this->regularizedModel, _IFT_SimpleInterfaceMaterial_regularizedModel);
+    input.setField(this->m, _IFT_SimpleInterfaceMaterial_regularizationCoeff);
+    
 }
 
 

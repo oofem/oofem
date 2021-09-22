@@ -95,6 +95,8 @@ analysis types are
 
 -  Non-linear static analysis, see section :ref:`NonLinearStatic`.
 
+-  Dymmy problem, see section :ref:`DummyEngngModel` 
+
 Structural Problems
 -------------------
 
@@ -219,14 +221,18 @@ how many time steps will be analyzed.
 DIIDynamic
 ~~~~~~~~~~
 
-``DIIDynamic`` ``nsteps #(in)`` ``deltaT #(rn)`` ``alpha #(rn)`` ``beta #(rn)`` ``Psi #(rn)``
+``DIIDynamic`` ``nsteps #(in)`` ``deltaT #(rn)`` [``ddtscheme #(in)``] [``gamma #(rn)``] [``beta #(rn)``] [``eta #(rn)``] [``delta #(rn)``] [``theta #(rn)``]
 
-Represents direct implicit integration of linear dynamic problems.
-Damping is modeled as Rayleigh damping :math:`(\boldsymbol{c} =
-\rm{alpha}*\boldsymbol{M} + \rm{beta} * \boldsymbol{K})`. Parameter
-``Psi`` determines integration method used, for\ ``Psi`` = 1 the Newmark
-and for ``Psi`` :math:`\ge` 1.37 the Wilson method will be used.
-Parameter ``deltaT`` is required time integration step length.
+Represents direct implicit integration of linear dynamic problems. Solution procedure described in Solution procedure described in 
+K. Subbaraj and M. A. Dokainish, A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS,
+Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989.
+
+Parameter ``ddtscheme`` determines integration scheme, as defined in src/oofemlib/timediscretizationtype.h (TD_ThreePointBackward=0 (default), TD_TwoPointBackward =  1,
+TD_Newmark =  2, TD_Wilson =  3, TD_Explicit  =  4).
+
+Parameters ``beta`` and ``gamma`` determine the stability and acuracy of the integration algorithm, both have zero values as default. For ``gamma=0.5`` and ``beta = l/6``, the linear acceleration method is obtained. Unconditional stability is obtained, when :math:`2\beta \ge \gamma \ge 1/2`. 
+The dafault values are ``beta=0.25`` and ``gamma=0.5``. The Wilson-theta metod requires additional ``theta`` parameter with default value equal to 1.37.
+The damping is assumed to be modeled as Rayleigh damping :math:`\boldsymbol{C} = \eta \boldsymbol{M} + \delta \boldsymbol{K}`.
 
 .. _IncrementalLinearStatic:
 
@@ -355,7 +361,7 @@ where
   level, where equilibrium is searched. The implementation supports also
   displacement control - it is possible to prescribe one or more
   displacements by applying “quasi prescribed” boundary
-  condition(s) [1]_ The load level then represents the time, where the
+  condition(s). The load level then represents the time, where the
   equilibrium has been found. The Newton-Raphson solver parameters
   (``solverParams``) for load-control are:
 | ``maxiter #(in)`` [``minsteplength #(in)``]
@@ -1098,3 +1104,13 @@ performed, if not specified by ``maxiter``.
 Note: This problem type **is included in PFEM module** and it can be
 used only when this module is configured.
 
+.. _DummyEngngModel:
+
+DummyEngngModel
+~~~~~~~~~~~~~~~~
+
+``Dummy``  ``nnmodules #(in)`` 
+
+Represents a dummy model, whch is not capable to perform any analysis. 
+Its intended use is to invoke the configured export modules, 
+so that the problem geometry can be exported without requiring to actually solve the problem.

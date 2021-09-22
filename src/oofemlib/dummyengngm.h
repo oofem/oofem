@@ -32,32 +32,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef util_h
-#define util_h
+#ifndef dummyengngm_h
+#define dummyengngm_h
 
-#include "oofemcfg.h"
-#include "problemmode.h"
+#include "engngm.h"
+#include "inputrecord.h"
 
-#include <memory>
-#include <cstdio>
+
+
+#define _IFT_DummyEngngModel_Name "Dummy"
 
 namespace oofem {
-class DataReader;
-class EngngModel;
+
+
 
 /**
- * Helper that prints a stack trace (only available on GCC)
+ * Dummy Engneering model. Does not solve any problem, but invokes the configured export modules.
+ * Usefull for exporting model geometry without solving the problem.
  */
-void print_stacktrace(FILE *out = stderr, int skip = 0, unsigned int max_frames = 63);
+class OOFEM_EXPORT DummyEngngModel : public EngngModel
+{
+public:
 
-/**
- * Instanciates the new problem.
- * @param dr DataReader containing the problem data.
- * @param mode Mode determining macro or micro problem.
- * @param master Master problem in case of multiscale computations.
- * @param parallelFlag Determines if the problem should be run in parallel or not.
- * @param contextFlag When set, turns on context output after each step.
- */
-OOFEM_EXPORT std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
+    /**
+     * Constructor. Creates Engng model with number i.
+     */
+    DummyEngngModel(int i, EngngModel * _master = NULL);
+    virtual ~DummyEngngModel() {}
+
+    void solveYourselfAt(TimeStep *tStep) override;
+    void initializeFrom(InputRecord &ir) override;
+    TimeStep * giveNextStep() override;
+    const char *giveClassName() const override { return "DummyEngngModel"; }
+ 
+
+};
+
 } // end namespace oofem
-#endif // util_h
+#endif // engngm_h

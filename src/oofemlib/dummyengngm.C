@@ -32,32 +32,47 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef util_h
-#define util_h
+// Milan ?????????????????
+//#include "gpinitmodule.h"
+// Milan ?????????????????
 
-#include "oofemcfg.h"
-#include "problemmode.h"
+#include "dummyengngm.h"
+#include "timestep.h"
+#include "classfactory.h"
 
-#include <memory>
-#include <cstdio>
 
 namespace oofem {
-class DataReader;
-class EngngModel;
+REGISTER_EngngModel(DummyEngngModel);
 
-/**
- * Helper that prints a stack trace (only available on GCC)
- */
-void print_stacktrace(FILE *out = stderr, int skip = 0, unsigned int max_frames = 63);
+DummyEngngModel :: DummyEngngModel(int i, EngngModel *_master) : EngngModel (i, _master)
+{
+    ndomains = 1;
+}
 
-/**
- * Instanciates the new problem.
- * @param dr DataReader containing the problem data.
- * @param mode Mode determining macro or micro problem.
- * @param master Master problem in case of multiscale computations.
- * @param parallelFlag Determines if the problem should be run in parallel or not.
- * @param contextFlag When set, turns on context output after each step.
- */
-OOFEM_EXPORT std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
+void
+DummyEngngModel :: initializeFrom(InputRecord &ir)
+{
+    this->numberOfSteps = 1;
+    this->nMetaSteps   = 0;
+    this->suppressOutput = true;
+    
+}
+
+TimeStep *DummyEngngModel :: giveNextStep()
+{
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0);
+    }
+    previousStep = std :: move(currentStep);
+    currentStep = std::make_unique<TimeStep>(*previousStep, 1.);
+
+    return currentStep.get();
+}
+
+void DummyEngngModel :: solveYourselfAt(TimeStep *tStep)
+{
+
+}
 } // end namespace oofem
-#endif // util_h
