@@ -272,7 +272,7 @@ double LatticeFrame3d::giveIz() {
 
 double LatticeFrame3d::giveIk() {
   FloatArray lc(1);
-  return this->giveCrossSection()->give(CS_TorsionMomentX, lc, this);
+  return this->giveCrossSection()->give(CS_TorsionConstantX, lc, this);
 }
 
 double LatticeFrame3d::giveShearAreaY() {

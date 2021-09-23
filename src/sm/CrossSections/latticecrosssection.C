@@ -79,7 +79,7 @@ LatticeCrossSection::initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_LatticeCrossSection_MaterialNumber);
 
     double area = 0.0;
-    IR_GIVE_FIELD(ir, area, _IFT_LatticeCrossSection_area);
+    IR_GIVE_OPTIONAL_FIELD(ir, area, _IFT_LatticeCrossSection_area);
     propertyDictionary.add(CS_Area, area);
 
     value = 0.0;
@@ -92,7 +92,7 @@ LatticeCrossSection::initializeFrom(InputRecord &ir)
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_LatticeCrossSection_ik);
-    propertyDictionary.add(CS_TorsionMomentX, value);
+    propertyDictionary.add(CS_TorsionConstantX, value);
 
     double beamshearcoeff = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_LatticeCrossSection_shearcoeff);
