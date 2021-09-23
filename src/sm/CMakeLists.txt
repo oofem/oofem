@@ -92,6 +92,7 @@ set (sm_element
     Elements/LatticeElements/latticelink3dboundary.C
     Elements/LatticeElements/latticebeam3d.C
     Elements/LatticeElements/latticebeam3dboundary.C
+    Elements/LatticeElements/latticeframe3d.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
@@ -280,6 +281,8 @@ set (sm_material
     Materials/LatticeMaterials/latticeplasticitydamage.C
     Materials/LatticeMaterials/latticeslip.C
     Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
+    Materials/LatticeMaterials/latticeframeelastic.C
+    Materials/LatticeMaterials/latticeframesteelplastic.C
 )
 
     

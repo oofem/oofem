@@ -1,0 +1,52 @@
+latticeframesteelplastic2.out
+Toi 1993 plastic frame 
+NonLinearStatic nmsteps 1 nsteps 1  contextOutputStep 100 nmodules 0 
+nsteps 10 rtolv 1.e-6 maxiter 100 stiffMode 1 controllmode 1 refloadmode 1 minsteplength 1.e-3 ddm 2 5 1  ddv 1 2e-1   ddltf 2 
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 13 nelem 12 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1
+node 2 coords 3 0.000000e+00 250.000000e+00 0.000000e+00
+node 3 coords 3 0.000000e+00 500.000000e+00 0.000000e+00 
+node 4 coords 3 0.000000e+00 750.000000e+00 0.000000e+00
+node 5 coords 3 0.000000e+00 1000.000e+00 0.000000e+00 
+node 6 coords 3 250.0000e+00 1000.000e+00 0.000000e+00
+node 7 coords 3 500.0000e+00 1000.000e+00 0.000000e+00
+node 8 coords 3 750.0000e+00 1000.000e+00 0.000000e+00
+node 9 coords 3 1000.0000e+00 1000.000e+00 0.000000e+00 
+node 10 coords 3 1000.000e+00 750.000e+00 0.000000e+00
+node 11 coords 3 1000.000e+00 500.000e+00 0.000000e+00 
+node 12 coords 3 1000.000e+00 250.000e+00 0.000000e+00 
+node 13 coords 3 1000.000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1 
+latticeframe3d 1 nodes 2 1 2 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 2 nodes 2 2 3 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 3 nodes 2 3 4 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 4 nodes 2 4 5 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 5 nodes 2 5 6 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 6 nodes 2 6 7 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 7 nodes 2 7 8 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 8 nodes 2 8 9 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 9 nodes 2 9 10 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 10 nodes 2 10 11 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 11 nodes 2 11 12 zaxis 3 0 0 1 crossSect 1
+latticeframe3d 12 nodes 2 12 13 zaxis 3 0 0 1 crossSect 1
+latticecs 1 material 1 area 25281 iy 5.3e7 iz 5.3e7 ik 1e8 shearCoeff 0.833 
+latticeframesteelplastic 1 d 1. E 2.1e4 n 0.3 talpha 0 nx0 6e5 mx0 3e7 my0 3e7 mz0 3e7 tol 1.e-6 iter 100 sub 10
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0 10. f(t) 2 0. 10
+#%BEGIN_CHECK% 
+#REACTION number 1 dof 1 
+#REACTION number 1 dof 2 
+#REACTION number 1 dof 3 
+#REACTION number 1 dof 4 
+#REACTION number 1 dof 5 
+#REACTION number 1 dof 6  
+#DOFMAN number 5 dof 1 type d
+#DOFMAN number 5 dof 2 type d
+#DOFMAN number 5 dof 3 type d
+#DOFMAN number 5 dof 4 type d
+#DOFMAN number 5 dof 5 type d
+#DOFMAN number 5 dof 6 type d
+#TIME 
+#%END_CHECK%
