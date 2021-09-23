@@ -4,7 +4,7 @@ relaxation of prestressing reinforcement, all dofs fixed
 StaticStructural nsteps 25 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
 #
 errorcheck
-# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1
 #
 domain 2dPlaneStress
 #
@@ -67,8 +67,8 @@ ConstantFunction 1 f(t) 1.0
 HeavisideLTF 2 origin 0.0 value 1.0
 #
 #%BEGIN_CHECK% tolerance 5.e-3
-#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.237900e+02 
-#ELEMENT tStep 10 number 3 gp 1 keyword 1 component 1 value 7.349400e+02
-#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.012400e+02
-#ELEMENT tStep 25 number 3 gp 1 keyword 1 component 1 value 6.171000e+02
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.35062615e+02
+#ELEMENT tStep 10 number 3 gp 1 keyword 1 component 1 value 7.34992211e+02
+#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.19512976e+02
+#ELEMENT tStep 25 number 3 gp 1 keyword 1 component 1 value 6.18253822e+02
 #%END_CHECK%

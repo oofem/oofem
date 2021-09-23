@@ -49,11 +49,11 @@ IsoLE 1 d 25.0 E 25.e6 n 0.15 tAlpha 1.2e-5
 BoundaryCondition 1 loadTimeFunction 1 dofs 4 1 2 3 6 values 4 0. 0. 0. 0. set 2
 ConstantFunction 1 f(t) 1.
 #
-#%BEGIN_CHECK% tolerance 1.e-2
+#%BEGIN_CHECK% tolerance 1.e-4
 ## check eigen values
-#EIGVAL tStep 1 EigNum 1 value 1.28049596e+03
+#EIGVAL tStep 1 EigNum 1 value 1.26835015e+03
 #EIGVAL tStep 1 EigNum 2 value 2.85378786e+03
-#EIGVAL tStep 1 EigNum 3 value 2.10785640e+04
+#EIGVAL tStep 1 EigNum 3 value 2.02942280e+04
 #%END_CHECK%
 
 

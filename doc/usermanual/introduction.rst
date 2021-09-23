@@ -25,7 +25,7 @@ Documentation
 ---------------------
 The extensive documentation is available on `OOFEM web pages <http://www.oofem.org>`_: 
 
-* Input manual, available in [`html <http://www.oofem.org/resources/doc/oofemInput/html/oofemInput.html>`_] and [`PDF <http://www.oofem.org/resources/doc/oofemInput/html/oofemInput.pdf>`_].
+* Input manual, available in [`html <http://www.oofem.org/resources/doc/oofemInput/html/index.html>`_] and [`PDF <http://www.oofem.org/resources/doc/oofemInput/oofeminputmanual.pdf>`_].
 * Element Library Manual, available in [`html <http://www.oofem.org/resources/doc/elementlibmanual/html/elementlibmanual.html>`_] and [`PDF <http://www.oofem.org/resources/doc/elementlibmanual/elementlibmanual.pdf>`_] 
 * Material Model Library Manual, available in [`html <http://www.oofem.org/resources/doc/matlibmanual/html/matlibmanual.html>`_] and [`PDF <http://www.oofem.org/resources/doc/matlibmanual/matlibmanual.pdf>`_] 
 

@@ -266,6 +266,36 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain, 
 }
 
 
+FloatArrayF<9>
+SimpleCrossSection :: giveGeneralizedStress_ShellRot(const FloatArrayF<9> &strain, GaussPoint *gp, TimeStep *tStep) const
+{
+    /**Note: (by bp): This assumes that the behaviour is elastic
+     * there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     * defined directly in terms of integral forces and moments and corresponding
+     * deformations and curvatures. This would require to implement support at material model level.
+     * Mikael: See earlier response to comment
+     */
+
+  FloatArrayF<9> answer;
+  FloatArrayF<8> rstrain;
+  for (int i=1; i<=8; i++) {
+    rstrain.at(i)=strain.at(i);
+  }
+  FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep);
+  for (int i=1; i<=8; i++) {
+    answer.at(i)=ra.at(i);
+  }
+  answer.at(9) = this->give(CS_DrillingStiffness, gp)*strain.at(9);
+
+  auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );  
+  auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
+  status->letTempStrainVectorBe(strain);
+  status->letTempStressVectorBe(answer);
+    
+  return answer;
+}
+
+
 FloatArrayF<4>
 SimpleCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
@@ -350,7 +380,7 @@ SimpleCrossSection :: give3dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp,
     double area = this->give(CS_Area, gp);
     double Iy   = this->give(CS_InertiaMomentY, gp);
     double Iz   = this->give(CS_InertiaMomentZ, gp);
-    double Ik   = this->give(CS_TorsionMomentX, gp);
+    double Ik   = this->give(CS_TorsionConstantX, gp); // St. Venant torsional constant
 
     //shearCoeff = this->give(CS_BeamShearCoeff);
     double shearAreay = this->give(CS_ShearAreaY, gp);
@@ -420,6 +450,20 @@ SimpleCrossSection :: give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp
 
     answer.at(8, 8) = answer.at(7, 7) = mat2d.at(3, 3) * thickness * ( 5. / 6. );
     return answer;
+}
+
+
+FloatMatrixF<9,9>
+SimpleCrossSection :: give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+  FloatMatrix d, answer;
+  d = this->give3dShellStiffMtrx(rMode, gp, tStep);
+  answer.resize(9,9);
+  answer.zero();
+  answer.assemble(d, {1,2,3,4,5,6,7,8});
+  answer.at(9,9) = this->give(CS_DrillingStiffness, gp);
+  return answer;
+
 }
 
 
@@ -497,7 +541,7 @@ SimpleCrossSection :: initializeFrom(InputRecord &ir)
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_ik);
-    propertyDictionary.add(CS_TorsionMomentX, value);
+    propertyDictionary.add(CS_TorsionConstantX, value);
 
     double beamshearcoeff = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_SimpleCrossSection_shearcoeff);
@@ -565,8 +609,8 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->propertyDictionary.at(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
-    if ( this->propertyDictionary.includes(CS_TorsionMomentX) ) {
-        input.setField(this->propertyDictionary.at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    if ( this->propertyDictionary.includes(CS_TorsionConstantX) ) {
+        input.setField(this->propertyDictionary.at(CS_TorsionConstantX), _IFT_SimpleCrossSection_ik);
     }
 
     if ( this->propertyDictionary.includes(CS_InertiaMomentY) ) {

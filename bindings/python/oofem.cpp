@@ -91,6 +91,7 @@ namespace py = pybind11;
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 #include "vtkxmlexportmodule.h"
+#include "vtkmemoryexportmodule.h"
 #include "homexportmodule.h"
 
 #include "uniformgridfield.h"
@@ -115,6 +116,7 @@ void test (oofem::Element& e) {
 */
 template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
         // inherit the constructor
+public:
         using ElementBase::ElementBase;
         // trampoline (need one for each virtual method)
         int giveNumberOfDofs() override {
@@ -171,6 +173,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
         // inherit the constructor
+    public:
         using PyElement<StructuralElementBase>::PyElement;
         // trampoline (need one for each virtual method)
         void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override {
@@ -202,6 +205,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
         // inherit the constructor
+    public:
         using IntegrationPointStatusBase::IntegrationPointStatusBase;
         // trampoline (need one for each virtual method)
         const char *giveClassName() const override {
@@ -211,6 +215,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
         // inherit the constructor
+    public:
         using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
         // trampoline (need one for each virtual method)
         void printOutputAt(FILE *file, TimeStep *tStep) const override {
@@ -615,7 +620,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("beDyadicProductOf", &oofem::FloatMatrix::beDyadicProductOf)
         .def("beInverseOf", &oofem::FloatMatrix::beInverseOf)
         .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatArray &, FloatArray &, bool)) &oofem::FloatMatrix::solveForRhs)
-        .def("solveForRhs", (void (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
         .def("plusProductSymmUpper", &oofem::FloatMatrix::plusProductSymmUpper)
         .def("plusDyadSymmUpper", &oofem::FloatMatrix::plusDyadSymmUpper)
         .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
@@ -1046,17 +1051,45 @@ PYBIND11_MODULE(oofempy, m) {
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
-    py::class_<oofem::HOMExportModule>(m, "HOMExportModule")
-    ;
+    py::class_<oofem::ExportModule>(m, "ExportModule")
+      .def("initialize", &oofem::ExportModule::initialize)
+      .def("doOutput", &oofem::ExportModule::doOutput)
+      .def("terminate", &oofem::ExportModule::terminate)
+      ;
     
-    py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
-    .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
-    .def("getInternalVars", &oofem::VTKXMLExportModule::getInternalVars)
-    .def("getCellVars", &oofem::VTKXMLExportModule::getCellVars)
-    .def("getNodes", &oofem::VTKXMLExportModule::getNodes)
-    .def("getElementsConnectivity", &oofem::VTKXMLExportModule::getElementsConnectivity)
-    ;
+    py::class_<oofem::HOMExportModule, oofem::ExportModule>(m, "HOMExportModule")
+      ;
+
+    py::class_<oofem::VTKPiece>(m, "VTKPiece")
+      .def("giveNumberOfNodes", &oofem::VTKPiece::giveNumberOfNodes)
+      .def("giveNodeCoords", &oofem::VTKPiece::giveNodeCoords)
+      .def("giveNumberOfCells", &oofem::VTKPiece::giveNumberOfCells)
+      .def("giveCellConnectivity", &oofem::VTKPiece::giveCellConnectivity)
+      .def("giveCellType", &oofem::VTKPiece::giveCellType)
+      .def("giveCellOffset", &oofem::VTKPiece::giveCellOffset)
+      .def("givePrimaryVarInNode", &oofem::VTKPiece::givePrimaryVarInNode)
+      .def("giveInternalVarInNode", &oofem::VTKPiece::giveInternalVarInNode)
+      .def("giveCellVar", &oofem::VTKPiece::giveCellVar)
+
+      .def("getVertices", &oofem::VTKPiece::getVertices, py::return_value_policy::move)
+      .def("getCellConnectivity", &oofem::VTKPiece::getCellConnectivity, py::return_value_policy::move)
+      .def("getCellTypes", &oofem::VTKPiece::getCellTypes, py::return_value_policy::move)
+      .def("getPrimaryVertexValues", &oofem::VTKPiece::getPrimaryVertexValues, py::return_value_policy::move)
+      .def("getInternalVertexValues", &oofem::VTKPiece::getInternalVertexValues, py::return_value_policy::move)
+      .def("getCellValues", &oofem::VTKPiece::getCellValues, py::return_value_policy::move)
+      ;
+
+    py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
+      ;
     
+    py::class_<oofem::VTKXMLExportModule, oofem::VTKBaseExportModule>(m, "VTKXMLExportModule")
+      .def("getVTKPieces", &oofem::VTKXMLExportModule::getVTKPieces,  py::return_value_policy::reference)
+      ;
+
+    py::class_<oofem::VTKMemoryExportModule, oofem::VTKBaseExportModule>(m, "VTKMemoryExportModule")
+      .def("getVTKPieces", &oofem::VTKMemoryExportModule::getVTKPieces,  py::return_value_policy::reference)
+      ;
+
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
@@ -1079,6 +1112,12 @@ PYBIND11_MODULE(oofempy, m) {
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
     ;
 
+
+    py::enum_<oofem::UnknownType>(m, "UnknownType")
+      .value("DisplacementVector", oofem::UnknownType::DisplacementVector)
+      .value("Temperature", oofem::UnknownType::Temperature)
+      ;
+    
     py::enum_<oofem::ValueModeType>(m, "ValueModeType")
         .value("VM_Unknown", oofem::ValueModeType::VM_Unknown)
         .value("VM_Total", oofem::ValueModeType::VM_Total)
@@ -1392,6 +1431,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
     m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
+    m.def("lspace", &lspace, py::return_value_policy::move);
 
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
@@ -1404,6 +1444,8 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoLE", &isoLE, py::return_value_policy::move);
     m.def("idm1", &idm1, py::return_value_policy::move);
     m.def("isoHeat", &isoHeat, py::return_value_policy::move);
+    m.def("j2mat", &j2mat, py::return_value_policy::move);
+    m.def("steel1", &steel1, py::return_value_policy::move);
 
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("simpleTransportCS", &simpleTransportCS, py::return_value_policy::move);
@@ -1411,6 +1453,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
     m.def("vtkxml", &vtkxml, py::return_value_policy::move);
+    m.def("vtkmemory", &vtkmemory, py::return_value_policy::move);
     m.def("homExport", &homExport, py::return_value_policy::move);
     m.def("createSet", &createSet, py::return_value_policy::move);
 

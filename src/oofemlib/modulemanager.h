@@ -37,6 +37,8 @@
 
 #include "datareader.h"
 #include "error.h"
+#include "exportmodule.h"
+
 
 #include <memory>
 #include <vector>
@@ -154,5 +156,8 @@ public:
 
     int giveNumberOfModules() const { return (int)moduleList.size(); }
 };
+
+template class OOFEM_EXPORT ModuleManager<ExportModule>;
+
 } // end namespace oofem
 #endif // modulemanager_h

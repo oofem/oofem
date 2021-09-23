@@ -84,7 +84,7 @@ protected:
     //
     //  Exports single internal variable by smoothing.
     //
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
+    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
@@ -93,10 +93,8 @@ protected:
      * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
      * The i-th value contains the corresponding global node number.
      */
-    int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                        int &regionDofMans, 
-                        int &totalcells,
-                        Domain *domain, TimeStep *tStep, int reg) override;
+    int initRegionNodeNumbering(VTKPiece& p, 
+                                Domain *domain, TimeStep *tStep, Set& region) override;
 };
 } // end namespace oofem
 #endif // quasicontinuumvtkxmlexportmodule_h

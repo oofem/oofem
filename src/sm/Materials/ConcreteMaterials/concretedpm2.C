@@ -93,9 +93,6 @@ ConcreteDPM2Status::initTempStatus()
     tempRateFactor = rateFactor;
     tempRateStrain = rateStrain;
 
-    tempReturnType = returnType;
-    tempReturnResult = returnResult;
-
 #ifdef keep_track_of_dissipated_energy
     tempStressWork = stressWork;
     tempDissWork = dissWork;
@@ -142,10 +139,6 @@ ConcreteDPM2Status::updateYourself(TimeStep *tStep)
     rateFactor = tempRateFactor;
 
     rateStrain = tempRateStrain;
-
-    returnType = tempReturnType;
-
-    returnResult = tempReturnResult;
 
 #ifdef keep_track_of_dissipated_energy
     stressWork = tempStressWork;
@@ -220,6 +213,8 @@ ConcreteDPM2Status::printOutputAt(FILE *file, TimeStep *tStep) const
 
     fprintf(file, " alpha %.10e,", this->alpha);
 
+    fprintf(file, " rateFactor %.10e,", this->rateFactor);
+
 #ifdef keep_track_of_dissipated_energy
     fprintf(file, " dissW %g, freeE %g, stressW %g ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);
 #endif
@@ -237,6 +232,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
 
     if ( !stream.write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -248,6 +247,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.write(alpha) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -264,6 +267,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.write(kappaDCompression) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -304,13 +311,6 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(returnType) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.write(returnResult) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
 
 #ifdef keep_track_of_dissipated_energy
     if ( !stream.write(stressWork) ) {
@@ -335,6 +335,9 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( !stream.read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -345,6 +348,10 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.read(alpha) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -361,6 +368,10 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.read(kappaDCompression) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -401,14 +412,6 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.read(returnType) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.read(returnResult) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
 
 #ifdef keep_track_of_dissipated_energy
     if ( !stream.read(stressWork) ) {
@@ -434,7 +437,7 @@ ConcreteDPM2Status::computeWork(GaussPoint *gp, double gf)
 
     //Ask for stress tensor at step
     auto stress = tempStressVector;
-    //int n = stress.giveSize();
+
     //Calculate increase/decrease in total work
     double dSW = ( dot(tempStressVector, deltaTotalStrain) + dot(stressVector, deltaTotalStrain) ) / 2.;
 
@@ -480,8 +483,7 @@ ConcreteDPM2::hasMaterialModeCapability(MaterialMode mode) const
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat ||
-           mode == _1dMat;
+    return mode == _3dMat;
 }
 
 
@@ -492,10 +494,9 @@ ConcreteDPM2::initializeFrom(InputRecord &ir)
     StructuralMaterial::initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir);
 
-    //isotropic flag
-    this->isotropicFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->isotropicFlag, _IFT_ConcreteDPM2_isoflag);
-
+    //damage flag
+    this->damageFlag = 1; //Default value using damage in tension and compression according to IJSS CDPM2 paper.
+    IR_GIVE_OPTIONAL_FIELD(ir, this->damageFlag, _IFT_ConcreteDPM2_damflag);
 
     // elastic parameters
     IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
@@ -592,74 +593,220 @@ ConcreteDPM2::initializeFrom(InputRecord &ir)
     }
 }
 
-#if 0
+
 void
-ConcreteDPM2::giveRealStressVector_1d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &fullStrainVector,
-                                      TimeStep *tStep)
+ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
 {
-    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-
-    // Initialize temp variables for this gauss point
-    this->initTempStatus(gp);
-
-    //Remove thermal/shrinkage strains
-    auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
-    auto strainVector = assemble< 6 >(fullStrainVector - thermalStrain [ { 0 } ], { 0 });
-    status->letTempFullStrainBe(strainVector);
-
-    //Calculate time increment (required if strainRateFlag >0)
-    double dt = deltaTime;
-    if ( dt == -1 ) {
-        if ( tStep->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
-            dt = 1.;
-        } else {
-            dt = tStep->giveTimeIncrement();
+    StructuralMaterial::saveContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        if ( !stream.write(fc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ecc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(damageFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(e0) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(AHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(BHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(CHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(DHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(hardeningModulus) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ASoft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldHardPrimePeak) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldHardInitial) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(dilationConst) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(m) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(mQ) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(helem) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(eM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(gM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(kM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(nu) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(efCompression) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(wf) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(wfOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ftOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldTol) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldTolDamage) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(newtonIter) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(softeningType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(deltaTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(strengthRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(energyRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
         }
     }
 
-    auto D = this->linearElasticMaterial.give1dStressStiffMtrx(ElasticStiffness, gp, tStep);
 
-    // perform plasticity return
-    auto effectiveStress = performPlasticityReturn(gp, strainVector, true);
-
-    FloatArrayF< 6 >effectiveStressTension;
-    FloatArrayF< 6 >effectiveStressCompression;
-    double alpha = 0.;
-    if ( effectiveStress.at(1) >= 0 ) { //1D tensile stress state
-        alpha = 0.;
-        effectiveStressTension = effectiveStress;
-    } else if ( effectiveStress.at(1) < 0 ) { //1D compressive stress state
-        alpha = 1.;
-        effectiveStressCompression = effectiveStress;
-    }
-
-    auto damages = computeDamage(strainVector, D, dt, gp, tStep, alpha, effectiveStress);
-
-    //Split damage in a tension and compression part
-
-    FloatArrayF< 6 >stress;
-    if ( isotropicFlag == 0 ) { //Default
-        effectiveStressTension *= ( 1. - damages.at(1) );
-        effectiveStressCompression *= ( 1. - damages.at(2) );
-        stress = effectiveStressTension + effectiveStressCompression;
-    } else { //Consider only tensile damage. Reduction to a fully isotropic model
-        stress = effectiveStress * ( 1. - damages.at(1) );
-    }
-
-    status->letTempStrainVectorBe(fullStrainVector);
-    status->letTempAlphaBe(alpha);
-    status->letTempStressVectorBe(stress);
- #ifdef keep_track_of_dissipated_energy
-    double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
-    status->computeWork(gp, gf);
- #endif
-    assignStateFlag(gp);
-
-    answer = stress [ { 0 } ];
+    linearElasticMaterial.saveContext(stream, mode);
 }
-#endif
+
+void
+ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::restoreContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        if ( !stream.read(fc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ecc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(damageFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(e0) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(AHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(BHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(CHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(DHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(hardeningModulus) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ASoft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldHardPrimePeak) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldHardInitial) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(dilationConst) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(m) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(mQ) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(helem) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(eM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(gM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(kM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(nu) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(efCompression) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(wf) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(wfOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ftOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldTol) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldTolDamage) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(newtonIter) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(softeningType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(deltaTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(strengthRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(energyRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+    linearElasticMaterial.restoreContext(stream, mode);
+}
+
+
 
 
 FloatArrayF< 6 >
@@ -670,9 +817,11 @@ ConcreteDPM2::giveRealStressVector_3d(const FloatArrayF< 6 > &fullStrainVector, 
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
-    //Remove thermal/shrinkage strains
+    //    Remove thermal/shrinkage strains
     auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+
     auto strainVector = fullStrainVector - thermalStrain;
+
     status->letTempReducedStrainBe(strainVector);
 
     //Calculate time increment
@@ -691,21 +840,31 @@ ConcreteDPM2::giveRealStressVector_3d(const FloatArrayF< 6 > &fullStrainVector, 
 
     FloatArrayF< 6 >effectiveStressTension;
     FloatArrayF< 6 >effectiveStressCompression;
-    double alpha = computeAlpha(effectiveStressTension, effectiveStressCompression, effectiveStress);
-
-    auto damages = computeDamage(strainVector, D, dt, gp, tStep, alpha, effectiveStress);
-
-    //Split damage in a tension and compression part
     FloatArrayF< 6 >stress;
-    if ( isotropicFlag == 0 ) { //Default
-        stress = effectiveStressTension * ( 1. - damages.at(1) ) + effectiveStressCompression * ( 1. - damages.at(2) );
-    } else { //Consider only tensile damage. Reduction to a fully isotropic model
-        stress = effectiveStress * ( 1. - damages.at(1) );
+
+    double alpha = 0.;
+
+    if ( this->damageFlag != 0 ) {//Apply damage
+        alpha  = computeAlpha(effectiveStressTension, effectiveStressCompression, effectiveStress);
+        auto damages = computeDamage(strainVector, D, dt, gp, tStep, alpha, effectiveStress);
+
+        if ( this->damageFlag == 1 ) { //Default as described in IJSS CDPM2 article
+            stress = effectiveStressTension * ( 1. - damages.at(1) ) + effectiveStressCompression * ( 1. - damages.at(2) );
+        } else if ( this->damageFlag == 2 ) {  //Simplified version without split of stress but two damage variables
+            stress = effectiveStress * ( 1. - ( 1. - alpha ) * damages.at(1) ) * ( 1. - alpha * damages.at(2) );
+        } else if ( this->damageFlag == 3 ) { //Consider only tensile damage. Reduction to a fully isotropic model. Similar to CDPM article.
+            stress = effectiveStress * ( 1. - damages.at(1) );
+        } else {
+            OOFEM_ERROR("Unknown value of damage flag. Must be 0, 1, 2 or 3");
+        }
+    } else {
+        stress = effectiveStress;
     }
 
     status->letTempStrainVectorBe(fullStrainVector);
     status->letTempAlphaBe(alpha);
     status->letTempStressVectorBe(stress);
+    status->letTempEffectiveStressBe(effectiveStress);
 #ifdef keep_track_of_dissipated_energy
     double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
     status->computeWork(gp, gf);
@@ -963,7 +1122,9 @@ ConcreteDPM2::computeRateFactor(double alpha,
     const auto &strain = status->giveTempReducedStrain();
 
     //Determine the principal values of the strain
-    auto principalStrain = StructuralMaterial::computePrincipalValues( from_voigt_strain(strain) );  ///@todo CHECK
+
+    auto principalStrain = StructuralMaterial::computePrincipalValues( from_voigt_strain(strain) );    ///@todo CHECK
+
     //Determine max and min value;
     double maxStrain = -1.e20, minStrain = 1.e20;
     for ( int k = 1; k <= principalStrain.giveSize(); k++ ) {
@@ -1030,6 +1191,7 @@ ConcreteDPM2::computeRateFactor(double alpha,
     }
 
     double rateFactor = ( 1. - alpha ) * rateFactorTension + alpha * rateFactorCompression;
+
 
     return rateFactor;
 }
@@ -1202,7 +1364,7 @@ ConcreteDPM2::computeDamageParamTension(double equivStrain, double kappaOne, dou
 double
 ConcreteDPM2::computeDamageParamCompression(double equivStrain, double kappaOne, double kappaTwo, double omegaOld, double rateFactor) const
 {
-    if ( isotropicFlag == 1 ) {
+    if ( this->damageFlag == 3 ) {
         return 0.;
     }
 
@@ -1263,9 +1425,6 @@ ConcreteDPM2::initDamaged(double kappaD,
 
     if ( helem > 0. ) {
         status->setLe(helem);
-    } else if ( strain.giveSize() == 1 ) {
-        double le = gp->giveElement()->computeLength();
-        status->setLe(le);
     } else if ( status->giveDamageTension() == 0. && status->giveDamageCompression() == 0. ) {
         //auto [principalStrains, principalDir] = computePrincipalValDir(from_voigt_strain(strain)); // c++17
         auto tmp = computePrincipalValDir( from_voigt_strain(strain) );
@@ -1306,7 +1465,7 @@ ConcreteDPM2::initDamaged(double kappaD,
 double
 ConcreteDPM2::computeDuctilityMeasureDamage(GaussPoint *gp, const double sig, const double rho) const
 {
-    //Angle in uniaxial compression is atan(1./sqrt(6.))=0.387597
+    //1./sqrt(6.)=0.40824829
     double alphaZero = 0.40824829;
 
     double Rs = 0;
@@ -1329,12 +1488,14 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
 {
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
+    ConcreteDPM2_ReturnResult returnResult = RR_Unknown;
+    ConcreteDPM2_ReturnType returnType = RT_Unknown;
+
     //get plastic strain and kappa
     auto tempPlasticStrain = status->givePlasticStrain();
     double tempKappaP = status->giveKappaP();
 
     //this theta computed here should stay constant for the rest of procedure.
-    //compute coordinates should only be called by 1d from now on.
 
     const auto &oldStrain = status->giveReducedStrain();
 
@@ -1353,8 +1514,8 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
     FloatArrayF< 6 >effectiveStress;
 
     //To get into the loop
-    status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
-    while ( status->giveTempReturnResult() == ConcreteDPM2Status::RR_NotConverged || subIncrementFlag == 1 ) {
+    returnResult = RR_NotConverged;
+    while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
         auto elasticStrain = tempStrain - tempPlasticStrain;
 
         effectiveStress = dot(D, elasticStrain);
@@ -1366,24 +1527,29 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
         apexStress = 0.;
 
         if ( yieldValue > 0. ) {
-            checkForVertexCase(apexStress, sig, tempKappaP, strain.giveSize() == 1, gp);
-            if ( status->giveTempReturnType() == ConcreteDPM2Status::RT_Tension || status->giveTempReturnType() == ConcreteDPM2Status::RT_Compression ) {
-                tempKappaP = performVertexReturn(effectiveStress, apexStress, tempKappaP, gp);
+            checkForVertexCase(apexStress, returnType, sig, tempKappaP, gp);
+            if ( returnType == RT_Tension || returnType == RT_Compression ) {
+                tempKappaP = performVertexReturn(effectiveStress, returnResult, returnType, apexStress, tempKappaP, gp);
                 status->letTempKappaPBe(tempKappaP);
+                if ( returnType == RT_Tension ) {
+                    status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexTension);
+                } else if ( returnType == RT_Compression ) {
+                    status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompression);
+                }
             }
-            if ( status->giveTempReturnType() == ConcreteDPM2Status::RT_Regular ) {
-                tempKappaP = performRegularReturn(effectiveStress, tempKappaP, gp, theta);
+            if ( returnType == RT_Regular ) {
+                tempKappaP = performRegularReturn(effectiveStress, returnResult, returnType, tempKappaP, gp, theta);
                 status->letTempKappaPBe(tempKappaP);
             }
         } else {
-            status->letTempReturnResultBe(ConcreteDPM2Status::RR_Converged);
+            returnResult = RR_Converged;
             tempPlasticStrain = status->givePlasticStrain();
             status->letTempPlasticStrainBe(tempPlasticStrain);
             status->letTempKappaPBe(tempKappaP);
             break;
         }
 
-        if ( status->giveTempReturnResult() == ConcreteDPM2Status::RR_NotConverged ) {
+        if ( returnResult == RR_NotConverged ) {
             subincrementcounter++;
             if ( subincrementcounter > 10 ) {
                 OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
@@ -1400,7 +1566,7 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
                 yieldValue = computeYieldValue(sig, rho, theta, tempKappaP);
                 OOFEM_LOG_INFO("OLD Sig %g rho %g theta %g  \n", sig1, rho1, theta1);
                 OOFEM_LOG_INFO("NEW Sig %g rho %g theta %g  \n", sig, rho, theta);
-                if ( status->giveTempReturnType() == ConcreteDPM2Status::RT_Tension || status->giveTempReturnType() == ConcreteDPM2Status::RT_Compression ) {
+                if ( returnType == RT_Tension || returnType == RT_Compression ) {
                     OOFEM_LOG_INFO("Vertex case apexstress %g\n", apexStress);
                 } else {
                     OOFEM_LOG_INFO("Regular case %g \n", 15.18);
@@ -1415,12 +1581,12 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
             subIncrementFlag = 1;
             deltaStrain *= 0.5;
             tempStrain = convergedStrain + deltaStrain;
-        } else if ( status->giveTempReturnResult() == ConcreteDPM2Status::RR_Converged && subIncrementFlag == 0 ) {
+        } else if ( returnResult == RR_Converged && subIncrementFlag == 0 ) {
             auto C = inv(D); // compliance
             elasticStrain = dot(C, effectiveStress);
             tempPlasticStrain = strain - elasticStrain;
             status->letTempPlasticStrainBe(tempPlasticStrain);
-        } else if ( status->giveTempReturnResult() == ConcreteDPM2Status::RR_Converged && subIncrementFlag == 1 ) {
+        } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
             subincrementcounter = 0;
             auto C = inv(D); // compliance
             elasticStrain = dot(C, effectiveStress);
@@ -1428,7 +1594,7 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
             status->letTempPlasticStrainBe(tempPlasticStrain);
 
             subIncrementFlag = 0;
-            status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
+            returnResult = RR_NotConverged;
             convergedStrain = tempStrain;
             deltaStrain = strain - convergedStrain;
             tempStrain = strain;
@@ -1440,30 +1606,28 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
 
 void
 ConcreteDPM2::checkForVertexCase(double &answer,
+                                 ConcreteDPM2_ReturnType &returnType,
                                  double sig,
                                  double tempKappa,
-                                 bool mat1d,
                                  GaussPoint *gp) const
 {
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    if ( mat1d ) {
-        status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Regular);
-    }
-
     answer = 0.;
     if ( sig > 0. ) {
-        status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Tension);
+        returnType = RT_Tension;
     } else if ( sig < 0. &&  tempKappa < 1. ) {
-        status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Compression);
+        returnType = RT_Compression;
     } else {
-        status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Regular);
+        returnType = RT_Regular;
     }
 }
 
 
 double
 ConcreteDPM2::performVertexReturn(FloatArrayF< 6 > &effectiveStress,
+                                  ConcreteDPM2_ReturnResult &returnResult,
+                                  ConcreteDPM2_ReturnType &returnType,
                                   double apexStress, double tempKappaP,
                                   GaussPoint *gp) const
 {
@@ -1489,8 +1653,8 @@ ConcreteDPM2::performVertexReturn(FloatArrayF< 6 > &effectiveStress,
     double yieldValueMid = computeYieldValue(sig2, 0., 0., tempKappaP);
 
     if ( yieldValue * yieldValueMid >= 0. ) {
-        status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Regular);
-        status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
+        returnType = RT_Regular;
+        returnResult = RR_NotConverged;
         return kappaInitial;
     }
 
@@ -1524,35 +1688,36 @@ ConcreteDPM2::performVertexReturn(FloatArrayF< 6 > &effectiveStress,
 
             double ratioTrial = rhoTrial / ( sigTrial - sigAnswer );
 
-            if ( ( ( ( ratioPotential >= ratioTrial ) && status->giveTempReturnType() == ConcreteDPM2Status::RT_Tension ) ) ||
-                 ( ( ratioPotential <= ratioTrial ) && status->giveTempReturnType() == ConcreteDPM2Status::RT_Compression ) ) {
+            if ( ( ( ( ratioPotential >= ratioTrial ) && returnType == RT_Tension ) ) ||
+                 ( ( ratioPotential <= ratioTrial ) && returnType == RT_Compression ) ) {
                 for ( int i = 0; i < 3; i++ ) {
-                    effectiveStress [ i ] = sigAnswer;
+                    effectiveStress.at(i + 1) = sigAnswer;
                 }
 
                 for ( int i = 3; i < 6; i++ ) {
-                    effectiveStress [ i ] = 0.;
+                    effectiveStress.at(i + 1) = 0.;
                 }
-                status->letTempReturnResultBe(ConcreteDPM2Status::RR_Converged);
+                returnResult = RR_Converged;
                 return tempKappaP;
             } else {
-                status->letTempReturnTypeBe(ConcreteDPM2Status::RT_Regular);
-                status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
+                returnType = RT_Regular;
+                returnResult = RR_NotConverged;
                 return kappaInitial;
             }
         }
     }
 
     for ( int i = 0; i < 3; i++ ) {
-        effectiveStress [ i ] = sigAnswer;
+        effectiveStress.at(i + 1) = sigAnswer;
     }
 
     for ( int i = 3; i < 6; i++ ) {
-        effectiveStress [ i ] = 0.;
+        effectiveStress.at(i + 1) = 0.;
     }
-    status->letTempReturnResultBe(ConcreteDPM2Status::RR_Converged);
+    returnResult = RR_Converged;
 
-    //// Warning solution NOT CONVERGED!!!!
+    OOFEM_WARNING("Perform vertex return not converged!\n");
+
     return tempKappaP;
 }
 
@@ -1630,13 +1795,13 @@ ConcreteDPM2::computeRatioPotential(double sig,
 
 double
 ConcreteDPM2::performRegularReturn(FloatArrayF< 6 > &effectiveStress,
+                                   ConcreteDPM2_ReturnResult &returnResult,
+                                   ConcreteDPM2_ReturnType &returnType,
                                    double kappaP,
                                    GaussPoint *gp,
                                    double theta) const
 {
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-
-    bool mode3d = effectiveStress.giveSize() > 1;
 
     //Define stressVariables
     double trialSig, trialRho;
@@ -1644,16 +1809,11 @@ ConcreteDPM2::performRegularReturn(FloatArrayF< 6 > &effectiveStress,
     auto trialStress = effectiveStress;
 
     //compute invariants from stress state
-    if ( mode3d ) {
-        //auto [deviatoricTrialStress, trialSig] = computeDeviatoricVolumetricSplit(trialStress); // c++17
-        auto tmp = computeDeviatoricVolumetricSplit(trialStress);
-        auto deviatoricTrialStress = tmp.first;
-        trialSig = tmp.second;
-        trialRho = computeSecondCoordinate(deviatoricTrialStress);
-    } else {  //1d case
-        double angle; // this variable is used only as an input to the function computeCoordinates and is not important and it is already calculated
-        computeCoordinates(trialStress, trialSig, trialRho, angle);
-    }
+    //auto [deviatoricTrialStress, trialSig] = computeDeviatoricVolumetricSplit(trialStress); // c++17
+    auto tmp = computeDeviatoricVolumetricSplit(trialStress);
+    auto deviatoricTrialStress = tmp.first;
+    trialSig = tmp.second;
+    trialRho = computeSecondCoordinate(deviatoricTrialStress);
 
     double sig = trialSig;
     double rho = trialRho;
@@ -1667,22 +1827,13 @@ ConcreteDPM2::performRegularReturn(FloatArrayF< 6 > &effectiveStress,
     //initialise unknowns
     FloatArray unknowns;
     FloatArray residuals;
-    if ( mode3d ) {
-        residuals.resize(4);
-        residuals.at(4) = yieldValue;  //store in the last element of the array
-        unknowns.resize(4);
-        unknowns.at(1) = trialSig;
-        unknowns.at(2) = trialRho;
-        unknowns.at(3) = tempKappaP;
-        unknowns.at(4) = 0.;
-    } else {  //1D case
-        residuals.resize(3);
-        residuals.at(3) = yieldValue;  //store in the last element of the array
-        unknowns.resize(3);
-        unknowns.at(1) = trialSig * 3.; // It is calculated as the volumetric stress in this case sigma/3
-        unknowns.at(2) = tempKappaP;
-        unknowns.at(3) = 0.;
-    }
+    residuals.resize(4);
+    residuals.at(4) = yieldValue;  //store in the last element of the array
+    unknowns.resize(4);
+    unknowns.at(1) = trialSig;
+    unknowns.at(2) = trialRho;
+    unknowns.at(3) = tempKappaP;
+    unknowns.at(4) = 0.;
 
     double deltaLambda = 0.;
     double normOfResiduals  = 1.; //just to get into the loop
@@ -1693,139 +1844,73 @@ ConcreteDPM2::performRegularReturn(FloatArrayF< 6 > &effectiveStress,
     while ( normOfResiduals > yieldTol   ) {
         iterationCount++;
         if ( iterationCount == newtonIter ) {
-            status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
+            returnResult = RR_NotConverged;
 
             return kappaP;
         }
 
         auto residualsNorm = residuals;
-        if ( effectiveStress.giveSize() > 1 ) {
-            //Normalize residuals. Think about it more.
-            residualsNorm.at(1) /= this->kM;
-            residualsNorm.at(2) /= 2. * this->gM;
-        } else {  //1D case
-            residualsNorm.at(1) /= this->eM;
-        }
+        //Normalize residuals. Think about it more.
+        residualsNorm.at(1) /= this->kM;
+        residualsNorm.at(2) /= 2. * this->gM;
 
         normOfResiduals = norm(residualsNorm);
 
         if ( std::isnan(normOfResiduals) ) {
-            status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
+            returnResult = RR_NotConverged;
             return kappaP;
         }
 
         if ( normOfResiduals > yieldTol  ) {
             // Test to run newton iteration using inverse of Jacobian
-            if ( mode3d ) {
-                auto jacobian = computeJacobian(sig, rho, theta, tempKappaP, deltaLambda, gp);
+            auto jacobian = computeJacobian(sig, rho, theta, tempKappaP, deltaLambda, gp);
 
-                try {
-                    auto deltaIncrement = solve( jacobian, FloatArrayF< 4 >(residuals) );
-                    unknowns -= deltaIncrement;
-                } catch ( ... ) {
-                    status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
-                    return kappaP;
-                }
-
-                unknowns.at(2) = max(unknowns.at(2), 0.); //Keep rho greater than zero!
-                unknowns.at(3) = max(unknowns.at(3), kappaP); //Keep deltaKappa greater than zero!
-                unknowns.at(4) = max(unknowns.at(4), 0.); //Keep deltaLambda greater than zero!
-
-                //compute residuals
-                sig = unknowns.at(1);
-                rho = unknowns.at(2);
-                tempKappaP = unknowns.at(3);
-                deltaLambda = unknowns.at(4);
-
-                /* Compute the mVector holding the derivatives of the g function and the hardening function*/
-                auto dGDInv = computeDGDInv(sig, rho, tempKappaP);
-                double dKappaDDeltaLambda = computeDKappaDDeltaLambda(sig, rho, theta, tempKappaP);
-
-                residuals.at(1) = sig - trialSig + this->kM * deltaLambda * dGDInv.at(1);
-                residuals.at(2) = rho - trialRho + ( 2. * this->gM ) * deltaLambda * dGDInv.at(2);
-                residuals.at(3) = -tempKappaP + kappaP + deltaLambda * dKappaDDeltaLambda;
-                residuals.at(4) = computeYieldValue(sig, rho, theta, tempKappaP);
-            } else {
-                auto jacobian = compute1dJacobian(3. * sig, theta, tempKappaP, deltaLambda, gp);
-
-                try {
-                    auto deltaIncrement = solve( jacobian, FloatArrayF< 3 >(residuals) );
-                    unknowns -= deltaIncrement;
-                } catch ( ... ) {
-                    status->letTempReturnResultBe(ConcreteDPM2Status::RR_NotConverged);
-                    return kappaP;
-                }
-
-                unknowns.at(2) = max(unknowns.at(2), kappaP); //Keep deltaKappa greater equal than zero!
-                unknowns.at(3) = max(unknowns.at(3), 0.); //Keep deltaLambda greater equal than zero!
-
-                //compute residuals
-                sig = unknowns.at(1) / 3.;
-                rho = unknowns.at(1) * sqrt(2. / 3.); //for the 1d case
-                tempKappaP = unknowns.at(2);
-                deltaLambda = unknowns.at(3);
-
-                /* Compute the mVector holding the derivatives of the g function and the hardening function*/
-                double dginv = computeDGDInv1d(unknowns.at(1), tempKappaP);
-                double dKappaDDeltaLambda = computeDKappaDDeltaLambda1d(unknowns.at(1), theta, tempKappaP);
-
-                residuals.at(1) = 3. * ( sig - trialSig ) + this->eM * deltaLambda * dginv;
-                residuals.at(2) = -tempKappaP + kappaP + deltaLambda * dKappaDDeltaLambda;
-                residuals.at(3) = computeYieldValue(sig, rho, theta, tempKappaP);
+            try {
+                auto deltaIncrement = solve(jacobian, FloatArrayF< 4 >(residuals) );
+                unknowns -= deltaIncrement;
+            } catch ( ... ) {
+                returnResult = RR_NotConverged;
+                return kappaP;
             }
+
+            unknowns.at(2) = max(unknowns.at(2), 0.); //Keep rho greater than zero!
+            unknowns.at(3) = max(unknowns.at(3), kappaP); //Keep deltaKappa greater than zero!
+            unknowns.at(4) = max(unknowns.at(4), 0.); //Keep deltaLambda greater than zero!
+
+            //compute residuals
+            sig = unknowns.at(1);
+            rho = unknowns.at(2);
+            tempKappaP = unknowns.at(3);
+            deltaLambda = unknowns.at(4);
+
+            /* Compute the mVector holding the derivatives of the g function and the hardening function*/
+            auto dGDInv = computeDGDInv(sig, rho, tempKappaP);
+            double dKappaDDeltaLambda = computeDKappaDDeltaLambda(sig, rho, theta, tempKappaP);
+
+            residuals.at(1) = sig - trialSig + this->kM * deltaLambda * dGDInv.at(1);
+            residuals.at(2) = rho - trialRho + ( 2. * this->gM ) * deltaLambda * dGDInv.at(2);
+            residuals.at(3) = -tempKappaP + kappaP + deltaLambda * dKappaDDeltaLambda;
+            residuals.at(4) = computeYieldValue(sig, rho, theta, tempKappaP);
         }
     }
 
-    if ( mode3d ) {
-        //compute the principal directions of the stress
-        //auto [helpStress, stressPrincipalDir] = StructuralMaterial :: computePrincipalValDir(from_voigt_stress(trialStress)); // c++17
-        auto tmpEig = StructuralMaterial::computePrincipalValDir( from_voigt_stress(trialStress) );
-        auto stressPrincipalDir = tmpEig.second;
 
-        FloatArrayF< 6 >stressPrincipal;
-        stressPrincipal [ 0 ] = sig + sqrt(2. / 3.) * rho * cos(theta);
-        stressPrincipal [ 1 ] = sig + sqrt(2. / 3.) * rho * cos(theta - 2. * M_PI / 3.);
-        stressPrincipal [ 2 ] = sig + sqrt(2. / 3.) * rho * cos(theta + 2. * M_PI / 3.);
-        effectiveStress = transformStressVectorTo(stressPrincipalDir, stressPrincipal, 1);
-    } else {
-        effectiveStress.at(1) = sig * 3;
-    }
-    status->letTempReturnResultBe(ConcreteDPM2Status::RR_Converged);
+    //compute the principal directions of the stress
+    //auto [helpStress, stressPrincipalDir] = StructuralMaterial :: computePrincipalValDir(from_voigt_stress(trialStress)); // c++17
+    auto tmpEig = StructuralMaterial::computePrincipalValDir(from_voigt_stress(trialStress) );
+    auto stressPrincipalDir = tmpEig.second;
+
+    FloatArrayF< 6 >stressPrincipal;
+    stressPrincipal [ 0 ] = sig + sqrt(2. / 3.) * rho * cos(theta);
+    stressPrincipal [ 1 ] = sig + sqrt(2. / 3.) * rho * cos(theta - 2. * M_PI / 3.);
+    stressPrincipal [ 2 ] = sig + sqrt(2. / 3.) * rho * cos(theta + 2. * M_PI / 3.);
+    effectiveStress = transformStressVectorTo(stressPrincipalDir, stressPrincipal, 1);
+    returnResult = RR_Converged;
+
+    //Store deltaLambda in status
+    status->letDeltaLambdaBe(deltaLambda);
 
     return tempKappaP;
-}
-
-FloatMatrixF< 3, 3 >
-ConcreteDPM2::compute1dJacobian(double totalsigma,
-                                double theta,
-                                double kappa,
-                                double deltaLambda,
-                                GaussPoint *gp) const
-{
-    double dFDInv = computeDFDInv1d(totalsigma, theta, kappa);
-    double dGDInv = computeDGDInv1d(totalsigma, kappa);
-    double dDGDDInv = computeDDGDDInv1d(totalsigma, kappa);
-    double dKappaDDeltaLambda = computeDKappaDDeltaLambda(totalsigma, 1, theta, kappa);
-    double dFDKappa = computeDFDKappa(totalsigma, 1, theta, kappa, true);
-    double dDGDInvDKappa = computeDDGDInvDKappa1d(totalsigma, kappa);
-    double dDKappaDDeltaLambdaDKappa = computeDDKappaDDeltaLambdaDKappa1d(totalsigma, theta, kappa);
-    double dDKappaDDeltaLambdaDInv = computeDDKappaDDeltaLambdaDInv1d(totalsigma, theta, kappa);
-
-    FloatMatrixF< 3, 3 >answer;
-    /* Compute matrix*/
-    /* 1st row */
-    answer.at(1, 1) = 1. + this->eM * deltaLambda * dDGDDInv;
-    answer.at(1, 2) = this->eM * deltaLambda * dDGDInvDKappa;
-    answer.at(1, 3) = this->eM * dGDInv;
-    /* 2nd row */
-    answer.at(2, 1) = deltaLambda * dDKappaDDeltaLambdaDInv;
-    answer.at(2, 2) = deltaLambda * dDKappaDDeltaLambdaDKappa - 1.;
-    answer.at(2, 3) = dKappaDDeltaLambda;
-    /* 3rd row */
-    answer.at(3, 1) = dFDInv;
-    answer.at(3, 2) = dFDKappa;
-    answer.at(3, 3) = 0.;
-    return answer;
 }
 
 
@@ -1842,7 +1927,7 @@ ConcreteDPM2::computeJacobian(double sig,
     auto dDGDDInv = computeDDGDDInv(sig, rho, kappa);
 
     double dKappaDDeltaLambda = computeDKappaDDeltaLambda(sig, rho, theta, kappa);
-    double dFDKappa = computeDFDKappa(sig, rho, theta, kappa, false);
+    double dFDKappa = computeDFDKappa(sig, rho, theta, kappa);
 
     auto dDGDInvDKappa = computeDDGDInvDKappa(sig, rho, kappa);
 
@@ -1909,8 +1994,7 @@ double
 ConcreteDPM2::computeDFDKappa(double sig,
                               double rho,
                               double theta,
-                              double tempKappa,
-                              bool mode1d) const
+                              double tempKappa) const
 {
     double dFDKappa;
     //compute yieldHard and yieldSoft
@@ -1924,27 +2008,19 @@ ConcreteDPM2::computeDFDKappa(double sig,
         ( 4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + pow( ( 2. * ecc - 1. ), 2) ) /
         ( 2 * ( 1. - pow(ecc, 2) ) * cos(theta) + ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + 5. * pow(ecc, 2) - 4. * ecc) );
 
+    //compute help functions Al, Bl
+    double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2. ) + sqrt(3. / 2.) * rho / fc;
 
-    if ( !mode1d ) {
-        //compute help functions Al, Bl
-        double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2.) + sqrt(3. / 2.) * rho / fc;
 
-        double Bl = sig / fc + rho / ( fc * sqrt(6.) );
+    double Bl = sig / fc + rho / ( fc * sqrt(6.) );
+    double dFDYieldHardOne = -2. * Al * pow(Bl, 2.)
+                             + 2. * yieldHardOne * yieldHardTwo * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardOne * pow(yieldHardTwo, 2.);
 
-        double dFDYieldHardOne = -2. * Al * pow(Bl, 2.)
-                                 + 2. * yieldHardOne * yieldHardTwo * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardOne * pow(yieldHardTwo, 2.);
+    double dFDYieldHardTwo = pow(yieldHardOne, 2.) * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardTwo * pow(yieldHardOne, 2.);
 
-        double dFDYieldHardTwo = pow(yieldHardOne, 2.) * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardTwo * pow(yieldHardOne, 2.);
-
-        // compute dFDKappa
-        dFDKappa = dFDYieldHardOne * dYieldHardOneDKappa +
-                   dFDYieldHardTwo * dYieldHardTwoDKappa;
-    } else {  //1d case
-        dFDKappa = -2 * pow(2 * sig / 3 / fc, 2) * ( sig / fc + pow(2 / 3 * sig / fc, 2) * ( 1 - yieldHardOne ) ) * dYieldHardOneDKappa +
-                   ( 1 + rFunction ) * m * sig / 3 / fc * ( dYieldHardOneDKappa * 2. * yieldHardOne * yieldHardTwo + dYieldHardTwoDKappa * yieldHardOne ) -
-                   2 * ( yieldHardOne * pow(yieldHardTwo, 2) * dYieldHardOneDKappa + yieldHardTwo * pow(yieldHardOne, 2) * dYieldHardTwoDKappa );
-    }
-
+    // compute dFDKappa
+    dFDKappa = dFDYieldHardOne * dYieldHardOneDKappa +
+               dFDYieldHardTwo * dYieldHardTwoDKappa;
     /*
      * set dFDKappa to zero, if it becomes greater than zero.
      * dFDKappa can only be negative or zero in the converged state for
@@ -1958,20 +2034,6 @@ ConcreteDPM2::computeDFDKappa(double sig,
 
     return dFDKappa;
 }
-
-double
-ConcreteDPM2::computeDFDInv1d(double sigma,
-                              double theta,
-                              double tempKappa) const
-{
-    double yieldHardOne = computeHardeningOne(tempKappa);
-    double yieldHardTwo = computeHardeningTwo(tempKappa);
-
-    double rFunction =  ( 4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + pow( ( 2. * ecc - 1. ), 2) ) /
-                       ( 2. * ( 1. - pow(ecc, 2) ) * cos(theta) + ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + 5. * pow(ecc, 2) - 4. * ecc) );
-    return 2 * ( 1 / fc + 8 * sigma / pow(3 * fc, 2) * ( 1 - yieldHardOne ) ) * ( sigma / fc + pow(2 * sigma / 3 / fc, 2) * ( 1 - yieldHardOne ) ) + ( 1 + rFunction ) * m / ( 3 * fc ) * pow(yieldHardOne, 2) * yieldHardTwo;
-}
-
 
 FloatArrayF< 2 >
 ConcreteDPM2::computeDFDInv(double sig,
@@ -2005,15 +2067,6 @@ ConcreteDPM2::computeDFDInv(double sig,
 
 
 double
-ConcreteDPM2::computeDKappaDDeltaLambda1d(double sig, double theta, double tempKappa) const
-{
-    double equivalentDGDStress = fabs( computeDGDInv1d(sig, tempKappa) ); // In 1D is the absolute value
-    double ductilityMeasure = computeDuctilityMeasure(sig / 3., sqrt(2. / 3.) * sig, theta);
-    return equivalentDGDStress / ductilityMeasure; // dKappaDDeltaLambda
-}
-
-
-double
 ConcreteDPM2::computeDKappaDDeltaLambda(double sig,
                                         double rho,
                                         double theta,
@@ -2024,27 +2077,6 @@ ConcreteDPM2::computeDKappaDDeltaLambda(double sig,
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, theta);
     return equivalentDGDStress / ductilityMeasure; // dKappaDDeltaLambda
 }
-
-double
-ConcreteDPM2::computeDDKappaDDeltaLambdaDInv1d(double sigma, double theta, double tempKappa) const
-{
-    //Compute first and second derivative of plastic potential
-    double dGDInv = computeDGDInv1d(sigma, tempKappa);
-    double dDGDDInv = computeDDGDDInv1d(sigma, tempKappa);
-
-    //computeDuctilityMeasure
-    double ductilityMeasure = computeDuctilityMeasure(sigma / 3., sigma * sqrt(2. / 3.), theta);
-
-    // compute the derivative of
-    double dDuctilityMeasureDInv = computeDDuctilityMeasureDInv1d(sigma, theta, tempKappa);
-    if ( dGDInv < 0 ) {
-        dDGDDInv = -dDGDDInv;
-        dGDInv = -dGDInv;
-    }
-
-    return dDGDDInv / ductilityMeasure - dGDInv * dDuctilityMeasureDInv / pow(ductilityMeasure, 2);
-}
-
 
 FloatArrayF< 2 >
 ConcreteDPM2::computeDDKappaDDeltaLambdaDInv(double sig,
@@ -2079,6 +2111,75 @@ ConcreteDPM2::computeDDKappaDDeltaLambdaDInv(double sig,
     return answer;
 }
 
+FloatArrayF< 6 >
+ConcreteDPM2::computeDDKappaDDeltaLambdaDStress(const FloatArrayF< 6 > &stress, double tempKappa) const
+{
+    auto tmp = computeDeviatoricVolumetricSplit(stress);
+    auto deviatoricStress = tmp.first;
+    double sig = tmp.second;
+
+    double rho = computeSecondCoordinate(deviatoricStress);
+    double theta = computeThirdCoordinate(deviatoricStress);
+
+    auto dDKappaDDeltaLambdaDInv = computeDDKappaDDeltaLambdaDInv(sig, rho, theta, tempKappa);
+
+    // compute dDKappaDDeltaLambdaDCosTheta
+    auto dGDInv = computeDGDInv(sig, rho, tempKappa);
+
+    double equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv [ 0 ], 2.) + pow(dGDInv [ 1 ], 2.) );
+
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, theta);
+
+    //Reuse implementation to compute dKappaDDeltaLambdaDCosTheta
+    //Ductility measure has in denominator (2*cos(theta))^2
+    double dDKappaDDeltaLambdaDCosTheta = equivalentDGDStress / ductilityMeasure / cos(theta);
+    //  dDKappaDDeltaLambdaDCosTheta = 0.;
+
+    auto dSigDStress = computeDSigDStress();
+    auto dRhoDStress = computeDRhoDStress(stress);
+    auto dCosThetaDStress = computeDCosThetaDStress(stress);
+
+    dSigDStress *= dDKappaDDeltaLambdaDInv.at(1);
+
+    dRhoDStress *= dDKappaDDeltaLambdaDInv.at(2);
+
+    dCosThetaDStress *= dDKappaDDeltaLambdaDCosTheta;
+
+    auto dDKappaDDeltaLambdaDStress = dSigDStress + dRhoDStress + dCosThetaDStress;
+
+    return dDKappaDDeltaLambdaDStress;
+}
+
+FloatArrayF< 6 >
+ConcreteDPM2::computeDDGDStressDKappa(const FloatArrayF< 6 > &stress, double tempKappa) const
+{
+    FloatArrayF< 6 >answer;
+
+    auto tmp = computeDeviatoricVolumetricSplit(stress);
+    auto deviatoricStress = tmp.first;
+    double sig = tmp.second;
+
+    double rho = computeSecondCoordinate(deviatoricStress);
+    //  double theta = computeThirdCoordinate(deviatoricStress);
+
+    auto dDGDInvDKappa = computeDDGDInvDKappa(sig, rho, tempKappa);
+    auto dSigDStress = computeDSigDStress();
+    auto dRhoDStress = computeDRhoDStress(stress);
+
+    answer = dSigDStress;
+    answer *= dDGDInvDKappa.at(1);
+
+    FloatArrayF< 6 >temp1;
+    temp1 = dRhoDStress;
+    temp1 *= dDGDInvDKappa.at(2);
+
+    answer += temp1;
+
+    return answer;
+}
+
+
+
 double
 ConcreteDPM2::computeDDKappaDDeltaLambdaDKappa(double sig, double rho, double theta, double tempKappa) const
 {
@@ -2086,65 +2187,14 @@ ConcreteDPM2::computeDDKappaDDeltaLambdaDKappa(double sig, double rho, double th
     auto dGDInv = computeDGDInv(sig, rho, tempKappa);
     auto dDGDInvDKappa = computeDDGDInvDKappa(sig, rho, tempKappa);
 
-    double equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv [ 0 ], 2.) + pow(dGDInv [ 1 ], 2.) );
+    double equivalentDGDStress = sqrt(1. / 3. * pow(dGDInv [ 0 ], 2.) + pow(dGDInv [ 1 ], 2.) );
 
-    double ductilityMeasure = computeDuctilityMeasure(sig, rho, theta);  //computeDuctilityMeasure
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, theta);
     //Compute dEquivalentDGDStressDKappa
     double dEquivalentDGDStressDKappa =
         ( 2. / 3. * dGDInv [ 0 ] * dDGDInvDKappa [ 0 ] + 2. * dGDInv [ 1 ] * dDGDInvDKappa [ 1 ] ) / ( 2. * equivalentDGDStress );
 
-#if 0
-    // compute the derivative of
-    double dDuctilityMeasureDKappa = 0.;
-
-    ///@todo Is this right? This is *NEVER* used.
-    double dDKappaDDeltaLambdaDKappa =
-        ( dEquivalentDGDStressDKappa * ductilityMeasure -
-          equivalentDGDStress * dDuctilityMeasureDKappa ) / pow(ductilityMeasure, 2.);
-#endif
-    return dEquivalentDGDStressDKappa / ductilityMeasure; // dDKappaDDeltaLambdaDKappa
-}
-
-
-double
-ConcreteDPM2::computeDDKappaDDeltaLambdaDKappa1d(double sig,
-                                                 double theta,
-                                                 double tempKappa) const
-{
-    double equivalentDGDStress, dEquivalentDGDStressDKappa, ductilityMeasure;
-
-    equivalentDGDStress = computeDGDInv1d(sig, tempKappa);
-    dEquivalentDGDStressDKappa = computeDDGDInvDKappa1d(sig, tempKappa);
-    if ( equivalentDGDStress < 0 ) {
-        dEquivalentDGDStressDKappa = ( -1 ) * dEquivalentDGDStressDKappa;                        //We are differentiating the absolute value of the first derivative of G with respect to stress
-    }
-
-    ductilityMeasure = computeDuctilityMeasure(sig / 3., sig * sqrt(2. / 3.), theta);
-
-    return dEquivalentDGDStressDKappa / ductilityMeasure; // dDKappaDDeltaLambdaDKappa
-}
-
-
-double
-ConcreteDPM2::computeDDuctilityMeasureDInv1d(double sigma,
-                                             double theta,
-                                             double tempKappa) const
-{
-    double thetaConst = pow(2. * cos(theta), 2.);
-    double x =  -( sigma + fc ) / ( 3 * fc ); //R hardening variable
-    double dXDSigma = -1. / ( 3. * fc );
-    if ( x < 0. ) {
-        /* Introduce exponential help function which results in a
-         * smooth transition. */
-        double EHard = BHard - DHard;
-        double FHard = ( BHard - DHard ) * CHard / ( AHard - BHard );
-
-        double dDuctilityMeasureDX = EHard / FHard * exp(x / FHard) / thetaConst;
-        return dDuctilityMeasureDX * dXDSigma;
-    } else {
-        double dDuctilityMeasureDX = ( AHard - BHard ) /  CHard  / thetaConst * exp(-x /  CHard);
-        return dDuctilityMeasureDX * dXDSigma;
-    }
+    return dEquivalentDGDStressDKappa / ductilityMeasure;
 }
 
 FloatArrayF< 2 >
@@ -2175,22 +2225,6 @@ ConcreteDPM2::computeDDuctilityMeasureDInv(double sig,
         };
     }
 }
-
-
-double
-ConcreteDPM2::computeDGDInv1d(double sigma,
-                              double tempKappa) const
-{
-    //compute yieldHard and yieldSoft
-    double yieldHardOne = computeHardeningOne(tempKappa);
-    double yieldHardTwo = computeHardeningTwo(tempKappa);
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
-    double BGParam =  yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) / ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
-    double R = ( sigma - yieldHardTwo * ft ) / ( 3 * fc * BGParam );
-    double mQ = AGParam * exp(R) / 3;
-    return 2 * ( 1 / fc + 8 * sigma / pow(3 * fc, 2) * ( 1 - yieldHardOne ) ) * ( sigma / fc + pow(2 * sigma / ( 3 * fc ), 2) * ( 1 - yieldHardOne ) ) + pow(yieldHardOne, 2) / fc * ( m / 3 + mQ );
-}
-
 
 FloatArrayF< 2 >
 ConcreteDPM2::computeDGDInv(double sig,
@@ -2224,44 +2258,190 @@ ConcreteDPM2::computeDGDInv(double sig,
     };
 }
 
-double
-ConcreteDPM2::computeDDGDInvDKappa1d(double sigma,
-                                     double tempKappa) const
+FloatArrayF< 6 >
+ConcreteDPM2::computeDFDStress(const FloatArrayF< 6 > &stress,
+                               double tempKappa) const
 {
-    //compute yieldHard and yieldSoft
+    double sig, rho, theta;
+    computeCoordinates(stress, sig, rho, theta);
+    auto dFDInv = computeDFDInv(sig, rho, theta, tempKappa);
+
+    double dRDCosTheta = computeDRDCosTheta(theta, this->ecc);
+
     double yieldHardOne = computeHardeningOne(tempKappa);
     double yieldHardTwo = computeHardeningTwo(tempKappa);
 
-    double dYieldHardOneDKappa = computeHardeningOnePrime(tempKappa);
-    double dYieldHardTwoDKappa = computeHardeningTwoPrime(tempKappa);
+    //Compute dFDCosTheta. This was not needed for the stress return, but now for the tangent stiffness
+    auto dFDCosTheta = dRDCosTheta * pow(yieldHardOne, 2.) * yieldHardTwo * m * rho / ( sqrt(6.) * fc );
 
-    //Compute dilation parameter
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
-    double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
+    auto dSigDStress = computeDSigDStress();
+    auto dRhoDStress = computeDRhoDStress(stress);
+    auto dCosThetaDStress = computeDCosThetaDStress(stress);
 
-    double R = ( sigma - ft * yieldHardTwo ) / ( 3 * fc * BGParam );
-    double mQ = AGParam * exp(R) / 3;
-    //Compute the derivative of mQ with respect to kappa
+    dSigDStress *= dFDInv.at(1);
+    dRhoDStress *= dFDInv.at(2);
+    dCosThetaDStress *= dFDCosTheta;
 
-    //Derivative of AGParam
-    double dAGParamDKappa = dYieldHardTwoDKappa * 3. * this->ft / this->fc;
+    auto dFDStress = dSigDStress + dRhoDStress + dCosThetaDStress;
 
-    //Derivative of BGParam
-    double BGParamTop = yieldHardTwo / 3. * ( 1. + this->ft / this->fc );
-    double BGParamBottom = ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
-    double dBGParamTopDKappa1 = dYieldHardTwoDKappa * ( 1 + ft / fc ) / 3;
-    double dBGParamBottomDKappa1 = BGParamBottom;
-    double dBGParamTopDKappa2 = BGParamTop * ( dAGParamDKappa / AGParam - 3 * dYieldHardTwoDKappa / ( m / 2 + 3 * yieldHardTwo ) );
-    double dBGParamBottomDKappa2 = pow(BGParamBottom, 2);
-
-    double dBGParamDKappa = dBGParamTopDKappa1 / dBGParamBottomDKappa1 - dBGParamTopDKappa2 / dBGParamBottomDKappa2;
-    double dMQDKappa = 1 / 3 * exp(R) * ( dAGParamDKappa - AGParam * ( ( sigma - ft * yieldHardTwo ) * dBGParamDKappa / ( 3 * fc * pow(BGParam, 2) ) + ft * dYieldHardTwoDKappa / 3 / fc / BGParam ) );
-
-    return -8 / 9 * pow(sigma / fc, 2) * ( 1 / fc + 8 * sigma / pow(3 * fc, 2) * ( 1 - yieldHardOne ) ) * dYieldHardOneDKappa - sigma * pow(4 / 3 / fc, 2) * ( sigma / fc + pow(2 / 3 * sigma / fc, 2) * ( 1 - yieldHardOne ) ) * dYieldHardOneDKappa + 2 * dYieldHardOneDKappa * yieldHardOne / fc * ( this->m / 3 + mQ ) + yieldHardOne / fc * dMQDKappa;
+    return dFDStress;
 }
 
+FloatArrayF< 6 >
+ConcreteDPM2::computeDGDStress(const FloatArrayF< 6 > &stress, const double tempKappa) const
+{
+    auto tmp = computeDeviatoricVolumetricSplit(stress);
+    auto deviatoricStress = tmp.first;
+    double sig = tmp.second;
+    double rho = computeSecondCoordinate(deviatoricStress);
+
+    //compute dGDSig*dSigDStress + dGDRho*dRhoDStress
+    auto dGDInv = computeDGDInv(sig, rho, tempKappa);
+    auto dSigDStress = computeDSigDStress();
+    auto dRhoDStress = computeDRhoDStress(stress);
+
+    dSigDStress *= dGDInv.at(1);
+    dRhoDStress *= dGDInv.at(2);
+    dSigDStress += dRhoDStress;
+
+    return dSigDStress;
+}
+
+
+
+//Debug
+FloatMatrixF< 8, 8 >
+ConcreteDPM2::computeFullJacobian(const FloatArrayF< 6 > &stress,
+                                  const double deltaLambda,
+                                  GaussPoint *gp,
+                                  TimeStep *atTime,
+                                  const double tempKappa) const
+{
+    FloatMatrixF< 8, 8 >jacobian;
+    auto dFDStress = computeDFDStress(stress, tempKappa);
+    auto dGDStress = computeDGDStress(stress, tempKappa);
+    auto dDGDDStress = computeDDGDDStress(stress, tempKappa);
+    auto dDGDStressDKappa = computeDDGDStressDKappa(stress, tempKappa);
+    auto dDKappaDDeltaLambdaDStress = computeDDKappaDDeltaLambdaDStress(stress, tempKappa);
+
+    double sig, rho, theta;
+    computeCoordinates(stress, sig, rho, theta);
+
+    double dFDKappa = computeDFDKappa(sig, rho, theta, tempKappa);
+    double dKappaDDeltaLambda  = computeDKappaDDeltaLambda(sig, rho, theta, tempKappa);
+
+    double dDKappaDDeltaLambdaDKappa = computeDDKappaDDeltaLambdaDKappa(sig, rho, theta, tempKappa);
+
+    auto d = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, atTime);
+
+    auto helpA = dot(d, dDGDDStress);
+
+    //Assign jacobian
+    for ( int i = 0; i < 6; i++ ) {
+        for ( int j = 0; j < 6; j++ ) {
+            if ( i == j ) {
+                jacobian.at(i + 1, j + 1) = 1. + deltaLambda * helpA.at(i + 1, j + 1);
+            } else {
+                jacobian.at(i + 1, j + 1) = deltaLambda * helpA.at(i + 1, j + 1);
+            }
+        }
+    }
+
+    FloatArrayF< 6 >helpB;
+    helpB = dot(d, dDGDStressDKappa);
+
+    for ( int i = 0; i < 6; i++ ) {
+        jacobian.at(i + 1, 7) = deltaLambda * helpB.at(i + 1);
+    }
+
+    helpB = dot(d, dGDStress);
+
+    for ( int i = 0; i < 6; i++ ) {
+        jacobian.at(i + 1, 8) = helpB.at(i + 1);
+    }
+
+    for ( int i = 0; i < 6; i++ ) {
+        jacobian.at(7, i + 1) = deltaLambda * dDKappaDDeltaLambdaDStress.at(i + 1);
+    }
+
+
+    jacobian.at(7, 7) = deltaLambda * dDKappaDDeltaLambdaDKappa - 1.;
+    jacobian.at(7, 8) = dKappaDDeltaLambda;
+
+    for ( int i = 0; i < 6; i++ ) {
+        jacobian.at(8, i + 1) = dFDStress.at(i + 1);
+    }
+
+    jacobian.at(8, 7) = dFDKappa;
+    jacobian.at(8, 8) = 0.;
+
+    return jacobian;
+}
+
+
+FloatMatrixF< 6, 6 >
+ConcreteDPM2::computeDDGDDStress(const FloatArrayF< 6 > &stress,
+                                 const double tempKappa) const
+{
+    FloatMatrixF< 6, 6 >answer;
+
+    auto tmp = computeDeviatoricVolumetricSplit(stress);
+    auto deviatoricStress = tmp.first;
+    double sig = tmp.second;
+    double rho = computeSecondCoordinate(deviatoricStress);
+
+    //compute deriviates with respect to invariants
+    auto dDGDDInv = computeDDGDDInv(sig, rho, tempKappa);
+    auto dGDInv = computeDGDInv(sig, rho, tempKappa);
+
+    //Compute derivatives of invariants with respect to stress
+    auto dRhoDStress =  computeDRhoDStress(stress);
+
+    auto dDRhoDDStress = computeDDRhoDDStress(stress);
+
+    auto dSigDStress =  computeDSigDStress();
+
+    //Assemble terms
+
+    //Compute (dDGDDSig*dSigDStress + dDGDSigDRho*dRhoDStress)*dSigDStress
+    FloatArrayF< 6 >temp1;
+    temp1 = dSigDStress;
+    temp1 *= dDGDDInv.at(1, 1);
+
+    FloatArrayF< 6 >temp2;
+    temp2 = dRhoDStress;
+    temp2 *= dDGDDInv.at(1, 2);
+
+    temp1 += temp2;
+
+    FloatMatrixF< 6, 6 >helpA;
+    helpA = dyad(temp1, dSigDStress);
+
+    //Compute (dDGDDRho*dRhoDStress + dDGDRhoDSig*dSigDStress)*dRhoDstress
+    temp1 = dRhoDStress;
+    temp1 *= dDGDDInv.at(2, 2);
+
+    temp2 = dSigDStress;
+    temp2 *= dDGDDInv.at(2, 1);
+
+    temp1 += temp2;
+
+    FloatMatrixF< 6, 6 >helpB;
+    helpB = dyad(temp1, dRhoDStress);
+
+    //compute dGDRho * dDRhoDDStress
+    FloatMatrixF< 6, 6 >helpC = dDRhoDDStress;
+    helpC *= dGDInv.at(2);
+
+    //The term dGDSig*dDSigDDStress is zero
+
+    //sum up all parts
+    answer = helpA;
+    answer += helpB;
+    answer += helpC;
+
+    return answer;
+}
 
 FloatArrayF< 2 >
 ConcreteDPM2::computeDDGDInvDKappa(double sig,
@@ -2318,6 +2498,8 @@ ConcreteDPM2::computeDDGDInvDKappa(double sig,
         ( -4. * Al * Bl / fc + 4. * ( 1 - yieldHardOne ) / fc * dAlDYieldHard * Bl ) * dYieldHardOneDKappa +
         dYieldHardOneDKappa * 2 * yieldHardOne * mQ / fc + pow(yieldHardOne, 2.) * dMQDKappa / fc;
 
+    //dDGDSigDKappa = 0.;
+
     const double dDGDRhoDKappa =
         ( dAlDYieldHard / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. ) -
           4. * Al / ( sqrt(6.) * fc ) * Bl + m / ( sqrt(6.) * fc ) * 2 * yieldHardOne ) * dYieldHardOneDKappa;
@@ -2325,22 +2507,6 @@ ConcreteDPM2::computeDDGDInvDKappa(double sig,
     return {
         dDGDSigDKappa, dDGDRhoDKappa
     };
-}
-
-double
-ConcreteDPM2::computeDDGDDInv1d(double sigma,
-                                double tempKappa) const
-{
-    //compute yieldHardOne and yieldSoft
-    double yieldHardOne = computeHardeningOne(tempKappa);
-    double yieldHardTwo = computeHardeningTwo(tempKappa);
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
-    double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
-    double R = ( sigma - ft  * yieldHardTwo ) / ( 3 * fc * BGParam );
-    double dMQDSigma = AGParam / ( 9 * BGParam * fc ) * exp(R);
-    return 2 * pow(1 / fc + 8 * sigma / pow(3 * fc, 2) * ( 1 - yieldHardOne ), 2) + pow(4 / 3 / fc, 2) * ( sigma / fc + pow(2 / 3 * sigma / fc, 2) * ( 1 - yieldHardOne ) ) * ( 1 - yieldHardOne ) + pow(yieldHardOne, 2) / fc * dMQDSigma;
 }
 
 FloatMatrixF< 2, 2 >
@@ -2377,20 +2543,23 @@ ConcreteDPM2::computeDDGDDInv(double sig,
     //compute second derivatives of g
     double ddgddSig = 4. * ( 1. - yieldHardOne ) / fc * ( dAlDSig * Bl + Al * dBlDSig ) +
                       pow(yieldHardOne, 2.) * dMQDSig / fc;
+    // ddgddSig = 0.;
 
     double ddgddRho = dAlDRho / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. ) +
                       Al * dBlDRho * 4. * ( 1. - yieldHardOne ) / ( sqrt(6.) * fc );
 
     double ddgdSigdRho = 4. * ( 1. - yieldHardOne ) / fc * ( dAlDRho * Bl + Al * dBlDRho );
+    // ddgdSigdRho = 0.;
 
     double ddgdRhodSig = dAlDSig / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. )
                          + Al / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * dBlDSig );
+    // ddgdRhodSig = 0.;
 
     FloatMatrixF< 2, 2 >answer;
-    answer(0, 0) = ddgddSig;
-    answer(0, 1) = ddgdSigdRho;
-    answer(1, 0) = ddgdRhodSig;
-    answer(1, 1) = ddgddRho;
+    answer.at(1, 1) = ddgddSig;
+    answer.at(1, 2) = ddgdSigdRho;
+    answer.at(2, 1) = ddgdRhodSig;
+    answer.at(2, 2) = ddgddRho;
     return answer;
 }
 
@@ -2502,41 +2671,24 @@ ConcreteDPM2::computeHardeningTwoPrime(double kappa) const
     }
 }
 
-
-FloatMatrixF< 1, 1 >
-ConcreteDPM2::give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-{
-    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-
-    if ( mode == SecantStiffness ) {
-        auto elasticStrain = status->giveTempReducedStrain() - status->giveTempPlasticStrain();
-        auto effectiveStress = eM * elasticStrain.at(1);
-        if ( effectiveStress > 0 ) {
-            double omegaTension = min(status->giveTempDamageTension(), 0.999999);
-            return {
-                eM * ( 1.0 - omegaTension )
-            };
-        }
-    }
-    return {
-        eM
-    };
-}
-
-
 FloatMatrixF< 6, 6 >
 ConcreteDPM2::give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *tStep) const
 {
-    if ( mode == ElasticStiffness ) {
-        return this->linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    } else if ( mode == SecantStiffness ) {
+    auto status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
+    if ( mode == SecantStiffness ) {
         return this->compute3dSecantStiffness(gp, tStep);
-    } else { /*if ( mode == TangentStiffness )*/
-        //OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented). Secant stiffness used!");
-        return this->compute3dSecantStiffness(gp, tStep);
+    } else if ( mode == TangentStiffness ) {
+        const int stateFlag = status->giveTempStateFlag();
+        if ( stateFlag == ConcreteDPM2Status::ConcreteDPM2_PlasticDamage || stateFlag == ConcreteDPM2Status::ConcreteDPM2_Plastic ) {
+            return this->compute3dTangentStiffness(gp, tStep);
+        } else {
+            return this->compute3dSecantStiffness(gp, tStep);
+        }
     }
+    //Elastic case
+    return this->linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
 }
 
 
@@ -2547,59 +2699,73 @@ ConcreteDPM2::compute3dSecantStiffness(GaussPoint *gp, TimeStep *tStep) const
 
     //  Damage parameters
     double omegaTension = min(status->giveTempDamageTension(), 0.999999);
+    double omegaCompression = min(status->giveTempDamageCompression(), 0.999999);
+
+    double alpha = status->giveTempAlpha();
 
     auto d = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    if ( isotropicFlag == 1 ) {
-        return d * ( 1. - omegaTension );
+    if ( damageFlag == 2 ) {
+        d *= ( 1. - omegaTension );
+    } else if ( damageFlag == 3 ) {
+        d *= ( 1. - ( 1. - alpha ) * omegaTension ) * ( 1. - alpha * omegaCompression );
     }
 
-    const auto &strain = status->giveTempReducedStrain();
-    const auto &plasticStrain = status->giveTempPlasticStrain();
+    return d;
+}
 
-    auto elasticStrain = strain - plasticStrain;
-    auto effectiveStress = dot(d, elasticStrain);
+FloatMatrixF< 6, 6 >
+ConcreteDPM2::compute3dTangentStiffness(GaussPoint *gp, TimeStep *tStep) const
+{
+    FloatMatrixF< 6, 6 >answer;
 
-    //Calculate the principal values of the effective stress
-    auto principalStress = computePrincipalValues( from_voigt_stress(effectiveStress) );
+    FloatArrayF< 6 >effectiveStress;
+    auto status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
+    effectiveStress = status->giveTempEffectiveStress();
 
-    //exclude two special cases.
-    if ( iszero(principalStress) ) {
-        return d;
-    }
+    double tempKappa = status->giveTempKappaP();
+    double deltaLambda = status->giveDeltaLambda();
 
-    for ( int i = 1; i <= 3; i++ ) {
-        if ( principalStress.at(i) < -CDPM2_TOL ) {
-            return d;
+    //Computes only the plastic part of the tangent stiffness
+    auto d = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    // Debug
+    FloatMatrixF< 8, 8 >fullJacobian = computeFullJacobian(effectiveStress, deltaLambda, gp, tStep, tempKappa);
+
+    FloatMatrixF< 8, 8 >invFullJacobian = inv(fullJacobian);
+
+    FloatMatrixF< 6, 6 >help;
+    for ( int i = 1; i <= 6; i++ ) {
+        for ( int j = 1; j <= 6; j++ ) {
+            help.at(i, j) = invFullJacobian.at(i, j);
         }
     }
 
-    return d * ( 1. - omegaTension );
+    answer = dot(help, d);
+
+    //  Damage parameters
+    double omegaTension = min(status->giveTempDamageTension(), 0.999999);
+    double omegaCompression = min(status->giveTempDamageCompression(), 0.999999);
+    double alpha = status->giveTempAlpha();
+
+    if ( damageFlag == 2 ) {
+        answer *= ( 1. - ( 1. - alpha ) * omegaTension ) * ( 1. - alpha * omegaCompression );
+    } else if ( damageFlag == 3 ) {
+        answer *= ( 1. - omegaTension );
+    }
+
+    return answer;
 }
-
-
 
 void
 ConcreteDPM2::computeCoordinates(const FloatArrayF< 6 > &stress, double &sigNew, double &rhoNew, double &thetaNew) const
 {
-    if ( stress.giveSize() == 1 ) { //1d case
-        sigNew = stress [ 0 ] / 3.;
-        rhoNew = stress [ 0 ] * sqrt(2. / 3.);
-        if ( sigNew >= 0 ) {
-            thetaNew = 0.;
-        } else {
-            thetaNew = M_PI / 6;
-        }
-    } else {
-        //auto [deviatoricStressm, sigNew] = computeDeviatoricVolumetricSplit(stress);
-        auto tmp = computeDeviatoricVolumetricSplit(stress);
-        auto deviatoricStress = tmp.first;
-        sigNew = tmp.second;
-        rhoNew = computeSecondCoordinate(deviatoricStress);
-        thetaNew = computeThirdCoordinate(deviatoricStress);
-    }
+    auto tmp = computeDeviatoricVolumetricSplit(stress);
+    auto deviatoricStress = tmp.first;
+    sigNew = tmp.second;
+    rhoNew = computeSecondCoordinate(deviatoricStress);
+    thetaNew = computeThirdCoordinate(deviatoricStress);
 }
-
 
 void
 ConcreteDPM2::assignStateFlag(GaussPoint *gp) const
@@ -2617,7 +2783,13 @@ ConcreteDPM2::assignStateFlag(GaussPoint *gp) const
     if ( tempKappaP > kappaP ) {
         if ( tempDamageTension > damageTension ||  tempDamageTension == 1. ||
              tempDamageCompression > damageCompression || tempDamageCompression == 1. ) {
-            status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_PlasticDamage);
+            if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension ) {
+                status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexTensionDamage);
+            } else if ( status->giveTempStateFlag() == ConcreteDPM2Status::ConcreteDPM2_VertexTension )      {
+                status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_VertexCompressionDamage);
+            } else   {
+                status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_PlasticDamage);
+            }
         } else {
             status->letTempStateFlagBe(ConcreteDPM2Status::ConcreteDPM2_Plastic);
         }
@@ -2636,6 +2808,164 @@ ConcreteDPM2::assignStateFlag(GaussPoint *gp) const
     }
 }
 
+
+double
+ConcreteDPM2::computeDRDCosTheta(const double theta, const double ecc) const
+{
+    //    double thetaCrit = M_PI/3.*0.999;
+    double ACostheta = 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) +
+                       ( 2. * ecc - 1. ) * ( 2. * ecc - 1. );
+    double BCostheta = 2. * ( 1. - ecc * ecc ) * cos(theta) +
+                       ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta)
+                                                + 5. * ecc * ecc - 4. * ecc);
+    double A1Costheta = 8. * ( 1. - pow(ecc, 2.) ) * cos(theta);
+    double B1Costheta = 2. * ( 1. - pow(ecc, 2.) ) +
+                        4. * ( 2. * ecc - 1. ) * ( 1. - pow(ecc, 2.) ) * cos(theta) /
+                        sqrt(4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.) +
+                             5. * pow(ecc, 2.) - 4. * ecc);
+    double dRDCostheta = A1Costheta / BCostheta - ACostheta / pow(BCostheta, 2.) * B1Costheta;
+    return dRDCostheta;
+}
+
+double
+ConcreteDPM2::computeDDRDDCosTheta(const double theta, const double ecc) const
+{
+    //  double thetaCrit = M_PI/3.*0.999;
+    // if (thetaCrit<theta){
+    //  printf("theta = %e\n", theta);
+    //  return 0;
+    // }
+
+    //compute the derivative of the  rFunction with respect to costheta
+    double atheta = 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) +
+                    ( 2. * ecc - 1. ) * ( 2. * ecc - 1. );
+    double btheta = 2. * ( 1. - ecc * ecc ) * cos(theta) +
+                    ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta)
+                                             + 5. * ecc * ecc - 4. * ecc);
+    double a1theta = 8. * ( 1. - ecc * ecc ) * cos(theta);
+    double b1theta = 2. * ( 1. - ecc * ecc ) +
+                     4. * ( 2. * ecc - 1. ) * ( 1. - ecc * ecc ) * cos(theta) /
+                     sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) +
+                          5. * ecc * ecc - 4. * ecc);
+
+    //compute the second derivative of rFunction with respect to theta
+    double a2theta = 8. * ( 1. - pow(ecc, 2.) );
+    double Ntheta = 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) +
+                    5. * ecc * ecc - 4. * ecc;
+    printf("cos(theta) = %e\n", cos(theta) );
+    double b2theta =  4. * ( 2. * ecc - 1. ) * ( 1. - ecc * ecc ) / sqrt(Ntheta) *
+                     ( 1. - 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) / Ntheta );
+    double ddrddcostheta = a2theta / btheta - 2. * a1theta * b1theta / ( btheta * btheta ) -
+                           atheta * b2theta / ( btheta * btheta ) +
+                           2. * atheta * b1theta * b1theta / ( btheta * btheta * btheta );
+
+    return ddrddcostheta;
+}
+
+
+FloatArrayF< 6 >
+ConcreteDPM2::computeDCosThetaDStress(const FloatArrayF< 6 > &stress) const
+{
+    //compute volumetric deviatoric split
+    auto deviatoricStress = computeDeviator(stress);
+
+    //compute the coordinates
+    double rho = computeSecondCoordinate(deviatoricStress);
+
+    //compute principal stresses and directions
+    //auto [principalDeviatoricStress, principalDir] = computePrincipalValDir(from_voigt_stress(deviatoricStress)); // c++17
+    auto tmp = computePrincipalValDir( from_voigt_stress(deviatoricStress) );
+    auto principalDeviatoricStress = tmp.first;
+    auto principalDir = tmp.second;
+
+    //compute the derivative of s1 with respect to the cartesian stress
+    FloatArrayF< 6 >ds1DStress;
+    ds1DStress.at(1) = principalDir.at(1, 1) * principalDir.at(1, 1) - 1. / 3.;
+    ds1DStress.at(2) = principalDir.at(2, 1) * principalDir.at(2, 1) - 1. / 3.;
+    ds1DStress.at(3) = principalDir.at(3, 1) * principalDir.at(3, 1) - 1. / 3.;
+    ds1DStress.at(4) = 2. * principalDir.at(2, 1) * principalDir.at(3, 1);
+    ds1DStress.at(5) = 2. * principalDir.at(3, 1) * principalDir(1, 1);
+    ds1DStress.at(6) = 2. * principalDir.at(1, 1) * principalDir.at(2, 1);
+
+    //compute dCosThetaDStress
+    auto dCosThetaDStress = ds1DStress * ( sqrt(3. / 2.) * rho / pow(rho, 2.) ) +
+                            computeDRhoDStress(stress) * ( -sqrt(3. / 2.) * principalDeviatoricStress [ 0 ] / pow(rho, 2.) );
+    return dCosThetaDStress;
+}
+
+
+FloatMatrixF< 6, 6 >
+ConcreteDPM2::computeDDCosThetaDDStress(const FloatArrayF< 6 > &stress) const
+{
+    //compute volumetric deviatoric split
+    auto deviatoricStress = computeDeviator(stress);
+
+    //compute the coordinate
+    double rho = computeSecondCoordinate(deviatoricStress);
+
+    //compute principal stresses and directions
+    //auto [principalDeviatoricStress, principalDir] = computePrincipalValDir(from_voigt_stress(deviatoricStress)); // c++17
+    auto tmp = computePrincipalValDir( from_voigt_stress(deviatoricStress) );
+    auto principalDeviatoricStress = tmp.first;
+    auto principalDir = tmp.second;
+
+
+    //compute the derivative of s1 with respect to the cartesian stress
+    FloatArrayF< 6 >dS1DStress;
+    dS1DStress.at(1) = principalDir.at(1, 1) * principalDir.at(1, 1) - 1. / 3.;
+    dS1DStress.at(2) = principalDir.at(2, 1) * principalDir.at(2, 1) - 1. / 3.;
+    dS1DStress.at(3) = principalDir.at(3, 1) * principalDir.at(3, 1) - 1. / 3.;
+    dS1DStress.at(4) = 2. * principalDir.at(2, 1) * principalDir.at(3, 1);
+    dS1DStress.at(5) = 2. * principalDir.at(3, 1) * principalDir.at(1, 1);
+    dS1DStress.at(6) = 2. * principalDir.at(1, 1) * principalDir.at(2, 1);
+
+    //compute the second derivative of costheta
+    FloatMatrixF< 6, 6 >dDCosThetaDDStress;
+    //compute the product of dS1DStress and DRhoDStress
+    auto dRhoDStress = computeDRhoDStress(stress);
+    FloatMatrixF< 6, 6 >dS1DRho;
+    for ( int v = 0; v < 6; v++ ) {
+        for ( int w = 0; w < 6; w++ ) {
+            dS1DRho.at(v + 1, w + 1) = dS1DStress.at(v + 1) * dRhoDStress.at(w + 1);
+        }
+    }
+
+    //compute the square of dRhoDStress and DRhoDStress
+    FloatMatrixF< 6, 6 >dRhoDRho;
+    for ( int v = 0; v < 6; v++ ) {
+        for ( int w = 0; w < 6; w++ ) {
+            dRhoDRho.at(v + 1, w + 1) = dRhoDStress.at(v + 1) * dRhoDStress.at(w + 1);
+        }
+    }
+
+    //compute the product of dRhoDStress and DS1DStress
+    FloatMatrixF< 6, 6 >dRhoDS1;
+    for ( int v = 0; v < 6; v++ ) {
+        for ( int w = 0; w < 6; w++ ) {
+            dRhoDS1.at(v + 1, w + 1) = dRhoDStress.at(v + 1) * dS1DStress.at(w + 1);
+        }
+    }
+
+    auto dDRhoDDStress = computeDDRhoDDStress(stress);
+    dDCosThetaDDStress = dDRhoDDStress;
+    dDCosThetaDDStress *= ( -sqrt(3. / 2.) * principalDeviatoricStress.at(1) / pow(rho, 2.) );
+
+    auto helpB1 = dS1DRho;
+    helpB1 *= ( -sqrt(3. / 2.) / pow(rho, 2.) );
+
+    auto helpC1 = dRhoDRho;
+    helpC1 *= ( sqrt(6.) * principalDeviatoricStress.at(1) / pow(rho, 3.) );
+
+    auto helpD1 = dRhoDS1;
+    helpD1 *= ( -sqrt(3. / 2.) / pow(rho, 2.) );
+    dDCosThetaDDStress += helpB1;
+    dDCosThetaDDStress += helpC1;
+    dDCosThetaDDStress += helpD1;
+
+    return dDCosThetaDDStress;
+}
+
+
 FloatArrayF< 6 >
 ConcreteDPM2::computeDRhoDStress(const FloatArrayF< 6 > &stress) const
 {
@@ -2646,7 +2976,7 @@ ConcreteDPM2::computeDRhoDStress(const FloatArrayF< 6 > &stress) const
     //compute the derivative of J2 with respect to the stress
     auto dJ2DStress = deviatoricStress;
     for ( int i = 3; i < 6; i++ ) {
-        dJ2DStress [ i ] = deviatoricStress [ i ] * 2.0;
+        dJ2DStress.at(i + 1) = deviatoricStress.at(i + 1) * 2.0;
     }
 
     //compute the derivative of rho with respect to stress
@@ -2662,7 +2992,7 @@ ConcreteDPM2::computeDSigDStress() const
 }
 
 
-FloatMatrixF< 3, 3 >
+FloatMatrixF< 6, 6 >
 ConcreteDPM2::computeDDRhoDDStress(const FloatArrayF< 6 > &stress) const
 {
     //compute volumetric deviatoric split
@@ -2672,27 +3002,27 @@ ConcreteDPM2::computeDDRhoDDStress(const FloatArrayF< 6 > &stress) const
     //compute first dericative of J2
     auto dJ2dstress = deviatoricStress;
     for ( int i = 3; i < 6; i++ ) {
-        dJ2dstress [ i ] = deviatoricStress [ i ] * 2.;
+        dJ2dstress.at(i + 1) = deviatoricStress.at(i + 1) * 2.;
     }
 
     //compute second derivative of J2
-    FloatMatrixF< 3, 3 >ddJ2ddstress;
+    FloatMatrixF< 6, 6 >ddJ2ddstress;
     for ( int i = 0; i < 6; i++ ) {
         if ( i < 3 ) {
-            ddJ2ddstress(i, i) = 2. / 3.;
+            ddJ2ddstress.at(i + 1, i + 1) = 2. / 3.;
         }
 
         if ( i > 2 ) {
-            ddJ2ddstress(i, i) = 2.;
+            ddJ2ddstress.at(i + 1, i + 1) = 2.;
         }
     }
 
-    ddJ2ddstress(0, 1) = -1. / 3.;
-    ddJ2ddstress(0, 2) = -1. / 3.;
-    ddJ2ddstress(1, 0) = -1. / 3.;
-    ddJ2ddstress(1, 2) = -1. / 3.;
-    ddJ2ddstress(2, 0) = -1. / 3.;
-    ddJ2ddstress(2, 1) = -1. / 3.;
+    ddJ2ddstress.at(1, 2) = -1. / 3.;
+    ddJ2ddstress.at(1, 3) = -1. / 3.;
+    ddJ2ddstress.at(2, 1) = -1. / 3.;
+    ddJ2ddstress.at(2, 3) = -1. / 3.;
+    ddJ2ddstress.at(3, 1) = -1. / 3.;
+    ddJ2ddstress.at(3, 2) = -1. / 3.;
 
     return ddJ2ddstress * ( 1. / rho ) + dyad(dJ2dstress, dJ2dstress) * ( -1. / ( rho * rho * rho ) );
 }

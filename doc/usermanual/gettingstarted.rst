@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-To get OOFEM installed on yout system, please follow :ref:`installation` instructions first.
+To get OOFEM installed on your system, please follow :ref:`installation` instructions first.
 
 OOFEM is console application, it should be executed from command line with arguments specifying the path to input file. When no arguments are privided, the help is printed on output.
 
@@ -28,26 +28,26 @@ OOFEM is console application, it should be executed from command line with argum
 
 The problem to be solved is fully described in input file. The structure of input is explained in :ref:`understanding_input` sectiona and fully documented in `OOFEM Input manual <http://www.oofem.org/resources/doc/oofemInput/html/oofemInput.html>`_.
 
-To run oofem with specific input, use ``-f`` option followed by a system path to input file. For illustration, we demonstrate the execution using ``beam2d_1.in`` test which is a part of OOFEM test suite and is located in ``tests/sm`` directory.
+To run oofem with specific input, use ``-f`` option followed by a system path to input file. For illustration, we demonstrate the execution using `beam2d_1.in <https://github.com/oofem/oofem/blob/master/tests/sm/beam2d_1.in>`_ test which is a part of OOFEM test suite and is located in ``tests/sm`` directory.
 
 .. code-block:: bash
 
     $ ./oofem -f /home/user/oofem.git/tests/sm/beam2d_1.in
-        ____________________________________________________
-                    OOFEM - Finite Element Solver
-                Copyright (C) 1994-2017 Borek Patzak
-        ____________________________________________________
-        Computing initial guess
-        
-        StaticStructural :: solveYourselfAt - Solving step 1, metastep 1, (neq = 15)
+    ____________________________________________________
+                OOFEM - Finite Element Solver
+            Copyright (C) 1994-2017 Borek Patzak
+    ____________________________________________________
+    Computing initial guess
+    
+    StaticStructural :: solveYourselfAt - Solving step 1, metastep 1, (neq = 15)
 
-        ...
+    ...
 
-        ANALYSIS FINISHED
+    ANALYSIS FINISHED
 
-        Real time consumed: 000h:00m:00s
-        User time consumed: 000h:00m:00s
-        Total 0 error(s) and 0 warning(s) reported
+    Real time consumed: 000h:00m:00s
+    User time consumed: 000h:00m:00s
+    Total 0 error(s) and 0 warning(s) reported
 
 By default, the text output file with results is created (as specified in input file). In this case, the ``beam2d_1.out`` file is created in the current working directory.
 

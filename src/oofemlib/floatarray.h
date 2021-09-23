@@ -550,23 +550,23 @@ const FloatArray ZeroVector = {0.0,0.0,0.0};
 ///@name IML compatibility
 //@{
 /// Vector multiplication by scalar
-FloatArray &operator *= ( FloatArray & x, const double & a );
-FloatArray operator *( const double & a, const FloatArray & x );
-FloatArray operator *( const FloatArray & x, const double & a );
-FloatArray operator + ( const FloatArray & x, const FloatArray & y );
-FloatArray operator - ( const FloatArray & x, const FloatArray & y );
-FloatArray &operator += ( FloatArray & x, const FloatArray & y );
-FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
+OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
+OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
+OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
 
-double norm(const FloatArray &x);
-double norm_square(const FloatArray &x);
-double dot(const FloatArray &x, const FloatArray &y);
-double distance(const FloatArray &x, const FloatArray &y);
-double distance_square(const FloatArray &x, const FloatArray &y);
-bool isfinite(const FloatArray &x);
-bool iszero(const FloatArray &x);
-double sum(const FloatArray & x);
-double product(const FloatArray & x);
+OOFEM_EXPORT double norm(const FloatArray &x);
+OOFEM_EXPORT double norm_square(const FloatArray &x);
+OOFEM_EXPORT double dot(const FloatArray &x, const FloatArray &y);
+OOFEM_EXPORT double distance(const FloatArray &x, const FloatArray &y);
+OOFEM_EXPORT double distance_square(const FloatArray &x, const FloatArray &y);
+OOFEM_EXPORT bool isfinite(const FloatArray &x);
+OOFEM_EXPORT bool iszero(const FloatArray &x);
+OOFEM_EXPORT double sum(const FloatArray & x);
+OOFEM_EXPORT double product(const FloatArray & x);
 //@}
 } // end namespace oofem
 #endif // floatarray_h

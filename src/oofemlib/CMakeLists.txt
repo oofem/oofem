@@ -176,9 +176,13 @@ set (core_export
     outputexportmodule.C
     errorcheckingexportmodule.C
     vtkexportmodule.C
+    vtkbaseexportmodule.C
     vtkxmlexportmodule.C
+    vtkmemoryexportmodule.C
     vtkxmlperiodicexportmodule.C
     vtkxmllatticeexportmodule.C
+    vtkpfemexportmodule.C
+    vtkxfemexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
@@ -205,6 +209,7 @@ set (core_arrays
 set (core_engng
     engngm.C
     staggeredproblem.C
+    dummyengngm.C
     )
 
 set (core_element
@@ -230,6 +235,7 @@ set (core_fei
     fei2dquadbiquad.C
     fei3dlinelin.C
     fei3dtrlin.C
+    fei3dquadlin.C
     fei3dtrquad.C
     fei3dtetlin.C
     fei3dtetquad.C

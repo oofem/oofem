@@ -3,6 +3,8 @@
 namespace py = pybind11;
 #include <string>
 #include <iostream>
+// for alternative tokens like 'or' 
+#include <ciso646>
 
 #include "oofemtxtdatareader.h"
 #include "classfactory.h"
@@ -11,6 +13,12 @@ namespace py = pybind11;
 #include "outputmanager.h"
 #include "modulemanager.h"
 #include "set.h"
+
+
+#ifdef _MSC_VER 
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
 
 using namespace oofem;
 
@@ -229,6 +237,7 @@ py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("
 py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
+py::object lspace(py::args args, py::kwargs &kw) { return createElementOfType("lspace",args,kw); }
 
 
 
@@ -310,6 +319,8 @@ py::object createMaterialOfType(const char* type, py::args args, py::kwargs kw)
 py::object isoLE(py::args args, py::kwargs kw) { return createMaterialOfType("isole",args,kw); }
 py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm1",args,kw); }
 py::object isoHeat(py::args args, py::kwargs kw) { return createMaterialOfType("isoheat",args,kw); }
+py::object j2mat(py::args args, py::kwargs kw) { return createMaterialOfType("j2mat",args,kw); }
+py::object steel1(py::args args, py::kwargs kw) { return createMaterialOfType("steel1",args,kw); }
 
 
 /*****************************************************
@@ -370,7 +381,7 @@ py::object createExportModuleOfType(const char* type, py::args args, py::kwargs 
 
 py::object vtkxml(py::args args, py::kwargs kw) { return createExportModuleOfType("vtkxml",args,kw); }
 py::object homExport(py::args args, py::kwargs kw) { return createExportModuleOfType("hom",args,kw); }
-
+py::object vtkmemory(py::args args, py::kwargs kw) { return createExportModuleOfType("vtkmemory",args,kw); }
 
 /*****************************************************
 * Sets

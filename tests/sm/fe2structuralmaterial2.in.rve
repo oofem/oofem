@@ -1,0 +1,20 @@
+rvesmall.out
+Small RVE for automatic test.
+StaticStructural nsteps 1 deltat 1.0 rtolv 1.0e-6 MaxIter 40 minIter 2 nmodules 0 manrmsteps 1
+#vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 2dplanestress
+OutputManager
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 1 nxfemman 0
+node 1     coords 3  0        0        0       
+node 2     coords 3  0.01     0        0       
+node 3     coords 3  0.01     0.01     0       
+node 4     coords 3  0        0.01     0       
+planestress2d 1    nodes 4   1   2  3  4  crosssect 1
+SimpleCS 1 thick 1.0 material 1
+#
+#Linear elasticity
+IsoLE 1 d 1.0 E 210.0e9 n 0.3 tAlpha 0.0
+PrescribedGradient 1 dofs 2 1 2 set 1 loadTimeFunction 1 ccoord 3 0.0 0.0 0.0 gradient 3 3 {1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0}
+#
+ConstantFunction 1 f(t) 1.0
+set 1 elementboundaries 8 1 1 1 2 1 3 1 4 

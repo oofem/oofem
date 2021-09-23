@@ -85,6 +85,7 @@
 #define _IFT_MPSMaterial_B4_r_t "b4_r_t"
 #define _IFT_MPSMaterial_B4_cem_type "b4_cem_type"
 #define _IFT_MPSMaterial_temperInCelsius "temperincelsius"
+#define _IFT_MPSMaterial_hydrationTimescaleTF "hydrationtimescaletf"
 //@}
 
 namespace oofem {
@@ -112,7 +113,6 @@ protected:
     /// flag for Emodulus - true if modulus has been already computed in the current time step
     bool storedEmodulusFlag = false;
     double storedEmodulus = -1.;
-
 #ifdef keep_track_of_strains
     double dryingShrinkageStrain = 0.;
     double tempDryingShrinkageStrain = 0.;
@@ -255,6 +255,14 @@ protected:
     /// 0 for Kelvin, 273.15 for Celsius
     double temperScaleDifference = 0.;
 
+    /**
+     * Further scaling of creep, shrinkage, tensile strength etc. with regards to this time function.
+     * Let us assume two hydrating cements with different kinetics. If the fast cement is a reference one,
+     * the simulation of the slow one is carried out on the reference cement and scaling by 
+     * this time function, which is then ≤1. Results from isothermal calorimetry are typically used for
+     * defining this function.
+     */
+    int hydrationTimescaleTF;
 
 
 
