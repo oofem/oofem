@@ -50,11 +50,11 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-LatticeStructuralMaterial :: LatticeStructuralMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+LatticeStructuralMaterial::LatticeStructuralMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
 
 
 bool
-LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
+LatticeStructuralMaterial::hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -63,9 +63,9 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 void
-LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *tStep)
+LatticeStructuralMaterial::giveStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode rMode,
+                                               GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -75,10 +75,10 @@ LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 
 
 int
-LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
-                                         GaussPoint *gp,
-                                         InternalStateType type,
-                                         TimeStep *atTime)
+LatticeStructuralMaterial::giveIPValue(FloatArray &answer,
+                                       GaussPoint *gp,
+                                       InternalStateType type,
+                                       TimeStep *atTime)
 {
     auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
@@ -89,13 +89,13 @@ LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
         answer = status->giveLatticeStrain();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial::giveIPValue(answer, gp, type, atTime);
     }
 }
 
 
 double
-LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep)
+LatticeStructuralMaterial::giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArrayF< 6 >tempStrain;
     tempStrain [ 0 ] = strain;
@@ -104,20 +104,28 @@ LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, 
 }
 
 FloatArrayF< 3 >
-LatticeStructuralMaterial :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
+LatticeStructuralMaterial::giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
     auto answer = giveLatticeStress3d(assemble< 6 >(strain, { 0, 1, 5 }), gp, tStep);
     return answer [ { 0, 1, 5 } ];
 }
 
 FloatArrayF< 6 >
-LatticeStructuralMaterial :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
+LatticeStructuralMaterial::giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("3dLattice mode not supported");
 }
 
+FloatArrayF< 6 >
+LatticeStructuralMaterial::giveFrameForces3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("3dFrame mode not supported");
+}
+
+
+
 FloatMatrixF< 1, 1 >
-LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+LatticeStructuralMaterial::give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 1dlattice
 //
@@ -126,7 +134,7 @@ LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, 
 }
 
 FloatMatrixF< 3, 3 >
-LatticeStructuralMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+LatticeStructuralMaterial::give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
 //
@@ -135,7 +143,16 @@ LatticeStructuralMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, 
 }
 
 FloatMatrixF< 6, 6 >
-LatticeStructuralMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+LatticeStructuralMaterial::give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+//
+// return material stiffness matrix for 2dlattice
+//
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+FloatMatrixF< 6, 6 >
+LatticeStructuralMaterial::give3dFrameStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
 //
