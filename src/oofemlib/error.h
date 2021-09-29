@@ -44,6 +44,8 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
+
 
 namespace oofem {
 /** Cause oofem program termination by calling exit. */
@@ -52,13 +54,24 @@ namespace oofem {
     fprintf(stderr, "oofem exit code %d\n", code); \
     exit(code);
 
+
+class RuntimeException : public std::exception
+{
+public:
+    std::string msg;
+
+    RuntimeException(const char* _func, const char* _file, int _line, const char *format, ...);
+    const char* what() const noexcept override;
+};
+
+
 /**
  * Macros for printing errors.
  * This macro can be used only within classes that implement errorInfo function.
  */
 //@{
-#define OOFEM_FATAL(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
-#define OOFEM_ERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
+#define OOFEM_FATAL(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
+#define OOFEM_ERROR(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
 #define OOFEM_WARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__)
 #define OOFEM_SERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
 #define OOFEM_SWARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __func__, __FILE__, __LINE__, __VA_ARGS__)
