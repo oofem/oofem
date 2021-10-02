@@ -491,8 +491,7 @@ The crossSectType keyword can be one from following possibilities
      of cross section using ``midSurf`` parameter (normal and momentum
      forces are then computed with regard to it’s position, by default it is located at average thickness position). 
      The number of integration points per layer can be specified using ``nintegrationpoints`` parameter, default is one integration point. It is also possible to set up different number of integration points per individual layer using ``layerintegrationpoints`` array, where its size should be equal to number of layers configured. The ``layerintegrationspoints`` parameter overrides the ``nitengrationpoints`` setting. The Gauss integration rule is used for setting up integration points in each layer.
-     
-     The optional parameter ``beamshearcoeffxz`` allows to set shear correction factor for 2D beam sections, 
+   | The optional parameter ``beamshearcoeffxz`` allows to set shear correction factor for 2D beam sections, 
      controlling shear effective area used to evaluate shear force (default value is 1.0).
      Elements using this cross section model must implement layered cross section
      extension. For information see element library manual.
