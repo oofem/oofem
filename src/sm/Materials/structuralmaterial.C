@@ -155,7 +155,7 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
     FloatArray answer;
     int SCManrSteps = 10;
     FloatMatrix reducedTangentInverse;
-    for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 100000 iterations.
+    for ( int k = 0; k < SCMaxiter; k++ ) { // Allow for a generous 100000 iterations.
         vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
@@ -224,7 +224,7 @@ StructuralMaterial::giveRealStressVector_ShellStressControl(const FloatArray &st
     // Iterate to find full vE.
     //vE.printYourself("vE");
     FloatArray answer;
-    for ( int k = 0; k < 100000; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < SCMaxiter; k++ ) { // Allow for a generous 100 iterations.
         answer = this->giveRealStressVector_3d(vE, gp, tStep);
         // step 0: answer = full stress vector
         // step n: answer = {., ., ->0, ., ., .}
@@ -369,7 +369,7 @@ StructuralMaterial::giveFirstPKStressVector_StressControl(const FloatArray &redu
 
     // Iterate to find full vF.
     FloatArray answer;
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+    for ( int k = 0; k < SCMaxiter; k++ ) { // Allow for a generous 100 iterations.
         vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
         reducedvP.beSubArrayOf(vP, P_control);
         // Pick out the (response) stresses for the controlled strains
@@ -2392,7 +2392,7 @@ StructuralMaterial::initializeFrom(InputRecord &ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->SCRelTol, _IFT_StructuralMaterial_StressControl_reltol);
     IR_GIVE_OPTIONAL_FIELD(ir, this->SCAbsTol, _IFT_StructuralMaterial_StressControl_abstol);
-    
+    IR_GIVE_OPTIONAL_FIELD(ir, this->SCMaxiter, _IFT_StructuralMaterial_StressControl_maxiter);
 }
 
 

@@ -86,6 +86,7 @@
 #define _IFT_MPSMaterial_B4_cem_type "b4_cem_type"
 #define _IFT_MPSMaterial_temperInCelsius "temperincelsius"
 #define _IFT_MPSMaterial_hydrationTimescaleTF "hydrationtimescaletf"
+#define _IFT_MPSMaterial_autoShrinkageTF "autoshrinkagetf"
 //@}
 
 namespace oofem {
@@ -264,6 +265,11 @@ protected:
      */
     int hydrationTimescaleTF;
 
+    /**
+     * Possibility to prescribe the evolution of autogenous shrinkage strain by an auxiliary time function, the function is evaluated according to the current value of the equivalenet age, i.e. maturity.
+     */
+    int autoShrinkageTF;
+
 
 
 public:
@@ -321,6 +327,9 @@ protected:
 
     /// Evaluation of the autogenousShrinkageStrainVector according to Bazant's B4 model. In the model the evolution depends on temperature adjusted age, here on equivalent age (additional humidity influence)
     void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
+
+   /// Evaluation of the autogenousShrinkageStrainVector given by an auxiliary time function (autoShrinkageTF parameter). The time scale in that time function corresponds to the equivalent material age.
+   void computeAutogenousShrinkageDefinedByTF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     //double inverse_sorption_isotherm(double w) const;
 
