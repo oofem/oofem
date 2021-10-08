@@ -406,6 +406,10 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
         answer.resize(6);
         answer.zero();
         return 1;
+    } else if ( type == IST_FreeEnergyDensity ) {
+        answer.resize(1);
+        answer.at(1) = this->giveEnergyDensity(gp,tStep);
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }

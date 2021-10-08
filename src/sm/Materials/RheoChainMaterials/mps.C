@@ -402,6 +402,9 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
     
     hydrationTimescaleTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, hydrationTimescaleTF, _IFT_MPSMaterial_hydrationTimescaleTF);
+
+    autoShrinkageTF = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, autoShrinkageTF, _IFT_MPSMaterial_autoShrinkageTF);
 }
 
 
@@ -461,12 +464,14 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     }
 #endif
 
-    if ( ( this->eps_cas0 != 0. ) || ( this->b4_eps_au_infty != 0. ) ) {
+    if ( ( this->eps_cas0 != 0. ) || ( this->b4_eps_au_infty != 0. ) || (this->autoShrinkageTF)  ) {
         if ( this->eps_cas0 != 0. ) {
             this->computeFibAutogenousShrinkageStrainVector(eps_as, gp, tStep);
         } else if ( this->b4_eps_au_infty != 0. ) {
             this->computeB4AutogenousShrinkageStrainVector(eps_as, gp, tStep);
-        }
+        } else if ( this->autoShrinkageTF ) {
+	    this->computeAutogenousShrinkageDefinedByTF(eps_as, gp, tStep);
+	}
 
 #ifdef keep_track_of_strains
         if ( eps_as.giveSize() >= 1 ) {
@@ -1275,6 +1280,43 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
     //  t_equiv_beg, t_equiv_end and b4_tau_au are in time-units of the analysis
     double eps_au = b4_eps_au_infty * ( pow(1. + pow(b4_tau_au / t_equiv_end, b4_alpha), b4_r_t) -  pow(1. + pow(b4_tau_au / t_equiv_beg, b4_alpha), b4_r_t) );
 
+    FloatArray fullAnswer(size);
+
+    if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {
+        fullAnswer.at(1) = eps_au;
+    } else {
+        fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = eps_au;
+    }
+
+    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode() );
+}
+
+void
+MPSMaterial :: computeAutogenousShrinkageDefinedByTF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
+{
+    int size;
+    MaterialMode mMode = gp->giveMaterialMode();
+
+    if ( ( mMode == _3dShell ) || ( mMode ==  _3dBeam ) || ( mMode == _2dPlate ) || ( mMode == _2dBeam ) ) {
+        size = 12;
+    } else {
+        size = 6;
+    }
+
+    // is the first time step or the material has been just activated (i.e. the previous time was less than casting time)
+    double t_equiv_beg, t_equiv_end;
+    if ( tStep->isTheFirstStep() ||  ( !Material :: isActivated(tStep->givePreviousStep() ) ) ) {
+        t_equiv_beg = this->relMatAge - tStep->giveTimeIncrement();
+    } else {
+        MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
+        t_equiv_beg = status->giveEquivalentTime();
+    }
+
+    t_equiv_end = this->computeEquivalentTime(gp, tStep, 1);
+    
+    double eps_au = domain->giveFunction(this->autoShrinkageTF)->evaluateAtTime(t_equiv_end);
+    eps_au -= domain->giveFunction(this->autoShrinkageTF)->evaluateAtTime(t_equiv_beg);
+    
     FloatArray fullAnswer(size);
 
     if ( ( mMode ==  _2dLattice ) || ( mMode ==  _3dLattice ) ) {

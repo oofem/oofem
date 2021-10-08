@@ -9,7 +9,7 @@ errorcheck
 #
 domain 3d
 OutputManager tstep_all dofman_all element_all
-ndofman 12 nelem 8 ncrosssect 2 nmat 1 nbc 2 nic 0 nltf 2 nset 3 nxfemman 0
+ndofman 18 nelem 12 ncrosssect 3 nmat 1 nbc 2 nic 0 nltf 2 nset 4 nxfemman 0
 #
 node      1 coords 3  0.00  0.	0. 
 node      2 coords 3  0.50  0.	0. 
@@ -25,25 +25,38 @@ node     14 coords 3  0.00  0.2	0.
 node     15 coords 3  0.50  0.2	0.
 node     16 coords 3  1.00  0.2	0. load 1 2
 #
+node     21 coords 3  0.00  0.	0. 
+node     22 coords 3  0.50  0.	0. 
+node     23 coords 3  1.00  0.	0. load 1 2
+node     24 coords 3  0.00  0.2	0.
+node     25 coords 3  0.50  0.2	0.
+node     26 coords 3  1.00  0.2	0. load 1 2
+#
 tr_shell01 1 nodes 3 1 2 5 nip 4
 tr_shell01 2 nodes 3 5 4 1 nip 4
 tr_shell01 3 nodes 3 2 3 6 nip 4
 tr_shell01 4 nodes 3 6 5 2 nip 4
-
+#
 tr_shell01 11 nodes 3 11 12 15 nip 4
 tr_shell01 12 nodes 3 15 14 11 nip 4
 tr_shell01 13 nodes 3 12 13 16 nip 4
 tr_shell01 14 nodes 3 16 15 12 nip 4
 #
+tr_shell01 21 nodes 3 21 22 25 nip 4
+tr_shell01 22 nodes 3 25 24 21 nip 4
+tr_shell01 23 nodes 3 22 23 26 nip 4
+tr_shell01 24 nodes 3 26 25 22 nip 4
+#
 #CROSS SECTIONS
 SimpleCS 1 thick 0.02 material 1 set 1 drillstiffness 1.0e+09
 LayeredCS 2 nlayers 2 layermaterials 2 1 1 widths 2 1 1 thicks 2  0.01 0.01 nintegrationpoints 2 set 2
+LayeredCS 3 nlayers 2 layermaterials 2 1 1 widths 2 1 1 thicks 2  0.01 0.01 layerintegrationpoints 2  4 2 set 3
 #
 #MATERIALS
 IsoLE 1 d 1. E 1e9 n 0.0 tAlpha 0.
 #
 #BOUNDARY CONDITIONS
-	BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 3
+	BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 4
 	nodalload 2 loadTimeFunction 2 components 6 0. 1.e3 1.e3 0 0 0 
 #
 #FUNCTIONS
@@ -53,7 +66,8 @@ IsoLE 1 d 1. E 1e9 n 0.0 tAlpha 0.
 #SETS
 Set 1 elementranges {(1 4)}
 Set 2 elementranges {(11 14)}
-Set 3 nodes 4 1 4 11 14
+Set 3 elementranges {(21 24)}
+Set 4 nodes 4 1 4 11 14
 #
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check load levels
@@ -69,6 +83,12 @@ Set 3 nodes 4 1 4 11 14
 #NODE tStep 2 number 13 dof 2 unknown d value 1.84651546e-02
 #NODE tStep 2 number 13 dof 3 unknown d value 4.68420501e+00
 #NODE tStep 2 number 13 dof 5 unknown d value -7.47621230e+00
+##
+#NODE tStep 2 number 21 dof 2 unknown d value 0.0
+#NODE tStep 2 number 22 dof 2 unknown d value 5.89140445e-03
+#NODE tStep 2 number 23 dof 2 unknown d value 1.84651546e-02
+#NODE tStep 2 number 23 dof 3 unknown d value 4.68420501e+00
+#NODE tStep 2 number 23 dof 5 unknown d value -7.47621230e+00
 ## check some arbitrary element
 #ELEMENT tStep 2 number 1 gp 1 keyword 10 component 1  value 5.2896226e+04 tolerance 1.e-2
 #ELEMENT tStep 2 number 1 gp 1 keyword 10 component 2  value -6.766454e+03 tolerance 1.e-2
@@ -81,6 +101,12 @@ Set 3 nodes 4 1 4 11 14
 #ELEMENT tStep 2 number 11 gp 1 keyword 10 component 4  value 5.4942e+03 tolerance 1.e-2
 #ELEMENT tStep 2 number 11 gp 1 keyword 10 component 5  value 1.63293101e+04 tolerance 1.e-2
 #ELEMENT tStep 2 number 11 gp 1 keyword 10 component 6  value -1.33521715e+04 tolerance 1.e-2
+#
+#ELEMENT tStep 2 number 21 gp 1 keyword 10 component 1  value 5.2896226e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 10 component 2  value -6.766454e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 10 component 4  value 5.4942e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 10 component 5  value 1.63293101e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 10 component 6  value -1.33521715e+04 tolerance 1.e-2
 ##
 #ELEMENT tStep 2 number 1 gp 1 keyword 9 component 1  value -7.4927e+03 tolerance 1.e-2
 #ELEMENT tStep 2 number 1 gp 1 keyword 9 component 2  value -2.9910e+01 tolerance 1.e-2
@@ -91,6 +117,11 @@ Set 3 nodes 4 1 4 11 14
 #ELEMENT tStep 2 number 11 gp 1 keyword 9 component 2  value -2.9910e+01 tolerance 1.e-2
 #ELEMENT tStep 2 number 11 gp 1 keyword 9 component 3  value  1.10925262e+06 tolerance 1.e-2
 #ELEMENT tStep 2 number 11 gp 1 keyword 9 component 6  value -1.4378e+01 tolerance 1.e-2
+#
+#ELEMENT tStep 2 number 21 gp 1 keyword 9 component 1  value -7.4927e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 9 component 2  value -2.9910e+01 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 9 component 3  value  1.10925262e+06 tolerance 1.e-2
+#ELEMENT tStep 2 number 21 gp 1 keyword 9 component 6  value -1.4378e+01 tolerance 1.e-2
 ##
 #REACTION tStep 2 number 1 dof 2 value 2.25964537e+02 tolerance 1.e-4
 #REACTION tStep 2 number 1 dof 3 value -5.24278057e+02 tolerance 1.e-4
@@ -100,4 +131,8 @@ Set 3 nodes 4 1 4 11 14
 #REACTION tStep 2 number 11 dof 3 value -5.24278057e+02 tolerance 1.e-4
 #REACTION tStep 2 number 14 dof 2 value -2.22596454e+03 tolerance 1.e-4
 #REACTION tStep 2 number 14 dof 3 value -1.47572194e+03 tolerance 1.e-4
+#REACTION tStep 2 number 21 dof 2 value 2.25964537e+02 tolerance 1.e-4
+#REACTION tStep 2 number 21 dof 3 value -5.24278057e+02 tolerance 1.e-4
+#REACTION tStep 2 number 24 dof 2 value -2.22596454e+03 tolerance 1.e-4
+#REACTION tStep 2 number 24 dof 3 value -1.47572194e+03 tolerance 1.e-4
 #%END_CHECK%

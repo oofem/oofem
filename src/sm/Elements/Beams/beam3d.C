@@ -884,8 +884,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
     answer.resize(3);  // {Exx,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
-    answer.at(2) = masterGpStrain.at(2);
-    answer.at(3) = masterGpStrain.at(3);
+    answer.at(2) = masterGpStrain.at(2) + layerYCoord * masterGpStrain.at(4);
+    answer.at(3) = masterGpStrain.at(3) - layerZCoord * masterGpStrain.at(4);
 }
 
 

@@ -237,7 +237,7 @@ public:
      * associated status is called. The same function is also invoked for all available
      * slaves of receiver.
      */
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep, const char* indent="");
     /**
      * Updates internal state of receiver after finishing time step.
      * Material::updateYourself (receiver, tStep) function is called to

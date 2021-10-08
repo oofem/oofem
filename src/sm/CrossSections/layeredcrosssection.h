@@ -56,6 +56,7 @@
 #define _IFT_LayeredCrossSection_widths "widths"
 #define _IFT_LayeredCrossSection_midsurf "midsurf"
 #define _IFT_LayeredCrossSection_nintegrationpoints "nintegrationpoints"
+#define _IFT_LayeredCrossSection_nlayerintegrationpoints "layerintegrationpoints"
 #define _IFT_LayeredCrossSection_initiationlimits "initiationlimits"
 #define _IFT_LayeredCrossSection_shearcoeff_xz "beamshearcoeffxz"
 //@}
@@ -99,7 +100,8 @@ protected:
     FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
     FloatArray layerRots;   ///< Rotation of the material in each layer.
     int numberOfLayers = 0;
-    int numberOfIntegrationPoints = 1; ///< num integration points per layer
+    int numberOfIntegrationPoints = 1; ///< number of integration points per layer (for 3D elements)
+    IntArray layerIntegrationPoints;
     double midSurfaceZcoordFromBottom = 0.;
     double midSurfaceXiCoordFromBottom = 0.;
     double totalThick = 0.;
@@ -260,7 +262,9 @@ public:
     { OOFEM_ERROR("not implemented"); }
 
 protected:
-    double giveArea() const;
+  double giveArea() const;
+  int giveSlaveGPIndex (int ilayer, int igp) const;
+
 };
 
 /**

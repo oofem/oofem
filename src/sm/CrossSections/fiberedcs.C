@@ -256,7 +256,7 @@ FiberedCrossSection :: give3dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp
 // 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
 //
 {
-    double Ip = 0.0, A = 0.0, Ik, G = 0.0;
+    double GIp = 0.0;
 
     FloatMatrixF<6,6> beamStiffness;
 
@@ -285,19 +285,13 @@ FiberedCrossSection :: give3dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp
         beamStiffness.at(3, 3) += fiberMatrix.at(3, 3) * fiberWidth * fiberThick;
 
         // 2) bending terms mx, my, mz
-
-        Ip += fiberWidth * fiberThick * fiberZCoord2 + fiberWidth * fiberThick * fiberYCoord2;
-        A  += fiberWidth * fiberThick;
-        G  = fiberMatrix.at(2, 2) * fiberWidth * fiberThick;
+        // G*Ik
+        beamStiffness.at(4,4) += fiberMatrix.at(2, 2)*(fiberWidth * fiberThick * fiberZCoord2 + fiberWidth * fiberThick * fiberYCoord2);
 
         beamStiffness.at(5, 5) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberZCoord2;
         beamStiffness.at(6, 6) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberYCoord2;
     }
 
-    ///@todo This must be wrong, it will use the last evaluated G (from the last fiber), outside the loop. FIXME!
-    G /= A;
-    Ik = A * A * A * A / ( 40.0 * Ip );
-    beamStiffness.at(4, 4) = G * Ik;
     return beamStiffness;
 }
 
