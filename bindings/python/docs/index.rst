@@ -16,6 +16,8 @@ Welcome to OOFEM Python bindings documentation!
    advanced/buildingproblem
    advanced/customclasses
 
+   postprocessing
+
 Indices and tables
 ==================
 

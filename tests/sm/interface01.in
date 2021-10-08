@@ -16,7 +16,7 @@ Interface1d 2   nodes 2   4 5  normal 2 1. 0.
 SimpleCS 1 thick 0.1 material 1
 InterfaceCS 2 thickness 0.1 material 2 set 4
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6
-simpleintermat 2 kn 1.e+3 fc 1.0 stiffcoeff 0.2
+simpleintermat 2 kn 1.e+3 fc 1.0 stiffcoeff 0.2 regularized 0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 1
 BoundaryCondition 2 loadTimeFunction 2 dofs 1 1 values 1 0.01 set 2
 BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3

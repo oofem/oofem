@@ -4081,7 +4081,7 @@ Note that the effective element size $h$ is obtained by projecting the element.
 For instance, if the element is a cube of edge length 100 mm, its effective
 size in the direction of the body diagonal can be 173 mm. 
 
-\subsubsection{CDPM2}
+\subsubsection{Damage-plastic model for concrete - CDPM2}
 
 This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
 CDPM2 has been developed by Grassl and coworkers for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
@@ -4467,7 +4467,7 @@ The dynamic increase factor (DIF) for strength is computed according to Model Co
 
 The {\bf parameters of CDPM2} for OOFEM input file are summarised in Tab.~\ref{cdpm2_table}.
 By default, two damage variables are used, i.e., the effective stress is transformed into
-nominal stress using equation (\ref{cdpm2:efftonominal}). If parameter {\em isoflag} is set to 1,
+nominal stress using equation (\ref{cdpm2:efftonominal}). If parameter {\em damflag} is set to 3,
 only $\omega_t$ is used and the effective stress is reduced by $1-\omega_t$.
 
 
@@ -4480,7 +4480,7 @@ only $\omega_t$ is used and the effective stress is reduced by $1-\omega_t$.
 \hline
 Description & CDPM2\\
 \hline
-Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{isoflag}{in}] [\elemparam{sratetype}{in}] \elemparam{eratetype}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
+Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{damflag}{in}] [\elemparam{sratetype}{in}] \elemparam{eratetype}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
 Parameters &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
@@ -4507,7 +4507,7 @@ Parameters &- \param{d} material density\\
 &- \param{helem} element size $h$, optional (if not specified, the actual element size is used)\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
-&- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
+&- \param{damflag} flag which allows for the use of different damage formulations. Default value is 1. If set to zero, no damage is used. If set to 3, only the tensile damage varialbe is used.\\
 &- \param{sratetype}  Dynamic increase factor (DIF) for strength
 \begin{itemize}\setlength{\itemsep}{-3pt}
 \item[0 -] DIF = 1  (no rate effect)
@@ -5459,7 +5459,8 @@ This model provides a simple interface law with penalty-type contact and frictio
 In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
 By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
 in the sense of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
-of the gap can be allowed.
+of the gap can be allowed. 
+
 The shear response is elastoplastic, with the yield limit dependent on the normal traction. Crosssection's width, height or area have no influence on the results.
 The magnitude of the shear traction $\vsig_T$ must not exceed the yield limit computed 
 according to a Coulomb-like friction law as the product of the (negative part of)
@@ -5469,6 +5470,15 @@ according to a Coulomb-like friction law as the product of the (negative part of
 \end{equation}
 $\sigma_N$ is computed multiplying a known normal strain and a known stiffness in 
 tension or in compression.
+
+If \param{regularized} is set to true, the regularized version of the model is used. The regularization parameter \param{m} allows to controll, how close to original formulation the  regularized model is. The defaukt value is 15, the higher value the closer resposes are. The regularized version has following form:
+\begin{eqnarray}
+\sigma_N &=& 0.5 k_n(\delta_0+\delta_n)-
+            \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n))|)+\\
+         &+&c\left(0.5 k_n(\delta_0+\delta_n)+
+            \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n)))|)\right)
+\end{eqnarray}
+where $c$ is ratio of tensile/compressive stiffness (\param{stiffcoeff}), $\delta_0$ normal clearance, $\delta_n$ normal strain (jump), and $m$ denoting the regularization coefficient. Consistent tangent stiffness is computed by differentiating the above relation.
 
 The shear elastic stiffness is assumed to be \param{kn} (i.e., equal to the
 normal stiffness). If the normal traction is tensile
@@ -5492,6 +5502,8 @@ Parameters &- \param{} material number\\
 &- \param{fc} friction coefficient\\
 &- \param{stiffcoeff} ratio (tensile stiffness / compression stiffness)\\
 &- \param{normalClearance} free distance within element\\
+&- \param{regularized} when true use regularized formulation (Default is False)\\
+&- \param{m} regularization coefficient $m$ (default value is 15)\\
 
 Supported modes& \_1dInterface\\
 \hline
@@ -5969,13 +5981,13 @@ relaxation.
 \hline
 Description & SteelRelaxMat model for relaxation of prestressing reinforcement\\
 \hline
-Record Format & \descitem{SteelRelaxMat}  
+Record Format & \descitem{SteelRelaxMat}
 \elemparam{d}{rn}
 \elemparam{E}{rn}
 \elemparam{reinfClass}{in}
 \optelemparam{timeFactor}{rn}
-\elemparam{charStrength}{rn} 
-\elemparam{approach}{in} 
+\elemparam{charStrength}{rn}
+\elemparam{approach}{in}
 \optelemparam{k1}{rn}
 \optelemparam{k2}{rn}
 \optelemparam{rho1000}{rn}
@@ -6013,6 +6025,53 @@ Supported modes& 1dMat\\
 \label{steelRelax_table}
 %\end{center}
 \end{table}
+
+
+
+\subsection{User-defined material models using MFront}
+A user-defined material created with MFront can be used if MGIS is installed
+\newline
+(https://github.com/thelfer/MFrontGenericInterfaceSupport) and linked to OOFEM with cmake before the compilation.
+Run cmake with following flags and specify the location of the MGIS cmake files:
+\newline
+\verb|-DUSE_MFRONT=ON -DMFrontGenericInterface_DIR=/path/to/mgis/cmake/|
+\newline
+Once OOFEM is compiled with this setting, the file /tests/smmfront/mfront01.in will be included in the tests.
+It requires the file
+\newline
+/tests/smmfront/plasticityIsotropicLinearHardeningPlasticity.mfront to be processed by MFront before the tests are run.
+\newline
+See /tests/smmfront/readme_install.txt for more detailed instructions.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & MFrontUserMaterial allows use of user-defined material models based on MFront\\
+\hline
+Record Format & \descitem{MFrontUserMaterial}
+\elemparam{d}{rn}
+\elemparam{modelname}{s}
+\elemparam{libpath}{s}
+\elemparam{properties}{dc}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} specific weight\\
+&- \param{modelname} name of the material model from the shared library to be used \\
+&- \param{libpath} path to the shared library of the material created with MFront \\
+&- \param{properties} are not used now, which yields in "properties~0" on input for now \\
+
+Supported modes& 3dMat\\
+\hline
+\end{mmt}
+\caption{MFrontUserMaterial material model -- summary.}
+\label{MFrontUserMaterial_table}
+%\end{center}
+\end{table}
+
+
+
+
+
 
 
 \clearpage

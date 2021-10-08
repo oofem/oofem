@@ -12,7 +12,7 @@ from numpy.core.defchararray import splitlines
 
 if __name__=='__main__':
     helpmsg=""" 
-Usage: unv2oofem.py unvfile ctrlfile oofemfile auxiliaryFile
+Usage: unv2oofem.py unvfile ctrlfile oofemfile
 
 What it does: read unvfile, create an internal FEM object structure
               in memory and writes the oofem native input file
@@ -92,11 +92,6 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         CTRL.parse(FEM)
         print ("done")
         # write files in native oofem format
-
-        for sets in FEM.nodesets:
-            if sets.name.startswith('OOFEM-Hanging'):
-                print("Found group of HANGING nodes, assigning them")
-
 
         print ('Writing oofem file %s' % sys.argv[3])
         # write oofem header
@@ -204,20 +199,15 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         
         #write nodes
         for node in FEM.nodes:
-            #resolve nodal properties
-            hangNodes = {}
-            for sets in FEM.nodesets:
-                if sets.name.startswith('OOFEM-Hanging'):
-                    for key in sets.items:
-                        hangNodes[key] = ''
+            hanging = False
+            for igroup in node.oofem_groups:
+                if (igroup.oofem_hangingNode):
+                    hanging = True  
             
-            outputLine="%s %-5d coords %-2d" % ('hangingNode' if node.id in hangNodes else 'node', node.id, len(node.coords))
+            outputLine="%s %-5d coords %-2d" % ('hangingNode' if hanging else 'node', node.id, len(node.coords))
             
             for coord in node.coords:
                 outputLine+= "% -8g " % coord
-            
-            if node.id in hangNodes:
-                outputLine+= "dofType %d %s" % (len(node.coords), ' 2 2 ' if len(node.coords) == 2 else ' 2 2 2 ') 
             
             properties=""
            

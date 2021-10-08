@@ -52,7 +52,7 @@ After the definition, we can directly use the MyFunc class in the problem setup:
     problem.terminateAnalysis()
     print("\nProblem solved")
 
-Follow https://github.com/oofem/oofem/blob/master/bindings/python/test_3.py for a full example.
+Follow https://github.com/oofem/oofem/blob/master/bindings/python/tests/test_3.py for a full example.
 
 Custom element
 --------------
@@ -117,7 +117,7 @@ The element can again added into domain and used from oofem
     elems = (e1,)
     ...
 
-You can follow https://github.com/oofem/oofem/blob/master/bindings/python/test_3.py for a complete illustration.
+You can follow https://github.com/oofem/oofem/blob/master/bindings/python/tests/test_3.py for a complete illustration.
 
 Custom material
 ---------------
@@ -161,5 +161,5 @@ Each matteril model must define its material status contatining its internal sta
         return gp.giveMaterialStatus() 
         
 
-You can follow https://github.com/oofem/oofem/blob/master/bindings/python/test_4.py for a complete illustration.
+You can follow https://github.com/oofem/oofem/blob/master/bindings/python/tests/test_4.py for a complete illustration.
 

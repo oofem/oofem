@@ -222,6 +222,7 @@ public:
      * @return Slave gp.
      */
     GaussPoint *giveSlaveGaussPoint(int index);
+    std::vector< GaussPoint * > &giveSlaveGaussPoints() {return this->gaussPoints;}
 
     /**
      * True if gauss point has slave points. Otherwise false.
@@ -236,7 +237,7 @@ public:
      * associated status is called. The same function is also invoked for all available
      * slaves of receiver.
      */
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep, const char* indent="");
     /**
      * Updates internal state of receiver after finishing time step.
      * Material::updateYourself (receiver, tStep) function is called to

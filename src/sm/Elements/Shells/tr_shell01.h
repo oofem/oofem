@@ -108,6 +108,7 @@ public:
     // the membrane and plate irules are same (chacked in initializeFrom)
     int giveDefaultIntegrationRule() const override { return plate->giveDefaultIntegrationRule(); }
     IntegrationRule *giveDefaultIntegrationRulePtr() override { return plate->giveDefaultIntegrationRulePtr(); }
+  IntegrationRule *giveIntegrationRule(int i) override { return plate->giveIntegrationRule(i); }
     Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
     integrationDomain giveIntegrationDomain() const override { return _Triangle; }
     MaterialMode giveMaterialMode() override { return _Unknown; }

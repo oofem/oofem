@@ -65,11 +65,11 @@ GaussPoint::~GaussPoint()
 }
 
 
-void GaussPoint :: printOutputAt(FILE *file, TimeStep *tStep)
+  void GaussPoint :: printOutputAt(FILE *file, TimeStep *tStep, const char* indent)
 {
     int iruleNumber = irule ? irule->giveNumber() : 0;
 
-    fprintf(file, "  GP %2d.%-2d :", iruleNumber, number);
+    fprintf(file, "%s  GP %2d.%-2d :", indent, iruleNumber, number);
 
     IntegrationPointStatus *status = this->giveMaterialStatus();
     if ( status ) {
@@ -77,12 +77,12 @@ void GaussPoint :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     if ( gaussPoints.size() != 0 ) { // layered material
-        fprintf(file, "Layers report \n{\n");
+        fprintf(file, "\tLayers report {\n");
         for ( auto &gp: gaussPoints ) {
-            gp->printOutputAt(file, tStep);
+          gp->printOutputAt(file, tStep, "\t\t");
         }
 
-        fprintf(file, "} end layers report\n");
+        fprintf(file, "\t} end layers report\n");
     }
 }
 

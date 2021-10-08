@@ -303,6 +303,17 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, " %.4e %.4e %.4e %.4e %.4e %.4e ",
                 v.at(1), v.at(2), v.at(3), v.at(4), v.at(5), v.at(6) );
 
+        if ( gp->hasSlaveGaussPoint()) { // layered material
+          fprintf(file, "\n              Layers report {\n");
+          
+          for (auto &sgp: gp->giveSlaveGaussPoints()) {
+            sgp->printOutputAt(file, tStep, "            ");
+          }
+          fprintf(file, "             }\n");
+          
+        }
+
+
         fprintf(file, "\n");
     }
 }

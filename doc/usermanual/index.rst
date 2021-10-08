@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to OOFEM User Manual!
+Welcome to OOFEM User Manual
 ===============================================
 
 .. toctree::
@@ -14,6 +14,8 @@ Welcome to OOFEM User Manual!
    installation
    gettingstarted
    understandinginput 
+   understandingoutput
+   postprocessing
    
 
   

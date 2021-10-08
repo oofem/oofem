@@ -191,17 +191,24 @@ Logger :: writeELogMsg(logLevelType level, const char *_func, const char *_file,
 
     if  ( level <= this->logLevel ) {
         if ( _file ) {
-            fprintf(stream, "%s\n%s: (%s:%d)\n", LOG_ERR_HEADER, giveLevelName(level), _file, _line);
+            fprintf(stream, "%s\n%s:", LOG_ERR_HEADER, giveLevelName(level));
         } else {
-            fprintf(stream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
-        }
-        if ( _func ) {
-            fprintf(stream, "In %s:\n", _func );
+            fprintf(stream, "%s\n%s:", LOG_ERR_HEADER, giveLevelName(level));
         }
 
         va_start(args, format);
         vfprintf(stream, format, args);
         va_end(args);
+        fprintf(stream, "\n");    
+
+        if ( _func ) {
+            fprintf(stream, "In %s ", _func );
+        }
+
+        if ( _file ) {
+            fprintf(stream, "(%s:%d)", _file, _line);
+        } 
+
         fprintf(stream, "\n%s", LOG_ERR_TAIL);
     }
 

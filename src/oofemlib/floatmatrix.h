@@ -420,8 +420,9 @@ public:
     /**
      * Modifies receiver to become inverse of given parameter. Size of receiver will be adjusted.
      * @param src Matrix to be inverted.
+     * @return False if K is singular, otherwise true.
      */
-    void beInverseOf(const FloatMatrix &src);
+    bool beInverseOf(const FloatMatrix &src);
     /**
      * Solves the  system of linear equations @f$ K\cdot a = b @f$ . Uses Gaussian elimination with pivoting directly on receiver.
      * @param b RHS of linear system.
@@ -436,7 +437,7 @@ public:
      * @param answer Solution of linear equations, each column corresponding to columns in B.
      * @param transpose Solves for the transpose of K.
      */
-    void solveForRhs(const FloatMatrix &B, FloatMatrix &answer, bool transpose = false);
+    bool solveForRhs(const FloatMatrix &B, FloatMatrix &answer, bool transpose = false);
     /**
      * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
      * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the

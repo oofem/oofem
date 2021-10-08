@@ -29,6 +29,25 @@ if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE Debug)
 endif ()
 
+function(add_git_submodule dir)
+# add a Git submodule directory to CMake, assuming the
+# Git submodule directory is a CMake project.
+#
+# Usage: in CMakeLists.txt
+# 
+# include(AddGitSubmodule.cmake)
+# add_git_submodule(mysubmod_dir)
+  find_package(Git REQUIRED)
+  if(NOT EXISTS ${dir}/CMakeLists.txt)
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- ${dir}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      #COMMAND_ERROR_IS_FATAL ANY #cmake 3.19
+      )
+  endif()
+  add_subdirectory(${dir})
+endfunction(add_git_submodule)
+
+
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
@@ -79,6 +98,7 @@ set (PYBIND_DIR CACHE PATH "Manual pybind11 directory")
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_SHARED_LIB "Build shared library" ON)
+option (USE_MFRONT "Build shared library" OFF)
 
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -484,13 +504,13 @@ if (USE_PYTHON_EXTENSION OR USE_BOOSTPYTHON_BINDINGS)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
     #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
     #Print if set up manually
-    message(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
-    message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
-    message(STATUS "PYTHON_INCLUDE_DIR = ${PYTHON_INCLUDE_DIR}")     
+    message(STATUS "PYTHON_LIBRARY = ${Python_LIBRARIES}")
+    message(STATUS "PYTHON_EXECUTABLE = ${Python_EXECUTABLE}")
+    message(STATUS "PYTHON_INCLUDE_DIR = ${Python_INCLUDE_DIR}")     
     find_package(PythonInterp "3" REQUIRED)
-    find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
-    include_directories (${PYTHON_INCLUDE_DIRS})
-    list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
+    find_package(PythonLibs "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}" REQUIRED)
+    include_directories (${Python_INCLUDE_DIRS})
+    list (APPEND EXT_LIBS ${Python_LIBRARIES})
     list (APPEND MODULE_LIST "Python")
     if(USE_PYTHON_EXTENSION)
         add_definitions(-D_PYTHON_EXTENSION)    
@@ -498,7 +518,7 @@ if (USE_PYTHON_EXTENSION OR USE_BOOSTPYTHON_BINDINGS)
     
     if(USE_BOOSTPYTHON_BINDINGS)
         # require boost_python also for python stuff by itself
-        find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
+        find_package(Boost COMPONENTS "python-py${Python_VERSION_MAJOR}${Python_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
         list (APPEND EXT_LIBS ${Boost_LIBRARIES})
         add_definitions(-D_BOOSTPYTHON_BINDINGS)
@@ -515,23 +535,26 @@ endif()
 
 if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
-    find_package(PythonInterp 3.0 REQUIRED)
-    find_package(pybind11 REQUIRED CONFIG)
+    find_package(Python COMPONENTS Interpreter Development)
+    #find_package(pybind11 CONFIG)
+    add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
     endif ()
+    include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
+    list (APPEND EXT_LIBS ${Python_LIBRARIES})
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
     set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
     # Make sure pytest is found or produce a fatal error
     if(NOT PYTEST_FOUND)
-        execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
+        execute_process(COMMAND ${Python_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
                         RESULT_VARIABLE pytest_not_found OUTPUT_VARIABLE pytest_version ERROR_QUIET)
         if(pytest_not_found)
             message(FATAL_ERROR "Running the tests requires pytest. Please install it manually"
-                    " (try: ${PYTHON_EXECUTABLE} -m pip install pytest)")
+                    " (try: ${Python_EXECUTABLE} -m pip install pytest)")
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
     add_definitions(-D_PYBIND_BINDINGS)
@@ -584,6 +607,7 @@ if (USE_BOOSTPYTHON_BINDINGS)
     set (oofempy ${oofem_SOURCE_DIR}/bindings/Deprecated/python/oofemlib.cpp)
 endif ()
 
+
 # Main targets
 if (USE_SHARED_LIB)
     add_library (liboofem
@@ -634,6 +658,11 @@ else ()
 endif ()
 
 install (TARGETS oofem DESTINATION bin)
+
+if (USE_MFRONT)
+    find_package (MFrontGenericInterface REQUIRED)
+    target_link_libraries(oofem mgis::MFrontGenericInterface)
+endif ()
 
 if (USE_OOFEG)
     #  OOFEG target:
@@ -801,6 +830,13 @@ if (USE_FM AND USE_PFEM)
     endforeach (case)
 endif()
 
+if (USE_SM AND USE_MFRONT)
+    file (GLOB smmfront_tests RELATIVE "${oofem_TEST_DIR}/smmfront" "${oofem_TEST_DIR}/smmfront/*.in")
+    foreach (case ${smmfront_tests})
+        add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/smmfront COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
 
 ######################## Benchmarks ########################################
 
@@ -860,7 +896,7 @@ endif ()
 
 ######################## Tests of Python bindings ########################################
 if (USE_PYBIND_BINDINGS)
-    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python COMMAND ${PYTHON_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python)
+    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python COMMAND ${Python_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python)
     set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}")
 endif()
 

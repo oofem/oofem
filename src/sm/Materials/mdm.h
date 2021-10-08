@@ -309,7 +309,7 @@ protected:
     void applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals) const;
     void transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp) const;
     void computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC,
-                                GaussPoint *gp, TimeStep *tStep) const;
+                                GaussPoint *gp, TimeStep *tStep) ;
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode, GaussPoint *gp,
                                      TimeStep *tStep) const;

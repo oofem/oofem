@@ -42,7 +42,7 @@ namespace oofem {
 REGISTER_Material(HydratingConcreteMat);
 
 HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d){ }
-
+        
 void
 HydratingConcreteMat :: initializeFrom(InputRecord &ir)
 {
@@ -135,9 +135,12 @@ HydratingConcreteMat :: initializeFrom(InputRecord &ir)
     densityType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, densityType, _IFT_HydratingConcreteMat_densitytype);
 
-
     reinforcementDegree = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_HydratingConcreteMat_reinforcementDegree);
+    
+    timeToSeconds = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, timeToSeconds, _IFT_HydratingConcreteMat_timeToSeconds);
+    
 }
 
 // returns hydration power [W/m3 of concrete]
@@ -335,7 +338,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
             ms->degreeOfHydration = alphaTrialNew;
         }
     
-    } else if ( this->hydrationModelType == 3 ) { //Rahimi-Aghdam's model  
+    } else if ( this->hydrationModelType == 3 ) { //Rahimi-Aghdam's model, still unfinished  
         double RH=0.99;//ToDo - relative humidity in pore checking from registered fields
         double hStar = 0.88;
         double cf = 0.;
@@ -443,7 +446,7 @@ double HydratingConcreteMat :: scaleTemperature(GaussPoint *gp) const
 
 double HydratingConcreteMat :: affinity25(double DoH) const
 {
-    double result =  this->B1 * ( this->B2 / this->DoHInf + DoH ) * ( this->DoHInf - DoH ) * exp(-this->eta * DoH / this->DoHInf);
+    double result =  this->B1 *timeToSeconds* ( this->B2 / this->DoHInf + DoH ) * ( this->DoHInf - DoH ) * exp(-this->eta * DoH / this->DoHInf);
     if ( result < 0. ) { //numerical instabilities
         return 0.;
     }

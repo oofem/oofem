@@ -1,0 +1,21 @@
+eigen02_beam3d.out
+Test of json interface
+eigenvaluedynamic nroot 2 smtype 0 stype 1 rtolv 1e-008
+domain 3dShell
+dofman_all element_all tstep_all
+nbc 2 ncrosssect 1 ndofman 2 nelem 1 nic 0 nltf 1 nmat 1 nset 1
+node 1 coords 3 -1000 0 0 load 0
+node 2 coords 3  0 0 0 
+beam3d 1 crosssect 1 mat 1 zaxis 3 0 0 -1 bodyloads 1 2 boundaryloads 0 dofstocondense 0 nodes 2 1 2
+simplecs 1 material 1 area 692.67374207 beamshearcoeff 0.56 ik 553293.9663 iy 276646.9832 iz 276646.9832 thick 60.3 width 60.3
+isole 1 d 7.85e-006 e 2.03395e+008 n 0.3 talpha 1.15e-005
+boundarycondition 1 loadtimefunction 1 set 1 values 6 0 0 0 0 0 0 dofs 6 1 2 3 4 5 6
+deadweight 2 loadtimefunction 1 components 6 0 -9.81 0 0 0 0
+constantfunction 1 f(t) 1
+set 1 nodes 1 1
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check eigen values
+#EIGVAL tStep 1 EigNum 1 value 1.28195811e+05
+#EIGVAL tStep 1 EigNum 2 value 1.28195811e+05
+#%END_CHECK%

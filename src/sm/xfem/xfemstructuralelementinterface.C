@@ -1632,7 +1632,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
 
     // Export nodal variables from primary fields
-    vtkPieces [ 0 ].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPieces [ 0 ].setNumberOfPrimaryVarsToExport(primaryVarsToExport, numTotalNodes);
 
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -1769,7 +1769,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
 
                     FloatArray valuearray = u;
-                    vtkPieces [ 0 ].setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
+                    vtkPieces [ 0 ].setPrimaryVarInNode(type, nodesPassed, valuearray);
                 } else {
                     // TODO: Implement
                     printf("fieldNum: %d\n", fieldNum);
@@ -1782,10 +1782,10 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
 
     // Export nodal variables from internal fields
-    vtkPieces [ 0 ].setNumberOfInternalVarsToExport(0, numTotalNodes);
+    vtkPieces [ 0 ].setNumberOfInternalVarsToExport(internalVarsToExport, numTotalNodes);
 
 
-    vtkPieces [ 0 ].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPieces [ 0 ].setNumberOfCellVarsToExport(cellVarsToExport, numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
 
@@ -1819,7 +1819,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                 }
             }
 
-            vtkPieces [ 0 ].setCellVar(i, triInd, averageVoigt);
+            vtkPieces [ 0 ].setCellVar(type, triInd, averageVoigt);
         }
     }
 

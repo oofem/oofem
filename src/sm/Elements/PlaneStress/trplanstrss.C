@@ -59,7 +59,8 @@ TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     ZZErrorEstimatorInterface(this),
-    HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface(),
+    LayeredCrossSectionInterface()
 {
     numberOfDofMans  = 3;
     area = -1;
@@ -83,6 +84,8 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
+    } else if ( interface == LayeredCrossSectionInterfaceType ) {
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -533,5 +536,12 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
 }
+
+void
+TrPlaneStress2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+{
+  answer=masterGpStrain;
+}
+
 
 } // end namespace oofem

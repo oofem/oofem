@@ -39,6 +39,7 @@
 #include "problemmode.h"
 
 #include <memory>
+#include <cstdio>
 
 namespace oofem {
 class DataReader;

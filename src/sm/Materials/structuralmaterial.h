@@ -51,6 +51,10 @@
 //@{
 #define _IFT_StructuralMaterial_referencetemperature "referencetemperature"
 #define _IFT_StructuralMaterial_talpha "talpha"
+#define _IFT_StructuralMaterial_StressControl_stiffmode "scstiffmode"
+#define _IFT_StructuralMaterial_StressControl_reltol "screltol"
+#define _IFT_StructuralMaterial_StressControl_abstol "scabstol"
+#define _IFT_StructuralMaterial_StressControl_maxiter "maxiter"
 //@}
 
 namespace oofem {
@@ -118,6 +122,14 @@ class OOFEM_EXPORT StructuralMaterial : public Material
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
     double referenceTemperature = 0.;
+    /// stifness mode used in stress control
+    MatResponseMode SCStiffMode = TangentStiffness; // tangent
+    /// relative tolerance for stress control
+    double SCRelTol = 1.e-3;  // relative stress control tolerance
+    /// absolute stress tolerance for stress control
+    double SCAbsTol = 1.e-12;
+    /// maximum iterations for stress-control 
+    int SCMaxiter = 100000;
 
 public:
     /// Voigt index map
