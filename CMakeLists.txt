@@ -62,6 +62,8 @@ else ()
 endif ()
 
 set (CMAKE_CXX_STANDARD 17)
+option (CMAKE_UNITY_BUILD "Combine multiple compilation units to speed up build times" FALSE)
+set (CMAKE_UNITY_BUILD_BATCH_SIZE 8 CACHE STRING "How many cpp files should be combined together")
 
 set (CMAKE_CXX_FLAGS_DEBUG "-DDEBUG ${CMAKE_CXX_FLAGS_DEBUG}")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
