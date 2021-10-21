@@ -65,7 +65,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(VM_RhsIncremental, 6)     \
     ENUM_ITEM_WITH_VALUE(VM_RhsInitial, 7)         \
     ENUM_ITEM_WITH_VALUE(VM_Intermediate, 8)       \
-    ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)
+    ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)     \
+    ENUM_ITEM_WITH_VALUE(VM_Residual, 99)
+
       
 
 /**
