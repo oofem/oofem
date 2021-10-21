@@ -330,6 +330,8 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     if ( this->nMethod->referenceLoad() ) {
         // This check is pretty much only here as to avoid unnecessarily trying to integrate all the loads.
         referenceForces.resize(neq);
+        referenceForces.zero();
+        
         this->assembleVector(referenceForces, tStep, ReferenceForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(di) );
         this->updateSharedDofManagers(referenceForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
