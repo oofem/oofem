@@ -247,7 +247,7 @@ int giveInternalStateTypeSize(InternalStateValueType valType)
 
 InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
-    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField || type == MacroSlipVector ) {
+    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField || type == MacroSlipVector || type == ResidualForce ) {
         return ISVT_VECTOR;
     } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {
         return ISVT_SCALAR;
