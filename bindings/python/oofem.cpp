@@ -55,6 +55,8 @@ namespace py = pybind11;
 #include "element.h"
 #include "Elements/structuralelement.h"
 #include "datastream.h"
+#include "timediscretizationtype.h"
+#include "statecountertype.h"
 
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
@@ -114,10 +116,16 @@ void test (oofem::Element& e) {
 /*
     Trampoline classes
 */
-template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
+template <class FemComponentBase = oofem::FEMComponent> class PyFemComponent : public FemComponentBase {
+    using FemComponentBase::FemComponentBase;
+};
+
+
+template <class ElementBase = oofem::Element> class PyElement : public PyFemComponent<ElementBase> {
+//template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
         // inherit the constructor
 public:
-        using ElementBase::ElementBase;
+        using PyFemComponent<ElementBase>::PyFemComponent;
         // trampoline (need one for each virtual method)
         int giveNumberOfDofs() override {
             PYBIND11_OVERLOAD (int, ElementBase, giveNumberOfDofs,);
@@ -133,7 +141,7 @@ public:
             PYBIND11_OVERLOAD (oofem::DofManager*, ElementBase, giveInternalDofManager,i);
         }
         void giveCharacteristicMatrix(oofem::FloatMatrix &answer, oofem::CharType type, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD (void, ElementBase, giveCharacteristicMatrix,std::ref(answer),type, tStep);
+            PYBIND11_OVERRIDE (void, ElementBase, giveCharacteristicMatrix,std::ref(answer),type, tStep);
         }
         void giveCharacteristicVector(oofem::FloatArray &answer, oofem::CharType type, oofem::ValueModeType mode, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD (void, ElementBase, giveCharacteristicVector,std::ref(answer), type, mode, tStep);
@@ -159,6 +167,9 @@ public:
         }
         void printOutputAt(FILE *file, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD (void, ElementBase, printOutputAt, file, tStep);
+        }
+        void postInitialize() override {
+            PYBIND11_OVERLOAD (void, ElementBase, postInitialize,);
         }
         oofem::MaterialMode giveMaterialMode() override {
             PYBIND11_OVERLOAD (oofem::MaterialMode, ElementBase, giveMaterialMode,);
@@ -197,9 +208,9 @@ public:
         void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp,TimeStep *tStep) override {
             PYBIND11_OVERLOAD_PURE (void, StructuralElementBase, computeConstitutiveMatrixAt, std::ref(answer), rMode, gp, tStep);
         }
-      void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override {
-        PYBIND11_OVERLOAD (void, StructuralElementBase, giveInternalForcesVector, std::ref(answer), tStep, useUpdatedGpRecord);
-      }
+        void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override {
+            PYBIND11_OVERLOAD (void, StructuralElementBase, giveInternalForcesVector, std::ref(answer), tStep, useUpdatedGpRecord);
+        }
     };
 
 
@@ -586,16 +597,21 @@ PYBIND11_MODULE(oofempy, m) {
             return s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>());
         })
         .def("__repr__",
-            [](const oofem::FloatArray &s) {
-                std::string a = "<oofempy.FloatArray: {";
-                for ( int i = 0; i < s.giveSize(); ++i ) {
-                    if ( i > 40 ) {
-                        a.append("...");
-                        break;
-                    } else {
-                        a.append(std::to_string(s[i]));
-                        a.append(", ");
+            [](const oofem::FloatMatrix &s) {
+                std::string a = "<oofempy.FloatMatrix: {";
+                int count=0;
+                for ( int i = 0; i < s.giveNumberOfRows(); ++i ) {
+                    for (int j=0; j< s.giveNumberOfColumns(); ++j) {
+                        count++;
+                        if ( count > 40 ) {
+                            a.append("...");
+                            break;
+                        } else {
+                            a.append(std::to_string(s(i,j)));
+                            a.append(" ");
+                        }
                     }
+                    a.append("; ");
                 }
                 a.append("}>");
                 return a;
@@ -725,7 +741,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
 
-    py::class_<oofem::FEMComponent>(m, "FEMComponent")
+    py::class_<oofem::FEMComponent, PyFemComponent<>>(m, "FEMComponent")
         .def("giveClassName", &oofem::FEMComponent::giveClassName)
         .def("giveInputRecordName", &oofem::FEMComponent::giveInputRecordName)
         .def("giveDomain", &oofem::FEMComponent::giveDomain, py::return_value_policy::reference)
@@ -744,6 +760,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
         
     py::class_<oofem::TimeStep>(m, "TimeStep")
+        .def(py::init<int, EngngModel*, int, double, double, StateCounterType, TimeDiscretizationType>())
         .def("giveNumber", &oofem::TimeStep::giveNumber)
         .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
         .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
@@ -872,8 +889,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<int, oofem::Domain*>())
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *dofIds) const) &oofem::Element::giveLocationArray)
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *) const) &oofem::Element::giveLocationArray)
-        //.def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
-        //.def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
+        .def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
+        .def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
         //.def("giveCharacteristicValue", &oofem::Element::giveCharacteristicValue)
         .def("computeVectorOf", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOf)
         .def("computeVectorOf", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep*, oofem::FloatArray &, bool)) &oofem::Element::computeVectorOf)
@@ -898,6 +915,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveIPValue", &oofem::Element::giveIPValue)
         .def("giveLabel", &oofem::Element::giveLabel)
         .def("initializeFrom", &oofem::Element::initializeFrom)
+        .def("postInitialize", &oofem::Element::postInitialize)
         .def("setDofManagers", &oofem::Element::setDofManagers)
         .def("setNumberOfDofManagers", &oofem::Element::setNumberOfDofManagers)
         .def("giveDofManDofIDMask", &oofem::Element::giveDofManDofIDMask)
@@ -1421,6 +1439,14 @@ PYBIND11_MODULE(oofempy, m) {
         .value("IntSource_wh", oofem::MatResponseMode::IntSource_wh)
     ;
 
+    py::enum_<oofem::TimeDiscretizationType>(m,"TimeDiscretizationType")
+        .value("TD_Unspecified", oofem::TimeDiscretizationType::TD_Unspecified)
+        .value("TD_ThreePointBackward", oofem::TimeDiscretizationType::TD_ThreePointBackward)  
+        .value("TD_TwoPointBackward", oofem::TimeDiscretizationType::TD_TwoPointBackward)  
+        .value("TD_Newmark", oofem::TimeDiscretizationType::TD_Newmark)  
+        .value("TD_Wilson", oofem::TimeDiscretizationType::TD_Wilson)  
+        .value("TD_Explicit", oofem::TimeDiscretizationType::TD_Explicit)  
+    ;
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);
