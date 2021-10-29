@@ -69,6 +69,7 @@ namespace py = pybind11;
 #include "Materials/structuralms.h"
 
 #include "crosssection.h"
+#include "sparsemtrx.h"
 
 #include "field.h"
 #include "feinterpol.h"
@@ -211,6 +212,132 @@ public:
         void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override {
             PYBIND11_OVERLOAD (void, StructuralElementBase, giveInternalForcesVector, std::ref(answer), tStep, useUpdatedGpRecord);
         }
+    };
+
+
+    template <class EngngModelBase = oofem::EngngModel> class PyEngngModel : public EngngModelBase {
+            // inherit the constructor
+        public:
+            using EngngModelBase::EngngModelBase;
+            // trampoline (need one for each virtual method)
+            void solveYourself()  override {
+                PYBIND11_OVERLOAD_PURE( void, EngngModelBase, solveYourself,);
+            }
+            void solveYourselfAt(TimeStep *tStep)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, solveYourselfAt, tStep);
+            }
+            void terminate(TimeStep *tStep)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, terminate, tStep);
+            }
+            void doStepOutput(TimeStep *tStep)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, doStepOutput, tStep);
+            }
+            void updateYourself(TimeStep *tStep) override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateYourself, tStep);
+            }
+            void initializeYourself(TimeStep *tStep)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, initializeYourself, tStep);
+            }
+            int giveNumberOfDomainEquations(int di, const UnknownNumberingScheme &num)  override {
+                PYBIND11_OVERLOAD (int, EngngModelBase, giveNumberOfDomainEquations, di, num);
+            }
+            double giveUnknownComponent(ValueModeType vm, TimeStep *t, Domain *domain, Dof *d)  override {
+                PYBIND11_OVERLOAD (double, EngngModelBase, giveUnknownComponent, vm,t,domain,d);
+            }
+            //  virtual FieldPtr giveField (FieldType key, TimeStep *) { return FieldPtr();}
+            int instanciateYourself(DataReader &dr, InputRecord &ir, const char *outFileName, const char *desc)  override {
+                PYBIND11_OVERLOAD (int, EngngModelBase, instanciateYourself, dr, ir, outFileName, desc);
+            }
+            void initializeFrom(InputRecord &ir)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, initializeFrom, ir);
+            }
+            int instanciateDefaultMetaStep(InputRecord &ir)  override {
+                PYBIND11_OVERLOAD (int, EngngModelBase, instanciateDefaultMetaStep, ir);
+            }
+            void updateAttributes(MetaStep *mStep)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateAttributes, mStep);
+            }
+            TimeStep *giveCurrentStep(bool force = false)  override {
+                PYBIND11_OVERLOAD (TimeStep*, EngngModelBase, giveCurrentStep, force);
+            }
+            TimeStep *givePreviousStep(bool force = false)  override {
+                PYBIND11_OVERLOAD (TimeStep*, EngngModelBase, givePreviousStep, force);
+            }
+            TimeStep *giveNextStep()  override { 
+                PYBIND11_OVERLOAD (TimeStep*, EngngModelBase, giveNextStep, );
+            }
+            TimeStep *giveSolutionStepWhenIcApply(bool force = false)  override {
+                PYBIND11_OVERLOAD (TimeStep*, EngngModelBase, giveSolutionStepWhenIcApply, force);
+            }
+            int giveNumberOfFirstStep(bool force = false)  override {
+                PYBIND11_OVERLOAD (int, EngngModelBase, giveNumberOfFirstStep, force);
+            }
+            double giveEndOfTimeOfInterest()  override {
+                PYBIND11_OVERLOAD (double, EngngModelBase, giveEndOfTimeOfInterest, ); 
+            }
+            void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateSolution, solutionVector, tStep, d);
+            }
+            void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateComponent, tStep, cmpn, d);
+            }
+            void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateInternalRHS, answer, tStep, d, eNorm);
+            }
+            void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateMatrix, mat, tStep, d);
+            }
+            void initStepIncrements()  override {
+                PYBIND11_OVERLOAD (void, EngngModelBase, initStepIncrements, );
+            }
+            int forceEquationNumbering()  override {
+                PYBIND11_OVERLOAD (int, EngngModelBase, forceEquationNumbering, );
+            }
+            int requiresUnknownsDictionaryUpdate() override  { 
+                PYBIND11_OVERLOAD (int, EngngModelBase, requiresUnknownsDictionaryUpdate, );
+            }
+            bool requiresEquationRenumbering(TimeStep *tStep) override  { 
+                PYBIND11_OVERLOAD (bool, EngngModelBase, requiresEquationRenumbering, tStep);
+            }
+            void updateDofUnknownsDictionary(DofManager *dm, TimeStep *tStep) override  { 
+                PYBIND11_OVERLOAD (void, EngngModelBase, updateDofUnknownsDictionary, dm, tStep);
+            }
+            int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override  { 
+                PYBIND11_OVERLOAD (int, EngngModelBase, giveUnknownDictHashIndx, mode, tStep);
+            }
+            void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma, const UnknownNumberingScheme &s, Domain *domain) override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, assemble, answer, tStep, ma, s, domain );
+            }
+            void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, assemble, answer, tStep, ma, r_s, c_s, domain);
+            }
+            int checkConsistency() override  { 
+                PYBIND11_OVERLOAD (int, EngngModelBase, checkConsistency, );
+            }
+            int checkProblemConsistency() override  {
+                PYBIND11_OVERLOAD (int, EngngModelBase, checkProblemConsistency, );
+            }
+            void init() override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, init, );
+            }
+            void postInitialize() override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, postInitialize, );
+            }
+            void printOutputAt(FILE *file, TimeStep *tStep) override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep);
+            }
+            void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets) override  {
+                PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep, nodeSets, elementSets);
+            }
+            const char *giveClassName() const override  {
+                PYBIND11_OVERLOAD_PURE (const char*, EngngModelBase, giveClassName, );
+            }
+            bool isElementActivated( int elemNum )  override {
+                PYBIND11_OVERLOAD (bool, EngngModelBase, isElementActivated, elemNum);
+            }
+            bool isElementActivated( Element *e )  override { 
+                PYBIND11_OVERLOAD (bool, EngngModelBase, isElementActivated, e);
+            }
     };
 
 
@@ -783,10 +910,12 @@ PYBIND11_MODULE(oofempy, m) {
 
         ;
 
-    py::class_<oofem::EngngModel>(m, "EngngModel")
+    py::class_<oofem::EngngModel, PyEngngModel<>>(m, "EngngModel")
+        .def(py::init<int, oofem::EngngModel* >())
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
         .def("setDomain", &oofem::EngngModel::setDomain, py::keep_alive<1, 3>())
         .def("giveNumberOfDomains", &oofem::EngngModel::giveNumberOfDomains)
+        .def("setNumberOfDomains", &oofem::EngngModel::setNumberOfDomains)
         .def("giveMetaStep", &oofem::EngngModel::giveMetaStep, py::return_value_policy::reference)
         .def("terminateAnalysis", &oofem::EngngModel::terminateAnalysis)
         .def("terminate", &oofem::EngngModel::terminate)
@@ -812,6 +941,9 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
         .def("forceEquationNumbering", py::overload_cast<int>(&oofem::EngngModel::forceEquationNumbering))
         .def("forceEquationNumbering", py::overload_cast<>(&oofem::EngngModel::forceEquationNumbering))
+        .def("giveNumberOfDomainEquations", &oofem::EngngModel::giveNumberOfDomainEquations)
+        .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
+        .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
         ;
     
     py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
@@ -867,6 +999,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveUnknown", (double (oofem::Dof::*)(oofem::ValueModeType, oofem::TimeStep*)) &oofem::Dof::giveUnknown)
         .def("giveDofID", &oofem::Dof::giveDofID)
         .def("printYourself", &oofem::Dof::printYourself)
+        .def("giveEquationNumber", &oofem::Dof::giveEquationNumber)
     ;
 
     py::class_<oofem::DofManager, oofem::FEMComponent>(m, "DofManager")
@@ -1058,6 +1191,12 @@ PYBIND11_MODULE(oofempy, m) {
 
     
     py::class_<oofem::UnknownNumberingScheme>(m, "UnknownNumberingScheme")
+        .def("init", &oofem::UnknownNumberingScheme::init)
+        .def("giveDofEquationNumber", &oofem::UnknownNumberingScheme::giveDofEquationNumber)
+    ;
+
+    py::class_<oofem::EModelDefaultEquationNumbering, oofem::UnknownNumberingScheme>(m,"EModelDefaultEquationNumbering")
+        .def(py::init<>())
     ;
 
     py::class_<oofem::IntegrationRule>(m, "IntegrationRule")
@@ -1107,6 +1246,26 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::VTKMemoryExportModule, oofem::VTKBaseExportModule>(m, "VTKMemoryExportModule")
       .def("getVTKPieces", &oofem::VTKMemoryExportModule::getVTKPieces,  py::return_value_policy::reference)
       ;
+
+    py::class_<oofem::SparseMtrx>(m, "SparseMtrx")
+        .def("giveNumberOfRows", &oofem::SparseMtrx::giveNumberOfRows)
+        .def("giveNumberOfColumns", &oofem::SparseMtrx::giveNumberOfColumns)
+        .def("times", (void (oofem::SparseMtrx::*)(const FloatArray&, FloatArray&)const) &oofem::SparseMtrx::times)
+        .def("timesT", (void (oofem::SparseMtrx::*)(const FloatArray &, FloatArray &)const) &oofem::SparseMtrx::timesT)
+        .def("times", (void (oofem::SparseMtrx::*)(const FloatMatrix &, FloatMatrix &)const) &oofem::SparseMtrx::times)
+        .def("timesT", (void (oofem::SparseMtrx::*)(const FloatMatrix &, FloatMatrix &)const) &oofem::SparseMtrx::timesT)
+        .def("times", (void (oofem::SparseMtrx::*)(double)) &oofem::SparseMtrx::times)
+        .def("add", &oofem::SparseMtrx::add)
+        .def("addDiagonal", &oofem::SparseMtrx::addDiagonal)
+        .def("buildInternalStructure", (int (oofem::SparseMtrx::*)(EngngModel *, int , int , const IntArray &, const IntArray &)) &oofem::SparseMtrx::buildInternalStructure)
+        .def("buildInternalStructure", (int (oofem::SparseMtrx::*)(EngngModel *, int , const UnknownNumberingScheme &)) &oofem::SparseMtrx::buildInternalStructure)
+        .def("buildInternalStructure", (int (oofem::SparseMtrx::*)(EngngModel *, int , const UnknownNumberingScheme &,const UnknownNumberingScheme &)) &oofem::SparseMtrx::buildInternalStructure)
+        .def("assemble", (int (oofem::SparseMtrx::*)(const IntArray &, const FloatMatrix &))&oofem::SparseMtrx::assemble)
+        .def("assemble", (int (oofem::SparseMtrx::*)(const IntArray &, const IntArray &, const FloatMatrix &))&oofem::SparseMtrx::assemble)
+        .def("at", (double (oofem::SparseMtrx::*)(int , int )const) &oofem::SparseMtrx::at)
+        .def("at", (double& (oofem::SparseMtrx::*)(int , int )) &oofem::SparseMtrx::at)
+        .def("printYourself", &oofem::SparseMtrx::printYourself)
+    ;        
 
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
