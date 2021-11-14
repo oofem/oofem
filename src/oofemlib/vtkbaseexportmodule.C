@@ -647,7 +647,7 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
 
     dofIDMask.clear();
 
-    if ( type == DisplacementVector ) {
+    if ( (type == DisplacementVector) || (type == ResidualForce) ) {
         dofIDMask = {
             ( int ) Undef, ( int ) Undef, ( int ) Undef
         };
@@ -731,7 +731,7 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
             answer.resize(3);
         }
         iState = IST_MacroSlipVector;
-    } else {
+     } else {
         OOFEM_ERROR("unsupported unknownType %s", __UnknownTypeToString(type) );
     }
 
@@ -753,6 +753,8 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
                 OOFEM_WARNING("Recovered variable size mismatch for %d for id %d", type, id);
                 answer.at(j) = 0.0;
             }
+        } else if (type == ResidualForce) {
+            answer.at(j) = dman->giveDofWithID(id)->giveUnknown(VM_Residual, tStep);
         } else if ( dman->hasDofID(id) ) {
             // primary variable available directly in DOF-manager
             answer.at(j) = dman->giveDofWithID(id)->giveUnknown(VM_Total, tStep);

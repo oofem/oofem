@@ -150,7 +150,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
         return 0.0;
     }
 
-    if ( ! dofManager->giveDomain()->giveEngngModel()->newDofHandling() ) {
+    if ( (! dofManager->giveDomain()->giveEngngModel()->newDofHandling() ) && (mode!=VM_Residual)) {
         // first try if IC apply
         if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
             if ( this->hasIcOn(mode) ) {

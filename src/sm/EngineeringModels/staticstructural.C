@@ -320,16 +320,18 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     }
 
     // Build initial/external load
-    FloatArray externalForces(neq);
+    externalForces.resize(neq);
+    externalForces.zero();
     this->assembleVector(externalForces, tStep, ExternalForceAssembler(), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(di) );
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
     // Build reference load (for CALM solver)
-    FloatArray referenceForces;
     if ( this->nMethod->referenceLoad() ) {
         // This check is pretty much only here as to avoid unnecessarily trying to integrate all the loads.
         referenceForces.resize(neq);
+        referenceForces.zero();
+        
         this->assembleVector(referenceForces, tStep, ReferenceForceAssembler(), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(di) );
         this->updateSharedDofManagers(referenceForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -386,7 +388,22 @@ void StaticStructural :: terminate(TimeStep *tStep)
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    return this->field->giveUnknownValue(dof, mode, tStep);
+    if (mode == VM_Residual) {
+        // evaluate the residual of momentum balance for specific unknown
+        // evaluate the residual of momentum balance for specific unknown
+        int eq = dof->__giveEquationNumber();
+        if (eq && internalForces.isNotEmpty()) {
+            double ans = loadLevel*referenceForces.at(eq)-internalForces.at(eq);
+            if (externalForces.isNotEmpty()) {
+                ans += externalForces.at(eq);
+            }
+            return ans;
+        } else {
+            return 0.;
+        }
+    } else {
+        return this->field->giveUnknownValue(dof, mode, tStep);
+    }
 }
 
 

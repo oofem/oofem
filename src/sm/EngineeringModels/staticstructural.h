@@ -63,6 +63,7 @@ protected:
     FloatArray solution;
     FloatArray internalForces;
     FloatArray eNorm;
+    FloatArray referenceForces, externalForces;
 
 public:
     std :: unique_ptr< SparseMtrx >stiffnessMatrix;
