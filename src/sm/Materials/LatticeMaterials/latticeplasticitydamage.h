@@ -206,18 +206,32 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
-                                   GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma,
+                                   const double deltaLambda,
+                                   const int surface,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) const;
 
-    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
-                                   GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma,
+                                   const double deltaLambda,
+                                   const int surface,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) const;
 
-    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma, const double deltaLambda,
+    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma,
+                                        const double deltaLambda,
+                                        const int surface,
                                         GaussPoint *gp, TimeStep *tStep) const;
 
+    int checkTransition(const FloatArrayF< 3 > &sigma, const double tempKappa, GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma, const double tempKappa,
-                                        const double deltaLambda, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma,
+                                        const double tempKappa,
+                                        const double deltaLambda,
+                                        const int surface,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) const;
 
     virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp, TimeStep *tStep) const;
 
@@ -231,10 +245,16 @@ public:
                                  FloatArrayF< 6 > &reducedStrain,
                                  TimeStep *tStep) const;
 
-    double performRegularReturn(FloatArrayF< 3 > &stress, LatticePlasticityDamage_ReturnResult &returnResult, double yieldValue, GaussPoint *gp, TimeStep *tStep) const;
+    double performRegularReturn(FloatArrayF< 3 > &stress,
+                                LatticePlasticityDamage_ReturnResult &returnResult,
+                                double yieldValue,
+                                const int surface,
+                                GaussPoint *gp,
+                                TimeStep *tStep) const;
 
     double computeYieldValue(const FloatArrayF< 3 > &sigma,
                              const double tempKappa,
+                             const int surface,
                              GaussPoint *gp,
                              TimeStep *tStep) const;
 
