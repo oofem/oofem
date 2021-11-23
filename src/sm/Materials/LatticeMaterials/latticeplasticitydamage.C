@@ -379,7 +379,6 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                                                  TimeStep *tStep) const
 {
     LatticePlasticityDamage_ReturnResult returnResult = RR_Unknown;
-    int surfaceIter = 0;
 
     double fcLocal =  giveCompressiveStrength(gp, tStep);
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
@@ -459,25 +458,16 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                 subIncrementCounter = 0;
             } else {//Converged
                 //Check the surface
-                int surfaceCheck = checkTransition(stress, tempKappa, gp, tStep);
-
-                if ( surfaceCheck == surface ) {
-                    status->setTempKappaP(tempKappa);
-                } else   {
-                    //ended up in a region for which other surface should have been used.
-                    //Try with other surface
-                    if ( surfaceIter == 1 ) {
-                        OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Tried both surfaces");
-                    }
-
-                    surface = surfaceCheck;
-                    returnResult = RR_NotConverged;
-                    surfaceIter++;
-                }
+	      int surfaceCheck = checkTransition(stress, tempKappa, gp, tStep);
+	      status->setTempKappaP(tempKappa);
+	      if ( surfaceCheck != surface ) {
+		OOFEM_WARNING("LatticePlasticityDamage::PerformPlasticityReturn Wrong surface. Try the other\n");
+		surface = surfaceCheck;
+		returnResult = RR_NotConverged;
+	      }		  
             }
         }
     }
-
 
     tempPlasticStrain.at(1) = strain.at(1) - stress.at(1) / eNormalMean;
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
