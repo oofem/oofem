@@ -460,11 +460,11 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                 //Check the surface
 	      int surfaceCheck = checkTransition(stress, tempKappa, gp, tStep);
 	      status->setTempKappaP(tempKappa);
-	      if ( surfaceCheck != surface ) {
-		OOFEM_WARNING("LatticePlasticityDamage::PerformPlasticityReturn Wrong surface. Try the other\n");
-		surface = surfaceCheck;
-		returnResult = RR_NotConverged;
-	      }		  
+	      // if ( surfaceCheck != surface ) {
+	      // 	//		OOFEM_WARNING("LatticePlasticityDamage::PerformPlasticityReturn Wrong surface. Try the other\n");
+	      // 	surface = surfaceCheck;
+	      // 	returnResult = RR_NotConverged;
+	      //	      }		  
             }
         }
     }
