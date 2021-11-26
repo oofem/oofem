@@ -107,7 +107,6 @@ public:
  * This class implements a local random linear elastic model for lattice elements.
  */
 class LatticeFrameSteelPlastic : public LatticeStructuralMaterial
-
 {
 protected:
 
@@ -158,6 +157,8 @@ public:
     FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const override;
 
     FloatArrayF< 6 >giveReducedLatticeStrain(GaussPoint *gp, TimeStep *tStep) const;
+
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     virtual FloatArrayF< 6 >giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 

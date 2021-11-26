@@ -90,6 +90,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CurvatureTensorTemp:
     case IST_EigenStrainTensor:
     case IST_CrackStrainTensor:
+
         return ISVT_TENSOR_S3E;
 
     case IST_StressTensor:
@@ -123,6 +124,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_MacroSlipGradient:
     case IST_ReinfMembraneStress:
     //case IST_MaterialOrientation:
+    case IST_LatticeStrain:
+    case IST_LatticeStress:
+    case IST_PlasticLatticeStrain:
         return ISVT_TENSOR_G;
 
     case IST_BeamForceMomentTensor:
@@ -149,7 +153,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackStatusesTemp:
     case IST_CrackVector:
     case IST_2ndCrackVector:
-    case IST_3rdCrackVector:      
+    case IST_3rdCrackVector:
     case IST_InterfaceFirstPKTraction:
     case IST_InterfaceTraction:
     case IST_InterfaceJump:
@@ -206,7 +210,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrossSectionNumber:
     case IST_CrackWidth:
     case IST_2ndCrackWidth:
-    case IST_3rdCrackWidth: 
+    case IST_3rdCrackWidth:
     case IST_TensileStrength:
     case IST_ResidualTensileStrength:
     case IST_CrackIndex:
@@ -252,13 +256,13 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
     } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {
         return ISVT_SCALAR;
     } else {
-        OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR("unsupported UnknownType %s", __UnknownTypeToString(type) );
         return ISVT_SCALAR; // To make compiler happy.
     }
 }
 
 
-ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line) :
+ContextIOERR::ContextIOERR(contextIOResultType e, const char *file, int line) :
     error(e),
     msg(nullptr),
     file(file),
@@ -267,7 +271,7 @@ ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line) 
     this->full_message = "ContextIOERR " + std::to_string(error) + " at line " + std::to_string(line) + " in file \"" + file + "\"";
 }
 
-ContextIOERR :: ContextIOERR(contextIOResultType e, const char *msg, const char *file, int line) :
+ContextIOERR::ContextIOERR(contextIOResultType e, const char *msg, const char *file, int line) :
     error(e),
     msg(msg),
     file(file),
@@ -278,13 +282,13 @@ ContextIOERR :: ContextIOERR(contextIOResultType e, const char *msg, const char 
 
 
 void
-ContextIOERR :: print()
+ContextIOERR::print()
 {
     if ( msg ) {
-        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+        oofem_logger.writeELogMsg(Logger::LOG_LEVEL_ERROR, NULL, file, line,
                                   "ContextIOERR encountered, error code: %d\n%s", error, msg);
     }  else {
-        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+        oofem_logger.writeELogMsg(Logger::LOG_LEVEL_ERROR, NULL, file, line,
                                   "ContextIOERR encountered, error code: %d", error);
     }
     OOFEM_EXIT(1);
@@ -338,9 +342,9 @@ const char *__MatResponseModeToString(MatResponseMode _value) {
     TO_STRING_BODY(MatResponseMode_DEF)
 }
 
-std :: string __DofIDItemToString(DofIDItem _value) {
+std::string __DofIDItemToString(DofIDItem _value) {
     if ( _value >= MaxDofID ) {
-        char tmp [ 1024 ];
+        char tmp[ 1024 ];
         sprintf(tmp, "X_%d", _value - MaxDofID + 1);
         return tmp;
     }

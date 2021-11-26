@@ -123,6 +123,24 @@ LatticeFrameSteelPlastic::giveStatus(GaussPoint *gp) const
     return status;
 }
 
+int
+LatticeFrameSteelPlastic::giveIPValue(FloatArray &answer,
+                                      GaussPoint *gp,
+                                      InternalStateType type,
+                                      TimeStep *atTime)
+{
+    auto status = static_cast< LatticeFrameSteelPlasticStatus * >( this->giveStatus(gp) );
+
+    if ( type == IST_PlasticLatticeStrain ) {
+        answer = status->givePlasticLatticeStrain();
+        return 1;
+    } else {
+        return LatticeStructuralMaterial::giveIPValue(answer, gp, type, atTime);
+    }
+}
+
+
+
 double
 LatticeFrameSteelPlastic::computeYieldValue(const FloatArrayF< 4 > &stress,
                                             GaussPoint *gp,
@@ -256,12 +274,12 @@ LatticeFrameSteelPlastic::performPlasticityReturn(GaussPoint *gp, const FloatArr
             if ( status->giveTempReturnResult() == RR_NotConverged ) {
                 subIncrementCounter++;
                 if ( subIncrementCounter > numberOfSubIncrements ) {
-                    OOFEM_LOG_INFO("Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
+                    OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
                     OOFEM_LOG_INFO("Yield value %e \n", yieldValue);
-                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3), convergedStrain.at(4) );
-                    OOFEM_LOG_INFO("tempStrain value %e %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3), tempStrain.at(4) );
-                    OOFEM_LOG_INFO("deltaStrain value %e %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3), deltaStrain.at(4) );
-                    OOFEM_LOG_INFO("targetstrain value %e %e %e %e\n", strain.at(1), strain.at(2), strain.at(3), strain.at(4) );
+                    OOFEM_LOG_INFO( "ConvergedStrain value %e %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3), convergedStrain.at(4) );
+                    OOFEM_LOG_INFO( "tempStrain value %e %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3), tempStrain.at(4) );
+                    OOFEM_LOG_INFO( "deltaStrain value %e %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3), deltaStrain.at(4) );
+                    OOFEM_LOG_INFO( "targetstrain value %e %e %e %e\n", strain.at(1), strain.at(2), strain.at(3), strain.at(4) );
 
                     OOFEM_ERROR("LatticeFrameSteelPlastic :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
                 }
@@ -274,7 +292,7 @@ LatticeFrameSteelPlastic::performPlasticityReturn(GaussPoint *gp, const FloatArr
                 tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( iy * this->e );
                 tempPlasticStrain.at(4) = tempStrain.at(4) - stress.at(4) / ( iz * this->e );
 
-                status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 3, 4, 5 }) );
+                status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 3, 4, 5 }) );
 
                 subIncrementFlag = 0;
 
@@ -297,7 +315,7 @@ LatticeFrameSteelPlastic::performPlasticityReturn(GaussPoint *gp, const FloatArr
     tempPlasticStrain.at(4) = strain.at(4) - stress.at(4) / ( iz * this->e );
 
 
-    status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 3, 4, 5 }) );
+    status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 3, 4, 5 }) );
     auto answer = assemble< 6 >(stress, { 0, 3, 4, 5 });
     answer.at(2) = shearareay * g * reducedStrain.at(2);
     answer.at(3) = shearareaz * g * reducedStrain.at(3);
