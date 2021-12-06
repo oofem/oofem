@@ -59,6 +59,7 @@
 #define _IFT_ConcreteDPM2_dhard "dhard"
 #define _IFT_ConcreteDPM2_dilation "dilation"
 #define _IFT_ConcreteDPM2_asoft "asoft"
+#define _IFT_ConcreteDPM2_bsoft "bsoft"
 #define _IFT_ConcreteDPM2_hp "hp"
 #define _IFT_ConcreteDPM2_yieldtol "yieldtol"
 #define _IFT_ConcreteDPM2_newtoniter "newtoniter"
@@ -233,8 +234,8 @@ public:
     double giveDeviatoricPlasticStrainNorm() const
     {
         auto dev = StructuralMaterial::computeDeviator(plasticStrain);
-        return sqrt( .5 * ( 2. * dev [ 0 ] * dev [ 0 ] + 2. * dev [ 1 ] * dev [ 1 ] + 2. * dev [ 2 ] * dev [ 2 ] +
-                            dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
+        return sqrt(.5 * ( 2. * dev [ 0 ] * dev [ 0 ] + 2. * dev [ 1 ] * dev [ 1 ] + 2. * dev [ 2 ] * dev [ 2 ] +
+                           dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
     }
 
     /**
@@ -668,6 +669,9 @@ protected:
 
     /// Parameter of the ductilityMeasure of the damage model.
     double ASoft = 0.;
+
+    /// Parameter of the ductilityMeasure of the damage model.
+    double BSoft = 0.;
 
     /// Parameter of the hardening law of the plasticity model.
     double yieldHardPrimePeak = 0.;
