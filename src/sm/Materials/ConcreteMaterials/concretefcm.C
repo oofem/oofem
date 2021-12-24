@@ -744,7 +744,7 @@ ConcreteFCM :: checkSnapBack(GaussPoint *gp, TimeStep *tStep, int i)
     }
 
     if ( ef <= ft / E ) {
-        OOFEM_ERROR("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, ft / E, gp->giveElement()->giveNumber(), Le);
+        OOFEM_WARNING("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f (E=%e, ft=%e)", ef, ft / E, gp->giveElement()->giveGlobalNumber(), Le, E, ft);
     }
 }
 

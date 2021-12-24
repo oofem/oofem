@@ -40,6 +40,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "spatiallocalizer.h"
 
 #define _IFT_QSpace_Name "qspace"
 
@@ -52,7 +53,7 @@ class FEI3dHexaQuad;
  * @author Ladislav Svoboda
  * @author Mikael Öhman
  */
-class QSpace : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class QSpace : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface
 {
 protected:
     static FEI3dHexaQuad interpolation;

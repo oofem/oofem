@@ -167,10 +167,10 @@ class UNVParser:
                         # 1D elements have an additionnal line in their definition
                         line3=file.readline()
                         cntvt=Line2Int(line3)
-                    elif eltype==113:#Quadratic wedge have nodes on 2 lines
+                    elif eltype==113:#Quadratic wedge has nodes on 2 lines
                         line3=file.readline()
                         cntvt = Line2Int(line2) + Line2Int(line3)
-                        print(cntvt, type(cntvt))
+                        #print("Quadratic wedge", cntvt, type(cntvt))
                     elif eltype==116:#Quadratic brick element have nodes on 3 lines
                         line3=file.readline()
                         line4=file.readline()

@@ -50,7 +50,7 @@ REGISTER_Element(QSpace);
 
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+QSpace :: QSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans = 20;
 }
@@ -155,6 +155,8 @@ QSpace :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     OOFEM_LOG_INFO("Interface on Qspace element not supported");

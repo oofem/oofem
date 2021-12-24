@@ -2,7 +2,7 @@ patch140.out
 Patch test of QTrPlStr elements -> pure compression
 StaticStructural nsteps 1 nmodules 1
 errorcheck
-#vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 2
+#vtkxml tstep_all domain_all externalforces 1 1 primvars 1 1 vars 2 1 4 stype 2
 domain 2dPlaneStress2D
 OutputManager tstep_all dofman_all element_all
 ndofman 13 nelem 4 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 4

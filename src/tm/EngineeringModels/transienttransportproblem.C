@@ -50,6 +50,7 @@
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
 #include "activebc.h"
+#include "outputmanager.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
@@ -386,6 +387,89 @@ TransientTransportProblem :: forceEquationNumbering()
     this->effectiveMatrix = nullptr;
     return EngngModel :: forceEquationNumbering();
 }
+
+
+void
+TransientTransportProblem :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
+        return; // Do not print even Solution step header
+    }
+
+    EngngModel :: printOutputAt(file, tStep);
+    
+    // computes and prints reaction forces in all supported or restrained dofs
+    fprintf(file, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
+    
+    IntArray restrDofMans, restrDofs, eqn;
+    int di=1;
+    //from StructuralEngngModel :: buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, 1);
+    // determine number of restrained dofs
+    Domain *domain = this->giveDomain(di);
+    int numRestrDofs = this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() );
+    int ndofMan = domain->giveNumberOfDofManagers();
+    int rindex, count = 0;
+
+    // initialize corresponding dofManagers and dofs for each restrained dof
+    restrDofMans.resize(numRestrDofs);
+    restrDofs.resize(numRestrDofs);
+    eqn.resize(numRestrDofs);
+
+    for ( int i = 1; i <= ndofMan; i++ ) {
+        DofManager *inode = domain->giveDofManager(i);
+        for ( Dof *jdof: *inode ) {
+            if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
+                rindex = jdof->__givePrescribedEquationNumber();
+                if ( rindex ) {
+                    count++;
+                    restrDofMans.at(count) = i;
+                    restrDofs.at(count) = jdof->giveDofID();
+                    eqn.at(count) = rindex;
+                } else {
+                    // NullDof has no equation number and no prescribed equation number
+                    //_error("No prescribed equation number assigned to supported DOF");
+                }
+            }
+        }
+    }
+    // Trim to size.
+    restrDofMans.resizeWithValues(count);
+    restrDofs.resizeWithValues(count);
+    eqn.resizeWithValues(count);
+    
+    //restrDofMans.printYourself();
+    //restrDofs.printYourself();
+    //eqn.printYourself();
+    
+    //from StructuralEngngModel :: computeReaction()
+    FloatArray internal, external;
+    internal.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
+    internal.zero();
+    
+    // Add internal forces
+    this->assembleVector( internal, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di), &this->eNorm );
+    // Subtract external loading
+    external.resize(internal.giveSize());
+    this->assembleVector( external, tStep, ExternalForceAssembler(), VM_Total,                   EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di), &this->eNorm );
+    
+    internal.subtract(external);
+    //internal.printYourself();
+    
+    //
+    // loop over reactions and print them
+    //
+    for ( int i = 1; i <= restrDofMans.giveSize(); i++ ) {
+        if ( domain->giveOutputManager()->testDofManOutput(restrDofMans.at(i), tStep) ) {
+            fprintf(file, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
+                    domain->giveDofManager( restrDofMans.at(i) )->giveLabel(),
+                    restrDofs.at(i), internal.at( eqn.at(i) ),
+                    domain->giveDofManager( restrDofMans.at(i) )->giveDofWithID( restrDofs.at(i) )->giveBcId() );
+        }
+    }
+    
+}
+
 
 void
 TransientTransportProblem :: updateYourself(TimeStep *tStep)
