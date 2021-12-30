@@ -837,9 +837,10 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 #ifdef _OPENMP
 #pragma omp parallel for shared(answer) private(mat, R, loc)
 #endif
-    for ( auto &bc : domain->giveBcs() ) {
-        auto abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get());
-
+        //for ( auto &bc : domain->giveBcs() ) { //problems with OPENMP
+        for (size_t i = 0; i < domain->giveBcs().size(); i++) {
+            auto &bc = domain->giveBcs()[i];
+            auto abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get());
         if ( abc ) {
             /// @note: Some active bcs still make changes even when they are not applied
             /// We should probably reconsider this approach, so that they e.g. just prescribe their lagrange mult. instead.
@@ -898,7 +899,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 
                         ma.locationFromElementNodes(loc, *element, bNodes, s);
  
- #ifdef _OPENMP
+#ifdef _OPENMP
             			omp_set_lock(&writelock);
 #endif			
                         answer.assemble(loc, mat);
@@ -993,7 +994,9 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 #ifdef _OPENMP
 #pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
 #endif
-    for ( auto &gbc : domain->giveBcs() ) {
+    //for ( auto &gbc : domain->giveBcs() ) { //problems with OPENMP
+    for (size_t i = 0; i < domain->giveBcs().size(); i++) {
+        auto &gbc = domain->giveBcs()[i];
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
 #ifdef _OPENMP
