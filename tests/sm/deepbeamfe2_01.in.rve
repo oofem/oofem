@@ -86,7 +86,7 @@ MazarsModel 1 d 1.0 E 3.36e10 n 0.2 version 1 e0 8.63e-5 ac 2.6 bc 800 ef 0.0025
 MisesMat 2 d 1.0 E 2e11 n 0.3 sig0 500e6 H 8.456659619e8 omega_crit 0 a 0 tAlpha 1.0
 bondceb 3 kn 6e12 ks 6.135e10 s1 0.001 s2 0.002 s3 0.0065 taumax 1.541e7 tauf 6.164e6
 bondceb 4 kn 6e12 ks 6.135e10 s1 0.001 s2 0.002 s3 0.004 taumax 1.541e7 tauf 6.164e6
-PrescribedDispSlipBCDirichletRC 1 loadTimeFunction 1 dofs 3 1 2 6 ccoord 3 0.0 0.0 0.0 dispGrad 2 2 {0 0; 0 0} set 5 conboundset 6 reinfxbound 8 reinfybound 7
+PrescribedDispSlipBCDirichletRC 1 loadTimeFunction 1 dofs 3 1 2 6 ccoord 3 0.0 0.0 0.0 dispGrad 2 2 {0 0; 0 0} set 5 conboundset 6
 ConstantFunction 1 f(t) 1.0
 set 1 elements 16 32 33 34 35 36 37 38 39 40 25 26 27 28 29 30 31
 set 2 elements 3 33 35 36
