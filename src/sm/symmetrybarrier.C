@@ -52,7 +52,7 @@ SymmetryBarrier :: ~SymmetryBarrier()
 { }
 
 void
-SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
+SymmetryBarrier :: applyConstraint(const double cl, const FloatArray &c1, const FloatArray &c2, double &weight,
                                    bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei)
 {
     // compute node coordinates in barrrier lcs
@@ -82,7 +82,7 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
             }
 
             // compute weight of mirrored source
-            weight += nei.computeWeightFunction(c1, mc2);
+            weight += nei.computeWeightFunction(cl, c1, mc2);
         }
     }
 
@@ -104,7 +104,7 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
             }
 
             // compute weight of mirrored source
-            weight += nei.computeWeightFunction(c1, mc2);
+            weight += nei.computeWeightFunction(cl, c1, mc2);
         }
     }
 
@@ -116,7 +116,7 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
         }
 
         // compute weight of mirrored source
-        weight += nei.computeWeightFunction(c1, mc2);
+        weight += nei.computeWeightFunction(cl, c1, mc2);
     }
 }
 
