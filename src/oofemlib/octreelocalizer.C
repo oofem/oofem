@@ -209,8 +209,12 @@ OctreeSpatialLocalizer :: OctreeSpatialLocalizer(Domain* d) : SpatialLocalizer(d
     octreeMask(3),
     elementIPListsInitialized(false)
 {
+  this->initialized = false;
+  this->rootCell=nullptr;
 #ifdef _OPENMP
     omp_init_lock(&ElementIPDataStructureLock);
+    omp_init_lock(&buildOctreeDataStructureLock);
+    omp_init_lock(&initLock);
 #endif
 }
 
@@ -242,6 +246,13 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     if ( rootCell ) {
         return true;
     }
+#ifdef _OPENMP
+    omp_set_lock(&buildOctreeDataStructureLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+    if ( rootCell ) {
+        omp_unset_lock(&buildOctreeDataStructureLock); 
+        return true;
+    }
+#endif  
 
     this->elementListsInitialized.resize(this->domain->giveNumberOfRegions() + 1);
     this->elementListsInitialized.zero();
@@ -316,7 +327,9 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     // compute max. tree depth
     int treeDepth = this->giveMaxTreeDepthFrom(*this->rootCell);
     OOFEM_LOG_DEBUG( "Octree init [depth %d in %.2fs]\n", treeDepth, timer.getUtime() );
-
+#ifdef _OPENMP
+    omp_unset_lock(&buildOctreeDataStructureLock);
+#endif
     return true;
 }
 
@@ -1531,32 +1544,45 @@ OctreeSpatialLocalizer :: init(bool force)
 {
     if ( force ) {
         int ans;
+        initialized = false;
 #ifdef _OPENMP
-#pragma omp single
-#endif
-        {
-            rootCell = nullptr;
-            elementIPListsInitialized = false;
-            elementListsInitialized.zero();
-            ans = this->buildOctreeDataStructure();
-            //this->initElementIPDataStructure();
+        omp_set_lock(&initLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+        if ( initialized) {
+          omp_unset_lock(&initLock); 
+          return 0;
         }
-        return ans;
-    }
-
-    if ( !rootCell ) {
-        int ans;
+#endif   
+        rootCell = nullptr;
+        elementIPListsInitialized = false;
+        elementListsInitialized.zero();
+        ans = this->buildOctreeDataStructure();
+        //this->initElementIPDataStructure();
+        this->initialized=true;
 #ifdef _OPENMP
-#pragma omp single
+        omp_unset_lock(&initLock);
 #endif
-        {
-            OOFEM_LOG_INFO("OctreeLocalizer: init\n");
-            ans = this->buildOctreeDataStructure();
-            //this->initElementIPDataStructure();
-        }
         return ans;
     } else {
+      if ( !this->initialized) {
+        int ans;
+#ifdef _OPENMP
+        omp_set_lock(&initLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+        if ( initialized) {
+          omp_unset_lock(&initLock); 
+          return 0;
+        }
+#endif   
+        OOFEM_LOG_INFO("OctreeLocalizer: init\n");
+        ans = this->buildOctreeDataStructure();
+        //this->initElementIPDataStructure();
+        this->initialized = true;
+#ifdef _OPENMP
+    omp_unset_lock(&initLock);
+#endif
+    return ans;
+      } else {
         return 0;
+      }
     }
 }
 } // end namespace oofem
