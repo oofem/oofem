@@ -217,11 +217,11 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio,
 }
 
 double
-IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight) const
+IDNLMaterial :: computeStressBasedWeight(double cl, double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight) const
 {
     // Take into account periodicity, if required
     if ( this->px > 0. ) {
-        return computeStressBasedWeightForPeriodicCell(nx, ny, ratio, gp, jGp);
+      return computeStressBasedWeightForPeriodicCell(cl, nx, ny, ratio, gp, jGp);
     }
 
     //Check if source and receiver point coincide
@@ -243,7 +243,7 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
     double modDistance = sqrt(x1 * x1 + x2 * x2);
 
     //Get new weight
-    double updatedWeight = this->computeWeightFunction(modDistance);
+    double updatedWeight = this->computeWeightFunction(cl, modDistance);
     updatedWeight *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
     return updatedWeight;
 }
@@ -251,7 +251,7 @@ IDNLMaterial :: computeStressBasedWeight(double &nx, double &ny, double &ratio, 
 // This method is a slight modification of IDNLMaterial :: computeStressBasedWeight but is implemented separately,
 // to keep the basic method as simple (and efficient) as possible
 double
-IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp) const
+IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double cl, double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp) const
 {
     double updatedWeight = 0.;
     FloatArray gpCoords, distance;
@@ -272,7 +272,7 @@ IDNLMaterial :: computeStressBasedWeightForPeriodicCell(double &nx, double &ny, 
         double modDistance = sqrt(x1 * x1 + x2 * x2);
 
         //Get new weight
-        double updatedWeightContribution = this->computeWeightFunction(modDistance);
+        double updatedWeightContribution = this->computeWeightFunction(cl, modDistance);
         if ( updatedWeightContribution > 0. ) {
             updatedWeightContribution *= jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
             updatedWeight += updatedWeightContribution;
@@ -312,8 +312,9 @@ IDNLMaterial :: computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp
         GaussPoint *neargp = lir.nearGp;
         nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus() );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
+
         if ( SBAflag ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
-            double stressBasedWeight = computeStressBasedWeight(nx, ny, sigmaRatio, gp, neargp, lir.weight); //Compute new weight
+          double stressBasedWeight = computeStressBasedWeight(cl, nx, ny, sigmaRatio, gp, neargp, lir.weight); //Compute new weight
             updatedIntegrationVolume +=  stressBasedWeight;
             nonlocalContribution *= stressBasedWeight;
         } else {
