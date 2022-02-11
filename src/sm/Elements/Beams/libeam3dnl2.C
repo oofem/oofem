@@ -472,6 +472,7 @@ LIBeam3dNL2 :: initializeFrom(InputRecord &ir)
     tc.beTranspositionOf(lcs);
 
     this->computeQuaternionFromRotMtrx(q, tc);
+    this->nlGeometry = 0; // element always nonlinear, this is to force ouput in strains and stresses in GP (see structuralms.C)
 }
 
 
