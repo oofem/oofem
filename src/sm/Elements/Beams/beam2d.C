@@ -655,6 +655,32 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     //answer.beLumpedOf (mass);
 }
 
+void
+Beam2d :: computeLumpedInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    // computes initial stress matrix of receiver (or geometric stiffness matrix)
+
+    FloatMatrix stiff;
+    FloatArray endForces;
+
+    double l = this->computeLength();
+    double N;
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    answer.at(2, 2) = 1.;
+    answer.at(2, 5) =-1.;
+    answer.at(5, 2) =-1.;
+    answer.at(5, 5) = 1.;
+
+    // ask end forces in g.c.s
+    this->giveEndForcesVector(endForces, tStep);
+    N = ( -endForces.at(1) + endForces.at(4) ) / 2.;
+    answer.times( N / l);
+}
+
+
 
 #ifdef __OOFEG
 void Beam2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
