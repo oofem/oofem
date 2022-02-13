@@ -50,6 +50,7 @@
 #define _IFT_Pdelta_rtolv "rtolv"
 #define _IFT_Pdelta_stype "stype"
 #define _IFT_Pdelta_maxiter "maxiter"
+#define _IFT_Pdelta_lumpedInitialStressMatrix "lumped"
 //@}
 
 namespace oofem {
@@ -67,6 +68,7 @@ private:
     std :: unique_ptr< SparseMtrx > initialStressMatrix;
     double rtolv;
     int maxiter;
+    bool lumpedInitialStressMatrix; 
 
 public:
     Pdelta(int i, EngngModel *master=nullptr);

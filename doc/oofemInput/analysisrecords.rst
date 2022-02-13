@@ -153,12 +153,12 @@ solver attributes and is explained in section
 Pdelta
 ~~~~~~~~~~~~~~~
 
-``pdelta`` ``nsteps 1`` ``rtolv #(rn)`` [``maxiter #(in)``] [``sparselinsolverparams #(...)``]
+``pdelta`` ``nsteps 1`` ``rtolv #(rn)`` [``maxiter #(in)``] ``lumped #(in)`` [``sparselinsolverparams #(...)``]
 
 Performs P-delta analysis, a kind of geometrically nonliner analysis, where the effects of axial (normal) forces is considered on deformed configuration. It solves the following nonlinear equation: :math:`(\boldsymbol{K}+\boldsymbol{Ks}(\boldsymbol{r}))\boldsymbol{r}
 = \boldsymbol{f}`, where :math:`\boldsymbol{K}` is stifness matrix, :math:`\boldsymbol{Ks}` is initial stress matrix, :math:`\boldsymbol{r}` is displacement vector and :math:`\boldsymbol{f}` is load vector.
 Relative convergence tolerance is specified using ``rtolv``
-parameter ans max number of iterations can be set using ``maxiter`` parameter (with 100 as defult value).
+parameter ans max number of iterations can be set using ``maxiter`` parameter (with 100 as defult value). By default, lumped initial stress matrix is used, consistent initial stress matrix can be used when setting ``lumped`` parameter value to zero.
 
 The ``sparselinsolverparams`` parameter describes the sparse linear
 solver attributes and is explained in section

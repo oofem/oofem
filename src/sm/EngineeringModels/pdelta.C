@@ -62,6 +62,7 @@ Pdelta :: Pdelta(int i, EngngModel *_master) : LinearStatic(i, _master)
     ndomains = 1;
     initFlag = 1;
     solverType = ST_Direct;
+    lumpedInitialStressMatrix = true;
 }
 
 void
@@ -72,6 +73,7 @@ Pdelta :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, rtolv, _IFT_Pdelta_rtolv);
     this->maxiter = 50;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_Pdelta_maxiter);
+    IR_GIVE_OPTIONAL_FIELD(ir, lumpedInitialStressMatrix, _IFT_Pdelta_lumpedInitialStressMatrix);
 }
 
 void Pdelta :: solveYourselfAt(TimeStep *tStep)
@@ -150,8 +152,14 @@ void Pdelta :: solveYourselfAt(TimeStep *tStep)
         rhs = loadVector;
         if (iter) {
             feq.zero();
-            this->assembleVector(feq, tStep, MatrixProductAssembler(LumpedInitialStressMatrixAssembler()),
-                                 VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            if (this->lumpedInitialStressMatrix) {
+                this->assembleVector(feq, tStep, MatrixProductAssembler(LumpedInitialStressMatrixAssembler()),
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            } else {
+                this->assembleVector(feq, tStep, MatrixProductAssembler(InitialStressMatrixAssembler()),
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
+            }
             rhs.subtract(feq);
             //this->assembleVector(rhs, tStep, EquivalentLateralLoadAssembler(), VM_Total,
             //                     this->giveEquationNumbering(), this->giveDomain(1) );
