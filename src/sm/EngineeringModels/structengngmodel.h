@@ -69,6 +69,15 @@ public:
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
+/**
+ * Callback class for assembling lumped initial stress matrices
+ * @author Mikael Öhman
+ */
+class LumpedInitialStressMatrixAssembler : public MatrixAssembler
+{
+public:
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+};
 
 /**
  * This class implements extension of EngngModel for structural models.
