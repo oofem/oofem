@@ -91,29 +91,31 @@ void MatrixAssembler :: locationFromElementNodes(IntArray& loc, Element& element
 void MatrixProductAssembler :: vectorFromElement(FloatArray& vec, Element& element, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
+    FloatArray r;
     this->mAssem.matrixFromElement(mat, element, tStep);
-    vec.beProductOf(mat, this->vec);
+    element.computeVectorOf(mode, tStep, r);
+    vec.beProductOf(mat, r);
 }
 
 void MatrixProductAssembler :: vectorFromLoad(FloatArray& vec, Element& element, BodyLoad* load, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
     this->mAssem.matrixFromLoad(mat, element, load, tStep);
-    vec.beProductOf(mat, this->vec);
+    //vec.beProductOf(mat, this->vec);
 }
 
 void MatrixProductAssembler :: vectorFromSurfaceLoad(FloatArray& vec, Element& element, SurfaceLoad* load, int boundary, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
     this->mAssem.matrixFromSurfaceLoad(mat, element, load, boundary, tStep);
-    vec.beProductOf(mat, this->vec);
+    //vec.beProductOf(mat, this->vec);
 }
 
 void MatrixProductAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, EdgeLoad* load, int edge, TimeStep* tStep, ValueModeType mode) const
 {
     FloatMatrix mat;
     this->mAssem.matrixFromEdgeLoad(mat, element, load, edge, tStep); // ??????
-    vec.beProductOf(mat, this->vec);
+    //vec.beProductOf(mat, this->vec);
 }
 
 
