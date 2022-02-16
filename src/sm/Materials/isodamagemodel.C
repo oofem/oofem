@@ -39,6 +39,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
+#include "gausspoint.h"
 
 namespace oofem {
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
@@ -109,7 +110,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 
     // compute equivalent strain
     equivStrain = this->computeEquivalentStrain(reducedTotalStrainVector, gp, tStep);
-
+    
     if ( llcriteria == idm_strainLevelCR ) {
         // compute value of loading function if strainLevel crit apply
         f = equivStrain - status->giveKappa();

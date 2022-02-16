@@ -32,54 +32,54 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef symmetrybarrier_h
-#define symmetrybarrier_h
+#ifndef pdelta_h
+#define pdelta_h
 
-#include "nonlocalbarrier.h"
-#include "intarray.h"
-#include "floatarray.h"
+#include "sm/EngineeringModels/linearstatic.h"
+#include "geneigvalsolvertype.h"
+#include "sparsegeneigenvalsystemnm.h"
+#include "sparselinsystemnm.h"
+#include "sparsemtrx.h"
 #include "floatmatrix.h"
+#include "floatarray.h"
+#include "nummet.h"
 
-///@name Input fields for SymmetryBarrier
+///@name Input fields for LinearStability
 //@{
-#define _IFT_SymmetryBarrier_Name "symmetrybarrier"
-#define _IFT_SymmetryBarrier_origin "origin"
-#define _IFT_SymmetryBarrier_normals "normals"
-#define _IFT_SymmetryBarrier_activemask "activemask"
+#define _IFT_Pdelta_Name "pdelta"
+#define _IFT_Pdelta_rtolv "rtolv"
+#define _IFT_Pdelta_stype "stype"
+#define _IFT_Pdelta_maxiter "maxiter"
+#define _IFT_Pdelta_lumpedInitialStressMatrix "lumped"
 //@}
 
 namespace oofem {
+
 /**
- * Implementation of symmetry nonlocal barrier.
- * It allows to specify up to three planes (orthogonal ones) of symmetry
- * It then modifies the integration weights of source points to take into account
- * symmetry of the averaged field.
+ * This class implements p-delta analysis, where the effects of normal force on deformed configuration
+ * is taken into account by means of initial stress matrix.
+ *
+ * Solution of this problem is base on equation in the form of: @f$ (K+K_\sigma(r))\cdot r=f @f$.
+ * This is a nonlinear problem solved using simple iteration method.
  */
-class SymmetryBarrier : public NonlocalBarrier
+class Pdelta : public LinearStatic
 {
-protected:
-    FloatArray origin;
-    FloatArray normals;
-    IntArray mask;
-    FloatMatrix lcs;
+private:
+    std :: unique_ptr< SparseMtrx > initialStressMatrix;
+    double rtolv;
+    int maxiter;
+    bool lumpedInitialStressMatrix; 
 
 public:
-    /**
-     * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number
-     * @param d Pointer to the domain to which element belongs.
-     */
-    SymmetryBarrier(int n, Domain * d);
-    /// Destructor.
-    virtual ~SymmetryBarrier();
+    Pdelta(int i, EngngModel *master=nullptr);
+    virtual ~Pdelta() { }
 
-  void applyConstraint(const double cl, const FloatArray &c1, const FloatArray &c2, double &weight,
-                         bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei) override;
-    double calculateMinimumDistanceFromBoundary(const FloatArray &coords) override { return 1.e10; }
+    void solveYourselfAt(TimeStep *tStep) override;
     void initializeFrom(InputRecord &ir) override;
 
-    const char *giveInputRecordName() const override { return _IFT_SymmetryBarrier_Name; }
-    const char *giveClassName() const override { return "SymmetryBarrier"; }
+    // identification
+    const char *giveInputRecordName() const override { return _IFT_Pdelta_Name; }
+    const char *giveClassName() const override { return "Pdelta"; }
 };
 } // end namespace oofem
-#endif // symmetrybarrier_h
+#endif // pdelta_h

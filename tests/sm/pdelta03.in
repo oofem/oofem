@@ -1,0 +1,41 @@
+pdelta01.out
+pdelta analysis of simple cantilever beam
+#only momentum influence to the displacements is taken into account
+#beamShearCoeff is artificially enlarged.
+pdelta nsteps 1 nmodules 1 rtolv 1.e-3 maxiter 1
+errorcheck
+domain 3dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 0. 10.  0.
+node 3 coords 3 0.  0.  0.
+node 4 coords 3 0. 10.  0.
+Beam3d 1 nodes 2 1 2 zaxis 3 0 0 1
+Beam3d 2 nodes 2 3 4 zaxis 3 0 0 1
+SimpleCS 1 area 1.e8 Iy 8.33e-6 Iz 8.33e-6 Ik 0.003606447115384616 beamShearCoeff 1.e18 thick 0.54 material 1 set 1
+IsoLE 1 d 1. E 205000000000 n 0.2 tAlpha 1.2e-5
+BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0.0 0.0 0.0 0.0 0.0 0.0 set 2
+NodalLoad 2 loadTimeFunction 1 dofs 3 1 2 3 Components 3 2000. -50000.0 0. set 3
+NodalLoad 3 loadTimeFunction 1 dofs 3 1 2 3 Components 3 0. -50000.0 2000. set 4
+PeakFunction 1 t 1.0 f(t) 1.
+Set 1 elements 2 1 2
+Set 2 nodes 2 1 3
+Set 3 nodes 1 2
+Set 4 nodes 1 4
+#
+# exact solution
+#
+#%BEGIN_CHECK% tolerance 5.e-3
+#NODE tStep 1 number 2 dof 1 unknown d value 7.71430584e-01
+#REACTION tStep 1 number 1 dof 2 value  5.0000e+04
+#REACTION tStep 1 number 1 dof 1 value -3.9520e+03
+#REACTION tStep 1 number 1 dof 6 value  3.9520e+04
+#NODE tStep 1 number 4 dof 3 unknown d value 7.71430584e-01
+#REACTION tStep 1 number 3 dof 2 value  5.0000e+04
+#REACTION tStep 1 number 3 dof 3 value -3.9520e+03
+#REACTION tStep 1 number 3 dof 4 value -3.9520e+04
+#%END_CHECK%
+
+
+

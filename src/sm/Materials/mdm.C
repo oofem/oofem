@@ -1151,7 +1151,7 @@ MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp,
 
 
 double
-MDM :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
+MDM :: computeWeightFunction(const double R, const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 

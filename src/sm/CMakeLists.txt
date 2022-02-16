@@ -187,6 +187,7 @@ set (sm_emodel
     EngineeringModels/freewarping.C 
     EngineeringModels/structuralmaterialevaluator.C
     EngineeringModels/qclinearstatic.C
+    EngineeringModels/pdelta.C
     )
 
 set (sm_loads

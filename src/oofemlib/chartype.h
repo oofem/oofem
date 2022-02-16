@@ -60,6 +60,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(ConductivityMatrix, 9)                 \
     ENUM_ITEM_WITH_VALUE(CapacityMatrix, 10)                    \
     ENUM_ITEM_WITH_VALUE(InitialStressMatrix, 11)               \
+    ENUM_ITEM_WITH_VALUE(LumpedInitialStressMatrix, 12)         \
     /* characteristic vectors */ \
     ENUM_ITEM_WITH_VALUE(ExternalForcesVector, 150)                                       \
     ENUM_ITEM_WITH_VALUE(InternalForcesVector, 151)                                       \

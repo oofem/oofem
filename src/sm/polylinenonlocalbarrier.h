@@ -84,7 +84,7 @@ public:
 
     virtual bool isActivated(const FloatArray &c1, const FloatArray &c2);
 
-    void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
+  void applyConstraint(const double cl, const FloatArray &c1, const FloatArray &c2, double &weight,
                          bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei) override;
 
     void initializeFrom(InputRecord &ir) override;

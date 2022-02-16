@@ -907,6 +907,8 @@ StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computeLumpedMassMatrix(answer, tStep);
     } else if ( mtrx == InitialStressMatrix ) {
         this->computeInitialStressMatrix(answer, tStep);
+    } else if ( mtrx == LumpedInitialStressMatrix ) {
+        this->computeLumpedInitialStressMatrix(answer, tStep);
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }

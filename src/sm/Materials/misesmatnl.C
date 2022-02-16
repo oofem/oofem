@@ -167,7 +167,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
 
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+        w = computeWeightFunction(this->cl, distance) * nearElem->computeVolumeAround(pos->nearGp);
         pos->weight = w;
         wsum += w;
         xprev = x;
@@ -184,7 +184,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
         damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-            w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+            w = computeWeightFunction(this->cl, distance) * nearElem->computeVolumeAround(pos->nearGp);
             pos->weight = w;
             wsum += w;
         }
@@ -202,7 +202,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+        w = computeWeightFunction(this->cl, distance) * nearElem->computeVolumeAround(pos->nearGp);
         pos->weight = w;
         wsum += w;
     }

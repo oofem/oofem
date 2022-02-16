@@ -40,6 +40,13 @@
 
 namespace oofem {
 
+  ConnectivityTable::ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0)
+{
+  #ifdef _OPENMP
+    omp_init_lock(&initLock);
+#endif
+}
+
 void
 ConnectivityTable :: reset()
 {
@@ -59,7 +66,13 @@ ConnectivityTable :: instanciateConnectivityTable()
     if ( nodalConnectivityFlag ) {
         return;                     // already initialized
     }
-
+#ifdef _OPENMP
+    omp_set_lock(&initLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+    if ( this->nodalConnectivityFlag ) {
+        omp_unset_lock(&initLock); 
+        return;
+    }
+#endif   
 //    OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
     for ( auto &elem : domain->giveElements() ) {
@@ -89,6 +102,11 @@ ConnectivityTable :: instanciateConnectivityTable()
     }
 
     nodalConnectivityFlag = 1;
+    
+ #ifdef _OPENMP
+    omp_unset_lock(&initLock);
+#endif
+ 
 }
 
 const IntArray *

@@ -199,7 +199,10 @@ protected:
     /// Flag indicating elementIP tables are initialized.
     bool elementIPListsInitialized;
     IntArray elementListsInitialized;
+    bool initialized;
 #ifdef _OPENMP
+    omp_lock_t initLock;
+    omp_lock_t buildOctreeDataStructureLock;
     omp_lock_t ElementIPDataStructureLock;
 #endif
 public:

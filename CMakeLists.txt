@@ -884,8 +884,11 @@ endif()
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
-ProcessorCount(N)
+#ProcessorCount(N)
 if (N EQUAL 0)
+  set (N 1)
+endif ()
+if (USE_OPENMP) # OPENMP will use all processors by default
   set (N 1)
 endif ()
 
