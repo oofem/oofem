@@ -344,6 +344,7 @@ if (USE_PARDISO_ORG)
     if (${PARDISO_ORG_LIB} STREQUAL "PARDISO_ORG_LIB-NOTFOUND")
         message (FATAL_ERROR "Pardiso library not found")
     endif ()
+    message(STATUS "PARDISO_ORG_LIB = ${PARDISO_ORG_LIB}")
     list (APPEND EXT_LIBS ${PARDISO_ORG_LIB} blas lapack gfortran pthread)
     set (CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILES_FLAGS} -fopenmp")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp" ) 
@@ -883,8 +884,11 @@ endif()
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
-ProcessorCount(N)
+#ProcessorCount(N)
 if (N EQUAL 0)
+  set (N 1)
+endif ()
+if (USE_OPENMP) # OPENMP will use all processors by default
   set (N 1)
 endif ()
 

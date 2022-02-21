@@ -165,11 +165,10 @@ public:
 class MatrixProductAssembler : public VectorAssembler
 {
 protected:
-    MatrixAssembler mAssem;
-    const FloatArray &vec;
+    const MatrixAssembler &mAssem;
 
 public:
-    MatrixProductAssembler(MatrixAssembler m, const FloatArray &vec): VectorAssembler(), mAssem(m), vec(vec) {}
+    MatrixProductAssembler(const MatrixAssembler &m): VectorAssembler(), mAssem(m) {}
 
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;

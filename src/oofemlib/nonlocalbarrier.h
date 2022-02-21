@@ -74,13 +74,14 @@ public:
 
     /**
      * Abstract method modifying the integration weight between master (c1) and source (c2) point.
+     * @param cl Characteristic length of nonlocal model.
      * @param c1 Coordinates of master point.
      * @param c2 Coordinates of source point.
      * @param weight Original integration weight; on output modified weight.
      * @param[out] shieldFlag Set to true if shielding is activated.
      * @param nei The element with the non local material extension.
      */
-    virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
+    virtual void applyConstraint(const double cl, const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei) = 0;
 
     /**

@@ -126,7 +126,7 @@ MazarsNLMaterial :: initializeFrom(InputRecord &ir)
 
 
 double
-MazarsNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
+MazarsNLMaterial :: computeWeightFunction(const double R, const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 

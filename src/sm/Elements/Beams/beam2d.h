@@ -82,6 +82,8 @@ public:
 
     void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) override;
     void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeLumpedInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;

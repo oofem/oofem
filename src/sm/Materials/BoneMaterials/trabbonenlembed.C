@@ -158,7 +158,7 @@ TrabBoneNLEmbed :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-TrabBoneNLEmbed :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
+TrabBoneNLEmbed :: computeWeightFunction(const double R, const FloatArray &src, const FloatArray &coord) const
 {
     double dist = distance(src, coord);
 

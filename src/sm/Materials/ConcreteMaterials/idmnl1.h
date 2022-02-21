@@ -130,6 +130,7 @@ public:
     void computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio, GaussPoint *gp, bool &flag) const;
     /**
      * Function used to compute the new weight based on stress-based averaging.
+     * @param cl Characteristic length of the nonlocal model 
      * @param nx x-component of the first eigenvector of effective stress.
      * @param ny y-component of the first eigenvector of effective stress.
      * @param ratio Value of the ratio of the second over the first eigenvalue of the stress tensor (sigma2/sigma1).
@@ -138,8 +139,8 @@ public:
      * @param weight Original weight.
      * @return New weight based on stress-based averaging.
      */
-    double computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight) const;
-    double computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp) const;
+    double computeStressBasedWeight(double cl, double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight) const;
+  double computeStressBasedWeightForPeriodicCell(double cl, double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp) const;
 
     double computeLocalEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
     { return IsotropicDamageMaterial1 :: computeEquivalentStrain(strain, gp, tStep); }

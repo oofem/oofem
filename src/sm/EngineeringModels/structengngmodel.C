@@ -82,6 +82,11 @@ void InitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Elem
     static_cast< StructuralElement & >( element ).computeInitialStressMatrix(answer, tStep);
 }
 
+void LumpedInitialStressMatrixAssembler :: matrixFromElement(FloatMatrix &answer, Element &element, TimeStep *tStep) const
+{
+    static_cast< StructuralElement & >( element ).computeLumpedInitialStressMatrix(answer, tStep);
+}
+
 
 
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),

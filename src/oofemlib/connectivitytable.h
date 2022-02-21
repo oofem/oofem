@@ -39,6 +39,10 @@
 
 #include <vector>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 class IntArray;
 class Domain;
@@ -62,12 +66,14 @@ private:
     std::vector< IntArray > nodalConnectivity;
     /// Flag indicating assembled connectivity table for domain.
     int nodalConnectivityFlag;
-
+#ifdef _OPENMP
+    omp_lock_t initLock;
+#endif
 public:
     /**
      * Constructor. Creates new Connectivity table belonging to given domain.
      */
-    ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0) { }
+      ConnectivityTable(Domain * d) ;
     /// Destructor
     ~ConnectivityTable() { }
     /// reset receiver to an initial state (will force table update, when needed next time)
