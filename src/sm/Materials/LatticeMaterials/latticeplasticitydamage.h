@@ -78,6 +78,38 @@ protected:
 
     double tempDamage = 0.;
 
+    double dissipation = 0.;
+    
+    double tempDissipation = 0.;
+
+    double tensionDissipation = 0.;
+    
+    double tempTensionDissipation = 0.;
+
+    double compressionDissipation = 0.;
+    
+    double tempCompressionDissipation = 0.;
+
+    double shearDissipation = 0.;
+    
+    double tempShearDissipation = 0.;
+
+    double deltaDissipation = 0.;
+    
+    double tempDeltaDissipation = 0.;
+
+    double tensionDeltaDissipation = 0.;
+    
+    double tempTensionDeltaDissipation = 0.;
+
+    double compressionDeltaDissipation = 0.;
+    
+    double tempCompressionDeltaDissipation = 0.;
+
+    double shearDeltaDissipation = 0.;
+    
+    double tempShearDeltaDissipation = 0.;
+    
     //double e0 = 0.;
 
     int compressionFlag = 0;
@@ -110,6 +142,26 @@ public:
 
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
+    double giveDissipation() const override {return dissipation;}
+    double giveTensionDissipation() const {return tensionDissipation;}
+    double giveCompressionDissipation() const {return compressionDissipation;}
+    double giveShearDissipation() const {return shearDissipation;}
+
+    double giveDeltaDissipation() const override {return deltaDissipation;}
+    double giveTensionDeltaDissipation() const {return tensionDeltaDissipation;}
+    double giveCompressionDeltaDissipation() const {return compressionDeltaDissipation;}
+    double giveShearDeltaDissipation() const {return shearDeltaDissipation;}
+    
+    void setTempDissipation(double newDiss) {this->tempDissipation = newDiss;}
+    void setTempTensionDissipation(double newDiss) {this->tempTensionDissipation = newDiss;}
+    void setTempCompressionDissipation(double newDiss) {this->tempCompressionDissipation = newDiss;}
+    void setTempShearDissipation(double newDiss) {this->tempShearDissipation = newDiss;}
+
+    void setTempDeltaDissipation(double newDiss) {this->tempDeltaDissipation = newDiss;}
+    void setTempTensionDeltaDissipation(double newDiss) {this->tempTensionDeltaDissipation = newDiss;}
+    void setTempCompressionDeltaDissipation(double newDiss) {this->tempCompressionDeltaDissipation = newDiss;}
+    void setTempShearDeltaDissipation(double newDiss) {this->tempShearDeltaDissipation = newDiss;}
+    
     int giveCompressionFlag() const { return compressionFlag; }
 
     void setCompressionFlag(int flag) { compressionFlag = flag; }
@@ -205,6 +257,12 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
+
+    double computeDeltaDissipation(const double omega,
+				   const FloatArray &reducedStrain,
+				   GaussPoint *gp,
+				   TimeStep *atTime) const;
+    
 
     FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma,
                                    const double deltaLambda,

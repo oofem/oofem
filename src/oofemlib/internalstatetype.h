@@ -192,7 +192,13 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_MacroSlipVector, 142) \
     ENUM_ITEM_WITH_VALUE(IST_TransferStress, 143) \
     ENUM_ITEM_WITH_VALUE(IST_MacroSlipGradient, 144) \
-    ENUM_ITEM_WITH_VALUE(IST_ReinfMembraneStress, 145)
+    ENUM_ITEM_WITH_VALUE(IST_ReinfMembraneStress, 145)\
+    ENUM_ITEM_WITH_VALUE(IST_TensionDissWork, 146) \
+    ENUM_ITEM_WITH_VALUE(IST_TensionDeltaDissWork, 147) \
+    ENUM_ITEM_WITH_VALUE(IST_ShearDissWork, 148) \
+    ENUM_ITEM_WITH_VALUE(IST_ShearDeltaDissWork, 149) \
+    ENUM_ITEM_WITH_VALUE(IST_CompressionDissWork, 150) \
+    ENUM_ITEM_WITH_VALUE(IST_CompressionDeltaDissWork, 151)      
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

@@ -665,16 +665,54 @@ LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
         reducedStrain -= FloatArrayF< 6 >(thermalStrain);
     }
 
-    auto stress = this->performPlasticityReturn(gp, reducedStrain, tStep);
-
+    auto effectiveStress = this->performPlasticityReturn(gp, reducedStrain, tStep);
     double omega = 0.;
     if ( damageFlag == 1 ) {
         this->performDamageEvaluation(gp, reducedStrain, tStep);
         omega = status->giveTempDamage();
     }
 
+    auto stress = effectiveStress;
     stress *= ( 1. - omega );
 
+    //TODO: Compute dissipation
+    double tempDissipation = status->giveDissipation();
+    double tempTensionDissipation = status->giveTensionDissipation();
+    double tempShearDissipation = status->giveShearDissipation();
+    double tempCompressionDissipation = status->giveCompressionDissipation();
+    double tempDeltaDissipation = 0., tempTensionDeltaDissipation = 0., tempShearDeltaDissipation = 0., tempCompressionDeltaDissipation = 0.;
+    tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
+
+    //Check what stress state the model is in
+    double tempKappaP = status->giveTempKappaP();
+    auto reducedEffectiveStress = effectiveStress [ { 0, 1, 2 } ];
+    int surface = checkTransition(reducedEffectiveStress, tempKappaP, gp, tStep);
+    
+    if(effectiveStress.at(1) > 0.){
+      tempTensionDeltaDissipation = tempDeltaDissipation;
+      tempTensionDissipation +=tempDeltaDissipation;
+    }
+    else if(stress.at(1)<0 && surface == 0){
+      tempShearDeltaDissipation =  tempDeltaDissipation;
+      tempShearDissipation +=tempDeltaDissipation;
+    }
+    else{
+      tempCompressionDeltaDissipation = tempDeltaDissipation;
+      tempCompressionDissipation +=tempDeltaDissipation;
+    }
+    
+    tempDissipation += tempDeltaDissipation;
+
+    status->setTempDissipation(tempDissipation);
+    status->setTempTensionDissipation(tempTensionDissipation);
+    status->setTempShearDissipation(tempShearDissipation);
+    status->setTempCompressionDissipation(tempCompressionDissipation);
+
+    status->setTempDeltaDissipation(tempDeltaDissipation);
+    status->setTempTensionDeltaDissipation(tempTensionDeltaDissipation);
+    status->setTempShearDeltaDissipation(tempShearDeltaDissipation);
+    status->setTempCompressionDeltaDissipation(tempCompressionDeltaDissipation);
+    
     status->letTempLatticeStrainBe(originalStrain);
     status->letTempReducedLatticeStrainBe(reducedStrain);
     status->letTempLatticeStressBe(stress);
@@ -753,12 +791,6 @@ LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 
 
     double crackWidth = norm(tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
 
-    //TODO: Compute dissipation
-    // double tempDissipation = status->giveDissipation();
-    // double tempDeltaDissipation = 0.;
-    // tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, atTime);
-    // tempDissipation += tempDeltaDissipation;
-
     status->setTempKappaDOne(tempKappaDOne);
     status->setTempKappaDTwo(tempKappaDTwo);
     status->setTempDamage(omega);
@@ -771,109 +803,45 @@ LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 
  *  }*/
 
 
-// double
-// LatticePlasticityDamage :: computeDeltaDissipation(double omega,
-//                                            FloatArray &reducedStrain,
-//                                            GaussPoint *gp,
-//                                            TimeStep *atTime)
-// {
-//     LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-//     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-//     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-//     double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+double
+LatticePlasticityDamage :: computeDeltaDissipation(const double omega,
+                                           const FloatArray &tempReducedStrain,
+                                           GaussPoint *gp,
+                                           TimeStep *tStep) const
+{
+    auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
-//     const double eShear =  this->alphaOne * eNormal;
-//     const double eTorsion =  this->alphaTwo * eNormal / 12.;
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
 
-//     FloatArray reducedStrainOld;
+    auto plasticStrain = status->givePlasticLatticeStrain() [ { 0, 1, 2 } ];
+    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain() [ { 0, 1, 2 } ];
+    auto deltaPlasticStrain = tempPlasticStrain-plasticStrain;
+    auto reducedStrain = status->giveReducedLatticeStrain();
+    double omegaOld = status->giveDamage();
+    double deltaOmega;
 
-//     reducedStrainOld = status->giveReducedStrain();
-//     double omegaOld = status->giveDamage();
-//     double deltaOmega;
+    deltaOmega = ( omega - omegaOld );
+    double deltaDissPlastic =  length * (1.-omega)*((tempReducedStrain.at(1)-tempPlasticStrain.at(1) +
+						     reducedStrain.at(1)-plasticStrain.at(1))/2.
+						    * this->eNormalMean * deltaPlasticStrain.at(1) +
+						    (tempReducedStrain.at(2)-tempPlasticStrain.at(2) +
+						     reducedStrain.at(2)-plasticStrain.at(2))/2.
+						    *this->alphaOne * this->eNormalMean * deltaPlasticStrain.at(2) +
+						    (tempReducedStrain.at(3)-tempPlasticStrain.at(3) +
+						     reducedStrain.at(3)-plasticStrain.at(3))/2.
+				     *this->alphaOne * this->eNormalMean * deltaPlasticStrain.at(3));
 
-//     FloatArray crackOpeningOld(6);
-//     crackOpeningOld.times(omegaOld);
-//     crackOpeningOld.times(length);
-//     FloatArray stressOld( status->giveStressVector() );
-//     FloatArray intermediateStrain(6);
+    double deltaDissDamage  = 0.5 * length * ( pow( ( tempReducedStrain.at(1)-tempPlasticStrain.at(1) + reducedStrain.at(1) - plasticStrain.at(1) ) / 2., 2. ) * this->eNormalMean +
+					  pow( ( tempReducedStrain.at(2)-tempPlasticStrain.at(2) + reducedStrain.at(2) - plasticStrain.at(2) ) / 2., 2. ) * this->alphaOne*this->eNormalMean +
+					  pow( ( tempReducedStrain.at(3)-tempPlasticStrain.at(3) + reducedStrain.at(3) - plasticStrain.at(3) ) / 2., 2. ) * this->alphaOne*this->eNormalMean +
+					  pow( ( tempReducedStrain.at(4) + reducedStrain.at(4) ) / 2., 2. ) * this->alphaTwo * this->eNormalMean +
+					  pow( ( tempReducedStrain.at(5) + reducedStrain.at(5) ) / 2., 2. ) * this->alphaTwo * this->eNormalMean +
+					  pow( ( tempReducedStrain.at(6) + reducedStrain.at(6) ) / 2., 2. ) * this->alphaTwo* this->eNormalMean ) * deltaOmega;
 
-//     double tempDeltaDissipation = 0.;
-//     double deltaTempDeltaDissipation = 0.;
+    double totalDeltaDiss = deltaDissDamage + deltaDissPlastic;    
 
-//     double intermediateOmega = 0;
-//     FloatArray oldIntermediateStrain(6);
-//     oldIntermediateStrain = reducedStrainOld;
-//     double oldIntermediateOmega = omegaOld;
-//     deltaOmega = ( omega - omegaOld );
-//     double testDissipation  = 0.5 * length * ( pow( ( reducedStrain.at(1) + reducedStrainOld.at(1) ) / 2., 2. ) * eNormal +
-//                                                pow( ( reducedStrain.at(2) + reducedStrainOld.at(2) ) / 2., 2. ) * eShear +
-//                                                pow( ( reducedStrain.at(3) + reducedStrainOld.at(3) ) / 2., 2. ) * eShear +
-//                                                pow( ( reducedStrain.at(4) + reducedStrainOld.at(4) ) / 2., 2. ) * eTorsion +
-//                                                pow( ( reducedStrain.at(5) + reducedStrainOld.at(5) ) / 2., 2. ) * eTorsion +
-//                                                pow( ( reducedStrain.at(6) + reducedStrainOld.at(6) ) / 2., 2. ) * eTorsion ) * deltaOmega;
-//     double intervals = 0.;
-
-//     double referenceGf = 0;
-
-//     if ( softeningType == 1 ) {
-//         referenceGf = e0 * eNormal * this->wf / 2.;
-//     } else {   //This is for the exponential law. Should also implement it for the bilinear one.
-//         referenceGf = e0 * eNormal * this->wf;
-//     }
-
-//     if ( testDissipation / ( referenceGf ) > 0.001 ) {
-//         intervals = 1000. * testDissipation / referenceGf;
-//     } else {
-//         intervals = 1.;
-//     }
-
-//     if ( intervals > 1000. ) {
-//         intervals = 1000.;
-//     }
-
-//     double oldKappa = status->giveKappa();
-//     double f, equivStrain;
-//     if ( deltaOmega > 0 ) {
-//         for ( int k = 0; k < intervals; k++ ) {
-//             intermediateStrain(0) = reducedStrainOld(0) + ( k + 1 ) / intervals * ( reducedStrain(0) - reducedStrainOld(0) );
-//             intermediateStrain(1) = reducedStrainOld(1) + ( k + 1 ) / intervals * ( reducedStrain(1) - reducedStrainOld(1) );
-//             intermediateStrain(2) = reducedStrainOld(2) + ( k + 1 ) / intervals * ( reducedStrain(2) - reducedStrainOld(2) );
-//             intermediateStrain(3) = reducedStrainOld(3) + ( k + 1 ) / intervals * ( reducedStrain(3) - reducedStrainOld(3) );
-//             intermediateStrain(4) = reducedStrainOld(4) + ( k + 1 ) / intervals * ( reducedStrain(4) - reducedStrainOld(4) );
-//             intermediateStrain(5) = reducedStrainOld(5) + ( k + 1 ) / intervals * ( reducedStrain(5) - reducedStrainOld(5) );
-
-//             this->computeEquivalentStrain(equivStrain, intermediateStrain, gp, atTime);
-//             f = equivStrain - oldKappa;
-//             if ( f > 0 ) {
-//                 this->computeDamageParam(intermediateOmega, equivStrain, intermediateStrain, gp);
-//                 deltaOmega = ( intermediateOmega - oldIntermediateOmega );
-//                 deltaTempDeltaDissipation =
-//                     0.5 * length * ( pow( ( intermediateStrain(0) + oldIntermediateStrain(0) ) / 2., 2. ) * eNormal +
-//                                      pow( ( intermediateStrain(1) + oldIntermediateStrain(1) ) / 2., 2. ) * eShear +
-//                                      pow( ( intermediateStrain(2) + oldIntermediateStrain(2) ) / 2., 2. ) * eShear +
-//                                      pow( ( intermediateStrain(3) + oldIntermediateStrain(3) ) / 2., 2. ) * eTorsion +
-//                                      pow( ( intermediateStrain(4) + oldIntermediateStrain(4) ) / 2., 2. ) * eTorsion +
-//                                      pow( ( intermediateStrain(5) + oldIntermediateStrain(5) ) / 2., 2. ) * eTorsion ) * deltaOmega;
-
-//                 oldKappa = equivStrain;
-//                 oldIntermediateOmega = intermediateOmega;
-//             } else {
-//                 deltaTempDeltaDissipation = 0.;
-//             }
-
-//             tempDeltaDissipation += deltaTempDeltaDissipation;
-//             oldIntermediateStrain = intermediateStrain;
-//         }
-//     } else {
-//         tempDeltaDissipation = 0.;
-//     }
-
-//     if ( tempDeltaDissipation >= 2. * referenceGf ) {
-//         tempDeltaDissipation = 2. * referenceGf;
-//     }
-
-//     return tempDeltaDissipation;
-// }
+    return totalDeltaDiss;
+}
 
 
 FloatMatrixF< 6, 6 >
@@ -944,7 +912,41 @@ LatticePlasticityDamage::giveIPValue(FloatArray &answer,
         answer.at(1);
         answer.at(1) = giveTensileStrength(gp, atTime);
         return 1;
-    } else {
+    } else if ( type == IST_TensionDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveTensionDissipation();
+        return 1;
+    } else if ( type == IST_TensionDeltaDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveTensionDeltaDissipation();
+        return 1;
+    } else if ( type == IST_ShearDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveShearDissipation();
+        return 1;
+    } else if ( type == IST_ShearDeltaDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveShearDeltaDissipation();
+        return 1;
+    } else if ( type == IST_CompressionDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveCompressionDissipation();
+        return 1;
+    } else if ( type == IST_CompressionDeltaDissWork ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = status->giveCompressionDeltaDissipation();
+        return 1;
+    }
+
+
+
+    else {
         return LatticeLinearElastic::giveIPValue(answer, gp, type, atTime);
     }
 }
@@ -961,6 +963,14 @@ LatticePlasticityDamageStatus::initTempStatus()
     this->tempKappaDOne = this->kappaDOne;
     this->tempKappaDTwo = this->kappaDTwo;
     this->tempDamage = this->damage;
+    this->tempDissipation = this->dissipation;
+    this->tempTensionDissipation = this->tensionDissipation;
+    this->tempShearDissipation = this->shearDissipation;
+    this->tempCompressionDissipation = this->compressionDissipation;
+    this->tempDeltaDissipation = this->deltaDissipation;
+    this->tempTensionDeltaDissipation = this->tensionDeltaDissipation;
+    this->tempShearDeltaDissipation = this->shearDeltaDissipation;
+    this->tempCompressionDeltaDissipation = this->compressionDeltaDissipation;    
 }
 
 void
@@ -973,7 +983,7 @@ LatticePlasticityDamageStatus::printOutputAt(FILE *file, TimeStep *tStep) const
         fprintf(file, "% .8e ", s);
     }
 
-    fprintf(file, ", kappaP %.8e, kappaDOne %.8e, kappaDTwo %.8e, damage %.8e, deltaDissipation %.8e, dissipation %.8e, crackFlag %d, crackWidth %.8e \n", this->kappaP, this->kappaDOne,  this->kappaDTwo, this->damage, this->deltaDissipation, this->dissipation, this->crackFlag, this->crackWidth);
+    fprintf(file, ", kappaP %.8e, kappaDOne %.8e, kappaDTwo %.8e, damage %.8e, deltaDissipation %.8e, dissipation %.8e,  tensionDeltaDissipation %.8e, tensionDissipation %.8e,  shearDeltaDissipation %.8e, shearDissipation %.8e,  compressionDeltaDissipation %.8e, compressionDissipation %.8e, crackFlag %d, crackWidth %.8e \n", this->kappaP, this->kappaDOne,  this->kappaDTwo, this->damage, this->deltaDissipation, this->dissipation, this->tensionDeltaDissipation, this->tensionDissipation, this->shearDeltaDissipation, this->shearDissipation, this->compressionDeltaDissipation, this->compressionDissipation, this->crackFlag, this->crackWidth);
 }
 
 
@@ -990,6 +1000,14 @@ LatticePlasticityDamageStatus::updateYourself(TimeStep *atTime)
     this->kappaDOne = this->tempKappaDOne;
     this->kappaDTwo = this->tempKappaDTwo;
     this->damage = this->tempDamage;
+    this->dissipation = this->tempDissipation;
+    this->tensionDissipation = this->tempTensionDissipation;
+    this->compressionDissipation = this->tempCompressionDissipation;
+    this->shearDissipation = this->tempShearDissipation;
+    this->deltaDissipation = this->tempDeltaDissipation;
+    this->tensionDeltaDissipation = this->tempTensionDeltaDissipation;
+    this->compressionDeltaDissipation = this->tempCompressionDeltaDissipation;
+    this->shearDeltaDissipation = this->tempShearDeltaDissipation;
 }
 
 
@@ -1014,6 +1032,31 @@ LatticePlasticityDamageStatus::saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(& damage, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+    if ( !stream.write(& dissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& tensionDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& compressionDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& shearDissipation, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& deltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& tensionDeltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& compressionDeltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.write(& shearDeltaDissipation, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
 }
 
 
@@ -1037,5 +1080,30 @@ LatticePlasticityDamageStatus::restoreContext(DataStream &stream, ContextMode mo
     if ( !stream.read(& damage, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+    if ( !stream.read(& dissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& tensionDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& shearDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& compressionDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& deltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& tensionDeltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& shearDeltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream.read(& compressionDeltaDissipation, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    
 }
 }     // end namespace oofem
