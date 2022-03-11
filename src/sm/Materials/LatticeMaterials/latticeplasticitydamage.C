@@ -378,7 +378,9 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                                                  const FloatArrayF< 6 > &reducedStrain,
                                                  TimeStep *tStep) const
 {
-    LatticePlasticityDamage_ReturnResult returnResult = RR_Unknown;
+  FloatArrayF<6> answer;
+  
+  LatticePlasticityDamage_ReturnResult returnResult = RR_Unknown;
 
     double fcLocal =  giveCompressiveStrength(gp, tStep);
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
@@ -436,7 +438,12 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                     OOFEM_LOG_INFO("deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
                     OOFEM_LOG_INFO("targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
 
-                    OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
+		    OOFEM_WARNING("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up. Delete element.\n");
+		    status->setTempDeletionFlag(1);
+		    for(int k=0; k<6;k++){
+		      answer.at(k+1) = 0.;
+		    }
+		    return answer;
                 }
 
                 subIncrementFlag = 1;
@@ -478,7 +485,7 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
 
     //    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
 
-    auto answer = assemble< 6 >(stress, { 0, 1, 2 });
+    answer = assemble< 6 >(stress, { 0, 1, 2 });
     answer.at(4) = this->alphaTwo * this->eNormalMean * reducedStrain.at(4);
     answer.at(5) = this->alphaTwo * this->eNormalMean * reducedStrain.at(5);
     answer.at(6) = this->alphaTwo * this->eNormalMean * reducedStrain.at(6);
@@ -659,6 +666,16 @@ LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
 
+    FloatArrayF<6> stress;
+    
+    if(status->giveTempDeletionFlag()==1){
+      //Deal with deleted element      
+      return stress;
+      
+    }
+
+
+    
     auto reducedStrain = originalStrain;
     auto thermalStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
     if ( thermalStrain.giveSize() ) {
@@ -666,14 +683,8 @@ LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     }
 
     auto effectiveStress = this->performPlasticityReturn(gp, reducedStrain, tStep);
-    double omega = 0.;
-    if ( damageFlag == 1 ) {
-        this->performDamageEvaluation(gp, reducedStrain, tStep);
-        omega = status->giveTempDamage();
-    }
 
-    auto stress = effectiveStress;
-    stress *= ( 1. - omega );
+    stress = effectiveStress;
 
     //TODO: Compute dissipation
     double tempDissipation = status->giveDissipation();
@@ -681,6 +692,21 @@ LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     double tempShearDissipation = status->giveShearDissipation();
     double tempCompressionDissipation = status->giveCompressionDissipation();
     double tempDeltaDissipation = 0., tempTensionDeltaDissipation = 0., tempShearDeltaDissipation = 0., tempCompressionDeltaDissipation = 0.;
+    
+    if(status->giveTempDeletionFlag()==1){
+      //Deal with deleted element      
+      return stress;
+      
+    }
+    
+    double omega = 0.;
+    if ( damageFlag == 1 ) {
+        this->performDamageEvaluation(gp, reducedStrain, tStep);
+        omega = status->giveTempDamage();
+    }
+
+    stress *= ( 1. - omega );
+
     tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
 
     //Check what stress state the model is in
@@ -967,10 +993,11 @@ LatticePlasticityDamageStatus::initTempStatus()
     this->tempTensionDissipation = this->tensionDissipation;
     this->tempShearDissipation = this->shearDissipation;
     this->tempCompressionDissipation = this->compressionDissipation;
-    this->tempDeltaDissipation = this->deltaDissipation;
-    this->tempTensionDeltaDissipation = this->tensionDeltaDissipation;
-    this->tempShearDeltaDissipation = this->shearDeltaDissipation;
-    this->tempCompressionDeltaDissipation = this->compressionDeltaDissipation;    
+    this->tempDeltaDissipation = 0.;
+    this->tempTensionDeltaDissipation = 0.;
+    this->tempShearDeltaDissipation = 0.;
+    this->tempCompressionDeltaDissipation = 0.;    
+    this->tempDeletionFlag = this->deletionFlag;
 }
 
 void
@@ -1008,6 +1035,7 @@ LatticePlasticityDamageStatus::updateYourself(TimeStep *atTime)
     this->tensionDeltaDissipation = this->tempTensionDeltaDissipation;
     this->compressionDeltaDissipation = this->tempCompressionDeltaDissipation;
     this->shearDeltaDissipation = this->tempShearDeltaDissipation;
+    this->deletionFlag = this->tempDeletionFlag;
 }
 
 

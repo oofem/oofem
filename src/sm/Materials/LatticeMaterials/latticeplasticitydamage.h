@@ -109,6 +109,9 @@ protected:
     double shearDeltaDissipation = 0.;
     
     double tempShearDeltaDissipation = 0.;
+
+    int deletionFlag = 0;
+    int tempDeletionFlag = 1.;
     
     //double e0 = 0.;
 
@@ -161,6 +164,10 @@ public:
     void setTempTensionDeltaDissipation(double newDiss) {this->tempTensionDeltaDissipation = newDiss;}
     void setTempCompressionDeltaDissipation(double newDiss) {this->tempCompressionDeltaDissipation = newDiss;}
     void setTempShearDeltaDissipation(double newDiss) {this->tempShearDeltaDissipation = newDiss;}
+
+    void setTempDeletionFlag(int newFlag) {this->tempDeletionFlag = newFlag;}
+    int giveDeletionFlag() const{ return this->deletionFlag;}
+    int giveTempDeletionFlag() const{ return this->tempDeletionFlag;}
     
     int giveCompressionFlag() const { return compressionFlag; }
 
