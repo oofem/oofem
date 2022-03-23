@@ -1,4 +1,4 @@
-name: Build-Unity
+name: Build_Unity
 
 on: workflow_dispatch
 
