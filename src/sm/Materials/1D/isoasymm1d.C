@@ -48,10 +48,13 @@ IsotropicAsymmetric1DMaterial :: IsotropicAsymmetric1DMaterial(int n, Domain *d)
 { }
 
 IsotropicAsymmetric1DMaterial :: IsotropicAsymmetric1DMaterial(int n, Domain *d,
-                                                                 double _Ec, double _Et) :
+                                                                 double _Ec, double _Et,
+                                                                 double _efc, double _eft) :
     StructuralMaterial(n, d),
     Et(_Et),
     Ec(_Ec),
+    efc(_efc),
+    eft(_eft),
     a(0.),
     m(15.)
 {}
@@ -64,6 +67,8 @@ IsotropicAsymmetric1DMaterial :: initializeFrom(InputRecord &ir)
 
     IR_GIVE_FIELD(ir, Ec, _IFT_IsotropicAsymmetric1DMaterial_ec);
     IR_GIVE_FIELD(ir, Et, _IFT_IsotropicAsymmetric1DMaterial_et);
+    IR_GIVE_FIELD(ir, efc, _IFT_IsotropicAsymmetric1DMaterial_efc);
+    IR_GIVE_FIELD(ir, eft, _IFT_IsotropicAsymmetric1DMaterial_eft);
     IR_GIVE_FIELD(ir, a, _IFT_IsotropicAsymmetric1DMaterial_talpha);
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_IsotropicAsymmetric1DMaterial_m);
 
@@ -77,6 +82,8 @@ IsotropicAsymmetric1DMaterial :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(this->Ec, _IFT_IsotropicAsymmetric1DMaterial_ec);
     input.setField(this->Et, _IFT_IsotropicAsymmetric1DMaterial_et);
+    input.setField(this->efc, _IFT_IsotropicAsymmetric1DMaterial_efc);
+    input.setField(this->eft, _IFT_IsotropicAsymmetric1DMaterial_eft);
     input.setField(this->a, _IFT_IsotropicAsymmetric1DMaterial_talpha);
     input.setField(this->m, _IFT_IsotropicAsymmetric1DMaterial_m);
 
@@ -92,6 +99,12 @@ void IsotropicAsymmetric1DMaterial :: saveContext(DataStream &stream, ContextMod
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.write(Et) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(efc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(eft) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.write(a) ) {
@@ -113,6 +126,12 @@ void IsotropicAsymmetric1DMaterial :: restoreContext(DataStream &stream, Context
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(Et) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(efc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(eft) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(a) ) {
@@ -151,8 +170,16 @@ IsotropicAsymmetric1DMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
+    double E;
     double eps = status->giveTempStrainVector().at(1);
-    double E = this->Ec+0.5*(1+tanh(this->m*eps))*(this->Et-this->Ec);
+    if ((eps >0.0) && (eps>this->eft)) { // check for tension failure
+        E = 1.e-6* this->Et;
+    } else if ((eps<0.0) && (eps <this->efc)) { // check for compression failure
+        E = 1.e-6* this->Ec;
+    } else {
+        // elastic
+        E = this->Ec+0.5*(1+tanh(this->m*eps))*(this->Et-this->Ec);
+    }
 
     return {E};
 }
@@ -162,8 +189,16 @@ IsotropicAsymmetric1DMaterial::giveRealStressVector_1d(const FloatArrayF< 1 > &r
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
+    double s;
     double eps = reducedE.at(1);
-    double s=(0.5*this->Et-0.5*this->Ec)*((log(cosh(this->m*eps)))/(this->m))+eps*(0.5*this->Ec+0.5*this->Et);
+    
+    if ((eps >0.0) && (eps>this->eft)) { // check for tension failure
+        s = 0.0;
+    } else if ((eps<0.0) && (eps <this->efc)) { // check for compression failure
+        s = 0.0;
+    } else {
+        s=(0.5*this->Et-0.5*this->Ec)*((log(cosh(this->m*eps)))/(this->m))+eps*(0.5*this->Ec+0.5*this->Et);
+    }
 
     status->letTempStressVectorBe({s});
     status->letTempStrainVectorBe(reducedE);

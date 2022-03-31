@@ -48,6 +48,8 @@
 #define _IFT_IsotropicAsymmetric1DMaterial_Name "isoasymm1d"
 #define _IFT_IsotropicAsymmetric1DMaterial_ec "ec"
 #define _IFT_IsotropicAsymmetric1DMaterial_et "et"
+#define _IFT_IsotropicAsymmetric1DMaterial_efc "efc"
+#define _IFT_IsotropicAsymmetric1DMaterial_eft "eft"
 #define _IFT_IsotropicAsymmetric1DMaterial_talpha "talpha"
 #define _IFT_IsotropicAsymmetric1DMaterial_m "m"
 
@@ -76,6 +78,10 @@ protected:
     double Et = 0;
     /// Young's modulus in compression
     double Ec = 0;
+    // failure strain in compression 
+    double efc = 1.0; // positive value means efc not set, no failure in compression
+    // failure strain in tension
+    double eft = -1.0; // negative values means eft not set, no failure in tension
     /// Alpha
     double a = 0;
     /// Regularization parameter
@@ -97,7 +103,7 @@ public:
      * @param E Young modulus.
      * @param nu Poisson ratio.
      */
-    IsotropicAsymmetric1DMaterial(int n, Domain *d, double Et, double Ec);
+    IsotropicAsymmetric1DMaterial(int n, Domain *d, double Et, double Ec, double efc, double eft);
 
     const char *giveClassName() const override { return "IsotropicAsymmetric1DMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IsotropicAsymmetric1DMaterial_Name; }
