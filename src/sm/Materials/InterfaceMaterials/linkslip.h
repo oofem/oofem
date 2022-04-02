@@ -38,7 +38,7 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
-///@name Input fields for LatticeSlip
+///@name Input fields for LinkSlip
 //@{
 #define _IFT_LinkSlip_Name "linkslip"
 #define _IFT_LinkSlip_talpha "talpha"
@@ -54,32 +54,30 @@
 //@}
 
 namespace oofem {
-
- /**
- * This class implements a constitutive model for a bond link for connecting beam (frame) and continuum elements in unstructured meshes.
- * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
- * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie 
+/**
+ * This class implements a constitutive model for a bond link for connecting beam or truss and continuum elements.
+ * The main idea is to use  the displacement jump in the direction of the rebar element (and two components, which are perpendicular to each other and lie
  * in a plane for which the direction along the rebar is normal to.
- * This constitutive model differs from the standard bond model, because only the first component of the jump is used to determine the bond stress.  
+ * This constitutive model differs from the standard bond model, because only the first component of the jump is used to determine the bond stress.
  *
  * @author: Peter Grassl
-*/
+ */
 
 
 class LinkSlipStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
-  double kappa = 0;
+    double kappa = 0;
 
-  double tempKappa = 0;
+    double tempKappa = 0;
 
 public:
 
     /// Constructor
     LinkSlipStatus(GaussPoint *g);
-    
-    double giveKappa(){ return this->kappa; }
+
+    double giveKappa() { return this->kappa; }
 
     void letTempKappaBe(const double &v)
     { this->tempKappa = v; }
@@ -87,7 +85,7 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LinkSlipStatus"; }
-    
+
     void initTempStatus() override;
 
     void updateYourself(TimeStep *) override;
@@ -112,10 +110,10 @@ protected:
     double kLateral = 0.;
 
     int type = 0;
-    
+
     ///Strength for slip component
     double tauMax = 0., tauFinal = 0.;
-    
+
     double s1 = 0., s2 = 0., s3 = 0.;
 
     double alpha = 0.;
@@ -125,7 +123,7 @@ public:
     LinkSlip(int n, Domain *d);
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
-    
+
     const char *giveInputRecordName() const override { return _IFT_LinkSlip_Name; }
     const char *giveClassName() const override { return "LinkSlip"; }
 
@@ -137,15 +135,15 @@ public:
 
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
-    
+
     double evaluateBondStress(const double kappa) const;
 
-    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 3 >giveEngTraction_3d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
-    
+    FloatMatrixF< 3, 3 >give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
     Interface *giveInterface(InterfaceType) override;
-                                  
+
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
