@@ -5618,6 +5618,36 @@ Supported modes& \_2dInterface, \_3dInterface\\
 %\end{center}
 \end{table}
 
+\subsubsection{Slip model for trusses and beams}
+This is an elasto-plastic model for slip between reinforcement modelled as three-dimensional beam or truss elements and matrix elements. The theory of the model is described in the paper \textit{Upscaling of three-dimensional reinforced concrete representative volume elements to effective beam and plate models. A Sciegaj, P Grassl, F Larsson, K Runesson, K Lundgren. International Journal of Solids and Structures 202, 835-853} The model parameters are summarised in Tab.~\ref{linkslip_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Slip model \\
+\hline
+Record Format & \descitem{linkslip} \elemparam{}{in} 
+\elemparam{kn}{rn}  \elemparam{ks}{rn} \elemparam{s1}{rn} \elemparam{s2}{rn} \elemparam{s3}{rn} \elemparam{taumax}{rn} \optelemparam{tauf}{rn}  \optelemparam{alpha}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{ka} interface elastic axial stiffness (in the direction of slip)\\
+&- \param{kl} interface elastic lateral stiffness\\
+&- \param{s1} characteristic slip value\\
+&- \param{s2} characteristic slip value\\
+&- \param{s3} characteristic slip value\\
+&- \param{taumax} maximum bond stress\\
+&- \param{tauf} residual bond stress at reinforcement pull-out\\
+&- \param{alpha} bond-slip curve parameter (exponent)\\
+
+Supported modes & \_3dInterface\\
+\hline
+\end{mmt}
+\caption{Slip model for truss and beam elements -- summary.}
+\label{linkslip_table}
+%\end{center}
+\end{table}
+
+
+
 
 \subsection{Material models for lattice elements}
 
