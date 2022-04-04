@@ -15,7 +15,7 @@ Lattice2D 1 nodes 2 1 2 crossSect 1 mat 2 gpCoords 2 50 0. width 1000.0 thick 10
 latticecs 1 material 2
 #
 mps 1 d 0. lattice a1 1. a2 1. talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1000. relMatAge 28. CoupledAnalysisType 0
-latticeplasticitydamageviscoelastic 2 d 0 talpha 0. viscomat 1 e 20.e3 a1 1. a2 1. ft 3. fc 30. angle1 0.5 angle2 0.5 flow 0.25 wf 50.e-3 ahard 1.e-3 iter 100 tol 1.e-60 timefactor 1.
+latticeplasticitydamageviscoelastic 2 d 0 talpha 0. viscomat 1 e 20.e3 a1 1. a2 1. ft 3. fc 30. angle1 0.5 angle2 0.5 flow 0.25 wf 50.e-3 ahard 1.e-3 iter 100 tol 1.e-180 timefactor 1.
 #
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 2 6 values 2 0. 0. set 1
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
@@ -35,10 +35,10 @@ Set 3 nodes 1 2
 #ELEMENT number 1 gp 1 keyword "latticestress" component 1
 #
 #%BEGIN_CHECK%
-#ELEMENT tStep 10 number 1 gp 1 keyword 139 component 1 value 2.80973642e+00 tolerance 1.e-6
-#ELEMENT tStep 13 number 1 gp 1 keyword 139 component 1 value 2.55894185e+00 tolerance 1.e-6
-#ELEMENT tStep 16 number 1 gp 1 keyword 139 component 1 value 2.55834671e+00 tolerance 1.e-6
-#ELEMENT tStep 19 number 1 gp 1 keyword 139 component 1 value 2.20367783e+00 tolerance 1.e-6
-#ELEMENT tStep 22 number 1 gp 1 keyword 139 component 1 value 1.73687255e+00 tolerance 1.e-6
-#ELEMENT tStep 25 number 1 gp 1 keyword 139 component 1 value 1.33234290e+00 tolerance 1.e-6
+#ELEMENT tStep 2 number 1 gp 1 keyword 139 component 1 value 8.77988160e-03 tolerance 1.e-6
+#ELEMENT tStep 13 number 1 gp 1 keyword 139 component 1 value 0.0 tolerance 1.e-6
+#ELEMENT tStep 16 number 1 gp 1 keyword 139 component 1 value 0.0 tolerance 1.e-6
+#ELEMENT tStep 19 number 1 gp 1 keyword 139 component 1 value 0.0 tolerance 1.e-6
+#ELEMENT tStep 22 number 1 gp 1 keyword 139 component 1 value 0.0 tolerance 1.e-6
+#ELEMENT tStep 25 number 1 gp 1 keyword 139 component 1 value 0.0 tolerance 1.e-6
 #%END_CHECK%
