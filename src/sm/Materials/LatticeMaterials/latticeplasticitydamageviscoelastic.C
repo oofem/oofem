@@ -86,6 +86,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
                                                          GaussPoint *gp,
                                                          TimeStep *tStep)
 {
+  
     double tol = 1.e-12; // error in order of approx. Pascals
 
     auto status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
@@ -93,18 +94,28 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
     GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
+
     // just a dummy yet essential call to create a status of viscomaterial. Otherwise initTempStatus() would fail.
     rheoMat->giveStatus(rChGP);
 
     status->initTempStatus();
 
+    
+    FloatArrayF< 6 >viscoStress;
+    FloatArrayF< 6 >plastDamStress;
+    
+    if(status->giveTempDeletionFlag()==1){
+      //Deal with deleted element
+      viscoStress.printYourself();
+      status->letTempLatticeStressBe(viscoStress);
+      return viscoStress;
+    }
+       
     FloatArrayF< 6 >reducedStrainForViscoMat;
     FloatArrayF< 6 >reducedStrain;
     FloatArrayF< 6 >quasiReducedStrain;
 
     FloatArray tempStressVE;
-    FloatArrayF< 6 >viscoStress;
-    FloatArrayF< 6 >plastDamStress;
 
     int itercount = 1;
 
@@ -177,7 +188,14 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         }
 
         plastDamStress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
-        this->performDamageEvaluation(gp, quasiReducedStrain, tStep);
+
+	if(status->giveTempDeletionFlag()==1){
+	  //Deal with deleted element      
+	  return plastDamStress;      
+	}
+    
+	    
+	    this->performDamageEvaluation(gp, quasiReducedStrain, tStep);
         double tempDamage = status->giveTempDamage();
         plastDamStress *= ( 1. - tempDamage );
 

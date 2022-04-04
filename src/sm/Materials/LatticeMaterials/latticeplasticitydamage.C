@@ -695,8 +695,7 @@ LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     
     if(status->giveTempDeletionFlag()==1){
       //Deal with deleted element      
-      return stress;
-      
+      return stress;      
     }
     
     double omega = 0.;
