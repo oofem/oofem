@@ -106,7 +106,6 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     
     if(status->giveTempDeletionFlag()==1){
       //Deal with deleted element
-      viscoStress.printYourself();
       status->letTempLatticeStressBe(viscoStress);
       return viscoStress;
     }
@@ -190,7 +189,8 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         plastDamStress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
 
 	if(status->giveTempDeletionFlag()==1){
-	  //Deal with deleted element      
+	  //Deal with deleted element
+	  status->letTempLatticeStressBe(plastDamStress);
 	  return plastDamStress;      
 	}
     
