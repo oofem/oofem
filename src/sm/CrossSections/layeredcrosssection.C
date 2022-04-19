@@ -1613,12 +1613,22 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 double
 LayeredCrossSection :: give(int aProperty, GaussPoint* gp) const
 {
-    double average = 0.;
-    for ( int layer = 1; layer <= numberOfLayers; ++layer ) {
-        Material *mat = this->giveDomain()->giveMaterial( giveLayerMaterial(layer) );
-        average += mat->give(aProperty, gp) * giveLayerThickness(layer);
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = ( gpnum - 1 ) / gpsperlayer + 1;
+        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        return layerMat->give(aProperty, gp);
+    } else {
+        double average = 0.;
+        for ( int layer = 1; layer <= numberOfLayers; ++layer ) {
+          Material *mat = this->giveDomain()->giveMaterial( giveLayerMaterial(layer) );
+          average += mat->give(aProperty, gp) * giveLayerThickness(layer);
+        }
+        return average / this->totalThick;
     }
-    return average / this->totalThick;
 }
 
 } // end namespace oofem

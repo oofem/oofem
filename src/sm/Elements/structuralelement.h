@@ -198,6 +198,12 @@ public:
     {
         OOFEM_ERROR("not implemented");
     }
+    /**
+     * Computes lumped initial stress matrix of receiver. 
+     * @param answer Lumped initial stress matrix.
+     * @param tStep Time step.
+     */
+    virtual void computeLumpedInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) {}
 
     void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
 

@@ -122,7 +122,7 @@ class CTRLParser:
                     lineSplit = line.split()
                     if len(lineSplit) == 0:
                         break;
-                    #print "Line: ", line,
+                    #print("Line: ", line)
                     if lineSplit[0].lower() == 'nodeprop':
                         if (lineSplit[-2].lower()=='set'):
                             for igroup in groups:
@@ -144,6 +144,7 @@ class CTRLParser:
                                     print (str)
                         else:
                             for igroup in groups:
+                                #print("igroup", igroup)
                                 __gr=self.getNodeGroup(FEM,igroup)
                                 if __gr:
                                     __gr.oofem_properties=' '.join(lineSplit[1:])

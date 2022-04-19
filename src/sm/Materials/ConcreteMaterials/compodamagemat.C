@@ -516,7 +516,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
                 elem_h = charLenModes.at(i);
                 if ( elem_h > 2 * l_ch ) {
                     if ( this->allowSnapBack.contains(i + 6 * j) ) {
-                        OOFEM_LOG_INFO("Allowed snapback of 3D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
+                        OOFEM_LOG_INFO("Allowed snapback of 3D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                     } else {
                         OOFEM_ERROR("Decrease size of 3D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                     }
@@ -533,7 +533,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
             if ( elem_h > 2 * l_ch ) {
                 ///@todo Check value here for 1d mat (old broken code used undeclared variable)
                 if ( this->allowSnapBack.contains(1 + 6 * j) ) {
-                    OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
+                    OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
                 } else {
                     OOFEM_ERROR("Decrease size of 1D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
                 }

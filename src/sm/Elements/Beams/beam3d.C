@@ -873,6 +873,40 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
+Beam3d :: computeLumpedInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    // computes initial stress matrix of receiver (or geometric stiffness matrix)
+
+    FloatMatrix stiff;
+    FloatArray endForces;
+
+    double l = this->computeLength();
+    double N;
+
+    answer.resize(12, 12);
+    answer.zero();
+
+    answer.at(2, 2) = 1.;
+    answer.at(2, 8) =-1.;
+    answer.at(8, 2) =-1.;
+    answer.at(8, 8) = 1.;
+
+    answer.at(3, 3) = 1.;
+    answer.at(3, 9) =-1.;
+    answer.at(9, 3) =-1.;
+    answer.at(9, 9) = 1.;
+
+
+    // ask end forces in g.c.s
+      // ask end forces in g.c.s
+    this->giveEndForcesVector(endForces, tStep);
+    N = ( -endForces.at(1) + endForces.at(7) ) / 2.;
+    answer.times(N / l);
+    
+}
+
+
+void
 Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                   GaussPoint *slaveGp, TimeStep *tStep)
 {

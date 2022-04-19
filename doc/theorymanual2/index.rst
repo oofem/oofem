@@ -8,7 +8,7 @@ Welcome to OOFEM Theory manual!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Table of Contents
 
    introduction
    general

@@ -121,6 +121,8 @@ public:
     bool requiresEquationRenumbering(TimeStep *tStep) override;
     int forceEquationNumbering() override;
 
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    
     void updateYourself(TimeStep *tStep) override;
     
     int checkConsistency() override;

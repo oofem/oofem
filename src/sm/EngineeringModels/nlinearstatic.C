@@ -221,21 +221,38 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->__giveEquationNumber();
-#ifdef DEBUG
-    if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
-    }
-#endif
-
-
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
-    switch ( mode ) {
-    case VM_Incremental:
+    int eq = dof->__giveEquationNumber();
+    if (mode == VM_Residual) {
+        // evaluate the residual of momentum balance for specific unknown
+        // evaluate the residual of momentum balance for specific unknown
+        
+        if (eq && internalForces.isNotEmpty()) {
+            double ans = loadLevel*incrementalLoadVector.at(eq)-internalForces.at(eq);
+            if (initialLoadVector.isNotEmpty()) {
+                ans += initialLoadVector.at(eq);
+            }
+            return ans;
+        } else {
+            return 0.;
+        }
+    } else if (mode == VM_Total) {
+#ifdef DEBUG
+        if ( eq == 0 ) OOFEM_ERROR("invalid equation number");
+#endif
+        if ( totalDisplacement.isNotEmpty() ) {
+            return totalDisplacement.at(eq);
+        } else {
+            return 0.;
+        }
+    } else if (mode == VM_Incremental) {
+#ifdef DEBUG
+        if ( eq == 0 ) OOFEM_ERROR("invalid equation number");
+#endif
         // return incrementOfDisplacement -> at(eq);
         // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
         if ( incrementOfDisplacement.isNotEmpty() ) {
@@ -243,25 +260,18 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
         } else {
             return 0.;
         }
-
-    case VM_Total:
-        if ( totalDisplacement.isNotEmpty() ) {
-            return totalDisplacement.at(eq);
-        } else {
-            return 0.;
-        }
-
-    case VM_Velocity:
+    } else if (mode == VM_Velocity) {
+#ifdef DEBUG
+        if ( eq == 0 ) OOFEM_ERROR("invalid equation number");
+#endif
         if ( incrementOfDisplacement.isNotEmpty() ) {
             return incrementOfDisplacement.at(eq) / tStep->giveTimeIncrement();
         } else {
             return 0.;
         }
-
-    default:
-        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
+    } else {
+       OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem"); 
     }
-
     return 0.0;
 }
 

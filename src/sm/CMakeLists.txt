@@ -187,6 +187,7 @@ set (sm_emodel
     EngineeringModels/freewarping.C 
     EngineeringModels/structuralmaterialevaluator.C
     EngineeringModels/qclinearstatic.C
+    EngineeringModels/pdelta.C
     )
 
 set (sm_loads
@@ -290,6 +291,7 @@ set (sm_material
     Materials/LatticeMaterials/latticeplasticitydamage.C
     Materials/LatticeMaterials/latticeslip.C
     Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
+    Materials/1D/isoasymm1d.C
 )
 
 if (USE_MFRONT)

@@ -32,39 +32,54 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef unknowntype_h
-#define unknowntype_h
-//#include "internalstatetype.h"
-#include "enumitem.h"
+#ifndef pdelta_h
+#define pdelta_h
+
+#include "sm/EngineeringModels/linearstatic.h"
+#include "geneigvalsolvertype.h"
+#include "sparsegeneigenvalsystemnm.h"
+#include "sparselinsystemnm.h"
+#include "sparsemtrx.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
+#include "nummet.h"
+
+///@name Input fields for LinearStability
+//@{
+#define _IFT_Pdelta_Name "pdelta"
+#define _IFT_Pdelta_rtolv "rtolv"
+#define _IFT_Pdelta_stype "stype"
+#define _IFT_Pdelta_maxiter "maxiter"
+#define _IFT_Pdelta_lumpedInitialStressMatrix "lumped"
+//@}
 
 namespace oofem {
-#define UnknownType_DEF \
-    ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
-    ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
-    ENUM_ITEM_WITH_VALUE(FluxVector, 3)                    \
-    ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                \
-    ENUM_ITEM_WITH_VALUE(PressureVector, 5)                \
-    ENUM_ITEM_WITH_VALUE(Temperature, 6)                   \
-    ENUM_ITEM_WITH_VALUE(Humidity, 7)                      \
-    ENUM_ITEM_WITH_VALUE(EigenVector, 8)                   \
-    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */ \
-    ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)          \
-    ENUM_ITEM_WITH_VALUE(MacroSlipVector, 17) \
-    ENUM_ITEM_WITH_VALUE(ResidualForce, 18)
+
 /**
- * Type representing particular unknown (its physical meaning).
+ * This class implements p-delta analysis, where the effects of normal force on deformed configuration
+ * is taken into account by means of initial stress matrix.
+ *
+ * Solution of this problem is base on equation in the form of: @f$ (K+K_\sigma(r))\cdot r=f @f$.
+ * This is a nonlinear problem solved using simple iteration method.
  */
-enum UnknownType {
-    UnknownType_DEF
+class Pdelta : public LinearStatic
+{
+private:
+    std :: unique_ptr< SparseMtrx > initialStressMatrix;
+    double rtolv;
+    int maxiter;
+    bool lumpedInitialStressMatrix; 
+
+public:
+    Pdelta(int i, EngngModel *master=nullptr);
+    virtual ~Pdelta() { }
+
+    void solveYourselfAt(TimeStep *tStep) override;
+    void initializeFrom(InputRecord &ir) override;
+
+    // identification
+    const char *giveInputRecordName() const override { return _IFT_Pdelta_Name; }
+    const char *giveClassName() const override { return "Pdelta"; }
 };
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-
-
-
-const char *__UnknownTypeToString(UnknownType _value);
 } // end namespace oofem
-#endif // unknowntype_h
+#endif // pdelta_h

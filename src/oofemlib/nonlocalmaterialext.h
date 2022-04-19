@@ -44,7 +44,9 @@
 
 #include <list>
 #include <memory>
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 ///@name Input fields for NonlocalMaterialExtensionInterface
 //@{
 #define _IFT_NonlocalMaterialExtensionInterface_regionmap "regionmap"
@@ -81,6 +83,15 @@ struct localIntegrationRecord {
     /// Corresponding integration weight.
     double weight;
 };
+
+  enum WeightFunctionType {
+                           WFT_Unknown,
+                           WFT_Bell,
+                           WFT_Gauss,
+                           WFT_Green,
+                           WFT_Uniform,
+                           WFT_UniformOverElement,
+                           WFT_Green_21 }; 
 
 /**
  * Abstract base class for all nonlocal constitutive model statuses. Introduces the list of
@@ -176,15 +187,10 @@ protected:
     IntArray regionMap;
     /// Flag indicating whether to keep nonlocal interaction tables of integration points cached.
     bool permanentNonlocTableFlag = false;
-    /// Type characterizing the nonlocal weight function.
-    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
     /// Grid on which the eikonal equation will be solved (used by eikonal nonlocal models)
     int gridSize = 0;
-    std::unique_ptr<Grid> grid;
-    /// Auxiliary matrix to store minimum distances of grid points from Gauss points
-    std::unique_ptr<FloatMatrix> minDist2;
     /// Optional parameters setting details of the fast marching method
     double initDiag = 0.;
     int order = 0;
@@ -256,6 +262,10 @@ protected:
     /// Parameter specifying how the weight function should be adjusted due to damage.
     int averType = 0;
 
+#ifdef _OPENMP
+ public:
+    static omp_lock_t updateDomainBeforeNonlocAverageLock;
+#endif
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -320,7 +330,7 @@ public:
      * based on the current solution (e.g., on the damage field).
      * This method is used e.g. by eikonal nonlocal damage models.
      */
-    double computeDistanceModifier(double damage) const;
+    double computeDistanceModifier(double cl, double damage) const;
 
     /**
      * Compute the modified interaction length based on the current solution (e.g., on the damage field).
@@ -344,7 +354,7 @@ public:
      * @param distance Distance between interacting points.
      * @return Value of weight function.
      */
-    virtual double computeWeightFunction(double distance) const;
+    virtual double computeWeightFunction(const double cl, const double distance) const;
 
     /**
      * Evaluates the basic nonlocal weight function for two points
@@ -354,13 +364,13 @@ public:
      * @param coord Coordinates of receiver point.
      * @return Value of weight function.
      */
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const;
+    virtual double computeWeightFunction(const double cl, const FloatArray &src, const FloatArray &coord) const;
 
     /**
      * Provides the integral of the weight function
      * over the contributing volume in 1, 2 or 3D.
      */
-    double giveIntegralOfWeightFunction(const int spatial_dimension) const;
+    double giveIntegralOfWeightFunction(double cl, const int spatial_dimension) const;
 
 
     /// Determines the maximum value of the nonlocal weight function.
@@ -386,7 +396,7 @@ public:
      * Determines the width (radius) of limited support of weighting function.
      * i.e., the distance at which the interaction weight becomes zero.
      */
-    virtual double evaluateSupportRadius() const;
+    virtual double evaluateSupportRadius(double cl) const;
 
     /// Returns reference to domain.
     Domain *giveDomain() { return this->domain; }

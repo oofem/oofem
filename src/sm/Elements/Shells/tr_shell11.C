@@ -806,7 +806,7 @@ TR_SHELL11 :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
         answer.at(8) = load;
         answer.at(14) = load;
 
-        load = force.at(6) * dens * dV / 3.0;
+        load = force.at(3) * dens * dV / 3.0;
         answer.at(3) = load;
         answer.at(9) = load;
         answer.at(15) = load;

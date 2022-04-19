@@ -55,7 +55,7 @@ REGISTER_Element(QWedge);
 
 FEI3dWedgeQuad QWedge :: interpolation;
 
-QWedge :: QWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+QWedge :: QWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans = 15;
 }
@@ -85,7 +85,9 @@ QWedge :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
-    }
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+        return static_cast< SpatialLocalizerInterface * >(this);
+    }    
 
     OOFEM_LOG_INFO("Interface on QWedge element not supported");
     return NULL;

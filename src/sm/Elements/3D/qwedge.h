@@ -40,6 +40,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "spatiallocalizer.h"
 
 #define _IFT_QWedge_Name "qwedge"
 
@@ -52,8 +53,7 @@ class FEI3dWedgeQuad;
  *
  * @author Mikael Öhman (among others)
  */
-class QWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
-
+class QWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface
 {
 protected:
     static FEI3dWedgeQuad interpolation;

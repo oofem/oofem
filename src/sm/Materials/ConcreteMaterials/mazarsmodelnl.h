@@ -121,7 +121,7 @@ public:
     { return MazarsMaterial :: computeEquivalentStrain(strain, gp, tStep); }
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
-    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
+  double computeWeightFunction(const double cl, const FloatArray &src, const FloatArray &coord) const override;
     int hasBoundedSupport() const override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
