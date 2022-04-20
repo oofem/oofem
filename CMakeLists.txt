@@ -111,7 +111,8 @@ option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
-option (USE_INTEL_MKLPARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_INTEL_MKL_PARDISO "Enable MKLPARDISO solver support" OFF)
+option (USE_ONEAPI "Enable OneMKL solver support via OneAPI Base Toolkit" OFF)
 option (USE_PARDISO_ORG "Enable PARDISO-project.org solver support" OFF)
 option (USE_PETSC "Enable PETSc support (specify PETSC_DIR and/or PETSC_ARCH if needed)" OFF)
 option (USE_SLEPC "Enable SLEPc support" OFF)
