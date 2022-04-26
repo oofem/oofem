@@ -137,7 +137,7 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 #define REGISTER_InitModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, CTOR< InitModule, class, int, EngngModel* > );
 #define REGISTER_TopologyDescription(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, CTOR< TopologyDescription, class, Domain* > );
 #define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, CTOR< LoadBalancerMonitor, class, EngngModel* > );
-#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, CTOR< LoadBalancer, class, EngngModel* > );
+#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, CTOR< LoadBalancer, class, Domain* > );
 #define REGISTER_Monitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMonitor(_IFT_ ## class ## _Name, CTOR< Monitor, class, int > );
 
 // These should be converted to use strings.
