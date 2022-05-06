@@ -57,6 +57,12 @@ class FloatMatrix;
 class OOFEM_EXPORT SuperLUSolver : public SparseLinearSystemNM
 {
 private:
+    SparseMtrx::SparseMtrxVersionType lhsVersion; // timestamp of existing decomposition
+    SuperMatrix A, L, U;
+    bool AAllocated=false, LAllocated=false, UAllocated=false;
+    bool permAllocated = false;
+    int_t *perm_c;
+    int_t *perm_r;
 
 public:
     SuperLUSolver(Domain * d, EngngModel * m);

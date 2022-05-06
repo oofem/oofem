@@ -57,7 +57,17 @@ SuperLUSolver :: SuperLUSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(
 { }
 
 
-SuperLUSolver :: ~SuperLUSolver() { }
+SuperLUSolver :: ~SuperLUSolver() {
+  if (this->AAllocated) {
+    Destroy_SuperMatrix_Store(& this->A);
+    Destroy_SuperNode_SCP(& this->L);
+    Destroy_CompCol_NCP(& this->U);
+  }
+  if (this->permAllocated) {
+    SUPERLU_FREE(this->perm_r);
+    SUPERLU_FREE(this->perm_c);
+  }
+}
 
 
 void
@@ -74,10 +84,15 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
     //3. Step: call superLU Solve with tranformed input parameters
     //4. Step: Transfrom result back to FloatArray *x
     //5. Step: return SUCCESS!
+#ifdef TIME_REPORT
+  Timer timer;
+  timer.startTimer();
+#endif
+	  
 
     CompCol *CC = dynamic_cast< CompCol * >( & Lhs );
+
     if ( CC ) {
-        SuperMatrix A, L, U;
         SuperMatrix B, X;
         int_t nprocs;
         fact_t fact;
@@ -86,8 +101,6 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
         equed_t equed;
         double *a;
         int_t *asub, *xa;
-        int_t *perm_c;
-        int_t *perm_r;
         void *work;
         superlumt_options_t superlumt_options;
         int_t info, lwork, nrhs, /*ldx,*/ panel_size, relax;
@@ -99,10 +112,11 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
         superlu_memusage_t superlu_memusage;
         void parse_command_line();
 
+
         /* Default parameters to control factorization. */
         nprocs = omp_get_max_threads(); //omp_get_num_threads() does not work as we are not in parallel region!!;
         printf("Use number of LU threads: %u\n", nprocs);
-        fact  = EQUILIBRATE;
+        fact  = DOFACT; //EQUILIBRATE;
         trans = NOTRANS;
         equed = NOEQUIL;
         refact = NO;
@@ -121,129 +135,161 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
         asub =  CC->giveRowIndex().givePointer();
         xa = CC->giveColPtr().givePointer();
 
-        /* Command line options to modify default behavior. */
-        //parse_command_line(argc, argv, &nprocs, &lwork, &panel_size, &relax,
-        //	       &u, &fact, &trans, &refact, &equed);
+	if (0) {
+	  permc_spec = 0;
+	  dCreate_CompCol_Matrix(& this->A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
+	  if ( !( this->perm_r = intMalloc(m) ) ) {
+	    SUPERLU_ABORT("Malloc fails for perm_r[].");
+	  }
+	  if ( !( this->perm_c = intMalloc(n) ) ) {
+	    SUPERLU_ABORT("Malloc fails for perm_c[].");
+	  }
+	  dCreate_Dense_Matrix(& B, m, nrhs, b.givePointer(), m, SLU_DN, SLU_D, SLU_GE);
+	  
+	  get_perm_c(permc_spec, &this->A, this->perm_c);
+	  //dPrint_Dense_Matrix(&B);
+	  pdgssv(nprocs, &this->A, this->perm_c, this->perm_r, &this->L, &this->U, &B, &info);
+	  //dPrint_Dense_Matrix(&B);
+	  x.resize( b.giveSize() );
+	  this->convertRhs(& B, x);
+	  Destroy_SuperMatrix_Store(& this->A);
+	  Destroy_SuperMatrix_Store(& B);
+	  Destroy_SuperNode_SCP(& this->L);
+	  Destroy_CompCol_NCP(& this->U);
+	  SUPERLU_FREE(this->perm_r);
+	  SUPERLU_FREE(this->perm_c);
+	} else { 
 
-        if ( lwork > 0 ) {
+	  /* Command line options to modify default behavior. */
+	  //parse_command_line(argc, argv, &nprocs, &lwork, &panel_size, &relax,
+	  //	       &u, &fact, &trans, &refact, &equed);
+	  
+	  if ( lwork > 0 ) {
             work = SUPERLU_MALLOC(lwork);
-            printf("Use work space of size LWORK = " IFMT " bytes\n", lwork);
+            OOFEM_LOG_DEBUG("Use work space of size LWORK = " IFMT " bytes\n", lwork);
             if ( !work ) {
-                SUPERLU_ABORT("cannot allocate work[]");
+	      SUPERLU_ABORT("cannot allocate work[]");
             }
-        }
-
-        //printf("Use work space of size LWORK = " IFMT " bytes\n", lwork);
-
+	  }
+	  
+	  //printf("Use work space of size LWORK = " IFMT " bytes\n", lwork);
+	  
 #if ( PRNTlevel == 1 )
-        cpp_defs();
-        printf( "int_t %d bytes\n", sizeof( int_t ) );
+	  cpp_defs();
+	  printf( "int_t %d bytes\n", sizeof( int_t ) );
 #endif
-
-#ifdef TIME_REPORT
-        Timer timer;
-        timer.startTimer();
-#endif
-
-
-
-        dCreate_CompCol_Matrix(& A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
-
-
-        if ( !( rhsb = doubleMalloc(m * nrhs) ) ) {
+	  
+	  if (CC->giveVersion() == this->lhsVersion) {
+	    // reuse existing factorization
+	    fact = FACTORED;
+	    OOFEM_LOG_DEBUG ("SuperLU_MT:LHS already factored\n");
+	  } else {
+	    fact  = DOFACT; //EQUILIBRATE;
+	    // solve for new (updated) lhs
+	    if (this->AAllocated) Destroy_SuperMatrix_Store(& this->A);
+	    dCreate_CompCol_Matrix(& this->A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
+	    this->AAllocated = true;
+	    this->lhsVersion = CC->giveVersion();
+	    OOFEM_LOG_DEBUG ("SuperLU_MT:Factoring.....\n");
+	    
+	    if (!this->permAllocated) {
+	      if ( !( this->perm_r = intMalloc(m) ) ) {
+		SUPERLU_ABORT("Malloc fails for perm_r[].");
+	      }
+	      if ( !( this->perm_c = intMalloc(n) ) ) {
+		SUPERLU_ABORT("Malloc fails for perm_c[].");
+	      }
+	      this->permAllocated = true;
+	    }
+	  }
+	  
+	  if ( !( rhsb = doubleMalloc(m * nrhs) ) ) {
             SUPERLU_ABORT("Malloc fails for rhsb[].");
-        }
-        if ( !( rhsx = doubleMalloc(m * nrhs) ) ) {
+	  }
+	  if ( !( rhsx = doubleMalloc(m * nrhs) ) ) {
             SUPERLU_ABORT("Malloc fails for rhsx[].");
-        }
-        dCreate_Dense_Matrix(& B, m, nrhs, b.givePointer(), m, SLU_DN, SLU_D, SLU_GE);
-        dCreate_Dense_Matrix(& X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
-        //dPrint_Dense_Matrix(&B);
-        //dPrint_Dense_Matrix(&X);
-
-        if ( !( perm_r = intMalloc(m) ) ) {
-            SUPERLU_ABORT("Malloc fails for perm_r[].");
-        }
-        if ( !( perm_c = intMalloc(n) ) ) {
-            SUPERLU_ABORT("Malloc fails for perm_c[].");
-        }
-        if ( !( R = ( double * ) SUPERLU_MALLOC( A.nrow * sizeof( double ) ) ) ) {
+	  }
+	  dCreate_Dense_Matrix(& B, m, nrhs, b.givePointer(), m, SLU_DN, SLU_D, SLU_GE);
+	  dCreate_Dense_Matrix(& X, m, nrhs, rhsx, m, SLU_DN, SLU_D, SLU_GE);
+	  //dPrint_Dense_Matrix(&B);
+	  //dPrint_Dense_Matrix(&X);
+	  
+	  if ( !( R = ( double * ) SUPERLU_MALLOC( this->A.nrow * sizeof( double ) ) ) ) {
             SUPERLU_ABORT("SUPERLU_MALLOC fails for R[].");
-        }
-        if ( !( C = ( double * ) SUPERLU_MALLOC( A.ncol * sizeof( double ) ) ) ) {
+	  }
+	  if ( !( C = ( double * ) SUPERLU_MALLOC( this->A.ncol * sizeof( double ) ) ) ) {
             SUPERLU_ABORT("SUPERLU_MALLOC fails for C[].");
-        }
-        if ( !( ferr = ( double * ) SUPERLU_MALLOC( nrhs * sizeof( double ) ) ) ) {
+	  }
+	  if ( !( ferr = ( double * ) SUPERLU_MALLOC( nrhs * sizeof( double ) ) ) ) {
             SUPERLU_ABORT("SUPERLU_MALLOC fails for ferr[].");
-        }
-        if ( !( berr = ( double * ) SUPERLU_MALLOC( nrhs * sizeof( double ) ) ) ) {
+	  }
+	  if ( !( berr = ( double * ) SUPERLU_MALLOC( nrhs * sizeof( double ) ) ) ) {
             SUPERLU_ABORT("SUPERLU_MALLOC fails for berr[].");
-        }
-
-        /*
-         * Get column permutation vector perm_c[], according to permc_spec:
-         *   permc_spec = 0: natural ordering
-         *   permc_spec = 1: minimum degree ordering on structure of A'*A
-         *   permc_spec = 2: minimum degree ordering on structure of A'+A
-         *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
-         */
-
-        permc_spec = 2;
-        get_perm_c(permc_spec, & A, perm_c);
-
-        superlumt_options.SymmetricMode = YES;
-        superlumt_options.diag_pivot_thresh = 0.0;
-
-        superlumt_options.nprocs = nprocs;
-        superlumt_options.fact = fact;
-        superlumt_options.trans = trans;
-        superlumt_options.refact = refact;
-        superlumt_options.panel_size = panel_size;
-        superlumt_options.relax = relax;
-        superlumt_options.usepr = usepr;
-        superlumt_options.drop_tol = drop_tol;
-        superlumt_options.PrintStat = NO;
-        superlumt_options.perm_c = perm_c;
-        superlumt_options.perm_r = perm_r;
-        //superlumt_options.work = work;
-        superlumt_options.lwork = lwork;
-        if ( !( superlumt_options.etree = intMalloc(n) ) ) {
-            SUPERLU_ABORT("Malloc fails for etree[].");
-        }
-        if ( !( superlumt_options.colcnt_h = intMalloc(n) ) ) {
-            SUPERLU_ABORT("Malloc fails for colcnt_h[].");
-        }
-        if ( !( superlumt_options.part_super_h = intMalloc(n) ) ) {
-            SUPERLU_ABORT("Malloc fails for colcnt_h[].");
-        }
-
-        printf("sym_mode %d\tdiag_pivot_thresh %.4e\n",
-               superlumt_options.SymmetricMode,
-               superlumt_options.diag_pivot_thresh);
-
-        /*
-         * Solve the system and compute the condition number
-         * and error bounds using pdgssvx.
-         */
-        pdgssvx(nprocs, & superlumt_options, & A, perm_c, perm_r, & equed, R, C, & L, & U, & B, & X, & rpg, & rcond, ferr, berr, & superlu_memusage, & info);
-
-        //dPrint_Dense_Matrix(&B);
-        //dPrint_Dense_Matrix(&X);
-
+	  }
+	  
+	  /*
+	   * Get column permutation vector perm_c[], according to permc_spec:
+	   *   permc_spec = 0: natural ordering
+	   *   permc_spec = 1: minimum degree ordering on structure of A'*A
+	   *   permc_spec = 2: minimum degree ordering on structure of A'+A
+	   *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
+	   */
+	  
+	  permc_spec = 0; // 2;
+	  get_perm_c(permc_spec, & this->A, this->perm_c);
+	  
+	  superlumt_options.SymmetricMode = YES;
+	  superlumt_options.diag_pivot_thresh = 0.0;
+	  
+	  superlumt_options.nprocs = nprocs;
+	  superlumt_options.fact = fact;
+	  superlumt_options.trans = trans;
+	  superlumt_options.refact = refact;
+	  superlumt_options.panel_size = panel_size;
+	  superlumt_options.relax = relax;
+	  superlumt_options.usepr = usepr;
+	  superlumt_options.drop_tol = drop_tol;
+	  superlumt_options.PrintStat = NO;
+	  superlumt_options.perm_c = perm_c;
+	  superlumt_options.perm_r = perm_r;
+	  //superlumt_options.work = work;
+	  superlumt_options.lwork = lwork;
+	  if ( !( superlumt_options.etree = intMalloc(n) ) ) {
+	    SUPERLU_ABORT("Malloc fails for etree[].");
+	  }
+	  if ( !( superlumt_options.colcnt_h = intMalloc(n) ) ) {
+	    SUPERLU_ABORT("Malloc fails for colcnt_h[].");
+	  }
+	  if ( !( superlumt_options.part_super_h = intMalloc(n) ) ) {
+	    SUPERLU_ABORT("Malloc fails for colcnt_h[].");
+	  }
+	  
+	  OOFEM_LOG_DEBUG ("sym_mode %d\tdiag_pivot_thresh %.4e\n",
+		 superlumt_options.SymmetricMode,
+		 superlumt_options.diag_pivot_thresh);
+	  
+	  /*
+	   * Solve the system and compute the condition number
+	   * and error bounds using pdgssvx.
+	   */
+	  pdgssvx(nprocs, & superlumt_options, & this->A, this->perm_c, this->perm_r, & equed, R, C, & this->L, & this->U, & B, & X, & rpg, & rcond, ferr, berr, & superlu_memusage, & info);
+	  x.resize( b.giveSize() );
+	  this->convertRhs(& X, x);
+	  
 #if 0
-        printf("psgssvx(): info " IFMT "\n", info);
-
-        if ( info == 0 || info == n + 1 ) {
+	  printf("psgssvx(): info " IFMT "\n", info);
+	  
+	  if ( info == 0 || info == n + 1 ) {
             SCPformat *Lstore;
             NCPformat *Ustore;
-
+	    
             printf("Recip. pivot growth = %e\n", rpg);
             printf("Recip. condition number = %e\n", rcond);
             printf("%8s%16s%16s\n", "rhs", "FERR", "BERR");
             for ( int i = 0; i < nrhs; ++i ) {
-                printf(IFMT "%16e%16e\n", i + 1, ferr [ i ], berr [ i ]);
+	      printf(IFMT "%16e%16e\n", i + 1, ferr [ i ], berr [ i ]);
             }
-
+	    
             Lstore = ( SCPformat * ) L.Store;
             Ustore = ( NCPformat * ) U.Store;
             printf("No of nonzeros in factor L = " IFMT "\n", Lstore->nnz);
@@ -252,56 +298,47 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
             printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions " IFMT "\n",
                    superlu_memusage.for_lu / 1e6, superlu_memusage.total_needed / 1e6,
                    superlu_memusage.expansions);
-
+	    
             fflush(stdout);
-        } else if ( info > 0 && lwork == -1 ) {
+	  } else if ( info > 0 && lwork == -1 ) {
             printf("** Estimated memory: " IFMT " bytes\n", info - n);
-        }
+	  }
 #else
-        if ( info > 0 && lwork == -1 ) {
+	  if ( info > 0 && lwork == -1 ) {
             printf("** Estimated memory: " IFMT " bytes\n", info - n);
-        }
+	  }
 #endif
-
-        //dPrint_Dense_Matrix(&B);
-        // copy B into x (assuming only one rhs)
-        x.resize( b.giveSize() );
-        this->convertRhs(& X, x);
-        SUPERLU_FREE(rhsb);
-        SUPERLU_FREE(rhsx);
-        //SUPERLU_FREE (xact);
-        SUPERLU_FREE(perm_r);
-        SUPERLU_FREE(perm_c);
-        SUPERLU_FREE(R);
-        SUPERLU_FREE(C);
-        SUPERLU_FREE(ferr);
-        SUPERLU_FREE(berr);
-        Destroy_SuperMatrix_Store(& A);
-        Destroy_SuperMatrix_Store(& B);
-        Destroy_SuperMatrix_Store(& X);
-        //    SUPERLU_FREE (superlumt_options.etree);
-        //    SUPERLU_FREE (superlumt_options.colcnt_h);
-        ///   SUPERLU_FREE (superlumt_options.part_super_h);
-        if ( lwork == 0 ) {
-            Destroy_SuperNode_SCP(& L);
-            Destroy_CompCol_NCP(& U);
-        } else if ( lwork > 0 ) {
+	  
+	  SUPERLU_FREE(rhsb);
+	  SUPERLU_FREE(rhsx);
+	  //SUPERLU_FREE (xact);
+	  SUPERLU_FREE(R);
+	  SUPERLU_FREE(C);
+	  SUPERLU_FREE(ferr);
+	  SUPERLU_FREE(berr);
+	  //Destroy_SuperMatrix_Store(& this->A);
+	  Destroy_SuperMatrix_Store(& B);
+	  Destroy_SuperMatrix_Store(& X);
+	  //    SUPERLU_FREE (superlumt_options.etree);
+	  //    SUPERLU_FREE (superlumt_options.colcnt_h);
+	  ///   SUPERLU_FREE (superlumt_options.part_super_h);
+	  if ( lwork == 0 ) {
+	    //Destroy_SuperNode_SCP(& this->L);
+	    //Destroy_CompCol_NCP(& this->U);
+	  } else if ( lwork > 0 ) {
             SUPERLU_FREE(work);
-        }
-
+	  }
+	}
 #ifdef TIME_REPORT
-        timer.stopTimer();
-        OOFEM_LOG_INFO( "SuperLU_MT info: user time consumed by solution: %.2fs\n", timer.getUtime() );
-        OOFEM_LOG_INFO( "SuperLU_MT info: real time consumed by solution: %.2fs\n", timer.getWtime() );
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "SuperLU_MT info: user time consumed by solution: %.2fs\n", timer.getUtime() );
+    OOFEM_LOG_INFO( "SuperLU_MT info: real time consumed by solution: %.2fs\n", timer.getWtime() );
 #endif
+    
     } else {
-        OOFEM_ERROR("Incompatible sparse storage encountered");
+      OOFEM_ERROR("Incompatible sparse storage encountered");
     }
-
-
-
-
-
+    
     //dPrint_Dense_Matrix(&B);
     /*
      * Lstore = (SCPformat *) L.Store;
