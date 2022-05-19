@@ -272,6 +272,9 @@ public:
 
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
                                             TimeStep *tStep) const override;
+  
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     
 protected:
     /**

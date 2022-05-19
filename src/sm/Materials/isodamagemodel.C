@@ -395,6 +395,25 @@ IsotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
+void
+IsotropicDamageMaterial::saveContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::saveContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        linearElasticMaterial->saveContext(stream, mode);
+    }
+}
+
+
+void
+IsotropicDamageMaterial::restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::restoreContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        linearElasticMaterial->saveContext(stream, mode);
+    }
+}
+
 
 IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
@@ -428,7 +447,7 @@ IsotropicDamageMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
     //mj 14 July 2010 - should be discussed with Borek !!!
-    //this->tempDamage = this->damage;
+    this->tempDamage = this->damage;
 #ifdef keep_track_of_dissipated_energy
     this->tempStressWork = this->stressWork;
     this->tempDissWork = this->dissWork;
