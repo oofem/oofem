@@ -54,7 +54,7 @@ REGISTER_SparseLinSolver(SuperLUSolver, ST_SuperLU_MT)
 
 
 SuperLUSolver :: SuperLUSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
-{ }
+{}
 
 
 SuperLUSolver :: ~SuperLUSolver() {
@@ -73,6 +73,16 @@ SuperLUSolver :: ~SuperLUSolver() {
 void
 SuperLUSolver :: initializeFrom(InputRecord &ir)
 {
+  /*
+   * Get column permutation vector perm_c[], according to permc_spec:
+   *   permc_spec = 0: natural ordering
+   *   permc_spec = 1: minimum degree ordering on structure of A'*A
+   *   permc_spec = 2: minimum degree ordering on structure of A'+A
+   *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
+   */
+
+  this->permc_spec = 0; // default
+  IR_GIVE_OPTIONAL_FIELD(ir, this->permc_spec, _IFT_SuperLUSolver_Permcspec);
 }
 
 NM_Status
@@ -104,7 +114,7 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
         void *work;
         superlumt_options_t superlumt_options;
         int_t info, lwork, nrhs, /*ldx,*/ panel_size, relax;
-        int_t m, n, nnz, permc_spec;
+        int_t m, n, nnz;
         double *rhsb, *rhsx /*, *xact*/;
         double *R, *C;
         double *ferr, *berr;
@@ -136,7 +146,6 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
         xa = CC->giveColPtr().givePointer();
 
 	if (0) {
-	  permc_spec = 0;
 	  dCreate_CompCol_Matrix(& this->A, m, n, nnz, a, asub, xa, SLU_NC, SLU_D, SLU_GE);
 	  if ( !( this->perm_r = intMalloc(m) ) ) {
 	    SUPERLU_ABORT("Malloc fails for perm_r[].");
@@ -146,11 +155,11 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
 	  }
 	  dCreate_Dense_Matrix(& B, m, nrhs, b.givePointer(), m, SLU_DN, SLU_D, SLU_GE);
 	  
-	  get_perm_c(permc_spec, &this->A, this->perm_c);
+	  get_perm_c(this->permc_spec, &this->A, this->perm_c);
 	  //dPrint_Dense_Matrix(&B);
 	  pdgssv(nprocs, &this->A, this->perm_c, this->perm_r, &this->L, &this->U, &B, &info);
 	  //dPrint_Dense_Matrix(&B);
-	  x.resize( b.giveSize() );
+	  x.resize( m );
 	  this->convertRhs(& B, x);
 	  Destroy_SuperMatrix_Store(& this->A);
 	  Destroy_SuperMatrix_Store(& B);
@@ -227,16 +236,7 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
             SUPERLU_ABORT("SUPERLU_MALLOC fails for berr[].");
 	  }
 	  
-	  /*
-	   * Get column permutation vector perm_c[], according to permc_spec:
-	   *   permc_spec = 0: natural ordering
-	   *   permc_spec = 1: minimum degree ordering on structure of A'*A
-	   *   permc_spec = 2: minimum degree ordering on structure of A'+A
-	   *   permc_spec = 3: approximate minimum degree for unsymmetric matrices
-	   */
-	  
-	  permc_spec = 0; // 2;
-	  get_perm_c(permc_spec, & this->A, this->perm_c);
+	  get_perm_c(this->permc_spec, & this->A, this->perm_c);
 	  
 	  superlumt_options.SymmetricMode = YES;
 	  superlumt_options.diag_pivot_thresh = 0.0;
