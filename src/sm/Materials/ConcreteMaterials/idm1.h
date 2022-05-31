@@ -335,6 +335,8 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
+    void restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 protected:
     /**
      * Performs initialization, when damage first appear. The characteristic length is
