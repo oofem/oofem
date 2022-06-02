@@ -449,6 +449,24 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 }
 
 
+void
+StaticStructural :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
+{
+    if ( ( di == 1 ) && ( tStep == this->giveCurrentStep() ) ) {
+      reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
+      reactions.zero();
+      this->assembleVector( reactions, tStep, ReferenceForceAssembler(), VM_Total,
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+      reactions.times(loadLevel);
+      this->assembleVector( reactions, tStep, ExternalForceAssembler(), VM_Total,
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    } else {
+      OOFEM_ERROR("unable to respond due to invalid solution step or domain");
+    }
+}
+
+
+
 void StaticStructural :: saveContext(DataStream &stream, ContextMode mode)
 {
     StructuralEngngModel :: saveContext(stream, mode);
