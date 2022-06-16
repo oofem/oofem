@@ -2038,6 +2038,7 @@ of equivalent strain:
 \item[5 -] smooth stress-strain curve with parameters e0 and md
 \item[6 -] disable damage (dummy linear elastic material)
 \item[7 -] extended smooth damage law (\ref{eq:damageEvol}) with parameters ft, ep, e1, e2, nd
+\item[11 -] trilinear softening diagram with (e0, w\_k, w\_r, w\_f, f\_k, f\_r)
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
@@ -2062,6 +2063,11 @@ of equivalent strain:
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
 &- \param{checkSnapBack} parameter for snap back checking, 0 no check, 1 check (default)\\
+&- \param{w\_k} crack opening of point $k$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{w\_r} crack opening of point $r$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{w\_f} crack opening of point $f$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{f\_k} cohesive stress of point $k$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{f\_r} cohesive stress of point $r$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
