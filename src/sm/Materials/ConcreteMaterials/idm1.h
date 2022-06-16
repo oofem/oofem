@@ -172,7 +172,7 @@ protected:
     double c1 = 3., c2 = 6.93;  // default value of Hordijk parameter
 
     /// Parameters used in Trilinear_Cohesive_Crack softening law
-    double w_k = 0., w_r = 0., w_f = 0., f_k = 0., f_r = 0.;  // default value of Hordijk parameter
+    double w_k = 0., w_r = 0., w_f = 0., f_k = 0., f_r = 0.;
 
     /** Type characterizing the algorithm used to compute equivalent strain measure.
      *  Note that the assigned numbers to enum values have to correspond to values

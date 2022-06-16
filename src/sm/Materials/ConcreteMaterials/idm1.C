@@ -418,6 +418,13 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
         input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
         break;
+    case 11: // Trilinear softening
+        input.setField(this->w_k, _IFT_IsotropicDamageMaterial1_w_k);
+        input.setField(this->w_r, _IFT_IsotropicDamageMaterial1_w_r);
+        input.setField(this->w_f, _IFT_IsotropicDamageMaterial1_w_f);
+        input.setField(this->f_k, _IFT_IsotropicDamageMaterial1_f_k);
+        input.setField(this->f_r, _IFT_IsotropicDamageMaterial1_f_r);
+        break;
     }
     if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack || softType == ST_Trilinear_Cohesive_Crack ) {
         input.setField(this->ecsMethod, _IFT_IsotropicDamageMaterial1_ecsm);
@@ -1008,31 +1015,6 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp) const
         } else {
             return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
         }
-/*    case ST_Trilinear:
-    	{
-        auto status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
-        double Le = status->giveLe();
-//        Le=100.0;
-    	const double E = this->linearElasticMaterial->give('E', gp);
-    	double eps_k = this->w_k/Le + this->f_k/E;
-    	double eps_r = this->w_r/Le + this->f_r/E;
-    	double eps_f = this->w_f/Le ;
-    	double f_t = E*e0;
-        if ( kappa <= e0 ) {
-            return 0.0;
-        } else if ( kappa > e0 && kappa <= eps_k ) {
-        	double slope=((f_k - f_t)/w_k);
-        	return E/(E-slope*Le) - (E*e0)/(kappa*(E-slope*Le));
-        } else if ( kappa > eps_k && kappa <= eps_r ) {
-        	double slope=((f_r - f_k)/(w_r-w_k));
-        	return E/(E+slope*Le) +(1.0/kappa)*(w_k*slope-f_k)/(Le*slope+E);
-        } else if ( kappa > eps_r && kappa <= eps_f ) {
-        	double slope=(- f_r/(w_f-w_r));
-        	return E/(E+slope*Le) +(1.0/kappa)*(w_r*slope-f_r)/(Le*slope+E);
-        } else {
-            return 1.0;
-        }
-    	}*/
     default:
         OOFEM_WARNING(":damageFunction ... undefined softening type %d\n", softType);
     }
@@ -1123,7 +1105,6 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) co
     case ST_Trilinear_Cohesive_Crack:
     {
     	double Le = status->giveLe();
-//    	Le=100.0;
     	const double E = this->linearElasticMaterial->give('E', gp);
     	double eps_k = this->w_k/Le + this->f_k/E;
     	double eps_r = this->w_r/Le + this->f_r/E;
@@ -1141,7 +1122,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) co
         	double slope=(- f_r/(w_f-w_r));
         	return -(w_r*slope-f_r)/(Le*slope+E)*(1.0/(kappa*kappa));
         } else {
-            return 1.0;
+            return 0.0;
         }
     } break;
     default:
