@@ -35,6 +35,7 @@
 #ifndef assemblercallback_h
 #define assemblercallback_h
 
+#include "oofem_export.h"
 #include "valuemodetype.h" ///@todo We shouldn't have this for assembling vectors or matrices(!) / Mikael
 #include "matresponsemode.h"
 #include "chartype.h"
@@ -60,7 +61,7 @@ class ActiveBoundaryCondition;
  * Default implementations are that no contributions are considered (empty vectors on output).
  * @author Mikael Öhman
  */
-class VectorAssembler
+class OOFEM_EXPORT VectorAssembler
 {
 public:
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
@@ -80,7 +81,7 @@ public:
  * Callback class for assembling specific types of matrices
  * @author Mikael Öhman
  */
-class MatrixAssembler
+class OOFEM_EXPORT MatrixAssembler
 {
 public:
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
@@ -98,7 +99,7 @@ public:
  * Implementation for assembling internal forces vectors in standard monolithic, nonlinear FE-problems
  * @author Mikael Öhman
  */
-class InternalForceAssembler : public VectorAssembler
+class OOFEM_EXPORT InternalForceAssembler : public VectorAssembler
 {
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
@@ -112,7 +113,7 @@ public:
  * Implementation for assembling external forces vectors in standard monolithic FE-problems
  * @author Mikael Öhman
  */
-class ExternalForceAssembler : public VectorAssembler
+class OOFEM_EXPORT ExternalForceAssembler : public VectorAssembler
 {
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override; ///@todo Temporary: Remove when switch to sets is complete
@@ -127,7 +128,7 @@ public:
  * Implementation for assembling reference (external) forces vectors
  * @author Mikael Öhman
  */
-class ReferenceForceAssembler : public VectorAssembler
+class OOFEM_EXPORT ReferenceForceAssembler : public VectorAssembler
 {
 public:
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;
@@ -140,7 +141,7 @@ public:
  * Implementation for assembling lumped mass matrix (diagonal components) in vector form.
  * @author Mikael Öhman
  */
-class LumpedMassVectorAssembler : public VectorAssembler
+class OOFEM_EXPORT LumpedMassVectorAssembler : public VectorAssembler
 {
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
@@ -150,7 +151,7 @@ public:
  * Implementation for assembling the intertia forces vector (i.e. C * dT/dt or M * a)
  * @author Mikael Öhman
  */
-class InertiaForceAssembler : public VectorAssembler
+class OOFEM_EXPORT InertiaForceAssembler : public VectorAssembler
 {
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
@@ -162,7 +163,7 @@ public:
  * This is useful for computing; f = K * u for extrapolated forces, without constructing the K-matrix.
  * @author Mikael Öhman
  */
-class MatrixProductAssembler : public VectorAssembler
+class OOFEM_EXPORT MatrixProductAssembler : public VectorAssembler
 {
 protected:
     const MatrixAssembler &mAssem;
@@ -181,7 +182,7 @@ public:
  * Implementation for assembling tangent matrices in standard monolithic FE-problems
  * @author Mikael Öhman
  */
-class TangentAssembler : public MatrixAssembler
+class OOFEM_EXPORT TangentAssembler : public MatrixAssembler
 {
 protected:
     ///@todo This is more general than just material responses; we should make a "TangentType"
@@ -202,7 +203,7 @@ public:
  * Implementation for assembling the consistent mass matrix
  * @author Mikael Öhman
  */
-class MassMatrixAssembler : public MatrixAssembler
+class OOFEM_EXPORT MassMatrixAssembler : public MatrixAssembler
 {
 public:
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
@@ -213,7 +214,7 @@ public:
  * Callback class for assembling effective tangents composed of stiffness and mass matrix.
  * @author Mikael Öhman
  */
-class EffectiveTangentAssembler : public MatrixAssembler
+class OOFEM_EXPORT EffectiveTangentAssembler : public MatrixAssembler
 {
 protected:
     MatResponseMode rmode;
