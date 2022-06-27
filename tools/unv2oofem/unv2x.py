@@ -163,8 +163,8 @@ class UNVParser:
                 else:
                     dataline=Line2Int(line1)
                     eltype=dataline[1]
-                    if eltype==11 or eltype==22:# types of elements which are defined on 3 lines
-                        # 1D elements have an additionnal line in their definition
+                    if eltype==11 or eltype==21 or eltype==22:# types of elements which are defined on 3 lines
+                        # 1D elements have an additional line in their definition
                         line3=file.readline()
                         cntvt=Line2Int(line3)
                     elif eltype==113:#Quadratic wedge has nodes on 2 lines

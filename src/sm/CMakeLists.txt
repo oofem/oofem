@@ -294,6 +294,7 @@ set (sm_material
     Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
     Materials/LatticeMaterials/latticeframeelastic.C
     Materials/LatticeMaterials/latticeframesteelplastic.C
+    Materials/1D/isoasymm1d.C
 )
 
 if (USE_MFRONT)

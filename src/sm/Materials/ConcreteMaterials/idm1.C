@@ -46,7 +46,7 @@
 #include "dynamicinputrecord.h"
 #include "engngm.h"
 #include "crosssection.h"
-
+#include "oofemtxtinputrecord.h"
 
 namespace oofem {
 REGISTER_Material(IsotropicDamageMaterial1);
@@ -1293,6 +1293,33 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
         return static_cast< MaterialModelMapperInterface * >(this);
     } else {
         return nullptr;
+    }
+}
+
+void
+IsotropicDamageMaterial1::saveContext(DataStream &stream, ContextMode mode)
+{
+    if ( ( mode & CM_Definition ) ) {
+        DynamicInputRecord input;
+        this->giveInputRecord(input);
+        if ( !stream.write(input.giveRecordAsString()
+                           ) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+}
+
+
+void
+IsotropicDamageMaterial1::restoreContext(DataStream &stream, ContextMode mode)
+{
+    if ( ( mode & CM_Definition ) ) {
+        std::string input;
+        if ( !stream.read(input) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        OOFEMTXTInputRecord ir(0, input);
+        this->initializeFrom(ir);
     }
 }
 

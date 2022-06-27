@@ -1,0 +1,34 @@
+nlstatic01.out
+Test of LIbeam2d elements -> simply supported beam
+StaticStructural nsteps 1 solverType "calm" stepLength 100 minStepLength 100 rtolf 1e-4 Psi 1 nmodules 1
+errorcheck
+domain 2dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 5
+node 1 coords 3 0. 0 0.
+node 2 coords 3 5. 0 0.
+node 3 coords 3 10. 0 0.
+Beam2d 1 nodes 2 1 2 nip 4        
+Beam2d 2 nodes 2 2 3 nip 4
+SimpleCS 1 area 0.3 Iy 2.25e-3 beamshearcoeff 1.e18 thick 0.3 material 1 set 1
+ISoLE 1 E 30.0e9 n 0.25 tAlpha 0.000012 d 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 3 values 2 0 0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0 set 3
+ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0 100 0 loadtype 3 set 4 reference
+ConstantEdgeLoad 4 loadTimeFunction 1 Components 3 0 100 0 loadtype 3 set 5 reference
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 1 1
+set 3 nodes 1 3
+Set 4 elementedges 2 1 1  
+Set 5 elementedges 2 2 1
+#
+#%BEGIN_CHECK% tolerance 1.e-6
+#LOADLEVEL tStep 1 value 1.723100e-01
+## check reactions 
+#REACTION tStep 1 number 1 dof 3 value -8.61549790e+01
+#REACTION tStep 1 number 3 dof 3 value -8.61549790e+01
+#
+#NODE tStep 1 number 2 dof 3 unknown d value 3.32388036e-05
+#
+#%END_CHECK%

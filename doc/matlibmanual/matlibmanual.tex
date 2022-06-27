@@ -264,6 +264,35 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 %\end{center}
 \end{table}
 
+\subsubsection{1D linear elastic material with different tension and compression stiffness - isoAxysymm1D}
+\label{isoaxysymm1d}
+Bi-linear material model for 1D elasticity, with different elastic moduli in tension and compression. The model parameters are summarized
+in Tab.~\ref{isoaxysymm1d_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Bi-Linear elastic material\\
+\hline
+Record Format & \descitem{IsoAxysymm1D} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{Et}{rn} \elemparam{Ec}{rn}
+\elemparam{tAlpha}{rn} [\elemparam{m}{rn}]\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{Et} Modulus of elasticity in tension\\
+&- \param{Ec} Modulus of elasticity in compression\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{m} optional regularization coefficient, default value set to 15, higher value makes response close to trully bilinear\\
+Supported modes& 1dMat\\
+Features & Adaptivity support\\
+\hline
+\end{mmt}
+\caption{Bi-Linear Elastic Material - summary.}
+\label{isoaxysymm1d_table}
+%\end{center}
+\end{table}
+
 \subsubsection{Hyperelastic material - Simo-Pister Material}
 This material model can describe elastic behavior at large strains.
 A hyperelastic model postulates the existence of free energy potential. Existence of the potential implies reversibility of deformations and no energy dissipation during loading process. Here we use the free energy function introduced in \cite{SimoHughes}
@@ -6041,7 +6070,7 @@ It requires the file
 \newline
 /tests/smmfront/plasticityIsotropicLinearHardeningPlasticity.mfront to be processed by MFront before the tests are run.
 \newline
-See /tests/smmfront/readme_install.txt for more detailed instructions.
+See /tests/smmfront/readme\_install.txt for more detailed instructions.
 
 \begin{table}[!htb]
 %\begin{center}

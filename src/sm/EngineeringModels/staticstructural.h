@@ -119,7 +119,7 @@ public:
 
     int requiresUnknownsDictionaryUpdate() override { return true; }
     int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
-
+    void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di) override;
     // identification
     const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
     const char *giveClassName() const override { return "StaticStructural"; }

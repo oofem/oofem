@@ -1,0 +1,26 @@
+test1.out
+Patch test of Truss1d elements -> temperature load
+StaticStructural nsteps 1 nmodules 1 stiffmode 0 manrmsteps 5
+errorcheck
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+Node 1 coords 1  0.
+Node 2 coords 1  2.
+Truss1d 1 nodes 2 1 2 
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+isoasymm1d 1  Et 1.0 Ec 15.0 tAlpha 0.000012  m 200 d 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+NodalLoad 2 loadTimeFunction 1 Components 1 -2.0 dofs 1 1 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elements 1 1
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+#REACTION tStep 1 number 1 dof 1 value 2.0
+#NODE tStep 1 number 2 dof 1 unknown d value -2.69901345e-1
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value -1.34950677e-1
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -2.0
+#%END_CHECK%
