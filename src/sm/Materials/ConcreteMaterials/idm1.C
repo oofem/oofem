@@ -914,11 +914,9 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
 			double eps_r = this->w_r/Le + this->f_r/E;
 			double eps_f = this->w_f/Le ;
 			double f_t = E*e0;
-			if ( kappa <= e0 ) {
-				omega = 0.0;
-			} else if ( kappa > e0 && kappa <= eps_k ) {
+			if ( kappa > e0 && kappa <= eps_k ) {
 				double slope=((f_k - f_t)/w_k);
-				omega = E/(E-slope*Le) - (E*e0)/(kappa*(E-slope*Le));
+				omega = E/(E+slope*Le) - (f_t)/(kappa*(E+slope*Le));
 			} else if ( kappa > eps_k && kappa <= eps_r ) {
 				double slope=((f_r - f_k)/(w_r-w_k));
 				omega = E/(E+slope*Le) +(1.0/kappa)*(w_k*slope-f_k)/(Le*slope+E);
@@ -1114,7 +1112,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) co
             return 0.0;
         } else if ( kappa > e0 && kappa <= eps_k ) {
         	double slope=((f_k - f_t)/w_k);
-        	return (E*e0)/(E-slope*Le)*(1.0/(kappa*kappa));
+        	return (f_t)/(E+slope*Le)*(1.0/(kappa*kappa));
         } else if ( kappa > eps_k && kappa <= eps_r ) {
         	double slope=((f_r - f_k)/(w_r-w_k));
         	return -(w_k*slope-f_k)/(Le*slope+E)*(1.0/(kappa*kappa));
