@@ -35,7 +35,7 @@
 #ifndef quad1mindlinshell3d_h
 #define quad1mindlinshell3d_h
 
-#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
@@ -66,13 +66,13 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
-class Quad1MindlinShell3D : public NLStructuralElement,
-public ZZNodalRecoveryModelInterface,
-public SPRNodalRecoveryModelInterface
+class Quad1MindlinShell3D : public StructuralElement,
+    public ZZNodalRecoveryModelInterface,
+    public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
-    std::vector< FloatArray > lnodes;
+    std::vector< FloatArray >lnodes;
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
     /// Flag controlling reduced (one - point) integration for shear
@@ -86,7 +86,7 @@ protected:
     static IntArray drillOrdering;
 
 public:
-    Quad1MindlinShell3D(int n, Domain * d);
+    Quad1MindlinShell3D(int n, Domain *d);
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
@@ -139,7 +139,7 @@ protected:
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
-    void computeVectorOfUnknowns(ValueModeType mode, TimeStep* tStep, FloatArray &shellUnknowns, FloatArray &drillUnknowns);
+    void computeVectorOfUnknowns(ValueModeType mode, TimeStep *tStep, FloatArray &shellUnknowns, FloatArray &drillUnknowns);
     //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }

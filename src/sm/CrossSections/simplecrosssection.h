@@ -97,37 +97,52 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    FloatArrayF<6> giveRealStress_3d(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<6> giveRealStress_3dDegeneratedShell(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<4> giveRealStress_PlaneStrain(const FloatArrayF<4> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<3> giveRealStress_PlaneStress(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<1> giveRealStress_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<2> giveRealStress_Warping(const FloatArrayF<2> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveRealStress_3d(const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveRealStress_3dDegeneratedShell(const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 4 >giveRealStress_PlaneStrain(const FloatArrayF< 4 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 3 >giveRealStress_PlaneStress(const FloatArrayF< 3 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 1 >giveRealStress_1d(const FloatArrayF< 1 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 2 >giveRealStress_Warping(const FloatArrayF< 2 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<6,6> giveStiffnessMatrix_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<3,3> giveStiffnessMatrix_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<4,4> giveStiffnessMatrix_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<1,1> giveStiffnessMatrix_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >giveStiffnessMatrix_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >giveStiffnessMatrix_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 4, 4 >giveStiffnessMatrix_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >giveStiffnessMatrix_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatArrayF<3> giveGeneralizedStress_Beam2d(const FloatArrayF<3> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<6> giveGeneralizedStress_Beam3d(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<5> giveGeneralizedStress_Plate(const FloatArrayF<5> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<8> giveGeneralizedStress_Shell(const FloatArrayF<8> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<9> giveGeneralizedStress_ShellRot(const FloatArrayF<9> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<4> giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatArrayF<3> giveGeneralizedStress_PlateSubSoil(const FloatArrayF<3> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 3 >giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 5 >giveGeneralizedStress_Plate(const FloatArrayF< 5 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 8 >giveGeneralizedStress_Shell(const FloatArrayF< 8 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 9 >giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 4 >giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 3 >giveGeneralizedStress_PlateSubSoil(const FloatArrayF< 3 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
     bool isCharacteristicMtrxSymmetric(MatResponseMode mode) const override;
 
-    FloatMatrixF<6,6> give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<3,3> give2dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<6,6> give3dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<5,5> give2dPlateStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<8,8> give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<9,9> give3dShellRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<4,4> giveMembraneRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >give2dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 5, 5 >give2dPlateStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 8, 8 >give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 9, 9 >give3dShellRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 4, 4 >giveMembraneRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+
+
+    //@{
+    virtual FloatArrayF< 9 >giveFirstPKStress_3d(const FloatArrayF< 9 > &reducedF, GaussPoint *gp, TimeStep *tStep) const override;
+    virtual FloatArrayF< 5 >giveFirstPKStress_PlaneStrain(const FloatArrayF< 5 > &reducedF, GaussPoint *gp, TimeStep *tStep) const override;
+    virtual FloatArrayF< 4 >giveFirstPKStress_PlaneStress(const FloatArrayF< 4 > &reducedF, GaussPoint *gp, TimeStep *tStep) const override;
+    virtual FloatArrayF< 1 >giveFirstPKStress_1d(const FloatArrayF< 1 > &reducedF, GaussPoint *gp, TimeStep *tStep) const override;
+
+    void giveCharMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF< 9, 9 >giveStiffnessMatrix_dPdF_3d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 5, 5 >giveStiffnessMatrix_dPdF_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 4, 4 >giveStiffnessMatrix_dPdF_PlaneStress(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >giveStiffnessMatrix_dPdF_1d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
+
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -151,8 +166,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_SimpleCrossSection_Name; }
 
     double give(int aProperty, GaussPoint *gp) const override;
-    double give(CrossSectionProperty a, GaussPoint *gp) const override { return CrossSection :: give(a, gp); }
-    double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) const override { return CrossSection :: give(a, coords, elem, local); }
+    double give(CrossSectionProperty a, GaussPoint *gp) const override { return CrossSection::give(a, gp); }
+    double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) const override { return CrossSection::give(a, coords, elem, local); }
     int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
     Material *giveMaterial(IntegrationPoint *ip) const override;
 
@@ -162,10 +177,8 @@ public:
     Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) override;
 
 
-    void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep) override;
     void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep) override;
     void giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) override;
-    void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
     void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
     void giveTemperatureVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;

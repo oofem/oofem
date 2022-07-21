@@ -69,20 +69,20 @@ namespace oofem {
 
 REGISTER_Element(tet21ghostsolid);
 
-FEI3dTetQuad tet21ghostsolid :: interpolation;
-FEI3dTetLin tet21ghostsolid :: interpolation_lin;
+FEI3dTetQuad tet21ghostsolid::interpolation;
+FEI3dTetLin tet21ghostsolid::interpolation_lin;
 
-IntArray tet21ghostsolid :: momentum_ordering(30);
-IntArray tet21ghostsolid :: conservation_ordering(4);
-IntArray tet21ghostsolid :: ghostdisplacement_ordering(30);
-IntArray tet21ghostsolid :: velocitydofsonside = {
+IntArray tet21ghostsolid::momentum_ordering(30);
+IntArray tet21ghostsolid::conservation_ordering(4);
+IntArray tet21ghostsolid::ghostdisplacement_ordering(30);
+IntArray tet21ghostsolid::velocitydofsonside = {
     1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 28, 29, 30, 34, 35, 36
 };
-IntArray tet21ghostsolid :: displacementdofsonside = {
+IntArray tet21ghostsolid::displacementdofsonside = {
     4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 31, 32, 33, 37, 38, 39
 };
 
-tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this)
+tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     numberOfGaussPoints = 4;
     numberOfDofMans = 10;
@@ -98,16 +98,16 @@ tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement
     Dghost.at(3, 3) = 1 - nu;
     Dghost.at(3, 1) = Dghost.at(3, 2) = nu;
     Dghost.at(4, 4) = Dghost.at(5, 5) = Dghost.at(6, 6) = .5 * ( 1 - 2 * nu );
-    Dghost.times( E / ( 1 + nu ) / ( 1 - 2 * nu ) );
+    Dghost.times(E / ( 1 + nu ) / ( 1 - 2 * nu ) );
 
     conservation_ordering = {
         7, 14, 21, 28
     };
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
-        momentum_ordering[i * 3 + 0] = j++;
-        momentum_ordering[i * 3 + 1] = j++;
-        momentum_ordering[i * 3 + 2] = j++;
+        momentum_ordering [ i * 3 + 0 ] = j++;
+        momentum_ordering [ i * 3 + 1 ] = j++;
+        momentum_ordering [ i * 3 + 2 ] = j++;
         if ( i <= 3 ) {
             j++;
         }
@@ -116,9 +116,9 @@ tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
         j += 3;
-        ghostdisplacement_ordering[i * 3 + 0] = j++;
-        ghostdisplacement_ordering[i * 3 + 1] = j++;
-        ghostdisplacement_ordering[i * 3 + 2] = j++;
+        ghostdisplacement_ordering [ i * 3 + 0 ] = j++;
+        ghostdisplacement_ordering [ i * 3 + 1 ] = j++;
+        ghostdisplacement_ordering [ i * 3 + 2 ] = j++;
         if ( i <= 3 ) {
             j++;
         }
@@ -126,13 +126,13 @@ tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement
 }
 
 FEInterpolation *
-tet21ghostsolid :: giveInterpolation() const
+tet21ghostsolid::giveInterpolation() const
 {
     return & interpolation;
 }
 
 FEInterpolation *
-tet21ghostsolid :: giveInterpolation(DofIDItem id) const
+tet21ghostsolid::giveInterpolation(DofIDItem id) const
 {
     if ( id == P_f ) {
         return & interpolation_lin;
@@ -142,18 +142,18 @@ tet21ghostsolid :: giveInterpolation(DofIDItem id) const
 }
 
 void
-tet21ghostsolid :: computeGaussPoints()
+tet21ghostsolid::computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 6);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-tet21ghostsolid :: computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+tet21ghostsolid::computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     FloatArray a, aPert, intF, intFPert, DintF;
     double eps = 1e-9;
@@ -171,14 +171,14 @@ tet21ghostsolid :: computeNumericStiffnessMatrix(FloatMatrix &answer, MatRespons
 
         giveInternalForcesVectorGivenSolution(intFPert, tStep, 0, aPert);
 
-        DintF.operator = ( intF - intFPert );
+        DintF.operator=(intF - intFPert);
         DintF.times(-1 / eps);
         answer.setColumn(DintF, i);
     }
 }
 
 void
-tet21ghostsolid :: computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+tet21ghostsolid::computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     FloatArray a, aPert, intF, intFPert, DintF;
     double eps = 1e-9;
@@ -196,7 +196,7 @@ tet21ghostsolid :: computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatRe
 
         giveInternalForcesVectorGivenSolutionDebug(intFPert, tStep, 0, aPert, false);
 
-        DintF.operator = ( intF - intFPert );
+        DintF.operator=(intF - intFPert);
         DintF.times(-1 / eps);
         answer.setColumn(DintF, i);
     }
@@ -204,26 +204,33 @@ tet21ghostsolid :: computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatRe
 
 
 void
-tet21ghostsolid :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+tet21ghostsolid::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveRealStress_3d(strain, gp, tStep);
 }
 
 void
-tet21ghostsolid :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+tet21ghostsolid::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
 }
 
+
 void
-tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+tet21ghostsolid::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_3d(rMode, gp, tStep);
+}
+
+void
+tet21ghostsolid::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 #ifdef __FM_MODULE
-#if USENUMTAN == 1
+ #if USENUMTAN == 1
     computeNumericStiffnessMatrix(answer, rMode, tStep);
     return;
 
-#endif
+ #endif
 
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 
@@ -249,10 +256,10 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     if ( !tStep->isTheFirstStep() ) {
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), a_prev);
     } else {
-        a_prev.resize( a.giveSize() );
+        a_prev.resize(a.giveSize() );
         a_prev.zero();
     }
-    a_inc.operator = ( a - a_prev );
+    a_inc.operator=(a - a_prev);
 
     aVelocity.beSubArrayOf(a, momentum_ordering);
     aPressure.beSubArrayOf(a, conservation_ordering);
@@ -260,16 +267,16 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
 
     FloatArray aTotal;
-    aTotal.operator = ( aVelocity + aIncGhostDisplacement * VELOCITYCOEFF ); // Assume deltaT=1 gives that the increment is the velocity
+    aTotal.operator=(aVelocity + aIncGhostDisplacement * VELOCITYCOEFF);     // Assume deltaT=1 gives that the increment is the velocity
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         // gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
-        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 
-        this->interpolation.evaldNdx( dNx, lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx(dNx, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this) );
 
         // Move to small deformations
         dNv.resize(30); // dNv = [dN1/dx dN1/dy dN1/dz dN2/dx dN2/dy dN2/dz ... dN10/dz]
@@ -298,8 +305,8 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             // Incompressibility part
             G.plusDyadUnsym(dNv, Nlin, -detJ * weight);
         } else {
-            int Voigt6 [ 3 ] [ 3 ] = { { 1, 6, 5 }, { 6, 2, 4 }, { 5, 4, 3 } };
-            int Voigt9 [ 3 ] [ 3 ] = { { 1, 6, 5 }, { 9, 2, 4 }, { 8, 7, 3 } };
+            int Voigt6[ 3 ] [ 3 ] = { { 1, 6, 5 }, { 6, 2, 4 }, { 5, 4, 3 } };
+            int Voigt9[ 3 ] [ 3 ] = { { 1, 6, 5 }, { 9, 2, 4 }, { 8, 7, 3 } };
 
             // Compute commonly used matrices
             FloatArray Fa, Finva, FinvTa;
@@ -322,9 +329,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             NlinFinvTaB.beDyadicProductOf(Nlin, FinvTaB);
 
             double J = F.giveDeterminant();
-#if FIXEDJ == 1
+ #if FIXEDJ == 1
             J = 1;
-#endif
+ #endif
 
             // Compute Cauchy stress
             FloatArray fluidCauchyArray, epsf;
@@ -334,9 +341,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             epsf.beProductOf(B, aTotal);
             pressure = Nlin.dotProduct(aPressure);
 
-#if FIXEDpressure == 1
+ #if FIXEDpressure == 1
             pressure = 1.0;
-#endif
+ #endif
 
             gp->setMaterialMode(_3dFlow);
             auto stress_eps = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
@@ -356,9 +363,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
             afuT1.beDyadicProductOf(BTS, FinvTaB);
             afuT1.times(J * weight * detJ);
-#if FIXEDJ == 1
+ #if FIXEDJ == 1
             afuT1.times(0.0);
-#endif
+ #endif
             afDu.add(afuT1);
 
             // 2nd term ------------ // Works
@@ -410,9 +417,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             BTK.beTProductOf(BH, K);
             afuT3.beProductOf(BTK, BH);
             afuT3.times(-J * weight * detJ);
-#if FIXEDFinvT == 1
+ #if FIXEDFinvT == 1
             afuT3.times(0.0);
-#endif
+ #endif
             afDu.add(afuT3);
 
             // afDw terms ========== // Works
@@ -481,9 +488,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
             bfpT1 = NlinFinvTaB;
             bfpT1.times(-J * detJ * weight * FinvTaBv);
-#if FIXEDJ == 1
+ #if FIXEDJ == 1
             bfpT1.times(0.0);
-#endif
+ #endif
 
             bfpDu.add(bfpT1);
 
@@ -494,9 +501,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             AiiB.beTProductOf(BH, A_IVa);
             bfpT2.beDyadicProductOf(Nlin, AiiB);
             bfpT2.times(J * detJ * weight);
-#if FIXEDFinvT == 1
+ #if FIXEDFinvT == 1
             bfpT2.times(0.0);
-#endif
+ #endif
             bfpDu.add(bfpT2);
 
 
@@ -548,7 +555,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     answer.beProductOf(Itransform, temp);
 
     // ******************* This is for development purposes only. Compare to numerical stiffness tangent
-#if TESTTANGENT
+ #if TESTTANGENT
     if ( ( this->globalNumber == 292 ) && ( tStep->giveNumber() > 0 ) ) {
         double MaxErr = 0.0;
         FloatMatrix numtan;
@@ -581,7 +588,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             }
         }
 
-        printf( "globalNumber: %u, i:%u, j:%u, MaxErr: %e, Numtan=%f, Analytic=%f\n", this->globalNumber, imax, jmax, MaxErr, numtan.at(imax, jmax), temp.at(imax, jmax) );
+        printf("globalNumber: %u, i:%u, j:%u, MaxErr: %e, Numtan=%f, Analytic=%f\n", this->globalNumber, imax, jmax, MaxErr, numtan.at(imax, jmax), temp.at(imax, jmax) );
 
         numtan.printYourselfToFile("/tmp/numtan.txt", false);
         temp.printYourselfToFile("/tmp/analytic.txt", false);
@@ -589,9 +596,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             printf("The error is actually quite large..\n");
         }
     }
-#endif
+ #endif
 #else // ifdef __FM_MODULE
-        OOFEM_ERROR("Fluid module missing\n");
+    OOFEM_ERROR("Fluid module missing\n");
 #endif// ifdef __FM_MODULE
 
 
@@ -600,7 +607,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 }
 
 void
-tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
+tet21ghostsolid::computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     // Compute displacements used to compute J
 
@@ -628,10 +635,10 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
     u.beSubArrayOf(a, ghostdisplacement_ordering);
     u_prev.beSubArrayOf(a_prev, ghostdisplacement_ordering);
 
-    for ( auto &gp : *this->integrationRulesArray [ 0 ] ) {
+    for ( auto &gp : * this->integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
+        double detJ = fabs(this->interpolation.giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this) ) );
         double dA = detJ * gp->giveWeight();
 
         // Body load
@@ -657,7 +664,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
                 gVector = temp;
             }
 
-            this->interpolation.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation.evalN(N, lcoords, FEIElementGeometryWrapper(this) );
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
@@ -667,8 +674,8 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
         }
 
         // "load" from previous step
-        this->interpolation.evaldNdx( dNx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx(dNx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         dNv.resize(30);
         for ( int k = 0; k < dNx.giveNumberOfRows(); k++ ) {
@@ -700,7 +707,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
 }
 
 void
-tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+tet21ghostsolid::giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     FloatArray a;
     this->computeVectorOf(VM_Total, tStep, a);
@@ -708,7 +715,7 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 }
 
 void
-tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a)
+tet21ghostsolid::giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a)
 {
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
@@ -722,10 +729,10 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     if ( !tStep->isTheFirstStep() ) {
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), a_prev);
     } else {
-        a_prev.resize( a.giveSize() );
+        a_prev.resize(a.giveSize() );
         a_prev.zero();
     }
-    a_inc.operator = ( a - a_prev );
+    a_inc.operator=(a - a_prev);
 
     aVelocity.beSubArrayOf(a, momentum_ordering);
     aPressure.beSubArrayOf(a, conservation_ordering);
@@ -733,15 +740,15 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
 
     FloatArray aTotal;
-    aTotal.operator = ( aVelocity + aIncGhostDisplacement * VELOCITYCOEFF ); // Assume deltaT=1 gives that the increment is the velocity
+    aTotal.operator=(aVelocity + aIncGhostDisplacement * VELOCITYCOEFF);     // Assume deltaT=1 gives that the increment is the velocity
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
-        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 
-        this->interpolation.evaldNdx( dNx, lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx(dNx, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this) );
 
         dNv.resize(30);
         for ( int k = 0; k < dNx.giveNumberOfRows(); k++ ) {
@@ -863,7 +870,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 }
 
 void
-tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a, bool ExtraLogging)
+tet21ghostsolid::giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a, bool ExtraLogging)
 {
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
@@ -877,10 +884,10 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
     if ( !tStep->isTheFirstStep() ) {
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), a_prev);
     } else {
-        a_prev.resize( a.giveSize() );
+        a_prev.resize(a.giveSize() );
         a_prev.zero();
     }
-    a_inc.operator = ( a - a_prev );
+    a_inc.operator=(a - a_prev);
 
     aVelocity.beSubArrayOf(a, momentum_ordering);
     aPressure.beSubArrayOf(a, conservation_ordering);
@@ -888,16 +895,16 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
     aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
 
     FloatArray aTotal;
-    aTotal.operator = ( aVelocity + aIncGhostDisplacement * VELOCITYCOEFF ); // Assume deltaT=1 gives that the increment is the velocity
+    aTotal.operator=(aVelocity + aIncGhostDisplacement * VELOCITYCOEFF);     // Assume deltaT=1 gives that the increment is the velocity
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         // gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
-        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 
-        this->interpolation.evaldNdx( dNx, lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx(dNx, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this) );
 
         dNv.resize(30);
         for ( int k = 0; k < dNx.giveNumberOfRows(); k++ ) {
@@ -1039,7 +1046,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
 } // **************** DEBUG
 
 void
-tet21ghostsolid :: giveDofManDofIDMask(int inode, IntArray &answer) const
+tet21ghostsolid::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Returns the mask for node number inode of this element.
 
@@ -1055,14 +1062,14 @@ tet21ghostsolid :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+tet21ghostsolid::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x30] strain-displacement matrix {B} of the receiver, eva-
 // luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx(dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 30);
     answer.zero();
@@ -1084,7 +1091,7 @@ tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
 }
 
 void
-tet21ghostsolid :: computeDeformationGradientVectorAt(FloatArray &answer, FloatArray lcoord, TimeStep *tStep)
+tet21ghostsolid::computeDeformationGradientVectorAt(FloatArray &answer, FloatArray lcoord, TimeStep *tStep)
 {
     FloatArray F, u;
     FloatMatrix dNdx, BH, Fmatrix, Finv;
@@ -1094,7 +1101,7 @@ tet21ghostsolid :: computeDeformationGradientVectorAt(FloatArray &answer, FloatA
     this->computeVectorOf({ 1, 2, 3 }, VM_Total, tStep, u);
 
     // Compute dNdx in point
-    interpolation->evaldNdx( dNdx, lcoord, FEIElementGeometryWrapper(this) );
+    interpolation->evaldNdx(dNdx, lcoord, FEIElementGeometryWrapper(this) );
 
     // Compute displacement gradient BH
     BH.resize(9, dNdx.giveNumberOfRows() * 3);
@@ -1122,11 +1129,11 @@ tet21ghostsolid :: computeDeformationGradientVectorAt(FloatArray &answer, FloatA
 }
 
 void
-tet21ghostsolid :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+tet21ghostsolid::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx(dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 30);
     answer.zero();
@@ -1145,7 +1152,7 @@ tet21ghostsolid :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 void
-tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep)
+tet21ghostsolid::giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep)
 {
     this->computeVectorOf(VM_Total, tStep, u);
 
@@ -1153,14 +1160,14 @@ tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), u_prev);
         this->computeVectorOf(VM_Incremental, tStep, inc);
     } else {
-        inc.resize( u.giveSize() );
+        inc.resize(u.giveSize() );
         inc.zero();
-        u_prev.operator = ( inc );
+        u_prev.operator=(inc);
     }
 }
 
 void
-tet21ghostsolid :: computeDeformationGradientVectorFromDispl(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
+tet21ghostsolid::computeDeformationGradientVectorFromDispl(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
 {
     // Computes the deformation gradient in the Voigt format at the Gauss point gp of
     // the receiver at time step tStep.
@@ -1188,12 +1195,12 @@ tet21ghostsolid :: computeDeformationGradientVectorFromDispl(FloatArray &answer,
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR( "MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
 void
-tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+tet21ghostsolid::computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray u;
     this->computeVectorOf({ 1, 2, 3 }, VM_Total, tStep, u);
@@ -1201,10 +1208,10 @@ tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoi
 }
 
 double
-tet21ghostsolid :: computeVolumeAround(GaussPoint *gp)
+tet21ghostsolid::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs(this->interpolation.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight      = gp->giveWeight();
     return ( this->computeVolume() );
 
@@ -1213,14 +1220,14 @@ tet21ghostsolid :: computeVolumeAround(GaussPoint *gp)
 
 
 int
-tet21ghostsolid :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+tet21ghostsolid::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Velocity ) {
         FloatArray N, a;
         FloatMatrix Nmat;
 
         this->computeVectorOf({ V_u, V_v, V_w }, VM_Total, tStep, a);
-        this->interpolation.evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         Nmat.resize(3, N.giveSize() * 3);
         for ( int i = 1; i <= N.giveSize(); i++ ) {
@@ -1235,7 +1242,7 @@ tet21ghostsolid :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         FloatArray N, a;
 
         this->computeVectorOf({ P_f }, VM_Total, tStep, a);
-        this->interpolation_lin.evalN( N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         answer.resize(1);
         answer.at(1) = N.dotProduct(a);
@@ -1243,14 +1250,14 @@ tet21ghostsolid :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
     } else {
         MaterialMode matmode = gp->giveMaterialMode();
         gp->setMaterialMode(_3dFlow);
-        int r = StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        int r = StructuralElement::giveIPValue(answer, gp, type, tStep);
         gp->setMaterialMode(matmode);
         return r;
     }
 }
 
 bool
-tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
+tet21ghostsolid::giveRowTransformationMatrix(TimeStep *tStep)
 {
     // Create a transformation matrix that switch all rows/equations located in OmegaF but not on GammaInt, i.e where we do not have a no slip condition
 
@@ -1279,7 +1286,7 @@ tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
             row2 = m;
 
             if ( DofIDs.at(j) == V_u || DofIDs.at(j) == V_v || DofIDs.at(j) == V_w ) {
-                bool doSwitch = !this->giveDofManager(i)->giveDofWithID( DofIDs.at(j) )->hasBc(tStep);
+                bool doSwitch = !this->giveDofManager(i)->giveDofWithID(DofIDs.at(j) )->hasBc(tStep);
 
                 if ( doSwitch ) {     // Boundary condition not set, make switch
                     row1 = m;
@@ -1292,9 +1299,9 @@ tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
                         }
                     }
                     row1List.resizeWithValues(row1List.giveSize() + 1);
-                    row1List.at( row1List.giveSize() ) = row1;
+                    row1List.at(row1List.giveSize() ) = row1;
                     row2List.resizeWithValues(row2List.giveSize() + 1);
-                    row2List.at( row2List.giveSize() ) = row2;
+                    row2List.at(row2List.giveSize() ) = row2;
                 }
             }
             m++;
@@ -1306,11 +1313,11 @@ tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
 
     // Create tranformation matrix by switching rows
     for ( int i = 1; i <= row1List.giveSize(); i++ ) {
-        Itransform.at( row1List.at(i), row1List.at(i) ) = 0;
-        Itransform.at( row2List.at(i), row2List.at(i) ) = 0;
+        Itransform.at(row1List.at(i), row1List.at(i) ) = 0;
+        Itransform.at(row2List.at(i), row2List.at(i) ) = 0;
 
-        Itransform.at( row1List.at(i), row2List.at(i) ) = 1;
-        Itransform.at( row2List.at(i), row1List.at(i) ) = 1;
+        Itransform.at(row1List.at(i), row2List.at(i) ) = 1;
+        Itransform.at(row2List.at(i), row1List.at(i) ) = 1;
     }
 
     computeItransform = false;
@@ -1320,30 +1327,30 @@ tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
 
 // Some extension Interfaces to follow:
 
-Interface *tet21ghostsolid :: giveInterface(InterfaceType it)
+Interface *tet21ghostsolid::giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
 
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
 
     default:
-        return StructuralElement :: giveInterface(it);
+        return StructuralElement::giveInterface(it);
         //return FMElement :: giveInterface(it);
     }
 }
 
-void tet21ghostsolid :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                              TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+void tet21ghostsolid::EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
-    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->interpolation_lin.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN(n, lcoords, FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(4);
     answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
@@ -1358,7 +1365,7 @@ void tet21ghostsolid :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
 }
 
 void
-tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
+tet21ghostsolid::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {
         answer.resize(1);
@@ -1367,8 +1374,8 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         } else {
             const auto &eNodes = this->interpolation.computeLocalEdgeMapping(node - 4);
             answer.at(1) = 0.5 * (
-                this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
-                this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
+                this->giveNode(eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
+                this->giveNode(eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         answer.clear();
@@ -1376,7 +1383,7 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 }
 
 void
-tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
+tet21ghostsolid::computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global)
 {
     answer.clear();
     if ( type != ExternalForcesVector ) {
@@ -1396,15 +1403,15 @@ tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundary
     f.zero();
     auto iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
-    for ( auto &gp : *iRule ) {
+    for ( auto &gp : * iRule ) {
         FloatArray lcoords = gp->giveNaturalCoordinates();
-        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+        if ( load->giveFormulationType() == Load::FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
             FloatArray gcoords, elcoords;
-            this->interpolation.surfaceLocal2global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-            this->interpolation.global2local( elcoords, gcoords, FEIElementGeometryWrapper(this) );
-            NeumannMomentLoad *thisLoad = dynamic_cast< NeumannMomentLoad * >(load);
+            this->interpolation.surfaceLocal2global(gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation.global2local(elcoords, gcoords, FEIElementGeometryWrapper(this) );
+            NeumannMomentLoad *thisLoad = dynamic_cast< NeumannMomentLoad * >( load );
             if ( thisLoad != NULL ) {
                 FloatArray temp;
                 thisLoad->computeValueAtBoundary(temp, tStep, gcoords, VM_Total, this, boundary);
@@ -1426,7 +1433,7 @@ tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundary
         ///@todo Make sure this part is correct.
         // We always want the global values in the end, so we might as well compute them here directly:
         // transform force
-        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+        if ( load->giveCoordSystMode() == Load::CST_Global ) {
             // then just keep it in global c.s
         } else {
             ///@todo Support this...
@@ -1441,12 +1448,12 @@ tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundary
         }
 
         // Construct n-matrix
-        fei->boundaryEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
         n.beNMatrixOf(n_vec, nsd);
 
         ///@todo Some way to ask for the thickness at a global coordinate maybe?
         double thickness = 1.0; // Should be the circumference for axisymm-elements.
-        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this) );
         f.plusProduct(n, force, dV);
     }
 

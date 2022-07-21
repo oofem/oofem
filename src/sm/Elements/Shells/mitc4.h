@@ -35,7 +35,7 @@
 #ifndef mitc4_h
 #define mitc4_h
 
-#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -69,7 +69,7 @@ enum CharTensor {
  * - calculating its B,D matrices and dV.
  */
 
-class MITC4Shell : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
+class MITC4Shell : public StructuralElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface
 {
@@ -80,7 +80,7 @@ protected:
      * Transformation Matrix form GtoL(3,3) is stored
      * at the element level for computation efficiency.
      */
-    FloatMatrixF<3,3> GtoLRotationMatrix;
+    FloatMatrixF< 3, 3 >GtoLRotationMatrix;
     int nPointsXY = 0, nPointsZ = 0, directorType = 0;
     double drillCoeff = 0.;
 
@@ -112,7 +112,7 @@ public:
     // transformation
     bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
     int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
-    std::array<FloatMatrixF<3,3>, 4> computeLToDirectorRotationMatrix();
+    std::array< FloatMatrixF< 3, 3 >, 4 >computeLToDirectorRotationMatrix();
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
 
 protected:
@@ -125,20 +125,20 @@ protected:
 
 
 private:
-    std::array<FloatArrayF<3>, 4> giveNodeCoordinates();
-    std::array<FloatArrayF<3>, 4> giveDirectorVectors();
-    std::array<FloatArrayF<3>, 4> giveLocalDirectorVectors();
-    std::array<double, 4> giveThickness();
-    FloatMatrixF<3,3> giveJacobian(const FloatArrayF<3> &lcoords);
-    FloatArrayF<3> giveLocalCoordinates(const FloatArrayF<3> &global);
+    std::array< FloatArrayF< 3 >, 4 >giveNodeCoordinates();
+    std::array< FloatArrayF< 3 >, 4 >giveDirectorVectors();
+    std::array< FloatArrayF< 3 >, 4 >giveLocalDirectorVectors();
+    std::array< double, 4 >giveThickness();
+    FloatMatrixF< 3, 3 >giveJacobian(const FloatArrayF< 3 > &lcoords);
+    FloatArrayF< 3 >giveLocalCoordinates(const FloatArrayF< 3 > &global);
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     FloatMatrix giveCharacteristicTensor(CharTensor type, GaussPoint *gp, TimeStep *tStep);
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
     bool computeLocalCoordinates(FloatArray &answer, const FloatArray &coords) override;
     double computeVolumeAround(GaussPoint *gp) override;
-    std::array<FloatArrayF<3>, 3> computeLocalBaseVectors();
-    std::array<FloatArrayF<4>, 2> givedNdx(const FloatArrayF<3> &coords);
+    std::array< FloatArrayF< 3 >, 3 >computeLocalBaseVectors();
+    std::array< FloatArrayF< 4 >, 2 >givedNdx(const FloatArrayF< 3 > &coords);
 
     FloatArray giveMidplaneIPValue(int gpXY, InternalStateType type, TimeStep *tStep);
 
@@ -147,7 +147,7 @@ private:
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
     void giveDofManDofIDMask(int inode, IntArray &) const override;
     double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
-    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);  ///@note This method isn't overloaded, it's never called for any class 
+    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);  ///@note This method isn't overloaded, it's never called for any class
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
 
     void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords) override;

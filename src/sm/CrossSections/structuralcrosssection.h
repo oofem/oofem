@@ -98,12 +98,12 @@ public:
      */
     //@{
     FloatArray giveRealStresses(const FloatArray &reducedStrain, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<6> giveRealStress_3d(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<6> giveRealStress_3dDegeneratedShell(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("not implemented"); };
-    virtual FloatArrayF<4> giveRealStress_PlaneStrain(const FloatArrayF<4> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<3> giveRealStress_PlaneStress(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<1> giveRealStress_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<2> giveRealStress_Warping(const FloatArrayF<2> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 6 >giveRealStress_3d(const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 6 >giveRealStress_3dDegeneratedShell(const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("not implemented"); };
+    virtual FloatArrayF< 4 >giveRealStress_PlaneStrain(const FloatArrayF< 4 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 3 >giveRealStress_PlaneStress(const FloatArrayF< 3 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 1 >giveRealStress_1d(const FloatArrayF< 1 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 2 >giveRealStress_Warping(const FloatArrayF< 2 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
     //@}
 
     /**
@@ -114,10 +114,10 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual FloatMatrixF<6,6> giveStiffnessMatrix_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatMatrixF<3,3> giveStiffnessMatrix_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatMatrixF<4,4> giveStiffnessMatrix_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatMatrixF<1,1> giveStiffnessMatrix_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 6, 6 >giveStiffnessMatrix_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 3, 3 >giveStiffnessMatrix_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 4, 4 >giveStiffnessMatrix_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 1, 1 >giveStiffnessMatrix_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     //@}
 
     /**
@@ -128,14 +128,14 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual FloatArrayF<3> giveGeneralizedStress_Beam2d(const FloatArrayF<3> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<6> giveGeneralizedStress_Beam3d(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<5> giveGeneralizedStress_Plate(const FloatArrayF<5> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<8> giveGeneralizedStress_Shell(const FloatArrayF<8> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<9> giveGeneralizedStress_ShellRot(const FloatArrayF<9> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<4> giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<3> giveGeneralizedStress_PlateSubSoil(const FloatArrayF<3> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
-    virtual FloatArrayF<6> giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 3 >giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 6 >giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 5 >giveGeneralizedStress_Plate(const FloatArrayF< 5 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 8 >giveGeneralizedStress_Shell(const FloatArrayF< 8 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 9 >giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 4 >giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 3 >giveGeneralizedStress_PlateSubSoil(const FloatArrayF< 3 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 6 >giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF< 6 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 
     /**
@@ -152,7 +152,14 @@ public:
      * @param reducedFIncrement Increment of the deformation gradient vector in reduced form. @todo should this then be in a multiplicative way? /JB
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep) = 0;
+    virtual FloatArray giveFirstPKStresses(const FloatArray &reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    //@{
+    virtual FloatArrayF< 9 >giveFirstPKStress_3d(const FloatArrayF< 9 > &reducedF, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 5 >giveFirstPKStress_PlaneStrain(const FloatArrayF< 5 > &reducedF, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 4 >giveFirstPKStress_PlaneStress(const FloatArrayF< 4 > &reducedF, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatArrayF< 1 >giveFirstPKStress_1d(const FloatArrayF< 1 > &reducedF, GaussPoint *gp, TimeStep *tStep) const = 0;
+    //@}
+
 
 
     /**
@@ -178,20 +185,6 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) {};
-
-    /**
-     * Computes the material stiffness matrix dPdF of receiver in a given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * Elements should always pass their requests to their cross section model, which
-     * performs necessary integration over its volume and invokes necessary material
-     * services for corresponding material model defined for given integration point.
-     * @param answer Contains result.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Computes the material stiffness matrix dCde of receiver in a given integration point, respecting its history.
@@ -229,7 +222,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual FloatMatrixF<3,3> give2dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 3, 3 >give2dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Computes the stiffness matrix for 2d beams.
      * @param answer The requested matrix.
@@ -237,7 +230,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual FloatMatrixF<6,6> give3dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 6, 6 >give3dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing subsoil stiffness matrix for 2d beams.
      * @param answer Stiffness matrix.
@@ -245,7 +238,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 6, 6 >give3dBeamSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Method for computing 2d plate stiffness matrix.
@@ -254,7 +247,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<5,5> give2dPlateStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 5, 5 >give2dPlateStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing 3d shell stiffness matrix.
      * @param answer Stiffness matrix.
@@ -262,15 +255,15 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<8,8> give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
-        /**
+    virtual FloatMatrixF< 8, 8 >give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    /**
      * Method for computing 3d shell (with normal rotation) stiffness matrix.
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<9,9> give3dShellRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 9, 9 >give3dShellRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing 3d shell stiffness matrix on degenerated shell elements.
      * @param answer Stiffness matrix.
@@ -278,7 +271,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<6,6> give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("Implemented in inherited classes"); };
+    virtual FloatMatrixF< 6, 6 >give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("Implemented in inherited classes"); };
     /**
      * Method for computing membrane stiffness matrix with added drilling stiffness.
      * @param answer Stiffness matrix.
@@ -286,7 +279,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<4,4> giveMembraneRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 4, 4 >giveMembraneRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing subsoil stiffness matrix for plates.
      * @param answer Stiffness matrix.
@@ -294,7 +287,45 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 3, 3 >give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+
+    /**
+     * Computes the large strain stiffness matrix of receiver in given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * Elements should always pass their requests to their cross section model, which
+     * performs necessary integration over its volume and invokes necessary material
+     * services for corresponding material model defined for given integration point.
+     * @param answer Contains result.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+
+    virtual void giveCharMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /**
+     * Computes the material stiffness matrix dPdF of receiver in a given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * Elements should always pass their requests to their cross section model, which
+     * performs necessary integration over its volume and invokes necessary material
+     * services for corresponding material model defined for given integration point.
+     * @param answer Contains result.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    //@{
+    virtual FloatMatrixF< 9, 9 >giveStiffnessMatrix_dPdF_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 5, 5 >giveStiffnessMatrix_dPdF_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 4, 4 >giveStiffnessMatrix_dPdF_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF< 1, 1 >giveStiffnessMatrix_dPdF_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    //@}
+
+
+
+
     /**
      * Returns modified gradient of stress vector, which is used to
      * bring stresses back to yield surface.

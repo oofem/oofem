@@ -52,7 +52,7 @@ protected:
     double pitch, length;
 
 public:
-    LIBeam2dNL(int n, Domain * d);
+    LIBeam2dNL(int n, Domain *d);
     virtual ~LIBeam2dNL() { }
 
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
@@ -65,6 +65,7 @@ public:
 
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     // layered cross section support functions
     void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,

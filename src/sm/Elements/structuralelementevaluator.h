@@ -141,6 +141,15 @@ protected:
      */
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
+     * Computes large strain constitutive matrix of receiver.
+     * @param answer Constitutive matrix.
+     * @param rMode Material response mode of answer.
+     * @param gp Integration point for which constitutive matrix is computed.
+     * @param tStep Time step.
+     */
+    //    virtual void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /**
      * Optimized version, allowing to pass element displacements as parameter.
      * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large
      * and its querying for each point take more time than strain evaluation. And this has to be done for each

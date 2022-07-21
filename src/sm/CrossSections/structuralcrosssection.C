@@ -41,7 +41,7 @@
 
 namespace oofem {
 FloatArray
-StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
+StructuralCrossSection::giveRealStresses(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
@@ -53,7 +53,7 @@ StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint 
     } else if ( mode == _3dShell ) {
         return this->giveGeneralizedStress_Shell(strain, gp, tStep);
     } else if ( mode == _3dShellRot ) {
-      return this->giveGeneralizedStress_ShellRot(strain, gp, tStep);
+        return this->giveGeneralizedStress_ShellRot(strain, gp, tStep);
     } else if ( mode == _3dMat ) {
         return this->giveRealStress_3d(strain, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
@@ -68,7 +68,7 @@ StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint 
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
         auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-        if ( mat->hasMaterialModeCapability( mode ) ) {
+        if ( mat->hasMaterialModeCapability(mode) ) {
             FloatArray answer;
             mat->giveRealStressVector(answer, gp, strain, tStep);
             return answer;
@@ -79,9 +79,29 @@ StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint 
 }
 
 
+FloatArray
+StructuralCrossSection::giveFirstPKStresses(const FloatArray &reducedF, GaussPoint *gp, TimeStep *tStep) const
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        return this->giveFirstPKStress_3d(reducedF, gp, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        return this->giveFirstPKStress_PlaneStrain(reducedF, gp, tStep);
+    } else if ( mode == _PlaneStress ) {
+        return this->giveFirstPKStress_PlaneStress(reducedF, gp, tStep);
+    } else if ( mode == _1dMat ) {
+        return this->giveFirstPKStress_1d(reducedF, gp, tStep);
+    } else {
+        OOFEM_ERROR("unsupported mode");
+    }
+}
+
+
+
+
 FloatArray *
-StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
-                                                           FloatArray *gradientStressVector3d)
+StructuralCrossSection::imposeStressConstrainsOnGradient(GaussPoint *gp,
+                                                         FloatArray *gradientStressVector3d)
 //
 // returns modified gradient of stress vector, which is used to
 // bring stresses back to yield surface.
@@ -124,32 +144,32 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 
     return gradientStressVector3d;
 }
 
-FloatArrayF<6>
-StructuralCrossSection :: giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const
+FloatArrayF< 6 >
+StructuralCrossSection::giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF< 6 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     return mat->giveRealStressVector_3dBeamSubSoil(generalizedStrain, gp, tStep);
 }
 
-FloatMatrixF<6,6>
-StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+FloatMatrixF< 6, 6 >
+StructuralCrossSection::give3dBeamSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     return mat->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
 }
 
-  
+
 
 FloatArray *
-StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
-                                                           FloatArray *gradientStrainVector3d)
+StructuralCrossSection::imposeStrainConstrainsOnGradient(GaussPoint *gp,
+                                                         FloatArray *gradientStrainVector3d)
 //
 // returns modified gradient of strain vector, which is used to
 // compute plastic strain increment.
@@ -186,11 +206,10 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 
     return gradientStrainVector3d;
 }
-
 } // end namespace oofem

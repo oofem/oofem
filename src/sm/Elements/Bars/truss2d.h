@@ -64,10 +64,10 @@ protected:
     double pitch;
     int cs_mode;
     // array for diffrent cs_modes
-    static FEI2dLineLin interp[3];  // only defined it so far...
-    
+    static FEI2dLineLin interp[ 3 ];  // only defined it so far...
+
 public:
-    Truss2d(int n, Domain * d);
+    Truss2d(int n, Domain *d);
     virtual ~Truss2d() { }
 
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
@@ -82,6 +82,7 @@ public:
 
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     // characteristic length (for crack band approach)
     double giveCharacteristicLength(const FloatArray &) override

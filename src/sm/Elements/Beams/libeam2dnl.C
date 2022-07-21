@@ -52,7 +52,7 @@
 namespace oofem {
 REGISTER_Element(LIBeam2dNL);
 
-LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
+LIBeam2dNL::LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans     = 2;
     length              = 0.;
@@ -60,10 +60,10 @@ LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
 }
 
 Interface *
-LIBeam2dNL :: giveInterface(InterfaceType interface)
+LIBeam2dNL::giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >(this);
+        return static_cast< LayeredCrossSectionInterface * >( this );
     }
 
     return NULL;
@@ -71,7 +71,7 @@ LIBeam2dNL :: giveInterface(InterfaceType interface)
 
 
 void
-LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+LIBeam2dNL::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, n1, n2, n1x, n2x, n3x;
@@ -103,7 +103,7 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 
 
 void
-LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
+LIBeam2dNL::computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 {
     //
     // Returns nonlinear part of geometrical equations of the receiver at gp.
@@ -253,7 +253,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 
 
 void
-LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+LIBeam2dNL::computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV;
     FloatArray stress;
@@ -263,7 +263,7 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
 
     // assemble initial stress matrix
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( GaussPoint *gp: * this->giveDefaultIntegrationRulePtr() ) {
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         if ( stress.giveSize() ) {
@@ -280,19 +280,19 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 }
 
 
-void LIBeam2dNL :: computeGaussPoints()
+void LIBeam2dNL::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 
 void
-LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+LIBeam2dNL::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -309,7 +309,7 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam2dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+LIBeam2dNL::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
@@ -339,11 +339,11 @@ LIBeam2dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 bool
-LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer)
+LIBeam2dNL::computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double sine, cosine;
 
-    sine = sin( this->givePitch() );
+    sine = sin(this->givePitch() );
     cosine = cos(pitch);
 
     answer.resize(6, 6);
@@ -364,7 +364,7 @@ LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 
-double LIBeam2dNL :: computeVolumeAround(GaussPoint *gp)
+double LIBeam2dNL::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -374,10 +374,10 @@ double LIBeam2dNL :: computeVolumeAround(GaussPoint *gp)
 
 
 int
-LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+LIBeam2dNL::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
-    /// to support all the sensible moment/force tensors. 
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams)
+    /// to support all the sensible moment/force tensors.
     if ( type == IST_BeamForceMomentTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
@@ -385,27 +385,33 @@ LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return StructuralElement::giveIPValue(answer, gp, type, tStep);
     }
 }
 
 
 void
-LIBeam2dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+LIBeam2dNL::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep);
 }
 
 
 void
-LIBeam2dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+LIBeam2dNL::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->give2dBeamStiffMtrx(rMode, gp, tStep);
 }
 
+void
+LIBeam2dNL::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("computeConstitutiveMatrix_dPdF_At Not implemented for libeam2dnl");
+}
+
 
 void
-LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+LIBeam2dNL::computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -426,14 +432,14 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 
 
 void
-LIBeam2dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
+LIBeam2dNL::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_w, R_v};
+    answer = { D_u, D_w, R_v };
 }
 
 
 int
-LIBeam2dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+LIBeam2dNL::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     double ksi, n1, n2;
 
@@ -442,14 +448,14 @@ LIBeam2dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
 
 
-double LIBeam2dNL :: computeLength()
+double LIBeam2dNL::computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -467,7 +473,7 @@ double LIBeam2dNL :: computeLength()
 }
 
 
-double LIBeam2dNL :: givePitch()
+double LIBeam2dNL::givePitch()
 // Returns the pitch of the receiver.
 {
     double xA, xB, yA, yB;
@@ -488,14 +494,14 @@ double LIBeam2dNL :: givePitch()
 
 
 void
-LIBeam2dNL :: initializeFrom(InputRecord &ir)
+LIBeam2dNL::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
 }
 
 
 void
-LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+LIBeam2dNL::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -517,7 +523,7 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+LIBeam2dNL::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong egde number");
@@ -529,7 +535,7 @@ LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 int
-LIBeam2dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+LIBeam2dNL::computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
     /*
      * Returns transformation matrix from global coordinate system to local
@@ -543,7 +549,7 @@ LIBeam2dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
+    sine           = sin(this->givePitch() );
     cosine         = cos(pitch);
 
     answer.at(1, 1) = cosine;
@@ -556,7 +562,7 @@ LIBeam2dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 }
 
 int
-LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+LIBeam2dNL::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -571,16 +577,16 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 
 
 void
-LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+LIBeam2dNL::computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
+    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times(this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
 #ifdef __OOFEG
-void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void LIBeam2dNL::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -589,9 +595,9 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     //  if (!go) { // create new one
-    WCRec p [ 2 ];   /* poin */
+    WCRec p[ 2 ];    /* poin */
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = 0.;
@@ -606,7 +612,7 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 
-void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void LIBeam2dNL::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -615,9 +621,9 @@ void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep
 
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p[ 2 ];  /* poin */
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = 0.;

@@ -35,7 +35,7 @@
 #ifndef qdkt_h
 #define qdkt_h
 
-#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "sm/CrossSections/layeredcrosssection.h"
 #include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "zznodalrecoverymodel.h"
@@ -60,18 +60,18 @@ class FEI2dQuadLin;
  * Tasks:
  * - calculating its B,D,N matrices and dV.
  */
-class QDKTPlate : public NLStructuralElement,
-public ZZNodalRecoveryModelInterface,
-public SPRNodalRecoveryModelInterface,
-public LayeredCrossSectionInterface, 
-public ZZErrorEstimatorInterface
+class QDKTPlate : public StructuralElement,
+    public ZZNodalRecoveryModelInterface,
+    public SPRNodalRecoveryModelInterface,
+    public LayeredCrossSectionInterface,
+    public ZZErrorEstimatorInterface
 {
 protected:
     /// Element geometry approximation
     static FEI2dQuadLin interp_lin;
 
 public:
-    QDKTPlate(int n, Domain * d);
+    QDKTPlate(int n, Domain *d);
     virtual ~QDKTPlate() { }
 
     FEInterpolation *giveInterpolation() const override;
@@ -99,7 +99,7 @@ protected:
      * @name Surface load support
      */
     //@{
-    void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords) override;
+    void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords) override;
     void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
     double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
@@ -112,7 +112,7 @@ protected:
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
-     //@}
+    //@}
 
 public:
     // definition & identification

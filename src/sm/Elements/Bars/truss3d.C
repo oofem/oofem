@@ -52,25 +52,25 @@
 namespace oofem {
 REGISTER_Element(Truss3d);
 
-FEI3dLineLin Truss3d :: interp;
+FEI3dLineLin Truss3d::interp;
 
-Truss3d :: Truss3d(int n, Domain *aDomain) :
+Truss3d::Truss3d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 2;
 }
 
 
-FEInterpolation *Truss3d :: giveInterpolation() const { return & interp; }
+FEInterpolation *Truss3d::giveInterpolation() const { return & interp; }
 
 
 Interface *
-Truss3d :: giveInterface(InterfaceType interface)
+Truss3d::giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     //OOFEM_LOG_INFO("Interface on Truss3d element not supported");
@@ -79,7 +79,7 @@ Truss3d :: giveInterface(InterfaceType interface)
 
 
 void
-Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
+Truss3d::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.clear();
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
@@ -87,14 +87,14 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 
 
 void
-Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+Truss3d::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx(dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 6);
     answer.at(1, 1) = dN.at(1, 1);
@@ -106,34 +106,34 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 }
 
 
-  void
-Truss3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+void
+Truss3d::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     this->computeBmatrixAt(gp, answer);
 }
 
-  
+
 void
-Truss3d :: computeGaussPoints()
+Truss3d::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 
 double
-Truss3d :: computeLength()
+Truss3d::computeLength()
 {
-    return this->interp.giveLength( FEIElementGeometryWrapper(this) );
+    return this->interp.giveLength(FEIElementGeometryWrapper(this) );
 }
 
 
 void
-Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+Truss3d::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -156,29 +156,29 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+Truss3d::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
+    this->interp.evalN(n, iLocCoord, FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 3);
 }
 
 
 double
-Truss3d :: computeVolumeAround(GaussPoint *gp)
+Truss3d::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
-    return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
+    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
 int
-Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
+Truss3d::giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 // returns a unit vectors of local coordinate system at element
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
@@ -186,7 +186,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 {
     FloatArray lx, ly(3), lz;
 
-    lx.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    lx.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
     lx.normalize();
 
     ly(0) = lx(1);
@@ -211,33 +211,39 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-Truss3d :: initializeFrom(InputRecord &ir)
+Truss3d::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
 }
 
 
 void
-Truss3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+Truss3d::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
 }
 
 void
-Truss3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+Truss3d::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
 }
 
 void
-Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Truss3d::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = {D_u, D_v, D_w};
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+}
+
+void
+Truss3d::giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = { D_u, D_v, D_w };
 }
 
 
 void
-Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Truss3d::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -259,19 +265,19 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Truss3d::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong edge number");
     }
 
     double weight = gp->giveWeight();
-    return this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+    return this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
 }
 
 
 int
-Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+Truss3d::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -289,17 +295,17 @@ Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 
 
 #ifdef __OOFEG
-void Truss3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void Truss3d::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
@@ -314,18 +320,18 @@ void Truss3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 
-void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void Truss3d::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);

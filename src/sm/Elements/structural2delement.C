@@ -40,14 +40,14 @@
 #include "mathfem.h"
 
 namespace oofem {
-Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
+Structural2DElement::Structural2DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     matRotation(false)
 {
     cellGeometryWrapper = NULL;
 }
 
-Structural2DElement :: ~Structural2DElement()
+Structural2DElement::~Structural2DElement()
 {
     if ( cellGeometryWrapper ) {
         delete cellGeometryWrapper;
@@ -56,31 +56,31 @@ Structural2DElement :: ~Structural2DElement()
 
 
 void
-Structural2DElement :: initializeFrom(InputRecord &ir)
+Structural2DElement::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
     matRotation = ir.hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
 }
 
 
 void
-Structural2DElement :: postInitialize()
+Structural2DElement::postInitialize()
 {
     // Element must be created before giveNumberOfNodes can be called
-    StructuralElement :: postInitialize();
+    StructuralElement::postInitialize();
     this->numberOfDofMans = this->giveNumberOfNodes();
 }
 
 
 int
-Structural2DElement :: giveNumberOfNodes() const
+Structural2DElement::giveNumberOfNodes() const
 {
     return this->giveInterpolation()->giveNumberOfNodes();
 }
 
 
 FEICellGeometry *
-Structural2DElement :: giveCellGeometryWrapper()
+Structural2DElement::giveCellGeometryWrapper()
 {
     if ( !cellGeometryWrapper ) {
         cellGeometryWrapper = new FEIElementGeometryWrapper(this);
@@ -91,7 +91,7 @@ Structural2DElement :: giveCellGeometryWrapper()
 
 
 int
-Structural2DElement :: computeNumberOfDofs()
+Structural2DElement::computeNumberOfDofs()
 {
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask;
@@ -101,7 +101,7 @@ Structural2DElement :: computeNumberOfDofs()
 
 
 void
-Structural2DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Structural2DElement::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {
         D_u, D_v
@@ -110,13 +110,13 @@ Structural2DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 double
-Structural2DElement :: computeVolumeAround(GaussPoint *gp)
+Structural2DElement::computeVolumeAround(GaussPoint *gp)
 {
     // Computes the volume element dV associated with the given gp.
 
     double weight = gp->giveWeight();
     const FloatArray &lCoords = gp->giveNaturalCoordinates(); // local/natural coords of the gp (parent domain)
-    double detJ = fabs( this->giveInterpolation()->giveTransformationJacobian( lCoords, * this->giveCellGeometryWrapper() ) );
+    double detJ = fabs(this->giveInterpolation()->giveTransformationJacobian(lCoords, * this->giveCellGeometryWrapper() ) );
     double thickness = this->giveCrossSection()->give(CS_Thickness, gp); // the cross section keeps track of the thickness
 
     return detJ * thickness * weight; // dV
@@ -124,20 +124,20 @@ Structural2DElement :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Structural2DElement :: computeGaussPoints()
+Structural2DElement::computeGaussPoints()
 {
     // Sets up the integration rule array which contains all the Gauss points
     // Default: create one integration rule
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
 
 void
-Structural2DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, const FloatArray &lcoords)
+Structural2DElement::giveMaterialOrientationAt(FloatArray &x, FloatArray &y, const FloatArray &lcoords)
 {
     if ( this->elemLocalCS.isNotEmpty() ) { // User specified orientation
         x = {
@@ -148,7 +148,7 @@ Structural2DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, c
         };
     } else {
         FloatMatrix jac;
-        this->giveInterpolation()->giveJacobianMatrixAt( jac, lcoords, * this->giveCellGeometryWrapper() );
+        this->giveInterpolation()->giveJacobianMatrixAt(jac, lcoords, * this->giveCellGeometryWrapper() );
         x.beColumnOf(jac, 1); // This is {dx/dxi, dy/dxi, dz/dxi}
         x.normalize();
         y = {
@@ -159,7 +159,7 @@ Structural2DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, c
 
 
 double
-Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+Structural2DElement::giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
     return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
@@ -170,7 +170,7 @@ Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 // Edge support
 
 void
-Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Structural2DElement::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -187,20 +187,20 @@ Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Structural2DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Structural2DElement::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     /* Returns the line element ds associated with the given gp on the specific edge.
      * Note: The name is misleading since there is no volume to speak of in this case.
      * The returned value is used for integration of a line integral (external forces).
      */
     double detJ = static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-                  edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+                  edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
     return detJ * gp->giveWeight();
 }
 
 
 int
-Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+Structural2DElement::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -212,7 +212,7 @@ Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     FloatArray normal(2);
 
     static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-    edgeEvalNormal( normal, iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    edgeEvalNormal(normal, iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
     answer.resize(2, 2);
     answer.zero();
@@ -230,18 +230,18 @@ Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
 
 // Plane stress
 
-PlaneStressElement :: PlaneStressElement(int n, Domain *aDomain) :
+PlaneStressElement::PlaneStressElement(int n, Domain *aDomain) :
     Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {}
 
 
 void
-PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
+PlaneStressElement::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
     answer.resize(3, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -257,14 +257,14 @@ PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
 
 void
-PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+PlaneStressElement::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Returns the [ 4 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
     /// @todo not checked if correct
 
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -279,25 +279,25 @@ PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+PlaneStressElement::computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        FloatArrayF<3> rotStrain = {
-            e[0] * x[0] * x[0] + e[2] * x[0] * x[1] + e[1] * x[1] * x[1],
-            e[0] * y[0] * y[0] + e[2] * y[0] * y[1] + e[1] * y[1] * y[1],
-            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[2] * ( x[1] * y[0] + x[0] * y[1] )
+        FloatArrayF< 3 >rotStrain = {
+            e [ 0 ] * x [ 0 ] * x [ 0 ] + e [ 2 ] * x [ 0 ] * x [ 1 ] + e [ 1 ] * x [ 1 ] * x [ 1 ],
+            e [ 0 ] * y [ 0 ] * y [ 0 ] + e [ 2 ] * y [ 0 ] * y [ 1 ] + e [ 1 ] * y [ 1 ] * y [ 1 ],
+            2 * e [ 0 ] * x [ 0 ] * y [ 0 ] + 2 * e [ 1 ] * x [ 1 ] * y [ 1 ] + e [ 2 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] )
         };
 
         auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(rotStrain, gp, tStep);
 
         answer = {
-            s[0] * x[0] * x[0] + 2 * s[2] * x[0] * y[0] + s[1] * y[0] * y[0],
-            s[0] * x[1] * x[1] + 2 * s[2] * x[1] * y[1] + s[1] * y[1] * y[1],
-            s[1] * y[0] * y[1] + s[0] * x[0] * x[1] + s[2] * ( x[1] * y[0] + x[0] * y[1] )
+            s [ 0 ] * x [ 0 ] * x [ 0 ] + 2 * s [ 2 ] * x [ 0 ] * y [ 0 ] + s [ 1 ] * y [ 0 ] * y [ 0 ],
+            s [ 0 ] * x [ 1 ] * x [ 1 ] + 2 * s [ 2 ] * x [ 1 ] * y [ 1 ] + s [ 1 ] * y [ 1 ] * y [ 1 ],
+            s [ 1 ] * y [ 0 ] * y [ 1 ] + s [ 0 ] * x [ 0 ] * x [ 1 ] + s [ 2 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] )
         };
     } else {
         answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(e, gp, tStep);
@@ -306,19 +306,39 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
 
 
 void
-PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+PlaneStressElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
 
         Q = {
             { x(0) * x(0), x(1) * x(1), x(0) * x(1) },
             { y(0) * y(0), y(1) * y(1), y(0) * y(1) },
             { 2 * x(0) * y(0), 2 * x(1) * y(1), x(1) * y(0) + x(0) * y(1) }
+        };
+        answer.rotatedWith(Q, 't');
+    }
+}
+
+void
+PlaneStressElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStress(rMode, gp, tStep);
+    if ( this->matRotation ) {
+        FloatArray x, y;
+        FloatMatrix Q;
+
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
+
+        Q = {
+            { x(0) * x(0), x(1) * x(1), x(0) * x(1), x(1) * x(0) },
+            { y(0) * y(0), y(1) * y(1), y(0) * y(1), y(1) * y(0) },
+            { x(0) * y(0), x(1) * y(1), x(0) * y(1), x(1) * y(0) },
+            { y(0) * x(0), y(1) * x(1), y(0) * x(1), y(1) * x(0) }
         };
         answer.rotatedWith(Q, 't');
     }
@@ -331,20 +351,20 @@ PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespon
 // Plane strain
 
 
-PlaneStrainElement :: PlaneStrainElement(int n, Domain *aDomain) :
+PlaneStrainElement::PlaneStrainElement(int n, Domain *aDomain) :
     Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {}
 
 
 void
-PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
+PlaneStrainElement::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
 // Returns the [ 4 x (nno*2) ] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
@@ -361,14 +381,14 @@ PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 
 
 void
-PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+PlaneStrainElement::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Returns the [ 5 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
     /// @todo not checked if correct
 
     FloatMatrix dNdx;
-    this->giveInterpolation()->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    this->giveInterpolation()->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
     answer.resize(4, dNdx.giveNumberOfRows() * 2);
     answer.zero();
@@ -383,26 +403,26 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+PlaneStrainElement::computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
 
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        FloatArrayF<4> rotStrain = {
-            e[0] * x[0] * x[0] + e[3] * x[0] * x[1] + e[1] * x[1] * x[1],
-            e[0] * y[0] * y[0] + e[3] * y[0] * y[1] + e[1] * y[1] * y[1],
-            e[2],
-            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[3] * ( x[1] * y[0] + x[0] * y[1] )
+        FloatArrayF< 4 >rotStrain = {
+            e [ 0 ] * x [ 0 ] * x [ 0 ] + e [ 3 ] * x [ 0 ] * x [ 1 ] + e [ 1 ] * x [ 1 ] * x [ 1 ],
+            e [ 0 ] * y [ 0 ] * y [ 0 ] + e [ 3 ] * y [ 0 ] * y [ 1 ] + e [ 1 ] * y [ 1 ] * y [ 1 ],
+            e [ 2 ],
+            2 * e [ 0 ] * x [ 0 ] * y [ 0 ] + 2 * e [ 1 ] * x [ 1 ] * y [ 1 ] + e [ 3 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] )
         };
         auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(rotStrain, gp, tStep);
         answer = {
-            s[0] * x[0] * x[0] + 2 * s[3] * x[0] * y[0] + s[1] * y[0] * y[0],
-            s[0] * x[1] * x[1] + 2 * s[3] * x[1] * y[1] + s[1] * y[1] * y[1],
-            s[2],
-            y[1] * ( s[3] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[3] * y[0] )
+            s [ 0 ] * x [ 0 ] * x [ 0 ] + 2 * s [ 3 ] * x [ 0 ] * y [ 0 ] + s [ 1 ] * y [ 0 ] * y [ 0 ],
+            s [ 0 ] * x [ 1 ] * x [ 1 ] + 2 * s [ 3 ] * x [ 1 ] * y [ 1 ] + s [ 1 ] * y [ 1 ] * y [ 1 ],
+            s [ 2 ],
+            y [ 1 ] * ( s [ 3 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] ) + x [ 1 ] * ( s [ 0 ] * x [ 0 ] + s [ 3 ] * y [ 0 ] )
         };
     } else {
         answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(e, gp, tStep);
@@ -411,14 +431,14 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
 
 
 void
-PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+PlaneStrainElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
         Q = {
             { x(0) * x(0), x(1) * x(1), 0, x(0) * x(1) },
             { y(0) * y(0), y(1) * y(1), 0, y(0) * y(1) },
@@ -431,10 +451,33 @@ PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespon
 }
 
 
+void
+PlaneStrainElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStrain(rMode, gp, tStep);
+    if ( this->matRotation ) {
+        FloatArray x, y;
+        FloatMatrix Q;
+
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
+
+        Q = {
+            { x(0) * x(0), x(1) * x(1), 0, x(0) * x(1), x(1) * x(0) },
+            { y(0) * y(0), y(1) * y(1), 0, y(0) * y(1), y(1) * y(0) },
+            { 0, 0, 1, 0, 0           },
+            { x(0) * y(0), x(1) * y(1), 0, x(0) * y(1), x(1) * y(0) },
+            { y(0) * x(0), y(1) * x(1), 0, y(0) * x(1), y(1) * x(0) }
+        };
+        answer.rotatedWith(Q, 't');
+    }
+}
+
+
+
 
 // Axisymmetry
 
-AxisymElement :: AxisymElement(int n, Domain *aDomain) :
+AxisymElement::AxisymElement(int n, Domain *aDomain) :
     Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
@@ -443,7 +486,7 @@ AxisymElement :: AxisymElement(int n, Domain *aDomain) :
 
 
 double
-AxisymElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+AxisymElement::giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
 // returns receiver's characteristic length for crack band models
 // for a crack formed in the plane with normal normalToCrackPlane.
@@ -454,21 +497,20 @@ AxisymElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 
 
 double
-AxisymElement :: computeVolumeAround(GaussPoint *gp)
+AxisymElement::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-  // note: radius is accounted by interpolation (of Fei2d*Axi type)
-  double determinant = fabs( static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-                             giveTransformationJacobian( gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() ) );
+    // note: radius is accounted by interpolation (of Fei2d*Axi type)
+    double determinant = fabs(static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
+                              giveTransformationJacobian(gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() ) );
 
-  double weight = gp->giveWeight();
-  return determinant * weight;
-  
+    double weight = gp->giveWeight();
+    return determinant * weight;
 }
 
 
 void
-AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+AxisymElement::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [ 6 x (nno*2) ] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
@@ -478,7 +520,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FEInterpolation *interp = this->giveInterpolation();
 
     FloatArray N;
-    interp->evalN( N, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evalN(N, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
     double r = 0.0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         double x = this->giveNode(i)->giveCoordinate(1);
@@ -486,7 +528,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
 
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
     answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
@@ -501,7 +543,7 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 
 
 void
-AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+AxisymElement::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [ 9 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
@@ -511,8 +553,8 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatMatrix dnx;
     FEInterpolation2d *interp = static_cast< FEInterpolation2d * >( this->giveInterpolation() );
 
-    interp->evalN( n, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
-    interp->evaldNdx( dnx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evalN(n, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    interp->evaldNdx(dnx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
 
     int nRows = dnx.giveNumberOfRows();
@@ -541,11 +583,11 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 double
-AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+AxisymElement::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
     double result = static_cast< FEInterpolation2d * >( this->giveInterpolation() )->
-                    edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+                    edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
 
 
     return result * gp->giveWeight();
@@ -554,41 +596,41 @@ AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 void
-AxisymElement :: computeGaussPoints()
+AxisymElement::computeGaussPoints()
 {
     // Sets up the integration rule array which contains all the Gauss points
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 6);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
 void
-AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+AxisymElement::computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
 
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        FloatArrayF<6> rotStrain = {
-            e[0] * x[0] * x[0] + e[5] * x[0] * x[1] + e[1] * x[1] * x[1],
-            e[0] * y[0] * y[0] + e[5] * y[0] * y[1] + e[1] * y[1] * y[1],
-            e[2],
-            e[4] * y[0] + e[3] * y[1],
-            e[4] * x[0] + e[3] * x[1],
-            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[5] * ( x[1] * y[0] + x[0] * y[1] )
+        FloatArrayF< 6 >rotStrain = {
+            e [ 0 ] * x [ 0 ] * x [ 0 ] + e [ 5 ] * x [ 0 ] * x [ 1 ] + e [ 1 ] * x [ 1 ] * x [ 1 ],
+            e [ 0 ] * y [ 0 ] * y [ 0 ] + e [ 5 ] * y [ 0 ] * y [ 1 ] + e [ 1 ] * y [ 1 ] * y [ 1 ],
+            e [ 2 ],
+            e [ 4 ] * y [ 0 ] + e [ 3 ] * y [ 1 ],
+            e [ 4 ] * x [ 0 ] + e [ 3 ] * x [ 1 ],
+            2 * e [ 0 ] * x [ 0 ] * y [ 0 ] + 2 * e [ 1 ] * x [ 1 ] * y [ 1 ] + e [ 5 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] )
         };
         auto s = this->giveStructuralCrossSection()->giveRealStress_3d(rotStrain, gp, tStep);
         answer = {
-            s[0] * x[0] * x[0] + 2 * s[5] * x[0] * y[0] + s[1] * y[0] * y[0],
-            s[0] * x[1] * x[1] + 2 * s[5] * x[1] * y[1] + s[1] * y[1] * y[1],
-            s[2],
-            s[4] * x[1] + s[3] * y[1],
-            s[4] * x[0] + s[3] * y[0],
-            y[1] * ( s[5] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[5] * y[0] )
+            s [ 0 ] * x [ 0 ] * x [ 0 ] + 2 * s [ 5 ] * x [ 0 ] * y [ 0 ] + s [ 1 ] * y [ 0 ] * y [ 0 ],
+            s [ 0 ] * x [ 1 ] * x [ 1 ] + 2 * s [ 5 ] * x [ 1 ] * y [ 1 ] + s [ 1 ] * y [ 1 ] * y [ 1 ],
+            s [ 2 ],
+            s [ 4 ] * x [ 1 ] + s [ 3 ] * y [ 1 ],
+            s [ 4 ] * x [ 0 ] + s [ 3 ] * y [ 0 ],
+            y [ 1 ] * ( s [ 5 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] ) + x [ 1 ] * ( s [ 0 ] * x [ 0 ] + s [ 5 ] * y [ 0 ] )
         };
     } else {
         answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
@@ -596,21 +638,43 @@ AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &e, Ga
 }
 
 void
-AxisymElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
-                                             MatResponseMode rMode, GaussPoint *gp,
-                                             TimeStep *tStep)
+AxisymElement::computeConstitutiveMatrixAt(FloatMatrix &answer,
+                                           MatResponseMode rMode, GaussPoint *gp,
+                                           TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
         Q = {
             { x(0) * x(0), x(1) * x(1), 0, 0, 0, x(0) * x(1) },
             { y(0) * y(0), y(1) * y(1), 0, 0, 0, y(0) * y(1) },
             { 0, 0, 1, 0, 0, 0 },
             { 0, 0, 0, y(1), y(0), 0 },
+            { 0, 0, 0, x(1), x(0), 0 },
+            { 2 * x(0) * y(0), 2 * x(1) * y(1), 0, 0, 0, x(1) * y(0) + x(0) * y(1) }
+        };
+
+        answer.rotatedWith(Q, 't');
+    }
+}
+
+void
+AxisymElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_3d(rMode, gp, tStep);
+    if ( this->matRotation ) {
+        FloatArray x, y;
+        FloatMatrix Q;
+
+        this->giveMaterialOrientationAt(x, y, gp->giveNaturalCoordinates() );
+        Q = {
+            { x(0) * x(0), x(1) * x(1), 0, 0,    0,    x(0) * x(1), 0, 0, x(1) * x(0) },
+            { y(0) * y(0), y(1) * y(1), 0, 0,    0,    y(0) * y(1), 0, 0, y(1) * y(0) },
+            { 0,           0,           1, 0,    0,    0,           0, 0, 0           },
+            { 0,           0,           0, y(1), y(0), 0,           0, 0, 0 },
             { 0, 0, 0, x(1), x(0), 0 },
             { 2 * x(0) * y(0), 2 * x(1) * y(1), 0, 0, 0, x(1) * y(0) + x(0) * y(1) }
         };

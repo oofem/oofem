@@ -36,7 +36,6 @@
 #define abaqususerelement_h
 
 #include "structuralelement.h"
-#include "nlstructuralelement.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "timestep.h"
@@ -54,10 +53,9 @@
 //@}
 
 namespace oofem {
-
 /**
  * UEL interface from Abaqus user elements.
- * 
+ *
  * The function prototype for UEL is:
  * SUBROUTINE UEL(RHS,AMATRX,SVARS,ENERGY,NDOFEL,NRHS,NSVARS,
  *      PROPS,NPROPS,COORDS,MCRD,NNODE,U,DU,V,A,JTYPE,TIME,
@@ -74,7 +72,7 @@ namespace oofem {
  *
  * @author Giovanni
  */
-class AbaqusUserElement : public NLStructuralElement
+class AbaqusUserElement : public StructuralElement
 {
 private:
     /// Dynamically loaded uel
@@ -138,7 +136,7 @@ private:
     int *jdltype = nullptr;                // Temporary init.
 
     /// params
-    double params [ 3 ];
+    double params[ 3 ];
 
     /// jprops
     IntArray jprops;
@@ -147,16 +145,16 @@ private:
     bool hasTangentFlag;
 
     /// Pointer to the dynamically loaded uel-function (translated to C)
-    void (*uel)(double *rhs, double *amatrx, double *svars, double energy [ 8 ], int *ndofel,            // 5
+    void (*uel)(double *rhs, double *amatrx, double *svars, double energy[ 8 ], int *ndofel,             // 5
                 int *nrhs, int *nsvars, double *props, int *nprops, double *coords, int *mcrd,           // 6
                 int *nnode, double *u, double *du, double *v, double *a, int *jtype,                     // 6
-                double time [ 2 ], double *dtime, int *kstep, int *kinc, int *jelem,                     // 5
-                double params [ 3 ], int *ndload, int *jdltyp, double *adlmag, double *predef,           // 5
+                double time[ 2 ], double *dtime, int *kstep, int *kinc, int *jelem,                      // 5
+                double params[ 3 ], int *ndload, int *jdltyp, double *adlmag, double *predef,            // 5
                 int *npredef, int *lflags, int *mvarx, double *ddlmag, int *mdload,                      // 5
                 double *pnewdt, int *jprops, int *njprop, double *period);                               // 4 - tot 36
 
     /// File containing the uel function
-    std :: string filename;
+    std::string filename;
 
 public:
     /// Constructor
@@ -227,7 +225,6 @@ protected:
         return 0;
     }
 };
-
 }// namespace oofem
 
 #endif  // abaqususerelement_h

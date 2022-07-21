@@ -52,11 +52,11 @@
 namespace oofem {
 REGISTER_Element(Truss2d);
 
-  FEI2dLineLin Truss2d :: interp[3] = {FEI2dLineLin(1,3),
-                                       FEI2dLineLin(1,2),
-                                       FEI2dLineLin(2,3)};  
+FEI2dLineLin Truss2d::interp[ 3 ] = { FEI2dLineLin(1, 3),
+                                      FEI2dLineLin(1, 2),
+                                      FEI2dLineLin(2, 3) };
 
-Truss2d :: Truss2d(int n, Domain *aDomain) :
+Truss2d::Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
 {
     numberOfDofMans     = 2;
@@ -67,7 +67,7 @@ Truss2d :: Truss2d(int n, Domain *aDomain) :
 
 
 void
-Truss2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+Truss2d::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
@@ -100,7 +100,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 
 
 void
-Truss2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Truss2d::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Will be the same as the regular B-matrix
     this->computeBmatrixAt(gp, answer);
@@ -108,19 +108,19 @@ Truss2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 
-void Truss2d :: computeGaussPoints()
+void Truss2d::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 
 void
-Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+Truss2d::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -141,7 +141,7 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+Truss2d::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
@@ -161,7 +161,7 @@ Truss2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 int
-Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+Truss2d::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     //determine in which plane the truss is defined
     int c1 = 0, c2 = 0;
@@ -175,14 +175,14 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
 
     answer.resize(3);
     answer.zero();
-    answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 *this->giveNode(2)->giveCoordinate(c1);
-    answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 *this->giveNode(2)->giveCoordinate(c2);
+    answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 * this->giveNode(2)->giveCoordinate(c1);
+    answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 * this->giveNode(2)->giveCoordinate(c2);
 
     return 1;
 }
 
 
-double Truss2d :: computeVolumeAround(GaussPoint *gp)
+double Truss2d::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -191,7 +191,7 @@ double Truss2d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-double Truss2d :: computeLength()
+double Truss2d::computeLength()
 // Returns the length of the receiver.
 {
     //determine in which plane the truss is defined
@@ -213,7 +213,7 @@ double Truss2d :: computeLength()
 }
 
 
-double Truss2d :: givePitch()
+double Truss2d::givePitch()
 // Returns the pitch of the receiver.
 {
     double xA, xB, zA, zB;
@@ -237,7 +237,7 @@ double Truss2d :: givePitch()
 
 
 int
-Truss2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
+Truss2d::giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 // returns a unit vectors of local coordinate system at element
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
@@ -248,7 +248,7 @@ Truss2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine = sin( this->givePitch() );
+    sine = sin(this->givePitch() );
     cosine = cos(pitch);
 
     answer.at(1, 1) = cosine;
@@ -262,7 +262,7 @@ Truss2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-Truss2d :: resolveCoordIndices(int &c1, int &c2)
+Truss2d::resolveCoordIndices(int &c1, int &c2)
 {
     if ( cs_mode == 0 ) {
         //xz-plane
@@ -282,9 +282,9 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
 }
 
 void
-Truss2d :: initializeFrom(InputRecord &ir)
+Truss2d::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
 
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
@@ -296,34 +296,41 @@ Truss2d :: initializeFrom(InputRecord &ir)
 
 
 void
-Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Truss2d::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
-        answer = {D_u, D_w};
+        answer = { D_u, D_w };
     } else if ( cs_mode == 1 ) {
-        answer = {D_u, D_v};
+        answer = { D_u, D_v };
     } else if ( cs_mode == 2 ) {
-        answer = {D_v, D_w};
+        answer = { D_v, D_w };
     }
 }
 
 
 void
-Truss2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+Truss2d::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
 }
 
 
 void
-Truss2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+Truss2d::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
 }
 
 
 void
-Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Truss2d::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+}
+
+
+void
+Truss2d::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -343,7 +350,7 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Truss2d::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong egde number");
@@ -354,7 +361,7 @@ Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 int
-Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+Truss2d::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -369,7 +376,7 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
     answer.resize(2, 2);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
+    sine           = sin(this->givePitch() );
     cosine         = cos(pitch);
 
     answer.at(1, 1) = cosine;
@@ -381,28 +388,28 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 }
 
 
-FEInterpolation *Truss2d :: giveInterpolation() const 
+FEInterpolation *Truss2d::giveInterpolation() const
 {
     // return interpolator
-    return & interp[cs_mode]; 
+    return & interp [ cs_mode ];
 }
 
 
 #ifdef __OOFEG
-void Truss2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void Truss2d::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int c1, c2;
     resolveCoordIndices(c1, c2);
 
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     if ( cs_mode == 0 ) {
         p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(c1);
@@ -434,7 +441,7 @@ void Truss2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 
-void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void Truss2d::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     int c1, c2;
     resolveCoordIndices(c1, c2);
@@ -442,13 +449,13 @@ void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, U
     GraphicObj *go;
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);

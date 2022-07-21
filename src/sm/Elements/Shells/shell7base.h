@@ -65,7 +65,7 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, 
+class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface,
     public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface, public FailureModuleElementInterface
 {
 public:
@@ -89,15 +89,18 @@ public:
     int giveNumberOfDofs() override;
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
-    FloatMatrixF<3,3> evalInitialCovarBaseVectorsAt(const FloatArrayF<3> &lCoords);
+    FloatMatrixF< 3, 3 >evalInitialCovarBaseVectorsAt(const FloatArrayF< 3 > &lCoords);
 
-    static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArrayF<3> &dphidxi1, FloatArrayF<3> &dphidxi2, FloatArrayF<3> &dmdxi1,
-                                         FloatArrayF<3> &dmdxi2, FloatArrayF<3> &m, double &dgamdxi1, double &dgamdxi2, double &gam);
-    static FloatMatrixF<3,3> giveDualBase(FloatMatrixF<3,3> &base1);
+    static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArrayF< 3 > &dphidxi1, FloatArrayF< 3 > &dphidxi2, FloatArrayF< 3 > &dmdxi1,
+                                                FloatArrayF< 3 > &dmdxi2, FloatArrayF< 3 > &m, double &dgamdxi1, double &dgamdxi2, double &gam);
+    static FloatMatrixF< 3, 3 >giveDualBase(FloatMatrixF< 3, 3 > &base1);
     LayeredCrossSection *giveLayeredCS() { return this->layeredCS; }
 
-    // Overloaded, as the element is using enhanced approximation 
+    // Overloaded, as the element is using enhanced approximation
     void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global) override;
+
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
+    { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
 protected:
     // Recover transverse stresses using momentum balance, cf. Främby, Fagerström & Bouzoulis, 'Adaptive modelling of delamination initiation and propagation using an equivalent single-layer shell approach', IJNME, 2016
@@ -115,8 +118,8 @@ protected:
     virtual const IntArray &giveOrderingNodes() const = 0;
     virtual const IntArray &giveOrderingEdgeNodes() const = 0;
 
-    std :: vector< FloatArrayF<3> >initialNodeDirectors;
-    FloatArrayF<3> &giveInitialNodeDirector(int i) {
+    std::vector< FloatArrayF< 3 > >initialNodeDirectors;
+    FloatArrayF< 3 > &giveInitialNodeDirector(int i) {
         return this->initialNodeDirectors [ i - 1 ];
     }
 
@@ -125,7 +128,7 @@ protected:
         return this->initialSolutionVector;
     }
 
-    std :: vector< FloatArray >initialEdgeSolutionVectors;
+    std::vector< FloatArray >initialEdgeSolutionVectors;
     FloatArray &giveInitialEdgeSolutionVector(int i) {
         return this->initialEdgeSolutionVectors [ i - 1 ];
     }
@@ -146,31 +149,31 @@ protected:
 
     // Base vectors and directors
     virtual void setupInitialNodeDirectors();
-    FloatArrayF<3> evalInitialDirectorAt(const FloatArrayF<3> &lCoords);
+    FloatArrayF< 3 >evalInitialDirectorAt(const FloatArrayF< 3 > &lCoords);
 
 
 
-    FloatMatrixF<3,3> evalInitialContravarBaseVectorsAt(const FloatArrayF<3> &lCoords);
+    FloatMatrixF< 3, 3 >evalInitialContravarBaseVectorsAt(const FloatArrayF< 3 > &lCoords);
 
-    virtual FloatMatrixF<3,3> evalCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, FloatArray &genEps, TimeStep *tStep);
+    virtual FloatMatrixF< 3, 3 >evalCovarBaseVectorsAt(const FloatArrayF< 3 > &lCoords, FloatArray &genEps, TimeStep *tStep);
 
-    virtual FloatArrayF<3> evalCovarNormalAt(const FloatArrayF<3> &lCoords, FloatArray &genEpsC, TimeStep *tStep);
-    virtual FloatArrayF<3> evalInitialCovarNormalAt(const FloatArrayF<3> &lCoords);
+    virtual FloatArrayF< 3 >evalCovarNormalAt(const FloatArrayF< 3 > &lCoords, FloatArray &genEpsC, TimeStep *tStep);
+    virtual FloatArrayF< 3 >evalInitialCovarNormalAt(const FloatArrayF< 3 > &lCoords);
 
-    FloatArrayF<3> edgeEvalInitialDirectorAt(const FloatArrayF<1> &lCoords, const int iEdge);
+    FloatArrayF< 3 >edgeEvalInitialDirectorAt(const FloatArrayF< 1 > &lCoords, const int iEdge);
 
-    std::pair<FloatArrayF<3>, FloatArrayF<3>> edgeEvalInitialCovarBaseVectorsAt(const FloatArrayF<1> &lCoords, const int iedge);
+    std::pair< FloatArrayF< 3 >, FloatArrayF< 3 > >edgeEvalInitialCovarBaseVectorsAt(const FloatArrayF< 1 > &lCoords, const int iedge);
 
-    FloatMatrixF<3,3> edgeEvalCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, const int iedge, TimeStep *tStep);
+    FloatMatrixF< 3, 3 >edgeEvalCovarBaseVectorsAt(const FloatArrayF< 3 > &lCoords, const int iedge, TimeStep *tStep);
 
-    virtual double giveGlobalZcoord(const FloatArrayF<3> &lCoords);
+    virtual double giveGlobalZcoord(const FloatArrayF< 3 > &lCoords);
     virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
-    FloatMatrixF<3,3> giveAxialMatrix(const FloatArrayF<3> &vec);
+    FloatMatrixF< 3, 3 >giveAxialMatrix(const FloatArrayF< 3 > &vec);
 
     // Stress and strain
-    FloatMatrixF<3,3> computeFAt(const FloatArrayF<3> &lCoords, FloatArray &genEps, TimeStep *tStep);
-    FloatMatrixF<3,3> computeStressMatrix(FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep);
+    FloatMatrixF< 3, 3 >computeFAt(const FloatArrayF< 3 > &lCoords, FloatArray &genEps, TimeStep *tStep);
+    FloatMatrixF< 3, 3 >computeStressMatrix(FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep);
 
     virtual void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -186,21 +189,21 @@ protected:
     // Tangent matrices
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, TimeStep *tStep);
-    void computeLinearizedStiffness(GaussPoint * gp,  StructuralMaterial * mat, TimeStep * tStep, FloatMatrix A [ 3 ] [ 3 ]);
+    void computeLinearizedStiffness(GaussPoint *gp,  StructuralMaterial *mat, TimeStep *tStep, FloatMatrix A[ 3 ] [ 3 ]);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
-    std::array<FloatMatrixF<3,18>, 3> computeLambdaGMatrices(FloatArray &genEps, double zeta);
-    FloatMatrixF<3,7> computeLambdaNMatrix(FloatArray &genEps, double zeta);
+    std::array< FloatMatrixF< 3, 18 >, 3 >computeLambdaGMatrices(FloatArray &genEps, double zeta);
+    FloatMatrixF< 3, 7 >computeLambdaNMatrix(FloatArray &genEps, double zeta);
 
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
-    void computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);  
+    void computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);
     void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEpsC, double zeta);
 
     // External forces
     void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
     void computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode);
     void computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode);
-    virtual void computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, bool map2elementDOFs=false);
+    virtual void computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, bool map2elementDOFs = false);
 
 
     // Solution vectors
@@ -214,7 +217,7 @@ protected:
 
     //void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-    void giveUnknownsAt(const FloatArrayF<3> &lcoords, const FloatArray &solVec, FloatArrayF<3> &x, FloatArrayF<3> &m, double &gam, TimeStep *tStep);
+    void giveUnknownsAt(const FloatArrayF< 3 > &lcoords, const FloatArray &solVec, FloatArrayF< 3 > &x, FloatArrayF< 3 > &m, double &gam, TimeStep *tStep);
 
     // Nodal averaging interface:
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
@@ -223,38 +226,38 @@ protected:
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type);
     void NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
     void NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type);
-    void NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
+    void NodalRecoveryMI_recoverValues(std::vector< FloatArray > &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
 
     // VTK interface
-    virtual FloatArrayF<3> vtkEvalInitialGlobalCoordinateAt(const FloatArrayF<3> &localCoords, int layer);
-    virtual FloatArrayF<3> vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF<3> &localCoords, int layer, TimeStep *tStep);
-    virtual FloatArrayF<3> vtkEvalInitialGlobalCZCoordinateAt(const FloatArrayF<3> &localCoords, int interface);
+    virtual FloatArrayF< 3 >vtkEvalInitialGlobalCoordinateAt(const FloatArrayF< 3 > &localCoords, int layer);
+    virtual FloatArrayF< 3 >vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF< 3 > &localCoords, int layer, TimeStep *tStep);
+    virtual FloatArrayF< 3 >vtkEvalInitialGlobalCZCoordinateAt(const FloatArrayF< 3 > &localCoords, int interface);
 
-    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
-    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) override;
+    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
-    std::vector<FloatArray> giveFictiousNodeCoordsForExport(int layer);
-    std::vector<FloatArray> giveFictiousCZNodeCoordsForExport(int interface);
-    std::vector<FloatArray> giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tStep);
+    std::vector< FloatArray >giveFictiousNodeCoordsForExport(int layer);
+    std::vector< FloatArray >giveFictiousCZNodeCoordsForExport(int interface);
+    std::vector< FloatArray >giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tStep);
     //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
 
     // Recovery of through thickness stresses by momentum balance
-    enum stressRecoveryType {copyIPvalue, LSfit, L2fit}; 
-    virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
+    enum stressRecoveryType { copyIPvalue, LSfit, L2fit };
+    virtual void giveRecoveredTransverseInterfaceStress(std::vector< FloatMatrix > &transverseStress, TimeStep *tStep);
     void giveTractionBC(FloatMatrix &tractionTop, FloatMatrix &tractionBtm, TimeStep *tStep);
-    void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep, stressRecoveryType SRtype = copyIPvalue);
-    void CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
-    void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
+    void recoverValuesFromIP(std::vector< FloatArray > &nodes, int layer, InternalStateType type, TimeStep *tStep, stressRecoveryType SRtype = copyIPvalue);
+    void CopyIPvaluesToNodes(std::vector< FloatArray > &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
+    void nodalLeastSquareFitFromIP(std::vector< FloatArray > &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     virtual void recoverShearStress(TimeStep *tStep);
     void giveLayerContributionToSR(FloatMatrix &dSmat, FloatMatrix &dSmatLayerIP, int layer, double zeroThicknessLevel, TimeStep *tStep);
-    void fitRecoveredStress2BC(std::vector<FloatMatrix> &answer1, std::vector<FloatMatrix> &answer2, std::vector<FloatMatrix> &dSmat, std::vector<FloatMatrix> &dSmatIP, FloatMatrix &SmatOld, FloatMatrix &tractionBtm, FloatMatrix &tractionTop, double zeroThicknessLevel, FloatArray fulfillBC, int startLayer, int endLayer);
+    void fitRecoveredStress2BC(std::vector< FloatMatrix > &answer1, std::vector< FloatMatrix > &answer2, std::vector< FloatMatrix > &dSmat, std::vector< FloatMatrix > &dSmatIP, FloatMatrix &SmatOld, FloatMatrix &tractionBtm, FloatMatrix &tractionTop, double zeroThicknessLevel, FloatArray fulfillBC, int startLayer, int endLayer);
     void updateLayerTransvStressesSR(FloatMatrix &dSmatLayerIP, int layer);
     void updateLayerTransvShearStressesSR(FloatMatrix &dSmatLayerIP, FloatMatrix &SmatOld, int layer);
     void updateLayerTransvNormalStressSR(FloatMatrix &dSzzMatLayerIP, FloatArray &SzzMatOld, int layer);
-//    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
-//     void givePolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+    //    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
+    //     void givePolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZintegratedPolynomialGradientForStressRecAt(FloatArray &answer, FloatArray &coords);
-//    void giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
+    //    void giveZintegratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveZ2integratedPolynomial2GradientForStressRecAt(FloatArray &answer, FloatArray &coords);
     void giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int layer, InternalStateType type, TimeStep *tStep);
     void giveSPRcontribution(FloatMatrix &eltIPvalues, FloatMatrix &eltPolynomialValues, int layer, InternalStateType type, TimeStep *tStep);
@@ -272,14 +275,14 @@ protected:
     }
     virtual void edgeComputeBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
-    static FloatArrayF<9> convV6ToV9Stress(const FloatArrayF<6> &V6);
+    static FloatArrayF< 9 >convV6ToV9Stress(const FloatArrayF< 6 > &V6);
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
-    void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
+    void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector< FloatArray > &interLamStresses);
     virtual void evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
     int giveSymVoigtIndex(int ind1, int ind2);
     int giveVoigtIndex(int ind1, int ind2);
-    std::vector< std::vector<int> > voigtIndices;
+    std::vector< std::vector< int > >voigtIndices;
 };
 } // end namespace oofem
 #endif

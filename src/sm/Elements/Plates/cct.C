@@ -55,11 +55,11 @@
 namespace oofem {
 REGISTER_Element(CCTPlate);
 
-FEI2dTrLin CCTPlate :: interp_lin(1, 2);
+FEI2dTrLin CCTPlate::interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
 
-CCTPlate :: CCTPlate(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
+CCTPlate::CCTPlate(int n, Domain *aDomain) :
+    StructuralElement(n, aDomain),
     LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
     NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
@@ -70,11 +70,11 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
 
 
 FEInterpolation *
-CCTPlate :: giveInterpolation() const { return & interp_lin; }
+CCTPlate::giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *
-CCTPlate :: giveInterpolation(DofIDItem id) const
+CCTPlate::giveInterpolation(DofIDItem id) const
 {
     if ( id == D_w ) {
         return & interp_lin;
@@ -85,19 +85,19 @@ CCTPlate :: giveInterpolation(DofIDItem id) const
 
 
 void
-CCTPlate :: computeGaussPoints()
+CCTPlate::computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 5);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+CCTPlate::computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
@@ -142,13 +142,13 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
 
 void
-CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+CCTPlate::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [5x9] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double area, b1, b2, b3, c1, c2, c3, l1, l2, l3;
@@ -205,18 +205,18 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     answer.at(5, 8) = ( -b2 * c3 * l1 - b2 * c1 * l3 + b1 * c2 * l3 + b1 * c3 * l2 ) * 0.5 - l3 * 2. * area;
     answer.at(5, 9) = ( -c3 * c2 * l1 + c3 * c1 * l2 ) * 0.5;
 
-    answer.times( 1. / ( 2. * area ) );
+    answer.times(1. / ( 2. * area ) );
 }
 
 
 void
-CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+CCTPlate::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
     // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double l1, l2, l3, b1, b2, b3, c1, c2, c3;
@@ -258,23 +258,23 @@ CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 void
-CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+CCTPlate::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
 }
 
 
 void
-CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+CCTPlate::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
-CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
-                                double &y1, double &y2, double &y3,
-                                double &z1, double &z2, double &z3)
+CCTPlate::giveNodeCoordinates(double &x1, double &x2, double &x3,
+                              double &y1, double &y2, double &y3,
+                              double &z1, double &z2, double &z3)
 {
     const auto &nc1 = this->giveNode(1)->giveCoordinates();
     const auto &nc2 = this->giveNode(2)->giveCoordinates();
@@ -294,41 +294,41 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 }
 
 double
-CCTPlate :: computeArea ()
+CCTPlate::computeArea()
 // returns the area occupied by the receiver
 {
-  // get node coordinates
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
-  
-  if (area > 0) return area;  // check if previously computed
+    // get node coordinates
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
-  return (area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3)) ;
- 
+    if ( area > 0 ) {
+        return area;          // check if previously computed
+    }
+    return ( area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) );
 }
 
 void
-CCTPlate :: initializeFrom(InputRecord &ir)
+CCTPlate::initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    NLStructuralElement :: initializeFrom(ir);
+    StructuralElement::initializeFrom(ir);
 }
 
 
 void
-CCTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
+CCTPlate::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_w, R_u, R_v};
+    answer = { D_w, R_u, R_v };
 }
 
 
 void
-CCTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
+CCTPlate::computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     FloatArray u, v;
-    u.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
-    v.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    u.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf(this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
     answer.beVectorProductOf(u, v);
     answer.normalize();
@@ -336,7 +336,7 @@ CCTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 
 
 double
-CCTPlate :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+CCTPlate::giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 // returns receiver's characteristic length (for crack band models)
 // for a crack formed in the plane with normal normalToCrackPlane.
 {
@@ -345,24 +345,24 @@ CCTPlate :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 
 
 double
-CCTPlate :: computeVolumeAround(GaussPoint *gp)
+CCTPlate::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double detJ, weight;
 
-    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3)};
-    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), 
-                              lc[0].at(2), lc[1].at(2), lc[2].at(2), 
-                              lc[0].at(3), lc[1].at(3), lc[2].at(3));
+    std::vector< FloatArray >lc = { FloatArray(3), FloatArray(3), FloatArray(3) };
+    this->giveNodeCoordinates( lc [ 0 ].at(1), lc [ 1 ].at(1), lc [ 2 ].at(1),
+                               lc [ 0 ].at(2), lc [ 1 ].at(2), lc [ 2 ].at(2),
+                               lc [ 0 ].at(3), lc [ 1 ].at(3), lc [ 2 ].at(3) );
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs(this->interp_lin.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
 
 void
-CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+CCTPlate::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
     answer.resize(9, 9);
@@ -371,11 +371,11 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double mass = 0.0;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     if ( iRule ) {
-        for ( GaussPoint *gp: *iRule ) {
-          mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp) * this->giveCrossSection()->give(CS_Thickness, gp);
+        for ( GaussPoint *gp: * iRule ) {
+            mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp) * this->giveCrossSection()->give(CS_Thickness, gp);
         }
     }
-    double mass3 = mass/3.0;
+    double mass3 = mass / 3.0;
 
     answer.at(1, 1) = mass3;
     answer.at(4, 4) = mass3;
@@ -384,18 +384,18 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 Interface *
-CCTPlate :: giveInterface(InterfaceType interface)
+CCTPlate::giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >(this);
+        return static_cast< LayeredCrossSectionInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this);
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     }
 
 
@@ -406,7 +406,7 @@ CCTPlate :: giveInterface(InterfaceType interface)
 #define POINT_TOL 1.e-3
 
 bool
-CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+CCTPlate::computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
@@ -416,7 +416,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
-    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
+    bool ok = this->interp_lin.global2local(answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
     //get midplane location at this point
     double midplZ;
@@ -427,7 +427,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     double elthick = cs->give(CS_Thickness, & _gp);
 
-    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
+    if ( elthick / 2.0 + midplZ - fabs(coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
         return false;
     }
@@ -448,7 +448,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
 
 int
-CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+CCTPlate::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatArray help;
     answer.resize(6);
@@ -479,17 +479,17 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(6) = help.at(3); // mxy
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return StructuralElement::giveIPValue(answer, gp, type, tStep);
     }
 }
 
 void
-CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                       InternalStateType type, TimeStep *tStep)
+CCTPlate::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                     InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentTensor ) ||
-        ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
+         ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(answer, gp, type, tStep);
     } else {
@@ -499,7 +499,7 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 
 
 void
-CCTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+CCTPlate::SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);
     pap.at(1) = this->giveNode(1)->giveNumber();
@@ -509,12 +509,12 @@ CCTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 
 
 void
-CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+CCTPlate::SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         OOFEM_ERROR("node unknown");
@@ -523,7 +523,7 @@ CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 
 
 SPRPatchType
-CCTPlate :: SPRNodalRecoveryMI_givePatchType()
+CCTPlate::SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
 }
@@ -533,8 +533,8 @@ CCTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+CCTPlate::computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                     GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
@@ -556,36 +556,36 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
 // Edge load support
 /*
+ * void
+ * CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
+ * {
+ *  IntArray edgeNodes;
+ *  FloatArray n;
+ *  double b, c, n12;
+ *
+ *  this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+ *  this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
+ *
+ *  n12 = 0.5 * n.at(1) * n.at(2);
+ *  b = this->giveNode( edgeNodes.at(1) )->giveCoordinate(2) - this->giveNode( edgeNodes.at(2) )->giveCoordinate(2);
+ *  c = this->giveNode( edgeNodes.at(2) )->giveCoordinate(1) - this->giveNode( edgeNodes.at(1) )->giveCoordinate(1);
+ *
+ *
+ *  answer.resize(3, 6);
+ *  answer.at(1, 1) = n.at(1);
+ *  answer.at(1, 2) = n12 * b;
+ *  answer.at(1, 3) = n12 * c;
+ *  answer.at(1, 4)  = n.at(2);
+ *  answer.at(1, 5) = -n12 * b;
+ *  answer.at(1, 6) = -n12 * c;
+ *  //
+ *  answer.at(2, 2) = answer.at(3, 3) = n.at(1);
+ *  answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+ * }
+ */
+
 void
-CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    IntArray edgeNodes;
-    FloatArray n;
-    double b, c, n12;
-
-    this->interp_lin.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    n12 = 0.5 * n.at(1) * n.at(2);
-    b = this->giveNode( edgeNodes.at(1) )->giveCoordinate(2) - this->giveNode( edgeNodes.at(2) )->giveCoordinate(2);
-    c = this->giveNode( edgeNodes.at(2) )->giveCoordinate(1) - this->giveNode( edgeNodes.at(1) )->giveCoordinate(1);
-
-
-    answer.resize(3, 6);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n12 * b;
-    answer.at(1, 3) = n12 * c;
-    answer.at(1, 4)  = n.at(2);
-    answer.at(1, 5) = -n12 * b;
-    answer.at(1, 6) = -n12 * c;
-    //
-    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
-}
-*/
-
-void
-CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+CCTPlate::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -620,15 +620,15 @@ CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+CCTPlate::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ * gp->giveWeight();
 }
 
 
 int
-CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+CCTPlate::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -639,8 +639,8 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    auto nodeA = this->giveNode( edgeNodes.at(1) );
-    auto nodeB = this->giveNode( edgeNodes.at(2) );
+    auto nodeA = this->giveNode(edgeNodes.at(1) );
+    auto nodeB = this->giveNode(edgeNodes.at(2) );
 
     double dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     double dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
@@ -661,23 +661,23 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 CCTPlate::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
 {
-  if (boundaryID == 1) {
-    this->computeNmatrixAt(lcoords, answer);
-  } else {
-    OOFEM_ERROR("computeSurfaceNMatrix: Unsupported surface id");
-  }
+    if ( boundaryID == 1 ) {
+        this->computeNmatrixAt(lcoords, answer);
+    } else {
+        OOFEM_ERROR("computeSurfaceNMatrix: Unsupported surface id");
+    }
 }
 
-  
+
 
 //
 // io routines
 //
 #ifdef __OOFEG
 void
-CCTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+CCTPlate::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *go;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -686,8 +686,8 @@ CCTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
     if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-        EASValsSetColor( gc.getElementColor() );
-        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetColor(gc.getElementColor() );
+        EASValsSetEdgeColor(gc.getElementEdgeColor() );
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -710,9 +710,9 @@ CCTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 void
-CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+CCTPlate::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *go;
     double defScale = gc.getDefScale();
 
@@ -722,8 +722,8 @@ CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkno
 
     if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-        EASValsSetColor( gc.getDeformedElementColor() );
-        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetColor(gc.getDeformedElementColor() );
+        EASValsSetEdgeColor(gc.getElementEdgeColor() );
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
@@ -745,13 +745,13 @@ CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkno
 
 
 void
-CCTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+CCTPlate::drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *tr;
     FloatArray v1, v2, v3;
-    double s [ 3 ], defScale;
+    double s[ 3 ], defScale;
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;

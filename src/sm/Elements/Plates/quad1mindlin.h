@@ -35,7 +35,7 @@
 #ifndef quad1mindlin_H
 #define quad1mindlin_H
 
-#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
@@ -61,9 +61,9 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
-class Quad1Mindlin : public NLStructuralElement,
-public ZZNodalRecoveryModelInterface,
-public SPRNodalRecoveryModelInterface
+class Quad1Mindlin : public StructuralElement,
+    public ZZNodalRecoveryModelInterface,
+    public SPRNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadLin interp_lin;
@@ -71,7 +71,7 @@ protected:
     bool reducedIntegrationFlag = false;
 
 public:
-    Quad1Mindlin(int n, Domain * d);
+    Quad1Mindlin(int n, Domain *d);
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;

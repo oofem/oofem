@@ -40,29 +40,29 @@
 #include "mathfem.h"
 
 namespace oofem {
-Structural3DElement :: Structural3DElement(int n, Domain *aDomain) :
+Structural3DElement::Structural3DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     matRotation(false)
 {}
 
 
 void
-Structural3DElement :: initializeFrom(InputRecord &ir)
+Structural3DElement::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
     this->matRotation = ir.hasField(_IFT_Structural3DElement_materialCoordinateSystem);
 }
 
 
 void
-Structural3DElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+Structural3DElement::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [ 6 x (nno*3) ] strain-displacement matrix {B} of the receiver, eva-
 // luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, dNdx.giveNumberOfRows() * 3);
     answer.zero();
@@ -81,14 +81,14 @@ Structural3DElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Structural3DElement::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [ 9 x (nno * 3) ] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx(dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, dNdx.giveNumberOfRows() * 3);
     answer.zero();
@@ -108,7 +108,7 @@ Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-Structural3DElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+Structural3DElement::computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatArray stress;
     FloatMatrix B, DB, stress_ident;
@@ -116,7 +116,7 @@ Structural3DElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
     answer.clear();
     stress_ident.resize(9, 9);
     // assemble initial stress matrix
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         // This function fetches the full form of the tensor
         this->giveIPValue(stress, gp, IST_StressTensor, tStep);
         stress_ident.zero();
@@ -176,21 +176,21 @@ Structural3DElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
         OOFEM_WARNING("Implementation not tested yet!");
         this->computeBHmatrixAt(gp, B);
         DB.beProductOf(stress_ident, B);
-        answer.plusProductUnsym( B, DB,  this->computeVolumeAround(gp) );
+        answer.plusProductUnsym(B, DB,  this->computeVolumeAround(gp) );
     }
 }
 
 
 
 MaterialMode
-Structural3DElement :: giveMaterialMode()
+Structural3DElement::giveMaterialMode()
 {
     return _3dMat;
 }
 
 
 void
-Structural3DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords)
+Structural3DElement::giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords)
 {
     if ( this->elemLocalCS.isNotEmpty() ) { // User specified orientation
         x.beColumnOf(this->elemLocalCS, 1);
@@ -200,7 +200,7 @@ Structural3DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, F
         ///@todo This is subject to change. I'm not sure which is the best way to define a local c.s.
         FloatMatrix jac;
         FloatArray help;
-        this->giveInterpolation()->giveJacobianMatrixAt( jac, lcoords, FEIElementGeometryWrapper(this) );
+        this->giveInterpolation()->giveJacobianMatrixAt(jac, lcoords, FEIElementGeometryWrapper(this) );
         x.beColumnOf(jac, 1); // This is {dx/dxi, dy/dxi, dz/dxi}
         x.normalize();
         help.beColumnOf(jac, 2);
@@ -212,30 +212,30 @@ Structural3DElement :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, F
 
 
 void
-Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+Structural3DElement::computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y, z;
 
-        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, z, gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
-        FloatArrayF<6> rotStrain = {
-            e[0] * x[0] * x[0] + e[5] * x[0] * x[1] + e[1] * x[1] * x[1] + e[4] * x[0] * x[2] + e[3] * x[1] * x[2] + e[2] * x[2] * x[2],
-            e[0] * y[0] * y[0] + e[5] * y[0] * y[1] + e[1] * y[1] * y[1] + e[4] * y[0] * y[2] + e[3] * y[1] * y[2] + e[2] * y[2] * y[2],
-            e[0] * z[0] * z[0] + e[5] * z[0] * z[1] + e[1] * z[1] * z[1] + e[4] * z[0] * z[2] + e[3] * z[1] * z[2] + e[2] * z[2] * z[2],
-            2 * e[0] * y[0] * z[0] + e[4] * y[2] * z[0] + 2 * e[1] * y[1] * z[1] + e[3] * y[2] * z[1] + e[5] * ( y[1] * z[0] + y[0] * z[1] ) + ( e[4] * y[0] + e[3] * y[1] + 2 * e[2] * y[2] ) * z[2],
-            2 * e[0] * x[0] * z[0] + e[4] * x[2] * z[0] + 2 * e[1] * x[1] * z[1] + e[3] * x[2] * z[1] + e[5] * ( x[1] * z[0] + x[0] * z[1] ) + ( e[4] * x[0] + e[3] * x[1] + 2 * e[2] * x[2] ) * z[2],
-            2 * e[0] * x[0] * y[0] + e[4] * x[2] * y[0] + 2 * e[1] * x[1] * y[1] + e[3] * x[2] * y[1] + e[5] * ( x[1] * y[0] + x[0] * y[1] ) + ( e[4] * x[0] + e[3] * x[1] + 2 * e[2] * x[2] ) * y[2]
+        FloatArrayF< 6 >rotStrain = {
+            e [ 0 ] * x [ 0 ] * x [ 0 ] + e [ 5 ] * x [ 0 ] * x [ 1 ] + e [ 1 ] * x [ 1 ] * x [ 1 ] + e [ 4 ] * x [ 0 ] * x [ 2 ] + e [ 3 ] * x [ 1 ] * x [ 2 ] + e [ 2 ] * x [ 2 ] * x [ 2 ],
+            e [ 0 ] * y [ 0 ] * y [ 0 ] + e [ 5 ] * y [ 0 ] * y [ 1 ] + e [ 1 ] * y [ 1 ] * y [ 1 ] + e [ 4 ] * y [ 0 ] * y [ 2 ] + e [ 3 ] * y [ 1 ] * y [ 2 ] + e [ 2 ] * y [ 2 ] * y [ 2 ],
+            e [ 0 ] * z [ 0 ] * z [ 0 ] + e [ 5 ] * z [ 0 ] * z [ 1 ] + e [ 1 ] * z [ 1 ] * z [ 1 ] + e [ 4 ] * z [ 0 ] * z [ 2 ] + e [ 3 ] * z [ 1 ] * z [ 2 ] + e [ 2 ] * z [ 2 ] * z [ 2 ],
+            2 * e [ 0 ] * y [ 0 ] * z [ 0 ] + e [ 4 ] * y [ 2 ] * z [ 0 ] + 2 * e [ 1 ] * y [ 1 ] * z [ 1 ] + e [ 3 ] * y [ 2 ] * z [ 1 ] + e [ 5 ] * ( y [ 1 ] * z [ 0 ] + y [ 0 ] * z [ 1 ] ) + ( e [ 4 ] * y [ 0 ] + e [ 3 ] * y [ 1 ] + 2 * e [ 2 ] * y [ 2 ] ) * z [ 2 ],
+            2 * e [ 0 ] * x [ 0 ] * z [ 0 ] + e [ 4 ] * x [ 2 ] * z [ 0 ] + 2 * e [ 1 ] * x [ 1 ] * z [ 1 ] + e [ 3 ] * x [ 2 ] * z [ 1 ] + e [ 5 ] * ( x [ 1 ] * z [ 0 ] + x [ 0 ] * z [ 1 ] ) + ( e [ 4 ] * x [ 0 ] + e [ 3 ] * x [ 1 ] + 2 * e [ 2 ] * x [ 2 ] ) * z [ 2 ],
+            2 * e [ 0 ] * x [ 0 ] * y [ 0 ] + e [ 4 ] * x [ 2 ] * y [ 0 ] + 2 * e [ 1 ] * x [ 1 ] * y [ 1 ] + e [ 3 ] * x [ 2 ] * y [ 1 ] + e [ 5 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] ) + ( e [ 4 ] * x [ 0 ] + e [ 3 ] * x [ 1 ] + 2 * e [ 2 ] * x [ 2 ] ) * y [ 2 ]
         };
         auto s = this->giveStructuralCrossSection()->giveRealStress_3d(rotStrain, gp, tStep);
         answer = {
-            s[0] * x[0] * x[0] + 2 * s[5] * x[0] * y[0] + s[1] * y[0] * y[0] + 2 * ( s[4] * x[0] + s[3] * y[0] ) * z[0] + s[2] * z[0] * z[0],
-            s[0] * x[1] * x[1] + 2 * s[5] * x[1] * y[1] + s[1] * y[1] * y[1] + 2 * ( s[4] * x[1] + s[3] * y[1] ) * z[1] + s[2] * z[1] * z[1],
-            s[0] * x[2] * x[2] + 2 * s[5] * x[2] * y[2] + s[1] * y[2] * y[2] + 2 * ( s[4] * x[2] + s[3] * y[2] ) * z[2] + s[2] * z[2] * z[2],
-            y[2] * ( s[5] * x[1] + s[1] * y[1] + s[3] * z[1] ) + x[2] * ( s[0] * x[1] + s[5] * y[1] + s[4] * z[1] ) + ( s[4] * x[1] + s[3] * y[1] + s[2] * z[1] ) * z[2],
-            y[2] * ( s[5] * x[0] + s[1] * y[0] + s[3] * z[0] ) + x[2] * ( s[0] * x[0] + s[5] * y[0] + s[4] * z[0] ) + ( s[4] * x[0] + s[3] * y[0] + s[2] * z[0] ) * z[2],
-            y[1] * ( s[5] * x[0] + s[1] * y[0] + s[3] * z[0] ) + x[1] * ( s[0] * x[0] + s[5] * y[0] + s[4] * z[0] ) + ( s[4] * x[0] + s[3] * y[0] + s[2] * z[0] ) * z[1]
+            s [ 0 ] * x [ 0 ] * x [ 0 ] + 2 * s [ 5 ] * x [ 0 ] * y [ 0 ] + s [ 1 ] * y [ 0 ] * y [ 0 ] + 2 * ( s [ 4 ] * x [ 0 ] + s [ 3 ] * y [ 0 ] ) * z [ 0 ] + s [ 2 ] * z [ 0 ] * z [ 0 ],
+            s [ 0 ] * x [ 1 ] * x [ 1 ] + 2 * s [ 5 ] * x [ 1 ] * y [ 1 ] + s [ 1 ] * y [ 1 ] * y [ 1 ] + 2 * ( s [ 4 ] * x [ 1 ] + s [ 3 ] * y [ 1 ] ) * z [ 1 ] + s [ 2 ] * z [ 1 ] * z [ 1 ],
+            s [ 0 ] * x [ 2 ] * x [ 2 ] + 2 * s [ 5 ] * x [ 2 ] * y [ 2 ] + s [ 1 ] * y [ 2 ] * y [ 2 ] + 2 * ( s [ 4 ] * x [ 2 ] + s [ 3 ] * y [ 2 ] ) * z [ 2 ] + s [ 2 ] * z [ 2 ] * z [ 2 ],
+            y [ 2 ] * ( s [ 5 ] * x [ 1 ] + s [ 1 ] * y [ 1 ] + s [ 3 ] * z [ 1 ] ) + x [ 2 ] * ( s [ 0 ] * x [ 1 ] + s [ 5 ] * y [ 1 ] + s [ 4 ] * z [ 1 ] ) + ( s [ 4 ] * x [ 1 ] + s [ 3 ] * y [ 1 ] + s [ 2 ] * z [ 1 ] ) * z [ 2 ],
+            y [ 2 ] * ( s [ 5 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] + s [ 3 ] * z [ 0 ] ) + x [ 2 ] * ( s [ 0 ] * x [ 0 ] + s [ 5 ] * y [ 0 ] + s [ 4 ] * z [ 0 ] ) + ( s [ 4 ] * x [ 0 ] + s [ 3 ] * y [ 0 ] + s [ 2 ] * z [ 0 ] ) * z [ 2 ],
+            y [ 1 ] * ( s [ 5 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] + s [ 3 ] * z [ 0 ] ) + x [ 1 ] * ( s [ 0 ] * x [ 0 ] + s [ 5 ] * y [ 0 ] + s [ 4 ] * z [ 0 ] ) + ( s [ 4 ] * x [ 0 ] + s [ 3 ] * y [ 0 ] + s [ 2 ] * z [ 0 ] ) * z [ 1 ]
         };
     } else {
         answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
@@ -243,14 +243,14 @@ Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray 
 }
 
 void
-Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+Structural3DElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
+        this->giveMaterialOrientationAt(x, y, z, gp->giveNaturalCoordinates() );
 
         Q = {
             { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1) },
@@ -266,7 +266,32 @@ Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 
 
 void
-Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Structural3DElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_3d(rMode, gp, tStep);
+    if ( this->matRotation ) {
+        FloatArray x, y, z;
+        FloatMatrix Q;
+        this->giveMaterialOrientationAt(x, y, z, gp->giveNaturalCoordinates() );
+        Q = {
+            { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1), x(2) * x(1), x(2) * x(0), x(1) * x(0) },
+            { y(0) * y(0), y(1) * y(1), y(2) * y(2), y(1) * y(2), y(0) * y(2), y(0) * y(1), y(2) * y(1), y(2) * y(0), y(1) * y(0) },
+            { z(0) * z(0), z(1) * z(1), z(2) * z(2), z(1) * z(2), z(0) * z(2), z(0) * z(1), z(2) * z(1), z(2) * z(0), z(1) * z(0) },
+            { y(0) * z(0), y(1) * z(1), y(2) * z(2), y(1) * z(2), y(0) * z(2), y(0) * z(1), y(2) * z(1), y(2) * z(0), y(1) * z(0) },
+            { x(0) * z(0), x(1) * z(1), x(2) * z(2), x(1) * z(2), x(0) * z(2), x(0) * z(1), x(2) * z(1), x(2) * z(0), x(1) * z(0) },
+            { x(0) * y(0), x(1) * y(1), x(2) * y(2), x(1) * y(2), x(0) * y(2), x(0) * y(1), x(2) * y(1), x(2) * y(0), x(1) * y(0) },
+            { z(0) * y(0), z(1) * y(1), z(2) * y(2), z(1) * y(2), z(0) * y(2), z(0) * y(1), z(2) * y(1), z(2) * y(0), z(1) * y(0) },
+            { z(0) * x(0), z(1) * x(1), z(2) * x(2), z(1) * x(2), z(0) * x(2), z(0) * x(1), z(2) * x(1), z(2) * x(0), z(1) * x(0) },
+            { y(0) * x(0), y(1) * x(1), y(2) * x(2), y(1) * x(2), y(0) * x(2), y(0) * x(1), y(2) * x(1), y(2) * x(0), y(1) * x(0) },
+        };
+        answer.rotatedWith(Q, 't');
+    }
+}
+
+
+
+void
+Structural3DElement::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {
         D_u, D_v, D_w
@@ -275,7 +300,7 @@ Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 int
-Structural3DElement :: computeNumberOfDofs()
+Structural3DElement::computeNumberOfDofs()
 {
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask;
@@ -284,12 +309,12 @@ Structural3DElement :: computeNumberOfDofs()
 }
 
 
-void Structural3DElement :: computeGaussPoints()
+void Structural3DElement::computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 6);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -297,12 +322,12 @@ void Structural3DElement :: computeGaussPoints()
 
 
 double
-Structural3DElement :: computeVolumeAround(GaussPoint *gp)
+Structural3DElement::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->giveInterpolation()->giveTransformationJacobian( gp->giveNaturalCoordinates(),
-                                                                               FEIElementGeometryWrapper(this) ) );
+    determinant = fabs(this->giveInterpolation()->giveTransformationJacobian(gp->giveNaturalCoordinates(),
+                                                                             FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -312,7 +337,7 @@ Structural3DElement :: computeVolumeAround(GaussPoint *gp)
 
 
 double
-Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+Structural3DElement::giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
     return this->giveLengthInDir(normalToCrackPlane);
 }
@@ -320,7 +345,7 @@ Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 
 // Surface support
 void
-Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+Structural3DElement::computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     /* Returns the [ 3 x (nno*3) ] shape function matrix {N} of the receiver,
      * evaluated at the given gp.
@@ -330,12 +355,12 @@ Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, G
     // Evaluate the shape functions at the position of the gp.
     FloatArray N;
     static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
-    surfaceEvalN( N, iSurf, sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    surfaceEvalN(N, iSurf, sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(N, 3);
 }
 
 void
-Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+Structural3DElement::giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     const int ndofsn = 3;
 
@@ -351,10 +376,10 @@ Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 }
 
 double
-Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+Structural3DElement::computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant = fabs( static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
-                        surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs(static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+                              surfaceGiveTransformationJacobian(iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     double weight = gp->giveWeight();
     return determinant * weight;
@@ -362,7 +387,7 @@ Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 
 
 int
-Structural3DElement :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
+Structural3DElement::computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
     OOFEM_ERROR("surface local coordinate system not supported");
     return 1;
@@ -372,7 +397,7 @@ Structural3DElement :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, 
 // Edge support
 
 void
-Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Structural3DElement::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -390,20 +415,20 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Structural3DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Structural3DElement::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     /* Returns the line element ds associated with the given gp on the specific edge.
      * Note: The name is misleading since there is no volume to speak of in this case.
      * The returned value is used for integration of a line integral (external forces).
      */
     double detJ = static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
-                  edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+                  edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ * gp->giveWeight();
 }
 
 
 int
-Structural3DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+Structural3DElement::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
