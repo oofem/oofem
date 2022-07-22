@@ -283,6 +283,7 @@ py::object nodalLoad(py::args args, py::kwargs kw) { return createGeneralBoundar
 py::object structTemperatureLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structtemperatureload",args,kw); }
 py::object structEigenstrainLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structEigenstrainLoad",args,kw); }
 py::object constantSurfaceLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("constantsurfaceload",args,kw); }
+py::object deadWeight(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("DeadWeight",args,kw); }
 
 
 /*****************************************************
