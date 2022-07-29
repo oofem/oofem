@@ -1,4 +1,4 @@
-
+	
 .. _DomainRecord:
 
 Domain record(s)
@@ -291,6 +291,15 @@ Supported DofManagerType keywords are
    not computed from any element, but given explicitly, as well as the
    connected dof managers (``masterDMan``).
 
+-  General Slave node
+
+   ``GeneralSlaveNode``  ``coords #(ra)``  ``dofType #(ia)``
+   ``masterSizes #(ia)``  ``masterList #(ia)``  ``masterWeights #(ra)``
+   
+   Generalization of SlaveNode; Meaning of ``dofType`` is the same as for SlaveNode or HangingNode, i.e., 0 means primary DOF, while
+   2 means linked DOF.  Array ``masteSizes`` specifies number of master dofs for each slave dof. Array ``masterList`` specifies master nodes and their dofs for all the slave dofs. Finally, ``masterList`` provides the associated weights. 
+
+   
 -  Element side
 
    | ``ElementSide``
