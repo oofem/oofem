@@ -181,7 +181,7 @@ MITC4Shell::giveDirectorVectors()
                     }
                 }
             }
-            directors [ i ] = normalize(nodeDir);
+            directors [ i-1 ] = normalize(nodeDir);
         }
         return directors;
     } else if ( directorType == 2 ) {          // specified at crosssection
