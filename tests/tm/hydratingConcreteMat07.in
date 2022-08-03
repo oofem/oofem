@@ -1,0 +1,37 @@
+hydratingConcreteMat07.out
+Test of hydrating concrete material, linear triangluar element with a heat source, transient linear solver, cooling with 1D element from one node, exponential model
+TransientTransport nsteps 29 deltat 3600.0 alpha 1 rtolv 1e-5 lumped nmodules 1
+errorcheck
+#vtkxml tstep_step 1 domain_all primvars 1 6 vars 3 37 39 56 stype 1 regionsets 1 1
+#vtkxml tstep_step 1 domain_all primvars 1 6 vars 1 56 stype 1 regionsets 1 2
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 2 ncrosssect 2 nmat 2 nbc 1 nic 1 nltf 1 nset 4
+node 1 coords 3  1.0   0.0   0.0
+node 2 coords 3  1.5   0.0   0.0
+node 3 coords 3  1.0   0.5   0.0
+node 4 coords 3  1.0   0.5   0.0495
+tr1ht 1 nodes 3 1 2 3
+line1ht 2 nodes 2 3 4
+SimpleTransportCS 1 thickness 1.0 mat 1 set 1
+#Cooling pipe 3/4" PVC, k=0.2 W/m/K, effective circumference 0.0707 m, thickness 0.0035 m, if heat flux (W/m2) corresponds to dissipated power (W/m of length), thickness need to be extended to 0.0035/0.0707=0.0495 m
+SimpleTransportCS 2 area 1.0 mat 2 set 2
+#Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
+HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 1 Qpot 509. masscement 409. referenceTemperature 25. tau 48600. beta 0.9 dohinf 0.85 activationenergy 38300 castingTime 0.
+IsoHeat 2 d 0.1 k 0.2 c 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 20.0 set 4
+InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elements 1 1
+Set 2 elements 1 2
+Set 3 elements 2 1 2
+Set 4 nodes 1 4
+
+#%BEGIN_CHECK% tolerance 1.e-3
+#TIME
+#NODE tStep  5 number 1 dof 10 unknown d value 3.42225515e+01
+#NODE tStep 29 number 1 dof 10 unknown d value 7.85131416e+01
+#ELEMENT tStep  5 number 1 gp 1 keyword 39 component 1 value 9.82865410e-02
+#ELEMENT tStep 29 number 1 gp 1 keyword 39 component 1 value  7.70453997e-01
+#ELEMENT tStep  5 number 1 gp 1 keyword 135 component 1 value 2.06830003e+04
+#%END_CHECK%

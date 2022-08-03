@@ -407,7 +407,7 @@ ConcreteFCMViscoElasticStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ConcreteFCMStatus::printOutputAt(file, tStep);
 
-    fprintf(file, "\nOutput for slave viscoelastic material\n");
+    fprintf(file, "remark {Output for slave viscoelastic material}\n");
     this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
     fprintf(file, "\n");
 }

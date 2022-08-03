@@ -1,0 +1,28 @@
+line01.out
+Patch test of Line1ht elements
+StationaryProblem nsteps 1 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
+errorcheck
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   1.0   0.0
+node 3 coords 3  0.0   4.0   0.0
+line1ht 1 nodes 2 1 2
+line1ht 2 nodes 2 2 3
+SimpleTransportCS 1 area 0.15 mat 1 set 1
+IsoHeat 1 d 0. k 2.0 c 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 10.0 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 10 values 1 40.0 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 1 1
+Set 3 nodes 1 3
+
+#%BEGIN_CHECK%
+#NODE tStep 1 number 2 dof 10 unknown d value 17.5
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 2 value -15.
+#ELEMENT tStep 1 number 2 gp 1 keyword 56 component 2 value -15.
+
+#%END_CHECK%

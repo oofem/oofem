@@ -1,0 +1,16 @@
+\begin{tikzpicture}[scale=7,>=stealth]
+ \tikzstyle{elemnode} = [draw=black,thick,fill=white,circle,inner sep=1]
+ \newcommand{\trusslength}{0.5};
+
+ \begin{scope}
+ \draw[->] (-0.05,0,0) -- (0.5,0,0) node[at end, below] {$x_g$};
+ \draw[->] (0,-0.05,0) -- (0,0.5,0) node[at end, below right] {$y_g$};
+ \draw[->] (0,0,-0.05) -- (0,0,0.5) node[at end, right] {$z_g$};
+ \end{scope}
+ 
+ \draw[very thick] (0.1,0.1) --  +(30:\trusslength) 
+    node[elemnode,at start] {} node[at start,yshift=2,above left] {1}
+    node[elemnode,at end] {} node[at end,yshift=2,above left] {2};
+ %\draw[dotted,->] (0.1,0.1)++(-30:0.42) -- +(-30:0.1) node[below] {$X_1$};
+ %\draw[dotted,->] (a)++(-30-90:0.02) -- +(-120:0.1) node[right] {$Z_1$};
+\end{tikzpicture}
