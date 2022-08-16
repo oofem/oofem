@@ -895,15 +895,15 @@ LayeredCrossSection::giveFirstPKStress_3d(const FloatArrayF< 9 > &vF, GaussPoint
             //rotation matrix
             //Q = {{c, -s, 0}, {s, c, 0}, {0, 0, 1}};
             FloatMatrixF< 9, 9 >Q = {
-                c *c,       s *s,  0.,  0.,  0., -c * s, 0, 0, -c * s,
-                s *s,       c *c,  0.,  0.,  0.,  c *s, 0, 0,  c *s,
-                0.,          0.,     1.,  0.,  0.,  0,     0, 0,  0,
-                0.,          0.,     0.,  c,   s,   0,     0, 0,  0,
-                0.,          0.,     0., -s,   c,   0,     0, 0,  0,
-                c *s,      -c * s,  0.,  0.,  0.,  c *c, 0, 0, -s * s,
-                0,           0,      0,   0,   0,   0,      c, s,  0,
-                0,           0,      0,   0,   0,   0,     -s, c,  0,
-                c *s,      -c * s,  0.,  0.,  0., -s * s, 0, 0, -c * c,
+                c *c,       s *s,  0.,  0.,  0., -c * s, 0., 0., -c * s,
+                s *s,       c *c,  0.,  0.,  0.,  c *s, 0., 0.,  c *s,
+                0.,          0.,     1.,  0.,  0.,  0.,     0., 0.,  0.,
+                0.,          0.,     0.,  c,   s,   0.,     0., 0.,  0.,
+                0.,          0.,     0., -s,   c,   0.,     0., 0.,  0.,
+                c *s,      -c * s,  0.,  0.,  0.,  c *c, 0., 0., -s * s,
+                0.,           0.,      0.,   0.,   0.,   0.,      c, s,  0.,
+                0.,           0.,      0.,   0.,   0.,   0.,     -s, c,  0.,
+                c *s,      -c * s,  0.,  0.,  0., -s * s, 0., 0., -c * c,
             };
             // Q^T F Q
             auto rotvF = dot(Q, vF);
@@ -994,7 +994,7 @@ LayeredCrossSection::giveCharMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    MaterialMode mode = gp->giveMaterialMode();
+  //    MaterialMode mode = gp->giveMaterialMode();
     int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
     int gpnum = gp->giveNumber();
     int gpsperlayer = ngps / this->numberOfLayers;
@@ -1028,15 +1028,15 @@ LayeredCrossSection::giveStiffnessMatrix_dPdF_3d(MatResponseMode rMode, GaussPoi
         double s = sin(rot * M_PI / 180.);
 
         FloatMatrixF< 9, 9 >Q = {
-            c *c,       s *s,  0.,  0.,  0., -c * s, 0, 0, -c * s,
-            s *s,       c *c,  0.,  0.,  0.,  c *s, 0, 0,  c *s,
-            0.,          0.,     1.,  0.,  0.,  0,     0, 0,  0,
-            0.,          0.,     0.,  c,   s,   0,     0, 0,  0,
-            0.,          0.,     0., -s,   c,   0,     0, 0,  0,
-            c *s,      -c * s,  0.,  0.,  0.,  c *c, 0, 0, -s * s,
-            0,           0,      0,   0,   0,   0,     c, s,  0,
-            0,           0,      0,   0,   0,   0,    -s, c,  0,
-            c *s,      -c * s,  0.,  0.,  0., -s * s, 0, 0, -c * c,
+            c *c,       s *s,  0.,  0.,  0., -c * s, 0., 0., -c * s,
+            s *s,       c *c,  0.,  0.,  0.,  c *s, 0., 0.,  c *s,
+            0.,          0.,     1.,  0.,  0.,  0.,     0., 0.,  0.,
+            0.,          0.,     0.,  c,   s,   0.,     0., 0.,  0.,
+            0.,          0.,     0., -s,   c,   0.,     0., 0.,  0.,
+            c *s,      -c * s,  0.,  0.,  0.,  c *c, 0., 0., -s * s,
+            0.,           0.,      0.,   0.,   0.,   0.,     c, s,  0.,
+            0.,           0.,      0.,   0.,   0.,   0.,    -s, c,  0.,
+            c *s,      -c * s,  0.,  0.,  0., -s * s, 0., 0., -c * c,
         };
 
         return unrotate(tangent, Q);
