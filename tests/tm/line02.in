@@ -1,0 +1,30 @@
+line02.out
+Line1_ht element in nonstationary problem
+TransientTransport nsteps 20 deltat 3600 alpha 0.5 lumped nmodules 1
+#vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
+errorcheck
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 1 nset 4
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   1.0   0.0
+node 3 coords 3  0.0   4.0   0.0
+line1ht 1 nodes 2 1 2
+line1ht 2 nodes 2 2 3
+SimpleTransportCS 1 area 0.15 mat 1 set 1
+IsoHeat 1 d 24. k 2.0 c 900.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 10.0 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 10 values 1 40.0 set 3
+InitialCondition 1 Conditions 1 u 10.0 dofs 1 10 set 4
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 2)}
+Set 2 nodes 1 1
+Set 3 nodes 1 3
+Set 4 nodes 1 2
+
+#%BEGIN_CHECK%
+#NODE tStep 20 number 2 dof 10 unknown d value 17.3883107
+#ELEMENT tStep 20 number 1 gp 1 keyword 56 component 2 value -14.7486991
+#ELEMENT tStep 20 number 2 gp 1 keyword 56 component 2 value -15.0837670
+
+#%END_CHECK%

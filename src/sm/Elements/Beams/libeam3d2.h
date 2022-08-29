@@ -71,7 +71,7 @@ private:
     StateCounterType tempTcCounter;
 
 public:
-    LIBeam3d2(int n, Domain * d);
+    LIBeam3d2(int n, Domain *d);
     virtual ~LIBeam3d2() { }
 
     void initializeFrom(InputRecord &ir) override;
@@ -96,6 +96,8 @@ public:
 
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+
 
     // Fibered cross section support functions
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,

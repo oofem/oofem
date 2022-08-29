@@ -49,7 +49,7 @@
 #include "mathfem.h"
 
 namespace oofem {
-NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
+NLStructuralElement::NLStructuralElement(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
@@ -58,10 +58,10 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 
 
 double
-NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
+NLStructuralElement::computeCurrentVolume(TimeStep *tStep)
 {
     double vol = 0.0;
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         FloatArray F;
         FloatMatrix Fm;
 
@@ -71,7 +71,7 @@ NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
         double J = Fm.giveDeterminant();
 
         FEInterpolation *interpolation = this->giveInterpolation();
-        double detJ = fabs( ( interpolation->giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+        double detJ = fabs( ( interpolation->giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
 
         vol += gp->giveWeight() * detJ * J;
     }
@@ -81,7 +81,7 @@ NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
 
 
 void
-NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+NLStructuralElement::computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Computes the deformation gradient in the Voigt format at the Gauss point gp of
     // the receiver at time step tStep.
@@ -111,13 +111,13 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR( "MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
 
 void
-NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+NLStructuralElement::computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
@@ -126,11 +126,11 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
-    cs->giveFirstPKStresses(answer, gp, vF, tStep);
+    answer = cs->giveFirstPKStresses(vF, gp, tStep);
 }
 
 void
-NLStructuralElement :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+NLStructuralElement::computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
@@ -143,7 +143,7 @@ NLStructuralElement :: computeCauchyStressVector(FloatArray &answer, GaussPoint 
 }
 
 void
-NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+NLStructuralElement::giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     FloatMatrix B;
     FloatArray vStress, vStrain, u;
@@ -158,7 +158,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
@@ -169,7 +169,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             } else {
                 ///@todo Is this really what we should do for inactive elements?
                 if ( !this->isActivated(tStep) ) {
-                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+                    vStrain.resize(StructuralMaterial::giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
                     vStrain.zero();
                 }
                 vStrain.beProductOf(B, u);
@@ -206,7 +206,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
             if ( vStress.giveSize() == 9 ) {
                 FloatArray stressTemp;
-                StructuralMaterial :: giveReducedVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
+                StructuralMaterial::giveReducedVectorForm(stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
             } else {
                 answer.plusProduct(B, vStress, dV);
@@ -219,7 +219,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 // (Note that no reduction will take place if
                 //  the simulation is actually 3D.)
                 FloatArray stressTemp;
-                StructuralMaterial :: giveReducedSymVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
+                StructuralMaterial::giveReducedSymVectorForm(stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
             } else {
                 answer.plusProduct(B, vStress, dV);
@@ -236,8 +236,8 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 
 
 void
-NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
-                                                                     TimeStep *tStep, int useUpdatedGpRecord)
+NLStructuralElement::giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+                                                                   TimeStep *tStep, int useUpdatedGpRecord)
 {
     /*
      * Returns nodal representation of real internal forces computed from first Piola-Kirchoff stress
@@ -264,7 +264,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
     // loop over individual integration rules
     for ( auto &iRule : integrationRulesArray ) {
-        for ( GaussPoint *gp : *iRule ) {
+        for ( GaussPoint *gp : * iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
             if ( nlGeometry == 0 ) {
@@ -324,8 +324,8 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 
 void
-NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseMode rMode, TimeStep *tStep)
+NLStructuralElement::computeStiffnessMatrix(FloatMatrix &answer,
+                                            MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
@@ -339,7 +339,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
     if ( integrationRulesArray.size() == 1 ) {
         FloatMatrix B, D, DB;
-        for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
             // Engineering (small strain) stiffness
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
@@ -351,8 +351,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
                 } else { // Material stiffness dP/dF
                     this->computeBHmatrixAt(gp, B);
-                    /// @todo We probably need overloaded function (like above) here as well.
-                    cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
+                    this->computeConstitutiveMatrix_dPdF_At(D, rMode, gp, tStep);
                 }
             }
 
@@ -392,7 +391,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     iRule = integrationRulesArray [ j ].get();
                 }
 
-                for ( GaussPoint *gp : *iRule ) {
+                for ( GaussPoint *gp : * iRule ) {
                     // Engineering (small strain) stiffness dSig/dEps
                     if ( nlGeometry == 0 ) {
                         this->computeBmatrixAt(gp, Bi, iStartIndx, iEndIndx);
@@ -403,7 +402,8 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                             cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
                         } else { // Material stiffness dP/dF
                             this->computeBHmatrixAt(gp, Bi);
-                            cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
+                            this->computeConstitutiveMatrix_dPdF_At(D, rMode, gp, tStep);
+                            //cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
                         }
                     }
 
@@ -442,8 +442,8 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
-                                                                   MatResponseMode rMode, TimeStep *tStep)
+NLStructuralElement::computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
+                                                                 MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
@@ -463,7 +463,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     FloatMatrix B, D, DB;
     IntArray irlocnum;
     for ( auto &iRule : integrationRulesArray ) {
-        for ( auto &gp : *iRule ) {
+        for ( auto &gp : * iRule ) {
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
                 this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
@@ -473,7 +473,8 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                     cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
                 } else { // Material stiffness dP/dF
                     this->computeBHmatrixAt(gp, B);
-                    cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
+                    this->computeConstitutiveMatrix_dPdF_At(D, rMode, gp, tStep);
+                    //cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
                 }
             }
 
@@ -502,23 +503,23 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
 
 void
-NLStructuralElement :: initializeFrom(InputRecord &ir)
+NLStructuralElement::initializeFrom(InputRecord &ir)
 {
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement::initializeFrom(ir);
 
     nlGeometry = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
-void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)
+void NLStructuralElement::giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralElement :: giveInputRecord(input);
+    StructuralElement::giveInputRecord(input);
 
     input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
 int
-NLStructuralElement :: checkConsistency()
+NLStructuralElement::checkConsistency()
 {
     if ( this->nlGeometry == 2 ) {
         OOFEM_ERROR("nlGeometry = 2 is not supported anymore. If access to F is needed, then the material \n should overload giveFirstPKStressVector which has F as input.");

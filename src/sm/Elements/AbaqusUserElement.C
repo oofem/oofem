@@ -51,15 +51,15 @@ namespace oofem {
 REGISTER_Element(AbaqusUserElement);
 
 
-AbaqusUserElement :: AbaqusUserElement(int n, Domain *d) :
-    NLStructuralElement(n, d), uelobj(NULL), hasTangentFlag(false), uel(NULL)
+AbaqusUserElement::AbaqusUserElement(int n, Domain *d) :
+    StructuralElement(n, d), uelobj(NULL), hasTangentFlag(false), uel(NULL)
 {}
 
-AbaqusUserElement :: ~AbaqusUserElement()
+AbaqusUserElement::~AbaqusUserElement()
 {
 #ifdef _WIN32
     if ( this->uelobj ) {
-        FreeLibrary( ( HMODULE ) this->uelobj );
+        FreeLibrary( ( HMODULE ) this->uelobj);
     }
 #else
     if ( this->uelobj ) {
@@ -69,9 +69,9 @@ AbaqusUserElement :: ~AbaqusUserElement()
 }
 
 
-void AbaqusUserElement :: initializeFrom(InputRecord &ir)
+void AbaqusUserElement::initializeFrom(InputRecord &ir)
 {
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement::initializeFrom(ir);
 
     this->numberOfDofMans = dofManArray.giveSize();
 
@@ -96,12 +96,12 @@ void AbaqusUserElement :: initializeFrom(InputRecord &ir)
 #endif
 
 #ifdef _WIN32
-    this->uelobj = ( void * ) LoadLibrary( filename.c_str() );
+    this->uelobj = ( void * ) LoadLibrary(filename.c_str() );
     if ( !this->uelobj ) {
-        OOFEM_ERROR( "couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
+        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
     }
 
-    * ( FARPROC * ) ( & this->uel ) = GetProcAddress( ( HMODULE ) this->uelobj, "uel_" );  //works for MinGW 32bit
+    * ( FARPROC * ) ( & this->uel ) = GetProcAddress( ( HMODULE ) this->uelobj, "uel_");   //works for MinGW 32bit
     if ( !this->uel ) {
         // char *dlresult = GetLastError();
         DWORD dlresult = GetLastError();                 //works for MinGW 32bit
@@ -110,7 +110,7 @@ void AbaqusUserElement :: initializeFrom(InputRecord &ir)
 #else
     this->uelobj = dlopen(filename.c_str(), RTLD_NOW);
     if ( !this->uelobj ) {
-        OOFEM_ERROR( "couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
+        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
     }
 
     * ( void ** ) ( & this->uel ) = dlsym(this->uelobj, "uel_");
@@ -122,9 +122,9 @@ void AbaqusUserElement :: initializeFrom(InputRecord &ir)
 }
 
 
-void AbaqusUserElement :: postInitialize()
+void AbaqusUserElement::postInitialize()
 {
-    NLStructuralElement :: postInitialize();
+    StructuralElement::postInitialize();
 
     this->ndofel = this->numberOfDofMans * this->nCoords;
     this->mlvarx = this->ndofel;
@@ -133,7 +133,7 @@ void AbaqusUserElement :: postInitialize()
     this->amatrx.resize(this->ndofel, this->ndofel);
     this->svars.resize(this->numSvars);
     this->lFlags.resize(5);
-    this->predef.resize( this->npredef * this->numberOfDofMans * 2 );
+    this->predef.resize(this->npredef * this->numberOfDofMans * 2);
     this->energy.resize(8);
     this->U.resize(this->ndofel);
     this->V.resize(this->ndofel);
@@ -152,9 +152,9 @@ void AbaqusUserElement :: postInitialize()
 }
 
 
-void AbaqusUserElement :: giveInputRecord(DynamicInputRecord &input)
+void AbaqusUserElement::giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralElement :: giveInputRecord(input);
+    StructuralElement::giveInputRecord(input);
 
     input.setField(this->coords, _IFT_AbaqusUserElement_numcoords);
     input.setField(this->dofs, _IFT_AbaqusUserElement_dofs);
@@ -164,12 +164,12 @@ void AbaqusUserElement :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->filename, _IFT_AbaqusUserElement_userElement);
 }
 
-void AbaqusUserElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
+void AbaqusUserElement::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = this->dofs;
 }
 
-void AbaqusUserElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+void AbaqusUserElement::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     if ( !hasTangent() ) {
         // use uel to calculate the tangent
@@ -181,22 +181,22 @@ void AbaqusUserElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
     // add stuff to behave differently if mUseNumericalTangent is set?
 }
 
-void AbaqusUserElement :: updateYourself(TimeStep *tStep)
+void AbaqusUserElement::updateYourself(TimeStep *tStep)
 {
-    StructuralElement :: updateYourself(tStep);
+    StructuralElement::updateYourself(tStep);
     svars = tempSvars;
     amatrx = tempAmatrx;
     rhs = tempRHS;
     hasTangentFlag = false;
 }
 
-void AbaqusUserElement :: updateInternalState(TimeStep *tStep)
+void AbaqusUserElement::updateInternalState(TimeStep *tStep)
 {
     FloatArray tmp;
     this->giveInternalForcesVector(tmp, tStep, 0);
 }
 
-void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+void AbaqusUserElement::giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // init U vector
     this->computeVectorOf(VM_Total, tStep, U);
@@ -210,8 +210,8 @@ void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep 
     this->giveInternalForcesVector(answer, tStep, U, DU, useUpdatedGpRecord);
 }
 
-void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
-                                            FloatArray &U, FloatMatrix &DU, int useUpdatedGpRecord)
+void AbaqusUserElement::giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
+                                                 FloatArray &U, FloatMatrix &DU, int useUpdatedGpRecord)
 {
     if ( useUpdatedGpRecord ) {
         this->rhs.copyColumn(answer, 1);
@@ -230,7 +230,7 @@ void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep 
         //this->getSvars();
         double period = 0., pnewdt = 0.;
         double dtime = tStep->giveTimeIncrement();
-        double time[] = {tStep->giveTargetTime() - dtime, tStep->giveTargetTime()};
+        double time[] = { tStep->giveTargetTime() - dtime, tStep->giveTargetTime() };
         this->uel(
             loc_rhs.givePointer(),
             loc_amatrx.givePointer(),
@@ -288,7 +288,7 @@ void AbaqusUserElement :: giveInternalForcesVector(FloatArray &answer, TimeStep 
 
 
 void
-AbaqusUserElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
+AbaqusUserElement::computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
     answer.resize(ndofel, ndofel);
     answer.zero();

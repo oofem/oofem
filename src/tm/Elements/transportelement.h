@@ -255,7 +255,7 @@ protected:
     /**
      * Computes the length around a integration point on a edge.
      */
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) = 0;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) { return 0.; }
 
     virtual void computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }

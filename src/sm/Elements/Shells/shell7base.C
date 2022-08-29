@@ -102,7 +102,6 @@ Shell7Base :: postInitialize()
         { 9, 2, 4 },
         { 8, 7, 3 }
     };
-
     this->nlGeometry = 1;
 }
 
@@ -137,7 +136,7 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
         return static_cast< FailureModuleElementInterface * >( this );
 
     default:
-        return StructuralElement :: giveInterface(it);
+        return NLStructuralElement :: giveInterface(it);
     }
 }
 

@@ -605,8 +605,8 @@ public:
         FloatMatrixF<3,3> givePlaneStressStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStressStiffMtrx, mmode, gp, tStep);
         }
-        oofem::FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
-            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStressStiffMtrx_dPdF, mmode, gp, tStep);
+        oofem::FloatMatrixF<4,4> givePlaneStressStiffnessMatrix_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStressStiffnessMatrix_dPdF, mmode, gp, tStep);
         }
         void givePlaneStressStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStressStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);
@@ -615,8 +615,8 @@ public:
         oofem::FloatMatrixF<4,4> givePlaneStrainStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStrainStiffMtrx, mmode, gp, tStep);
         }
-        oofem::FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
-            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStrainStiffMtrx_dPdF, mmode, gp, tStep);
+        oofem::FloatMatrixF<5,5> givePlaneStrainStiffnessMatrix_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStrainStiffnessMatrix_dPdF, mmode, gp, tStep);
         }
         void givePlaneStrainStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStrainStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);
@@ -626,8 +626,8 @@ public:
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give1dStressStiffMtrx, mmode, gp, tStep);
         }
 
-        oofem::FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
-            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give1dStressStiffMtrx_dPdF, mmode, gp, tStep);
+        oofem::FloatMatrixF<1,1> give1dStressStiffnessMatrix_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give1dStressStiffnessMatrix_dPdF, mmode, gp, tStep);
         }
         void give1dStressStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);
@@ -1623,6 +1623,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("initialCondition", &initialCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
     m.def("constantSurfaceLoad", &constantSurfaceLoad, py::return_value_policy::move);
+    m.def("DeadWeight", &deadWeight, py::return_value_policy::move);
     m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
     m.def("structTemperatureLoad", &structTemperatureLoad, py::return_value_policy::move);
     m.def("structEigenstrainLoad", &structEigenstrainLoad, py::return_value_policy::move);

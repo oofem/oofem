@@ -57,7 +57,7 @@
 namespace oofem {
 REGISTER_Element(LIBeam3d2);
 
-LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
+LIBeam3d2::LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
     numberOfDofMans     = 2;
     referenceNode       = 0;
@@ -68,14 +68,14 @@ LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 
 
 void
-LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+LIBeam3d2::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, n1, n2, n1x, n2x;
 
     if ( this->nlGeometry ) {
-        l = this->giveCurrentLength( domain->giveEngngModel()->giveCurrentStep() );
+        l = this->giveCurrentLength(domain->giveEngngModel()->giveCurrentStep() );
     } else {
         l = this->computeLength();
     }
@@ -114,12 +114,12 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 }
 
 void
-LIBeam3d2 :: computeGaussPoints()
+LIBeam3d2::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
@@ -127,7 +127,7 @@ LIBeam3d2 :: computeGaussPoints()
 
 
 void
-LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+LIBeam3d2::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -142,7 +142,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam3d2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+LIBeam3d2::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
@@ -172,16 +172,16 @@ LIBeam3d2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 void
-LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+LIBeam3d2::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 // Returns the stiffness matrix of the receiver, expressed in the global
 // axes.
 {
-    StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
+    StructuralElement::computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 
 bool
-LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
+LIBeam3d2::computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     answer.resize(12, 12);
     answer.zero();
@@ -199,7 +199,7 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
             }
         }
     } else {
-        this->updateTempTriad( domain->giveEngngModel()->giveCurrentStep() );
+        this->updateTempTriad(domain->giveEngngModel()->giveCurrentStep() );
 
         for ( int i = 1; i <= 3; i++ ) {
             for ( int j = 1; j <= 3; j++ ) {
@@ -216,7 +216,7 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
+LIBeam3d2::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -226,14 +226,14 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-LIBeam3d2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
+LIBeam3d2::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
 }
 
 
 int
-LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+LIBeam3d2::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     double ksi, n1, n2;
 
@@ -242,37 +242,43 @@ LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
 
 
 void
-LIBeam3d2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+LIBeam3d2::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
 }
 
+void
+LIBeam3d2::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("computeConstitutiveMatrix_dPdF_At Not implemented");
+}
+
 
 void
-LIBeam3d2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+LIBeam3d2::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
 }
 
 
 int
-LIBeam3d2 :: testElementExtension(ElementExtension ext)
+LIBeam3d2::testElementExtension(ElementExtension ext)
 {
     return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 );
 }
 
 
 double
-LIBeam3d2 :: computeLength()
+LIBeam3d2::computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -292,10 +298,10 @@ LIBeam3d2 :: computeLength()
 
 
 void
-LIBeam3d2 :: initializeFrom(InputRecord &ir)
+LIBeam3d2::initializeFrom(InputRecord &ir)
 {
     // first call parent
-   NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d2_refnode);
     if ( referenceNode == 0 ) {
@@ -317,7 +323,7 @@ LIBeam3d2 :: initializeFrom(InputRecord &ir)
 
 
 void
-LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+LIBeam3d2::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -336,7 +342,7 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+LIBeam3d2::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong egde number");
@@ -348,7 +354,7 @@ LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 int
-LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+LIBeam3d2::computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
     /*
      * Returns transformation matrix from global coordinate system to local
@@ -376,16 +382,16 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
 
 void
-LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+LIBeam3d2::computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
+    NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times(this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
 int
-LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+LIBeam3d2::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -400,7 +406,7 @@ LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
 
 int
-LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
+LIBeam3d2::giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 // returns a unit vectors of local coordinate system at element
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
@@ -437,7 +443,7 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
+LIBeam3d2::updateTempTriad(TimeStep *tStep)
 {
     // test if not previously done
     if ( tStep->giveSolutionStateCounter() == tempTcCounter ) {
@@ -466,7 +472,7 @@ LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
 
 
 void
-LIBeam3d2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+LIBeam3d2::computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 {
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
@@ -496,7 +502,7 @@ LIBeam3d2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 
 
 void
-LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
+LIBeam3d2::computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
         OOFEM_ERROR("vec param size mismatch");
@@ -515,7 +521,7 @@ LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 
 
 void
-LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+LIBeam3d2::computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray ui, PrevEpsilon;
     FloatMatrix b;
@@ -537,7 +543,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
 
 double
-LIBeam3d2 :: giveCurrentLength(TimeStep *tStep)
+LIBeam3d2::giveCurrentLength(TimeStep *tStep)
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -556,10 +562,10 @@ LIBeam3d2 :: giveCurrentLength(TimeStep *tStep)
 }
 
 
-void LIBeam3d2 :: updateYourself(TimeStep *tStep)
+void LIBeam3d2::updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    NLStructuralElement :: updateYourself(tStep);
+    NLStructuralElement::updateYourself(tStep);
 
     // update triad
     this->updateTempTriad(tStep);
@@ -573,20 +579,20 @@ void LIBeam3d2 :: updateYourself(TimeStep *tStep)
 
 
 void
-LIBeam3d2 :: initForNewStep()
+LIBeam3d2::initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
 {
-    NLStructuralElement :: initForNewStep();
+    NLStructuralElement::initForNewStep();
     tempTc = tc;
 }
 
 
 
-void LIBeam3d2 :: saveContext(DataStream &stream, ContextMode mode)
+void LIBeam3d2::saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    NLStructuralElement :: saveContext(stream, mode);
+    NLStructuralElement::saveContext(stream, mode);
 
     if ( ( iores = tc.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -594,10 +600,10 @@ void LIBeam3d2 :: saveContext(DataStream &stream, ContextMode mode)
 }
 
 
-void LIBeam3d2 :: restoreContext(DataStream &stream, ContextMode mode)
+void LIBeam3d2::restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    NLStructuralElement :: restoreContext(stream, mode);
+    NLStructuralElement::restoreContext(stream, mode);
 
     if ( ( iores = tc.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -606,8 +612,8 @@ void LIBeam3d2 :: restoreContext(DataStream &stream, ContextMode mode)
 
 
 void
-LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                                     GaussPoint *slaveGp, TimeStep *tStep)
+LIBeam3d2::FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
+                                                                   GaussPoint *slaveGp, TimeStep *tStep)
 {
     double layerYCoord, layerZCoord;
 
@@ -623,10 +629,10 @@ LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray 
 
 
 Interface *
-LIBeam3d2 :: giveInterface(InterfaceType interface)
+LIBeam3d2::giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >(this);
+        return static_cast< FiberedCrossSectionInterface * >( this );
     }
 
     return NULL;
@@ -635,7 +641,7 @@ LIBeam3d2 :: giveInterface(InterfaceType interface)
 
 #ifdef __OOFEG
 void
-LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+LIBeam3d2::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -644,9 +650,9 @@ LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     //  if (!go) { // create new one
-    WCRec p [ 2 ];   /* poin */
+    WCRec p[ 2 ];    /* poin */
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
@@ -662,7 +668,7 @@ LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 void
-LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+LIBeam3d2::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -672,13 +678,13 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkn
 
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p[ 2 ];  /* poin */
     char const *colors[] = {
         "red", "green", "blue"
     };
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
@@ -702,11 +708,11 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkn
 
     // draw t1
     for ( i = 1; i <= 3; i++ ) {
-        p [ 1 ].x = p [ 0 ].x + coeff *tc.at(1, i);
-        p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
-        p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
+        p [ 1 ].x = p [ 0 ].x + coeff * tc.at(1, i);
+        p [ 1 ].y = p [ 0 ].y + coeff * tc.at(2, i);
+        p [ 1 ].z = p [ 0 ].z + coeff * tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
+        EASValsSetColor(ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -716,9 +722,9 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkn
 
 
 void
-LIBeam3d2 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+LIBeam3d2::drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    WCRec p [ 2 ];
+    WCRec p[ 2 ];
     GraphicObj *go;
     FloatArray v;
     double defScale;
@@ -757,14 +763,14 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     gc.updateFringeTableMinMax(& s, 1);
 
     go = CreateLine3D(p);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);
 
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-    go = CreateMarkerWD3D( p, v.at(1) );
+    go = CreateMarkerWD3D(p, v.at(1) );
     EGWithMaskChangeAttributes(LAYER_MASK | FILL_MASK | MTYPE_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);
 }

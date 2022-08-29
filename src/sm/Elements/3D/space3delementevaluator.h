@@ -61,8 +61,9 @@ protected:
     double computeVolumeAround(GaussPoint *gp) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    //void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const {
-        answer = {D_u, D_v, D_w};
+        answer = { D_u, D_v, D_w };
     }
 };
 } // end namespace oofem

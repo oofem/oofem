@@ -124,7 +124,7 @@
              {\setcounter{nelpar}{1}Parameters&{#1}}%
              \\%
 }
-\newcommand{\elementDescription}[2]{{#1} & {#2}\\ }
+\newcommand{\elementDescription}[2]{{#1} & {#2}\\}
 \newcommand{\ignore}[1]{}
 
 
@@ -235,7 +235,15 @@ to 1}
 \label{Truss3d}
 
 Two node linear isoparametric truss element for 3D analysis. The
-element geometry is specified in (x,y,z) plane.  The element features are summarized in Table~\ref{truss3dsummary}.
+element geometry is specified in (x,y,z) space. The element features are summarized in Table~\ref{truss3dsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{truss3d.tikz}
+ \end{makeimage}
+ \caption{Truss3d element in (x,y,z) space.}
+\end{figure}
 
 
 \begin{elementsummary}{truss3d}{3D truss element}{-}{truss3d element summary}{truss3dsummary}
@@ -944,7 +952,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementDescription{Tests}{sm/trshell11_1.in}
+\elementDescription{Tests}{sm/trshell11\_1.in}
 \end{elementsummary}
 
 
@@ -1676,7 +1684,7 @@ with the tangent stiffness
 \end{equation} 
 Thus, for an element to support large deformations (in addition to small deformation) it needs only to implement the $\mathbf{B}_H$ matrix. 
 Similar to the regular \textbf{B} matrix, which gives the strains in Voigt form when multiplied with the solution vector $\textbf{a}$, 
-$\textbf{B}_H$ should give the displcement gradient in Voigt form with 9 components for a full 3D state.
+$\textbf{B}_H$ should give the displacement gradient in Voigt form with 9 components for a full 3D state.
 %
 \begin{table}
   \centering
@@ -1695,6 +1703,44 @@ $\textbf{B}_H$ should give the displcement gradient in Voigt form with 9 compone
 %-----------------------------------------------------------------------------------------------
 \clearpage
 \section{Elements for Transport problems (TM Module)}
+\subsection{1D Elements}
+\subsubsection{Line1ht element}
+\label{Line1ht}
+Two node linear isoparametric element for for heat transfer problems. Each node has 1 degree of freedom.
+The cross section property ``area'' is requested from the cross section. The
+element geometry is specified in (x,y,z) plane. The element features are summarized in Table~\ref{Line1htsummary}.
+Stabilization through lumped capacity matrix is suggested in transient transport problems, using \entKeywordInst{lumped}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{truss3d.tikz}
+ \end{makeimage}
+ \caption{Line1ht element in (x,y,z) space.}
+\end{figure}
+
+\begin{elementsummary}{Line1ht}{Line (truss-like) finite element with linear approximation for heat transfer problems}{-}{Line1ht element summary}{Line1htsummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using one point gauss integration formula.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are unsupported.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{Area}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+\subsubsection{Line1mt element}
+Line (truss-like) finite element with linear approximation of moisture.
+Other features are the same as for Line1ht in Section~\ref{Line1ht}.
+
+\subsubsection{Line1hmt element}
+Line (truss-like) finite element with linear approximations of temperature and moisture. 
+Other features are the same as for Tr1ht in Section~\ref{Line1ht}.
+
+
+
+
 \subsection{2D Elements}
 \subsubsection{Tr1ht element}
 \label{Tr1ht}

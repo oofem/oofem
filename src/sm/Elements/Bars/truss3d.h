@@ -50,14 +50,14 @@ class FEI3dLineLin;
  * analysis.
  */
 class Truss3d : public NLStructuralElement,
-public ZZNodalRecoveryModelInterface,
-public NodalAveragingRecoveryModelInterface
+    public ZZNodalRecoveryModelInterface,
+    public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI3dLineLin interp;
 
 public:
-    Truss3d(int n, Domain * d);
+    Truss3d(int n, Domain *d);
     virtual ~Truss3d() { }
 
     FEInterpolation *giveInterpolation() const override;
@@ -97,6 +97,7 @@ public:
     MaterialMode giveMaterialMode() override { return _1dMat; }
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
 protected:
     // edge load support
@@ -107,7 +108,6 @@ protected:
     void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeGaussPoints() override;
-
 };
 } // end namespace oofem
 #endif // truss3d_h

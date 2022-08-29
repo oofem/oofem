@@ -52,10 +52,10 @@
 namespace oofem {
 REGISTER_Element(Truss1d);
 
-FEI1dLin Truss1d :: interp(1); // Initiates the static interpolator
+FEI1dLin Truss1d::interp(1);   // Initiates the static interpolator
 
 
-Truss1d :: Truss1d(int n, Domain *aDomain) :
+Truss1d::Truss1d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
@@ -66,21 +66,21 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
 }
 
 
-void Truss1d :: computeGaussPoints()
+void Truss1d::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 2);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 FEInterpolation *
-Truss1d :: giveInterpolation() const { return & interp; }
+Truss1d::giveInterpolation() const { return & interp; }
 
 void
-Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+Truss1d::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -95,20 +95,20 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+Truss1d::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx(dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dN); ///@todo It would be more suitable to follow the column-major version as done in FEI-classes
 }
 
 
 void
-Truss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Truss1d::computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [1x2] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
@@ -120,12 +120,12 @@ Truss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-Truss1d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+Truss1d::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
     FloatArray n;
-    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
+    this->interp.evalN(n, iLocCoord, FEIElementGeometryWrapper(this) );
     // Reshape
     answer.resize(1, 2); ///@todo It would be more suitable to follow the column-major order and just do answer.setColumn(...)
     answer.at(1, 1) = n.at(1);
@@ -134,29 +134,35 @@ Truss1d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 double
-Truss1d :: computeVolumeAround(GaussPoint *gp)
+Truss1d::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs(this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * gp->giveWeight() * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
 void
-Truss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+Truss1d::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
 }
 
 void
-Truss1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+Truss1d::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
 }
 
 void
-Truss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Truss1d::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+}
+
+void
+Truss1d::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {
         D_u
@@ -165,18 +171,18 @@ Truss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
-                                                            IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
-                                                            HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
-                                                            int &localNodeId, int &localElemId, int &localBcId,
-                                                            IntArray &controlNode, IntArray &controlDof,
-                                                            HuertaErrorEstimator :: AnalysisMode aMode)
+Truss1d::HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
+                                                          IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
+                                                          HuertaErrorEstimatorInterface::SetupMode sMode, TimeStep *tStep,
+                                                          int &localNodeId, int &localElemId, int &localBcId,
+                                                          IntArray &controlNode, IntArray &controlDof,
+                                                          HuertaErrorEstimator::AnalysisMode aMode)
 {
     int nodes = 2;
 
-    FloatArray corner [ 2 ], midNode, cor [ 2 ];
-    if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+    FloatArray corner[ 2 ], midNode, cor[ 2 ];
+    if ( sMode == HuertaErrorEstimatorInterface::NodeMode ||
+         ( sMode == HuertaErrorEstimatorInterface::BCMode && aMode == HuertaErrorEstimator::HEE_linear ) ) {
         double x = 0.0;
         for ( int inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
@@ -206,24 +212,24 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
 }
 
 
-void Truss1d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+void Truss1d::HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     computeNmatrixAt(gp->giveSubPatchCoordinates(), answer);
 }
 
 
 #ifdef __OOFEG
-void Truss1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void Truss1d::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = 0.;
@@ -238,18 +244,18 @@ void Truss1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 
-void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void Truss1d::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* point */
+    WCRec p[ 2 ];  /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = 0.;
@@ -264,13 +270,13 @@ void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, U
 }
 
 
-void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void Truss1d::drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
-    WCRec p [ 2 ];
+    WCRec p[ 2 ];
     GraphicObj *tr;
     FloatArray v1, v2;
-    double s [ 2 ], defScale;
+    double s[ 2 ], defScale;
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -340,7 +346,7 @@ void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
              * tr =  CreateLine3D(p);
              * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
              */
-            WCRec pp [ 4 ];
+            WCRec pp[ 4 ];
             pp [ 0 ].x = p [ 0 ].x;
             pp [ 0 ].y = 0.0;
             pp [ 0 ].z = 0.0;
@@ -355,14 +361,14 @@ void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             pp [ 3 ].z = 0.0;
             tr = CreateQuad3D(pp);
             EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-            EASValsSetColor( gc.getDeformedElementColor() );
+            EASValsSetColor(gc.getDeformedElementColor() );
             //EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
             EASValsSetFillStyle(FILL_HOLLOW);
             EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
         } else {
             //tr =  CreateTriangleWD3D(p, s[0], s[1], s[2]);
-            EASValsSetColor( gc.getDeformedElementColor() );
+            EASValsSetColor(gc.getDeformedElementColor() );
             tr =  CreateLine3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
@@ -374,18 +380,18 @@ void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 Interface *
-Truss1d :: giveInterface(InterfaceType interface)
+Truss1d::giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this);
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >(this);
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     }
 
     return NULL;
@@ -393,8 +399,8 @@ Truss1d :: giveInterface(InterfaceType interface)
 
 
 void
-Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                      InternalStateType type, TimeStep *tStep)
+Truss1d::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);

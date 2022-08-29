@@ -69,7 +69,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3dNL2(int n, Domain * d);
+    LIBeam3dNL2(int n, Domain *d);
     virtual ~LIBeam3dNL2() { }
 
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
@@ -120,6 +120,7 @@ protected:
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeGaussPoints() override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
     double computeLength() override;

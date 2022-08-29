@@ -53,7 +53,7 @@
 namespace oofem {
 REGISTER_Element(LIBeam3dNL);
 
-LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3) //, kappa (3)
+LIBeam3dNL::LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3)   //, kappa (3)
 {
     numberOfDofMans    = 2;
     l0                 = 0.;
@@ -65,7 +65,7 @@ LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
 
 
 void
-LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
+LIBeam3dNL::computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
         OOFEM_ERROR("vec param size mismatch");
@@ -84,7 +84,7 @@ LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 
 
 void
-LIBeam3dNL :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+LIBeam3dNL::computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 {
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
@@ -114,7 +114,7 @@ LIBeam3dNL :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 
 
 void
-LIBeam3dNL :: updateTempTriad(TimeStep *tStep)
+LIBeam3dNL::updateTempTriad(TimeStep *tStep)
 {
     // test if not previously done
     if ( tStep->giveSolutionStateCounter() == tempTcCounter ) {
@@ -143,7 +143,7 @@ LIBeam3dNL :: updateTempTriad(TimeStep *tStep)
 
 
 void
-LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+LIBeam3dNL::computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray xd(3), eps(3), curv(3);
 
@@ -171,7 +171,7 @@ LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *
 
 
 void
-LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
+LIBeam3dNL::computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatArray xd(3);
     FloatMatrix s(3, 3);
@@ -196,7 +196,7 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+LIBeam3dNL::giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     FloatArray nm(6), stress, strain;
@@ -230,7 +230,7 @@ LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 
 
 void
-LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep)
+LIBeam3dNL::computeXdVector(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray u(3);
 
@@ -248,7 +248,7 @@ LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 
 
 void
-LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+LIBeam3dNL::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, sn, sm, sxd, y;
@@ -334,22 +334,22 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 
 
 void
-LIBeam3dNL :: computeGaussPoints()
+LIBeam3dNL::computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 
 void
-LIBeam3dNL :: initializeFrom(InputRecord &ir)
+LIBeam3dNL::initializeFrom(InputRecord &ir)
 {
     // first call parent
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL_refnode);
     if ( referenceNode == 0 ) {
@@ -376,7 +376,7 @@ LIBeam3dNL :: initializeFrom(InputRecord &ir)
 
 
 double
-LIBeam3dNL :: computeLength()
+LIBeam3dNL::computeLength()
 // Returns the original length (l0) of the receiver.
 {
     double dx, dy, dz;
@@ -396,7 +396,7 @@ LIBeam3dNL :: computeLength()
 
 
 void
-LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+LIBeam3dNL::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
@@ -411,7 +411,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double Irr, Iy, Iz;
     Iy   = this->giveCrossSection()->give(CS_InertiaMomentY, gp);
     Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ, gp);
-    Irr  = Iy+Iz;
+    Irr  = Iy + Iz;
 
     halfMass   = density * this->computeLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Irr * halfMass;
@@ -421,7 +421,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam3dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+LIBeam3dNL::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
@@ -456,7 +456,7 @@ LIBeam3dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 double
-LIBeam3dNL :: computeVolumeAround(GaussPoint *gp)
+LIBeam3dNL::computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -466,10 +466,10 @@ LIBeam3dNL :: computeVolumeAround(GaussPoint *gp)
 
 
 int
-LIBeam3dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+LIBeam3dNL::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
-    /// to support all the sensible moment/force tensors. 
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams)
+    /// to support all the sensible moment/force tensors.
     if ( type == IST_BeamForceMomentTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
@@ -477,20 +477,20 @@ LIBeam3dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return StructuralElement::giveIPValue(answer, gp, type, tStep);
     }
 }
 
 
 void
-LIBeam3dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
+LIBeam3dNL::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
 }
 
 
 int
-LIBeam3dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+LIBeam3dNL::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     double ksi, n1, n2;
 
@@ -499,30 +499,36 @@ LIBeam3dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
 
 
 void
-LIBeam3dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+LIBeam3dNL::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
 }
 
+void
+LIBeam3dNL::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("computeConstitutiveMatrix_dPdF_At Not implemented for libeam2dnl");
+}
+
 
 void
-LIBeam3dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+LIBeam3dNL::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
 }
 
 
 void
-LIBeam3dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+LIBeam3dNL::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -540,7 +546,7 @@ LIBeam3dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+LIBeam3dNL::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong egde number");
@@ -552,7 +558,7 @@ LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 int
-LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
+LIBeam3dNL::giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 // returns a unit vectors of local coordinate system at element
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
@@ -615,7 +621,7 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
  */
 
 int
-LIBeam3dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+LIBeam3dNL::computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
     /*
      * Returns transformation matrix from global coordinate system to local
@@ -644,7 +650,7 @@ LIBeam3dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
 
 int
-LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+LIBeam3dNL::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -659,19 +665,19 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 
 
 void
-LIBeam3dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+LIBeam3dNL::computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
+    NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times(this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
 
 
-void LIBeam3dNL :: updateYourself(TimeStep *tStep)
+void LIBeam3dNL::updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    NLStructuralElement :: updateYourself(tStep);
+    NLStructuralElement::updateYourself(tStep);
 
     // update triad
     this->updateTempTriad(tStep);
@@ -684,17 +690,17 @@ void LIBeam3dNL :: updateYourself(TimeStep *tStep)
 }
 
 void
-LIBeam3dNL :: initForNewStep()
+LIBeam3dNL::initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
 {
-    NLStructuralElement :: initForNewStep();
+    NLStructuralElement::initForNewStep();
     tempTc = tc;
 }
 
 
 void
-LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
+LIBeam3dNL::computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
@@ -740,7 +746,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 
 
 #ifdef __OOFEG
-void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void LIBeam3dNL::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -749,9 +755,9 @@ void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     //  if (!go) { // create new one
-    WCRec p [ 2 ];   /* poin */
+    WCRec p[ 2 ];    /* poin */
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
@@ -766,7 +772,7 @@ void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 }
 
 
-void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void LIBeam3dNL::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -776,9 +782,9 @@ void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep
 
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p[ 2 ];  /* poin */
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);

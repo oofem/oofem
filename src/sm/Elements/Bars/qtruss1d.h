@@ -52,7 +52,7 @@ protected:
     static FEI1dQuad interpolation;
 
 public:
-    QTruss1d(int n, Domain * d);
+    QTruss1d(int n, Domain *d);
     virtual ~QTruss1d() { }
 
     void initializeFrom(InputRecord &ir) override;
@@ -62,6 +62,7 @@ public:
 
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override
     { return this->computeLength(); }
@@ -81,7 +82,6 @@ protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
     void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeGaussPoints() override;
-    
 };
 } // end namespace oofem
 #endif // truss1d_h

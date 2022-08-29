@@ -40,6 +40,9 @@
 #define _IFT_SimpleTransportCrossSection_Name "simpletransportcs"
 #define _IFT_SimpleTransportCrossSection_material "mat"
 #define _IFT_SimpleTransportCrossSection_thickness "thickness"
+#define _IFT_SimpleTransportCrossSection_area "area"
+
+
 
 namespace oofem {
 class TransportMaterial;

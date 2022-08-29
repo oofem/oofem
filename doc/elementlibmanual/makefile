@@ -34,4 +34,5 @@ endif
 
 clean:
 	rm -fr html
-	rm -f *.aux *.dvi *.lof *.log *.toc *.dpth 
+	rm -f *.aux *.dvi *.lof *.log *.toc *.dpth
+	rm -f elementlibmanual-figure*

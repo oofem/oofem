@@ -85,22 +85,22 @@ private:
     void *umatobj = nullptr;
 
     /// Pointer to the dynamically loaded umat-function (translated to C)
-    void ( * umat )(double *stress, double *statev, double *ddsdde, double *sse, double *spd, // 5
-                    double *scd, double *rpl, double *ddsddt, double *drplde, double *drpldt, // 5
-                    double *stran, double *dstran, double time [ 2 ], double *dtime, double *temp, // 4
-                    double *dtemp, double predef [ 1 ], double dpred [ 1 ], char cmname [ 80 ], int *ndi, // 5
-                    int *nshr, int *ntens, int *nstatv, double *props, int *nprops, double coords [ 3 ], // 6
-                    double *drot, double *pnewdt, double *celent, double *dfgrd0, double *dfgrd1, // 5
-                    int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc) = nullptr; // 6
+    void ( *umat )(double *stress, double *statev, double *ddsdde, double *sse, double *spd,  // 5
+                   double *scd, double *rpl, double *ddsddt, double *drplde, double *drpldt,  // 5
+                   double *stran, double *dstran, double time[ 2 ], double *dtime, double *temp,   // 4
+                   double *dtemp, double predef[ 1 ], double dpred[ 1 ], char cmname[ 80 ], int *ndi,     // 5
+                   int *nshr, int *ntens, int *nstatv, double *props, int *nprops, double coords[ 3 ],   // 6
+                   double *drot, double *pnewdt, double *celent, double *dfgrd0, double *dfgrd1,  // 5
+                   int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc) = nullptr;  // 6
     /// Name for material routine.
-    char cmname [ 80 ];
+    char cmname[ 80 ];
     /// Size of the state vector.
     int numState = 0;
 
     /// Material properties.
     FloatArray properties;
     /// Initial stress.
-    FloatArrayF<6> initialStress;
+    FloatArrayF< 6 >initialStress;
     /**
      * Flag to determine how the stress and Jacobian are interpreted.
      * 0 implies that the P and dPdF are returned from the umat routine.
@@ -118,14 +118,14 @@ private:
     double mPerturbation = 1e-7;
 
     /// Name of the file that contains the umat function
-    std :: string filename;
-    
-    static int const abq2oo9[9];
-    static int const abq2oo6[6];
+    std::string filename;
+
+    static int const abq2oo9[ 9 ];
+    static int const abq2oo6[ 6 ];
 
 public:
     /// Constructor.
-    AbaqusUserMaterial(int n, Domain * d);
+    AbaqusUserMaterial(int n, Domain *d);
     /// Destructor.
     virtual ~AbaqusUserMaterial();
 
@@ -141,20 +141,20 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
-                                            GaussPoint *gp,
+    FloatMatrixF< 9, 9 >give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                           GaussPoint *gp,
+                                                           TimeStep *tStep) const override;
+
+    FloatMatrixF< 5, 5 >givePlaneStrainStiffnessMatrix_dPdF(MatResponseMode mmode, GaussPoint *gp,
+                                                            TimeStep *tStep) const override;
+
+    FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp,
                                             TimeStep *tStep) const override;
 
-    FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp,
-                                       TimeStep *tStep) const override;
-
-    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
-                                           TimeStep *tStep) const override;
-
-    FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
-                                              TimeStep *tStep) const override;
+    FloatArrayF< 9 >giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, GaussPoint *gp,
+                                               TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -179,7 +179,7 @@ protected:
 
 public:
     /// Constructor.
-    AbaqusUserMaterialStatus(GaussPoint * gp, int numState);
+    AbaqusUserMaterialStatus(GaussPoint *gp, int numState);
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -192,7 +192,7 @@ public:
     FloatArray &letTempStateVectorBe(FloatArray &s) { return tempStateVector = s; }
     const FloatMatrix &giveTempTangent() { return tempTangent; }
     void letTempTangentBe(FloatMatrix t) {
-        tempTangent = std :: move(t);
+        tempTangent = std::move(t);
         hasTangentFlag = true;
     }
 

@@ -96,7 +96,7 @@ class OOFEM_EXPORT StructuralElement : public Element
 {
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
-    std :: unique_ptr< FloatArray >initialDisplacements;
+    std::unique_ptr< FloatArray >initialDisplacements;
 
 public:
     /**
@@ -108,7 +108,7 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep) override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
 
     /**
@@ -199,7 +199,7 @@ public:
         OOFEM_ERROR("not implemented");
     }
     /**
-     * Computes lumped initial stress matrix of receiver. 
+     * Computes lumped initial stress matrix of receiver.
      * @param answer Lumped initial stress matrix.
      * @param tStep Time step.
      */
@@ -353,6 +353,7 @@ public:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep) = 0;
+
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
 

@@ -55,10 +55,10 @@
 namespace oofem {
 REGISTER_Element(DKTPlate);
 
-FEI2dTrLin DKTPlate :: interp_lin(1, 2);
+FEI2dTrLin DKTPlate::interp_lin(1, 2);
 
-DKTPlate :: DKTPlate(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
+DKTPlate::DKTPlate(int n, Domain *aDomain) :
+    StructuralElement(n, aDomain),
     LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
     NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
@@ -69,30 +69,30 @@ DKTPlate :: DKTPlate(int n, Domain *aDomain) :
 
 
 FEInterpolation *
-DKTPlate :: giveInterpolation() const { return & interp_lin; }
+DKTPlate::giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *
-DKTPlate :: giveInterpolation(DofIDItem id) const
+DKTPlate::giveInterpolation(DofIDItem id) const
 {
     return & interp_lin;
 }
 
 
 void
-DKTPlate :: computeGaussPoints()
+DKTPlate::computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 5);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+DKTPlate::computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
@@ -136,7 +136,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
 
 void
-DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+DKTPlate::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [5x9] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 // strain components xx, yy, zz, xz, yz
@@ -290,7 +290,7 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 
 
 void
-DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+DKTPlate::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 // Note: this interpolation is not available, as the deflection is cubic along the edges,
@@ -302,30 +302,30 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
     answer.resize(3, 9);
     answer.zero();
-    giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
+    giveInterpolation()->evalN(N, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.beNMatrixOf(N, 3);
 }
 
 
 void
-DKTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+DKTPlate::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
 }
 
 
 void
-DKTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+DKTPlate::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
-DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
-                                double &y1, double &y2, double &y3,
-                                double &z1, double &z2, double &z3)
+DKTPlate::giveNodeCoordinates(double &x1, double &x2, double &x3,
+                              double &y1, double &y2, double &y3,
+                              double &z1, double &z2, double &z3)
 {
     const auto &nc1 = this->giveNode(1)->giveCoordinates();
     const auto &nc2 = this->giveNode(2)->giveCoordinates();
@@ -346,26 +346,26 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 
 
 void
-DKTPlate :: initializeFrom(InputRecord &ir)
+DKTPlate::initializeFrom(InputRecord &ir)
 {
-    NLStructuralElement :: initializeFrom(ir);
+    StructuralElement::initializeFrom(ir);
 }
 
 
 void
-DKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
+DKTPlate::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_w, R_u, R_v};
+    answer = { D_w, R_u, R_v };
 }
 
 
 void
-DKTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
+DKTPlate::computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     FloatArray u, v;
-    u.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
-    v.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    u.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf(this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
     answer.beVectorProductOf(u, v);
     answer.normalize();
@@ -373,7 +373,7 @@ DKTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 
 
 double
-DKTPlate :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+DKTPlate::giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
 // returns receiver's characteristic length for crack band models
 // for a crack formed in the plane with normal normalToCrackPlane.
@@ -384,23 +384,23 @@ DKTPlate :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 
 
 double
-DKTPlate :: computeVolumeAround(GaussPoint *gp)
+DKTPlate::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double detJ, weight;
-    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3)};
-    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), 
-                              lc[0].at(2), lc[1].at(2), lc[2].at(2), 
-                              lc[0].at(3), lc[1].at(3), lc[2].at(3));
+    std::vector< FloatArray >lc = { FloatArray(3), FloatArray(3), FloatArray(3) };
+    this->giveNodeCoordinates( lc [ 0 ].at(1), lc [ 1 ].at(1), lc [ 2 ].at(1),
+                               lc [ 0 ].at(2), lc [ 1 ].at(2), lc [ 2 ].at(2),
+                               lc [ 0 ].at(3), lc [ 1 ].at(3), lc [ 2 ].at(3) );
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs(this->interp_lin.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
 
 void
-DKTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+DKTPlate::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
     answer.resize(9, 9);
@@ -419,18 +419,18 @@ DKTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 Interface *
-DKTPlate :: giveInterface(InterfaceType interface)
+DKTPlate::giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >(this);
+        return static_cast< LayeredCrossSectionInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this);
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     }
 
 
@@ -441,7 +441,7 @@ DKTPlate :: giveInterface(InterfaceType interface)
 #define POINT_TOL 1.e-3
 
 bool
-DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+DKTPlate::computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
@@ -451,7 +451,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
-    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
+    bool ok = this->interp_lin.global2local(answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
@@ -472,7 +472,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     double elthick = cs->give(CS_Thickness, answer, this);
 
-    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
+    if ( elthick / 2.0 + midplZ - fabs(coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
         return false;
     }
@@ -483,7 +483,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
 
 int
-DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+DKTPlate::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatArray help;
     answer.resize(6);
@@ -514,7 +514,7 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(6) = help.at(3); // mxy
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return StructuralElement::giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -523,12 +523,12 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 // The element interface required by NodalAveragingRecoveryModel
 //
 void
-DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                       InternalStateType type, TimeStep *tStep)
+DKTPlate::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                     InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentTensor ) ||
-        ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
+         ( type == IST_ShellStrainTensor )  || ( type == IST_CurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(answer, gp, type, tStep);
     } else {
@@ -541,7 +541,7 @@ DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 // The element interface required by SPRNodalRecoveryModelInterface
 //
 void
-DKTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+DKTPlate::SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);
     pap.at(1) = this->giveNode(1)->giveNumber();
@@ -551,12 +551,12 @@ DKTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 
 
 void
-DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+DKTPlate::SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         OOFEM_ERROR("node unknown");
@@ -565,18 +565,18 @@ DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 
 
 SPRPatchType
-DKTPlate :: SPRNodalRecoveryMI_givePatchType()
+DKTPlate::SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
 }
 
 
 void
-DKTPlate::computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+DKTPlate::computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN(n, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -586,13 +586,13 @@ DKTPlate::computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArr
 }
 
 
-  
+
 //
 // layered cross section support functions
 //
 void
-DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+DKTPlate::computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                     GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
@@ -613,7 +613,7 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 }
 
 void
-DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+DKTPlate::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -648,15 +648,15 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+DKTPlate::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ * gp->giveWeight();
 }
 
 
 int
-DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+DKTPlate::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -667,8 +667,8 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    auto nodeA = this->giveNode( edgeNodes.at(1) );
-    auto nodeB = this->giveNode( edgeNodes.at(2) );
+    auto nodeA = this->giveNode(edgeNodes.at(1) );
+    auto nodeB = this->giveNode(edgeNodes.at(2) );
 
     double dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     double dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
@@ -688,13 +688,13 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 
 
 void
-DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+DKTPlate::computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
 }
 
 void
-DKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+DKTPlate::giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(9);
     answer.zero();
@@ -709,20 +709,20 @@ DKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 
 double
-DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+DKTPlate::computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     return this->computeVolumeAround(gp);
 }
 
 
 int
-DKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+DKTPlate::computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {
     return 0;
 }
 
 void
-DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
+DKTPlate::computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 {
 #ifdef DKT_EnableVertexMomentsCache
     if ( stateCounter == tStep->giveSolutionStateCounter() ) {
@@ -736,7 +736,7 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(5, 3);
 
     FloatArray eps, m;
-    FloatArray coords [ 3 ]; // vertex local coordinates
+    FloatArray coords[ 3 ];  // vertex local coordinates
     coords [ 0 ] = {
         1.0, 0.0
     };
@@ -765,14 +765,14 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 }
 
 void
-DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+DKTPlate::computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // as shear strains are enforced to be zero (art least on element edges) the shear forces are computed from equlibrium
     FloatMatrix m, dndx;
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx
@@ -785,9 +785,9 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
 //
 #ifdef __OOFEG
 void
-DKTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+DKTPlate::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *go;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -796,8 +796,8 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
     if ( this->giveMaterial()->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-        EASValsSetColor( gc.getElementColor() );
-        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetColor(gc.getElementColor() );
+        EASValsSetEdgeColor(gc.getElementEdgeColor() );
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -820,9 +820,9 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 void
-DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+DKTPlate::drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *go;
     double defScale = gc.getDefScale();
 
@@ -832,8 +832,8 @@ DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkno
 
     if ( this->giveMaterial()->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-        EASValsSetColor( gc.getDeformedElementColor() );
-        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetColor(gc.getDeformedElementColor() );
+        EASValsSetEdgeColor(gc.getElementEdgeColor() );
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
@@ -855,13 +855,13 @@ DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkno
 
 
 void
-DKTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+DKTPlate::drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
-    WCRec p [ 3 ];
+    WCRec p[ 3 ];
     GraphicObj *tr;
     FloatArray v1, v2, v3;
-    double s [ 3 ], defScale;
+    double s[ 3 ], defScale;
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;

@@ -82,6 +82,7 @@ public:
 
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 
@@ -89,7 +90,7 @@ public:
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
@@ -105,10 +106,10 @@ public:
     // HuertaErrorEstimatorInterface
     void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                           IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
-                                                          HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
+                                                          HuertaErrorEstimatorInterface::SetupMode sMode, TimeStep *tStep,
                                                           int &localNodeId, int &localElemId, int &localBcId,
                                                           IntArray &controlNode, IntArray &controlDof,
-                                                          HuertaErrorEstimator :: AnalysisMode aMode) override;
+                                                          HuertaErrorEstimator::AnalysisMode aMode) override;
     void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
 protected:

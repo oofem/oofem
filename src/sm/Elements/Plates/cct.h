@@ -55,10 +55,10 @@ class FEI2dTrLin;
  * Tasks:
  * - calculating its B,D,N matrices and dV.
  */
-class CCTPlate : public NLStructuralElement,
-public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
-public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-public ZZErrorEstimatorInterface
+class CCTPlate : public StructuralElement,
+    public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
+    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public ZZErrorEstimatorInterface
 {
 protected:
     static FEI2dTrLin interp_lin;
@@ -67,7 +67,7 @@ protected:
     double area;
 
 public:
-    CCTPlate(int n, Domain * d);
+    CCTPlate(int n, Domain *d);
     virtual ~CCTPlate() { }
 
     FEInterpolation *giveInterpolation() const override;

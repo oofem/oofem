@@ -13,6 +13,7 @@ set (tm_emodel
 
 set (tm_element
     Elements/transportelement.C
+    Elements/line1_ht.C
     Elements/quad1_ht.C
     Elements/qquad1_ht.C
     Elements/tr1_ht.C

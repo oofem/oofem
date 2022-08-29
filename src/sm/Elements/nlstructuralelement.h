@@ -144,6 +144,7 @@ public:
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
 
+
     /**
      * Computes the initial stiffness matrix of receiver. This method is used only if mode = UL
      * The response is evaluated using @f$ \int B ({\mathrm{\sigma}}\otimes \delta )B_{\mathrm{H}} \;\mathrm{d}v @f$, where
@@ -181,6 +182,19 @@ public:
      */
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
+
+    /**
+     * Computes large strain constitutive matrix of receiver. Default implementation uses element cross section
+     * giveCharMaterialStiffnessMatrix service.
+     * @param answer Constitutive matrix.
+     * @param rMode Material response mode of answer.
+     * @param gp Integration point for which constitutive matrix is computed.
+     * @param tStep Time step.
+     */
+    virtual void computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer,
+                                                   MatResponseMode rMode, GaussPoint *gp,
+                                                   TimeStep *tStep) = 0;
+
 
     /**
      * Evaluates nodal representation of real internal forces.

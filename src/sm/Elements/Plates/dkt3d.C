@@ -47,13 +47,12 @@
 namespace oofem {
 REGISTER_Element(DKTPlate3d);
 
-DKTPlate3d :: DKTPlate3d(int n, Domain *aDomain) : DKTPlate(n, aDomain)
-{
-}
+DKTPlate3d::DKTPlate3d(int n, Domain *aDomain) : DKTPlate(n, aDomain)
+{}
 
 
 void
-DKTPlate3d :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
+DKTPlate3d::giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates - size mismatch");
@@ -63,21 +62,21 @@ DKTPlate3d :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     this->computeGtoLRotationMatrix();
 
     FloatArray offset;
-    offset.beDifferenceOf(global, this->giveNode(1)->giveCoordinates() );
+    offset.beDifferenceOf( global, this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
 
 void
-DKTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
-                                  double &y1, double &y2, double &y3,
-                                  double &z1, double &z2, double &z3)
+DKTPlate3d::giveNodeCoordinates(double &x1, double &x2, double &x3,
+                                double &y1, double &y2, double &y3,
+                                double &z1, double &z2, double &z3)
 {
     FloatArray nc1(3), nc2(3), nc3(3);
 
-    this->giveLocalCoordinates( nc1, this->giveNode(1)->giveCoordinates() );
-    this->giveLocalCoordinates( nc2, this->giveNode(2)->giveCoordinates() );
-    this->giveLocalCoordinates( nc3, this->giveNode(3)->giveCoordinates() );
+    this->giveLocalCoordinates(nc1, this->giveNode(1)->giveCoordinates() );
+    this->giveLocalCoordinates(nc2, this->giveNode(2)->giveCoordinates() );
+    this->giveLocalCoordinates(nc3, this->giveNode(3)->giveCoordinates() );
 
     x1 = nc1.at(1);
     x2 = nc2.at(1);
@@ -90,19 +89,18 @@ DKTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     z1 = nc1.at(3);
     z2 = nc2.at(3);
     z3 = nc3.at(3);
-
 }
 
 
 void
-DKTPlate3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+DKTPlate3d::giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
 }
 
 
 const FloatMatrix *
-DKTPlate3d :: computeGtoLRotationMatrix()
+DKTPlate3d::computeGtoLRotationMatrix()
 // Returns the rotation matrix of the receiver of the size [3,3]
 // coords(local) = T * coords(global)
 //
@@ -117,8 +115,8 @@ DKTPlate3d :: computeGtoLRotationMatrix()
         FloatArray e1, e2, e3, help;
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        e1.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
-        help.beDifferenceOf(this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
+        e1.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+        help.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
         // let us normalize e1'
         e1.normalize();
@@ -141,12 +139,12 @@ DKTPlate3d :: computeGtoLRotationMatrix()
         }
     }
 
-    return &GtoLRotationMatrix;
+    return & GtoLRotationMatrix;
 }
 
 
 bool
-DKTPlate3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
+DKTPlate3d::computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [9,18]
 // r(local) = T * r(global)
 // for one node (r written transposed): {w,r1,r2} = T * {u,v,w,r1,r2,r3}
@@ -166,7 +164,7 @@ DKTPlate3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 void
-DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep)
+DKTPlate3d::giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep)
 // returns characteristic tensor of the receiver at given gp and tStep
 // strain vector = (Kappa_x, Kappa_y, Kappa_xy, Gamma_zx, Gamma_zy)
 {
@@ -214,7 +212,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(GtoLRotationMatrix);
     }
@@ -222,7 +220,7 @@ DKTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
 
 int
-DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+DKTPlate3d::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatMatrix globTensor;
     CharTensor cht;
@@ -241,9 +239,9 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(1) = globTensor.at(1, 1); //xx
         answer.at(2) = globTensor.at(2, 2); //yy
         answer.at(3) = globTensor.at(3, 3); //zz
-        answer.at(4) = 2*globTensor.at(2, 3); //yz
-        answer.at(5) = 2*globTensor.at(1, 3); //xz
-        answer.at(6) = 2*globTensor.at(1, 2); //xy
+        answer.at(4) = 2 * globTensor.at(2, 3); //yz
+        answer.at(5) = 2 * globTensor.at(1, 3); //xz
+        answer.at(6) = 2 * globTensor.at(1, 2); //xy
 
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
@@ -264,12 +262,12 @@ DKTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
+        return StructuralElement::giveIPValue(answer, gp, type, tStep);
     }
 }
 
 int
-DKTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+DKTPlate3d::computeLoadGToLRotationMtrx(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [6,6]
 // f(local) = T * f(global)
 {
@@ -288,7 +286,7 @@ DKTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 }
 
 void
-DKTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+DKTPlate3d::computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatMatrix ne;
     this->computeNmatrixAt(sgp->giveNaturalCoordinates(), ne);
@@ -310,7 +308,7 @@ DKTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
 }
 
 void
-DKTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+DKTPlate3d::giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(18);
     answer.zero();
@@ -333,48 +331,55 @@ DKTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 
 double
-DKTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+DKTPlate3d::computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     return this->computeVolumeAround(gp);
 }
 
 
 int
-DKTPlate3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+DKTPlate3d::computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {
     return 0;
 }
 
 void
-DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
+DKTPlate3d::printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v;
 
-    fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
+    fprintf(file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
-        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-
-            fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
+    for ( int i = 0; i < ( int ) integrationRulesArray.size(); i++ ) {
+        for ( GaussPoint *gp: * integrationRulesArray [ i ] ) {
+            fprintf(file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
             this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains    ");
             // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-            for ( auto &val : v ) fprintf(file, " %.4e", val);
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
 
             this->giveIPValue(v, gp, IST_CurvatureTensor, tStep);
             fprintf(file, "\n              curvatures ");
-            for ( auto &val : v ) fprintf(file, " %.4e", val);
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
 
             // Forces - Moments
             this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses   ");
-            for ( auto &val : v ) fprintf(file, " %.4e", val);
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
 
             this->giveIPValue(v, gp, IST_ShellMomentTensor, tStep);
             fprintf(file, "\n              moments    ");
-            for ( auto &val : v ) fprintf(file, " %.4e", val);
+            for ( auto &val : v ) {
+                fprintf(file, " %.4e", val);
+            }
 
             fprintf(file, "\n");
         }
@@ -383,7 +388,7 @@ DKTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 void
-DKTPlate3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+DKTPlate3d::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -419,15 +424,15 @@ DKTPlate3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-DKTPlate3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+DKTPlate3d::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ * gp->giveWeight();
 }
 
 
 int
-DKTPlate3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+DKTPlate3d::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -439,12 +444,12 @@ DKTPlate3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 
     const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    auto nodeA = this->giveNode( edgeNodes.at(1) );
-    auto nodeB = this->giveNode( edgeNodes.at(2) );
+    auto nodeA = this->giveNode(edgeNodes.at(1) );
+    auto nodeB = this->giveNode(edgeNodes.at(2) );
 
     FloatArray cb(3), ca(3);
-    this->giveLocalCoordinates (ca, nodeA->giveCoordinates() );
-    this->giveLocalCoordinates (cb, nodeB->giveCoordinates() );
+    this->giveLocalCoordinates( ca, nodeA->giveCoordinates() );
+    this->giveLocalCoordinates( cb, nodeB->giveCoordinates() );
 
     double dx = cb.at(1) - ca.at(1);
     double dy = cb.at(2) - ca.at(2);
@@ -462,48 +467,48 @@ DKTPlate3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 }
 
 bool
-DKTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+DKTPlate3d::computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    std::vector< FloatArray > lc(3);
+    std::vector< FloatArray >lc(3);
     FloatArray llc;
-    this->giveLocalCoordinates( inputCoords_ElCS, coords );
+    this->giveLocalCoordinates(inputCoords_ElCS, coords);
     for ( int _i = 0; _i < 3; _i++ ) {
-        this->giveLocalCoordinates( lc [ _i ], this->giveNode(_i + 1)->giveCoordinates() );
+        this->giveLocalCoordinates(lc [ _i ], this->giveNode(_i + 1)->giveCoordinates() );
     }
     FEI2dTrLin _interp(1, 2);
-    bool inplane = _interp.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc)) > 0;
+    bool inplane = _interp.global2local( llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
     GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
-    bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
+    bool outofplane = ( fabs(inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
     return inplane && outofplane;
 }
 
 
 int
-DKTPlate3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+DKTPlate3d::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
     double l3 = 1. - l2 - l1;
-    
+
     answer.resize(3);
     for ( int _i = 1; _i <= 3; _i++ ) {
-        answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 *this->giveNode(2)->giveCoordinate(_i) + l3 *this->giveNode(3)->giveCoordinate(_i);
+        answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 * this->giveNode(2)->giveCoordinate(_i) + l3 * this->giveNode(3)->giveCoordinate(_i);
     }
     return true;
 }
 
 void
-DKTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+DKTPlate3d::computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.

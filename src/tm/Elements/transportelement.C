@@ -48,6 +48,7 @@
 #include "crosssection.h"
 #include "transportcrosssection.h"
 #include "feinterpol.h"
+#include "feinterpol1d.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "dof.h"
@@ -297,7 +298,6 @@ TransportElement :: giveEdgeDofMapping(IntArray &answer, int iEdge)
         answer = dynamic_cast< FEInterpolation3d * >(interp)->computeLocalEdgeMapping(iEdge);
     }
 }
-
 
 void
 TransportElement :: computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord)

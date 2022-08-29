@@ -123,7 +123,7 @@ errorestimate_re = re.compile(r"""
         """, re.X)
 
 
-gprecord_re = re.compile (r"""[ ]*(stresses|strains|status|element_status|curvatures|moments|jump|traction|{)\s*""",re.X)
+gprecord_re = re.compile (r"""[ ]*(stresses|strains|status|element_status|curvatures|moments|remark|jump|traction|{)\s*""",re.X)
 #gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
 #gpstatus_re = re.compile (r"""status\s.*""", re.X)
 #gpelementstatus_re = re.compile (r"""element_status\s.*""", re.X)
@@ -176,6 +176,7 @@ include_re = re.compile (r"""
 def getKeywordValue (infilename, record, kwd, optional = None):
     match = re.search (kwd+'\s+\"*([\\\.\+\-,:\w]+)\"*', record)
     if match:
+        #print('\nFOUND', kwd, 'WITH', match.group(1))
         return match.group(1)
     else:
         #issue an error if argument compulsory
@@ -195,6 +196,8 @@ def elemKwdToString(kwd):
         return 'strains'
     elif (kwd == '13') : 
         return 'damage'
+    elif (kwd == '56') : 
+        return 'flow'
     elif (kwd == '91') : 
         return 'F'
     elif (kwd == '92') : 
@@ -207,9 +210,6 @@ def elemKwdToString(kwd):
         return 'traction'
     elif (kwd == '135') : 
         return 'equivalentTime'
-    
-    
-    
     else:
         # keyword is something else -> allow to use the string directly 
         return kwd;
@@ -241,6 +241,7 @@ def parse_input_rec (context, recline):
             cmpn  = int(getKeywordValue(context.infilename, recline, 'component'))
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
             kwd = elemKwdToString(kwd)
+            if debug: print('er', tstep, number, irule, gp, kwd, cmpn, value)
             return ('er', tstep, number, irule, gp, kwd, cmpn, value)
 
         except ValueError:
@@ -474,19 +475,19 @@ def match_gpsubrec (context, aline):
     ppmatch = gpDamage_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'damage', aline)
-        if debug: print ( "     damage rec %s" % aline )
+        if debug: print ( "     damage record %s" % aline )
         return 1
     #state variables in transport problems
     ppmatch = gpstate_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'state', aline)
-        if debug: print ( "     state rec %s" % aline )
+        if debug: print ( "     state record %s" % aline )
         return 1
     #flow vector in transport problems
     ppmatch = gpflow_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'flow', aline)
-        if debug: print ( "     flow rec %s" % aline )
+        if debug: print ( "     flow record %s" % aline )
         return 1
     #Degree of hydration in cement hydration models
     ppmatch = gpDoH_re.search(aline)
@@ -507,7 +508,7 @@ def match_singlegprec (context, line):
     if match:
         context.recirule=int(match.group(1))
         context.recgpnum=int(match.group(2))
-        if debug: print ( "  gp", context.recgpnum )
+        if debug: print ( "  gp", context.recirule,'.', context.recgpnum )
         match_gpsubrec (context, line)
         for line in context.infile:
             match=gp_re.search(line)

@@ -303,7 +303,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 {
 #  ifndef NDEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
-        OOFEM_ERROR("error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match, A(*,%d), B(%d,*)", aMatrix.nColumns, bMatrix.nRows);
     }
 #  endif
     RESIZE(aMatrix.nRows, bMatrix.nColumns);
