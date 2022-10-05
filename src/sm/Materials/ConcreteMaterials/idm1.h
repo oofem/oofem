@@ -105,6 +105,11 @@
 #define _IFT_IsotropicDamageMaterial1_c2 "c2"
 #define _IFT_IsotropicDamageMaterial1_alphaps "alphaps"
 #define _IFT_IsotropicDamageMaterial1_h "h"
+#define _IFT_IsotropicDamageMaterial1_w_k "w_k"
+#define _IFT_IsotropicDamageMaterial1_w_r "w_r"
+#define _IFT_IsotropicDamageMaterial1_w_f "w_f"
+#define _IFT_IsotropicDamageMaterial1_f_k "f_k"
+#define _IFT_IsotropicDamageMaterial1_f_r "f_r"
 //@}
 
 namespace oofem {
@@ -166,6 +171,9 @@ protected:
     /// Parameters used in Hordijk's softening law
     double c1 = 3., c2 = 6.93;  // default value of Hordijk parameter
 
+    /// Parameters used in Trilinear_Cohesive_Crack softening law
+    double w_k = 0., w_r = 0., w_f = 0., f_k = 0., f_r = 0.;
+
     /** Type characterizing the algorithm used to compute equivalent strain measure.
      *  Note that the assigned numbers to enum values have to correspond to values
      *  used in initializeFrom to resolve EquivStrainType. If not, the consistency
@@ -197,7 +205,7 @@ protected:
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
      *   with fracturing strain or crack opening.
      */
-    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage, ST_PowerExponential, ST_DoubleExponential, ST_Hordijk_Cohesive_Crack, ST_ModPowerExponential };
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage, ST_PowerExponential, ST_DoubleExponential, ST_Hordijk_Cohesive_Crack, ST_ModPowerExponential, ST_Trilinear_Cohesive_Crack };
 
     /// Parameter specifying the type of softening (damage law).
     SofteningType softType = ST_Unknown;
@@ -260,7 +268,7 @@ public:
      */
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
 
-    bool isCrackBandApproachUsed() const { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
+    bool isCrackBandApproachUsed() const { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->softType == ST_Trilinear_Cohesive_Crack || this->gf != 0. ); }
     double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
