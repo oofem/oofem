@@ -118,6 +118,7 @@ void test (oofem::Element& e) {
     Trampoline classes
 */
 template <class FemComponentBase = oofem::FEMComponent> class PyFemComponent : public FemComponentBase {
+public:
     using FemComponentBase::FemComponentBase;
 };
 
