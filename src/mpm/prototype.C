@@ -126,6 +126,7 @@ class MPElement : public Element {
         FloatMatrix dw;
         for ( GaussPoint *igp : * iRule ) {
             term.evaluate_dw(dw, *this, igp->giveNaturalCoordinates());
+            dw.times(this->computeVolumeAround(igp));
             answer.add(dw);
         }
     } 
@@ -168,7 +169,9 @@ class PoissonElement : public MPElement {
         ir.SetUpPointsOnTriangle(numberOfGaussPoints, _2dHeat);
     }
 
-
+    // Note: performance can be probably improved once it will be possible 
+    // to directly assemble multiple term contributions to the system matrix.
+    // template metaprogramming?
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
         if (type == ConductivityMatrix) {
             FloatMatrix term;
@@ -184,6 +187,12 @@ class PoissonElement : public MPElement {
     }
     
     const char *giveInputRecordName() const override {return "pe";}
+    
+    double computeVolumeAround(GaussPoint *gp) override {
+        double determinant = fabs( this->interpol.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+        double weight = gp->giveWeight();
+        return determinant * weight ;
+    }
 };
 
 REGISTER_Element(PoissonElement)
