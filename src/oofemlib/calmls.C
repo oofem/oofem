@@ -241,7 +241,11 @@ restart:
        * this is used to test whether k has negative or positive slope */
       XR = parallel_context->localDotProduct(deltaXt, R);
     } else {
+      if(old_dX.giveSize()) {
         XR = parallel_context->localDotProduct(deltaXt, old_dX);
+      } else {
+	XR = parallel_context->localDotProduct(deltaXt, R);
+      }
     }
     DeltaLambda = deltaLambda = sgn(XR) * deltaL / p;
     Lambda += DeltaLambda;
@@ -880,6 +884,7 @@ CylindricalALM :: initializeFrom(InputRecord &ir)
 
     this->giveLinearSolver()->initializeFrom(ir);
     
+    rootselectiontype = RST_Cos;
     if ( ( calm_Control == calm_hpc_off ) || ( calm_Control == calm_hpc_on ) ) {
       int rst = 0;
       IR_GIVE_OPTIONAL_FIELD(ir, rst, _IFT_CylindricalALM_rootselectiontype);
