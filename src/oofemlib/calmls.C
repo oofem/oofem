@@ -236,12 +236,12 @@ restart:
     }
 
     Lambda = ReachedLambda;
-    if(old_dX.giveSize()) {
-      XR = parallel_context->localDotProduct(deltaXt, old_dX);
-    } else {
+    if(rootselectiontype == RST_Cos) {
       /* XR is unscaled Bergan's param of current stiffness XR = deltaXt^T k deltaXt
        * this is used to test whether k has negative or positive slope */
       XR = parallel_context->localDotProduct(deltaXt, R);
+    } else {
+        XR = parallel_context->localDotProduct(deltaXt, old_dX);
     }
     DeltaLambda = deltaLambda = sgn(XR) * deltaL / p;
     Lambda += DeltaLambda;
