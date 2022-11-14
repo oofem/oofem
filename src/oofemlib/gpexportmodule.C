@@ -86,73 +86,80 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     fprintf(stream, "\n %%# for interpretation see internalstatetype.h\n");
-
+    
+    elements.resize(0);
+    for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
+        elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
+    }
+    
     // loop over elements
     for ( auto &elem : d->giveElements() ) {
-        //iRule = elem->giveDefaultIntegrationRulePtr();
-        //int numIntRules = elem->giveNumberOfIntegrationRules();
-        for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-            IntegrationRule *iRule = elem->giveIntegrationRule(i);
+        if ( elements.contains(elem -> giveNumber()) ){
+            
+            //iRule = elem->giveDefaultIntegrationRulePtr();
+            //int numIntRules = elem->giveNumberOfIntegrationRules();
+            for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+                IntegrationRule *iRule = elem->giveIntegrationRule(i);
 
-            // loop over Gauss points
-            for ( GaussPoint *gp: *iRule ) {
-                // export:
-                // 1) element number
-                // 2) material number ///@todo deprecated returns -1
-                // 3) Integration rule number
-                // 4) Gauss point number
-                // 5) contributing volume around Gauss point
-                weight = elem->computeVolumeAround(gp);
-                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, gp->giveNumber(), weight);
+                // loop over Gauss points
+                for ( GaussPoint *gp: *iRule ) {
+                    // export:
+                    // 1) element number
+                    // 2) material number ///@todo deprecated returns -1
+                    // 3) Integration rule number
+                    // 4) Gauss point number
+                    // 5) contributing volume around Gauss point
+                    weight = elem->computeVolumeAround(gp);
+                    fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, gp->giveNumber(), weight);
 
-                // export Gauss point coordinates
-                if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
-                    int nc = gcoords.giveSize();
-                    if ( ncoords >= 0 ) {
-                        fprintf(stream, "%d ", ncoords);
-                    } else {
-                        fprintf(stream, "%d ", nc);
+                    // export Gauss point coordinates
+                    if ( ncoords ) { // no coordinates exported if ncoords==0
+                        elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+                        int nc = gcoords.giveSize();
+                        if ( ncoords >= 0 ) {
+                            fprintf(stream, "%d ", ncoords);
+                        } else {
+                            fprintf(stream, "%d ", nc);
+                        }
+
+                        if ( ncoords > 0 && ncoords < nc ) {
+                            nc = ncoords;
+                        }
+
+                        for ( auto &c : gcoords ) {
+                            fprintf( stream, "%.6e ", c );
+                        }
+
+                        for ( int ic = nc + 1; ic <= ncoords; ic++ ) {
+                            fprintf(stream, "%g ", 0.0);
+                        }
                     }
 
-                    if ( ncoords > 0 && ncoords < nc ) {
-                        nc = ncoords;
+                    // export internal variables
+                    for ( auto vartype : vartypes ) {
+                        elem->giveIPValue(intvar, gp, ( InternalStateType )vartype, tStep);
+                        fprintf(stream, "%d ", intvar.giveSize());
+                        for ( auto &val : intvar ) {
+                            fprintf( stream, "%.6e ", val );
+                        }
                     }
 
-                    for ( auto &c : gcoords ) {
-                        fprintf( stream, "%.6e ", c );
-                    }
-
-                    for ( int ic = nc + 1; ic <= ncoords; ic++ ) {
-                        fprintf(stream, "%g ", 0.0);
-                    }
+                    fprintf(stream, "\n");
                 }
+            }
 
-                // export internal variables
-                for ( auto vartype : vartypes ) {
-                    elem->giveIPValue(intvar, gp, ( InternalStateType )vartype, tStep);
-                    fprintf(stream, "%d ", intvar.giveSize());
-                    for ( auto &val : intvar ) {
-                        fprintf( stream, "%.6e ", val );
-                    }
+    #if 0
+            // for CST elements write also nodal coordinates
+            // (non-standard part, used only exceptionally)
+            int nnode = elem->giveNumberOfNodes();
+            if ( nnode == 3 ) {
+                for ( int inod = 1; inod <= 3; inod++ ) {
+                    fprintf( stream, "%f %f ", elem->giveNode(inod)->giveCoordinate(1), elem->giveNode(inod)->giveCoordinate(2) );
                 }
-
-                fprintf(stream, "\n");
             }
-        }
-
-#if 0
-        // for CST elements write also nodal coordinates
-        // (non-standard part, used only exceptionally)
-        int nnode = elem->giveNumberOfNodes();
-        if ( nnode == 3 ) {
-            for ( int inod = 1; inod <= 3; inod++ ) {
-                fprintf( stream, "%f %f ", elem->giveNode(inod)->giveCoordinate(1), elem->giveNode(inod)->giveCoordinate(2) );
-            }
-        }
 #endif
+        }
     }
-
     fclose(stream);
 }
 
