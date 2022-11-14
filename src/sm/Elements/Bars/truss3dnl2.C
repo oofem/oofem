@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Bars/truss3dnl.h"
+#include "../sm/Elements/Bars/truss3dnl2.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "../sm/Materials/structuralms.h"
 #include "fei3dlinelin.h"
@@ -48,24 +48,26 @@
 
 
 namespace oofem {
-REGISTER_Element(Truss3dnl);
+REGISTER_Element(Truss3dnl2);
 
-Truss3dnl :: Truss3dnl(int n, Domain *aDomain) : Truss3d(n, aDomain)
+Truss3dnl2 :: Truss3dnl2(int n, Domain *aDomain) : Truss3d(n, aDomain)
 {
+  cellGeometryWrapper = NULL;
 }
 
 
 void
-Truss3dnl :: initializeFrom(InputRecord &ir)
+Truss3dnl2 :: initializeFrom(InputRecord &ir)
 {
   Truss3d :: initializeFrom(ir);
-  initialStretch = 1;
-  IR_GIVE_OPTIONAL_FIELD(ir, initialStretch, _IFT_Truss3dnl_initialStretch);
+  X = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
+  X.append(this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 ));
+  L = this->computeLength();
 }
 
   
 void
-Truss3dnl :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+Truss3dnl2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
   FloatMatrix B, Be;
   FloatArray vStress, vStrain, u;
@@ -79,28 +81,21 @@ Truss3dnl :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int u
   
   // zero answer will resize accordingly when adding first contribution
   answer.clear();
-  
   for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
     StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
-    this->computeBmatrixAt(gp, B, tStep, true);
-    this->computeBmatrixAt(gp, Be, tStep);
+    this->computeBmatrixAt(gp, B, tStep, u);
     if ( useUpdatedGpRecord == 1 ) {
-      vStress = matStat->giveStressVector();
+      vStress = matStat->givePVector();
     } else {
       ///@todo Is this really what we should do for inactive elements?
       if ( !this->isActivated(tStep) ) {
 	vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
 	vStrain.zero();
       }
-      vStrain.beProductOf(Be, u);
-      // add influence of initial stress/stretch
-      double l2 = initialStretch*initialStretch;
-      vStrain.times(l2);
-      FloatArray E0(1);
-      E0.at(1) = (l2-1.)/2.;
-      vStrain.add(E0);
-      //
-      this->computeStressVector(vStress, vStrain, gp, tStep);
+      // compute strain tensor, i.e., Biot strain
+      auto vStrain = this->computeStrainVector(gp, u);
+      // compute stress tensor, i.e., firt Piola-Kirchhoff
+      vStress = this->giveStructuralCrossSection()->giveFirstPKStresses(vStrain, gp, tStep);
     }
     
     if ( vStress.giveSize() == 0 ) { /// @todo is this check really necessary?
@@ -131,12 +126,41 @@ Truss3dnl :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int u
     }
   }
 }
+
+
+double
+Truss3dnl2 :: computeLength()
+{
+  FloatArray X12;
+  X12.beProductOf(this->givePmatrix(), X);
+  return X12.computeNorm();
+}
   
+double
+Truss3dnl2 :: computeDeformedLength(const FloatArray &d)
+{
+  FloatArray x12, x(X);
+  x.add(d);
+  x12.beProductOf(this->givePmatrix(), x);
+  return x12.computeNorm();  
+}
+    
+
+
+
   
+FloatArray
+Truss3dnl2 :: computeStrainVector(GaussPoint *gp, const FloatArray &d)
+{
+  FloatArray answer(1);
+  auto l = this->computeDeformedLength(d);
+  answer.at(1) = l/this->computeLength();
+  return answer;
+}
   
-  
+
 void
-Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
+Truss3dnl2 :: computeStiffnessMatrix(FloatMatrix &answer,
 				    MatResponseMode rMode, TimeStep *tStep)
 {
   StructuralCrossSection *cs = this->giveStructuralCrossSection();
@@ -147,12 +171,14 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
   if ( !this->isActivated(tStep) ) {
     return;
   }
-  
+  FloatArray u;
+  this->computeVectorOf(VM_Total, tStep, u);
+ 
   // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
   if ( integrationRulesArray.size() == 1 ) {
     FloatMatrix B, D, DB, Ksigma;
     for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
-      this->computeBmatrixAt(gp, B, tStep, true);
+      this->computeBmatrixAt(gp, B, tStep, u);
       this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
       double dV = this->computeVolumeAround(gp);
       DB.beProductOf(D, B);
@@ -161,10 +187,10 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
       } else {
 	answer.plusProductUnsym(B, DB, dV);
       }
-      this->computeInitialStressStiffness(Ksigma, rMode, gp, tStep);
-      Ksigma.times(dV);
-      answer.add(Ksigma);
       
+      this->computeInitialStressStiffness(Ksigma, rMode, gp, tStep,B,u);
+      Ksigma.times(dV);
+      answer.add(Ksigma);   
     }
     
     if ( matStiffSymmFlag ) {
@@ -172,92 +198,85 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
     }
   }
 }
-  
+
+
+void
+Truss3dnl2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+  answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+}
+
+
   
 void
-Truss3dnl :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin)
+Truss3dnl2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, const FloatArray &d)
 {
-  FloatMatrix Bl, Bnl;
-  this->computeBlMatrixAt(gp, Bl);
-  this->computeBnlMatrixAt(gp, Bnl, tStep, lin);
-  answer = Bl;
-  answer.add(Bnl);
+  double L = computeLength();
+  double l = computeDeformedLength(d);
+  FloatMatrixF<6,6> A = this->giveAmatrix();
+  FloatArray x(X);
+  x.add(d); 
+  answer.beTProductOf(x,A);
+  answer.times(1./l/L);
+}
+
+
+FloatMatrixF<6,6> 
+Truss3dnl2 :: giveAmatrix()
+{
+  FloatMatrix A;
+  A = {{1, 0, 0, -1, 0, 0}, {0, 1, 0, 0, -1, 0}, {0, 0, 1, 0, 0, -1}, {-1, 0, 0, 1, 0, 0}, {0, -1, 0, 0, 1, 0}, {0, 0, -1, 0, 0, 1}};
+  return A;
+}
+
+FloatMatrixF<3,6> 
+Truss3dnl2 :: givePmatrix()
+{
+  FloatMatrix P;
+  P = {{1,0,0},{0,1,0},{0,0,1},{-1,0,0},{0,-1,0},{0,0,-1}};
+  return P;
 }
 
 
 
+
+  
 void
-Truss3dnl :: computeBlMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-//
-// Returns linear part of geometrical equations of the receiver at gp.
-// Returns the linear part of the B matrix
+Truss3dnl2 :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, const FloatMatrix &B, const FloatArray &d)
 //
 {
-  Truss3d::computeBmatrixAt(gp, answer);
-}
-
-
-
-void
-Truss3dnl :: computeBnlMatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin)
-//
-// Returns linear part of geometrical equations of the receiver at gp.
-// Returns the linear part of the B matrix
-//
-{
-  FloatArray d;
-  this->computeVectorOf(VM_Total, tStep, d);
     
-  FloatMatrix Bnl, A(6,6);
-  A.at(1,1) = A.at(2,2) = A.at(3,3) = A.at(4,4) = A.at(5,5) = A.at(6,6) =  1.0;
-  A.at(1,4) = A.at(2,5) = A.at(3,6) = A.at(4,1) = A.at(5,2) = A.at(6,3) = -1.0;
-  double l0 = this->computeLength();
-  double factor = 1/l0/l0;
-  if(!lin) {
-    factor /= 2;
-  } 
-  Bnl.beProductOf(A,d);
-  Bnl.times(factor);
-  answer.beTranspositionOf(Bnl);
+  FloatMatrix BB, A = this->giveAmatrix();
+  double L = computeLength();
+  double l = computeDeformedLength(d);
+  FloatArray x(X);
+  FloatMatrix xx, Axx, AxxA;
+  x.add(d); 
+
+  xx.beProductTOf(x,x);
+  Axx.beProductOf(A,xx);
+  AxxA.beProductOf(Axx,A);
+  AxxA.times(1./l/l);
   
+  answer = A;
+  answer.subtract(AxxA);
+  answer.times(1./l/L);
+  auto stress = this->giveStructuralCrossSection()->giveFirstPKStresses(this->computeStrainVector(gp, d), gp, tStep);
+
+   // prevent zero initial stress stiffness
+   if ( stress.at(1) == 0 ) {
+     FloatMatrix D;
+     this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
+     stress.at(1) = D.at(1,1) * initStressFactor;
+     
+   }
+   answer.times(stress.at(1));
 }
   
-  
-void
-Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-    answer.resize(6,6);
-    answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = answer.at(4,4) = answer.at(5,5) = answer.at(6,6) =  1.0;
-    answer.at(1,4) = answer.at(2,5) = answer.at(3,6) = answer.at(4,1) = answer.at(5,2) = answer.at(6,3) = -1.0;
-    
-    FloatArray d, strain;
-    FloatMatrix B;
-    this->computeVectorOf(VM_Total, tStep, d);
-    this->computeBmatrixAt(gp, B, tStep);	  
-    strain.beProductOf(B, d);
-    // add influence of initial stress/stretch
-    double l2 = initialStretch*initialStretch;
-    strain.times(l2);
-    FloatArray E0(1);
-    E0.at(1) = (l2-1.)/2;
-    strain.add(E0);
-    /////////////////////////////////////////////////////////////////////////////////////////
-    auto stress = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
-    double l0 = this->computeLength();	
-    double factor = 1/l0/l0;
-    // prevent zero initial stress stiffness
-    if ( stress.at(1) == 0 ) {
-      FloatMatrix D;
-      this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
-      stress.at(1) = D.at(1,1) * 1.e-8;
-    }
-    answer.times(stress.at(1));
-    answer.times(factor);
-}
-    
+
 
 void
-Truss3dnl :: computeGaussPoints()
+Truss3dnl2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
@@ -267,9 +286,16 @@ Truss3dnl :: computeGaussPoints()
     }
 }
 
-  
 
+FEICellGeometry *
+Truss3dnl2 :: giveCellGeometryWrapper()
+{
+    if ( !cellGeometryWrapper ) {
+        cellGeometryWrapper = new FEIElementGeometryWrapper(this);
+    }
 
-  
+    return cellGeometryWrapper;
+}  
+
 } // end namespace oofem
 

@@ -25,6 +25,7 @@ set (sm_element
     Elements/Bars/truss2d.C 
     Elements/Bars/truss3d.C
     Elements/Bars/truss3dnl.C
+    Elements/Bars/truss3dnl2.C
     Elements/Bars/qtruss1d.C 
     Elements/Beams/libeam2d.C 
     Elements/Beams/libeam2dnl.C
@@ -280,6 +281,7 @@ set (sm_material
     Materials/HyperelasticMaterials/blatzkomaterial.C
     Materials/HyperelasticMaterials/simopistermaterial.C
     Materials/HyperelasticMaterials/ogdencompressiblematerial.C
+    Materials/HyperelasticMaterials/hyperelasticmaterial1d.C
     #Lattice models
     Materials/LatticeMaterials/latticematstatus.C
     Materials/LatticeMaterials/latticestructuralmaterial.C	
