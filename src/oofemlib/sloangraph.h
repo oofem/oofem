@@ -87,6 +87,8 @@ private:
     std::vector< SloanGraphNode >nodes;
     /// List of dof managers corresponding to nodes.
     std::vector< DofManager* >dmans;
+    /// number of graph nodes (=numberOfNodes+numberOfElementInternalNodes)
+    int numberOfNodes;
     /// Start peripheral node.
     int startNode;
     /// End peripheral node.
@@ -133,6 +135,7 @@ public:
     /// Finds the peripheral nodes (rooted in optimal start node) according to receiver quality and current weights.
     void findPeripheralNodes();
 
+    int getNumberOfNodes() {return numberOfNodes;}
     int computeTrueDiameter();
     int findBestRoot();
     int giveFullProfileSize();
