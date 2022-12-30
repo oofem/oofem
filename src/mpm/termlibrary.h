@@ -31,7 +31,52 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#ifndef termlibrary_h
+#define termlibrary_h
 
 #include "mpm.h"
 
+namespace oofem {
+/**
+ * @brief A Linear momentum balance equation term ($w^TB^T\sigma(u)$)
+ * 
+ */
+class wTBTSigTerm : public Term {
+    protected:
+    public:
+    wTBTSigTerm (Variable& unknownField, Variable &testField) ;
 
+    /**
+     * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
+     * 
+     * @param answer 
+     * @param e 
+     * @param coords 
+     */
+    void evaluate_dw (FloatMatrix& answer, Element& e, const FloatArray& coords) override;
+    /**
+     * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
+     * 
+     * @param cell 
+     * @param coords 
+     */
+    void evaluate_c (FloatArray&, Element& cell, const FloatArray& coords) override;
+    void getDimensions_dw(Element& cell) override;
+    void initializeCell(Element& cell) override;
+
+    protected:
+    /**
+     * @brief Evaluates B matrix; i.e. $LN$ where $L$ is operator matrix and $N$ is interpolation matrix of unknowns
+     * 
+     * @param answer B matrix
+     * @param v 
+     * @param interpol 
+     * @param cell 
+     * @param coords 
+     */
+    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    
+};
+
+} // end namespace oofem
+#endif // termlibrary_h
