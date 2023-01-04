@@ -447,7 +447,7 @@ public:
 
     };
 
-    
+
     class PyField : public oofem::Field {
         // inherit the constructor
         using oofem::Field::Field;
@@ -886,7 +886,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setNumberOfSteps", &oofem::MetaStep::setNumberOfSteps)
         .def("giveNumberOfSteps", &oofem::MetaStep::giveNumberOfSteps)
     ;
-        
+
     py::class_<oofem::TimeStep>(m, "TimeStep")
         .def(py::init<int, EngngModel*, int, double, double, StateCounterType, TimeDiscretizationType>())
         .def("giveNumber", &oofem::TimeStep::giveNumber)
@@ -946,12 +946,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
         ;
-    
+
     py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
         .def("giveSlaveProblem", &oofem::StaggeredProblem::giveSlaveProblem, py::return_value_policy::reference)
         .def("giveTimeControl", &oofem::StaggeredProblem::giveTimeControl, py::return_value_policy::reference)
     ;
-        
+
     py::class_<oofem::Domain>(m, "Domain")
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
@@ -1078,13 +1078,13 @@ PYBIND11_MODULE(oofempy, m) {
 
 //     py::class_<oofem::Timer>(m, "Timer")
 //     ;
-    
+
     py::class_<oofem::EngngModelTimer> (m, "EngngModelTimer")
         .def("startTimer", &oofem::EngngModelTimer::startTimer)
         .def("stopTimer", &oofem::EngngModelTimer::stopTimer)
         .def("getUtime", &oofem::EngngModelTimer::getUtime)
     ;
-    
+
     py::enum_<oofem::EngngModelTimer::EngngModelTimerType>(m, "EngngModelTimerType")
         .value("EMTT_AnalysisTimer", oofem::EngngModelTimer::EMTT_AnalysisTimer)
         .value("EMTT_SolutionStepTimer", oofem::EngngModelTimer::EMTT_SolutionStepTimer)
@@ -1094,8 +1094,8 @@ PYBIND11_MODULE(oofempy, m) {
         .value("EMTT_LastTimer", oofem::EngngModelTimer::EMTT_LastTimer)
         .export_values()
     ;
-    
-    
+
+
     /*
         Function class
     */
@@ -1190,7 +1190,7 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
     ;
 
-    
+
     py::class_<oofem::UnknownNumberingScheme>(m, "UnknownNumberingScheme")
         .def("init", &oofem::UnknownNumberingScheme::init)
         .def("giveDofEquationNumber", &oofem::UnknownNumberingScheme::giveDofEquationNumber)
@@ -1214,7 +1214,7 @@ PYBIND11_MODULE(oofempy, m) {
       .def("doOutput", &oofem::ExportModule::doOutput)
       .def("terminate", &oofem::ExportModule::terminate)
       ;
-    
+
     py::class_<oofem::HOMExportModule, oofem::ExportModule>(m, "HOMExportModule")
       ;
 
@@ -1239,7 +1239,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
       ;
-    
+
     py::class_<oofem::VTKXMLExportModule, oofem::VTKBaseExportModule>(m, "VTKXMLExportModule")
       .def("getVTKPieces", &oofem::VTKXMLExportModule::getVTKPieces,  py::return_value_policy::reference)
       ;
@@ -1266,7 +1266,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("at", (double (oofem::SparseMtrx::*)(int , int )const) &oofem::SparseMtrx::at)
         .def("at", (double& (oofem::SparseMtrx::*)(int , int )) &oofem::SparseMtrx::at)
         .def("printYourself", &oofem::SparseMtrx::printYourself)
-    ;        
+    ;
 
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
@@ -1295,7 +1295,7 @@ PYBIND11_MODULE(oofempy, m) {
       .value("DisplacementVector", oofem::UnknownType::DisplacementVector)
       .value("Temperature", oofem::UnknownType::Temperature)
       ;
-    
+
     py::enum_<oofem::ValueModeType>(m, "ValueModeType")
         .value("VM_Unknown", oofem::ValueModeType::VM_Unknown)
         .value("VM_Total", oofem::ValueModeType::VM_Total)
@@ -1576,8 +1576,8 @@ PYBIND11_MODULE(oofempy, m) {
     py::register_exception<oofem::BadFormatInputException>(m, "BadFormatInputException");
     py::register_exception<oofem::ValueInputException>(m, "ValueInputException");
 
-   
-    
+
+
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)
         .value("SecantStiffness", oofem::MatResponseMode::SecantStiffness)
@@ -1601,11 +1601,11 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::enum_<oofem::TimeDiscretizationType>(m,"TimeDiscretizationType")
         .value("TD_Unspecified", oofem::TimeDiscretizationType::TD_Unspecified)
-        .value("TD_ThreePointBackward", oofem::TimeDiscretizationType::TD_ThreePointBackward)  
-        .value("TD_TwoPointBackward", oofem::TimeDiscretizationType::TD_TwoPointBackward)  
-        .value("TD_Newmark", oofem::TimeDiscretizationType::TD_Newmark)  
-        .value("TD_Wilson", oofem::TimeDiscretizationType::TD_Wilson)  
-        .value("TD_Explicit", oofem::TimeDiscretizationType::TD_Explicit)  
+        .value("TD_ThreePointBackward", oofem::TimeDiscretizationType::TD_ThreePointBackward)
+        .value("TD_TwoPointBackward", oofem::TimeDiscretizationType::TD_TwoPointBackward)
+        .value("TD_Newmark", oofem::TimeDiscretizationType::TD_Newmark)
+        .value("TD_Wilson", oofem::TimeDiscretizationType::TD_Wilson)
+        .value("TD_Explicit", oofem::TimeDiscretizationType::TD_Explicit)
     ;
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
@@ -1618,6 +1618,9 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
     m.def("lspace", &lspace, py::return_value_policy::move);
+    m.def("tr1ht", &tr1ht, py::return_value_policy::move);
+    m.def("quad1ht", &quad1ht, py::return_value_policy::move);
+    m.def("qquad1ht", &qquad1ht, py::return_value_policy::move);
 
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
