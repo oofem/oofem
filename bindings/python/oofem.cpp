@@ -103,7 +103,9 @@ namespace py = pybind11;
 #include "pythonfield.h"
 #include <iostream>
 #include "oofemutil.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 //test
 void test (oofem::Element& e) {
@@ -645,8 +647,27 @@ public:
         }
      };
 
+    /**
+     * @brief Initializes some global oofem options (typically controlled from command-line)
+     * 
+     */
+    void init(int logLevel=2, int numberOfThreads=0) {
+        oofem::oofem_logger.setLogLevel(logLevel);
+        if ( numberOfThreads > 0 ) {
+#ifdef _OPENMP
+            omp_set_num_threads (numberOfThreads);
+#else
+            fprintf(stderr, "\nCan't use -t, not compiled with OpenMP support\a\n\n");
+#endif
+        }
+    }
+
+
+
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
+
+    m.def("init", &init, py::arg("logLevel")=2, py::arg("numberOfThreads")=0, "Initializes some global oofem options (typically controlled from command-line)");
 
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
