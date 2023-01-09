@@ -93,9 +93,9 @@ class Term {
     Term (Variable& unknownField, Variable &testField) : field(unknownField), testField(testField) {}
     
     // evaluate term contribution to weak form on given cell at given point 
-    virtual void evaluate_dw (FloatMatrix& , Element& cell, const FloatArray& coodrs) =0;
+    virtual void evaluate_dw (FloatMatrix& , Element& cell, GaussPoint* gp, TimeStep* tStep) =0;
     // evaluate contribution (all vars known) on given cell
-    virtual void evaluate_c (FloatArray&, Element& cell, const FloatArray& coords)=0;
+    virtual void evaluate_c (FloatArray&, Element& cell, GaussPoint* gp, TimeStep* tStep)=0;
     virtual void getDimensions_dw(Element& cell) =0;
     virtual void initializeCell(Element& cell) =0;
 };
@@ -118,13 +118,13 @@ class MPElement : public Element {
         // loop over variables and allocate nodal dofs (for unknownFields)
     }
 
-    void integrateTerm_dw (FloatMatrix& answer, Term& term, IntegrationRule* iRule) {
+    void integrateTerm_dw (FloatMatrix& answer, Term& term, IntegrationRule* iRule, TimeStep* tstep) {
         // need for integration domain and rule.
         // who should determine integration domain? Element or term? Term is just integrand, not integral
         // so integral type (surface, volume, etc) defined by element ---
         FloatMatrix dw;
         for ( GaussPoint *igp : * iRule ) {
-            term.evaluate_dw(dw, *this, igp->giveNaturalCoordinates());
+            term.evaluate_dw(dw, *this, igp, tstep);
             dw.times(this->computeVolumeAround(igp));
             answer.add(dw);
         }

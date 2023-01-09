@@ -61,12 +61,12 @@ class PoissonTerm : public Term {
     }
 
 
-    void evaluate_dw (FloatMatrix& answer, Element& e, const FloatArray& coords) override {
+    void evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, TimeStep *tstep) override {
         FEInterpolation & si = field.interpolation;
         FEInterpolation &ti = testField.interpolation;
         FloatMatrix bs, bt;
-        this->grad(bs, this->field,si,e,coords);
-        this->grad(bt, this->testField,ti,e,coords);
+        this->grad(bs, this->field,si,e,gp->giveNaturalCoordinates());
+        this->grad(bt, this->testField,ti,e,gp->giveNaturalCoordinates());
 
         FloatMatrix gc, c(2,2);
         c.at(1,1) = this->c;
@@ -76,7 +76,7 @@ class PoissonTerm : public Term {
         answer.beProductTOf(gc, bt);
     }
 
-    void evaluate_c (FloatArray&, Element& cell, const FloatArray& coords) override {}
+    void evaluate_c (FloatArray&, Element& cell, GaussPoint*gp, TimeStep* tstep) override {}
     void getDimensions_dw(Element& cell) override {}
     void initializeCell(Element& cell) override {}
 };
@@ -114,7 +114,7 @@ class PoissonElement : public MPElement {
         if (type == ConductivityMatrix) {
             FloatMatrix term;
             answer.resize(3,3);
-            this->integrateTerm_dw (term, this->p, &this->ir) ;
+            this->integrateTerm_dw (term, this->p, &this->ir, tStep) ;
             this->assembleTermContribution(answer, term, this->p);
             answer.printYourself("Conductivity");
 

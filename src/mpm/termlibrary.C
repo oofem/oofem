@@ -34,6 +34,8 @@
 
 #include "mpm.h"
 #include "termlibrary.h"
+#include "element.h"
+#include "material.h"
 
 namespace oofem {
 
@@ -41,21 +43,21 @@ wTBTSigTerm::wTBTSigTerm (Variable& unknownField, Variable &testField) : Term(un
 
 
 // assuming symmmetric form 
-void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, Element& e, const FloatArray& coords)  {
+void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix D, B, DB;
-    //this->mat->giveCharacteristicMatrix(D, ...);
-    this->grad(B, this->field, this->field.interpolation, e, coords);
+    e.giveMaterial()->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);
+    this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     DB.beProductOf(D, B);
     answer.plusProductSymmUpper(B, DB, 1.0);
 }
 
-void wTBTSigTerm::evaluate_c (FloatArray& answer, Element& cell, const FloatArray& coords)  {
+void wTBTSigTerm::evaluate_c (FloatArray& answer, Element& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray u, eps, sig;
     FloatMatrix B;
     //cell.getUnknownVEcor(u, this->field);
-    this->grad(B, this->field, this->field.interpolation, cell, coords);
+    this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
-    //this->mat->giveCharacteristicVector(sig, ...);
+    cell.giveMaterial()->giveCharacteristicVector(sig, InertiaForcesVector, gp, tstep);
     answer.beTProductOf(B, eps);
 }
 
