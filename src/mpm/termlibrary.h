@@ -53,14 +53,14 @@ class wTBTSigTerm : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, Element& cell, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
     void getDimensions_dw(Element& cell) override;
     void initializeCell(Element& cell) override;
 

@@ -61,7 +61,7 @@ class PoissonTerm : public Term {
     }
 
 
-    void evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, TimeStep *tstep) override {
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) override {
         FEInterpolation & si = field.interpolation;
         FEInterpolation &ti = testField.interpolation;
         FloatMatrix bs, bt;
@@ -76,7 +76,7 @@ class PoissonTerm : public Term {
         answer.beProductTOf(gc, bt);
     }
 
-    void evaluate_c (FloatArray&, Element& cell, GaussPoint*gp, TimeStep* tstep) override {}
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint*gp, TimeStep* tstep) override {}
     void getDimensions_dw(Element& cell) override {}
     void initializeCell(Element& cell) override {}
 };

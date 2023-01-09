@@ -160,6 +160,11 @@ public:
      */
     int giveInterpolationOrder() { return order; }
     /**
+     * @brief Returns all element nodes (including on edges and surfaces) defining the approximation
+     * @note Required by mpm module
+     */
+    virtual void giveCellDofMans(IntArray& nodes, Element* elem) {}
+    /**
      * Evaluates the array of interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
      * @param lcoords Array containing (local) coordinates.

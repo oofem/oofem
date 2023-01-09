@@ -45,6 +45,7 @@
  */
 
 #include "element.h"
+#include "dofmanager.h"
 #include "gausspoint.h"
 #include "feinterpol.h"
 #include "intarray.h"
@@ -52,6 +53,15 @@
 
 
 namespace oofem {
+
+class MPElement;
+
+/* 
+ * Note: someone should be able to return for given cell and variable vector of unknowns.
+ * this depends on interpolation (constant, linear, etc), cell type and variable (defined the physical meaning of unknown(s))
+ * Interpolation should identify (or even introduce) cell nodes needed (quadratic element, linear interpolation), variable should assign to these nodes DOFs.
+ * interpolation.getCellNodes(cell)
+ */
 
 class Variable {
     public:
@@ -80,7 +90,7 @@ class Variable {
         this->size = size;
     }
 
-    /// Returns DodIF mask in node
+    /// Returns DodIF mask in node; need generalization (which dofMan)
     const IntArray& getDofManDofIDs () {return this->dofIDs;}
 };
 
@@ -93,9 +103,9 @@ class Term {
     Term (Variable& unknownField, Variable &testField) : field(unknownField), testField(testField) {}
     
     // evaluate term contribution to weak form on given cell at given point 
-    virtual void evaluate_dw (FloatMatrix& , Element& cell, GaussPoint* gp, TimeStep* tStep) =0;
+    virtual void evaluate_dw (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) =0;
     // evaluate contribution (all vars known) on given cell
-    virtual void evaluate_c (FloatArray&, Element& cell, GaussPoint* gp, TimeStep* tStep)=0;
+    virtual void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tStep)=0;
     virtual void getDimensions_dw(Element& cell) =0;
     virtual void initializeCell(Element& cell) =0;
 };
@@ -141,6 +151,24 @@ class MPElement : public Element {
         this->getLocalCodeNumbers(uloc, t.field);
         this->getLocalCodeNumbers(tloc, t.testField);
         answer.assemble(contrib, uloc, tloc);
+    }
+
+    /**
+     * @brief Returns vector of nodal unknows for given Variable
+     * 
+     * @param answer 
+     * @param field 
+     * @param tstep 
+     */
+    void getUnknownVector(FloatArray& answer, Variable& field, TimeStep* tstep) {
+        FloatArray uloc;
+        IntArray nodes, dofs;
+        field.interpolation.giveCellDofMans(nodes, this);
+        for (int i : nodes) {
+            dofs=field.getDofManDofIDs();
+            domain->giveDofManager(i)->giveUnknownVector(uloc, dofs, VM_Total, tstep);
+            answer.append(uloc);
+        }
     }
 };
 

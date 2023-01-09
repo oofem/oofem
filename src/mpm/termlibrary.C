@@ -43,7 +43,7 @@ wTBTSigTerm::wTBTSigTerm (Variable& unknownField, Variable &testField) : Term(un
 
 
 // assuming symmmetric form 
-void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, TimeStep* tstep)  {
+void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix D, B, DB;
     e.giveMaterial()->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
@@ -51,10 +51,10 @@ void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, Element& e, GaussPoint* gp, 
     answer.plusProductSymmUpper(B, DB, 1.0);
 }
 
-void wTBTSigTerm::evaluate_c (FloatArray& answer, Element& cell, GaussPoint* gp, TimeStep* tstep)  {
+void wTBTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray u, eps, sig;
     FloatMatrix B;
-    //cell.getUnknownVEcor(u, this->field);
+    cell.getUnknownVector(u, this->field, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
     cell.giveMaterial()->giveCharacteristicVector(sig, InertiaForcesVector, gp, tstep);
