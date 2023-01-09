@@ -63,6 +63,12 @@ class MPElement;
  * interpolation.getCellNodes(cell)
  */
 
+/**
+ * @brief Class representing unknown field (or test feld) in a weak psolution.
+ * The variable has its interpolation, type (scalar, vector), size.
+ * When test (dual) field, it keeps reference to its primary (unknown) variable.
+ * @todo The history parameter dermines how many time steps to remember. 
+ */
 class Variable {
     public:
     enum VariableType {
@@ -94,6 +100,10 @@ class Variable {
     const IntArray& getDofManDofIDs () {return this->dofIDs;}
 };
 
+
+/**
+ * @brief Class representing a weak form expression to be evaluated (integrated).
+ */
 class Term {
     public:
     Variable& field;
@@ -117,6 +127,11 @@ class Term {
 * this-> Assemble(integrationRule, term, destination); // where to integrate (volume, surface,edge?)
 * 
 */
+
+/**
+ * @brief Base class for elements based on mp (multi-physics) concept
+ * 
+ */
 class MPElement : public Element {
    public:
 
