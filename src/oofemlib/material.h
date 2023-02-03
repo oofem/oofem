@@ -142,7 +142,12 @@ public:
      * @brief Returns characteristic vector of the receiver
      * 
      */
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    virtual void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    /**
+     * @brief Returns characteristic value of the receiver
+     * 
+     */
+    virtual double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep);
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially

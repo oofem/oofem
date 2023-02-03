@@ -82,7 +82,13 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(LaplacePressureVector, 211)		                 \
     ENUM_ITEM_WITH_VALUE(LaplaceVelocityVector, 212)		                 \
     ENUM_ITEM_WITH_VALUE(DivergenceAuxVelocityVector, 213)                       \
-    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214)
+    ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214) \
+    /* MPM */ \
+    ENUM_ITEM_WITH_VALUE(PermeabilityMatrix, 250) \
+    ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 251) \
+    ENUM_ITEM_WITH_VALUE(BiotConstant, 252) \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 253) 
+    
 
 
 enum CharType {

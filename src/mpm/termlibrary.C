@@ -39,11 +39,11 @@
 
 namespace oofem {
 
-wTBTSigTerm::wTBTSigTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
+BTSigTerm::BTSigTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
 
 // assuming symmmetric form 
-void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
+void BTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix D, B, DB;
     e.giveMaterial()->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
@@ -51,24 +51,24 @@ void wTBTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp
     answer.plusProductSymmUpper(B, DB, 1.0);
 }
 
-void wTBTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
+void BTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray u, eps, sig;
     FloatMatrix B;
     cell.getUnknownVector(u, this->field, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
-    cell.giveMaterial()->giveCharacteristicVector(sig, InertiaForcesVector, gp, tstep);
+    cell.giveMaterial()->giveCharacteristicVector(sig, eps, InertiaForcesVector, gp, tstep);
     answer.beTProductOf(B, eps);
 }
 
-void wTBTSigTerm::getDimensions_dw(Element& cell)  {
+void BTSigTerm::getDimensions_dw(Element& cell)  {
     //int nnodes = interpol.giveNumberOfNodes();
     //int ndofs = v.size;
     //return nnodes*ndofs;
 }
-void wTBTSigTerm::initializeCell(Element& cell)  {}
+void BTSigTerm::initializeCell(Element& cell)  {}
 
-void wTBTSigTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+void BTSigTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
     FloatMatrix dndx;
     int nnodes = interpol.giveNumberOfNodes();
     int ndofs = v.size;
@@ -93,6 +93,125 @@ void wTBTSigTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interp
         answer(5, i*ndofs+1) = dndx(i, 0);
     }
 }
+
+//wTgNTfTerm class
+
+
+gNTfTerm::gNTfTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
+
+
+// assuming symmmetric form 
+void gNTfTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
+    FloatMatrix D, B, DB;
+    e.giveMaterial()->giveCharacteristicMatrix(D, PermeabilityMatrix, gp, tstep); // update
+    this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
+    DB.beProductOf(D, B);
+    answer.plusProductSymmUpper(B, DB, 1.0);
+}
+
+void gNTfTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
+    FloatArray p, gradp, fp;
+    FloatMatrix B;
+    cell.getUnknownVector(p, this->field, tstep);
+    this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
+    gradp.beProductOf(B, p);
+    cell.giveMaterial()->giveCharacteristicVector(fp, gradp, FluidMassBalancePressureContribution, gp, tstep); // update
+    answer.beTProductOf(B, fp);
+}
+
+void gNTfTerm::getDimensions_dw(Element& cell)  {
+    //int nnodes = interpol.giveNumberOfNodes();
+    //int ndofs = v.size;
+    //return nnodes*ndofs;
+}
+void gNTfTerm::initializeCell(Element& cell)  {}
+
+void gNTfTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+    // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
+    interpol.evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
+}
+
+// BTamN Term
+
+BTamNTerm::BTamNTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
+
+void BTamNTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
+    FloatMatrix m({1,1,1,0,0,0}, true), B, Np, mn;
+    this->field.interpolation.evaldNdx(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    m.times(e.giveMaterial()->giveCharacteristicValue(BiotConstant, gp, tstep));
+    mn.beProductOf(m,Np);
+
+    this->grad(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates());
+    answer.beTProductOf(B, mn);
+}
+
+void BTamNTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
+    FloatArray p;
+    FloatMatrix Q;
+    cell.getUnknownVector(p, this->field, tstep);
+    this->evaluate_dw (Q, cell,gp, tstep);
+    answer.beProductOf(Q,p);
+}
+
+void BTamNTerm::getDimensions_dw(Element& cell)  {
+    //int nnodes = interpol.giveNumberOfNodes();
+    //int ndofs = v.size;
+    //return nnodes*ndofs;
+}
+void BTamNTerm::initializeCell(Element& cell)  {}
+
+void BTamNTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+ FloatMatrix dndx;
+    int nnodes = interpol.giveNumberOfNodes();
+    int ndofs = v.size;
+    // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
+    interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+
+
+    // 3D mode only now
+    answer.resize(6, nnodes*ndofs);
+    for (int i = 0; i< nnodes; i++) {
+        answer(0, i*ndofs+0) = dndx(i, 0);
+        answer(1, i*ndofs+1) = dndx(i, 1);
+        answer(2, i*ndofs+2) = dndx(i, 2);
+
+        answer(3, i*ndofs+1) = dndx(i, 2);
+        answer(3, i*ndofs+2) = dndx(i, 1);
+
+        answer(4, i*ndofs+0) = dndx(i, 2);
+        answer(4, i*ndofs+2) = dndx(i, 0);
+
+        answer(5, i*ndofs+0) = dndx(i, 1);
+        answer(5, i*ndofs+1) = dndx(i, 0);
+    }
+}
+
+
+// NTcN Term
+
+NTcN::NTcN (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
+
+void NTcN::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
+    FloatArray Np;
+    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    answer.beDyadicProductOf(Np, Np);
+    answer.times(e.giveMaterial()->giveCharacteristicValue(CompressibilityCoefficient, gp, tstep));
+}
+
+void NTcN::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
+    FloatArray p;
+    FloatMatrix S;
+    cell.getUnknownVector(p, this->field, tstep);
+    this->evaluate_dw (S, cell,gp, tstep);
+    answer.beProductOf(S,p);
+}
+
+void NTcN::getDimensions_dw(Element& cell)  {
+    //int nnodes = interpol.giveNumberOfNodes();
+    //int ndofs = v.size;
+    //return nnodes*ndofs;
+}
+void NTcN::initializeCell(Element& cell)  {}
 
 
 
