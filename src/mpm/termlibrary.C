@@ -127,8 +127,10 @@ void gNTfTerm::getDimensions_dw(Element& cell)  {
 void gNTfTerm::initializeCell(Element& cell)  {}
 
 void gNTfTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+    FloatMatrix at;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol.evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
+    interpol.evaldNdx(at, coords, FEIElementGeometryWrapper(&cell));
+    answer.beTranspositionOf(at);
 }
 
 // BTamN Term
@@ -136,11 +138,11 @@ void gNTfTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol,
 BTamNTerm::BTamNTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
 void BTamNTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
-    FloatMatrix m({1,1,1,0,0,0}, true), B, Np, mn;
-    this->field.interpolation.evaldNdx(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    FloatMatrix B, mn;
+    FloatArray m({1,1,1,0,0,0}), Np;
+    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     m.times(e.giveMaterial()->giveCharacteristicValue(BiotConstant, gp, tstep));
-    mn.beProductOf(m,Np);
-
+    mn.beDyadicProductOf(m, Np);
     this->grad(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates());
     answer.beTProductOf(B, mn);
 }

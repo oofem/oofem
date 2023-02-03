@@ -78,7 +78,8 @@ class Variable {
 
     enum VariableQuantity {
         Displacement,
-        Temperature
+        Temperature,
+        Pressure
     };
 
     FEInterpolation& interpolation;  
@@ -110,7 +111,7 @@ class Term {
     Variable& testField;
 
     public:
-    Term (Variable& unknownField, Variable &testField) : field(unknownField), testField(testField) {}
+    Term (Variable &testField, Variable& unknownField) : field(unknownField), testField(testField) {}
     
     // evaluate term contribution to weak form on given cell at given point 
     virtual void evaluate_dw (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) =0;
@@ -165,7 +166,7 @@ class MPElement : public Element {
         IntArray uloc, tloc;
         this->getLocalCodeNumbers(uloc, t.field);
         this->getLocalCodeNumbers(tloc, t.testField);
-        answer.assemble(contrib, uloc, tloc);
+        answer.assemble(contrib, tloc, uloc);
     }
 
     /**

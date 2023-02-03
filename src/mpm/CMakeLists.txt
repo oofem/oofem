@@ -1,6 +1,7 @@
 set (mpm_element
     termlibrary.C
     prototype.C
+    up.C
     )
 
 set (mpm

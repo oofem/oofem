@@ -79,7 +79,7 @@ class BTSigTerm : public Term {
 };
 
 /**
- * @brief A continuity equation term ($(\grad N_p)^T f(p)$, where $f=\bf{k}/\mu \grad p$. 
+ * @brief A continuity equation term ($H=(\grad N_p)^T f(p)$, where $f=\bf{k}/\mu \grad p$. 
  */
 class gNTfTerm : public Term {
     protected:
