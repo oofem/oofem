@@ -169,6 +169,13 @@ class MPElement : public Element {
         answer.assemble(contrib, tloc, uloc);
     }
 
+    void assembleTermContributionT (FloatMatrix& answer, FloatMatrix& contrib, Term& t) {
+        IntArray uloc, tloc;
+        this->getLocalCodeNumbers(uloc, t.field);
+        this->getLocalCodeNumbers(tloc, t.testField);
+        answer.assemble(contrib, uloc, tloc);
+    }
+
     /**
      * @brief Returns vector of nodal unknows for given Variable
      * 

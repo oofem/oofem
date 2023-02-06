@@ -410,6 +410,8 @@ void oofem_debug(EngngModel &emodel)
 {
     FloatMatrix k;
     emodel.giveDomain(1)->giveElement(1)->giveCharacteristicMatrix(k, ConductivityMatrix, NULL);
+    emodel.giveDomain(1)->giveElement(1)->giveCharacteristicMatrix(k, CapacityMatrix, NULL);
+
     //FloatMatrix k;
     //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
 

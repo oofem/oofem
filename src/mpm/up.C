@@ -63,6 +63,7 @@ class UPElement : public MPElement {
         BTSigTerm tm;
         gNTfTerm th;
         BTamNTerm tq;
+        NTcN ts;
 
         GaussIntegrationRule ir;
     public:
@@ -71,7 +72,7 @@ class UPElement : public MPElement {
         pInterpol(), uInterpol(),
         p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3), 
         u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3),
-        tm(u,u), th(p,p), tq(u,p),
+        tm(u,u), th(p,p), tq(u,p), ts(p,p),
         ir(1, this)
     {
         numberOfDofMans  = 10;
@@ -83,6 +84,7 @@ class UPElement : public MPElement {
     // to directly assemble multiple term contributions to the system matrix.
     // template metaprogramming?
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
+
         if (type == ConductivityMatrix) {
             FloatMatrix contrib;
             answer.resize(34,34);
@@ -94,15 +96,25 @@ class UPElement : public MPElement {
             contrib.resize(30,4);
             this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->tq);
-
-            answer.printYourself("Conductivity");
             //  
             // mass balance (fluid continuity eq)
             //
-            contrib.resize(4,4); contrib.zero();
+            contrib.resize(4,4);
             this->integrateTerm_dw (contrib, this->th, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->th);
 
+            answer.printYourself("Conductivity");
+
+        } else if (type == CapacityMatrix) {
+            FloatMatrix contrib;
+            answer.resize(34,34);
+            contrib.resize(30,4);
+            this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
+            this->assembleTermContributionT(answer, contrib, this->tq);
+            contrib.resize(4,4);
+            this->integrateTerm_dw (contrib, this->ts, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->ts);
+            answer.printYourself("Capacity");         
         }
     }
     void getLocalCodeNumbers (IntArray& answer, Variable& v) override {
@@ -134,8 +146,9 @@ class UPMaterial : public Material {
         double e, nu; // elastic isotropic constants
         double k; // isotropic permeability
         double b; // Biot constant
+        double c; // Compressibility coefficient
     public:
-    UPMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0;}
+    UPMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0; c=0.1;}
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == StiffnessMatrix) {
@@ -170,6 +183,8 @@ class UPMaterial : public Material {
     double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == BiotConstant) {
             return b;
+        } else if (type == CompressibilityCoefficient) {
+            return c;
         } else {
             return 0.0;
         }
