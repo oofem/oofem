@@ -173,7 +173,7 @@ class MPElement : public Element {
         IntArray uloc, tloc;
         this->getLocalCodeNumbers(uloc, t.field);
         this->getLocalCodeNumbers(tloc, t.testField);
-        answer.assemble(contrib, uloc, tloc);
+        answer.assembleT(contrib, tloc, uloc);
     }
 
     /**
