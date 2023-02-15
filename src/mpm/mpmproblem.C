@@ -43,6 +43,8 @@
 #include "mathfem.h"
 #include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
+#include "dofdistributedprimaryfield.h"
+#include "primaryfield.h"
 
 namespace oofem {
 REGISTER_EngngModel(MPMProblem);
@@ -63,6 +65,7 @@ void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, Time
 
 MPMProblem :: MPMProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master)
 {
+    ndomains = 1;
 }
 
 void
@@ -100,6 +103,14 @@ MPMProblem :: initializeFrom(InputRecord &ir)
         NR_Mode = nrsolverAccelNRM;
     } else {
         NR_Mode = nrsolverModifiedNRM;
+    }
+
+    //secure equation renumbering, otherwise keep efficient algorithms
+    if ( ir.hasField(_IFT_MPMProblem_changingproblemsize) ) {
+        changingProblemSize = true;
+        UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
+    } else {
+        UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
     }
 }
 
@@ -545,6 +556,20 @@ MPMProblem :: giveDiscreteTime(int iStep)
 
     OOFEM_ERROR("invalid iStep");
     return 0.0;
+}
+
+TimeStep *
+MPMProblem :: giveSolutionStepWhenIcApply(bool force)
+{
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT( giveNumberOfFirstStep() ), giveDeltaT( giveNumberOfFirstStep() ), 0);
+        }
+
+        return stepWhenIcApply.get();
+    }
 }
 
 

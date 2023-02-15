@@ -73,7 +73,7 @@ class UPElement : public MPElement {
         pInterpol(), uInterpol(),
         p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3), 
         u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3),
-        tm(u,u), th(p,p), tq(u,p), ts(p,p), tqt(p,u),
+        tm(u,u), th(p,p), tq(u,p), tqt(p,u), ts(p,p), 
         ir(1, this)
     {
         numberOfDofMans  = 10;
@@ -104,7 +104,7 @@ class UPElement : public MPElement {
             this->integrateTerm_dw (contrib, this->th, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->th);
 
-            answer.printYourself("Conductivity");
+            //answer.printYourself("Conductivity");
 
         } else if (type == CapacityMatrix) {
             FloatMatrix contrib;
@@ -115,7 +115,7 @@ class UPElement : public MPElement {
             contrib.resize(4,4);
             this->integrateTerm_dw (contrib, this->ts, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->ts);
-            answer.printYourself("Capacity");         
+            //answer.printYourself("Capacity");         
         }
     }
 

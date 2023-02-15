@@ -53,6 +53,8 @@
 #define _IFT_MPMProblem_deltatfunction "deltatfunction"
 #define _IFT_MPMProblem_prescribedtimes "prescribedtimes"
 #define _IFT_MPMProblem_alpha "alpha"
+#define _IFT_MPMProblem_changingproblemsize "changingproblemsize"
+
 
 //@}
 
@@ -144,6 +146,8 @@ public:
     void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep) override;
 
     int giveCurrentNumberOfIterations() override { return currentIterations; }
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+
 
 protected:
     void updateInternalState(TimeStep *tStep) ;

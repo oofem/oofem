@@ -1,0 +1,43 @@
+mp03.out
+Test of mpm up element
+mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6
+domain HeatTransfer
+outputmanager 
+ndofman 18 nelem 3 nbc 2 ncrosssect 0 nic 0 nltf 1 nmat 1 nset 3
+node 1 coords 3 0 0 0 
+node 2 coords 3 1 0 0 
+node 3 coords 3 0 1 0
+node 4 coords 3 0 0 1
+node 5 coords 3 1 0 1
+node 6 coords 3 0 1 1
+#
+node 7 coords 3 0.5 0 0
+node 8 coords 3 0.5 0.5 0
+node 9 coords 3 0 0.5 0
+#
+node 10 coords 3 0.5 0 1
+node 11 coords 3 0.5 0.5 1
+node 12 coords 3 0 0.5 1
+#
+node 13 coords 3 0 0 0.5
+node 14 coords 3 1 0 0.5
+node 15 coords 3 0 1 0.5
+# 
+node 16 coords 3 0.5 0 0.5
+node 17 coords 3 0 0.5 0.5
+node 18 coords 3 0.5 0.5 0.5
+#
+up 1 nodes 10 1 2 3 4   7 8 9   13 16 17 crosssect 0 mat 1
+up 2 nodes 10 2 5 4 3  14 10 16  8 18 17 crosssect 0 mat 1
+up 3 nodes 10 4 5 6 3  10 11 12 17 18 15 crosssect 0 mat 1  
+#
+upm 1 
+#
+# displacement top
+boundarycondition 1 loadtimefunction 1 set 2 values 3 0 0 0   dofs 3 1 2 3 
+# pressure top
+boundarycondition 2 loadtimefunction 1 set 3 values 1 0 dofs 1 11 
+constantfunction 1 f(t) 1
+set 1 elements 3 1 2 3 
+set 2 nodes 6 4 5 6 10 11 12
+set 3 nodes 3 4 5 6 
