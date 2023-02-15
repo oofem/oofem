@@ -54,7 +54,7 @@ void BTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, 
 void BTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray u, eps, sig;
     FloatMatrix B;
-    cell.getUnknownVector(u, this->field, tstep);
+    cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
     cell.giveMaterial()->giveCharacteristicVector(sig, eps, InertiaForcesVector, gp, tstep);
@@ -112,7 +112,7 @@ void gNTfTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, T
 void gNTfTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray p, gradp, fp;
     FloatMatrix B;
-    cell.getUnknownVector(p, this->field, tstep);
+    cell.getUnknownVector(p, this->field, VM_TotalIntrinsic, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     gradp.beProductOf(B, p);
     cell.giveMaterial()->giveCharacteristicVector(fp, gradp, FluidMassBalancePressureContribution, gp, tstep); // update
@@ -133,7 +133,7 @@ void gNTfTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol,
     answer.beTranspositionOf(at);
 }
 
-// BTamN Term
+// BTamN Term (Qp)
 
 BTamNTerm::BTamNTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
@@ -150,7 +150,7 @@ void BTamNTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, 
 void BTamNTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray p;
     FloatMatrix Q;
-    cell.getUnknownVector(p, this->field, tstep);
+    cell.getUnknownVector(p, this->field, VM_TotalIntrinsic, tstep);
     this->evaluate_dw (Q, cell,gp, tstep);
     answer.beProductOf(Q,p);
 }
@@ -188,8 +188,63 @@ void BTamNTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol
     }
 }
 
+// NTamTBTerm Term (Q^T du/dt)
 
-// NTcN Term
+NTamTBTerm::NTamTBTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
+
+void NTamTBTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
+    FloatMatrix B, mb;
+    FloatArray m({1,1,1,0,0,0}), Np;
+    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    m.times(e.giveMaterial()->giveCharacteristicValue(BiotConstant, gp, tstep));
+    this->grad(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates());
+    mb.beTProductOf(m, B);
+    answer.beTProductOf(Np, mb);
+}
+
+void NTamTBTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
+    FloatArray p;
+    FloatMatrix Q;
+    cell.getUnknownVector(p, this->field, VM_Velocity ,tstep);
+    this->evaluate_dw (Q, cell,gp, tstep);
+    answer.beTProductOf(Q,p);
+}
+
+void NTamTBTerm::getDimensions_dw(Element& cell)  {
+    //int nnodes = interpol.giveNumberOfNodes();
+    //int ndofs = v.size;
+    //return nnodes*ndofs;
+}
+void NTamTBTerm::initializeCell(Element& cell)  {}
+
+void NTamTBTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+ FloatMatrix dndx;
+    int nnodes = interpol.giveNumberOfNodes();
+    int ndofs = v.size;
+    // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
+    interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+
+
+    // 3D mode only now
+    answer.resize(6, nnodes*ndofs);
+    for (int i = 0; i< nnodes; i++) {
+        answer(0, i*ndofs+0) = dndx(i, 0);
+        answer(1, i*ndofs+1) = dndx(i, 1);
+        answer(2, i*ndofs+2) = dndx(i, 2);
+
+        answer(3, i*ndofs+1) = dndx(i, 2);
+        answer(3, i*ndofs+2) = dndx(i, 1);
+
+        answer(4, i*ndofs+0) = dndx(i, 2);
+        answer(4, i*ndofs+2) = dndx(i, 0);
+
+        answer(5, i*ndofs+0) = dndx(i, 1);
+        answer(5, i*ndofs+1) = dndx(i, 0);
+    }
+}
+
+
+// NTcN Term (S(dp/dt))
 
 NTcN::NTcN (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
@@ -203,7 +258,7 @@ void NTcN::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeS
 void NTcN::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray p;
     FloatMatrix S;
-    cell.getUnknownVector(p, this->field, tstep);
+    cell.getUnknownVector(p, this->field, VM_Acceleration, tstep);
     this->evaluate_dw (S, cell,gp, tstep);
     answer.beProductOf(S,p);
 }

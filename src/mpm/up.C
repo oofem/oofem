@@ -63,6 +63,7 @@ class UPElement : public MPElement {
         BTSigTerm tm;
         gNTfTerm th;
         BTamNTerm tq;
+        NTamTBTerm tqt;
         NTcN ts;
 
         GaussIntegrationRule ir;
@@ -72,7 +73,7 @@ class UPElement : public MPElement {
         pInterpol(), uInterpol(),
         p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3), 
         u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3),
-        tm(u,u), th(p,p), tq(u,p), ts(p,p),
+        tm(u,u), th(p,p), tq(u,p), ts(p,p), tqt(p,u),
         ir(1, this)
     {
         numberOfDofMans  = 10;
@@ -117,6 +118,25 @@ class UPElement : public MPElement {
             answer.printYourself("Capacity");         
         }
     }
+
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
+        if (type == InternalForcesVector) {
+            FloatArray contrib;
+            answer.resize(34);
+            this->integrateTerm_c (contrib, this->tm, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->tm);
+            this->integrateTerm_c(contrib, this->tq, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->tq);
+            this->integrateTerm_c (contrib, this->th, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->th);
+            this->integrateTerm_c (contrib, this->tqt, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->tqt);
+            this->integrateTerm_c (contrib, this->ts, &this->ir, tStep) ;
+            this->assembleTermContribution(answer, contrib, this->ts);
+        }
+
+    }
+
     void getLocalCodeNumbers (IntArray& answer, Variable& v) override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
         if (v.q == Variable::VariableQuantity::Displacement) {

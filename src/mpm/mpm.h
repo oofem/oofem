@@ -156,6 +156,18 @@ class MPElement : public Element {
         }
     } 
 
+    void integrateTerm_c (FloatArray& answer, Term& term, IntegrationRule* iRule, TimeStep* tstep) {
+        // need for integration domain and rule.
+        // who should determine integration domain? Element or term? Term is just integrand, not integral
+        // so integral type (surface, volume, etc) defined by element ---
+        FloatArray dw;
+        for ( GaussPoint *igp : * iRule ) {
+            term.evaluate_c(dw, *this, igp, tstep);
+            dw.times(this->computeVolumeAround(igp));
+            answer.add(dw);
+        }
+    } 
+
     /// @brief  returns local code number on element to assemble variable/term contribution
     /// @param answer 
     /// @param v 
@@ -175,6 +187,12 @@ class MPElement : public Element {
         this->getLocalCodeNumbers(tloc, t.testField);
         answer.assembleT(contrib, tloc, uloc);
     }
+    
+    void assembleTermContribution (FloatArray& answer, FloatArray& contrib, Term& t) {
+        IntArray loc;
+        this->getLocalCodeNumbers(loc, t.testField);
+        answer.assemble(contrib, loc);
+    }
 
     /**
      * @brief Returns vector of nodal unknows for given Variable
@@ -183,13 +201,13 @@ class MPElement : public Element {
      * @param field 
      * @param tstep 
      */
-    void getUnknownVector(FloatArray& answer, Variable& field, TimeStep* tstep) {
+    void getUnknownVector(FloatArray& answer, Variable& field, ValueModeType mode, TimeStep* tstep) {
         FloatArray uloc;
         IntArray nodes, dofs;
         field.interpolation.giveCellDofMans(nodes, this);
         for (int i : nodes) {
             dofs=field.getDofManDofIDs();
-            domain->giveDofManager(i)->giveUnknownVector(uloc, dofs, VM_Total, tstep);
+            domain->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
             answer.append(uloc);
         }
     }

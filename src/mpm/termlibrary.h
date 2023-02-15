@@ -79,7 +79,7 @@ class BTSigTerm : public Term {
 };
 
 /**
- * @brief A continuity equation term ($H=(\grad N_p)^T f(p)$, where $f=\bf{k}/\mu \grad p$. 
+ * @brief A continuity equation term ($Hp=(\grad N_p)^T f(p)$, where $f=\bf{k}/\mu \grad p$. 
  */
 class gNTfTerm : public Term {
     protected:
@@ -119,12 +119,52 @@ class gNTfTerm : public Term {
 };
 
 /**
- * @brief A continuity equation term $Q=(B)^T \alpha\bf{m}N_p$. 
+ * @brief A continuity equation term $Qp=(B)^T \alpha\bf{m}N_p$. 
  */
 class BTamNTerm : public Term {
     protected:
     public:
     BTamNTerm (Variable& unknownField, Variable &testField) ;
+
+    /**
+     * @brief Evaluates the linearization of receiver, i.e. the LHS term
+     * 
+     * @param answer 
+     * @param e 
+     * @param coords 
+     */
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    /**
+     * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
+     * 
+     * @param cell 
+     * @param coords 
+     */
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
+    void getDimensions_dw(Element& cell) override;
+    void initializeCell(Element& cell) override;
+
+    protected:
+    /**
+     * @brief Evaluates B matrix; i.e. $\grad N$ where $N$ is interpolation matrix of unknown (p)
+     * 
+     * @param answer B matrix
+     * @param v 
+     * @param interpol 
+     * @param cell 
+     * @param coords 
+     */
+    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    
+};
+
+/**
+ * @brief A continuity equation term $Q^T(du\over dt)=(N)^T \alpha\bf{m}^TB du\over dt$. 
+ */
+class NTamTBTerm : public Term {
+    protected:
+    public:
+    NTamTBTerm (Variable& unknownField, Variable &testField) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
