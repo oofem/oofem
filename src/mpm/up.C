@@ -96,6 +96,7 @@ class UPElement : public MPElement {
             this->assembleTermContribution(answer, contrib, this->tm);
             contrib.resize(30,4);
             this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
+            contrib.negated();
             this->assembleTermContribution(answer, contrib, this->tq);
             //  
             // mass balance (fluid continuity eq)
@@ -127,6 +128,7 @@ class UPElement : public MPElement {
             this->assembleTermContribution(answer, contrib, this->tm);
             contrib.zero();
             this->integrateTerm_c(contrib, this->tq, &this->ir, tStep) ;
+            contrib.negated();
             this->assembleTermContribution(answer, contrib, this->tq);
             contrib.resize(0);
             this->integrateTerm_c (contrib, this->th, &this->ir, tStep) ;

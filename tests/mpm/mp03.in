@@ -3,7 +3,7 @@ Test of mpm up element
 mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6
 domain HeatTransfer
 outputmanager 
-ndofman 18 nelem 3 nbc 2 ncrosssect 0 nic 0 nltf 1 nmat 1 nset 3
+ndofman 18 nelem 3 nbc 2 ncrosssect 0 nic 1 nltf 1 nmat 1 nset 4
 node 1 coords 3 0 0 0 
 node 2 coords 3 1 0 0 
 node 3 coords 3 0 1 0
@@ -33,11 +33,15 @@ up 3 nodes 10 4 6 5 3  12 11 10 17 15 18 crosssect 0 mat 1
 #
 upm 1 
 #
-# displacement top
+# displacement bottom
 boundarycondition 1 loadtimefunction 1 set 2 values 3 0 0 0   dofs 3 1 2 3 
 # pressure top
-boundarycondition 2 loadtimefunction 1 set 3 values 1 0 dofs 1 11 
+boundarycondition 2 loadtimefunction 1 set 3 values 1 1.0 dofs 1 11 
+##
+InitialCondition 1 Conditions 1 u 1.0 dofs 1 11 set 4
+#
 constantfunction 1 f(t) 1
 set 1 elements 3 1 2 3 
-set 2 nodes 6 4 5 6 10 11 12
+set 2 nodes 6 1 2 3 7 8 9
 set 3 nodes 3 4 5 6 
+set 4 nodes 6 1 2 3 4 5 6 

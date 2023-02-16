@@ -572,5 +572,18 @@ MPMProblem :: giveSolutionStepWhenIcApply(bool force)
     }
 }
 
+NumericalMethod *MPMProblem :: giveNumericalMethod(MetaStep *mStep)
+// only one has reason for LinearStatic
+//     - SolutionOfLinearEquations
+{
+    if ( !linSolver ) { 
+        linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        if ( !linSolver ) {
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+        }
+    }
+    return linSolver.get();
+}
+
 
 } // end namespace oofem

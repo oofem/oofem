@@ -147,6 +147,7 @@ public:
 
     int giveCurrentNumberOfIterations() override { return currentIterations; }
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
 
 protected:
