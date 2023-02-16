@@ -67,7 +67,8 @@ public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-
+    int giveNumberOfNodes() const override { return 10; }
+    void giveCellDofMans(IntArray& nodes, Element* elem) override {nodes={1,2,3,4,5,6,7,8,9,10};}
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
      * @param cellgeo Underlying cell geometry.
@@ -93,7 +94,6 @@ public:
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
     std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
-    int giveNumberOfNodes() const override { return 10; }
 
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

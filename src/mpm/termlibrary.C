@@ -57,7 +57,7 @@ void BTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp,
     cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
-    cell.giveMaterial()->giveCharacteristicVector(sig, eps, InertiaForcesVector, gp, tstep);
+    cell.giveMaterial()->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
     answer.beTProductOf(B, eps);
 }
 
@@ -195,19 +195,20 @@ NTamTBTerm::NTamTBTerm (Variable& unknownField, Variable &testField) : Term(unkn
 void NTamTBTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix B, mb;
     FloatArray m({1,1,1,0,0,0}), Np;
-    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    this->testField.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     m.times(e.giveMaterial()->giveCharacteristicValue(BiotConstant, gp, tstep));
-    this->grad(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates());
+    this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     mb.beTProductOf(m, B);
-    answer.beTProductOf(Np, mb);
+    FloatMatrix Npm(Np);
+    answer.beProductOf(Npm, mb);
 }
 
 void NTamTBTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
-    FloatArray p;
+    FloatArray ut;
     FloatMatrix Q;
-    cell.getUnknownVector(p, this->field, VM_Velocity ,tstep);
+    cell.getUnknownVector(ut, this->field, VM_Velocity ,tstep);
     this->evaluate_dw (Q, cell,gp, tstep);
-    answer.beTProductOf(Q,p);
+    answer.beProductOf(Q,ut);
 }
 
 void NTamTBTerm::getDimensions_dw(Element& cell)  {
@@ -258,7 +259,7 @@ void NTcN::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeS
 void NTcN::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
     FloatArray p;
     FloatMatrix S;
-    cell.getUnknownVector(p, this->field, VM_Acceleration, tstep);
+    cell.getUnknownVector(p, this->field, VM_Velocity, tstep);
     this->evaluate_dw (S, cell,gp, tstep);
     answer.beProductOf(S,p);
 }

@@ -28,8 +28,8 @@ node 17 coords 3 0 0.5 0.5
 node 18 coords 3 0.5 0.5 0.5
 #
 up 1 nodes 10 1 2 3 4   7 8 9   13 16 17 crosssect 0 mat 1
-up 2 nodes 10 2 5 4 3  14 10 16  8 18 17 crosssect 0 mat 1
-up 3 nodes 10 4 5 6 3  10 11 12 17 18 15 crosssect 0 mat 1  
+up 2 nodes 10 4 5 2 3  10 14 16  17 18 8 crosssect 0 mat 1
+up 3 nodes 10 4 6 5 3  12 11 10 17 15 18 crosssect 0 mat 1  
 #
 upm 1 
 #

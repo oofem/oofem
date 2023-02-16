@@ -62,6 +62,7 @@ public:
     int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int giveNumberOfNodes() const override { return 4; }
+    void giveCellDofMans(IntArray& nodes, Element* elem) override {nodes={1,2,3,4};}
 
     // Edge
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

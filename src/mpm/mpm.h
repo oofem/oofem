@@ -89,10 +89,11 @@ class Variable {
     int size;
     IntArray dofIDs;
 
-    Variable (FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL) : 
+    Variable (FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}) : 
         interpolation(i), 
         dualVar(dual), 
-        q(q) {
+        q(q), 
+        dofIDs(dofIDs) {
         this->type = t;
         this->size = size;
     }
@@ -207,7 +208,7 @@ class MPElement : public Element {
         field.interpolation.giveCellDofMans(nodes, this);
         for (int i : nodes) {
             dofs=field.getDofManDofIDs();
-            domain->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
+            this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
             answer.append(uloc);
         }
     }

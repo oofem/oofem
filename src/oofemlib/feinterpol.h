@@ -160,6 +160,10 @@ public:
      */
     int giveInterpolationOrder() { return order; }
     /**
+     * Returns local element node numbers defining the approximation. Typically this corresponds to all element nodes.
+     * But for elements with mixed interpolation, we need to select subset of nodes 
+     * (quadratic triangle with linear interpolation). This method can query element geometry type (from given element)
+     * and compile the nodal set.
      * @brief Returns all element nodes (including on edges and surfaces) defining the approximation
      * @note Required by mpm module
      */

@@ -71,8 +71,8 @@ class UPElement : public MPElement {
     UPElement(int n, Domain* d): 
         MPElement(n,d), 
         pInterpol(), uInterpol(),
-        p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3), 
-        u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3),
+        p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3, NULL, {11}), 
+        u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3}),
         tm(u,u), th(p,p), tq(u,p), tqt(p,u), ts(p,p), 
         ir(1, this)
     {
@@ -125,12 +125,16 @@ class UPElement : public MPElement {
             answer.resize(34);
             this->integrateTerm_c (contrib, this->tm, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->tm);
+            contrib.zero();
             this->integrateTerm_c(contrib, this->tq, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->tq);
+            contrib.resize(0);
             this->integrateTerm_c (contrib, this->th, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->th);
+            contrib.resize(0);
             this->integrateTerm_c (contrib, this->tqt, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->tqt);
+            contrib.resize(0);
             this->integrateTerm_c (contrib, this->ts, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->ts);
         }
@@ -146,6 +150,14 @@ class UPElement : public MPElement {
         }
     }
     
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
+        if (inode >0 && inode <5) {
+            answer = {1,2,3,11};
+        } else {
+            answer= {1,2,3};
+        }
+    }
+
     const char *giveInputRecordName() const override {return "up";}
     
     double computeVolumeAround(GaussPoint *gp) override {
@@ -199,7 +211,20 @@ class UPMaterial : public Material {
             answer.times(this->k);
         }
     }
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {}
+
+    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {
+        if (type == InternalForcesVector) {
+            FloatMatrix d;
+            this->giveCharacteristicMatrix(d, StiffnessMatrix, gp, tStep);
+            answer.beProductOf(d, flux);
+        }else if (type == FluidMassBalancePressureContribution) {
+            FloatMatrix k;
+            this->giveCharacteristicMatrix(k, PermeabilityMatrix, gp, tStep);
+            answer.beProductOf(k, flux);
+        }
+    }
+
+
     double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == BiotConstant) {
             return b;
