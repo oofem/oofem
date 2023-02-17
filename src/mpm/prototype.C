@@ -120,7 +120,7 @@ class PoissonElement : public MPElement {
 
         }
     }
-    void getLocalCodeNumbers (IntArray& answer, Variable& v) override {
+    void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q) override {
         answer.enumerate(this->giveNumberOfDofManagers());
     }
     

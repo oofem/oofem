@@ -87,7 +87,12 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(PermeabilityMatrix, 250) \
     ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 251) \
     ENUM_ITEM_WITH_VALUE(BiotConstant, 252) \
-    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 253) 
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 253) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_StiffnessMatrix, 254) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_PressureCouplingMatrix, 255) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_PermeabilityMatrix, 256) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_CompresibilityMatrix, 257) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_StressCouplingMatrix, 258)
     
 
 

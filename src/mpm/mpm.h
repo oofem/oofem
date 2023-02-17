@@ -172,9 +172,24 @@ class MPElement : public Element {
     /// @brief  returns local code number on element to assemble variable/term contribution
     /// @param answer 
     /// @param v 
-    virtual void getLocalCodeNumbers (IntArray& answer, Variable& v) =0;
+    void getLocalCodeNumbers (IntArray& answer, Variable& v) {
+        getLocalCodeNumbers(answer, v.q);
+    }
     
+    /**
+     *  Returns local code numbers corresponding to specific variable identified by variablequantity.
+     *  This essentialy allows to assemble partial element contributions separately.
+     *  It is assumed, that partial element contributions are obtained using standard 
+     *  getCharacteristicMatrix and getCharacteristicVector methods. 
+     * @param answer code numbers corrresponding to given variable
+     * @param q variable type 
+     */
+    virtual void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) = 0;
 
+    /// @brief  Assembles the partial element contribution into local element matrix
+    /// @param answer 
+    /// @param contrib 
+    /// @param t 
     void assembleTermContribution (FloatMatrix& answer, FloatMatrix& contrib, Term& t) {
         IntArray uloc, tloc;
         this->getLocalCodeNumbers(uloc, t.field);

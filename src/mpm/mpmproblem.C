@@ -45,19 +45,42 @@
 #include "unknownnumberingscheme.h"
 #include "dofdistributedprimaryfield.h"
 #include "primaryfield.h"
+#include "mpm.h"
 
 namespace oofem {
 REGISTER_EngngModel(MPMProblem);
 
-MPMLhsAssembler :: MPMLhsAssembler(CharType t, double c) : 
-    MatrixAssembler(), type(t), factor(c)
+MPMLhsAssembler :: MPMLhsAssembler(double alpha, double deltaT) : 
+    MatrixAssembler(), alpha(alpha), deltaT(deltaT)
 {}
 
 
 void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
 {
-    el.giveCharacteristicMatrix(answer, this->type, tStep);
-    answer.times(this->factor);
+    answer.clear();
+    FloatMatrix contrib;
+    IntArray locu, locp;
+    MPElement *e = dynamic_cast<MPElement*>(&el);
+
+    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
+    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+
+    e->giveCharacteristicMatrix(contrib, MomentumBalance_StiffnessMatrix, tStep);
+    contrib.times(this->alpha);
+    answer.assemble(contrib, locu, locu);
+    e->giveCharacteristicMatrix(contrib, MomentumBalance_PressureCouplingMatrix, tStep);
+    contrib.times(this->alpha);
+    answer.assemble(contrib, locu, locp);
+
+    e->giveCharacteristicMatrix(contrib, MassBalance_PermeabilityMatrix, tStep);
+    contrib.times((-1.0)*this->alpha*this->alpha*this->deltaT);
+    answer.assemble(contrib, locp, locp);
+    e->giveCharacteristicMatrix(contrib, MassBalance_CompresibilityMatrix, tStep);
+    contrib.times((-1.0)*this->alpha);
+    answer.assemble(contrib, locp, locp);
+    e->giveCharacteristicMatrix(contrib, MassBalance_StressCouplingMatrix, tStep);
+    contrib.times((-1.0)*this->alpha);
+    answer.assemble(contrib, locp, locu);
 }
 
 

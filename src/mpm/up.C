@@ -67,6 +67,7 @@ class UPElement : public MPElement {
         NTcN ts;
 
         GaussIntegrationRule ir;
+        
     public:
     UPElement(int n, Domain* d): 
         MPElement(n,d), 
@@ -86,7 +87,23 @@ class UPElement : public MPElement {
     // template metaprogramming?
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
 
-        if (type == ConductivityMatrix) {
+        if (type == MomentumBalance_StiffnessMatrix) {
+            answer.resize(30,30);
+            this->integrateTerm_dw (answer, this->tm, &this->ir, tStep) ;
+        } else if (type == MomentumBalance_PressureCouplingMatrix) {
+            answer.resize(30,4);
+            this->integrateTerm_dw (answer, this->tq, &this->ir, tStep) ;
+            answer.negated();
+        } else if (type == MassBalance_PermeabilityMatrix) {
+            answer.resize(4,4);
+            this->integrateTerm_dw (answer, this->th, &this->ir, tStep) ;
+        } else if (type == MassBalance_CompresibilityMatrix) {
+            answer.resize(4,4);
+            this->integrateTerm_dw (answer, this->ts, &this->ir, tStep) ;
+        } else if (type == MassBalance_StressCouplingMatrix) {
+            answer.resize(4,30);
+            this->integrateTerm_dw (answer, this->tqt, &this->ir, tStep) ;
+        } else if (type == ConductivityMatrix) {
             FloatMatrix contrib;
             answer.resize(34,34);
             //
@@ -143,15 +160,15 @@ class UPElement : public MPElement {
 
     }
 
-    void getLocalCodeNumbers (IntArray& answer, Variable& v) override {
+    void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (v.q == Variable::VariableQuantity::Displacement) {
+        if (q == Variable::VariableQuantity::Displacement) {
             answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,32,34 };
-        } else if (v.q == Variable::VariableQuantity::Pressure) {
+        } else if (q == Variable::VariableQuantity::Pressure) {
             answer = {4, 8, 12, 16};
         }
     }
-    
+
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
         if (inode >0 && inode <5) {
             answer = {1,2,3,11};

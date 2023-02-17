@@ -61,16 +61,17 @@
 namespace oofem {
 
 /**
- * Callback class for assembling mid point effective tangents
+ * Callback class for assembling mid point effective tangents. 
+ * @todo Need to parametrize individual contributing terms, ther locations and multilication factors.
  */
 class MPMLhsAssembler : public MatrixAssembler
 {
 protected:
-    CharType type;
-    double factor;
+    double alpha;
+    double deltaT;
 
 public:
-    MPMLhsAssembler(CharType type, double factor);
+    MPMLhsAssembler(double alpha, double deltaT);
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
