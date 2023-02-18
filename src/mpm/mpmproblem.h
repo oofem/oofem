@@ -75,6 +75,31 @@ public:
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
+/**
+ * Callback class for assembling rhs external forces
+ */
+class MPMRhsAssembler : public VectorAssembler
+{
+protected:
+    double alpha;
+    double deltaT;
+public:
+    MPMRhsAssembler(double alpha, double deltaT) : VectorAssembler(), alpha(alpha), deltaT(deltaT) {}
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+};
+
+/**
+ * Callback class for assembling residuals
+ */
+class MPMResidualAssembler : public VectorAssembler
+{
+    protected:
+    double alpha;
+    double deltaT;
+public:
+    MPMResidualAssembler(double alpha, double deltaT) : VectorAssembler(), alpha(alpha), deltaT(deltaT) {}
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+};
 
 
 /**
@@ -155,7 +180,6 @@ protected:
     void updateInternalState(TimeStep *tStep) ;
     void applyIC(TimeStep *tStep) ;
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, const UnknownNumberingScheme &s, TimeStep *tStep) ;
     /**
      * Returns the time step length for given step number n, initial step is number 0.
      */

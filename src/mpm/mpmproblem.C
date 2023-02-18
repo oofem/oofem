@@ -83,8 +83,50 @@ void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, Time
     answer.assemble(contrib, locp, locu);
 }
 
+void MPMRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    vec.clear();
+    FloatArray contrib;
+    IntArray locu, locp;
+    MPElement *e = dynamic_cast<MPElement*>(&element);
+    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
+    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+
+    //e->giveCharacteristicVector(contrib, MomentumBalance_Rhs, mode, tStep);
+    vec.assemble(contrib, locu);
+    //e->giveCharacteristicVector(contrib, MassBalance_Rhs, mode, tStep);
+    contrib.times(this->alpha*this->deltaT);
+    vec.assemble(contrib, locp);
+}
+void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    vec.clear();
+    FloatArray contrib;
+    IntArray locu, locp;
+    MPElement *e = dynamic_cast<MPElement*>(&element);
+    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
+    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+
+    e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
+    vec.assemble(contrib, locu);
+    e->giveCharacteristicVector(contrib, MomentumBalance_PressureResidual, mode, tStep);
+    contrib.times(this->alpha*this->deltaT);
+    vec.assemble(contrib, locu);
+
+    e->giveCharacteristicVector(contrib, MassBalance_StressRateResidual, mode, tStep);
+    contrib.times(-1.0*alpha);
+    vec.assemble(contrib, locu);
+    e->giveCharacteristicVector(contrib, MassBalance_PressureResidual, mode, tStep);
+    contrib.times(-1.0*deltaT*alpha*alpha);
+    vec.assemble(contrib, locu);
+    e->giveCharacteristicVector(contrib, MassBalance_PressureRateResidual, mode, tStep);
+    contrib.times(-1.0*alpha);
+    vec.assemble(contrib, locu);
 
 
+
+    vec.negated();
+}
 
 MPMProblem :: MPMProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master)
 {
@@ -238,13 +280,9 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
 
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             jacobianMatrix->zero();
-            MPMLhsAssembler conductivityAssembler(ConductivityMatrix, this->alpha);
-            //Assembling left hand side - start with conductivity matrix
-            this->assemble( *jacobianMatrix, & TauStep, conductivityAssembler,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            //Add capacity matrix
-            MPMLhsAssembler capacityAssembler(CapacityMatrix, 1./tStep->giveTimeIncrement());
-            this->assemble( *jacobianMatrix, & TauStep, capacityAssembler,
+            MPMLhsAssembler jacobianAssembler(ConductivityMatrix, this->alpha);
+            //Assembling left hand side 
+            this->assemble( *jacobianMatrix, & TauStep, jacobianAssembler,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -255,11 +293,12 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
         //this->assembleVectorFromElements( rhs, tStep, TransportExternalForceAssembler(), VM_Total,
         //                                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
+
         this->assembleVectorFromDofManagers( rhs, tStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
         // subtract the rhs part depending on previous solution
-        assembleAlgorithmicPartOfRhs(rhs, EModelDefaultEquationNumbering(), tStep);
+        this->assembleVectorFromDofManagers( rhs, tStep, MPMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total,
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // set-up numerical model
         this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
@@ -487,43 +526,6 @@ MPMProblem :: updateInternalState(TimeStep *tStep)
         for ( auto &elem : domain->giveElements() ) {
             elem->updateInternalState(tStep);
         }
-    }
-}
-
-void
-MPMProblem :: assembleAlgorithmicPartOfRhs( FloatArray &answer,
-                                            const UnknownNumberingScheme &ns, TimeStep *tStep)
-{
-    //
-    // Computes right hand side on all nodes
-    //
-    IntArray loc;
-    FloatArray contrib;
-    Element *element;
-    //TimeStep *previousStep = this->givePreviousStep(); //r_t
-    //TimeStep *currentStep = this->giveCurrentStep(); //r_{t+\Delta t}. Note that *tStep is a Tau step between r_t and r_{t+\Delta t}
-
-    Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
-
-    for ( int i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-        if ( !element->isActivated(tStep) ) {
-            continue;
-        }
-
-        element->giveLocationArray(loc, ns);
-
-        element->giveCharacteristicVector(contrib, InternalForcesVector, VM_TotalIntrinsic, tStep);
-        contrib.negated();
-        answer.assemble(contrib, loc);
     }
 }
 

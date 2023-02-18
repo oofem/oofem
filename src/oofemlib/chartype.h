@@ -92,7 +92,12 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(MomentumBalance_PressureCouplingMatrix, 255) \
     ENUM_ITEM_WITH_VALUE(MassBalance_PermeabilityMatrix, 256) \
     ENUM_ITEM_WITH_VALUE(MassBalance_CompresibilityMatrix, 257) \
-    ENUM_ITEM_WITH_VALUE(MassBalance_StressCouplingMatrix, 258)
+    ENUM_ITEM_WITH_VALUE(MassBalance_StressCouplingMatrix, 258) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_StressResidual, 259) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_PressureResidual, 260) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_StressRateResidual, 261) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_PressureResidual, 262) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_PressureRateResidual, 263)
     
 
 

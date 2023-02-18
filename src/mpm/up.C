@@ -138,26 +138,23 @@ class UPElement : public MPElement {
     }
 
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
-        if (type == InternalForcesVector) {
-            FloatArray contrib;
-            answer.resize(34);
-            this->integrateTerm_c (contrib, this->tm, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->tm);
-            contrib.zero();
-            this->integrateTerm_c(contrib, this->tq, &this->ir, tStep) ;
-            contrib.negated();
-            this->assembleTermContribution(answer, contrib, this->tq);
-            contrib.resize(0);
-            this->integrateTerm_c (contrib, this->th, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->th);
-            contrib.resize(0);
-            this->integrateTerm_c (contrib, this->tqt, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->tqt);
-            contrib.resize(0);
-            this->integrateTerm_c (contrib, this->ts, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->ts);
+        if (type == MomentumBalance_StressResidual) {
+            answer.resize(30);
+            this->integrateTerm_c (answer, this->tm, &this->ir, tStep) ;
+        } else if (type == MomentumBalance_PressureResidual) {
+            answer.resize(30);
+            this->integrateTerm_c(answer, this->tq, &this->ir, tStep) ;
+            answer.negated();
+        } else if (type == MassBalance_StressRateResidual) {
+            answer.resize(4);
+            this->integrateTerm_c (answer, this->tqt, &this->ir, tStep) ;
+        } else if (type == MassBalance_PressureResidual) {
+            answer.resize(4);
+            this->integrateTerm_c (answer, this->th, &this->ir, tStep) ;
+        } else if (type == MassBalance_PressureRateResidual) {
+            answer.resize(4);
+            this->integrateTerm_c (answer, this->ts, &this->ir, tStep) ;   
         }
-
     }
 
     void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) override {
