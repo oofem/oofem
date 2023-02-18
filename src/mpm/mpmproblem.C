@@ -57,10 +57,11 @@ MPMLhsAssembler :: MPMLhsAssembler(double alpha, double deltaT) :
 
 void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
 {
-    answer.clear();
     FloatMatrix contrib;
     IntArray locu, locp;
     MPElement *e = dynamic_cast<MPElement*>(&el);
+    int ndofs = e->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
 
     e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
     e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
@@ -100,10 +101,12 @@ void MPMRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, Tim
 }
 void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
 {
-    vec.clear();
     FloatArray contrib;
     IntArray locu, locp;
     MPElement *e = dynamic_cast<MPElement*>(&element);
+    int ndofs = e->giveNumberOfDofs();
+    vec.resize(ndofs);
+
     e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
     e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
 

@@ -173,7 +173,7 @@ class UPElement : public MPElement {
             answer= {1,2,3};
         }
     }
-
+    int giveNumberOfDofs() override { return 34; }
     const char *giveInputRecordName() const override {return "up";}
     
     double computeVolumeAround(GaussPoint *gp) override {
