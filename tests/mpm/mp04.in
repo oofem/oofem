@@ -1,9 +1,9 @@
-mp03.out
+mp04.out
 Test of mpm up element
-mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6
+mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6 
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
-ndofman 18 nelem 3 nbc 2 ncrosssect 0 nic 1 nltf 1 nmat 1 nset 4
+ndofman 18 nelem 3 nbc 3 ncrosssect 0 nic 1 nltf 1 nmat 1 nset 5
 node 1 coords 3 0 0 0 
 node 2 coords 3 1 0 0 
 node 3 coords 3 0 1 0
@@ -37,6 +37,8 @@ upm 1
 boundarycondition 1 loadtimefunction 1 set 2 values 3 0 0 0   dofs 3 1 2 3 
 # pressure top
 boundarycondition 2 loadtimefunction 1 set 3 values 1 0.0 dofs 1 11 
+# load on top
+nodalload 3 loadtimefunction 1 set 5 dofs 1 3 Components 1 2.0 
 ##
 InitialCondition 1 Conditions 1 u 0.0 dofs 1 11 set 4
 #
@@ -45,3 +47,4 @@ set 1 elements 3 1 2 3
 set 2 nodes 6 1 2 3 7 8 9
 set 3 nodes 3 4 5 6 
 set 4 nodes 6 1 2 3 4 5 6 
+set 5 nodes 6 4 5 6 10 11 12

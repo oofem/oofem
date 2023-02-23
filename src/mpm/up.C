@@ -89,29 +89,36 @@ class UPElement : public MPElement {
 
         if (type == MomentumBalance_StiffnessMatrix) {
             answer.resize(30,30);
+            answer.zero();
             this->integrateTerm_dw (answer, this->tm, &this->ir, tStep) ;
         } else if (type == MomentumBalance_PressureCouplingMatrix) {
             answer.resize(30,4);
+            answer.zero();
             this->integrateTerm_dw (answer, this->tq, &this->ir, tStep) ;
             answer.negated();
         } else if (type == MassBalance_PermeabilityMatrix) {
             answer.resize(4,4);
+            answer.zero();
             this->integrateTerm_dw (answer, this->th, &this->ir, tStep) ;
         } else if (type == MassBalance_CompresibilityMatrix) {
             answer.resize(4,4);
+            answer.zero();
             this->integrateTerm_dw (answer, this->ts, &this->ir, tStep) ;
         } else if (type == MassBalance_StressCouplingMatrix) {
             answer.resize(4,30);
+            answer.zero();
             this->integrateTerm_dw (answer, this->tqt, &this->ir, tStep) ;
         } else if (type == ConductivityMatrix) {
             FloatMatrix contrib;
             answer.resize(34,34);
+            answer.zero();
             //
             // momentum balance
             // 
             this->integrateTerm_dw (contrib, this->tm, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->tm);
             contrib.resize(30,4);
+            contrib.zero();
             this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
             contrib.negated();
             this->assembleTermContribution(answer, contrib, this->tq);
@@ -119,6 +126,7 @@ class UPElement : public MPElement {
             // mass balance (fluid continuity eq)
             //
             contrib.resize(4,4);
+            contrib.zero();
             this->integrateTerm_dw (contrib, this->th, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->th);
 
@@ -127,10 +135,12 @@ class UPElement : public MPElement {
         } else if (type == CapacityMatrix) {
             FloatMatrix contrib;
             answer.resize(34,34);
+            answer.zero();
             contrib.resize(30,4);
             this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
             this->assembleTermContributionT(answer, contrib, this->tq);
             contrib.resize(4,4);
+            contrib.zero();
             this->integrateTerm_dw (contrib, this->ts, &this->ir, tStep) ;
             this->assembleTermContribution(answer, contrib, this->ts);
             //answer.printYourself("Capacity");         
@@ -140,19 +150,24 @@ class UPElement : public MPElement {
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
         if (type == MomentumBalance_StressResidual) {
             answer.resize(30);
+            answer.zero();
             this->integrateTerm_c (answer, this->tm, &this->ir, tStep) ;
         } else if (type == MomentumBalance_PressureResidual) {
             answer.resize(30);
+            answer.zero();
             this->integrateTerm_c(answer, this->tq, &this->ir, tStep) ;
             answer.negated();
         } else if (type == MassBalance_StressRateResidual) {
             answer.resize(4);
+            answer.zero();
             this->integrateTerm_c (answer, this->tqt, &this->ir, tStep) ;
         } else if (type == MassBalance_PressureResidual) {
             answer.resize(4);
+            answer.zero();
             this->integrateTerm_c (answer, this->th, &this->ir, tStep) ;
         } else if (type == MassBalance_PressureRateResidual) {
             answer.resize(4);
+            answer.zero();
             this->integrateTerm_c (answer, this->ts, &this->ir, tStep) ;   
         }
     }

@@ -62,6 +62,7 @@ void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, Time
     MPElement *e = dynamic_cast<MPElement*>(&el);
     int ndofs = e->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
+    answer.zero();
 
     e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
     e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
@@ -70,7 +71,7 @@ void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, Time
     contrib.times(this->alpha);
     answer.assemble(contrib, locu, locu);
     e->giveCharacteristicMatrix(contrib, MomentumBalance_PressureCouplingMatrix, tStep);
-    contrib.times(this->alpha);
+    contrib.times((-1.0)*this->alpha);
     answer.assemble(contrib, locu, locp);
 
     e->giveCharacteristicMatrix(contrib, MassBalance_PermeabilityMatrix, tStep);
@@ -96,7 +97,7 @@ void MPMRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, Tim
     //e->giveCharacteristicVector(contrib, MomentumBalance_Rhs, mode, tStep);
     vec.assemble(contrib, locu);
     //e->giveCharacteristicVector(contrib, MassBalance_Rhs, mode, tStep);
-    contrib.times(this->alpha*this->deltaT);
+    contrib.times((-1.0)*this->alpha*this->deltaT);
     vec.assemble(contrib, locp);
 }
 void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
@@ -106,6 +107,7 @@ void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element
     MPElement *e = dynamic_cast<MPElement*>(&element);
     int ndofs = e->giveNumberOfDofs();
     vec.resize(ndofs);
+    vec.zero();
 
     e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
     e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
@@ -113,20 +115,18 @@ void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element
     e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
     vec.assemble(contrib, locu);
     e->giveCharacteristicVector(contrib, MomentumBalance_PressureResidual, mode, tStep);
-    contrib.times(this->alpha*this->deltaT);
+    contrib.times((-1.0));
     vec.assemble(contrib, locu);
 
     e->giveCharacteristicVector(contrib, MassBalance_StressRateResidual, mode, tStep);
-    contrib.times(-1.0*alpha);
-    vec.assemble(contrib, locu);
+    contrib.times(-1.0*alpha*deltaT);
+    vec.assemble(contrib, locp);
     e->giveCharacteristicVector(contrib, MassBalance_PressureResidual, mode, tStep);
-    contrib.times(-1.0*deltaT*alpha*alpha);
-    vec.assemble(contrib, locu);
+    contrib.times(-1.0*alpha*deltaT);
+    vec.assemble(contrib, locp);
     e->giveCharacteristicVector(contrib, MassBalance_PressureRateResidual, mode, tStep);
-    contrib.times(-1.0*alpha);
-    vec.assemble(contrib, locu);
-
-
+    contrib.times(-1.0*alpha*deltaT);
+    vec.assemble(contrib, locp);
 
     vec.negated();
 }
@@ -172,6 +172,7 @@ MPMProblem :: initializeFrom(InputRecord &ir)
     } else {
         NR_Mode = nrsolverModifiedNRM;
     }
+    NR_Mode = nrsolverFullNRM; // bp
 
     //secure equation renumbering, otherwise keep efficient algorithms
     if ( ir.hasField(_IFT_MPMProblem_changingproblemsize) ) {
@@ -283,7 +284,7 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
 
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             jacobianMatrix->zero();
-            MPMLhsAssembler jacobianAssembler(ConductivityMatrix, this->alpha);
+            MPMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
             //Assembling left hand side 
             this->assemble( *jacobianMatrix, & TauStep, jacobianAssembler,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -299,8 +300,10 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
 
         this->assembleVectorFromDofManagers( rhs, tStep, ExternalForceAssembler(), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromBC (rhs, tStep, ExternalForceAssembler(), VM_Total,
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // subtract the rhs part depending on previous solution
-        this->assembleVectorFromDofManagers( rhs, tStep, MPMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total,
+        this->assembleVectorFromElements( rhs, tStep, MPMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // set-up numerical model
         this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -314,6 +317,7 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
         solutionErr = rhs.computeNorm();
 
         linSolver->solve(*jacobianMatrix, rhs, solutionVectorIncrement);
+
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(tStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
