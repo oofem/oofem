@@ -42,13 +42,13 @@ namespace oofem {
 BTSigTerm::BTSigTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
 
-// assuming symmmetric form 
 void BTSigTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix D, B, DB;
     e.giveMaterial()->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     DB.beProductOf(D, B);
-    answer.plusProductSymmUpper(B, DB, 1.0);
+    //answer.plusProductSymmUpper(B, DB, 1.0);
+    answer.beTProductOf(B,DB);
 }
 
 void BTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {
@@ -58,7 +58,7 @@ void BTSigTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp,
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     eps.beProductOf(B, u);
     cell.giveMaterial()->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
-    answer.beTProductOf(B, eps);
+    answer.beTProductOf(B, sig);
 }
 
 void BTSigTerm::getDimensions_dw(Element& cell)  {
@@ -94,19 +94,18 @@ void BTSigTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol
     }
 }
 
-//wTgNTfTerm class
+//wTgNTfTerm class (H)
 
 
 gNTfTerm::gNTfTerm (Variable& unknownField, Variable &testField) : Term(unknownField, testField) {}
 
 
-// assuming symmmetric form 
 void gNTfTerm::evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep)  {
     FloatMatrix D, B, DB;
     e.giveMaterial()->giveCharacteristicMatrix(D, PermeabilityMatrix, gp, tstep); // update
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     DB.beProductOf(D, B);
-    answer.plusProductSymmUpper(B, DB, 1.0);
+    answer.beTProductOf(B, DB);
 }
 
 void gNTfTerm::evaluate_c (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep)  {

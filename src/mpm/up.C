@@ -95,7 +95,6 @@ class UPElement : public MPElement {
             answer.resize(30,4);
             answer.zero();
             this->integrateTerm_dw (answer, this->tq, &this->ir, tStep) ;
-            answer.negated();
         } else if (type == MassBalance_PermeabilityMatrix) {
             answer.resize(4,4);
             answer.zero();
@@ -108,43 +107,9 @@ class UPElement : public MPElement {
             answer.resize(4,30);
             answer.zero();
             this->integrateTerm_dw (answer, this->tqt, &this->ir, tStep) ;
-        } else if (type == ConductivityMatrix) {
-            FloatMatrix contrib;
-            answer.resize(34,34);
-            answer.zero();
-            //
-            // momentum balance
-            // 
-            this->integrateTerm_dw (contrib, this->tm, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->tm);
-            contrib.resize(30,4);
-            contrib.zero();
-            this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
-            contrib.negated();
-            this->assembleTermContribution(answer, contrib, this->tq);
-            //  
-            // mass balance (fluid continuity eq)
-            //
-            contrib.resize(4,4);
-            contrib.zero();
-            this->integrateTerm_dw (contrib, this->th, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->th);
-
-            //answer.printYourself("Conductivity");
-
-        } else if (type == CapacityMatrix) {
-            FloatMatrix contrib;
-            answer.resize(34,34);
-            answer.zero();
-            contrib.resize(30,4);
-            this->integrateTerm_dw (contrib, this->tq, &this->ir, tStep) ;
-            this->assembleTermContributionT(answer, contrib, this->tq);
-            contrib.resize(4,4);
-            contrib.zero();
-            this->integrateTerm_dw (contrib, this->ts, &this->ir, tStep) ;
-            this->assembleTermContribution(answer, contrib, this->ts);
-            //answer.printYourself("Capacity");         
-        }
+        } else {
+	  OOFEM_ERROR("Unknown characteristic matrix type");
+	}
     }
 
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
@@ -156,7 +121,6 @@ class UPElement : public MPElement {
             answer.resize(30);
             answer.zero();
             this->integrateTerm_c(answer, this->tq, &this->ir, tStep) ;
-            answer.negated();
         } else if (type == MassBalance_StressRateResidual) {
             answer.resize(4);
             answer.zero();
@@ -169,13 +133,15 @@ class UPElement : public MPElement {
             answer.resize(4);
             answer.zero();
             this->integrateTerm_c (answer, this->ts, &this->ir, tStep) ;   
-        }
+        } else {
+	  OOFEM_ERROR("Unknown characteristic vector type");
+	}
     }
 
     void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
         if (q == Variable::VariableQuantity::Displacement) {
-            answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,32,34 };
+            answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,33,34 };
         } else if (q == Variable::VariableQuantity::Pressure) {
             answer = {4, 8, 12, 16};
         }

@@ -243,11 +243,6 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
         this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
     }
 
-    double dTTau = tStep->giveTimeIncrement();
-    double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
-    //Time step in which material laws are taken into account
-    TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetaStepNumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
-
     //Predictor
     FloatArray *solutionVector;
     UnknownsField->advanceSolution(tStep);
@@ -266,7 +261,7 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
         *solutionVector = *UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
     }
 
-    this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
+    this->updateInternalState(tStep); //insert to hash=0(current), if changes in equation numbering
 
     FloatArray solutionVectorIncrement(neq);
     int nite = 0;
@@ -286,7 +281,7 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
             jacobianMatrix->zero();
             MPMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
             //Assembling left hand side 
-            this->assemble( *jacobianMatrix, & TauStep, jacobianAssembler,
+            this->assemble( *jacobianMatrix, tStep, jacobianAssembler,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -324,7 +319,7 @@ void MPMProblem :: solveYourselfAt(TimeStep *tStep)
         incrementErr = solutionVectorIncrement.computeNorm();
 
         // update solution state counter
-        TauStep.incrementStateCounter();
+        //TauStep.incrementStateCounter();
         tStep->incrementStateCounter();
 
         OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
