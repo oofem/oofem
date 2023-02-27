@@ -52,16 +52,16 @@ class PoissonTerm : public Term {
     protected:
         double c;
     public:
-    PoissonTerm (Variable& unknownField, Variable &testField, double c) : Term(unknownField, testField) {
+    PoissonTerm (const Variable& unknownField, const Variable &testField, double c) : Term(unknownField, testField) {
         this->c = c;
     }
 
-    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
+    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const {
         interpol.evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
     }
 
 
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) override {
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) const override {
         const FEInterpolation & si = field.interpolation;
         const FEInterpolation &ti = testField.interpolation;
         FloatMatrix bs, bt;
@@ -76,9 +76,9 @@ class PoissonTerm : public Term {
         answer.beProductTOf(gc, bt);
     }
 
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint*gp, TimeStep* tstep) override {}
-    void getDimensions_dw(Element& cell) override {}
-    void initializeCell(Element& cell) override {}
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint*gp, TimeStep* tstep) const override {}
+    void getDimensions_dw(Element& cell) const override {}
+    void initializeCell(Element& cell) const override {}
 };
 
 
@@ -120,7 +120,7 @@ class PoissonElement : public MPElement {
 
         }
     }
-    void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q) override {
+    void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const override {
         answer.enumerate(this->giveNumberOfDofManagers());
     }
     

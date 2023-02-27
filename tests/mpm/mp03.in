@@ -1,5 +1,5 @@
 mp03.out
-Test of mpm up element
+Test of mpm uptetra21 element
 mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
@@ -27,9 +27,9 @@ node 16 coords 3 0.5 0 0.5
 node 17 coords 3 0 0.5 0.5
 node 18 coords 3 0.5 0.5 0.5
 #
-up 1 nodes 10 1 2 3 4   7 8 9   13 16 17 crosssect 0 mat 1
-up 2 nodes 10 4 5 2 3  10 14 16  17 18 8 crosssect 0 mat 1
-up 3 nodes 10 4 6 5 3  12 11 10 17 15 18 crosssect 0 mat 1  
+uptetra21 1 nodes 10 1 2 3 4   7 8 9   13 16 17 crosssect 0 mat 1
+uptetra21 2 nodes 10 4 5 2 3  10 14 16  17 18 8 crosssect 0 mat 1
+uptetra21 3 nodes 10 4 6 5 3  12 11 10 17 15 18 crosssect 0 mat 1  
 #
 upm 1 
 #

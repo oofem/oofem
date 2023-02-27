@@ -99,7 +99,7 @@ class Variable {
     }
 
     /// Returns DodIF mask in node; need generalization (which dofMan)
-    const IntArray& getDofManDofIDs () {return this->dofIDs;}
+    const IntArray& getDofManDofIDs () const {return this->dofIDs;}
 };
 
 
@@ -108,18 +108,18 @@ class Variable {
  */
 class Term {
     public:
-    Variable& field;
-    Variable& testField;
+    const Variable& field;
+    const Variable& testField;
 
     public:
-    Term (Variable &testField, Variable& unknownField) : field(unknownField), testField(testField) {}
+    Term (const Variable &testField, const Variable& unknownField) : field(unknownField), testField(testField) {}
     
     // evaluate term contribution to weak form on given cell at given point 
-    virtual void evaluate_dw (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) =0;
+    virtual void evaluate_dw (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) const =0;
     // evaluate contribution (all vars known) on given cell
-    virtual void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tStep)=0;
-    virtual void getDimensions_dw(Element& cell) =0;
-    virtual void initializeCell(Element& cell) =0;
+    virtual void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tStep) const =0;
+    virtual void getDimensions_dw(Element& cell) const =0;
+    virtual void initializeCell(Element& cell) const =0;
 };
 
 
@@ -145,7 +145,7 @@ class MPElement : public Element {
         // loop over variables and allocate nodal dofs (for unknownFields)
     }
 
-    void integrateTerm_dw (FloatMatrix& answer, Term& term, IntegrationRule* iRule, TimeStep* tstep) {
+    void integrateTerm_dw (FloatMatrix& answer, const Term& term, IntegrationRule* iRule, TimeStep* tstep) {
         // need for integration domain and rule.
         // who should determine integration domain? Element or term? Term is just integrand, not integral
         // so integral type (surface, volume, etc) defined by element ---
@@ -157,7 +157,7 @@ class MPElement : public Element {
         }
     } 
 
-    void integrateTerm_c (FloatArray& answer, Term& term, IntegrationRule* iRule, TimeStep* tstep) {
+    void integrateTerm_c (FloatArray& answer, const Term& term, IntegrationRule* iRule, TimeStep* tstep) {
         // need for integration domain and rule.
         // who should determine integration domain? Element or term? Term is just integrand, not integral
         // so integral type (surface, volume, etc) defined by element ---
@@ -172,7 +172,7 @@ class MPElement : public Element {
     /// @brief  returns local code number on element to assemble variable/term contribution
     /// @param answer 
     /// @param v 
-    void getLocalCodeNumbers (IntArray& answer, Variable& v) {
+    void getLocalCodeNumbers (IntArray& answer, const Variable& v) const {
         getLocalCodeNumbers(answer, v.q);
     }
     
@@ -184,27 +184,27 @@ class MPElement : public Element {
      * @param answer code numbers corrresponding to given variable
      * @param q variable type 
      */
-    virtual void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) = 0;
+    virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const = 0;
 
     /// @brief  Assembles the partial element contribution into local element matrix
     /// @param answer 
     /// @param contrib 
     /// @param t 
-    void assembleTermContribution (FloatMatrix& answer, FloatMatrix& contrib, Term& t) {
+    void assembleTermContribution (FloatMatrix& answer, FloatMatrix& contrib, const Term& t) {
         IntArray uloc, tloc;
         this->getLocalCodeNumbers(uloc, t.field);
         this->getLocalCodeNumbers(tloc, t.testField);
         answer.assemble(contrib, tloc, uloc);
     }
 
-    void assembleTermContributionT (FloatMatrix& answer, FloatMatrix& contrib, Term& t) {
+    void assembleTermContributionT (FloatMatrix& answer, FloatMatrix& contrib, const Term& t) {
         IntArray uloc, tloc;
         this->getLocalCodeNumbers(uloc, t.field);
         this->getLocalCodeNumbers(tloc, t.testField);
         answer.assembleT(contrib, tloc, uloc);
     }
     
-    void assembleTermContribution (FloatArray& answer, FloatArray& contrib, Term& t) {
+    void assembleTermContribution (FloatArray& answer, FloatArray& contrib, const Term& t) {
         IntArray loc;
         this->getLocalCodeNumbers(loc, t.testField);
         answer.assemble(contrib, loc);
@@ -217,7 +217,7 @@ class MPElement : public Element {
      * @param field 
      * @param tstep 
      */
-    void getUnknownVector(FloatArray& answer, Variable& field, ValueModeType mode, TimeStep* tstep) {
+    void getUnknownVector(FloatArray& answer, const Variable& field, ValueModeType mode, TimeStep* tstep) {
         FloatArray uloc;
         IntArray nodes, dofs;
         field.interpolation.giveCellDofMans(nodes, this);

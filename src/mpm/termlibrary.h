@@ -44,7 +44,7 @@ namespace oofem {
 class BTSigTerm : public Term {
     protected:
     public:
-    BTSigTerm (Variable& unknownField, Variable &testField) ;
+    BTSigTerm (const Variable& unknownField, const Variable &testField) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -53,16 +53,16 @@ class BTSigTerm : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
-    void getDimensions_dw(Element& cell) override;
-    void initializeCell(Element& cell) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
+    void getDimensions_dw(Element& cell) const override;
+    void initializeCell(Element& cell) const override;
 
     protected:
     /**
@@ -74,7 +74,7 @@ class BTSigTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const  ;
     
 };
 
@@ -84,7 +84,7 @@ class BTSigTerm : public Term {
 class gNTfTerm : public Term {
     protected:
     public:
-    gNTfTerm (Variable& unknownField, Variable &testField) ;
+    gNTfTerm (const Variable& unknownField, const Variable &testField) ;
 
     /**
      * @brief Evaluates $\bf{H}$ matrix, the linearization of $w^T(\grad N)^T f(p)$, i.e. $(\grad N)^T \bf{k}/\mu \grad p = \bf{H}$
@@ -93,16 +93,16 @@ class gNTfTerm : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
-    void getDimensions_dw(Element& cell) override;
-    void initializeCell(Element& cell) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  override;
+    void getDimensions_dw(Element& cell) const  override;
+    void initializeCell(Element& cell) const override;
 
     protected:
     /**
@@ -114,7 +114,7 @@ class gNTfTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const ;
     
 };
 
@@ -124,7 +124,7 @@ class gNTfTerm : public Term {
 class BTamNTerm : public Term {
     protected:
     public:
-    BTamNTerm (Variable& unknownField, Variable &testField) ;
+    BTamNTerm (const Variable& unknownField, const Variable &testField) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -133,16 +133,16 @@ class BTamNTerm : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
-    void getDimensions_dw(Element& cell) override;
-    void initializeCell(Element& cell) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
+    void getDimensions_dw(Element& cell) const override;
+    void initializeCell(Element& cell) const override;
 
     protected:
     /**
@@ -154,7 +154,7 @@ class BTamNTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const ;
     
 };
 
@@ -164,7 +164,7 @@ class BTamNTerm : public Term {
 class NTamTBTerm : public Term {
     protected:
     public:
-    NTamTBTerm (Variable& unknownField, Variable &testField) ;
+    NTamTBTerm (const Variable& unknownField, const Variable &testField) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -173,16 +173,16 @@ class NTamTBTerm : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
-    void getDimensions_dw(Element& cell) override;
-    void initializeCell(Element& cell) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
+    void getDimensions_dw(Element& cell) const override;
+    void initializeCell(Element& cell) const override;
 
     protected:
     /**
@@ -194,7 +194,7 @@ class NTamTBTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const ;
     
 };
 
@@ -205,7 +205,7 @@ class NTamTBTerm : public Term {
 class NTcN : public Term {
     protected:
     public:
-    NTcN (Variable& unknownField, Variable &testField) ;
+    NTcN (const Variable& unknownField, const Variable &testField) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -214,16 +214,16 @@ class NTcN : public Term {
      * @param e 
      * @param coords 
      */
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) override;
+    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
     /**
      * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
      * 
      * @param cell 
      * @param coords 
      */
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) override;
-    void getDimensions_dw(Element& cell) override;
-    void initializeCell(Element& cell) override;
+    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
+    void getDimensions_dw(Element& cell) const override;
+    void initializeCell(Element& cell) const override;
     
 };
 

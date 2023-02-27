@@ -44,39 +44,112 @@
 
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
+#include "fei3dhexalin.h"
 #include "mathfem.h"
 
 #include "material.h"
 
 namespace oofem {
 
-#define _IFT_UPElement_Name "up"
 
-
+/**
+ * @brief Base class for (3D) UP elements
+ * 
+ */
 class UPElement : public MPElement {
+        
+    public:
+    UPElement(int n, Domain* d): 
+        MPElement(n,d) { }
+
+    // Note: performance can be probably improved once it will be possible 
+    // to directly assemble multiple term contributions to the system matrix.
+    // template metaprogramming?
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
+        IntegrationRule* ir = this->giveDefaultIntegrationRulePtr();
+
+        if (type == MomentumBalance_StiffnessMatrix) {
+            int udofs = this->giveNumberOfUDofs();
+            answer.resize(udofs,udofs);
+            answer.zero();
+            this->integrateTerm_dw (answer, BTSigTerm(getU(),getU()), ir, tStep) ;
+        } else if (type == MomentumBalance_PressureCouplingMatrix) {
+            answer.resize(this->giveNumberOfUDofs(),this->giveNumberOfPDofs());
+            answer.zero();
+            this->integrateTerm_dw (answer, BTamNTerm(getU(),getP()), ir, tStep) ;
+        } else if (type == MassBalance_PermeabilityMatrix) {
+            int pdofs = this->giveNumberOfPDofs();
+            answer.resize(pdofs,pdofs);
+            answer.zero();
+            this->integrateTerm_dw (answer, gNTfTerm(getP(), getP()), ir, tStep) ;
+        } else if (type == MassBalance_CompresibilityMatrix) {
+            int pdofs = this->giveNumberOfPDofs();
+            answer.resize(pdofs,pdofs);
+            answer.zero();
+            this->integrateTerm_dw (answer, NTcN(getP(), getP()), ir, tStep) ;
+        } else if (type == MassBalance_StressCouplingMatrix) {
+            answer.resize(this->giveNumberOfPDofs(),this->giveNumberOfUDofs());
+            answer.zero();
+            this->integrateTerm_dw (answer, NTamTBTerm(getP(), getU()), ir, tStep) ;
+        } else {
+	        OOFEM_ERROR("Unknown characteristic matrix type");
+	    }
+    }
+
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
+        IntegrationRule* ir = this->giveDefaultIntegrationRulePtr();
+        if (type == MomentumBalance_StressResidual) {
+            answer.resize(this->giveNumberOfUDofs());
+            answer.zero();
+            this->integrateTerm_c (answer, BTSigTerm(getU(),getU()), ir, tStep) ;
+        } else if (type == MomentumBalance_PressureResidual) {
+            answer.resize(this->giveNumberOfUDofs());
+            answer.zero();
+            this->integrateTerm_c(answer, BTamNTerm(getU(),getP()), ir, tStep) ;
+        } else if (type == MassBalance_StressRateResidual) {
+            answer.resize(this->giveNumberOfPDofs());
+            answer.zero();
+            this->integrateTerm_c (answer, NTamTBTerm(getP(), getU()), ir, tStep) ;
+        } else if (type == MassBalance_PressureResidual) {
+            answer.resize(this->giveNumberOfPDofs());
+            answer.zero();
+            this->integrateTerm_c (answer, gNTfTerm(getP(), getP()), ir, tStep) ;
+        } else if (type == MassBalance_PressureRateResidual) {
+            answer.resize(this->giveNumberOfPDofs());
+            answer.zero();
+            this->integrateTerm_c (answer, NTcN(getP(), getP()), ir, tStep) ;   
+        } else {
+	        OOFEM_ERROR("Unknown characteristic vector type");
+	    }
+    }
+
+    //virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const = 0; 
+    //virtual void giveDofManDofIDMask(int inode, IntArray &answer) const =0;
+    private:
+        virtual int  giveNumberOfUDofs() const = 0;
+        virtual int  giveNumberOfPDofs() const = 0;
+        virtual const Variable& getU() const = 0;
+        virtual const Variable& getP() const = 0;
+};
+
+/**
+ * @brief 3D Tetrahedra element with quadratic interpolation for displacements, linear interpolation for pressure
+ * 
+ */
+class UPTetra21 : public UPElement {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
         const static FEInterpolation & pInterpol;
         const static FEInterpolation & uInterpol;
-        Variable p;
-        Variable u;
-        // Terms
-        BTSigTerm tm;
-        gNTfTerm th;
-        BTamNTerm tq;
-        NTamTBTerm tqt;
-        NTcN ts;
+        const static Variable& p;
+        const static Variable& u;
 
         GaussIntegrationRule ir;
         
     public:
-    UPElement(int n, Domain* d): 
-        MPElement(n,d), 
-        //pInterpol(), uInterpol(),
-        p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3, NULL, {11}), 
-        u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3}),
-        tm(u,u), th(p,p), tq(u,p), tqt(p,u), ts(p,p), 
+    UPTetra21(int n, Domain* d): 
+        UPElement(n,d), 
         ir(1, this)
     {
         numberOfDofMans  = 10;
@@ -84,63 +157,7 @@ class UPElement : public MPElement {
         ir.SetUpPointsOnTetrahedra(numberOfGaussPoints, _Unknown);
     }
 
-    // Note: performance can be probably improved once it will be possible 
-    // to directly assemble multiple term contributions to the system matrix.
-    // template metaprogramming?
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
-
-        if (type == MomentumBalance_StiffnessMatrix) {
-            answer.resize(30,30);
-            answer.zero();
-            this->integrateTerm_dw (answer, this->tm, &this->ir, tStep) ;
-        } else if (type == MomentumBalance_PressureCouplingMatrix) {
-            answer.resize(30,4);
-            answer.zero();
-            this->integrateTerm_dw (answer, this->tq, &this->ir, tStep) ;
-        } else if (type == MassBalance_PermeabilityMatrix) {
-            answer.resize(4,4);
-            answer.zero();
-            this->integrateTerm_dw (answer, this->th, &this->ir, tStep) ;
-        } else if (type == MassBalance_CompresibilityMatrix) {
-            answer.resize(4,4);
-            answer.zero();
-            this->integrateTerm_dw (answer, this->ts, &this->ir, tStep) ;
-        } else if (type == MassBalance_StressCouplingMatrix) {
-            answer.resize(4,30);
-            answer.zero();
-            this->integrateTerm_dw (answer, this->tqt, &this->ir, tStep) ;
-        } else {
-	  OOFEM_ERROR("Unknown characteristic matrix type");
-	}
-    }
-
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
-        if (type == MomentumBalance_StressResidual) {
-            answer.resize(30);
-            answer.zero();
-            this->integrateTerm_c (answer, this->tm, &this->ir, tStep) ;
-        } else if (type == MomentumBalance_PressureResidual) {
-            answer.resize(30);
-            answer.zero();
-            this->integrateTerm_c(answer, this->tq, &this->ir, tStep) ;
-        } else if (type == MassBalance_StressRateResidual) {
-            answer.resize(4);
-            answer.zero();
-            this->integrateTerm_c (answer, this->tqt, &this->ir, tStep) ;
-        } else if (type == MassBalance_PressureResidual) {
-            answer.resize(4);
-            answer.zero();
-            this->integrateTerm_c (answer, this->th, &this->ir, tStep) ;
-        } else if (type == MassBalance_PressureRateResidual) {
-            answer.resize(4);
-            answer.zero();
-            this->integrateTerm_c (answer, this->ts, &this->ir, tStep) ;   
-        } else {
-	  OOFEM_ERROR("Unknown characteristic vector type");
-	}
-    }
-
-    void getLocalCodeNumbers (IntArray& answer, Variable::VariableQuantity q ) override {
+    void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
         if (q == Variable::VariableQuantity::Displacement) {
             answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,33,34 };
@@ -157,20 +174,95 @@ class UPElement : public MPElement {
         }
     }
     int giveNumberOfDofs() override { return 34; }
-    const char *giveInputRecordName() const override {return "up";}
+    const char *giveInputRecordName() const override {return "uptetra21";}
     
     double computeVolumeAround(GaussPoint *gp) override {
         double determinant = fabs( this->pInterpol.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
         double weight = gp->giveWeight();
         return determinant * weight ;
     }
+    IntegrationRule *giveDefaultIntegrationRulePtr() override {
+        return &ir;
+    }
+
+    private:
+        virtual int  giveNumberOfUDofs() const override {return 30;} 
+        virtual int  giveNumberOfPDofs() const override {return 4;}
+        virtual const Variable& getU() const override {return u;}
+        virtual const Variable& getP() const override {return p;}
 };
 
+const FEInterpolation & UPTetra21::uInterpol = FEI3dTetQuad();
+const FEInterpolation & UPTetra21::pInterpol = FEI3dTetLin();
+const Variable& UPTetra21::p = Variable(UPTetra21::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3, NULL, {11});
+const Variable& UPTetra21::u = Variable(UPTetra21::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
-const FEInterpolation & UPElement::uInterpol = FEI3dTetQuad();
-const FEInterpolation & UPElement::pInterpol = FEI3dTetLin();
-REGISTER_Element(UPElement)
+#define _IFT_UPTetra21_Name "uptetra21"
+REGISTER_Element(UPTetra21)
 
+/**
+ * @brief 3D Equal order linear Brick UP Element
+ * 
+ */
+class UPBrick11 : public UPElement {
+    protected:
+        //FEI3dTetLin pInterpol;
+        //FEI3dTetQuad uInterpol;
+        const static FEInterpolation & pInterpol;
+        const static FEInterpolation & uInterpol;
+        const static Variable& p;
+        const static Variable& u;
+
+        GaussIntegrationRule ir;
+        
+    public:
+    UPBrick11(int n, Domain* d): 
+        UPElement(n,d), 
+        ir(1, this)
+    {
+        numberOfDofMans  = 8;
+        numberOfGaussPoints = 4;
+        ir.SetUpPointsOnCube(numberOfGaussPoints, _Unknown);
+    }
+
+    void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const  override {
+        /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
+        if (q == Variable::VariableQuantity::Displacement) {
+            answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 21,22,23, 25,26,27, 29,30,31 };
+        } else if (q == Variable::VariableQuantity::Pressure) {
+            answer = {4, 8, 12, 16, 20, 24, 28, 32};
+        }
+    }
+
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
+            answer = {1,2,3,11};
+    }
+    int giveNumberOfDofs() override { return 32; }
+    const char *giveInputRecordName() const override {return "upbrick11";}
+    
+    double computeVolumeAround(GaussPoint *gp) override {
+        double determinant = fabs( this->pInterpol.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+        double weight = gp->giveWeight();
+        return determinant * weight ;
+    }
+    IntegrationRule *giveDefaultIntegrationRulePtr() override {
+        return &ir;
+    }
+
+    private:
+        virtual int  giveNumberOfUDofs() const override {return 24;} 
+        virtual int  giveNumberOfPDofs() const override {return 8;}
+        virtual const Variable& getU() const override {return u;}
+        virtual const Variable& getP() const override {return p;}
+};
+
+const FEInterpolation & UPBrick11::uInterpol = FEI3dHexaLin();
+const FEInterpolation & UPBrick11::pInterpol = FEI3dHexaLin();
+const Variable& UPBrick11::p = Variable(UPBrick11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3, NULL, {11});
+const Variable& UPBrick11::u = Variable(UPBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+
+#define _IFT_UPBrick11_Name "upbrick11"
+REGISTER_Element(UPBrick11)
 
 
 
