@@ -41,14 +41,14 @@
 
 namespace oofem {
 void
-FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(1);
     answer.at(1) = 1.;
 }
 
 double
-FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(1, 2);
     answer.at(1, 1) = 0.;
@@ -57,7 +57,7 @@ FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 }
 
 void
-FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(2);
 
@@ -89,13 +89,13 @@ bool FEI2dQuadConst :: inside(const FloatArray &lcoords) const
 
 
 void
-FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = FloatArray{1.};
 }
 
 
-double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
     return 0.;
@@ -103,14 +103,14 @@ double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const Flo
 
 void
 FEI2dQuadConst :: edgeEvaldNds(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
 }
 
 void
 FEI2dQuadConst :: edgeLocal2global(FloatArray &answer, int iedge,
-                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
 }
@@ -142,7 +142,7 @@ FEI2dQuadConst :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeom
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dQuadConst :: giveIntegrationRule(int order)
+FEI2dQuadConst :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);

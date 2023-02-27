@@ -42,17 +42,17 @@ IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary) const
     return this->computeLocalEdgeMapping(boundary);
 }
 
-void FEInterpolation2d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEInterpolation2d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->edgeEvalN(answer, boundary, lcoords, cellgeo);
 }
 
-double FEInterpolation2d :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEInterpolation2d :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
-void FEInterpolation2d :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEInterpolation2d :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
@@ -65,7 +65,7 @@ double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
 
 #define POINT_TOL 1.e-3
 
-int FEInterpolation2d :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+int FEInterpolation2d :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac;
@@ -109,7 +109,7 @@ int FEInterpolation2d :: global2local(FloatArray &answer, const FloatArray &gcoo
 }
 
 void
-FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 {
     FloatMatrix dn;
@@ -140,22 +140,22 @@ IntArray FEInterpolation2d :: boundaryGiveNodes(int boundary) const
     return this->computeLocalEdgeMapping(boundary);
 }
 
-void FEInterpolation2d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEInterpolation2d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->edgeEvalN(answer, boundary, lcoords, cellgeo);
 }
 
-double FEInterpolation2d :: boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEInterpolation2d :: boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->edgeEvalNormal(answer, boundary, lcoords, cellgeo);
 }
 
-double FEInterpolation2d :: boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEInterpolation2d :: boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
-void FEInterpolation2d :: boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEInterpolation2d :: boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     return this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
@@ -171,38 +171,38 @@ IntArray FEInterpolation2d :: computeEdgeMapping(const IntArray &elemNodes, int 
     return edgeNodes;
 }
 
-double FEInterpolation2d :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEInterpolation2d :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     FloatArray normal;
     return this->edgeEvalNormal(normal, iedge, lcoords, cellgeo);
 }
 
-void FEInterpolation2d::boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEInterpolation2d::boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
   this->evalN(answer, lcoords, cellgeo);
 }
 
 void FEInterpolation2d::boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
-                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
   this->evaldNdx(answer, lcoords, cellgeo);
 }
 
 double FEInterpolation2d::boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-                            const FEICellGeometry &cellgeo)
+                            const FEICellGeometry &cellgeo) const
 {
     answer = {0, 0, 1};
     return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
 void FEInterpolation2d::boundarySurfaceLocal2global(FloatArray &answer, int isurf,
-                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->local2global(answer, lcoords, cellgeo);
 }
 
 double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                            const FEICellGeometry &cellgeo)
+                            const FEICellGeometry &cellgeo) const 
 {
   return this->giveTransformationJacobian(lcoords, cellgeo);
 }

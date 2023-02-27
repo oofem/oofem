@@ -58,7 +58,7 @@ FEI2dQuadLin :: giveArea(const FEICellGeometry &cellgeo) const
 }
 
 FloatArrayF<4>
-FEI2dQuadLin :: evalN(const FloatArrayF<2> &lcoords)
+FEI2dQuadLin :: evalN(const FloatArrayF<2> &lcoords) 
 {
     double ksi = lcoords[0];
     double eta = lcoords[1];
@@ -72,7 +72,7 @@ FEI2dQuadLin :: evalN(const FloatArrayF<2> &lcoords)
 }
 
 void
-FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = evalN({lcoords[0], lcoords[1]});
 }
@@ -96,7 +96,7 @@ FEI2dQuadLin :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &c
 }
 
 double
-FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     auto tmp = evaldNdx(lcoords, cellgeo);
     answer = transpose(tmp.second);
@@ -104,7 +104,7 @@ FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
@@ -128,7 +128,7 @@ FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 #define POINT_TOL 1.e-6
 
 int
-FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, a1, a2, a3, a4, b1, b2, b3, b4;
     double a, b, c, ksi1, ksi2, ksi3, eta1 = 0.0, eta2 = 0.0, denom;
@@ -253,14 +253,14 @@ FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 }
 
 void
-FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
 }
 
 double
-FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     int nodeA = edgeNodes.at(1);
@@ -275,7 +275,7 @@ FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
 
 void
 FEI2dQuadLin :: edgeEvaldNds(FloatArray &answer, int iedge,
-                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                             const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
@@ -285,7 +285,7 @@ FEI2dQuadLin :: edgeEvaldNds(FloatArray &answer, int iedge,
 
 void
 FEI2dQuadLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -362,12 +362,12 @@ FloatMatrixF<2,4> FEI2dQuadLin :: evaldNdxi(const FloatArrayF<2> &lcoords)
     return answer;
 }
 
-void FEI2dQuadLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dQuadLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = transpose(evaldNdxi({lcoords[0], lcoords[1]}));
 }
 
-double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 {
     const auto &eNodes = this->computeLocalEdgeMapping(iEdge);
 
@@ -383,7 +383,7 @@ double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule> 
-FEI2dQuadLin :: giveIntegrationRule(int order)
+FEI2dQuadLin :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
@@ -396,7 +396,7 @@ FEI2dQuadLin :: giveIntegrationRule(int order)
  * FEI2dQuadlinAxi element
  */
 double
-FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);
@@ -412,7 +412,7 @@ FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const F
 
 double
 FEI2dQuadLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo)
+                                                const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -423,13 +423,13 @@ FEI2dQuadLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lco
 }
 
 double
-FEI2dQuadLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
 double
-FEI2dQuadLinAxi::boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadLinAxi::boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }

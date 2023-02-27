@@ -61,7 +61,7 @@ void TSplineInterpolation :: initializeFrom(InputRecord &ir)
         }
     }
 
-    openLocalKnotVector.resize( 3 * max_deg + 2 );
+    //openLocalKnotVector.resize( 3 * max_deg + 2 );
 
     localIndexKnotVector.resize( totalNumberOfControlPoints );
 
@@ -113,7 +113,7 @@ void TSplineInterpolation :: initializeFrom(InputRecord &ir)
 }
 
 
-void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatArray N(nsd);
@@ -154,7 +154,7 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
@@ -286,7 +286,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
 }
 
 
-void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     /* Based on SurfacePoint A4.3 implementation*/
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
@@ -337,7 +337,7 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     //
     // Based on Algorithm A4.4 (p. 137) for d=1
@@ -449,7 +449,7 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
 // this implementation relies on the fact that IGAIntegrationElements are those subsets
 // of T-mesh cells on which there are fully (this means not only partially) nonzero relevant basis functions
 
-int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask)
+int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) const
 {
     FloatArray knotStart(nsd), knotEnd(nsd);
 
@@ -494,7 +494,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
 // this implementation relies on the fact that IGAIntegrationElements are those subsets
 // of T-mesh cells on which there are fully (this means not only partially) nonzero relevant basis functions
 
-int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan)
+int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) const
 {
     int answer = 0;
     FloatArray knotStart(nsd), knotEnd(nsd);
@@ -528,7 +528,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 // starKnotSpan and endKnotSpan are equal;
 // some of the basis function may not cover the whole knot span interval !!!
 
-int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotSpan, const IntArray &endKnotSpan, IntArray &mask)
+int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotSpan, const IntArray &endKnotSpan, IntArray &mask) const
 {
     int nonzero;
     FloatArray knotStart(nsd), knotEnd(nsd);
@@ -573,7 +573,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
 // starKnotSpan and endKnotSpan are equal
 // some of the basis function may not cover the whole knot span interval !!!
 
-int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &startKnotSpan, const IntArray &endKnotSpan)
+int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &startKnotSpan, const IntArray &endKnotSpan) const
 {
     int answer = 0;
     FloatArray knotStart(nsd), knotEnd(nsd);
@@ -604,12 +604,12 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
 
 // call corresponding BSpline methods for open local knot vector
 
-double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &U, const IntArray &I)
+double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &U, const IntArray &I) const
 {
     int span, prepend, append;
-    FloatArray N;
+    FloatArray N, openLocalKnotVector;
 
-    createLocalKnotVector(p, U, I, prepend, append);
+    createLocalKnotVector(openLocalKnotVector, p, U, I, prepend, append);
     span = BSplineInterpolation :: findSpan(prepend + append, p, u, openLocalKnotVector);
     BSplineInterpolation :: basisFuns(N, span, u, p, openLocalKnotVector);
 
@@ -621,12 +621,13 @@ double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &
 
 // call corresponding BSpline methods for open local knot vector
 
-void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const FloatArray &U, const IntArray &I, FloatArray &ders)
+void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const FloatArray &U, const IntArray &I, FloatArray &ders) const
 {
     int span, prepend, append;
+    FloatArray openLocalKnotVector;
     FloatMatrix Ders;
 
-    createLocalKnotVector(p, U, I, prepend, append);
+    createLocalKnotVector(openLocalKnotVector, p, U, I, prepend, append);
     span = BSplineInterpolation :: findSpan(prepend + append, p, u, openLocalKnotVector);
     BSplineInterpolation :: dersBasisFuns(n, u, span, p, openLocalKnotVector, Ders);
 
@@ -639,11 +640,18 @@ void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const Flo
 }
 
 
-void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, const IntArray &I, int &prepend, int &append)
+void TSplineInterpolation :: createLocalKnotVector(FloatArray &openLocalKnotVector, int p, const FloatArray &U, const IntArray &I, int &prepend, int &append) const
 {
     int j = 0, index_first = I [ 0 ], index_last = I [ p + 1 ], mult_first = 1, mult_last = 1;
     double first = U.at(index_first), last = U.at(index_last);
-
+    int max_deg = 0;
+    for ( int i = 0; i < nsd; i++ ) {
+        if ( degree [ i ] > max_deg ) {
+            max_deg = degree [ i ];
+        }
+    }
+    openLocalKnotVector.resize( 3 * max_deg + 2 );
+    
     for ( int i = 1; i < p + 1; i++ ) {
         if ( I [ i ] != index_first ) {
             break;

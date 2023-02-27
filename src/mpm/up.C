@@ -55,8 +55,10 @@ namespace oofem {
 
 class UPElement : public MPElement {
     protected:
-        FEI3dTetLin pInterpol;
-        FEI3dTetQuad uInterpol;
+        //FEI3dTetLin pInterpol;
+        //FEI3dTetQuad uInterpol;
+        const static FEInterpolation & pInterpol;
+        const static FEInterpolation & uInterpol;
         Variable p;
         Variable u;
         // Terms
@@ -71,7 +73,7 @@ class UPElement : public MPElement {
     public:
     UPElement(int n, Domain* d): 
         MPElement(n,d), 
-        pInterpol(), uInterpol(),
+        //pInterpol(), uInterpol(),
         p(this->pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 3, NULL, {11}), 
         u(this->uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3}),
         tm(u,u), th(p,p), tq(u,p), tqt(p,u), ts(p,p), 
@@ -164,6 +166,9 @@ class UPElement : public MPElement {
     }
 };
 
+
+const FEInterpolation & UPElement::uInterpol = FEI3dTetQuad();
+const FEInterpolation & UPElement::pInterpol = FEI3dTetLin();
 REGISTER_Element(UPElement)
 
 

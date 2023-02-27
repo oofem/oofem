@@ -82,14 +82,14 @@ class Variable {
         Pressure
     };
 
-    FEInterpolation& interpolation;  
+    const FEInterpolation& interpolation;  
     Variable* dualVar; //? or just bool?
     VariableType type;
     VariableQuantity q;
     int size;
     IntArray dofIDs;
 
-    Variable (FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}) : 
+    Variable (const FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}) : 
         interpolation(i), 
         dualVar(dual), 
         q(q), 

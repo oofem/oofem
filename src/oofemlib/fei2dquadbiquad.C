@@ -64,7 +64,7 @@ FEI2dQuadBiQuad :: evalN(const FloatArrayF<2> &lcoords)
 }
 
 void
-FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double u, v;
 
@@ -90,7 +90,7 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
 
 
 FloatMatrixF<2,9>
-FEI2dQuadBiQuad :: evaldNdxi(const FloatArrayF<2> &lc)
+FEI2dQuadBiQuad :: evaldNdxi(const FloatArrayF<2> &lc) 
 {
     double u = lc[0];
     double v = lc[1];
@@ -125,7 +125,7 @@ FEI2dQuadBiQuad :: evaldNdxi(const FloatArrayF<2> &lc)
 
 
 void
-FEI2dQuadBiQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lc, const FEICellGeometry &cellgeo)
+FEI2dQuadBiQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lc, const FEICellGeometry &cellgeo) const
 {
     double u = lc.at(1);
     double v = lc.at(2);
@@ -189,7 +189,7 @@ FEI2dQuadBiQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry
 }
 
 
-std::unique_ptr<IntegrationRule> FEI2dQuadBiQuad :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dQuadBiQuad :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);

@@ -56,14 +56,14 @@ class PoissonTerm : public Term {
         this->c = c;
     }
 
-    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
         interpol.evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
     }
 
 
     void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) override {
-        FEInterpolation & si = field.interpolation;
-        FEInterpolation &ti = testField.interpolation;
+        const FEInterpolation & si = field.interpolation;
+        const FEInterpolation &ti = testField.interpolation;
         FloatMatrix bs, bt;
         this->grad(bs, this->field,si,e,gp->giveNaturalCoordinates());
         this->grad(bt, this->testField,ti,e,gp->giveNaturalCoordinates());

@@ -144,7 +144,7 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir)
 }
 
 
-void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
@@ -189,7 +189,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
@@ -368,7 +368,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
 }
 
 
-void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     /* Based on SurfacePoint A3.5 implementation*/
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
@@ -450,7 +450,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
@@ -555,7 +555,7 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
 }
 
 
-int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask)
+int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) const
 {
     int c = 1;
     int size = giveNumberOfKnotSpanBasisFunctions(knotSpan);
@@ -593,7 +593,7 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
 
 
 // for pure Bspline the number of nonzero basis functions is the same for each knot span
-int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan)
+int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) const
 {
     int answer = 1;
     // there are always degree+1 nonzero basis functions on each knot span
@@ -612,7 +612,7 @@ int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 // it is also redundant to pass the span which can be calculated
 // but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const FloatArray &U)
+void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const FloatArray &U) const
 {
     //
     // Based on Algorithm A2.2 (p. 70)
@@ -643,7 +643,7 @@ void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p,
 // it is also redundant to pass the span which can be calculated
 // but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, const FloatArray &U, FloatMatrix &ders)
+void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, const FloatArray &U, FloatMatrix &ders) const
 {
     //
     // Based on Algorithm A2.3 (p. 72)

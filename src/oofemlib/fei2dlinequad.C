@@ -39,7 +39,7 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords(0);
     answer.resize(3);
@@ -48,7 +48,7 @@ void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const
     answer(2) = 1.0 - xi * xi;
 }
 
-double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // Not meaningful to return anything.
     answer.clear();
@@ -56,7 +56,7 @@ double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords,
 }
 
 void
-FEI2dLineQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dLineQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords(0);
     answer.resize(3, 1);
@@ -65,7 +65,7 @@ FEI2dLineQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const
     answer.at(3, 1) = -2.0 * xi;
 }
 
-void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
@@ -78,7 +78,7 @@ void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords
                    n(2) * cellgeo.giveVertexCoordinates(3).at(yind);
 }
 
-int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     double x1_x2, y1_y2, px_x3, py_y3, x3_x2_x1, y3_y2_y1;
     double b0, b1, b2, b3;
@@ -139,13 +139,13 @@ IntArray FEI2dLineQuad :: computeLocalEdgeMapping(int iedge) const
     return {1, 2, 3};
 }
 
-void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->evalN(answer, lcoords, cellgeo);
 }
 
 void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
-                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords(0);
     answer.resize(3);
@@ -166,7 +166,7 @@ void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     //return J;
 }
 
-double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double xi = lcoords(0);
@@ -188,12 +188,12 @@ double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 }
 
 void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                                       const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                       const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->local2global(answer, lcoords, cellgeo);
 }
 
-double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords(0);
     double a1 = -0.5 + xi;
@@ -210,7 +210,7 @@ double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, co
     return sqrt(es1 * es1 + es2 * es2);
 }
 
-void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;
@@ -240,7 +240,7 @@ double FEI2dLineQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICe
     return 0.0;
 }
 
-double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 {
     const auto &node1 = cellgeo.giveVertexCoordinates(1);
     double x1 = node1.at(xind);
@@ -257,7 +257,7 @@ double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo
     return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
-std::unique_ptr<IntegrationRule> FEI2dLineQuad :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dLineQuad :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 1);

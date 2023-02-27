@@ -74,7 +74,7 @@ class BTSigTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
     
 };
 
@@ -114,7 +114,7 @@ class gNTfTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
     
 };
 
@@ -154,7 +154,7 @@ class BTamNTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
     
 };
 
@@ -194,7 +194,7 @@ class NTamTBTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) ;
+    void grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) ;
     
 };
 

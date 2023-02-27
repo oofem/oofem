@@ -68,7 +68,7 @@ void BTSigTerm::getDimensions_dw(Element& cell)  {
 }
 void BTSigTerm::initializeCell(Element& cell)  {}
 
-void BTSigTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+void BTSigTerm::grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
     FloatMatrix dndx;
     int nnodes = interpol.giveNumberOfNodes();
     int ndofs = v.size;
@@ -125,7 +125,7 @@ void gNTfTerm::getDimensions_dw(Element& cell)  {
 }
 void gNTfTerm::initializeCell(Element& cell)  {}
 
-void gNTfTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+void gNTfTerm::grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
     FloatMatrix at;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(at, coords, FEIElementGeometryWrapper(&cell));
@@ -161,7 +161,7 @@ void BTamNTerm::getDimensions_dw(Element& cell)  {
 }
 void BTamNTerm::initializeCell(Element& cell)  {}
 
-void BTamNTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+void BTamNTerm::grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
  FloatMatrix dndx;
     int nnodes = interpol.giveNumberOfNodes();
     int ndofs = v.size;
@@ -217,7 +217,7 @@ void NTamTBTerm::getDimensions_dw(Element& cell)  {
 }
 void NTamTBTerm::initializeCell(Element& cell)  {}
 
-void NTamTBTerm::grad(FloatMatrix& answer, Variable &v, FEInterpolation& interpol, Element& cell, const FloatArray& coords) {
+void NTamTBTerm::grad(FloatMatrix& answer, Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) {
  FloatMatrix dndx;
     int nnodes = interpol.giveNumberOfNodes();
     int ndofs = v.size;
