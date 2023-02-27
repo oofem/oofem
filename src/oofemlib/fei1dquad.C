@@ -48,7 +48,7 @@ FEI1dQuad :: evalN(double ksi)
 }
 
 void
-FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
 #if 0
     answer = evalN(lcoords[0]);
@@ -82,7 +82,7 @@ FEI1dQuad :: evaldNdx(double ksi, const FEICellGeometry &cellgeo) const
 
 
 double
-FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     double J = this->giveTransformationJacobian(lcoords, cellgeo);
     double ksi = lcoords.at(1);
@@ -96,7 +96,7 @@ FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     answer.resize(1);
@@ -108,7 +108,7 @@ FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const F
 }
 
 int
-FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
     double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
@@ -144,7 +144,7 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
 }
 
 double
-FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
     double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
@@ -167,17 +167,17 @@ IntArray FEI1dQuad :: boundaryEdgeGiveNodes(int boundary) const
     return {1, 2, 3};
 }
 
-void FEI1dQuad :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI1dQuad :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->evalN(answer, lcoords, cellgeo);
 }
 
-double FEI1dQuad :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI1dQuad :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
-void FEI1dQuad :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI1dQuad :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->local2global(answer, lcoords, cellgeo);
 }

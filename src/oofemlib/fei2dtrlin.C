@@ -49,7 +49,7 @@ FEI2dTrLin :: evalN(const FloatArrayF<2> &lcoords)
 }
 
 void
-FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = {
         lcoords.at(1),
@@ -80,7 +80,7 @@ FEI2dTrLin :: evaldNdx(const FEICellGeometry &cellgeo) const
 
 
 double
-FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double x1, x2, x3, y1, y2, y3, detJ;
 
@@ -108,7 +108,7 @@ FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
 }
 
 void
-FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -127,7 +127,7 @@ FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
@@ -169,7 +169,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
 
 double
-FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
@@ -204,7 +204,7 @@ bool FEI2dTrLin :: inside(const FloatArray &lcoords) const
 }
 
 void
-FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
@@ -212,7 +212,7 @@ FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords
 
 void
 FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                           const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
@@ -220,7 +220,7 @@ FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     answer = { -1.0 / l, 1.0 / l };
 }
 
-double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     normal = {
@@ -232,7 +232,7 @@ double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatAr
 
 void
 FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -289,7 +289,7 @@ FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 }
 
 double
-FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 {
     const auto &eNodes = this->computeLocalEdgeMapping(iEdge);
 
@@ -305,7 +305,7 @@ FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dTrLin :: giveIntegrationRule(int order)
+FEI2dTrLin :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
@@ -316,7 +316,7 @@ FEI2dTrLin :: giveIntegrationRule(int order)
 // FEI2dTrLinAxi element
 
 double
-FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);
@@ -332,7 +332,7 @@ FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 double
 FEI2dTrLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo)
+                                                const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -344,13 +344,13 @@ FEI2dTrLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 }
 
 double
-FEI2dTrLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
 double
-FEI2dTrLinAxi::boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrLinAxi::boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }

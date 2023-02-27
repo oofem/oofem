@@ -61,7 +61,7 @@ FEI3dWedgeLin :: evalN(const FloatArrayF<3> &lcoords)
 
 
 void
-FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double u, v, w;
     answer.resize(6);
@@ -80,7 +80,7 @@ FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 
 
 FloatMatrixF<3,6>
-FEI3dWedgeLin :: evaldNdxi(const FloatArrayF<3> &lcoords)
+FEI3dWedgeLin :: evaldNdxi(const FloatArrayF<3> &lcoords) 
 {
     double u = lcoords.at(1);
     double v = lcoords.at(2);
@@ -111,7 +111,7 @@ FEI3dWedgeLin :: evaldNdxi(const FloatArrayF<3> &lcoords)
 
 
 void
-FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
+FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &) const
 {
     double u = lcoords.at(1);
     double v = lcoords.at(2);
@@ -143,7 +143,7 @@ FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEI
 
 
 std::pair<double, FloatMatrixF<3,6>>
-FEI3dWedgeLin :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo) 
 {
     auto dNduvw = evaldNdxi(lcoords);
     FloatMatrixF<3,6> coords;
@@ -156,7 +156,7 @@ FEI3dWedgeLin :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &
 
 
 double
-FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
 
@@ -174,7 +174,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 
 
 void
-FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
 
@@ -198,7 +198,7 @@ double FEI3dWedgeLin :: giveCharacteristicLength(const FEICellGeometry &cellgeo)
 #define POINT_TOL 1.e-3
 
 int
-FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
@@ -253,7 +253,7 @@ FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 
 
 double
-FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatMatrix jacobianMatrix;
 
@@ -263,7 +263,7 @@ FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 
 void
-FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;
@@ -277,7 +277,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 
 
 void
-FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -287,14 +287,14 @@ FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoo
 
 
 void
-FEI3dWedgeLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
 }
 
 
 void
-FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
 
@@ -337,7 +337,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(int iedge) const
 
 
 double
-FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
     return 0.0;
@@ -345,7 +345,7 @@ FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lco
 
 
 void
-FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
@@ -367,7 +367,7 @@ FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &l
 
 void
 FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
 
@@ -403,7 +403,7 @@ FEI3dWedgeLin :: computeLocalSurfaceMapping(int isurf) const
 
 double
 FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                   const FEICellGeometry &cellgeo)
+                                                   const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
     return 0;
@@ -411,7 +411,7 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeLin :: giveIntegrationRule(int order)
+FEI3dWedgeLin :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo This function below isn't supported for wedges. We must decide how we should do this.
@@ -425,7 +425,7 @@ FEI3dWedgeLin :: giveIntegrationRule(int order)
 
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
+FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     if ( boundary <= 2 ) {

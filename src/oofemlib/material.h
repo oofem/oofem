@@ -45,6 +45,7 @@
 #include "internalstatevaluetype.h"
 #include "matresponsemode.h"
 #include "dictionary.h"
+#include "chartype.h"
 
 ///@name Input fields for Material
 //@{
@@ -132,6 +133,21 @@ public:
      * Default implementation returns true.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const { return true; }
+    /**
+     * @brief Returns characteristic matrix of the receiver
+     * 
+     */
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    /**
+     * @brief Returns characteristic vector of the receiver
+     * 
+     */
+    virtual void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    /**
+     * @brief Returns characteristic value of the receiver
+     * 
+     */
+    virtual double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep);
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially

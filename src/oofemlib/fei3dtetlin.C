@@ -54,7 +54,7 @@ FEI3dTetLin :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
 #if 0
     answer = evalN(lcoords);
@@ -113,7 +113,7 @@ FEI3dTetLin :: evaldNdx(const FEICellGeometry &cellgeo)
 }
 
 double
-FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
 #if 0
     auto tmp = evaldNdx(lcoords, cellgeo);
@@ -168,7 +168,7 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 }
 
 void
-FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
@@ -182,7 +182,7 @@ FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 #define POINT_TOL 1.e-3
 
 int
-FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, xp, yp, zp, volume;
     answer.resize(4);
@@ -243,7 +243,7 @@ FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
 
 double
-FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
@@ -271,7 +271,7 @@ FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 
 
 void
-FEI3dTetLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -282,7 +282,7 @@ FEI3dTetLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoord
 
 void
 FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
@@ -307,7 +307,7 @@ FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 
 void
 FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -324,7 +324,7 @@ FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
 
 double
-FEI3dTetLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
@@ -359,7 +359,7 @@ FEI3dTetLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometr
 }
 
 void
-FEI3dTetLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(3);
 
@@ -370,7 +370,7 @@ FEI3dTetLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lco
 
 void
 FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
-                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &nodes = computeLocalSurfaceMapping(iedge);
 
@@ -391,7 +391,7 @@ FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 }
 
 void
-FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
     const auto &snodes = this->computeLocalSurfaceMapping(isurf);
@@ -412,7 +412,7 @@ FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray 
 }
 
 double
-FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
@@ -426,7 +426,7 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
 
 double
 FEI3dTetLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                 const FEICellGeometry &cellgeo)
+                                                 const FEICellGeometry &cellgeo) const
 {
     FloatArray c;
     return this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
@@ -461,7 +461,7 @@ FEI3dTetLin :: computeLocalSurfaceMapping(int isurf) const
 }
 
 double
-FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 {
     auto fNodes = this->computeLocalSurfaceMapping(iEdge);
 
@@ -475,7 +475,7 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetLin :: giveIntegrationRule(int order)
+FEI3dTetLin :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 0);
@@ -484,7 +484,7 @@ FEI3dTetLin :: giveIntegrationRule(int order)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary)
+FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);

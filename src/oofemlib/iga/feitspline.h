@@ -69,23 +69,23 @@ protected:
     /**
      * Temporary open local knot vector to enable use of BSpline algorithms (common for all directions) [3*max_degree+2].
      */
-    FloatArray openLocalKnotVector;
+    //FloatArray openLocalKnotVector;
 public:
     TSplineInterpolation(int nsd) : BSplineInterpolation(nsd) { }
 
     void initializeFrom(InputRecord &ir) override;
     void setNumberOfControlPoints(int num) { this->totalNumberOfControlPoints = num; }
-    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override {
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
         OOFEM_ERROR("Not yet implemented, contact lazy dr for implementation");
         return 0;
     }
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) override;
-    int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) override;
+    int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) const override;
+    int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) const override;
 
     const char *giveClassName() const { return "TSplineInterpolation"; }
 
@@ -99,7 +99,7 @@ protected:
      * @return N Computed middle basis function.
      * @warning Parameter u must be in a valid range.
      */
-    double basisFunction(double u, int p, const FloatArray &U, const IntArray &I);
+    double basisFunction(double u, int p, const FloatArray &U, const IntArray &I) const;
     /**
      * Computes the middle basis function and it derivatives on local knot vector at u.
      * The result is stored in the ders vector
@@ -117,7 +117,7 @@ protected:
      *
      * @warning Parameters n and u must be in a valid range.
      */
-    void dersBasisFunction(int n, double u, int p, const FloatArray &U, const IntArray &I, FloatArray &ders);
+    void dersBasisFunction(int n, double u, int p, const FloatArray &U, const IntArray &I, FloatArray &ders) const;
     /**
      * Creates local open knot vector.
      * This is generally done extracting knot values from global knot vector using the local index knot vector
@@ -129,13 +129,13 @@ protected:
      * @param prepend Number of prepended entries
      * @param append Number of appended entries
      */
-    void createLocalKnotVector(int p, const FloatArray &U, const IntArray &I, int &prepend, int &append);
+    void createLocalKnotVector(FloatArray& answer, int p, const FloatArray &U, const IntArray &I, int &prepend, int &append) const;
     /**
      * Returns indices (zero based) of nonzero basis functions for given knot span interval.
      */
-    int giveKnotSpanBasisFuncMask(const IntArray &startKnotSpan, const IntArray &endKnotSpan, IntArray &mask);
+    int giveKnotSpanBasisFuncMask(const IntArray &startKnotSpan, const IntArray &endKnotSpan, IntArray &mask) const;
     /** Returns the number of nonzero basis functions at given knot span interval. */
-    int  giveNumberOfKnotSpanBasisFunctions(const IntArray &startKnotSpan, const IntArray &endKnotSpan);
+    int  giveNumberOfKnotSpanBasisFunctions(const IntArray &startKnotSpan, const IntArray &endKnotSpan) const;
 }; // end of TSplineInterpolation class definition
 } // end namespace oofem
 #endif //feitspline_h

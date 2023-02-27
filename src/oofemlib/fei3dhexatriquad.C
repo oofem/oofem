@@ -86,7 +86,7 @@ FEI3dHexaTriQuad :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
 #if 0
     answer = evalN(lcoords);
@@ -147,7 +147,7 @@ FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const F
 
 
 void
-FEI3dHexaTriQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double u = lcoords.at(1);
     double v = lcoords.at(2);
@@ -176,7 +176,7 @@ FEI3dHexaTriQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray
 
 
 double
-FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray e1, e2, dNdu(9), dNdv(9);
 
@@ -255,7 +255,7 @@ FEI3dHexaTriQuad :: computeLocalSurfaceMapping(int isurf) const
 
 
 FloatMatrixF<3,27>
-FEI3dHexaTriQuad :: evaldNdxi(const FloatArrayF<3> &lcoords)
+FEI3dHexaTriQuad :: evaldNdxi(const FloatArrayF<3> &lcoords) 
 {
     //auto [u, v, w] = lcoords;
     double u = lcoords[0];
@@ -303,7 +303,7 @@ FEI3dHexaTriQuad :: evaldNdxi(const FloatArrayF<3> &lcoords)
 
 
 void
-FEI3dHexaTriQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
 #if 0
     dN = evaldNdxi(lcoords);
@@ -465,7 +465,7 @@ FEI3dHexaTriQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometr
 }
 
 double
-FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     auto tmp = evaldNdx(lcoords, cellgeo);
     answer = transpose(tmp.second);
@@ -473,7 +473,7 @@ FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, con
 }
 
 double
-FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo) const
 {
     const auto &fNodes = this->computeLocalSurfaceMapping(iSurf);
 
@@ -582,7 +582,7 @@ FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaTriQuad :: giveIntegrationRule(int order)
+FEI3dHexaTriQuad :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo Verify: Is +15 correct for dealing with "detJ"? If it is, perhaps we shouldn't go for exact integration since it is likely overkill.
@@ -592,7 +592,7 @@ FEI3dHexaTriQuad :: giveIntegrationRule(int order)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary)
+FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo Verify: Is +6 correct for dealing with "detJ" on this surface?
