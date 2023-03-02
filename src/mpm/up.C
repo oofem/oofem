@@ -48,6 +48,7 @@
 #include "mathfem.h"
 
 #include "material.h"
+#include "matstatus.h"
 
 namespace oofem {
 
@@ -181,15 +182,20 @@ class UPTetra21 : public UPElement {
         double weight = gp->giveWeight();
         return determinant * weight ;
     }
-    IntegrationRule *giveDefaultIntegrationRulePtr() override {
-        return &ir;
-    }
+    
 
     private:
         virtual int  giveNumberOfUDofs() const override {return 30;} 
         virtual int  giveNumberOfPDofs() const override {return 4;}
         virtual const Variable& getU() const override {return u;}
         virtual const Variable& getP() const override {return p;}
+        void computeGaussPoints() override {
+            if ( integrationRulesArray.size() == 0 ) {
+                integrationRulesArray.resize( 1 );
+                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
+                integrationRulesArray [ 0 ]->SetUpPointsOnTetrahedra(numberOfGaussPoints, _Unknown);
+            }
+        }
 };
 
 const FEInterpolation & UPTetra21::uInterpol = FEI3dTetQuad();
@@ -245,15 +251,20 @@ class UPBrick11 : public UPElement {
         double weight = gp->giveWeight();
         return determinant * weight ;
     }
-    IntegrationRule *giveDefaultIntegrationRulePtr() override {
-        return &ir;
-    }
+    
 
     private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
         virtual int  giveNumberOfPDofs() const override {return 8;}
         virtual const Variable& getU() const override {return u;}
         virtual const Variable& getP() const override {return p;}
+        void computeGaussPoints() override {
+            if ( integrationRulesArray.size() == 0 ) {
+                integrationRulesArray.resize( 1 );
+                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
+                integrationRulesArray [ 0 ]->SetUpPointsOnTetrahedra(numberOfGaussPoints, _Unknown);
+            }
+        }
 };
 
 const FEInterpolation & UPBrick11::uInterpol = FEI3dHexaLin();
@@ -266,15 +277,75 @@ REGISTER_Element(UPBrick11)
 
 
 
-#define _IFT_UPMaterial_Name "upm"
-class UPMaterial : public Material {
+
+
+class UPMaterialStatus : public MaterialStatus
+{
+protected:
+    /// Equilibrated strain vector in reduced form
+    FloatArray strainVector;
+    /// Equilibrated stress vector in reduced form
+    FloatArray stressVector;
+    /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
+    FloatArray tempStressVector;
+    /// Temporary strain vector in reduced form (to find balanced state)
+    FloatArray tempStrainVector;
+public:
+    /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
+    UPMaterialStatus (GaussPoint * g) : MaterialStatus(g), strainVector(), stressVector(),
+    tempStressVector(), tempStrainVector() 
+    {}
+
+/// Returns the const pointer to receiver's strain vector.
+    const FloatArray &giveStrainVector() const { return strainVector; }
+    /// Returns the const pointer to receiver's stress vector.
+    const FloatArray &giveStressVector() const { return stressVector; }
+    /// Returns the const pointer to receiver's temporary strain vector.
+    const FloatArray &giveTempStrainVector() const { return tempStrainVector; }
+    /// Returns the const pointer to receiver's temporary stress vector.
+    const FloatArray &giveTempStressVector() const { return tempStressVector; }
+    /// Assigns tempStressVector to given vector v.
+    void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
+    /// Assigns tempStrainVector to given vector v
+    void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+
+    void printOutputAt(FILE *file, TimeStep *tStep) const override {
+        MaterialStatus :: printOutputAt(file, tStep);
+        fprintf(file, "  strains ");
+        for ( auto &var : strainVector ) {
+            fprintf( file, " %+.4e", var );
+        }
+      
+        fprintf(file, "\n              stresses");  
+        for ( auto &var : stressVector ) {
+            fprintf( file, " %+.4e", var );
+        }
+        fprintf(file, "\n");
+    }
+
+    void initTempStatus() override {
+        MaterialStatus :: initTempStatus();
+        tempStressVector = stressVector;
+        tempStrainVector = strainVector;
+    }
+    void updateYourself(TimeStep *tStep) override {
+        MaterialStatus :: updateYourself(tStep);
+        stressVector = tempStressVector;
+        strainVector = tempStrainVector;
+    }
+    const char *giveClassName() const override {return "UPMaterialStatus";}
+
+};
+
+#define _IFT_UPSimpleMaterial_Name "upm"
+class UPSimpleMaterial : public Material {
     protected:
         double e, nu; // elastic isotropic constants
         double k; // isotropic permeability
         double b; // Biot constant
         double c; // Compressibility coefficient
     public:
-    UPMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0; c=0.1;}
+    UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0; c=0.1;}
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == StiffnessMatrix) {
@@ -309,8 +380,14 @@ class UPMaterial : public Material {
     void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == InternalForcesVector) {
             FloatMatrix d;
+            UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
+
             this->giveCharacteristicMatrix(d, StiffnessMatrix, gp, tStep);
             answer.beProductOf(d, flux);
+            // update gp status
+            status->letTempStrainVectorBe(flux);
+            status->letTempStressVectorBe(answer);
+
         }else if (type == FluidMassBalancePressureContribution) {
             FloatMatrix k;
             this->giveCharacteristicMatrix(k, PermeabilityMatrix, gp, tStep);
@@ -330,11 +407,13 @@ class UPMaterial : public Material {
     };
     void initializeFrom(InputRecord &ir) override {};
     void giveInputRecord(DynamicInputRecord &input) override {};
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new UPMaterialStatus(gp); }
 
-    const char *giveClassName() const override {return "UPMaterial";}
-    const char *giveInputRecordName() const override {return _IFT_UPMaterial_Name;}
+
+    const char *giveClassName() const override {return "UPSimpleMaterial";}
+    const char *giveInputRecordName() const override {return _IFT_UPSimpleMaterial_Name;}
 
 };
-REGISTER_Material(UPMaterial)
+REGISTER_Material(UPSimpleMaterial)
 
 } // end namespace oofem
