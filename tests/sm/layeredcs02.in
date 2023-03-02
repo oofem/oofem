@@ -1,5 +1,5 @@
 layeredcs02.out
-Comparing plane stress response for integral and layered cs
+Comparing tr_shell01 response (plate + plane_stress) for integral and layered cs
 #
 NonLinearStatic nmodules 1 nmsteps 1 nsteps 1 profileopt 1
 nsteps 2 controllmode 1 rtolf 1e-3 rtold 1e-3 MaxIter 2000 refloadmode 1
@@ -44,7 +44,7 @@ IsoLE 1 d 1. E 1e9 n 0.0 tAlpha 0.
 #
 #BOUNDARY CONDITIONS
 	BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 3
-	nodalload 2 loadTimeFunction 2 components 6 0. 1.e3 0 0 0 0 
+	nodalload 2 loadTimeFunction 2 components 6 0. 1.e3 1.e3 0 0 0 
 #
 #FUNCTIONS
 	ConstantFunction 1 f(t) 1.
@@ -55,25 +55,49 @@ Set 1 elementranges {(1 4)}
 Set 2 elementranges {(11 14)}
 Set 3 nodes 4 1 4 11 14
 #
-#%BEGIN_CHECK% tolerance 1.e-10
+#%BEGIN_CHECK% tolerance 1.e-8
 ## check load levels
 ## check node displacement at final step
 #NODE tStep 2 number 1 dof 2 unknown d value 0.0
 #NODE tStep 2 number 2 dof 2 unknown d value 5.89140445e-03
 #NODE tStep 2 number 3 dof 2 unknown d value 1.84651546e-02
+#NODE tStep 2 number 3 dof 3 unknown d value 4.68420501e+00
+#NODE tStep 2 number 3 dof 5 unknown d value -7.47621230e+00
+##
 #NODE tStep 2 number 11 dof 2 unknown d value 0.0
 #NODE tStep 2 number 12 dof 2 unknown d value 5.89140445e-03
 #NODE tStep 2 number 13 dof 2 unknown d value 1.84651546e-02
+#NODE tStep 2 number 13 dof 3 unknown d value 4.68420501e+00
+#NODE tStep 2 number 13 dof 5 unknown d value -7.47621230e+00
 ## check some arbitrary element
-##ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value 5.2896e+04 tolerance 1.e-2
-##ELEMENT tStep 2 number 2 gp 1 keyword 1 component 1  value -5.2896e+04 tolerance 1.e-2
-##ELEMENT tStep 2 number 3 gp 1 keyword 1 component 1  value 1.5027e+04 tolerance 1.e-2
-##ELEMENT tStep 2 number 4 gp 1 keyword 1 component 1  value 1.5027e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 10 component 1  value 5.2896226e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 10 component 2  value -6.766454e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 10 component 4  value 5.4942e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 10 component 5  value 1.63293101e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 10 component 6  value -1.33521715e+04 tolerance 1.e-2
+#
+#ELEMENT tStep 2 number 11 gp 1 keyword 10 component 1  value 5.2896226e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 10 component 2  value -6.766454e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 10 component 4  value 5.4942e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 10 component 5  value 1.63293101e+04 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 10 component 6  value -1.33521715e+04 tolerance 1.e-2
+##
+#ELEMENT tStep 2 number 1 gp 1 keyword 9 component 1  value -7.4927e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 9 component 2  value -2.9910e+01 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 9 component 3  value  1.10925262e+06 tolerance 1.e-2
+#ELEMENT tStep 2 number 1 gp 1 keyword 9 component 6  value -1.4378e+01 tolerance 1.e-2
+#
+#ELEMENT tStep 2 number 11 gp 1 keyword 9 component 1  value -7.4927e+03 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 9 component 2  value -2.9910e+01 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 9 component 3  value  1.10925262e+06 tolerance 1.e-2
+#ELEMENT tStep 2 number 11 gp 1 keyword 9 component 6  value -1.4378e+01 tolerance 1.e-2
 ##
 #REACTION tStep 2 number 1 dof 2 value 2.25964537e+02 tolerance 1.e-4
+#REACTION tStep 2 number 1 dof 3 value -5.24278057e+02 tolerance 1.e-4
 #REACTION tStep 2 number 4 dof 2 value -2.22596454e+03 tolerance 1.e-4
+#REACTION tStep 2 number 4 dof 3 value -1.47572194e+03 tolerance 1.e-4
 #REACTION tStep 2 number 11 dof 2 value 2.25964537e+02 tolerance 1.e-4
+#REACTION tStep 2 number 11 dof 3 value -5.24278057e+02 tolerance 1.e-4
 #REACTION tStep 2 number 14 dof 2 value -2.22596454e+03 tolerance 1.e-4
+#REACTION tStep 2 number 14 dof 3 value -1.47572194e+03 tolerance 1.e-4
 #%END_CHECK%
-
-
