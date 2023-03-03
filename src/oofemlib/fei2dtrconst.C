@@ -39,13 +39,13 @@
 
 namespace oofem {
 void
-FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = FloatArray{1.};
 }
 
 double
-FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(1, 2);
     answer.zero();
@@ -54,7 +54,7 @@ FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -72,7 +72,7 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -107,7 +107,7 @@ FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const
 
 
 double
-FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -122,14 +122,14 @@ FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 
 
 void
-FEI2dTrConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(1);
     answer.at(1) = 1.;
 }
 
 double
-FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not applicable to constant interpolation");
     return 0.;
@@ -137,14 +137,14 @@ FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
 
 void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
-                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                             const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer = { 0., 0. };
 }
 
 void
 FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
-                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n = { ( 1 - lcoords(0) ) * 0.5, ( 1 + lcoords(0) ) * 0.5 };
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -172,7 +172,7 @@ FEI2dTrConst :: computeLocalEdgeMapping(int iedge) const
 }
 
 double
-FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     auto nodeA = edgeNodes.at(1);
     auto nodeB = edgeNodes.at(2);
@@ -183,7 +183,7 @@ FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dTrConst :: giveIntegrationRule(int order)
+FEI2dTrConst :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);

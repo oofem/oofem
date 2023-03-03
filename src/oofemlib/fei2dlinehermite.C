@@ -45,7 +45,7 @@ double FEI2dLineHermite :: giveLength(const FEICellGeometry &cellgeo) const
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1);
 }
 
-void FEI2dLineHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     double l = this->giveLength(cellgeo);
@@ -59,7 +59,7 @@ void FEI2dLineHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, co
     answer.at(4) = -0.125 * l * ( 1.0 + ksi ) * ( 1.0 + ksi ) * ( 1.0 - ksi );
 }
 
-double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // This is dNds projected on the direction if the linear edge. If any other interpolation is used for geometry, this can't be used anymore.
     FloatArray dNds;
@@ -74,7 +74,7 @@ double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     return detJ;
 }
 
-void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
@@ -86,7 +86,7 @@ void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoo
                       n.at(2) * cellgeo.giveVertexCoordinates(2).at(yind);
 }
 
-int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     double x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
     double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
@@ -101,7 +101,7 @@ int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoor
     return false;
 }
 
-void FEI2dLineHermite :: edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineHermite :: edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double l_inv = this->giveLength(cellgeo);
     double ksi = lcoords.at(1);
@@ -113,7 +113,7 @@ void FEI2dLineHermite :: edgeEvaldNds(FloatArray &answer, int iedge, const Float
     answer.at(4) =  0.25 * ( ksi + 1.0 ) * ( 3.0 * ksi - 1.0 );
 }
 
-void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double l_inv = this->giveLength(cellgeo);
     double ksi = lcoords.at(1);
@@ -125,7 +125,7 @@ void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const Flo
     answer.at(4) =  l_inv * ( 3.0 * ksi + 1.0 );
 }
 
-double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     normal.resize(2);
     normal.at(1) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
@@ -134,7 +134,7 @@ double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const F
     return normal.normalize() * 0.5;
 }
 
-double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
 {
     double x2_x1, y2_y1;
     x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
@@ -142,7 +142,7 @@ double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords,
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) * 0.5;
 }
 
-std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order) const
 {
     OOFEM_ERROR("Not supported.");
     return nullptr;

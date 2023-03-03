@@ -246,6 +246,14 @@ public:
      */
     void assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind);
     /**
+     * Assembles the transposed contribution using localization array into receiver. The receiver must
+     * have dimensions large enough to localize contribution.
+     * @param src Source to be assembled.
+     * @param rowind Row localization indices.
+     * @param colind Column localization indices.
+     */
+    void assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind);
+    /**
      * Assembles the contribution using localization array into receiver. The receiver must
      * have dimensions large enough to localize contribution.
      * @param src Source to be assembled.

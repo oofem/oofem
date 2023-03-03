@@ -42,13 +42,13 @@
 
 namespace oofem {
 void
-FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
 double
-FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: evaldNdx - Not supported");
     return 0.;
@@ -56,14 +56,14 @@ FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
 
 
 void
-FEI3dTrLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     this->surfaceEvaldNdxi(answer, lcoords);
 }
 
 
 void
-FEI3dTrLin :: giveDerivativeXi(FloatArray &n, const FloatArray &lc)
+FEI3dTrLin :: giveDerivativeXi(FloatArray &n, const FloatArray &lc) const
 {
     n.resize(3);
     n.at(1) =  1.0;;
@@ -72,7 +72,7 @@ FEI3dTrLin :: giveDerivativeXi(FloatArray &n, const FloatArray &lc)
 }
 
 void
-FEI3dTrLin :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
+FEI3dTrLin :: giveDerivativeEta(FloatArray &n, const FloatArray &lc) const
 {
     n.resize(3);
     n.at(1) =  0.0;;
@@ -82,7 +82,7 @@ FEI3dTrLin :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
 
 
 void
-FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
@@ -94,7 +94,7 @@ FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
 
 #define POINT_TOL 1.e-3
 int
-FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: global2local - Not supported");
     return -1;
@@ -103,14 +103,14 @@ FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const 
 
 
 void
-FEI3dTrLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: giveJacobianMatrixAt - Not supported");
 }
 
 
 void
-FEI3dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double xi = lcoords.at(1);
     answer.resize(2);
@@ -122,13 +122,13 @@ FEI3dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords
 
 void
 FEI3dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: edgeEvaldNdx - Not supported");
 }
 
 void
-FEI3dTrLin :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(2);
     answer(0) = -0.5;
@@ -137,7 +137,7 @@ FEI3dTrLin :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lco
 
 void
 FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray N;
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
@@ -151,7 +151,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
 
 double
-FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
@@ -184,7 +184,7 @@ FEI3dTrLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry
 }
 
 void
-FEI3dTrLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     answer.resize(3);
     answer.at(1) = lcoords.at(1);
@@ -193,7 +193,7 @@ FEI3dTrLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoo
 }
 
 void
-FEI3dTrLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
+FEI3dTrLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const
 {
     // Returns matrix with derivatives wrt local coordinates
     answer.resize(3, 2);
@@ -211,7 +211,7 @@ FEI3dTrLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
 
 void
 FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     //Note: This gives the coordinate in the reference system
     FloatArray N;
@@ -224,14 +224,14 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int isurf,
 }
 
 void
-FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: surfaceEvaldNdx - Not supported");
 }
 
 void
-FEI3dTrLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // Note: These are not normalized. Returns the two tangent vectors to the surface.
     FloatMatrix dNdxi;
@@ -246,7 +246,7 @@ FEI3dTrLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Flo
 }
 
 double
-FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray G1, G2; // local curvilinear base vectors
     this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
@@ -257,7 +257,7 @@ FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray 
 }
 
 void
-FEI3dTrLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
     // Note! The base vectors are not normalized except the third (normal)
@@ -278,7 +278,7 @@ FEI3dTrLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Flo
 }
 
 double
-FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: surfaceGiveTransformationJacobian - Not supported yet");
     return 0;
@@ -293,7 +293,7 @@ FEI3dTrLin :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveIntegrationRule(int order)
+FEI3dTrLin :: giveIntegrationRule(int order) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
@@ -302,7 +302,7 @@ FEI3dTrLin :: giveIntegrationRule(int order)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary)
+FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrLin :: giveBoundaryIntegrationRule - Not supported");

@@ -40,7 +40,7 @@ namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
 
 double
-FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatMatrix jacobianMatrix;
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
@@ -49,7 +49,7 @@ FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const F
 
 
 std::unique_ptr<IntegrationRule>
-FEInterpolation:: giveIntegrationRule(int order)
+FEInterpolation:: giveIntegrationRule(int order) const
 {
     integrationDomain id = this->giveIntegrationDomain();
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
@@ -60,7 +60,7 @@ FEInterpolation:: giveIntegrationRule(int order)
 }
 
 std::unique_ptr<IntegrationRule>
-FEInterpolation::giveBoundaryIntegrationRule(int order, int boundary)
+FEInterpolation::giveBoundaryIntegrationRule(int order, int boundary) const 
 {
     integrationDomain id = this->giveBoundaryIntegrationDomain(boundary);
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
@@ -71,7 +71,7 @@ FEInterpolation::giveBoundaryIntegrationRule(int order, int boundary)
 }
 
 std::unique_ptr<IntegrationRule>
-FEInterpolation::giveBoundaryEdgeIntegrationRule(int order, int boundary)
+FEInterpolation::giveBoundaryEdgeIntegrationRule(int order, int boundary) const 
 {
     integrationDomain id = this->giveBoundaryEdgeIntegrationDomain(boundary);
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
@@ -82,7 +82,7 @@ FEInterpolation::giveBoundaryEdgeIntegrationRule(int order, int boundary)
 }
 
 std::unique_ptr<IntegrationRule>
-FEInterpolation::giveBoundarySurfaceIntegrationRule(int order, int boundary)
+FEInterpolation::giveBoundarySurfaceIntegrationRule(int order, int boundary) const
 {
     integrationDomain id = this->giveBoundarySurfaceIntegrationDomain(boundary);
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);

@@ -403,9 +403,15 @@ void oofem_finalize_modules()
 
 //#include "loadbalancer.h"
 //#include "xfem/iga.h"
-
+#include "floatmatrix.h"
+#include "domain.h"
+#include "element.h"
 void oofem_debug(EngngModel &emodel)
 {
+    FloatMatrix k;
+    emodel.giveDomain(1)->giveElement(1)->giveCharacteristicMatrix(k, ConductivityMatrix, NULL);
+    emodel.giveDomain(1)->giveElement(1)->giveCharacteristicMatrix(k, CapacityMatrix, NULL);
+
     //FloatMatrix k;
     //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
 

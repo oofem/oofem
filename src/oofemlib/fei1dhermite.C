@@ -42,7 +42,7 @@
 namespace oofem {
 
 void
-FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
     double l = this->giveLength(cellgeo);
@@ -71,7 +71,7 @@ FEI1dHermite :: evaldNdx(double ksi, const FEICellGeometry &cellgeo) const
 }
 
 double
-FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double l = this->giveLength(cellgeo);
     double l_inv = 1.0 / l;
@@ -102,7 +102,7 @@ FEI1dHermite :: evald2Ndx2(double ksi, const FEICellGeometry &cellgeo) const
 }
 
 void
-FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     //answer = evald2Ndx2(lcoords[0]);
     double l_inv = 1.0 / this->giveLength(cellgeo);
@@ -117,7 +117,7 @@ FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const
 }
 
 void
-FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
@@ -129,7 +129,7 @@ FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 }
 
 int
-FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
     double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
@@ -141,7 +141,7 @@ FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const
 }
 
 double
-FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // This isn't really relevant, interpolation of geometry will be just linear
     double l = this->giveLength(cellgeo);

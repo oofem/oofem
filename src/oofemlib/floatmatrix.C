@@ -265,6 +265,33 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
     }
 }
 
+void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
+{
+    int ii, jj;
+    int nr = src.giveNumberOfRows();
+    int nc = src.giveNumberOfColumns();
+
+#ifndef NDEBUG
+    if ( nr != rowind.giveSize() ) {
+        OOFEM_ERROR("row dimensions of 'src' and 'rowind' mismatch");
+    }
+
+    if ( nc != colind.giveSize() ) {
+        OOFEM_ERROR("column dimensions of 'src' and 'colind' mismatch");
+    }
+#endif
+
+    for ( int i = 1; i <= nr; i++ ) {
+        if ( ( ii = rowind.at(i) ) ) {
+            for ( int j = 1; j <= nc; j++ ) {
+                if ( ( jj = colind.at(j) ) ) {
+                    this->at(jj, ii) += src.at(i, j);
+                }
+            }
+        }
+    }
+}
+
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
 {
