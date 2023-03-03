@@ -79,11 +79,12 @@
 #define _IFT_NlIsoMoistureMaterial_abs "abs"
 #define _IFT_NlIsoMoistureMaterial_pl "pl"
 #define _IFT_NlIsoMoistureMaterial_mu "mu"
-#define _IFT_NlIsoMoistureMaterial_t "t"
 #define _IFT_NlIsoMoistureMaterial_timescale "timescale"
 #define _IFT_NlIsoMoistureMaterial_wn "wn"
 #define _IFT_NlIsoMoistureMaterial_alpha "alpha"
-
+#define _IFT_NlIsoMoistureMaterial_capil_coef "capil_coef"
+#define _IFT_NlIsoMoistureMaterial_t "t"
+#define _IFT_NlIsoMoistureMaterial_ttf "ttf"
 //@}
 
 namespace oofem {
@@ -140,10 +141,27 @@ protected:
     /// permeability parameters according to Xi, Bazant & Jennings
     double alphah = 0., betah = 0., gammah = 0.;
 
-    /// permeability parameters according to Kunzel
-    double deltap = 0., p_sat = 0.; // permation
     enum capillaryTransportType {Multilin_h, Multilin_wV, KunzelCT} CapillaryTransport;
-    double Abs = 0.;            ///< water absorption coefficient [kg m^-2 s^-0.5]
+    /// water absorption coefficient [kg m^-2 s^-0.5]
+    double Abs = 0.;
+
+    /// water vapor diffusion resistance [-]
+    double mu = 0.; 
+  
+    /// ambient atmospheric pressure [Pa]
+    double PL = 101325.;
+
+    /// = 1 for analysis in seconds, = 86400 for analysis in days, etc.
+    double timeScale = 1.; 
+  
+    /// parameter in liquid conduction
+    double capillary_transport_coef = 1000.;
+
+    /// constant temperature [K]
+    double T = 0.; 
+    /// explicitly prescribed evolution of temperature by a time function (e.g. piecewise-linear dfined externally) in [K]
+    int T_TF = 0;
+  
 
     /// values of the multilinear capillary transport function
     FloatArray capPerm_h;
@@ -163,10 +181,20 @@ public:
     double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
     double computeCapTranspCoeff(double humidity) const;
 
+    /// compute vapor diffusion coefficient in air [kg m^-1 s^-1 Pa^-1]
+    double computeVaporDiffusionCoeff(GaussPoint *gp, TimeStep *tStep) const;
+    /// compute saturation water vapor pressure
+    double computeSaturationWaterVaporPressure(GaussPoint *gp, TimeStep *tStep) const;
+    /// evaluate temperature effect on water viscosity - liquid water capillary conduction
+    double computeTemperatureEffectOnViscosity(GaussPoint *gp, TimeStep *tStep) const;
+    /// returns temperature in [K]
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
+  
     const char *giveInputRecordName() const override { return _IFT_NlIsoMoistureMaterial_Name; }
     const char *giveClassName() const override { return "NlIsoMoistureMaterial"; }
 
     double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
+  
 
     bool hasInternalSource() const override;
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;

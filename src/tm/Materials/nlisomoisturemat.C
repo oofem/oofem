@@ -145,37 +145,23 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, gammah, _IFT_NlIsoMoistureMaterial_gammah);
     } else if ( this->Permeability == KunzelPerm ) {
 
-        // compute vapor diffusion coefficient in air [kg m^-1 s^-1 Pa^-1]
-        double delta;
-        double PL; // ambient atmospheric pressure [Pa]
-        double mu; // water vapor diffusion resistance [-]
-        double T; // temperature [K]
+	
+	IR_GIVE_FIELD(ir, mu, _IFT_NlIsoMoistureMaterial_mu);
 
-        PL = 101325.;
+	// read temperature - either constant or time-dependent
+	if ( ir.hasField(_IFT_NlIsoMoistureMaterial_ttf ) ) {
+	  IR_GIVE_FIELD(ir, T_TF, _IFT_NlIsoMoistureMaterial_ttf);
+	} else {
+	  IR_GIVE_FIELD(ir, T, _IFT_NlIsoMoistureMaterial_t);
+	}
+
+	IR_GIVE_OPTIONAL_FIELD(ir, capillary_transport_coef, _IFT_NlIsoMoistureMaterial_capil_coef);
+
         IR_GIVE_OPTIONAL_FIELD(ir, PL, _IFT_NlIsoMoistureMaterial_pl);
-        IR_GIVE_FIELD(ir, mu, _IFT_NlIsoMoistureMaterial_mu);
-        IR_GIVE_FIELD(ir, T, _IFT_NlIsoMoistureMaterial_t);
 
-        double timeScale = 1.; // = 1 for analysis in seconds, = 86400 for analysis in days, etc.
         IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_NlIsoMoistureMaterial_timescale);
-        delta = timeScale * 2.0 * 1.e-7 * pow(T,0.81) / PL;
-
-        this->deltap = delta / mu;
-
-        // compute saturation water vapor pressure
-        double T0, a;
-        double T_C = T - 273.15;
-
-        if (T_C < 0.) {
-            a = 22.44;
-            T0 = 272.44;
-        } else {
-            a = 17.08;
-            T0 = 234.18;
-        }
-        this->p_sat = 611. * exp( a * T_C / (T0 + T_C) );
-
-
+	
+	
         if (CapillaryTransport == Multilin_h) {
             IR_GIVE_FIELD ( ir, capPerm_h, _IFT_NlIsoMoistureMaterial_capperm_h );
             IR_GIVE_FIELD ( ir, capPerm_Dwh, _IFT_NlIsoMoistureMaterial_capperm_dwh );
@@ -331,7 +317,11 @@ NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep) const
         // capillary transport coefficient [m^2/s]
         double Dw = this->computeCapTranspCoeff(humidity);
 
-        return Dw * dw_dh + deltap * p_sat;
+	double temper_factor = this->computeTemperatureEffectOnViscosity(gp, tStep);
+	double p_sat = this->computeSaturationWaterVaporPressure(gp, tStep);
+	double deltap = this->computeVaporDiffusionCoeff(gp, tStep);
+	
+        return temper_factor * Dw * dw_dh + deltap * p_sat;
 
     } else {
         OOFEM_ERROR("unknown permeability type");
@@ -345,7 +335,7 @@ double
 NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity) const
 {
     double Dw = 0.;
-
+    
     if ( this->CapillaryTransport == Multilin_h ) {
         double tol = 1.e-10;
         for (int i = 1; i <= capPerm_h.giveSize(); i++) {
@@ -367,15 +357,80 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity) const
 
     } else if ( this->CapillaryTransport == KunzelCT ){
         double w = this->giveMoistureContent(humidity);
-        Dw = 3.8 * (Abs/wf)*(Abs/wf) * pow(1000., w/wf -1.);
+        Dw = 3.8 * (Abs/wf)*(Abs/wf) * pow(this->capillary_transport_coef, w/wf -1.);
 
     } else {
         OOFEM_ERROR("unknown capillary transport type");
     }
 
+
+    
+    
     return Dw;
 }
 
+
+double
+NlIsoMoistureMaterial :: computeVaporDiffusionCoeff(GaussPoint *gp, TimeStep *tStep) const
+{
+  
+  double temperature = this->giveTemperature(gp, tStep);
+
+  double delta = this->timeScale * 2.0 * 1.e-7 * pow(temperature,0.81) / this->PL;
+  return delta / this->mu;
+  
+}
+
+
+double
+NlIsoMoistureMaterial :: computeSaturationWaterVaporPressure(GaussPoint *gp, TimeStep *tStep) const
+{
+  double temperature  = this->giveTemperature(gp, tStep);
+
+  temperature -= 273.15;
+  double T0, a;
+
+  if (temperature < 0.) {
+    a = 22.44;
+    T0 = 272.44;
+  } else {
+    a = 17.08;
+    T0 = 234.18;
+  }
+
+  return 611. * exp( a * temperature / (T0 + temperature) );
+}
+
+
+double
+NlIsoMoistureMaterial :: computeTemperatureEffectOnViscosity(GaussPoint *gp, TimeStep *tStep) const
+{
+  double temperature = this->giveTemperature(gp, tStep);
+
+  // ratio of water viscosity at given temperature and reference temperature, taken as 20 C
+  // viscosity is comptued according to Gawin
+  // eta(T) = 0.6612 * (T-229)**-1.532
+  return pow( 64./ (temperature - 229.) , -1.532 );
+}
+
+
+double
+NlIsoMoistureMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep) const
+{
+  double temperature;
+  
+  if (this->T_TF !=  0) {
+      temperature = domain->giveFunction(this->T_TF)->evaluateAtTime(tStep->giveTargetTime() );
+  } else {
+      temperature = this->T;
+  }
+
+  return temperature;
+}
+  
+
+
+  
 
 double
 NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
