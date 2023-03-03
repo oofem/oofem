@@ -141,27 +141,27 @@ protected:
     /// permeability parameters according to Xi, Bazant & Jennings
     double alphah = 0., betah = 0., gammah = 0.;
 
-    enum capillaryTransportType {Multilin_h, Multilin_wV, KunzelCT} CapillaryTransport;
+    enum capillaryTransportType { Multilin_h, Multilin_wV, KunzelCT } CapillaryTransport;
     /// water absorption coefficient [kg m^-2 s^-0.5]
     double Abs = 0.;
 
     /// water vapor diffusion resistance [-]
-    double mu = 0.; 
-  
+    double mu = 0.;
+
     /// ambient atmospheric pressure [Pa]
     double PL = 101325.;
 
     /// = 1 for analysis in seconds, = 86400 for analysis in days, etc.
-    double timeScale = 1.; 
-  
+    double timeScale = 1.;
+
     /// parameter in liquid conduction
     double capillary_transport_coef = 1000.;
 
     /// constant temperature [K]
-    double T = 0.; 
+    double T = 0.;
     /// explicitly prescribed evolution of temperature by a time function (e.g. piecewise-linear dfined externally) in [K]
     int T_TF = 0;
-  
+
 
     /// values of the multilinear capillary transport function
     FloatArray capPerm_h;
@@ -171,7 +171,7 @@ protected:
     double rhoH2O = 0.;
 
 public:
-    NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
+    NlIsoMoistureMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -189,12 +189,12 @@ public:
     double computeTemperatureEffectOnViscosity(GaussPoint *gp, TimeStep *tStep) const;
     /// returns temperature in [K]
     double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
-  
+
     const char *giveInputRecordName() const override { return _IFT_NlIsoMoistureMaterial_Name; }
     const char *giveClassName() const override { return "NlIsoMoistureMaterial"; }
 
     double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
-  
+
 
     bool hasInternalSource() const override;
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
