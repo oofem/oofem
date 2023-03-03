@@ -117,6 +117,10 @@ NlIsoMoistureMaterial::initializeFrom(InputRecord &ir)
 
         this->c1 = ( moistureCapacity * ( 2 * dx ) + capa2 * ( 2 * dx ) + 2 * wa - 2 * wb ) / ( 8 * dx * dx * dx );
         this->c2 = ( -3 * c1 * ( 2 * dx ) * ( 2 * dx ) - moistureCapacity + capa2 ) / ( 2 * ( 2 * dx ) );
+    } else if ( this->Isotherm == vanGenuchten ) { // isotherm = type 7
+        IR_GIVE_FIELD(ir, wf, _IFT_NlIsoMoistureMaterial_wf);
+        IR_GIVE_FIELD(ir, vG_b, _IFT_NlIsoMoistureMaterial_vg_b);
+        IR_GIVE_FIELD(ir, vG_m, _IFT_NlIsoMoistureMaterial_vg_m);
     } else {
         throw ValueInputException(ir, _IFT_NlIsoMoistureMaterial_isothermtype, "unknown isotherm type");
     }
@@ -239,6 +243,8 @@ NlIsoMoistureMaterial::giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) con
         } else {
             return moistureCapacity + 2 * c2 * ( humidity - hx + dx ) + 3 * c1 * pow(humidity - hx + dx, 2);
         }
+    } else if ( this->Isotherm == vanGenuchten ) {
+        return wf * vG_m * vG_b / humidity * pow( ( pow( ( -vG_b * log(humidity) ), ( 1. / ( 1. - vG_m ) ) ) + 1. ), ( -vG_m - 1 ) ) * ( 1. / ( 1. - vG_m ) * pow( ( -vG_b * log(humidity) ), ( vG_m / ( 1. - vG_m ) ) ) );
     } else {
         OOFEM_ERROR("unknown isotherm type");
     }
@@ -274,6 +280,8 @@ NlIsoMoistureMaterial::giveMoistureContent(double humidity) const
         } else {
             return ( hx - dx ) * moistureCapacity + moistureCapacity * ( humidity - hx + dx ) + c2 * pow(humidity - hx + dx, 2) + c1 * pow(humidity - hx + dx, 3)  + iso_offset;
         }
+    } else if ( this->Isotherm == vanGenuchten ) {
+        return wf * pow( ( pow( ( -vG_b * log(humidity) ), ( 1. / ( 1. - vG_m ) ) ) + 1. ), -vG_m);
     } else {
         OOFEM_ERROR("unknown isotherm type");
     }
@@ -294,9 +302,9 @@ NlIsoMoistureMaterial::givePermeability(GaussPoint *gp, TimeStep *tStep) const
             }
         }
     } else if ( this->Permeability == Bazant ) {
-        return C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n) ) );
+        return C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
     } else if ( this->Permeability == Xi ) {
-        double power = pow(10., gammah * ( humidity - 1. ) );
+        double power = pow( 10., gammah * ( humidity - 1. ) );
         return alphah + betah * ( 1. - pow(2., -power) );
     } else if ( this->Permeability == KunzelPerm ) {
         // [kg/m^3]
@@ -379,7 +387,7 @@ NlIsoMoistureMaterial::computeSaturationWaterVaporPressure(GaussPoint *gp, TimeS
         T0 = 234.18;
     }
 
-    return 611. * exp(a * temperature / ( T0 + temperature ) );
+    return 611. * exp( a * temperature / ( T0 + temperature ) );
 }
 
 
@@ -401,7 +409,7 @@ NlIsoMoistureMaterial::giveTemperature(GaussPoint *gp, TimeStep *tStep) const
     double temperature;
 
     if ( this->T_TF !=  0 ) {
-        temperature = domain->giveFunction(this->T_TF)->evaluateAtTime( tStep->giveTargetTime() );
+        temperature = domain->giveFunction(this->T_TF)->evaluateAtTime(tStep->giveTargetTime() );
     } else {
         temperature = this->T;
     }
@@ -436,9 +444,9 @@ NlIsoMoistureMaterial::computeInternalSourceVector(FloatArray &val, GaussPoint *
 {
     val.resize(1);
     if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
-        val.at(1) = -wn * ( this->alpha.eval({ { "t", tStep->giveTargetTime() } }, this->giveDomain() ) - this->alpha.eval({ { "t", tStep->giveTargetTime() - tStep->giveTimeIncrement() } }, this->giveDomain() ) ) / tStep->giveTimeIncrement();
+        val.at(1) = -wn * ( this->alpha.eval( { { "t", tStep->giveTargetTime() } }, this->giveDomain() ) - this->alpha.eval( { { "t", tStep->giveTargetTime() - tStep->giveTimeIncrement() } }, this->giveDomain() ) ) / tStep->giveTimeIncrement();
     } else {
-        OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
     }
 }
 } // end namespace oofem

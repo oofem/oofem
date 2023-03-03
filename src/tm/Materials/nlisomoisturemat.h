@@ -85,6 +85,8 @@
 #define _IFT_NlIsoMoistureMaterial_capil_coef "capil_coef"
 #define _IFT_NlIsoMoistureMaterial_t "t"
 #define _IFT_NlIsoMoistureMaterial_ttf "ttf"
+#define _IFT_NlIsoMoistureMaterial_vg_b "vg_b"
+#define _IFT_NlIsoMoistureMaterial_vg_m "vg_m"
 //@}
 
 namespace oofem {
@@ -94,7 +96,7 @@ namespace oofem {
 class NlIsoMoistureMaterial : public IsotropicMoistureTransferMaterial
 {
 protected:
-    enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear } Isotherm;
+    enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear, vanGenuchten } Isotherm;
 
     /// density of the dry solid phase
     double rhodry = 0.;
@@ -122,6 +124,9 @@ protected:
     double hx = 0., dx = 0.;
     double iso_offset = 0.;
     double c1 = 0., c2 = 0., capa2 = 0.;
+
+    /// parameters of vanGenuchten isotherm
+    double vG_b = 0., vG_m = 0.;
 
     /// Nonevaporable water content per m3 of concrete at complete hydration
     double wn = 0.;
