@@ -48,8 +48,8 @@ NlIsoMoistureMaterial::initializeFrom(InputRecord &ir)
     int type = 0;
     IR_GIVE_FIELD(ir, type, _IFT_NlIsoMoistureMaterial_isothermtype);
 
-    if ( type >= 7 ) {
-        throw ValueInputException(ir, _IFT_NlIsoMoistureMaterial_isothermtype, "must be equal to 0, 1, 2 ... 6");
+    if ( type > 7 ) {
+        throw ValueInputException(ir, _IFT_NlIsoMoistureMaterial_isothermtype, "must be equal to 0, 1, 2 ... 7");
     }
 
     this->Isotherm = ( isothermType ) type;
