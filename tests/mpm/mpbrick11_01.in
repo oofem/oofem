@@ -1,9 +1,10 @@
 mpbrick11_01.out
 Test of mpm upbrick11 element
-mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6 
+mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6 nmodules 1
+vtkxml tstep_all primvars 2 1 5
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
-ndofman 8 nelem 1 nbc 3 ncrosssect 0 nic 1 nltf 1 nmat 1 nset 5
+ndofman 8 nelem 1 nbc 3 ncrosssect 1 nic 1 nltf 1 nmat 1 nset 5
 node 1 coords 3 0 0 0 
 node 2 coords 3 1 0 0 
 node 3 coords 3 1 1 0
@@ -15,6 +16,7 @@ node 8 coords 3 0 1 2
 #
 upbrick11 1 nodes 8 1 2 3 4 5 6 7 8 crosssect 0 mat 1
 #
+dummycs 1 mat 1
 upm 1 
 #
 # displacement bottom

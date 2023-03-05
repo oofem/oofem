@@ -184,7 +184,9 @@ class UPTetra21 : public UPElement {
     IntegrationRule *giveDefaultIntegrationRulePtr() override {
         return &ir;
     }
-
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_tetra_2;
+    }
     private:
         virtual int  giveNumberOfUDofs() const override {return 30;} 
         virtual int  giveNumberOfPDofs() const override {return 4;}
@@ -248,7 +250,9 @@ class UPBrick11 : public UPElement {
     IntegrationRule *giveDefaultIntegrationRulePtr() override {
         return &ir;
     }
-
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_hexa_1;
+    }
     private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
         virtual int  giveNumberOfPDofs() const override {return 8;}
