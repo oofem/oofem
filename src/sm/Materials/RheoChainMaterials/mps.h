@@ -87,6 +87,7 @@
 #define _IFT_MPSMaterial_temperInCelsius "temperincelsius"
 #define _IFT_MPSMaterial_hydrationTimescaleTF "hydrationtimescaletf"
 #define _IFT_MPSMaterial_autoShrinkageTF "autoshrinkagetf"
+#define _IFT_MPSMaterial_tau_nano "tau_nano"
 //@}
 
 namespace oofem {
@@ -114,6 +115,11 @@ protected:
     /// flag for Emodulus - true if modulus has been already computed in the current time step
     bool storedEmodulusFlag = false;
     double storedEmodulus = -1.;
+
+    /// value of relative humidity in the nanopores
+    double humNano = -1.;
+    double humNanoTemp = -1.;
+  
 #ifdef keep_track_of_strains
     double dryingShrinkageStrain = 0.;
     double tempDryingShrinkageStrain = 0.;
@@ -142,6 +148,12 @@ public:
     /// Stores relative humidity increment
     void setHumIncrement(double src) { hum_increment = src; }
 
+
+    /// Returns relative humidity (nanopores)
+    double giveHumNano() { return humNano; }
+    /// Stores relative humidity (nanopores)
+    void setHumNanoTemp(double src) { humNanoTemp = src; }
+  
     /// Returns temperature
     double giveT() { return T; }
     /// Stores temperature
@@ -270,6 +282,13 @@ protected:
      */
     int autoShrinkageTF;
 
+  /** characteristic time defining delay of relative humidity in the nanopores behind the capillary pores
+   * alternative approach might initiate shrinakge cracking before the stresses relax
+   * hum_nano  + tau_nano * d_hum_nano / d_t = hum
+   * hum_nano is obtained using second-order exponential algorithm originally developed for creep of Kelvin unit
+   */
+    double tau_nano = 0.;
+
 
 
 public:
@@ -340,6 +359,14 @@ protected:
     /// option = 3 ... incremental values
     double giveHumidity(GaussPoint *gp, TimeStep *tStep, int option) const;
 
+    /// Gives value of humidity in the nanopores at given GP and timestep
+    /// for default value tau_nano = 0 hum_nano coincides with conventional pore humidity
+    /// option = 0 ... beginning of the time step
+    /// option = 1 ... end of the time step
+    /// option = 2 ... average values
+    /// option = 3 ... incremental values
+    double giveHumidityNano(GaussPoint *gp, TimeStep *tStep, int option) const;
+ 
     /// Gives value of temperature at given GP and timestep
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step

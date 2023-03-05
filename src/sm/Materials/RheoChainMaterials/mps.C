@@ -75,9 +75,12 @@ MPSMaterialStatus :: updateYourself(TimeStep *tStep)
 
     hum = -1.;
     hum_increment = -1.;
-
+  
     T = -1.;
     T_increment = -1.;
+
+    humNano = humNanoTemp;
+    humNanoTemp = -1.;
 
 #ifdef keep_track_of_strains
     dryingShrinkageStrain = tempDryingShrinkageStrain;
@@ -112,6 +115,8 @@ MPSMaterialStatus :: initTempStatus()
     T = -1.;
     T_increment = -1.;
 
+    humNanoTemp = -1.;
+
 #ifdef keep_track_of_strains
     tempDryingShrinkageStrain = 0.;
     creepStrainIncrement.zero();
@@ -131,6 +136,10 @@ MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(flowTermViscosity) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+    if ( !stream.write(humNano) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
 }
 
 void
@@ -143,6 +152,10 @@ MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.read(flowTermViscosity) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(humNano) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 }
@@ -264,6 +277,8 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
         IR_GIVE_OPTIONAL_FIELD(ir, alphaR, _IFT_MPSMaterial_alphar);
         this->alphaS = 0.1; // according to Bazant 1995
         IR_GIVE_OPTIONAL_FIELD(ir, alphaS, _IFT_MPSMaterial_alphas);
+
+	IR_GIVE_OPTIONAL_FIELD(ir, tau_nano, _IFT_MPSMaterial_tau_nano);
 
 
         /// if sortion parameters are provided then it is assumed that the transport analysis uses moisture content/ratio; if not then it exports relative humidity
@@ -857,8 +872,14 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
             PsiS = this->computePsiS(gp, tStep); // evaluated in the middle of the time step
 
             if ( ( this->CoupledAnalysis == MPS_full ) || ( this->CoupledAnalysis == MPS_humidity ) ) {
+	      if ( this->tau_nano > 0.) {
+                H_new = this->giveHumidityNano(gp, tStep, 1);
+                H_old = this->giveHumidityNano(gp, tStep, 0);
+	
+	      } else {
                 H_new = this->giveHumidity(gp, tStep, 1);
                 H_old = this->giveHumidity(gp, tStep, 0);
+	      }
             }
 
             if ( ( this->CoupledAnalysis == MPS_full ) || ( this->CoupledAnalysis == MPS_temperature ) ) {
@@ -1414,6 +1435,62 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option) const
     return 0.; // happy compiler
 }
 
+
+double
+MPSMaterial :: giveHumidityNano(GaussPoint *gp, TimeStep *tStep, int option) const
+{
+
+  MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
+      
+  double h_nano_beg, h_nano_end;
+ 
+    double h_beg = this->giveHumidity(gp, tStep, 0);
+    double h_end = this->giveHumidity(gp, tStep, 1);
+
+    // is the first time step or the material has been just activated (i.e. the previous time was less than casting time)
+    if ( tStep->isTheFirstStep() ||  ( !Material :: isActivated(tStep->givePreviousStep() ) ) ) {
+      h_nano_beg = h_beg;
+     
+    } else {
+      h_nano_beg = status->giveHumNano();
+    }
+      
+    double deltaT = tStep->giveTimeIncrement();
+    double beta, lambda;
+
+    if ( deltaT / this->tau_nano > 30 ) {
+      beta = 0.;
+    } else {
+      beta = exp(-( deltaT ) / this->tau_nano);
+    }
+
+    if ( deltaT / this->tau_nano < 1.e-5 ) {
+      lambda =  1. - 0.5 * ( deltaT / this->tau_nano ) + 1./6. * ( pow(deltaT / this->tau_nano, 2) ) - 1./24. * ( pow(deltaT / this->tau_nano, 3) );
+    } else if ( deltaT / this->tau_nano > 30. ) {
+      lambda =  this->tau_nano / deltaT;
+    } else {
+      lambda = ( 1.0 -  beta ) * this->tau_nano / deltaT;
+    }
+     
+    h_nano_end = h_nano_beg + (1.-lambda)*(h_end - h_beg) + (1.-beta)*(h_beg - h_nano_beg);
+
+    status->setHumNanoTemp(h_nano_end);
+
+    switch ( option ) {
+    case 0: return h_nano_beg; // returns relative humidity IN THE NANOPORES on the BEGINNING of the time step
+
+    case 1: return h_nano_end; // returns relative humidity IN THE NANOPORES in the END of the time step
+
+    case 2: return 0.5 * (h_nano_beg + h_nano_end); // returns relative humidity IN THE NANOPORES in the middle of the time step = AVERAGE
+
+    case 3: return (h_nano_end - h_nano_beg); // returns relative humidity IN THE NANOPORES INCREMENT
+
+    default: OOFEM_ERROR("option  %d not supported", option);
+    }
+    
+    return 0.; // happy compiler
+}
+
 double
 MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option) const
 {
@@ -1476,7 +1553,12 @@ double
 MPSMaterial :: computePsiR(GaussPoint *gp, TimeStep *tStep, int option) const
 {
     if ( this->CoupledAnalysis == MPS_humidity ) {
-        double H = this->giveHumidity(gp, tStep, option);
+      double H = 0.;
+      if ( this->tau_nano > 0.) {
+	H = this->giveHumidityNano(gp, tStep, option);
+      } else {
+        H = this->giveHumidity(gp, tStep, option);
+      }
         double betaRH = alphaR + ( 1. - alphaR ) * H * H;
         return betaRH;
     } else if ( this->CoupledAnalysis == MPS_temperature ) {
@@ -1484,7 +1566,12 @@ MPSMaterial :: computePsiR(GaussPoint *gp, TimeStep *tStep, int option) const
         double betaRT = exp(QRtoR * ( 1. / this->roomTemperature - 1. / T ) );
         return betaRT;
     } else if ( this->CoupledAnalysis == MPS_full ) {
-        double H = this->giveHumidity(gp, tStep, option);
+      double H = 0.;
+      if ( this->tau_nano > 0.) {
+        H = this->giveHumidityNano(gp, tStep, option);
+      } else {
+        H = this->giveHumidity(gp, tStep, option);
+      }
         double T = this->giveTemperature(gp, tStep, option);
         double betaRH = alphaR + ( 1. - alphaR ) * H * H;
         double betaRT = exp(QRtoR * ( 1. / this->roomTemperature - 1. / T ) );
@@ -1498,8 +1585,14 @@ MPSMaterial :: computePsiR(GaussPoint *gp, TimeStep *tStep, int option) const
 double
 MPSMaterial :: computePsiS(GaussPoint *gp, TimeStep *tStep) const
 {
-    if ( this->CoupledAnalysis == MPS_humidity ) {
-        double AverageHum = this->giveHumidity(gp, tStep, 2);
+
+  if ( this->CoupledAnalysis == MPS_humidity ) {
+        double AverageHum  = 0.;
+	if ( this->tau_nano > 0.) {
+	  AverageHum = this->giveHumidityNano(gp, tStep, 2);
+	} else {
+	  AverageHum = this->giveHumidity(gp, tStep, 2);
+	}
         double betaSH = alphaS + ( 1. - alphaS ) * AverageHum * AverageHum;
         return betaSH;
     } else if ( this->CoupledAnalysis == MPS_temperature ) {
@@ -1507,7 +1600,13 @@ MPSMaterial :: computePsiS(GaussPoint *gp, TimeStep *tStep) const
         double betaST = exp(QStoR * ( 1. / this->roomTemperature - 1. /  AverageTemp ) );
         return betaST;
     } else if ( this->CoupledAnalysis == MPS_full ) {
-        double AverageHum = this->giveHumidity(gp, tStep, 2);
+        double AverageHum  = 0.;
+	if ( this->tau_nano > 0.) {
+	  AverageHum = this->giveHumidityNano(gp, tStep, 2);
+	} else {
+	  AverageHum = this->giveHumidity(gp, tStep, 2);
+	}
+
         double AverageTemp = this->giveTemperature(gp, tStep, 2);
         double betaSH = alphaS + ( 1. - alphaS ) * AverageHum * AverageHum;
         double betaST = exp(QStoR * ( 1. / this->roomTemperature - 1. /  AverageTemp ) );
