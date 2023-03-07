@@ -349,7 +349,7 @@ class UPMaterial : public Material {
 
     };
     //   void giveInputRecord(DynamicInputRecord &input) override {};
-`
+
     const char *giveClassName() const override {return "UPMaterial";}
     const char *giveInputRecordName() const override {return _IFT_UPMaterial_Name;}
 
