@@ -271,20 +271,20 @@ REGISTER_Element(UPBrick11)
 
 
 #define _IFT_UPMaterial_Name "upm"
-#define _IFT_UPMaterial_E "E"
+#define _IFT_UPMaterial_E "e"
 #define _IFT_UPMaterial_nu "nu"
 #define _IFT_UPMaterial_k "k"
-#define _IFT_UPMaterial_b "b"
+#define _IFT_UPMaterial_alpha "alpha"
 #define _IFT_UPMaterial_c "c"
 
 class UPMaterial : public Material {
     protected:
         double e, nu; // elastic isotropic constants
         double k; // isotropic permeability
-        double b; // Biot constant
-        double c; // Compressibility coefficient
+        double alpha; // Biot constant = 1-K_t/K_s (Kt bulk moduli of the porous medium, Ks bulk moduli of solid phase)
+        double c; // 1/Q, where Q is combined compressibility of the fluid and solid phases (1/Q=n/Kt+(b-n)/Ks, where n is porosity) 
     public:
-    UPMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0; c=0.1;}
+    UPMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; alpha=1.0; c=0.1;}
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == StiffnessMatrix) {
@@ -331,7 +331,7 @@ class UPMaterial : public Material {
 
     double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == BiotConstant) {
-            return b;
+            return alpha;
         } else if (type == CompressibilityCoefficient) {
             return c;
         } else {
@@ -344,7 +344,7 @@ class UPMaterial : public Material {
         IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_UPMaterial_E);
         IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_UPMaterial_nu);
         IR_GIVE_OPTIONAL_FIELD(ir, k, _IFT_UPMaterial_k);
-        IR_GIVE_OPTIONAL_FIELD(ir, b, _IFT_UPMaterial_b);
+        IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_UPMaterial_alpha);
         IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_UPMaterial_c);
 
     };
