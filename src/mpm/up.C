@@ -271,6 +271,12 @@ REGISTER_Element(UPBrick11)
 
 
 #define _IFT_UPMaterial_Name "upm"
+#define _IFT_UPMaterial_E "E"
+#define _IFT_UPMaterial_nu "nu"
+#define _IFT_UPMaterial_k "k"
+#define _IFT_UPMaterial_b "b"
+#define _IFT_UPMaterial_c "c"
+
 class UPMaterial : public Material {
     protected:
         double e, nu; // elastic isotropic constants
@@ -332,9 +338,18 @@ class UPMaterial : public Material {
             return 0.0;
         }
     };
-    void initializeFrom(InputRecord &ir) override {};
-    void giveInputRecord(DynamicInputRecord &input) override {};
+    void initializeFrom(InputRecord &ir) override {
+        Material :: initializeFrom(ir);
 
+        IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_UPMaterial_E);
+        IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_UPMaterial_nu);
+        IR_GIVE_OPTIONAL_FIELD(ir, k, _IFT_UPMaterial_k);
+        IR_GIVE_OPTIONAL_FIELD(ir, b, _IFT_UPMaterial_b);
+        IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_UPMaterial_c);
+
+    };
+    //   void giveInputRecord(DynamicInputRecord &input) override {};
+`
     const char *giveClassName() const override {return "UPMaterial";}
     const char *giveInputRecordName() const override {return _IFT_UPMaterial_Name;}
 
