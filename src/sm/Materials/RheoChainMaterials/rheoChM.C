@@ -717,7 +717,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
         fprintf(file, "} ");
     }
 
-    fprintf(file, "}");
+    fprintf(file, "}\n");
 }
 
 
