@@ -42,6 +42,7 @@
 #include "element.h"
 #include "unknownnumberingscheme.h"
 #include "mathfem.h"
+#include "assemblercallback.h"
 
 namespace oofem {
 

@@ -53,6 +53,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "assemblercallback.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
