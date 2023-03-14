@@ -278,6 +278,9 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
         if ( requiresUnknownsDictionaryUpdate() ) {
+#ifdef _OPENMP
+#pragma omp parallel for 
+#endif
             for ( auto &dman : domain->giveDofManagers() ) {
                 this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
@@ -295,10 +298,12 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
+#ifdef _OPENMP
+#pragma omp parallel for 
+#endif
             for ( auto &elem : domain->giveElements() ) {
                 elem->updateInternalState(tStep);
             }
-
             internalVarUpdateStamp = tStep->giveSolutionStateCounter();
         }
     }
