@@ -129,6 +129,14 @@ MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
     KelvinChainSolidMaterialStatus :: saveContext(stream, mode);
 
+    if ( !stream.write(T_max) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(h_min) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    
     if ( !stream.write(equivalentTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -147,6 +155,15 @@ MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
     KelvinChainSolidMaterialStatus :: restoreContext(stream, mode);
 
+
+    if ( !stream.read(T_max) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(h_min) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    
     if ( !stream.read(equivalentTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -280,6 +297,12 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
 
 	IR_GIVE_OPTIONAL_FIELD(ir, tau_nano, _IFT_MPSMaterial_tau_nano);
 
+        this->khc = 1.0;
+        IR_GIVE_OPTIONAL_FIELD(ir, khc, _IFT_MPSMaterial_khc);
+	if ( (this->khc > 1. ) || (this->khc < 0. ) ) {
+	  throw ValueInputException(ir, _IFT_MPSMaterial_khc, "Allowed value for khc is in the range <0., 1.>");
+	}
+	
 
         /// if sortion parameters are provided then it is assumed that the transport analysis uses moisture content/ratio; if not then it exports relative humidity
         // Parameters for desorption isotherm
@@ -837,6 +860,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
     double A = 0., B = 0.;
     double T_new = 0., T_old = 0., H_new = 0., H_old = 0.;
     double kT = 0.;
+    double kh = 0.;
 
 
     /*  double eta, tHalfStep;
@@ -880,6 +904,13 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
                 H_new = this->giveHumidity(gp, tStep, 1);
                 H_old = this->giveHumidity(gp, tStep, 0);
 	      }
+ 
+	      if ( ( status->giveHumMin() - H_new >= 0. ) || tStep->isTheFirstStep() ||  ( !Material :: isActivated(tStep->givePreviousStep() ) ) ) {
+                    status->setHumMin(H_new);
+                    kh = 1.0;
+                } else {
+                    kh = this->khc;
+                }
             }
 
             if ( ( this->CoupledAnalysis == MPS_full ) || ( this->CoupledAnalysis == MPS_temperature ) ) {
@@ -900,14 +931,14 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
 
                 if ( this->CoupledAnalysis == MPS_full ) {
                     if ( kTm == -1. ) {
-                        A = sqrt(muS * fabs( ( T_new + T_old ) * ( H_new - H_old ) / ( H_new + H_old ) + log( ( H_new + H_old ) / 2. ) * ( T_new - T_old ) ) / ( dt * this->roomTemperature ) );
+		      A = sqrt(muS * fabs( ( T_new + T_old ) * kh * ( H_new - H_old ) / ( H_new + H_old ) + log( ( H_new + H_old ) / 2. ) * ( T_new - T_old ) ) / ( dt * this->roomTemperature ) );
                     } else {
-                        A = sqrt(muS * fabs( ( T_new + T_old ) * ( H_new - H_old ) / ( H_new + H_old ) - kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature ) );
+                        A = sqrt(muS * fabs( ( T_new + T_old ) * kh * ( H_new - H_old ) / ( H_new + H_old ) - kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature ) );
                     }
                     B = sqrt(PsiS / this->q4);
                 } else if ( this->CoupledAnalysis == MPS_humidity ) {
                     // original version of the RHS for constant && room temperature
-                    A = sqrt(muS * ( fabs(log(H_new) - log(H_old) ) ) / dt);
+                    A = sqrt(muS * ( kh * fabs(log(H_new) - log(H_old) ) ) / dt);
                     B = sqrt(PsiS / this->q4);
                 } else if ( this->CoupledAnalysis == MPS_temperature ) {
                     A = sqrt(muS * fabs(kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature ) );
@@ -931,13 +962,13 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
 
                 if ( this->CoupledAnalysis == MPS_full ) {
                     if ( kTm == -1. ) {
-                        A =  pow(muS, 1. / ( p - 1. ) ) * fabs( ( T_new + T_old ) * ( H_new - H_old ) / ( H_new + H_old ) + log( ( H_new + H_old ) / 2. ) * ( T_new - T_old ) ) / ( dt * this->roomTemperature );
+                        A =  pow(muS, 1. / ( p - 1. ) ) * fabs( ( T_new + T_old ) * kh * ( H_new - H_old ) / ( H_new + H_old ) + log( ( H_new + H_old ) / 2. ) * ( T_new - T_old ) ) / ( dt * this->roomTemperature );
                     } else {
-                        A =  pow(muS, 1. / ( p - 1. ) ) * fabs( ( T_new + T_old ) * ( H_new - H_old ) / ( H_new + H_old ) - kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature );
+                        A =  pow(muS, 1. / ( p - 1. ) ) * fabs( ( T_new + T_old ) * kh * ( H_new - H_old ) / ( H_new + H_old ) - kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature );
                     }
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_humidity ) {
-                    A =  pow(muS, 1. / ( p - 1. ) ) * ( fabs(log(H_new) - log(H_old) ) ) / dt;
+                    A =  pow(muS, 1. / ( p - 1. ) ) * ( kh * fabs(log(H_new) - log(H_old) ) ) / dt;
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_temperature ) {
                     A =  pow(muS, 1. / ( p - 1. ) ) * fabs(kT * ( T_new - T_old ) ) / ( dt * this->roomTemperature );
@@ -976,14 +1007,19 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
 
                 if ( this->CoupledAnalysis == MPS_full ) {
                     if ( kTm == -1. ) {
+		      if ( kh < 1. ) {
+                        A =  (  fabs( log( ( H_new + H_old ) / 2. ) ) *  fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * kh * fabs(log(H_new) - log(H_old) ) ) * pow(muS, 1. / ( p - 1. ) ) /  ( dt * this->roomTemperature );
+			
+		      } else { // kh == 1
                         A =  pow(muS, 1. / ( p - 1. ) ) * fabs(T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature );
+		      }
                     } else {
-                        A =  ( kT * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * fabs(log(H_new) - log(H_old) ) ) * pow(muS, 1. / ( p - 1. ) ) /  ( dt * this->roomTemperature );
+                        A =  ( kT * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * kh * fabs(log(H_new) - log(H_old) ) ) * pow(muS, 1. / ( p - 1. ) ) /  ( dt * this->roomTemperature );
                     }
 
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_humidity ) {
-                    A =  ( fabs(log(H_new) - log(H_old) ) ) * pow(muS, 1. / ( p - 1. ) ) /  dt;
+                    A =  ( kh * fabs(log(H_new) - log(H_old) ) ) * pow(muS, 1. / ( p - 1. ) ) /  dt;
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_temperature ) {
                     A =  kT * fabs(T_new - T_old) * pow(muS, 1. / ( p - 1. ) ) /  ( dt * this->roomTemperature );
@@ -1024,16 +1060,20 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
                 if ( this->CoupledAnalysis == MPS_full ) {
                     // original version of the RHS for variable/elevated temperature
                     if ( kTm == -1. ) {
-                        A =  k3 * fabs(T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature );
-                    } else {
-                        A =  k3 * ( kT * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * fabs(log(H_new) - log(H_old) ) ) / ( dt * this->roomTemperature );
+		      if ( kh < 1. ) {
+			A =  k3 * ( fabs( log( ( H_new + H_old ) / 2. ) ) * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * kh * fabs(log(H_new) - log(H_old) ) ) / ( dt * this->roomTemperature );
+		      } else { // kh == 1
+			A =  k3 * fabs(T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature );
+		      }
+                    } else { 
+                        A =  k3 * ( kT * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * kh * fabs(log(H_new) - log(H_old) ) ) / ( dt * this->roomTemperature );
                     }
 
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_humidity ) {
                     // original version of the RHS for constant && room temperature
                     // compiler warning:
-                    A =  k3 * ( fabs(log(H_new) - log(H_old) ) ) / dt;
+                    A =  k3 * ( kh * fabs(log(H_new) - log(H_old) ) ) / dt;
                     B = PsiS / this->q4;
                 } else if ( this->CoupledAnalysis == MPS_temperature ) {
                     A =  k3 * kT * fabs(T_new - T_old) / ( dt * this->roomTemperature );

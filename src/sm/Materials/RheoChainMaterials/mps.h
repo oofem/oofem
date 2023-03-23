@@ -67,6 +67,7 @@
 #define _IFT_MPSMaterial_mus "mus"
 #define _IFT_MPSMaterial_ktm "ktm"
 #define _IFT_MPSMaterial_ktc "ktc"
+#define _IFT_MPSMaterial_khc "khc"
 #define _IFT_MPSMaterial_stiffnessfactor "stiffnessfactor"
 #define _IFT_MPSMaterial_p "p"
 #define _IFT_MPSMaterial_p_tilde "p_tilde"
@@ -101,9 +102,10 @@ namespace oofem {
 class MPSMaterialStatus : public KelvinChainSolidMaterialStatus
 {
 protected:
-    /// Values of humidity and temperature in a particular GP and their increment
+    /// Values of humidity and temperature in a particular GP, their increment, and maximum/minimum to treat cyclic ambient conditions
     double hum = -1.;
     double hum_increment = -1.;
+    double h_min = 1.;
     double T = -1.;
     double T_increment = -1.;
     double T_max = 0.;
@@ -153,6 +155,12 @@ public:
     double giveHumNano() { return humNano; }
     /// Stores relative humidity (nanopores)
     void setHumNanoTemp(double src) { humNanoTemp = src; }
+
+    /// Returns previously minimum previously reached humidity - treatment of cyclic ambient coditions
+    double giveHumMin() { return h_min; }
+    /// Stores minimum reached humidity
+    void setHumMin(double src) { h_min = src; }
+  
   
     /// Returns temperature
     double giveT() { return T; }
@@ -241,8 +249,11 @@ protected:
     double kTm = 0.;
     /// parameter reducing creep effects of thermal cycling (replaces kTm in such case)
     double kTc = 0.;
+    /// parameter reducing creep effects of hygral cycling (0 = complete reduction, 1 = no reduction, default value)
+    double khc = 0.;
     /// parameter reducing creep effects of thermal cycling
-    double ct = 0.;
+    // commented - unused parameter? PH
+    //double ct = 0.;
     /// reference room temperature for MPS algorithm [K]
     double roomTemperature = 0.;
     /// activation energies
