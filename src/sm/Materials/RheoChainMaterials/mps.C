@@ -211,7 +211,12 @@ MPSMaterial::initializeFrom(InputRecord &ir)
     double p_tilde = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, p_tilde, _IFT_MPSMaterial_p_tilde);
 
-    p = p_tilde / ( p_tilde - 1. );
+    if (p_tilde == 1.) {
+      p = 100.;
+    } else {
+      p = p_tilde / ( p_tilde - 1. );
+    }
+    
     IR_GIVE_OPTIONAL_FIELD(ir, p, _IFT_MPSMaterial_p);
 
     if ( p > 100. ) {
