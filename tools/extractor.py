@@ -321,8 +321,8 @@ def check_element_rec (context, kwd, line):
         if ((rec[0]=='er') and timeflag and (context.recnumber == rec[2]) and
             (context.recirule==rec[3]) and (context.recgpnum == rec[4])):
             #print ( "Found er: looking for ",rec[5],"in ", line )
-            
-            match=re.search(rec[5]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
+
+            match=re.search(rec[5]+'\s*((([+-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
             if match:
                 # print ( "match: ",match.group(1) )
                 context.recVal[irec]=re.split('\s+',match.group(1))[rec[6]-1]
