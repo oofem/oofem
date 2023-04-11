@@ -81,11 +81,11 @@ namespace oofem {
 	ENUM_ITEM_WITH_VALUE(E_yy, 32) /* Macroscopic strain component yy*/ \
 	ENUM_ITEM_WITH_VALUE(E_zz, 33) /* Macroscopic strain component zz*/ \
 	ENUM_ITEM_WITH_VALUE(E_yz, 34) /* Macroscopic strain component yz*/ \
-	ENUM_ITEM_WITH_VALUE(E_zy, 35) /* Macroscopic strain component yz*/ \
+	ENUM_ITEM_WITH_VALUE(E_zy, 35) /* Macroscopic strain component zy*/ \
   	ENUM_ITEM_WITH_VALUE(E_xz, 36) /* Macroscopic strain component xz*/ \
-        ENUM_ITEM_WITH_VALUE(E_zx, 37) /* Macroscopic strain component xz*/ \
+        ENUM_ITEM_WITH_VALUE(E_zx, 37) /* Macroscopic strain component zx*/ \
 	ENUM_ITEM_WITH_VALUE(E_xy, 38) /* Macroscopic strain component xy*/ \
-      	ENUM_ITEM_WITH_VALUE(E_yx, 39) /* Macroscopic strain component xy*/ \
+      	ENUM_ITEM_WITH_VALUE(E_yx, 39) /* Macroscopic strain component yx*/ \
  \
 	ENUM_ITEM_WITH_VALUE(G_yz, 40) /* Macroscopic shear strain component xy (E_yz+E_zy)*/ \
       	ENUM_ITEM_WITH_VALUE(G_xz, 41) /* Macroscopic shear strain component xz (E_xz+E_zx)*/ \

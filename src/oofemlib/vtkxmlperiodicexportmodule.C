@@ -422,14 +422,13 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(VTKPiece& vtkPiece,
         }
     }
 
-
-    vtkPiece.setNumberOfNodes(regionDofMans);   
-    vtkPiece.setNumberOfCells(regionSingleCells);
- 
     uniqueNodeTable.resizeWithData(nnodes + uniqueNodes, 3);
     regionDofMans = nnodes + uniqueNodes;
     regionG2LNodalNumbers.resizeWithValues(regionDofMans);
     regionL2GNodalNumbers.resize(regionDofMans);
+
+    vtkPiece.setNumberOfNodes(regionDofMans);
+    vtkPiece.setNumberOfCells(regionSingleCells);
 
     for ( int i = 1; i <= regionDofMans; i++ ) {
         if ( regionG2LNodalNumbers.at(i) ) {
