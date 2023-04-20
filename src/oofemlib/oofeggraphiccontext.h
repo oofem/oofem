@@ -36,18 +36,29 @@
 #ifndef oofeggraphiccontext_h
 #define oofeggraphiccontext_h
 
+#pragma once
+
 #include "oofemcfg.h"
 #include "intarray.h"
 #include "internalstatemode.h"
 #include "internalstatetype.h"
+#include "floatmatrix.h"
+#include "timer.h"
+#include "outputmanager.h"
+#include "floatarrayf.h"
 
+#include <iostream>
 #include <list>
 
 //
 // for c++ compiler to be successful on some c files
 //
 
+  
+#include <mathfem.h>
+
 extern "C" {
+  /*
  #define min __min
  #define max __max
  #define sgn __sgn
@@ -55,9 +66,9 @@ extern "C" {
  #define Status __Status
  #define Request __Request
  #define Complex __Complex
-
- #include <Esimple.h>
-
+  */
+  #include <Esimple.h>
+  /*
  #undef min
  #undef max
  #undef sgn
@@ -67,6 +78,7 @@ extern "C" {
  #undef PI
  #undef Complex
  #undef None
+  */
 };
 
 

@@ -431,7 +431,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
 
     // version II
     // determine surface center
-    IntArray snodes(4);
+    //IntArray snodes(4);
     FloatArray h1(3), h2(3), nn(3), n(3);
     int j;
     const char *colors[] = {
@@ -439,9 +439,9 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
     };
 
 
-    this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
+    IntArray snodes = this->interpolation.computeSurfaceMapping(dofManArray, isurf);
     for ( i = 1; i <= 4; i++ ) {
-        gc.add( * ( domain->giveNode( snodes.at(i) )->giveCoordinates() ) );
+        gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);
@@ -449,9 +449,9 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
     nn.zero();
     for ( i = 1; i <= 4; i++ ) {
         j = ( i ) % 4 + 1;
-        h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
+        h1 = domain->giveNode( snodes.at(i) )->giveCoordinates();
         h1.subtract(gc);
-        h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
+        h2 = domain->giveNode( snodes.at(j) )->giveCoordinates();
         h2.subtract(gc);
         n.beVectorProductOf(h1, h2);
         if ( n.dotProduct(n, 3) > 1.e-6 ) {

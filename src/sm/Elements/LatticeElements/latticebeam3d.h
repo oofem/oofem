@@ -98,9 +98,9 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+    void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 

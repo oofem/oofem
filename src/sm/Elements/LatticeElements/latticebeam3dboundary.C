@@ -54,6 +54,8 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "dof.h"
+
 #endif
 
 namespace oofem {
