@@ -285,7 +285,10 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
                 this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
-
+        
+#ifdef _OPENMP
+#pragma omp parallel for 
+#endif
         for ( auto &bc : domain->giveBcs() ) {
             ActiveBoundaryCondition *abc;
 
