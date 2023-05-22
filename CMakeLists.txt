@@ -385,25 +385,54 @@ endif ()
 
 if (USE_ONEAPI)
     if (USE_INTEL_MKL_PARDISO)
-        message (FATAL_ERROR "Can't use both OneMKL and classic Intel MKL CMake (disable USE_INTEL_MKL_PARDISO)")
+        message (FATAL_ERROR "Can't use both OneMKL and classic Intel MKL (disable USE_INTEL_MKL_PARDISO option)")
     endif()
+
     message(STATUS "Seeking OneAPI libraries...")
-    list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "pthread")
+    if (WIN32)
+        # Windows machine must use Intel OpenMP (libiomp5) for OneAPI
+        list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "libiomp5md")
+    else()
+        list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "pthread")
+    endif ()
     foreach (f ${MKL_LIBS})
+        # OneAPI installation directory
         if (INTEL_ONEAPI_DIR)
             # user provided OneAPI directory
-            set(oneapiMklDir "${INTEL_ONEAPI_DIR}/mkl/latest")
-            message(STATUS "   Seeking for ${f} in custom path: ${oneapiMklDir}...")
-            find_library (${f}_LIB ${f} HINTS "${oneapiMklDir}/lib" DOC "MKLPARDISO (library)")
-            include_directories ("${oneapiMklDir}/include")
-        else ()
-            # an alternative could be obtaining from OneAPI's Environment variables
+            message(STATUS "User has provided OneAPI installation directory...")
+            set(oneapiDir ${INTEL_ONEAPI_DIR})
+        elseif (WIN32)
+            # Windows
+            set(oneapiDir "C:/Program Files (x86)/Intel/oneAPI")
+        else()
+            # MacOS or Linux
             set(oneapiDir "/opt/intel/oneapi")
+        endif()
+
+        # library directory
+        # an alternative could be obtaining from OneAPI's Environment variables
+        if (WIN32)
+            # Windows
             set(oneapiMklDir "${oneapiDir}/mkl/latest")
-            message(STATUS "    Seeking for ${f} in default path: ${oneapiMklDir}...")
-            find_library (${f}_LIB ${f} HINTS "${oneapiMklDir}/lib" DOC "MKLPARDISO (library)")
-            include_directories ("${oneapiMklDir}/include")
-        endif ()
+            set(oneapiMklLibDir "${oneapiMklDir}/lib/intel64")
+            set(oneapiLibDir
+                    "${oneapiDir}/compiler/latest/windows/compiler/lib/intel64")
+        elseif(APPLE)
+            # MacOS
+            set(oneapiMklDir "${oneapiDir}/mkl/latest")
+            set(oneapiMklLibDir "${oneapiMklDir}/lib")
+            set(oneapiLibDir "")
+        elseif(UNIX)
+            # Linux (not tested)
+            set(oneapiMklDir "${oneapiDir}/mkl/latest")
+            set(oneapiMklLibDir "${oneapiMklDir}/lib/intel64_lin")
+            set(oneapiLibDir "")
+        endif()
+
+        message(STATUS "    Seeking for ${f} in: ${oneapiMklLibDir};${oneapiLibDir}...")
+        find_library (${f}_LIB ${f} HINTS "${oneapiMklLibDir}" "${oneapiLibDir}" DOC "MKLPARDISO (library)")
+        include_directories ("${oneapiMklDir}/include")
+
         if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
             message (FATAL_ERROR "OneAPI ${f} library not found")
         else()
@@ -411,7 +440,6 @@ if (USE_ONEAPI)
         endif ()
         list (APPEND EXT_LIBS ${${f}_LIB})
     endforeach ()
-    #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
     list (APPEND MODULE_LIST "MKLPARDISO")
 endif ()
 
