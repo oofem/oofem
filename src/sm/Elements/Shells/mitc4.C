@@ -1127,7 +1127,7 @@ void
 MITC4Shell::computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     const auto &coords2 = sgp->giveNaturalCoordinates();
-    FloatArray coords = { coords2 [ 0 ], coords [ 1 ], 0. };
+    FloatArray coords = { coords2 [ 0 ], coords2 [ 1 ], 0. };
     this->computeNmatrixAt(coords, answer);
 }
 
