@@ -1014,6 +1014,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setFunction", &oofem::Domain::py_setFunction, py::keep_alive<0, 2>())
         .def("resizeSets", &oofem::Domain::resizeSets)
         .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
+        .def("giveSet", &oofem::Domain::giveSet, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -1097,6 +1098,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
+        .def("giveSetNumber", &oofem::InitialCondition::giveSetNumber)
     ;
 
 //     py::class_<oofem::Timer>(m, "Timer")
@@ -1640,6 +1642,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
     m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
+    m.def("quadAxiSym1ht", &quadAxiSym1ht, py::return_value_policy::move);
     m.def("lspace", &lspace, py::return_value_policy::move);
     m.def("tr1ht", &tr1ht, py::return_value_policy::move);
     m.def("quad1ht", &quad1ht, py::return_value_policy::move);

@@ -237,6 +237,7 @@ py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("
 py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
+py::object quadAxiSym1ht(py::args args, py::kwargs &kw) { return createElementOfType("quadaxisym1ht",args,kw); }
 py::object lspace(py::args args, py::kwargs &kw) { return createElementOfType("lspace",args,kw); }
 py::object tr1ht(py::args args, py::kwargs &kw) { return createElementOfType("tr1ht",args,kw); }
 py::object quad1ht(py::args args, py::kwargs &kw) { return createElementOfType("quad1ht",args,kw); }
