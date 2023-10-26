@@ -774,8 +774,9 @@ if (USE_OOFEG)
         target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
+    add_dependencies(oofeg version)
 endif ()
-add_dependencies(oofeg version)
+
 
 add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
 add_dependencies(liboofem_benchmark version)
