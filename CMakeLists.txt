@@ -70,6 +70,19 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GN
 endif()
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
+
+#######################################################################
+# generate git-version signature
+#######################################################################
+include_directories(${CMAKE_BINARY_DIR})
+find_package(Git)
+add_custom_target(version
+  ${CMAKE_COMMAND} -D SRC=${oofem_SOURCE_DIR}/src/oofem_version.h.in
+                   -D DST=${CMAKE_BINARY_DIR}/oofem_version.h
+                   -D GIT_EXECUTABLE=${GIT_EXECUTABLE}
+                   -P ${CMAKE_SOURCE_DIR}/GenerateVersionHeader.cmake
+  )
+
 #######################################################################
 ######################## Custom paths #################################
 #######################################################################
@@ -743,6 +756,7 @@ else ()
   target_link_libraries (oofem ${EXT_LIBS})
 endif ()
 
+add_dependencies(oofem version)
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_MFRONT)
@@ -761,13 +775,16 @@ if (USE_OOFEG)
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()
+add_dependencies(oofeg version)
 
 add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
+add_dependencies(liboofem_benchmark version)
 set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (liboofem_benchmark liboofem benchmark)
 
 # Example of using liboofem with dynamic input record:
 add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+add_dependencies(beam2d_1 version)
 set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (beam2d_1 liboofem)
 

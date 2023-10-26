@@ -1,0 +1,4 @@
+#ifndef OOFEM_VERSION_H_
+#define OOFEM_VERSION_H_
+#define OOFEM_GIT_HASH "@OOFEM_GIT_HASH@"
+#endif  /* OOFEM_VERSION_H_ */
