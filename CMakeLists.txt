@@ -710,6 +710,8 @@ if (USE_SHARED_LIB)
         )
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
+    add_dependencies(liboofem version)
+
     if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
         set_target_properties (liboofem PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
     endif ()
@@ -750,13 +752,16 @@ endif ()
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  add_dependencies(oofem version)
+
   target_link_libraries (oofem liboofem)
 else ()
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  add_dependencies(oofem version)
+
   target_link_libraries (oofem ${EXT_LIBS})
 endif ()
 
-add_dependencies(oofem version)
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_MFRONT)
