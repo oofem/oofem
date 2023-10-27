@@ -25,6 +25,8 @@ set (oofem_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE Debug)
