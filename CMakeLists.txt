@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.1)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-message (${CMAKE_MODULE_PATH})
 
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
