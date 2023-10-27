@@ -16,3 +16,5 @@ add_library (mpm
     ${LIB_TYPE}
     ${mpm}
     )
+
+add_dependencies(mpm version)

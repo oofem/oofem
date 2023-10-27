@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 3.1)
+set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+message (${CMAKE_MODULE_PATH})
+
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -6,6 +9,8 @@ include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (ProcessorCount)
+include (GenerateVersion)
+
 
 # Use ccache if available. Needs to be performed early for it to work with cmake.
 find_program(CCACHE_PROGRAM ccache)
@@ -22,8 +27,6 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 string(TIMESTAMP YEAR "%Y")
 set (oofem_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (oofem_EMAIL "oofem@fsv.cvut.cz")
-
-set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -73,17 +76,7 @@ endif()
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
 
-#######################################################################
-# generate git-version signature
-#######################################################################
-include_directories(${oofem_BINARY_DIR})
-find_package(Git)
-add_custom_target(version
-  ${CMAKE_COMMAND} -D SRC=${oofem_SOURCE_DIR}/src/oofem_version.h.in
-                   -D DST=${oofem_BINARY_DIR}/oofem_version.h
-                   -D GIT_EXECUTABLE=${GIT_EXECUTABLE}
-                   -P ${CMAKE_SOURCE_DIR}/GenerateVersionHeader.cmake
-  )
+
 
 #######################################################################
 ######################## Custom paths #################################
