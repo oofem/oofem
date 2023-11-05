@@ -4,7 +4,8 @@ if(GIT_EXECUTABLE)
   get_filename_component(SRC_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
   #message (${SRC_DIR})
   execute_process(
-    COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
+    #COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
+    COMMAND ${GIT_EXECUTABLE} describe --tags --dirty
     WORKING_DIRECTORY ${SRC_DIR}
     OUTPUT_VARIABLE GIT_HASH
     RESULT_VARIABLE GIT_HASH_ERROR_CODE

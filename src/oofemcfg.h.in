@@ -18,9 +18,10 @@ ____________________________________________________\n"
   ____  ____  __________  ___\n\
  / __ \\/ __ \\/ __/ __/  |/  /___  _______ _\n\
 / /_/ / /_/ / _// _// /|_/ // _ \\/ __/ _ `/\n\
-\\____/\\____/_/ /___/_/  /_(_)___/_/  \\_, /  OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@ (Git Hash:" OOFEM_GIT_HASH ")\n\
+\\____/\\____/_/ /___/_/  /_(_)___/_/  \\_, /  OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@ \n\
                                     /___/   @oofem_COPYRIGHT@\n\
-################################################################################\n\n"
+################################################################################\n\
+Git URL:" OOFEM_GIT_REPOURL ",\n    branch:" OOFEM_GIT_BRANCH ", hash:" OOFEM_GIT_HASH "\n\n"
 
                                
 #define HOST_TYPE "@HOST_TYPE@"
