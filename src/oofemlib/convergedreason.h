@@ -31,11 +31,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
 
 #ifndef convergedreason_h
 #define convergedreason_h

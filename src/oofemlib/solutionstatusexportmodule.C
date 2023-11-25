@@ -162,19 +162,19 @@ SolutionStatusExportModule :: printRecsHeader()
     if (rec == "m") {  // metstep number
       label = "MetaStep";
     } else if (rec == "s") { // solution step number
-      label="Step";
+      label = "Step";
     } else if (rec == "a") { // attempt number
-      label="Attempt";
+      label = "Attempt";
     } else if (rec == "nite") { // number of iterations
-      label="Nite";
+      label = "Step.nite";
     } else if (rec == "t") {
-      label = "t";
+      label = "Step.t";
     } else if (rec == "dt") {
-      label = "dt";
+      label = "Step.dt";
     } else if (rec == "cr") {
       label = "Status";
     } else if (rec == "st") {
-      label = "Sol.Time";
+      label = "Solver.t";
     } else if (rec == "-") {
       label = "-";
     }
