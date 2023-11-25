@@ -46,7 +46,7 @@ DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
 
 DSSSolver :: ~DSSSolver() { }
 
-NM_Status
+ConvergedReason
 DSSSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
  #ifdef TIME_REPORT
@@ -68,7 +68,7 @@ DSSSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     OOFEM_LOG_INFO( "DSSSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
  #endif
 
-    return NM_Success;
+    return CR_CONVERGED;
 }
 } // end namespace oofem
 

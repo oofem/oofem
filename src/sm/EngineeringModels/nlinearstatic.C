@@ -75,7 +75,7 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     currentStepLength = 0.;
     loadLevel = cumulatedLoadLevel = 0.;
     mstepCumulateLoadLevelFlag = 0;
-    numMetStatus = NM_None;
+    numMetStatus = CR_UNKNOWN;
     stiffMode = nls_tangentStiffness; // default
     internalVarUpdateStamp = 0;
     initFlag = loadInitFlag = 1;

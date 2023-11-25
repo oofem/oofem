@@ -525,10 +525,12 @@ EngngModel :: solveYourself()
             this->updateYourself( this->giveCurrentStep() );
 
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
-
+            double _steptime = this->giveSolutionStepTime();
+            this->giveCurrentStep()->solutionTime = _steptime;
+            
             this->terminate( this->giveCurrentStep() );
 
-            double _steptime = this->giveSolutionStepTime();
+
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 

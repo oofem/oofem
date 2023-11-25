@@ -47,7 +47,7 @@ LDLTFactorization :: ~LDLTFactorization()
 {
 }
 
-NM_Status
+ConvergedReason
 LDLTFactorization :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
     // check whether Lhs supports factorization
@@ -60,6 +60,6 @@ LDLTFactorization :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     // solving
     A.factorized()->backSubstitutionWith(x);
 
-    return NM_Success;
+    return CR_CONVERGED;
 }
 } // end namespace oofem

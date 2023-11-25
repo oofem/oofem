@@ -36,6 +36,7 @@
 
 #include "sparselinsystemnm.h"
 #include "petscsparsemtrx.h"
+#include "convergedreason.h"
 
 #define _IFT_PetscSolver_Name "petsc"
 
@@ -60,16 +61,16 @@ public:
 
     virtual ~PetscSolver();
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     /**
      * Solves the given linear system.
      * @param A Coefficient matrix.
      * @param b Right hand side (PETSC Vec(tor)).
      * @param x Solution array(PETSC Vec(tor)).
-     * @return NM_Status value.
+     * @return ConvergedReason value.
      */
-    NM_Status petsc_solve(PetscSparseMtrx &A, Vec b, Vec x);
+    ConvergedReason petsc_solve(PetscSparseMtrx &A, Vec b, Vec x);
 
     const char *giveClassName() const override { return "PetscSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_Petsc; }

@@ -468,6 +468,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray externalForces(neq);
+    ConvergedReason status = CR_UNKNOWN;
     this->internalForces.resize(neq);
 
     if ( tStep->isTheFirstStep() ) {
@@ -574,7 +575,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateInternalRHS( this->internalForces, tStep, this->giveDomain(1), &this->eNorm );
-    NM_Status status = this->nMethod->solve(*this->lhs,
+    ConvergedReason status = this->nMethod->solve(*this->lhs,
                                             externalForces,
                                             NULL,
                                             solutionVector,
@@ -586,7 +587,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 
-    if ( !( status & NM_Success ) ) {
+    if ( status != CR_CONVERGED) {
         OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
     }
     
@@ -757,11 +758,13 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
     if ( nite <= maxiter ) {
         OOFEM_LOG_INFO("SUPG info: number of iterations: %d\n", nite);
+        status = CR_CONVERGED;
     } else {
         OOFEM_WARNING("Convergence not reached, number of iterations: %d\n", nite);
         if ( stopmaxiter ) {
             exit(1);
         }
+        status = CR_DIVERGED_ITS;
     }
 #endif
 
@@ -784,6 +787,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
     // update solution state counter
     tStep->incrementStateCounter();
+    tStep->convergedReason = status;
 }
 
 

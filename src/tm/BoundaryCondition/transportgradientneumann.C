@@ -409,7 +409,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     us.times( KusD.computeFrobeniusNorm() / KusD0.computeFrobeniusNorm() );
 #endif
 
-    if ( solver->solve(*Kuu, KusD, us) & NM_NoSuccess ) {
+    if ( solver->solve(*Kuu, KusD, us) != CR_CONVERGED ) {
         OOFEM_ERROR("Failed to solve Kuu");
     }
     us.negated();

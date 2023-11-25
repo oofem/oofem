@@ -37,7 +37,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 #include "engngm.h"
 
 namespace oofem {
@@ -51,7 +51,7 @@ LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :
     minEta = 0.2;
 }
 
-NM_Status
+ConvergedReason
 LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                       IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep)
 {
@@ -81,7 +81,7 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
         engngModel->updateComponent(tStep, InternalRhs, domain);
         etaValue = 1.0;
         status = ls_ok;
-        return NM_Success;
+        return CR_CONVERGED;
     }
 
     // keep original total displacement r
@@ -130,7 +130,7 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
 
             etaValue = eta.at(ils);
             status = ls_ok;
-            return NM_Success;
+            return CR_CONVERGED;
         }
 
         // call line-search routine to get new estimate of eta.at(ils)
@@ -152,7 +152,7 @@ LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &
     engngModel->updateComponent(tStep, InternalRhs, domain);
     etaValue = 1.0;
     status = ls_failed;
-    return NM_NoSuccess;
+    return CR_DIVERGED_ITS;
 }
 
 

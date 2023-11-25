@@ -36,6 +36,8 @@
 #define pardisoprojectorgsolver_h
 
 #include "sparselinsystemnm.h"
+#include "convergedreason.h"
+
 /* PARDISO prototype. */
 extern "C" void pardisoinit(void *, int *,   int *, int *, double *, int *);
 extern "C" void pardiso(void *, int *,   int *, int *,    int *, int *,
@@ -67,7 +69,7 @@ public:
 
     virtual ~PardisoProjectOrgSolver();
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     const char *giveClassName() const override { return "PardisoProjectOrgSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_PardisoProjectOrg; }

@@ -63,7 +63,7 @@ DynamicRelaxationSolver :: initializeFrom(InputRecord &ir)
 }
 
 
-NM_Status
+ConvergedReason
 DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
@@ -75,7 +75,7 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
 
     double RRT;
     int neq = X.giveSize();
-    NM_Status status = NM_None;
+    ConvergedReason status = CR_UNKNOWN;
     bool converged, errorOutOfRangeFlag;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
     if ( engngModel->giveProblemScale() == macroScale ) {
@@ -126,16 +126,17 @@ DynamicRelaxationSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
 
         converged = this->checkConvergence(RT, F, rhs, ddX, X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( errorOutOfRangeFlag ) {
-            status = NM_NoSuccess;
+            status = CR_DIVERGED_TOL;
             dX.zero();
             X.zero();
             OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
-            status |= NM_Success;
+            status = CR_CONVERGED;
             break;
         } else if ( nite >= nsmax ) {
             OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
+            status = CR_DIVERGED_ITS;
             break;
         }
 

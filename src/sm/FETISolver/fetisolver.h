@@ -37,6 +37,7 @@
 
 #include "sm/FETISolver/feticommunicator.h"
 #include "sparselinsystemnm.h"
+#include "convergedreason.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -109,9 +110,9 @@ public:
      * @param A Coefficient matrix
      * @param b Right hand side
      * @param x Solution array
-     * @return NM_Status value
+     * @return ConvergedReason value
      */
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     int estimateMaxPackSize(IntArray &, DataStream &, int &);
     /// Sets up the communication maps

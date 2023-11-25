@@ -51,7 +51,7 @@ InverseIteration :: InverseIteration(Domain *d, EngngModel *m) :
 }
 
 
-NM_Status
+ConvergedReason
 InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &eigv, FloatMatrix &r, double rtol, int nroot)
 {
     if ( a.giveNumberOfColumns() != b.giveNumberOfColumns() ) {
@@ -169,8 +169,9 @@ InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &eigv, FloatM
         OOFEM_LOG_INFO("InverseIt info: convergence reached in %d iterations\n", it);
     } else {
         OOFEM_WARNING("convergence not reached after %d iterations\n", it);
+        return CR_DIVERGED_ITS;
     }
 
-    return NM_Success;
+    return CR_CONVERGED;
 }
 } // end namespace oofem

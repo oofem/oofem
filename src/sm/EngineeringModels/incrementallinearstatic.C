@@ -306,10 +306,11 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, incrementOfDisplacementVector);
-    if ( !( s & NM_Success ) ) {
+    ConvergedReason s = nMethod->solve(*stiffnessMatrix, loadVector, incrementOfDisplacementVector);
+    if ( s!= CR_CONVERGED) {
         OOFEM_ERROR("No success in solving system.");
     }
+    tStep->convergedReason = s;
 }
 
 

@@ -1607,7 +1607,7 @@ ConcreteDPM2::checkForVertexCase(double &answer,
                                  double tempKappa,
                                  GaussPoint *gp) const
 {
-    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+    //auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     answer = 0.;
     if ( sig > 0. ) {
@@ -1632,7 +1632,7 @@ ConcreteDPM2::performVertexReturn(FloatArrayF< 6 > &effectiveStress,
     auto deviatoricStressTrial = tmp.first;
     auto sigTrial = tmp.second;
 
-    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+    //auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     double rhoTrial = computeSecondCoordinate(deviatoricStressTrial);
 

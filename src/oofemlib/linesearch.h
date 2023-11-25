@@ -37,7 +37,7 @@
 #define linesearch_h
 
 #include "nummet.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 
 ///@name Input fields for LineSearchNM
@@ -88,7 +88,7 @@ public:
      * @param status Linesearch status
      * @param tStep Time step.
      */
-    NM_Status solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
+    ConvergedReason solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                     IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
     void initializeFrom(InputRecord &ir) override;

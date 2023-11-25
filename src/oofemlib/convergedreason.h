@@ -31,22 +31,27 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-#ifndef nmstatus_h
-#define nmstatus_h
-
-namespace oofem {
-/**
- * Mask defining NumMetod Status; which can be asked after
- * finishing computation by Numerical Method.
- * this mask should report some situation.
+/*
+ * The original idea for this class comes from
+ * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
+ * PhD Thesis, EPFL, Lausanne, 1992.
  */
-typedef unsigned long NM_Status;
 
-#define NM_None         0
-#define NM_Success      ( 1L << 1 ) ///< Numerical method exited with success.
-#define NM_NoSuccess    ( 1L << 2 ) ///< Numerical method failed to solve problem.
-#define NM_KeepTangent  ( 1L << 3 ) ///< Don't assemble new tangent, but use previous.
-#define NM_ForceRestart ( 1L << 4 )
+#ifndef convergedreason_h
+#define convergedreason_h
+namespace oofem {
+  /**
+   * Typedef to determine reason for a  solver to have converged or diverged
+   */
+  typedef enum {
+    CR_UNKNOWN                             = 0,
+    /* converged */
+    CR_CONVERGED                           = 1,
+    /* diverged */
+    CR_DIVERGED_ITS                        = -1,
+    CR_DIVERGED_TOL                        = -2,
+    /* failed */
+    CR_FAILED                              = -99
+  } ConvergedReason;
 } // end namespace oofem
-#endif // nmstatus_h
+#endif // convergedreason_h

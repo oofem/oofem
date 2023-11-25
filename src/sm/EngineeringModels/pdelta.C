@@ -164,12 +164,12 @@ void Pdelta :: solveYourselfAt(TimeStep *tStep)
             //this->assembleVector(rhs, tStep, EquivalentLateralLoadAssembler(), VM_Total,
             //                     this->giveEquationNumbering(), this->giveDomain(1) );
         }
-        NM_Status s = nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
+        ConvergedReason s = nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
     
-        if ( !( s & NM_Success ) ) {
+        if ( s != CR_CONVERGED ) {
             OOFEM_ERROR("No success in solving system.");
         }
-
+        tStep->convergedReason = s;
         tStep->incrementStateCounter();            // update solution state counter
         previousDisplacementVector.subtract(displacementVector);
         error = previousDisplacementVector.computeNorm()/displacementVector.computeNorm();

@@ -44,6 +44,7 @@
 #include "sparsemtrx.h"
 #include "floatarray.h"
 #include "linesearch.h"
+#include "convergedreason.h"
 
 #include <memory>
 #include <map>
@@ -168,7 +169,7 @@ public:
     virtual ~NRSolver();
 
     // Overloaded methods:
-    NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+    ConvergedReason solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                     FloatArray &X, FloatArray &dX, FloatArray &F,
                     const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                     int &nite, TimeStep *) override;

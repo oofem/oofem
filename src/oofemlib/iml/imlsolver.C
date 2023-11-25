@@ -98,7 +98,7 @@ IMLSolver :: initializeFrom(InputRecord &ir)
 }
 
 
-NM_Status
+ConvergedReason
 IMLSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
     int result;
@@ -143,6 +143,6 @@ IMLSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
 #endif
 
-    return NM_Success;
+    return (result == 0)?CR_CONVERGED:CR_DIVERGED_ITS;
 }
 } // end namespace oofem

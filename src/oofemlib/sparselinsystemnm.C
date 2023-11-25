@@ -44,9 +44,9 @@ SparseLinearSystemNM :: SparseLinearSystemNM(Domain *d, EngngModel *m) : Numeric
 SparseLinearSystemNM :: ~SparseLinearSystemNM()
 { }
 
-NM_Status SparseLinearSystemNM :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
+ConvergedReason SparseLinearSystemNM :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
 {
-    NM_Status status = NM_None;
+    ConvergedReason status = CR_UNKNOWN;
     int neq = A.giveNumberOfRows();
     int nrhs = B.giveNumberOfColumns();
     if ( A.giveNumberOfRows() != B.giveNumberOfRows() ) {
@@ -60,7 +60,7 @@ NM_Status SparseLinearSystemNM :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatr
         B.copyColumn(bi, i);
         X.copyColumn(xi, i);
         status = this->solve(A, bi, xi);
-        if ( status & NM_NoSuccess ) {
+        if ( status != CR_CONVERGED ) {
             return status;
         }
         X.setColumn(xi, i);

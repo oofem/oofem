@@ -46,6 +46,7 @@
 #include "statecountertype.h"
 #include "timediscretizationtype.h"
 #include "inputrecord.h"
+#include "convergedreason.h"
 
 namespace oofem {
 class EngngModel;
@@ -106,7 +107,21 @@ protected:
     int mStepNumber;
     /// Time discretization.
     TimeDiscretizationType timeDiscretization;
-
+ public:
+   /** 
+    * @name Generic attributes to track solution status
+    */
+   //@{
+     /// Number of itarations needed to achieve convergence
+     int numberOfIterations;
+     /// Number of attempts (reduction ot time incerement, etc) needed to reach convergence
+     int numberOfAttempts;
+     /// Status of solution step (Converged, 
+     ConvergedReason convergedReason;
+     /// time step solution time in seconds
+     double solutionTime;
+   //@}
+ 
 public:
     /**
      * Creates a new solution step.

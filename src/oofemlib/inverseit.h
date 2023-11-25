@@ -36,6 +36,7 @@
 #define inverseit_h
 
 #include "sparsegeneigenvalsystemnm.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 
 #define _IFT_InverseIteration_Name "inverseit"
@@ -88,7 +89,7 @@ public:
     InverseIteration(Domain * d, EngngModel * m);
     virtual ~InverseIteration() {}
 
-    NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) override;
+    ConvergedReason solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) override;
     const char *giveClassName() const override { return "InverseIteration"; }
 };
 } // end namespace oofem

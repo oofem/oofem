@@ -37,6 +37,7 @@
 #define subspaceit_h
 
 #include "sparsegeneigenvalsystemnm.h"
+#include "convergedreason.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
 
@@ -94,7 +95,7 @@ public:
     SubspaceIteration(Domain * d, EngngModel * m);
     virtual ~SubspaceIteration() {}
 
-    NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) override;
+    ConvergedReason solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) override;
     const char *giveClassName() const override { return "SubspaceIterationSolver"; }
 };
 } // end namespace oofem

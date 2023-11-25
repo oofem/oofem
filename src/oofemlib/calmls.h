@@ -41,6 +41,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "dofiditem.h"
@@ -230,7 +231,7 @@ public:
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+    ConvergedReason solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
                     FloatArray &X, FloatArray &dX, FloatArray &F,
                     const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                     int &nite, TimeStep *) override;

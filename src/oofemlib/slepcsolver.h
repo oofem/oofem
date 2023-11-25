@@ -36,6 +36,7 @@
 #define slepcsolver_h
 
 #include "sparsegeneigenvalsystemnm.h"
+#include "convergedreason.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
 
@@ -63,7 +64,7 @@ public:
     SLEPcSolver(Domain * d, EngngModel * m);
     virtual ~SLEPcSolver();
 
-    NM_Status solve(SparseMtrx &a, SparseMtrx &b, FloatArray &v, FloatMatrix &x, double rtol, int nroot) override;
+    ConvergedReason solve(SparseMtrx &a, SparseMtrx &b, FloatArray &v, FloatMatrix &x, double rtol, int nroot) override;
     const char *giveClassName() const override { return "SLEPcSolver"; }
 };
 } // end namespace oofem

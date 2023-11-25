@@ -42,7 +42,7 @@
 #define sparsenonlinsystemnm_h
 
 #include "nummet.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 #include "intarray.h"
 
@@ -116,9 +116,9 @@ public:
      * @param rlm Reference load mode.
      * @param nite Number of iterations needed.
      * @param tStep Time step to solve for.
-     * @return NM_Status value.
+     * @return ConvergedReason value.
      */
-    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+    virtual ConvergedReason solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
                             FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *tStep) = 0;

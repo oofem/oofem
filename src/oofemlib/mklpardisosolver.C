@@ -42,6 +42,7 @@
 #include "timer.h"
 #include "error.h"
 #include "classfactory.h"
+#include "convergedreason.h"
 
 #include <mkl.h>
 
@@ -52,7 +53,7 @@ MKLPardisoSolver :: MKLPardisoSolver(Domain *d, EngngModel *m) : SparseLinearSys
 
 MKLPardisoSolver :: ~MKLPardisoSolver() { }
 
-NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
+ConvergedReason MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
     int neqs = b.giveSize();
     x.resize(neqs);
@@ -69,7 +70,7 @@ NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 
     // Pardiso's CGS-implementation can't handle b = 0.
     if ( b.computeSquaredNorm() == 0 ) {
-        return NM_Success;
+        return CR_CONVERGED;
     }
 
     const int *ia = mat->giveColPtr().givePointer();
@@ -127,7 +128,7 @@ NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 
     if ( error != 0 ) {
         OOFEM_WARNING("Error during symbolic factorization: %d", error);
-        return NM_NoSuccess;
+        return CR_FAILED;
     }
     OOFEM_LOG_DEBUG("Reordering completed: %d nonzero factors, %d factorization MFLOPS\n", iparm[17-1], iparm[18-1]);
    
@@ -142,7 +143,7 @@ NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 
     if ( error != 0 ) {
         OOFEM_WARNING("ERROR during numerical factorization: %d", error);
-        return NM_NoSuccess;
+        return CR_FAILED;
     }
     OOFEM_LOG_DEBUG("Factorization completed ...\n");
 
@@ -158,7 +159,7 @@ NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     printf("iparm(20) = %d\n", iparm[20]);
     if ( error != 0 ) {
         OOFEM_WARNING("ERROR during solution: %d, iparm(20) = %d", error, iparm[20-1]);
-        return NM_NoSuccess;
+        return CR_FAILED;
     }
 
     OOFEM_LOG_DEBUG("Solve completed ... \n");
@@ -175,13 +176,12 @@ NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     timer.stopTimer();
     OOFEM_LOG_INFO( "MKLPardisoSolver:  User time consumed by solution: %.2fs\n", timer.getUtime() );
 
-    NM_Status s = NM_Success;
-    return s;
+    return CR_CONVERGED;
 }
 
 #if 0
 ///@todo Parallel mode of this.
-NM_Status MKLPardisoSolver :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
+ConvergedReason MKLPardisoSolver :: solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X)
 {
     ///@todo Write subfunction for this as to not repeat everything. Should be easy to add. It is very important to add this support(!!!!!)
 }

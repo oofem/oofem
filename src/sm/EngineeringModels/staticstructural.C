@@ -343,7 +343,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     }
 
     int currentIterations;
-    NM_Status status;
+    ConvergedReason status;
     if ( this->nMethod->referenceLoad() ) {
         status = this->nMethod->solve(*this->stiffnessMatrix,
                                       referenceForces,
@@ -369,9 +369,11 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
     }
-    if ( !( status & NM_Success ) ) {
+    if (status != CR_CONVERGED) {
       OOFEM_WARNING("No success in solving problem at step %d", tStep->giveNumber());
     }
+    tStep->numberOfIterations = currentIterations;
+    tStep->convergedReason = status;
 }
 
 void StaticStructural :: terminate(TimeStep *tStep)
