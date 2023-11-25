@@ -54,6 +54,14 @@
 #include "classfactory.h"
 #include "connectivitytable.h"
 
+
+#ifdef __OOFEG
+ #include "node.h"
+ #include "oofeggraphiccontext.h"
+ #include "connectivitytable.h"
+#endif
+
+
 namespace oofem {
 REGISTER_Element(MITC4Shell);
 
@@ -1182,4 +1190,139 @@ MITC4Shell::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const Flo
     this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n_vec, 6);
 }
+
+
+//
+// io routines
+//
+#ifdef __OOFEG
+
+void
+MITC4Shell :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    WCRec p [ 4 ];
+    GraphicObj *go;
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( this->isActivated(tStep) ) {
+        EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+        EASValsSetColor( gc.getElementColor() );
+        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetEdgeFlag(true);
+        EASValsSetFillStyle(FILL_SOLID);
+        EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+        for (int i=0; i<4; i++) {
+          p [ i ].x = ( FPNum ) this->giveNode(i+1)->giveCoordinate(1);
+          p [ i ].y = ( FPNum ) this->giveNode(i+1)->giveCoordinate(2);
+          p [ i ].z = ( FPNum ) this->giveNode(i+1)->giveCoordinate(3);
+        }
+        go =  CreateQuad3D(p);
+        EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+        EGAttachObject(go, ( EObjectP ) this);
+        EMAddGraphicsToModel(ESIModel(), go);
+    }
+}
+
+void
+MITC4Shell :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+{
+    WCRec p [ 4 ];
+    GraphicObj *go;
+    double defScale = gc.getDefScale();
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( this->isActivated(tStep) ) {
+        EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+        EASValsSetColor( gc.getDeformedElementColor() );
+        EASValsSetEdgeColor( gc.getElementEdgeColor() );
+        EASValsSetEdgeFlag(true);
+        EASValsSetFillStyle(FILL_SOLID);
+        EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
+        for (int i=0; i<4; i++) {
+          p [ i ].x = ( FPNum ) this->giveNode(i+1)->giveUpdatedCoordinate(1, tStep, defScale);
+          p [ i ].y = ( FPNum ) this->giveNode(i+1)->giveUpdatedCoordinate(2, tStep, defScale);
+          p [ i ].z = ( FPNum ) this->giveNode(i+1)->giveUpdatedCoordinate(3, tStep, defScale);
+        }
+        go =  CreateQuad3D(p);
+        EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+        EMAddGraphicsToModel(ESIModel(), go);
+    }
+}
+
+void
+MITC4Shell :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    int indx, result = 0;
+    WCRec p [ 4 ];
+    GraphicObj *tr;
+    FloatArray v1, v2, v3, v4;
+    double s [ 4 ], defScale;
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
+
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+        result += this->giveInternalStateAtNode(v4, gc.giveIntVarType(), gc.giveIntVarMode(), 4, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
+        double tot_w = 0.;
+        FloatArray a, v;
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+            this->giveIPValue(a, gp, IST_ShellMomentTensor, tStep);
+            v.add(gp->giveWeight(), a);
+            tot_w += gp->giveWeight();
+        }
+        v.times(1. / tot_w);
+        v1 = v;
+        v2 = v;
+        v3 = v;
+        v4 = v;
+    }
+
+    indx = gc.giveIntVarIndx();
+
+    s [ 0 ] = v1.at(indx);
+    s [ 1 ] = v2.at(indx);
+    s [ 2 ] = v3.at(indx);
+    s [ 3 ] = v4.at(indx);
+    EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
+        for ( int i = 0; i < 4; i++ ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
+                // use deformed geometry
+                defScale = gc.getDefScale();
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
+            } else {
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+            }
+        }
+        //     //EASValsSetColor(gc.getYieldPlotColor(ratio));
+        gc.updateFringeTableMinMax(s, 3);
+        tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s[3]);
+        EGWithMaskChangeAttributes(LAYER_MASK, tr);
+        EMAddGraphicsToModel(ESIModel(), tr);
+    }
+}
+
+#endif
+
+
+
+
 } // end namespace oofem
