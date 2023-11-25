@@ -110,6 +110,11 @@ public:
     void incrementErrorCounter() {numberOfErr++;}
     /// Prints number of errors and warning logged.
     void printStatistics();
+    /// Returns local (mpi-process) statistics
+    void getNumberOfWarningsAndErrors(int& nwrns, int &nerrs) {
+      nwrns = numberOfWrn;
+      nerrs = numberOfErr;
+    }
 
 protected:
     const char *giveLevelName(logLevelType l) const;

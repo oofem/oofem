@@ -189,6 +189,7 @@ set (core_export
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
+    solutionstatusexportmodule.C
     )
 
 set (core_monitors
