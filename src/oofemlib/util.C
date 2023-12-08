@@ -167,7 +167,7 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
     }
 
     problem->instanciateYourself( dr, *emodelir, dataOutputFileName.c_str(), desc.c_str() );
-    emodelir->finish();
+    //emodelir->finish();
 
     return problem;
 }
