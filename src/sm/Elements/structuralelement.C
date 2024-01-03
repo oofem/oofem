@@ -38,9 +38,7 @@
 #include "sm/Materials/structuralms.h"
 #include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "sm/Materials/LatticeMaterials/latticematstatus.h"
-#include "Loads/structtemperatureload.h"
 #include "sm/Materials/structuralnonlocalmaterialext.h"
-#include "Loads/structeigenstrainload.h"
 #include "feinterpol.h"
 #include "domain.h"
 #include "material.h"
@@ -501,15 +499,14 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     for ( int i = 1; i <= nbc; ++i ) {
         GeneralBoundaryCondition *bc = domain->giveBc(i);
 
-        if ( ( load = dynamic_cast< StructuralTemperatureLoad * >( bc ) ) ) {
-            if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
-                if ( load->giveBCValType() == TemperatureBVT ) {
-                    Set *set = domain->giveSet(bc->giveSetNumber() );
+        if ( bc->giveBCValType() == TemperatureBVT ) {
+            if ( bc->giveSetNumber() && bc->isImposed( tStep ) ) {
+                Set *set = domain->giveSet( bc->giveSetNumber() );
 
-                    if ( set->hasElement(this->giveNumber() ) ) {
-                        load->computeValueAt(temperature, tStep, gCoords, mode);
-                        answer.add(temperature);
-                    }
+                if ( set->hasElement( this->giveNumber() ) ) {
+                    load = static_cast<Load *>( bc );
+                    load->computeValueAt( temperature, tStep, gCoords, mode );
+                    answer.add( temperature );
                 }
             }
         }
@@ -548,15 +545,14 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     for ( int i = 1; i <= nbc; ++i ) {
         GeneralBoundaryCondition *bc = domain->giveBc(i);
 
-        if  ( ( load = dynamic_cast< StructuralEigenstrainLoad * >( bc ) ) ) {
-            if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
-                if ( load->giveBCValType() == EigenstrainBVT ) {
-                    Set *set = domain->giveSet(bc->giveSetNumber() );
+        if ( bc->giveBCValType() == EigenstrainBVT ) {
+            if ( bc->giveSetNumber() && bc->isImposed( tStep ) ) {
+                Set *set = domain->giveSet( bc->giveSetNumber() );
 
-                    if ( set->hasElement(this->giveNumber() ) ) {
-                        load->computeValueAt(eigenstrain, tStep, gCoords, mode);
-                        answer.add(eigenstrain);
-                    }
+                if ( set->hasElement( this->giveNumber() ) ) {
+                    load = static_cast<Load *>( bc );
+                    load->computeValueAt( eigenstrain, tStep, gCoords, mode );
+                    answer.add( eigenstrain );
                 }
             }
         }
