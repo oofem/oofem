@@ -505,9 +505,8 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
             if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
                 if ( load->giveBCValType() == TemperatureBVT ) {
                     Set *set = domain->giveSet(bc->giveSetNumber() );
-                    const IntArray &elements = set->giveElementList();
 
-                    if ( elements.contains(this->giveNumber() ) ) {
+                    if ( set->hasElement(this->giveNumber() ) ) {
                         load->computeValueAt(temperature, tStep, gCoords, mode);
                         answer.add(temperature);
                     }
@@ -553,9 +552,8 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
             if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {
                 if ( load->giveBCValType() == EigenstrainBVT ) {
                     Set *set = domain->giveSet(bc->giveSetNumber() );
-                    const IntArray &elements = set->giveElementList();
 
-                    if ( elements.contains(this->giveNumber() ) ) {
+                    if ( set->hasElement(this->giveNumber() ) ) {
                         load->computeValueAt(eigenstrain, tStep, gCoords, mode);
                         answer.add(eigenstrain);
                     }

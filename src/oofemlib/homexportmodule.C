@@ -84,6 +84,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
         elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
     }
+    elements.sort();
     //elements.printYourself();
     
     if (!ists.isEmpty()) {
@@ -139,7 +140,7 @@ HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, bool str
     Domain *d = emodel->giveDomain(1);
     for ( auto &elem : d->giveElements() ) {
         //printf("%d ", elem -> giveNumber());
-        if ( elements.contains(elem -> giveNumber()) ){
+        if ( elements.containsSorted(elem -> giveNumber()) ){
             for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                 double dV = elem->computeVolumeAround(gp);
                 volTot += dV;
