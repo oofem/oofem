@@ -44,8 +44,6 @@
 #define _IFT_Lattice2dBoundary_location "location"
 //@}
 
-#define TOL 1.e-8
-
 namespace oofem {
 class Lattice2dBoundary : public Lattice2d
 {

@@ -91,10 +91,11 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
         elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
     }
+    elements.sort();
     
     // loop over elements
     for ( auto &elem : d->giveElements() ) {
-        if ( elements.contains(elem -> giveNumber()) ){
+        if ( elements.containsSorted(elem -> giveNumber()) ){
             
             //iRule = elem->giveDefaultIntegrationRulePtr();
             //int numIntRules = elem->giveNumberOfIntegrationRules();
