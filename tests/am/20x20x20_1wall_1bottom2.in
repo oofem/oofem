@@ -1,0 +1,3 @@
+20x20x20_1wall_1bottom2.out
+Additive manufacturing - sample analysis of a 20x20x20mm hollow cube
+AdditiveManufacturingProblem nsteps 1 timedefinedbyprob 1 prob1 "20x20x20_1wall_1bottom2.in.tm" prob2 "20x20x20_1wall_1bottom2.in.sm" gcode "20x20x20_1wall_1bottom.gcode" stepx 1 stepy 1 stepz 1 minvof 0.1
