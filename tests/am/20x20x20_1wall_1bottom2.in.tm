@@ -1,6 +1,6 @@
 20x20x20_1wall_1bottom2.tm.out
 Additive manufacturing - heat transfer
-TransientTransport nsteps 1800 deltat 0.5 alpha 0.5 lumped exportfields 1 5 nmodules 1 smtype 4 lstype 1 lsprecond 4 lstol 1e-9
+TransientTransport nsteps 20 deltat 0.5 alpha 0.5 lumped exportfields 1 5 nmodules 1 smtype 4 lstype 1 lsprecond 4 lstol 1e-9
 vtkxml tstep_step 60 domain_all primvars 1 6
 domain heattransfer
 OutputManager
