@@ -1091,4 +1091,23 @@ void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
     ///@todo This duplicates the "copyColumn" from FloatMatrix.
     mat.copyColumn(*this, col);
 }
+
+void FloatArray :: beRowOf(const FloatMatrix &mat, int row)
+{
+    int nRows = mat.giveNumberOfRows();
+    int nColumns = mat.giveNumberOfColumns();
+
+#  ifndef NDEBUG
+    if (row>nRows) {
+        OOFEM_ERROR( "dimension mismatch, matrix rows = %d, wanted row = %d", nRows, row)    
+    }
+#  endif    
+    
+    FAST_RESIZE(nColumns);
+    for ( int i = 1; i <= nColumns; i++ ) {
+        this->at(i) = mat.at(row,i);
+    }
+}
+    
+    
 } // end namespace oofem

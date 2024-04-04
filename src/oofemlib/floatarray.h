@@ -524,6 +524,11 @@ public:
      */
     void beColumnOf(const FloatMatrix &mat, int col);
 
+    /**
+     * Reciever will be set to a given row in a matrix
+     */
+    void beRowOf(const FloatMatrix &mat, int row);
+    
     contextIOResultType storeYourself(DataStream &stream) const;
     contextIOResultType restoreYourself(DataStream &stream);
     int givePackSize(DataStream &buff) const;

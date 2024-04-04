@@ -1281,8 +1281,6 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
         vtkPieces [ 0 ].setCellType(i + 1, 3);
     }
 
-
-
     InternalStateType isttype;
     int n = internalVarsToExport.giveSize();
     vtkPieces [ 0 ].setNumberOfInternalVarsToExport(internalVarsToExport, nNodes);
@@ -1294,6 +1292,24 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
                 FloatArray endForces;
                 this->giveInternalForcesVectorAtPoint(endForces, tStep, coords);
                 vtkPieces [ 0 ].setInternalVarInNode(isttype, nN, endForces);
+            } else if ( isttype == IST_X_LCS || isttype == IST_Y_LCS || isttype == IST_Z_LCS ) {
+                FloatArray answer;
+                FloatMatrix rotMat;
+                int col = 0;
+                if ( isttype == IST_X_LCS ) {
+                    col = 1;
+                } else if ( isttype == IST_Y_LCS ) {
+                    col = 2;
+                } else if ( isttype == IST_Z_LCS ) {
+                    col = 3;
+                }
+
+                if ( !this->giveLocalCoordinateSystem(rotMat) ) {
+                    rotMat.resize(3, 3);
+                    rotMat.beUnitMatrix();
+                }
+                answer.beRowOf(rotMat, col);
+                vtkPieces[0].setInternalVarInNode(isttype, nN, answer);
             } else {
                 fprintf( stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }

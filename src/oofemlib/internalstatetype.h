@@ -192,7 +192,11 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_MacroSlipVector, 142) \
     ENUM_ITEM_WITH_VALUE(IST_TransferStress, 143) \
     ENUM_ITEM_WITH_VALUE(IST_MacroSlipGradient, 144) \
-    ENUM_ITEM_WITH_VALUE(IST_ReinfMembraneStress, 145)
+    ENUM_ITEM_WITH_VALUE(IST_ReinfMembraneStress, 145) \
+    ENUM_ITEM_WITH_VALUE(IST_X_LCS, 146) /*Unit vector in local coordinate system in the x direction (usable for diagrams of internal forces for VTK export)*/ \
+    ENUM_ITEM_WITH_VALUE(IST_Y_LCS, 147) \
+    ENUM_ITEM_WITH_VALUE(IST_Z_LCS, 148)
+    
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
