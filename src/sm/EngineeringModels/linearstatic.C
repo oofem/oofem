@@ -244,11 +244,12 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
-    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
-    if ( !( s & NM_Success ) ) {
+    ConvergedReason s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
+    if ( s != CR_CONVERGED ) {
         OOFEM_ERROR("No success in solving system.");
     }
-
+    tStep->numberOfIterations = 1;
+    tStep->convergedReason = s;
     tStep->incrementStateCounter();            // update solution state counter
 }
 

@@ -146,7 +146,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateInternalRHS( this->internalForces, tStep, d, &this->eNorm );
-    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+    ConvergedReason status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
                                             NULL,
                                             solutionVector,
@@ -162,14 +162,16 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateMatrix( this->stiffnessMatrix, tStep, d );
     this->internalForces.negated();
     this->internalForces.add(externalForces);
-    NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix.get(), & ( this->internalForces ), & solutionVector);
+    ConvergedReason status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix.get(), & ( this->internalForces ), & solutionVector);
     this->updateSolution(solutionVector);
     this->updateInternalRHS( this->internalForces, tStep, d, nullptr );
 #endif
 
-    if ( !( status & NM_Success ) ) {
+    if (status != CR_CONVERGED ) {
         OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
     }
+    tStep->numberOfIterations = currentIterations;
+    tStep->convergedReason = status;
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)

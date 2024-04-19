@@ -161,7 +161,7 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
       } else {
 	answer.plusProductUnsym(B, DB, dV);
       }
-      this->computeInitialStressStiffness(Ksigma, gp, tStep);
+      this->computeInitialStressStiffness(Ksigma, rMode, gp, tStep);
       Ksigma.times(dV);
       answer.add(Ksigma);
       
@@ -224,7 +224,7 @@ Truss3dnl :: computeBnlMatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *t
   
   
 void
-Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
+Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(6,6);
     answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = answer.at(4,4) = answer.at(5,5) = answer.at(6,6) =  1.0;
@@ -247,12 +247,29 @@ Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, GaussPoint *gp, 
     double factor = 1/l0/l0;
     // prevent zero initial stress stiffness
     if ( stress.at(1) == 0 ) {
-        stress.at(1) = 1;
+      FloatMatrix D;
+      this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
+      stress.at(1) = D.at(1,1) * 1.e-8;
     }
     answer.times(stress.at(1));
     answer.times(factor);
 }
     
 
+void
+Truss3dnl :: computeGaussPoints()
+// Sets up the array of Gauss Points of the receiver.
+{
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
+    }
+}
+
+  
+
+
+  
 } // end namespace oofem
 

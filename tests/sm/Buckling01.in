@@ -1,0 +1,75 @@
+Buckling01.out
+Euler buckling of a 2D beam, hinges on both supports. Rectangular cross section 160/40 mm, length 10 m, bending around more compliant axis. Initial imperfection as a sine wave with the amplitude 19 mm. The critical force is 210e+3*8.533e-07*pi^2/10^2=0.017656 MN. The reference node must be far away so the local coordination system is uninfluenced with node displacements.
+StaticStructural nsteps 50 solverType "calm" forcedInitialStepLength 1.e-8 stepLength 1.e-2 minStepLength 1.e-3 reqiterations 10 rtolv 1e-4 Psi 0.0  manrmsteps 1 hpc 4 17 1 5 3 hpcw 2 1000. 1. nmodules 1
+errorcheck
+#Note: hpc helps with the speed of convergence, it takes 1000*vertical displacement plus horizontal mid-span deflection
+#vtkxml tstep_all domain_all primvars 1 1 vars 1 7 stype 1
+domain 3dBeam 
+OutputManager tstep_all dofman_output {1 9 17} element_output { } 
+ndofman 18 nelem 16 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 1 nset 5
+node 1 coords 3 0.000  0.    0.
+node 2 coords 3 0.625  0.    0.003
+node 3 coords 3 1.25   0.    0.007
+node 4 coords 3 1.875  0.    0.011
+node 5 coords 3 2.500  0.    0.013
+node 6 coords 3 3.125  0.    0.016
+node 7 coords 3 3.750  0.    0.017
+node 8 coords 3 4.375  0.    0.019
+node 9 coords 3 5.000  0.    0.019
+node 10 coords 3 5.625  0.    0.019
+node 11 coords 3 6.250  0.    0.017 
+node 12 coords 3 6.875  0.    0.016 
+node 13 coords 3 7.500  0.    0.013
+node 14 coords 3 8.125  0.    0.011
+node 15 coords 3 8.750  0.    0.007
+node 16 coords 3 9.375  0.    0.003
+node 17 coords 3 10.00  0.    0.
+# common reference node, large y coordinate necessary to eliminate rotation of local coordinate system on displacements 
+node 18 coords 3 5.0  10000.   0.
+#
+LIBeam3dNL 1 nodes 2 1 2 refnode 18 nlgeo 1
+LIBeam3dNL 2 nodes 2 2 3 refnode 18 nlgeo 1
+LIBeam3dNL 3 nodes 2 3 4 refnode 18 nlgeo 1
+LIBeam3dNL 4 nodes 2 4 5 refnode 18 nlgeo 1
+LIBeam3dNL 5 nodes 2 5 6 refnode 18 nlgeo 1
+LIBeam3dNL 6 nodes 2 6 7 refnode 18 nlgeo 1
+LIBeam3dNL 7 nodes 2 7 8 refnode 18 nlgeo 1
+LIBeam3dNL 8 nodes 2 8 9 refnode 18 nlgeo 1
+LIBeam3dNL 9 nodes 2 9 10 refnode 18 nlgeo 1
+LIBeam3dNL 10 nodes 2 10 11 refnode 18 nlgeo 1
+LIBeam3dNL 11 nodes 2 11 12 refnode 18 nlgeo 1
+LIBeam3dNL 12 nodes 2 12 13 refnode 18 nlgeo 1
+LIBeam3dNL 13 nodes 2 13 14 refnode 18 nlgeo 1
+LIBeam3dNL 14 nodes 2 14 15 refnode 18 nlgeo 1
+LIBeam3dNL 15 nodes 2 15 16 refnode 18 nlgeo 1
+LIBeam3dNL 16 nodes 2 16 17 refnode 18 nlgeo 1
+#
+SimpleCS 1 area 0.0064 Iy 8.533e-07 Iz 100. Ik 100. beamShearCoeff 1.0 material 1 set 1
+IsoLE 1 d 1.0 E 210e+3 n 0.2 tAlpha 12e-6
+#Restrain y-displacement, x-rotation, z-rotation on all nodes
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 2 4 6 values 3 0. 0. 0. set 2
+#Bottom node
+BoundaryCondition  2 loadTimeFunction 1 dofs 2 1 3 values 2 0. 0. set 3
+#Top node
+BoundaryCondition  3 loadTimeFunction 1 dofs 1 3 values 1 0 set 4
+#Restrain of a reference node in all displacements and rotations
+BoundaryCondition  4 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0. 0. 0. 0. 0. 0. set 5
+#Vertical load
+NodalLoad 5 loadTimeFunction 1 dofs 1 1 Components 1 -1. set 4 reference
+ConstantFunction 1 f(t) 1.
+Set 1 elementranges {(1 16)}
+Set 2 noderanges {(1 18)}
+Set 3 nodes 1 1
+Set 4 nodes 1 17
+Set 5 nodes 1 18
+#
+#%BEGIN_CHECK%
+##
+#NODE tStep 2 number 17 dof 1 unknown d value -2.28811670e-05 
+#NODE tStep 2 number 9 dof 3 unknown d value 1.41580209e-03
+#REACTION tStep 2 number 1 dof 1 value 1.2384e-03
+##
+#NODE tStep 50 number 17 dof 1 unknown d value -1.00266125e-01 
+#NODE tStep 50 number 9 dof 3 unknown d value 6.17462816e-01
+#REACTION tStep 50 number 1 dof 1 value 1.7369e-02
+#%END_CHECK%

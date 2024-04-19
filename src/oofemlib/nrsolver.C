@@ -200,7 +200,7 @@ NRSolver :: initializeFrom(InputRecord &ir)
 }
 
 
-NM_Status
+ConvergedReason
 NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                   FloatArray &X, FloatArray &dX, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
@@ -231,7 +231,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
 
     l = 1.0;
 
-    NM_Status status = NM_None;
+    ConvergedReason status = CR_UNKNOWN;
     this->giveLinearSolver();
 
     // compute total load R = R+R0
@@ -275,14 +275,15 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         converged = this->checkConvergence(RT, F, rhs, ddX, X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
 
         if ( errorOutOfRangeFlag ) {
-            status = NM_NoSuccess;
+            status = CR_DIVERGED_TOL;
             OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
-            status |= NM_Success;
+            status = CR_CONVERGED;
             break;
         } else if ( nite >= nsmax ) {
             OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
+            status = CR_DIVERGED_ITS;
             break;
         }
 

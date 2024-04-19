@@ -147,6 +147,7 @@ set (core_ltf
 set (core_cs
     crosssection.C
     emptycs.C
+    dummycrosssection.C
     )
 
 set (core_td
@@ -188,6 +189,7 @@ set (core_export
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
+    solutionstatusexportmodule.C
     )
 
 set (core_monitors

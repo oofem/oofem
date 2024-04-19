@@ -61,6 +61,8 @@ protected:
     IntArray vartypes;
     /// Number of coordinates to be exported (at each Gauss point)
     int ncoords;
+    /// List of elements
+    IntArray elements;
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.

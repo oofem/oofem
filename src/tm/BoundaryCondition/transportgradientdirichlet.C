@@ -326,7 +326,7 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
     }
 
     t.startTimer();
-    if ( solver->solve(*Kff, KfpC, sol) & NM_NoSuccess ) {
+    if ( solver->solve(*Kff, KfpC, sol) != CR_CONVERGED ) {
         OOFEM_ERROR("Failed to solve Kff");
     }
     t.stopTimer();

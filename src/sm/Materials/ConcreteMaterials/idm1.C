@@ -120,7 +120,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord &ir)
 
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
-    if ( ( damageLaw != 6 ) && ( damageLaw != 7 ) ) {
+    if ( ( damageLaw != 6 ) && ( damageLaw != 7 )  ) {
         IR_GIVE_FIELD(ir, e0, _IFT_IsotropicDamageMaterial1_e0);
     }
 
@@ -310,12 +310,20 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
         IR_GIVE_FIELD(ir, md, _IFT_IsotropicDamageMaterial1_md);
         break;
+    case 11:     // trilinear softening
+        this->softType = ST_Trilinear_Cohesive_Crack;
+        IR_GIVE_FIELD(ir, w_k, _IFT_IsotropicDamageMaterial1_w_k);
+        IR_GIVE_FIELD(ir, w_r, _IFT_IsotropicDamageMaterial1_w_r);
+        IR_GIVE_FIELD(ir, w_f, _IFT_IsotropicDamageMaterial1_w_f);
+        IR_GIVE_FIELD(ir, f_k, _IFT_IsotropicDamageMaterial1_f_k);
+        IR_GIVE_FIELD(ir, f_r, _IFT_IsotropicDamageMaterial1_f_r);
+        break;
 
     default:
         throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_damageLaw, "Unknown value");
     }
 
-    if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) ) {
+    if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) || ( softType == ST_Trilinear_Cohesive_Crack )) {
         int ecsm = 0;
         IR_GIVE_OPTIONAL_FIELD(ir, ecsm, _IFT_IsotropicDamageMaterial1_ecsm);
         switch ( ecsm ) {
@@ -410,8 +418,15 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
         input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
         break;
+    case 11: // Trilinear softening
+        input.setField(this->w_k, _IFT_IsotropicDamageMaterial1_w_k);
+        input.setField(this->w_r, _IFT_IsotropicDamageMaterial1_w_r);
+        input.setField(this->w_f, _IFT_IsotropicDamageMaterial1_w_f);
+        input.setField(this->f_k, _IFT_IsotropicDamageMaterial1_f_k);
+        input.setField(this->f_r, _IFT_IsotropicDamageMaterial1_f_r);
+        break;
     }
-    if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) {
+    if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack || softType == ST_Trilinear_Cohesive_Crack ) {
         input.setField(this->ecsMethod, _IFT_IsotropicDamageMaterial1_ecsm);
     }
 }
@@ -809,6 +824,8 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
             }
         } else if ( softType == ST_BiLinear_Cohesive_Crack ) {
             wf = this->wk / ( e0 * E - this->sk ) * ( e0 * E );
+        } else if ( softType == ST_Trilinear_Cohesive_Crack ) {
+            wf = this->w_f;
         }
 
 
@@ -892,6 +909,23 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
                     OOFEM_ERROR("algorithm not converging");
                 }
             } while ( fabs(R) >= e0 * IDM1_ITERATION_LIMIT );
+        } else if ( this->softType == ST_Trilinear_Cohesive_Crack ) {
+			double eps_k = this->w_k/Le + this->f_k/E;
+			double eps_r = this->w_r/Le + this->f_r/E;
+			double eps_f = this->w_f/Le ;
+			double f_t = E*e0;
+			if ( kappa > e0 && kappa <= eps_k ) {
+				double slope=((f_k - f_t)/w_k);
+				omega = E/(E+slope*Le) - (f_t)/(kappa*(E+slope*Le));
+			} else if ( kappa > eps_k && kappa <= eps_r ) {
+				double slope=((f_r - f_k)/(w_r-w_k));
+				omega = E/(E+slope*Le) +(1.0/kappa)*(w_k*slope-f_k)/(Le*slope+E);
+			} else if ( kappa > eps_r && kappa <= eps_f ) {
+				double slope=(- f_r/(w_f-w_r));
+				omega = E/(E+slope*Le) +(1.0/kappa)*(w_r*slope-f_r)/(Le*slope+E);
+			} else {
+				omega = 1.0;
+			}
         } else {
             OOFEM_ERROR("Unknown softening type for cohesive crack model.");
         }
@@ -979,7 +1013,6 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp) const
         } else {
             return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
         }
-
     default:
         OOFEM_WARNING(":damageFunction ... undefined softening type %d\n", softType);
     }
@@ -1067,6 +1100,29 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) co
             return 0.0;
         }
     } break;
+    case ST_Trilinear_Cohesive_Crack:
+    {
+    	double Le = status->giveLe();
+    	const double E = this->linearElasticMaterial->give('E', gp);
+    	double eps_k = this->w_k/Le + this->f_k/E;
+    	double eps_r = this->w_r/Le + this->f_r/E;
+    	double eps_f = this->w_f/Le ;
+    	double f_t = E*e0;
+        if ( kappa <= e0 ) {
+            return 0.0;
+        } else if ( kappa > e0 && kappa <= eps_k ) {
+        	double slope=((f_k - f_t)/w_k);
+        	return (f_t)/(E+slope*Le)*(1.0/(kappa*kappa));
+        } else if ( kappa > eps_k && kappa <= eps_r ) {
+        	double slope=((f_r - f_k)/(w_r-w_k));
+        	return -(w_k*slope-f_k)/(Le*slope+E)*(1.0/(kappa*kappa));
+        } else if ( kappa > eps_r && kappa <= eps_f ) {
+        	double slope=(- f_r/(w_f-w_r));
+        	return -(w_r*slope-f_r)/(Le*slope+E)*(1.0/(kappa*kappa));
+        } else {
+            return 0.0;
+        }
+    } break;
     default:
         OOFEM_ERROR("undefined softening type %d\n", softType);
     }
@@ -1123,10 +1179,12 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     const double gf = this->give(gf_ID, gp);
     double wf = this->give(wf_ID, gp);
 
-
     if ( softType == ST_Disable_Damage ) {
         return;
     }
+    if ( softType == ST_Trilinear_Cohesive_Crack ) {
+                wf = this->w_f;
+            }
 
     if ( gf != 0. ) { //cohesive crack model
         if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening

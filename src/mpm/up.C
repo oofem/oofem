@@ -182,8 +182,12 @@ class UPTetra21 : public UPElement {
         double weight = gp->giveWeight();
         return determinant * weight ;
     }
-    
-
+    IntegrationRule *giveDefaultIntegrationRulePtr() override {
+        return &ir;
+    }
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_tetra_2;
+    }
     private:
         virtual int  giveNumberOfUDofs() const override {return 30;} 
         virtual int  giveNumberOfPDofs() const override {return 4;}
@@ -251,8 +255,12 @@ class UPBrick11 : public UPElement {
         double weight = gp->giveWeight();
         return determinant * weight ;
     }
-    
-
+    IntegrationRule *giveDefaultIntegrationRulePtr() override {
+        return &ir;
+    }
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_hexa_1;
+    }
     private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
         virtual int  giveNumberOfPDofs() const override {return 8;}
@@ -277,7 +285,12 @@ REGISTER_Element(UPBrick11)
 
 
 
-
+#define _IFT_UPSimpleMaterial_Name "upm"
+#define _IFT_UPSimpleMaterial_E "e"
+#define _IFT_UPSimpleMaterial_nu "nu"
+#define _IFT_UPSimpleMaterial_k "k"
+#define _IFT_UPSimpleMaterial_alpha "alpha"
+#define _IFT_UPSimpleMaterial_c "c"
 
 class UPMaterialStatus : public MaterialStatus
 {
@@ -337,15 +350,14 @@ public:
 
 };
 
-#define _IFT_UPSimpleMaterial_Name "upm"
 class UPSimpleMaterial : public Material {
     protected:
         double e, nu; // elastic isotropic constants
         double k; // isotropic permeability
-        double b; // Biot constant
-        double c; // Compressibility coefficient
+        double alpha; // Biot constant = 1-K_t/K_s (Kt bulk moduli of the porous medium, Ks bulk moduli of solid phase)
+        double c; // 1/Q, where Q is combined compressibility of the fluid and solid phases (1/Q=n/Kt+(b-n)/Ks, where n is porosity) 
     public:
-    UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; b=1.0; c=0.1;}
+    UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; alpha=1.0; c=0.1;}
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == StiffnessMatrix) {
@@ -398,17 +410,27 @@ class UPSimpleMaterial : public Material {
 
     double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == BiotConstant) {
-            return b;
+            return alpha;
         } else if (type == CompressibilityCoefficient) {
             return c;
         } else {
             return 0.0;
         }
     };
-    void initializeFrom(InputRecord &ir) override {};
+
+    void initializeFrom(InputRecord &ir) override {
+        Material :: initializeFrom(ir);
+
+        IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_UPSimpleMaterial_E);
+        IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_UPSimpleMaterial_nu);
+        IR_GIVE_OPTIONAL_FIELD(ir, k, _IFT_UPSimpleMaterial_k);
+        IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_UPSimpleMaterial_alpha);
+        IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_UPSimpleMaterial_c);
+
+    };
+    //   void giveInputRecord(DynamicInputRecord &input) override {};
     void giveInputRecord(DynamicInputRecord &input) override {};
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new UPMaterialStatus(gp); }
-
 
     const char *giveClassName() const override {return "UPSimpleMaterial";}
     const char *giveInputRecordName() const override {return _IFT_UPSimpleMaterial_Name;}

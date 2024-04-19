@@ -36,7 +36,7 @@
 #define sparselinsystemnm_h
 
 #include "nummet.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 #include "linsystsolvertype.h"
 #include "sparsemtrxtype.h"
 
@@ -78,7 +78,7 @@ public:
      * @param x Solution array.
      * @return Status of the solver.
      */
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) = 0;
+    virtual ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) = 0;
 
     /**
      * Solves the given sparse linear system of equations @f$ A\cdot X=B @f$.
@@ -88,7 +88,7 @@ public:
      * @param X Solution matrix.
      * @return Status of the solver.
      */
-    virtual NM_Status solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X);
+    virtual ConvergedReason solve(SparseMtrx &A, FloatMatrix &B, FloatMatrix &X);
     /**
      * Returns the recommended sparse matrix type for this solver.
      */

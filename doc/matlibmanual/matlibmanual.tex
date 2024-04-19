@@ -1845,6 +1845,105 @@ m&=&\frac{1}{\ln(E\varepsilon_{\rm p}/f_{\rm t})}\\
 \varepsilon_3&=&\varepsilon_1\exp\left(-\frac{1}{m}\left(\frac{\varepsilon_1}{\varepsilon_p}\right)^m\right)
 \label{eqparams3}
 \end{eqnarray}
+\item
+{\bf Trilinear softening} is a special formulation proposed by Prof. Gálvez's group to cope with fibre reinforced concrete fracture \cite{AlbGal17}. It is formulated for an embedded crack model and it is expressed in terms of crack opening ($w$). This approach uses a trilinear softening diagram that helps reproducing the FRC behaviour; this diagram is defined by four points: $t$, $k$, $r$ and $f$ that are related to specific properties of concrete, fibres and the fibre proportion. 
+In order to adapt the original formulation to the \texttt{idm1}, which uses damage $\omega$ as the driving parameter of fracture, instead of crack opening $w$, the correspondence between both must be taken into account. Figure \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon} shows the trilinear diagram expressed in terms of the crack opening $w$ (left) and in terms of the equivalent strain $\varepsilon$ (right).
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\textwidth]{trilinear_diagram_sigmaVSw_and_sigmaVSepsilon.eps}
+	\caption{Trilinear softening diagram expressed in terms of the crack opening ($w$) and expressed in terms of strain.}
+	\label{fig:diagram_sigmaVSw_and_sigmaVSepsilon}
+\end{figure}
+
+The inelastic strain $\varepsilon_c$ is the difference between the total strain $\varepsilon$ and the elastic strain $\varepsilon/E$, thus:
+\[
+\varepsilon_c = \varepsilon - \dfrac{\sigma}{E}
+\]
+
+If $\sigma$ is obtained by using the damage parameter ($\omega$) , it can be expressed as follows: 
+\begin{equation}
+\sigma = (1-\omega) E \varepsilon
+\label{eq:sigma}
+\end{equation}
+
+
+Therefore, the inelastic strain can be written as: 
+
+\[
+\varepsilon_c =  \varepsilon - \dfrac{1}{E}\left( (1-\omega) E \varepsilon\right) \quad \Rightarrow \quad \varepsilon_c = \varepsilon - (1- \omega) \varepsilon = \omega \varepsilon
+\]
+
+Thus, crack opening ($w$) is related to damage ($\omega$) through\footnote{Note that $\omega$ represents damage and $w$ represents crack opening. }:
+
+\begin{equation}
+w = h \varepsilon_c = h \omega \varepsilon
+\label{eq:w}
+\end{equation}
+
+
+
+\noindent where $h$ stands for the effective thickness of the crack band, which is estimated by projecting the finite elmeent onto the direction of the maximum principal strain at the onset of damage.
+
+Hereafter, the expressions of damage ($\omega$)  are obtained for each section of the softening diagram (before damage develops, damage between points $t$ and $k$, between points $k$ and $r$, between points $r$ and $f$ and, finally, after damage has fully developed).
+\begin{itemize}
+	\item {\bf Case 1: $\varepsilon \leq \varepsilon_0$ :}
+	In this case, damage has not started, thus: 
+	\[
+	\omega=0
+	\]
+	And its derivative:
+	\[
+	\dfrac{\partial \omega}{\partial \varepsilon}=0
+	\]
+	\item {\bf Case 2: $\varepsilon_0 \le \varepsilon \leq \varepsilon_k$ :}
+	Referred to the $\sigma-w$ diagram:	
+	\[
+	\sigma = f_t + w \dfrac{f_k -f_t}{w_k} 
+	\]
+	therefore, since $f_t = E \varepsilon_0$ and using expressions \eqref{eq:sigma} and \eqref{eq:w}:
+	
+	\begin{align*}	
+	\omega = \dfrac{E}{E + h \left(\dfrac{f_k-f_t}{w_k}\right) } - \dfrac{E \varepsilon_0}{\varepsilon\left[E + h\left(\dfrac{f_k-f_t}{w_k}\right) \right]}
+	\end{align*}
+	And its derivative:
+	\[
+	\dfrac{\partial \omega}{\partial \varepsilon}=\dfrac{E \varepsilon_0}{E + h \left(\dfrac{f_k-f_t}{w_k}\right) } \cdot \dfrac{1}{\varepsilon^2}
+	\] 
+	\item {\bf Case 3: $\varepsilon_k \le \varepsilon \leq \varepsilon_r$ :}
+	Referred to the $\sigma-w$ diagram:	
+	\[
+	\sigma = f_k + (w-w_k) \left(\dfrac{f_r -f_k}{w_r - w_k} \right)
+	\]
+	therefore, using expressions \eqref{eq:sigma} and \eqref{eq:w}:
+	
+	\begin{align*}
+	\omega = \dfrac{E}{E + h \left(\dfrac{f_r-f_k}{w_r - w_k}\right) } +\dfrac{1}{\varepsilon} \cdot \dfrac{w_k \left(\dfrac{f_r-f_k}{w_r - w_k}\right) - f_k}{E + h \left(\dfrac{f_r-f_k}{w_r - w_k}\right) } 
+	\end{align*}
+	And its derivative:
+	\[
+	\dfrac{\partial \omega}{\partial \varepsilon}=- \dfrac{w_k \left(\dfrac{f_r-f_k}{w_r - w_k}\right) - f_k}{E + h \left(\dfrac{f_r-f_k}{w_r - w_k}\right) } \cdot \dfrac{1}{\varepsilon^2}
+	\]
+	\item {\bf Case 4: $\varepsilon_r \le \varepsilon \leq \varepsilon_f$ :}
+	Referred to the $\sigma-w$ diagram:	
+	\[
+	\sigma = f_r + (w-w_r) \left(\dfrac{-f_r}{w_f - w_r} \right)
+	\]
+	therefore, using expressions \eqref{eq:sigma} and \eqref{eq:w}:
+	
+	\begin{align*}
+	\omega = \dfrac{E}{E + h \left(\dfrac{ -f_r}{w_f - w_r} \right) } +\dfrac{1}{\varepsilon} \cdot \dfrac{w_r \left(\dfrac{ -f_r}{w_f - w_r} \right) - f_r}{E + h \left(\dfrac{ -f_r}{w_f - w_r} \right) } 
+	\end{align*}
+	And its derivative:
+	\[
+	\dfrac{\partial \omega}{\partial \varepsilon}=- \dfrac{w_r \left(\dfrac{ -f_r}{w_f - w_r} \right) - f_r}{E + h \left(\dfrac{ -f_r}{w_f - w_r} \right) } \cdot \dfrac{1}{\varepsilon^2}
+	\]
+	\item {\bf Case 5: $\varepsilon \geq \varepsilon_f$ :}
+	In this case, damage is fully developed: 
+	\[
+	\omega=1
+	\]
+\end{itemize} 
 \end{itemize} 
 
 Note that parameter {\it damlaw} determines which type of damage law
@@ -1939,6 +2038,7 @@ of equivalent strain:
 \item[5 -] smooth stress-strain curve with parameters e0 and md
 \item[6 -] disable damage (dummy linear elastic material)
 \item[7 -] extended smooth damage law (\ref{eq:damageEvol}) with parameters ft, ep, e1, e2, nd
+\item[11 -] trilinear softening diagram with (e0, w\_k, w\_r, w\_f, f\_k, f\_r)
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
@@ -1963,6 +2063,11 @@ of equivalent strain:
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
 &- \param{checkSnapBack} parameter for snap back checking, 0 no check, 1 check (default)\\
+&- \param{w\_k} crack opening of point $k$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{w\_r} crack opening of point $r$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{w\_f} crack opening of point $f$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{f\_k} cohesive stress of point $k$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
+&- \param{f\_r} cohesive stress of point $r$ in the trilinear diagram (see Fig. \ref{fig:diagram_sigmaVSw_and_sigmaVSepsilon})\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
@@ -7089,6 +7194,9 @@ Supported modes&  2d, 3d flow\\
 \bibitem{GraJir10} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension.
 \newblock {\em International Journal of Solids and Structures}, 47: 957--968, 2010.
+\bibitem{AlbGal17} M.G.~Alberti, A.~Enfedaque, J.C.~G{\'a}lvez and E.~Reyes.
+\newblock Numerical modelling of the fracture of polyolefin fibre reinforced concrete by using a cohesive fracture approach.
+\newblock {\em Composites Part B: Engineering}, 111: 200--210, 2017.
 \bibitem{Gra14} P.~Grassl, D.~Xenos, M.~Jir\'{a}sek and M.~ Hor\'{a}k.
 \newblock  Evaluation of nonlocal approaches for modelling fracture near nonconvex boundaries.
 \newblock {\em International Journal of Solids and Structures}, 51: 3239–-3251, 2014.

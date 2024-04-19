@@ -67,6 +67,7 @@
 #define _IFT_MPSMaterial_mus "mus"
 #define _IFT_MPSMaterial_ktm "ktm"
 #define _IFT_MPSMaterial_ktc "ktc"
+#define _IFT_MPSMaterial_khc "khc"
 #define _IFT_MPSMaterial_stiffnessfactor "stiffnessfactor"
 #define _IFT_MPSMaterial_p "p"
 #define _IFT_MPSMaterial_p_tilde "p_tilde"
@@ -87,6 +88,7 @@
 #define _IFT_MPSMaterial_temperInCelsius "temperincelsius"
 #define _IFT_MPSMaterial_hydrationTimescaleTF "hydrationtimescaletf"
 #define _IFT_MPSMaterial_autoShrinkageTF "autoshrinkagetf"
+#define _IFT_MPSMaterial_tau_nano "tau_nano"
 //@}
 
 namespace oofem {
@@ -100,9 +102,10 @@ namespace oofem {
 class MPSMaterialStatus : public KelvinChainSolidMaterialStatus
 {
 protected:
-    /// Values of humidity and temperature in a particular GP and their increment
+    /// Values of humidity and temperature in a particular GP, their increment, and maximum/minimum to treat cyclic ambient conditions
     double hum = -1.;
     double hum_increment = -1.;
+    double h_min = 1.;
     double T = -1.;
     double T_increment = -1.;
     double T_max = 0.;
@@ -114,6 +117,11 @@ protected:
     /// flag for Emodulus - true if modulus has been already computed in the current time step
     bool storedEmodulusFlag = false;
     double storedEmodulus = -1.;
+
+    /// value of relative humidity in the nanopores
+    double humNano = -1.;
+    double humNanoTemp = -1.;
+
 #ifdef keep_track_of_strains
     double dryingShrinkageStrain = 0.;
     double tempDryingShrinkageStrain = 0.;
@@ -141,6 +149,18 @@ public:
     double giveHumIncrement() { return hum_increment; }
     /// Stores relative humidity increment
     void setHumIncrement(double src) { hum_increment = src; }
+
+
+    /// Returns relative humidity (nanopores)
+    double giveHumNano() { return humNano; }
+    /// Stores relative humidity (nanopores)
+    void setHumNanoTemp(double src) { humNanoTemp = src; }
+
+    /// Returns previously minimum previously reached humidity - treatment of cyclic ambient coditions
+    double giveHumMin() { return h_min; }
+    /// Stores minimum reached humidity
+    void setHumMin(double src) { h_min = src; }
+
 
     /// Returns temperature
     double giveT() { return T; }
@@ -183,7 +203,7 @@ public:
     double giveTempAutogenousShrinkageStrain(void) { return tempAutogenousShrinkageStrain; }
     double giveAutogenousShrinkageStrain(void) { return autogenousShrinkageStrain; }
 
-    void setCreepStrainIncrement(FloatArray src) { creepStrainIncrement  = std :: move(src); }
+    void setCreepStrainIncrement(FloatArray src) { creepStrainIncrement  = std::move(src); }
     const FloatArray &giveCreepStrain() const { return creepStrain; }
 #endif
 
@@ -229,8 +249,11 @@ protected:
     double kTm = 0.;
     /// parameter reducing creep effects of thermal cycling (replaces kTm in such case)
     double kTc = 0.;
+    /// parameter reducing creep effects of hygral cycling (0 = complete reduction, 1 = no reduction, default value)
+    double khc = 0.;
     /// parameter reducing creep effects of thermal cycling
-    double ct = 0.;
+    // commented - unused parameter? PH
+    //double ct = 0.;
     /// reference room temperature for MPS algorithm [K]
     double roomTemperature = 0.;
     /// activation energies
@@ -259,7 +282,7 @@ protected:
     /**
      * Further scaling of creep, shrinkage, tensile strength etc. with regards to this time function.
      * Let us assume two hydrating cements with different kinetics. If the fast cement is a reference one,
-     * the simulation of the slow one is carried out on the reference cement and scaling by 
+     * the simulation of the slow one is carried out on the reference cement and scaling by
      * this time function, which is then ≤1. Results from isothermal calorimetry are typically used for
      * defining this function.
      */
@@ -269,6 +292,13 @@ protected:
      * Possibility to prescribe the evolution of autogenous shrinkage strain by an auxiliary time function, the function is evaluated according to the current value of the equivalenet age, i.e. maturity.
      */
     int autoShrinkageTF;
+
+    /** characteristic time defining delay of relative humidity in the nanopores behind the capillary pores
+     * alternative approach might initiate shrinakge cracking before the stresses relax
+     * hum_nano  + tau_nano * d_hum_nano / d_t = hum
+     * hum_nano is obtained using second-order exponential algorithm originally developed for creep of Kelvin unit
+     */
+    double tau_nano = 0.;
 
 
 
@@ -328,8 +358,8 @@ protected:
     /// Evaluation of the autogenousShrinkageStrainVector according to Bazant's B4 model. In the model the evolution depends on temperature adjusted age, here on equivalent age (additional humidity influence)
     void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
-   /// Evaluation of the autogenousShrinkageStrainVector given by an auxiliary time function (autoShrinkageTF parameter). The time scale in that time function corresponds to the equivalent material age.
-   void computeAutogenousShrinkageDefinedByTF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
+    /// Evaluation of the autogenousShrinkageStrainVector given by an auxiliary time function (autoShrinkageTF parameter). The time scale in that time function corresponds to the equivalent material age.
+    void computeAutogenousShrinkageDefinedByTF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     //double inverse_sorption_isotherm(double w) const;
 
@@ -339,6 +369,14 @@ protected:
     /// option = 2 ... average values
     /// option = 3 ... incremental values
     double giveHumidity(GaussPoint *gp, TimeStep *tStep, int option) const;
+
+    /// Gives value of humidity in the nanopores at given GP and timestep
+    /// for default value tau_nano = 0 hum_nano coincides with conventional pore humidity
+    /// option = 0 ... beginning of the time step
+    /// option = 1 ... end of the time step
+    /// option = 2 ... average values
+    /// option = 3 ... incremental values
+    double giveHumidityNano(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Gives value of temperature at given GP and timestep
     /// option = 0 ... beginning of the time step

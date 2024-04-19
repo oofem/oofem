@@ -85,7 +85,7 @@ SuperLUSolver :: initializeFrom(InputRecord &ir)
   IR_GIVE_OPTIONAL_FIELD(ir, this->permc_spec, _IFT_SuperLUSolver_Permcspec);
 }
 
-NM_Status
+ConvergedReason
 SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
 {
     //1. Step: Transform SparseMtrx *A to SuperMatrix
@@ -351,7 +351,7 @@ SuperLUSolver :: solve(SparseMtrx &Lhs, FloatArray &b, FloatArray &x)
      * dPrint_CompCol_Matrix(&U);
      */
     //solved = 1;
-    return NM_Success;
+    return CR_CONVERGED;
 }
 
 void

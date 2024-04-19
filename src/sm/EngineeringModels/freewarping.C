@@ -326,11 +326,11 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
-    NM_Status s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
-    if ( !( s & NM_Success ) ) {
+    ConvergedReason s = nMethod->solve(*stiffnessMatrix, loadVector, displacementVector);
+    if (s != CR_CONVERGED) {
         OOFEM_ERROR("No success in solving system.");
     }
-
+    tStep->convergedReason = s;
     //
     // update computed "displacementVector" with the respect to the center of gravity
     //

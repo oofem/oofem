@@ -55,7 +55,7 @@ class DataStream;
  * (like solution of linear system). The interface usually consist in
  * declaring virtual abstract function solve, with parameters corresponding
  * to problem under consideration. The solve method should return
- * value of NM_Status type. (Other parameters can be provided via instanciateFrom
+ * value of ConvergedReason type. (Other parameters can be provided via instanciateFrom
  * service, which receives the init record of Engng method).
  * The data are specified using parameters passed to solve method (so called
  * mapping). Typically, each particular Engng model instance is responsible

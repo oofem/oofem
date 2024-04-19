@@ -69,7 +69,9 @@ protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin = false);
     void computeBlMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeBnlMatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin = false);
-    void computeInitialStressStiffness(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeGaussPoints() override;
+
 
 };
 } // end namespace oofem

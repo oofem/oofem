@@ -62,7 +62,7 @@ SloanLevelStructure :: formYourself(int limitWidth)
         return 1;
     }
 
-    int nnodes = Graph->giveDomain()->giveNumberOfDofManagers();
+    int nnodes = Graph->getNumberOfNodes();
     IntArray nodalStatuses(nnodes);
     IntArray Level = {Root};
 

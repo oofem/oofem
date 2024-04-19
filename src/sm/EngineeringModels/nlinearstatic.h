@@ -113,7 +113,7 @@ protected:
     int loadInitFlag;
     int nonlocalStiffnessFlag;
     bool updateElasticStiffnessFlag;
-    NM_Status numMetStatus;
+    ConvergedReason numMetStatus;
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
     /// Characterizes the type of control used.

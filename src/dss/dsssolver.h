@@ -37,6 +37,7 @@
 
 #include "oofemcfg.h"
 #include "sparselinsystemnm.h"
+#include "convergedreason.h"
 #include "sparsemtrx.h"
 
 #define _IFT_DSSSolver_Name "dss"
@@ -65,7 +66,7 @@ public:
     /// Destructor.
     virtual ~DSSSolver();
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     const char *giveClassName() const override { return "DSSSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_DSS; }

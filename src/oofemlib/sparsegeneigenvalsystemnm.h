@@ -36,7 +36,7 @@
 #define sparsegeneigenvalsystemnm_h
 
 #include "nummet.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 
 namespace oofem {
 class EngngModel;
@@ -74,7 +74,7 @@ public:
      * @param nroot number of required eigenvalues.
      * @return NM_Status value.
      */
-    virtual NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) = 0;
+    virtual ConvergedReason solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) = 0;
 };
 } // end namespace oofem
 #endif // sparsegeneigenvalsystemnm_h

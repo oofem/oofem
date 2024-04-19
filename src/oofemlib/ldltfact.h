@@ -36,6 +36,7 @@
 #define ldltfact_h
 
 #include "sparselinsystemnm.h"
+#include "convergedreason.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
 
@@ -68,7 +69,7 @@ public:
      * @param x solution array
      * @return NM_Status value
      */
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     const char *giveClassName() const override { return "LDLTFactorization"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_Direct; }

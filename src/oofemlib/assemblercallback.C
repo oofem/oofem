@@ -325,8 +325,8 @@ void EffectiveTangentAssembler :: matrixFromSurfaceLoad(FloatMatrix& mat, Elemen
 void EffectiveTangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, EdgeLoad* load, int edge, TimeStep* tStep) const
 {
     mat.clear();
-    //element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
-    //mat.times(this->k);
+    element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
+    mat.times(this->k);
 }
 
 void EffectiveTangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void* lock) const

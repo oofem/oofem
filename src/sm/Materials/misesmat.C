@@ -397,6 +397,7 @@ MisesMat::checkYieldStress(double &dKappa, double kappa, GaussPoint *gp, TimeSte
     } else {
         OOFEM_ERROR("MisesMat: Should not check yield stress for htype = 0\n");
     }
+    return yieldStress;
 }
 
 double
@@ -417,6 +418,7 @@ MisesMat::computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) cons
             }
         }
     }
+    return yieldStress;
 }
 
 
@@ -440,6 +442,7 @@ MisesMat::computeYieldStressPrime(double kappa) const
             }
         }
     }
+    return 0.;
 }
 
 

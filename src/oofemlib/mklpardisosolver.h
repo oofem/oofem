@@ -36,6 +36,7 @@
 #define mklpardisosolver_h
 
 #include "sparselinsystemnm.h"
+#include "convergedreason.h"
 
 #define _IFT_MKLPardisoSolver_Name "mklpardiso"
 
@@ -59,7 +60,7 @@ public:
     MKLPardisoSolver(Domain * d, EngngModel * m);
     virtual ~MKLPardisoSolver();
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     const char *giveClassName() const override { return "MKLPardisoSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_MKLPardiso; }

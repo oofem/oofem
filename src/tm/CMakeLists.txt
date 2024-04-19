@@ -77,3 +77,4 @@ add_library (tm
     ${LIB_TYPE}
     ${tm}
     )
+add_dependencies(tm version)

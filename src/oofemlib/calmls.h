@@ -41,6 +41,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "dofiditem.h"
@@ -71,6 +72,7 @@
 #define _IFT_CylindricalALM_rtolv "rtolv"
 #define _IFT_CylindricalALM_rtolf "rtolf"
 #define _IFT_CylindricalALM_rtold "rtold"
+#define _IFT_CylindricalALM_rootselectiontype "rootselectiontype"
 //@}
 
 
@@ -209,12 +211,27 @@ protected:
     /// Parallel context for computing norms, dot products and such.
     ParallelContext *parallel_context;
 
+    /** Type characterizing how the roots of the quadratic equation 
+     *  for the arc-length parameter are selected
+     *  0 -- cosinus based criterion
+     *  1 -- dot product based criterion
+     */
+    enum RootSelectionType {
+      RST_Cos=0,
+      RST_Dot=1,
+    };
+
+    /// Root selection type
+    RootSelectionType rootselectiontype;
+    /// previous increment of dX, needed by root selection type 1
+    FloatArray old_dX;
+
 public:
     CylindricalALM(Domain * d, EngngModel * m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+    ConvergedReason solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
                     FloatArray &X, FloatArray &dX, FloatArray &F,
                     const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                     int &nite, TimeStep *) override;

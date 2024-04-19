@@ -169,7 +169,7 @@ FloatArrayF< 6 >
 SimpleCrossSection::giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     /**Note: (by bp): This assumes that the behaviour is elastic
-     * there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding
+     * there exist a number of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding
      * deformations and curvatures. This would require to implement support at material model level.
      * Mikael: See earlier response to comment
      */

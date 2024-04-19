@@ -43,11 +43,12 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "error.h"
+#include "convergedreason.h"
 
 namespace oofem {
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :
     eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter),
-    number(n), version(0), subStepNumber(0), mStepNumber(mn), timeDiscretization(td)
+    number(n), version(0), subStepNumber(0), mStepNumber(mn), timeDiscretization(td), numberOfIterations(0), numberOfAttempts(0), convergedReason(ConvergedReason::CR_UNKNOWN)
 {
     // Target time and intrinsic time is the same in the constructor.
 }
@@ -63,6 +64,9 @@ TimeStep :: TimeStep(EngngModel *e)
     version = 0;
     mStepNumber = 0;
     subStepNumber = 0;
+    numberOfIterations = 0;
+    numberOfAttempts = 0;
+    convergedReason = ConvergedReason::CR_UNKNOWN;
 }
 
 TimeStep :: TimeStep(const TimeStep &src)
@@ -76,6 +80,9 @@ TimeStep :: TimeStep(const TimeStep &src)
     version = src.version;
     mStepNumber = src.mStepNumber;
     subStepNumber = src.subStepNumber;
+    numberOfIterations = src.numberOfIterations;
+    numberOfAttempts = src.numberOfAttempts;
+    convergedReason = src.convergedReason;
 }
 
 TimeStep :: TimeStep(const TimeStep &previous, double dt)
@@ -89,6 +96,9 @@ TimeStep :: TimeStep(const TimeStep &previous, double dt)
     version = 0;
     mStepNumber = previous.mStepNumber ? previous.mStepNumber : 1;
     subStepNumber = 0;
+    numberOfIterations = 0;
+    numberOfAttempts = 0;
+    convergedReason = ConvergedReason::CR_UNKNOWN;
 }
 
 
@@ -104,6 +114,9 @@ TimeStep :: operator = ( const TimeStep & src )
     version = src.version;
     mStepNumber = src.mStepNumber;
     subStepNumber = src.subStepNumber;
+    numberOfIterations = src.numberOfIterations;
+    numberOfAttempts = src.numberOfAttempts;
+    convergedReason = src.convergedReason;
 
     return * this;
 }

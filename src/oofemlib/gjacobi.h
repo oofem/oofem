@@ -37,7 +37,7 @@
 
 #include "nummet.h"
 #include "floatarray.h"
-#include "nmstatus.h"
+#include "convergedreason.h"
 
 namespace oofem {
 class Domain;
@@ -68,7 +68,7 @@ public:
      * @param w Eigenvalue(s).
      * @return Status.
      */
-    NM_Status solve(FloatMatrix &K, FloatMatrix &M, FloatArray &w, FloatMatrix &x);
+    ConvergedReason solve(FloatMatrix &K, FloatMatrix &M, FloatArray &w, FloatMatrix &x);
 
     const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
     std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }

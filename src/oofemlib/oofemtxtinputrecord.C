@@ -336,7 +336,13 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 
         answer.clear();
         for ( int i = 1; i <= size; i++ ) {
-            char key = ( tokenizer.giveToken(++indx) ) [ 0 ];
+            int key = 0;
+            const char * token = tokenizer.giveToken(++indx);
+            auto ptr1 = scanInteger( token, key );
+            if ( ptr1 == nullptr || *ptr1 != 0 ) {
+                key = token [ 0 ];
+               // throw BadFormatInputException(*this, id, lineNumber);
+            }
             double value;
             setReadFlag(indx);
             auto ptr = scanDouble(tokenizer.giveToken(++indx), value);

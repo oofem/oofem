@@ -101,6 +101,7 @@ void SloanGraph :: initialize()
             dman2map.insert({bc->giveInternalDofManager(j), count});
         }
     }
+    this->numberOfNodes = count;
 
     IntArray connections;
     for ( auto &elem : domain->giveElements() ) {
@@ -433,7 +434,7 @@ SloanGraph :: assignNewNumbers()
     }
 
 #ifdef MDC
-    if ( labeledNodes == domain->giveNumberOfDofManagers() ) {
+    if ( labeledNodes == this->numberOfNodes ) {
         break;
     }
 

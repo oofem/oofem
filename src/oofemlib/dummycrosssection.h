@@ -32,21 +32,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef nmstatus_h
-#define nmstatus_h
+#ifndef dummycrosssection_h
+#define dummycrosssection_h
+
+#include "crosssection.h"
+#include "materialmode.h"
+#include "matresponsemode.h"
+#include "material.h"
+#include "internalstatetype.h"
+#include "internalstatevaluetype.h"
+#include "dictionary.h"
+#include "crosssectextension.h"
+#include "gausspoint.h"
+
+///@name Input fields for CrossSection
+//@{
+#define _IFT_DummyCrossSection_Name "dummycs"
+#define _IFT_DummyCrossSection_material "mat"
+//@}
 
 namespace oofem {
-/**
- * Mask defining NumMetod Status; which can be asked after
- * finishing computation by Numerical Method.
- * this mask should report some situation.
- */
-typedef unsigned long NM_Status;
 
-#define NM_None         0
-#define NM_Success      ( 1L << 1 ) ///< Numerical method exited with success.
-#define NM_NoSuccess    ( 1L << 2 ) ///< Numerical method failed to solve problem.
-#define NM_KeepTangent  ( 1L << 3 ) ///< Don't assemble new tangent, but use previous.
-#define NM_ForceRestart ( 1L << 4 )
+/**
+ * Class representing dummy cross section, that forwards all requests to material model.
+ *
+ */
+class OOFEM_EXPORT DummyCrossSection : public CrossSection
+{
+protected:
+    int matNumber = 0;
+public:
+    DummyCrossSection(int n, Domain *d);
+    void initializeFrom(InputRecord &ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
+    Material *giveMaterial(IntegrationPoint *ip) const override;
+    const char *giveClassName() const override { return "DummyCrossSection"; }
+    const char *giveInputRecordName() const override { return _IFT_DummyCrossSection_Name; }
+
+};
 } // end namespace oofem
-#endif // nmstatus_h
+#endif // dummycrosssection_h

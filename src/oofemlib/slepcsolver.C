@@ -65,7 +65,7 @@ SLEPcSolver :: ~SLEPcSolver()
     }
 }
 
-NM_Status
+ConvergedReason
 SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 {
     PetscErrorCode ierr;
@@ -197,6 +197,6 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
     OOFEM_LOG_INFO( "SLEPcSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
 #endif
 
-    return NM_Success;
+    return CR_CONVERGED;
 }
 } // end namespace oofem

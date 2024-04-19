@@ -489,7 +489,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
     strain = status->giveTempStrainVector();
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, strain, gp, tStep);
+    equivStrain = this->computeEquivalentStrain(strain, gp, tStep);
     f = equivStrain - status->giveTempKappa();
 
     if ( ( equivStrain <= e0 ) || ( f < 0.0 ) ) {

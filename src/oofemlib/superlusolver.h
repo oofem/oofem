@@ -37,6 +37,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 #include "SUPERLU_MT/include/slu_mt_ddefs.h"
 
@@ -77,7 +78,7 @@ public:
      * @param x Solution array.
      * @return Status value.
      */
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
     SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_CompCol; }
 
 

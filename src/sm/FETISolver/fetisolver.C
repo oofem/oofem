@@ -1006,7 +1006,7 @@ FETISolver :: masterMapGammas()
 }
 
 
-NM_Status
+ConvergedReason
 FETISolver :: solve(SparseMtrx &A, FloatArray &partitionLoad, FloatArray &partitionSolution)
 {
     int tnse = 0, rank = domain->giveEngngModel()->giveRank();
@@ -1627,6 +1627,6 @@ FETISolver :: solve(SparseMtrx &A, FloatArray &partitionLoad, FloatArray &partit
         partitionSolution.add(help);
     }
 
-    return NM_Success;
+    return CR_CONVERGED;
 }
 } // end namespace oofem

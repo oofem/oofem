@@ -93,7 +93,7 @@ public:
     void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
     void drawDeformedGeometry(oofegGraphicContext &,  TimeStep *tStep, UnknownType) override;
     void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void giveCrossSectionCoordinates(FloatArray &coords);
+    void giveCrossSectionCoordinates(FloatArray &coords) override;
 #endif
 
 

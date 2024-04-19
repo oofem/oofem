@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
+set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -6,6 +8,8 @@ include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (ProcessorCount)
+include (GenerateVersion)
+
 
 # Use ccache if available. Needs to be performed early for it to work with cmake.
 find_program(CCACHE_PROGRAM ccache)
@@ -23,7 +27,7 @@ string(TIMESTAMP YEAR "%Y")
 set (oofem_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (oofem_EMAIL "oofem@fsv.cvut.cz")
 
-set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
@@ -69,6 +73,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GN
     set (CMAKE_CXX_FLAGS_DEBUG "-O0 -Wsuggest-override ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
+
+
+
 
 #######################################################################
 ######################## Custom paths #################################
@@ -129,6 +136,7 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_PFEM "Enable PFEM module" OFF)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
+option (USE_AM "Enable additive manufacturing module" OFF)
 option (USE_T3D "Enable T3D support" OFF)
 option (USE_BOOSTPYTHON_BINDINGS "Rather obsolete, use USE_PYBIND_BINDINGS. Enable Python bidings using boost (OOFEM callable from Python)." OFF)
 option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable from Python and vice versa)." OFF)
@@ -184,11 +192,20 @@ if (USE_TM)
     endif ()
 endif ()
 
+if (USE_AM)
+    include_directories ("${oofem_SOURCE_DIR}/src/am")
+    add_definitions (-D__AM_MODULE)
+    list (APPEND LIBS $<TARGET_OBJECTS:am>)
+    list (APPEND MODULE_LIST "am")
+endif ()
+
 if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
+    include_directories ("${oofem_SOURCE_DIR}/src/sm/Elements")
+    include_directories ("${oofem_SOURCE_DIR}/src/sm/Materials")
     add_definitions (-D__SM_MODULE)
-    list (APPEND LIBS $<TARGET_OBJECTS:sm>)
-    list (APPEND MODULE_LIST "sm")
+    list (APPEND LIBS $<TARGET_OBJECTS:sm> $<TARGET_OBJECTS:sm_elements> $<TARGET_OBJECTS:sm_materials>)
+    list (APPEND MODULE_LIST "sm" "sm_elements" "sm_materials")
 
     if (NOT MSVC AND NOT MINGW)
         find_library (DL_LIB dl) 
@@ -385,25 +402,54 @@ endif ()
 
 if (USE_ONEAPI)
     if (USE_INTEL_MKL_PARDISO)
-        message (FATAL_ERROR "Can't use both OneMKL and classic Intel MKL CMake (disable USE_INTEL_MKL_PARDISO)")
+        message (FATAL_ERROR "Can't use both OneMKL and classic Intel MKL (disable USE_INTEL_MKL_PARDISO option)")
     endif()
+
     message(STATUS "Seeking OneAPI libraries...")
-    list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "pthread")
+    if (WIN32)
+        # Windows machine must use Intel OpenMP (libiomp5) for OneAPI
+        list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "libiomp5md")
+    else()
+        list(APPEND MKL_LIBS "mkl_core" "mkl_intel_lp64" "mkl_intel_thread" "pthread")
+    endif ()
     foreach (f ${MKL_LIBS})
+        # OneAPI installation directory
         if (INTEL_ONEAPI_DIR)
             # user provided OneAPI directory
-            set(oneapiMklDir "${INTEL_ONEAPI_DIR}/mkl/latest")
-            message(STATUS "   Seeking for ${f} in custom path: ${oneapiMklDir}...")
-            find_library (${f}_LIB ${f} HINTS "${oneapiMklDir}/lib" DOC "MKLPARDISO (library)")
-            include_directories ("${oneapiMklDir}/include")
-        else ()
-            # an alternative could be obtaining from OneAPI's Environment variables
+            message(STATUS "User has provided OneAPI installation directory...")
+            set(oneapiDir ${INTEL_ONEAPI_DIR})
+        elseif (WIN32)
+            # Windows
+            set(oneapiDir "C:/Program Files (x86)/Intel/oneAPI")
+        else()
+            # MacOS or Linux
             set(oneapiDir "/opt/intel/oneapi")
+        endif()
+
+        # library directory
+        # an alternative could be obtaining from OneAPI's Environment variables
+        if (WIN32)
+            # Windows
             set(oneapiMklDir "${oneapiDir}/mkl/latest")
-            message(STATUS "    Seeking for ${f} in default path: ${oneapiMklDir}...")
-            find_library (${f}_LIB ${f} HINTS "${oneapiMklDir}/lib" DOC "MKLPARDISO (library)")
-            include_directories ("${oneapiMklDir}/include")
-        endif ()
+            set(oneapiMklLibDir "${oneapiMklDir}/lib/intel64")
+            set(oneapiLibDir
+                    "${oneapiDir}/compiler/latest/windows/compiler/lib/intel64")
+        elseif(APPLE)
+            # MacOS
+            set(oneapiMklDir "${oneapiDir}/mkl/latest")
+            set(oneapiMklLibDir "${oneapiMklDir}/lib")
+            set(oneapiLibDir "")
+        elseif(UNIX)
+            # Linux (not tested)
+            set(oneapiMklDir "${oneapiDir}/mkl/latest")
+            set(oneapiMklLibDir "${oneapiMklDir}/lib/intel64_lin")
+            set(oneapiLibDir "")
+        endif()
+
+        message(STATUS "    Seeking for ${f} in: ${oneapiMklLibDir};${oneapiLibDir}...")
+        find_library (${f}_LIB ${f} HINTS "${oneapiMklLibDir}" "${oneapiLibDir}" DOC "MKLPARDISO (library)")
+        include_directories ("${oneapiMklDir}/include")
+
         if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
             message (FATAL_ERROR "OneAPI ${f} library not found")
         else()
@@ -411,7 +457,6 @@ if (USE_ONEAPI)
         endif ()
         list (APPEND EXT_LIBS ${${f}_LIB})
     endforeach ()
-    #list (APPEND EXT_LIBS ${MKLPARDISO_LIB})
     list (APPEND MODULE_LIST "MKLPARDISO")
 endif ()
 
@@ -644,9 +689,14 @@ if (USE_DSS)
 endif ()
 if (USE_SM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/sm")
+    add_subdirectory ("${oofem_SOURCE_DIR}/src/sm/Elements")
+    add_subdirectory ("${oofem_SOURCE_DIR}/src/sm/Materials")
 endif ()
 if (USE_TM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/tm")
+endif ()
+if (USE_AM)
+    add_subdirectory ("${oofem_SOURCE_DIR}/src/am")
 endif ()
 if (USE_FM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/fm")
@@ -669,6 +719,8 @@ if (USE_SHARED_LIB)
         )
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
+    add_dependencies(liboofem version)
+
     if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
         set_target_properties (liboofem PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
     endif ()
@@ -684,14 +736,24 @@ if (USE_SHARED_LIB)
     endif()
     if (USE_SM)
         set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        set_target_properties (sm_elements PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        set_target_properties (sm_materials PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
             set_target_properties (sm PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+            set_target_properties (sm_elements PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+            set_target_properties (sm_materials PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
         endif ()
     endif()
     if (USE_TM)
         set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
             set_target_properties (tm PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+        endif ()
+    endif()
+    if (USE_AM)
+        set_target_properties (am PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
+            set_target_properties (am PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
         endif ()
     endif()
     if (USE_MPM)
@@ -709,9 +771,13 @@ endif ()
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+  add_dependencies(oofem version)
+
   target_link_libraries (oofem liboofem)
 else ()
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  add_dependencies(oofem version)
+
   target_link_libraries (oofem ${EXT_LIBS})
 endif ()
 
@@ -732,14 +798,18 @@ if (USE_OOFEG)
         target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
+    add_dependencies(oofeg version)
 endif ()
 
+
 add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
+add_dependencies(liboofem_benchmark version)
 set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (liboofem_benchmark liboofem benchmark)
 
 # Example of using liboofem with dynamic input record:
 add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+add_dependencies(beam2d_1 version)
 set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (beam2d_1 liboofem)
 
@@ -857,6 +927,13 @@ if (USE_TM)
     file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
     foreach (case ${tm_tests})
         add_test (NAME "test_tm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
+if (USE_AM)
+    file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/am" "${oofem_TEST_DIR}/am/*.in")
+    foreach (case ${tm_tests})
+        add_test (NAME "test_am_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/am COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif()
 

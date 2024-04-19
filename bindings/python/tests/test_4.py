@@ -87,7 +87,7 @@ def test_4():
     #print(rule)
     gp = rule.getIntegrationPoint(0)
     #print(gp)
-    #print(mat.giveStatus(gp))
+    print("Printing status", mat.giveStatus(gp))
     ans = domain.giveMaterial(1).giveRealStressVector_1d(a, rule.getIntegrationPoint(0), None)
     #ans.pY()
     assert (round(ans[0]-1.5, 8) == 0), "Stress value error"

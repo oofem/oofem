@@ -466,13 +466,16 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    NM_Status numMetStatus = nMethod->solve(*effectiveStiffnessMatrix, rhs, NULL,
+    ConvergedReason numMetStatus = nMethod->solve(*effectiveStiffnessMatrix, rhs, NULL,
                                             totalDisplacement, incrementOfDisplacement, forcesVector,
                                             internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
-    if ( !( numMetStatus & NM_Success ) ) {
+    if ( numMetStatus != CR_CONVERGED ) {
         OOFEM_ERROR("NRSolver failed to solve problem");
     }
+    tStep->numberOfIterations = currentIterations;
+    tStep->convergedReason = numMetStatus;
 
+    
     rhs = previousVelocityVector;
     rhs2 = previousAccelerationVector;
     for ( int i = 1; i <= neq; i++ ) {
@@ -847,7 +850,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
     int nelem = domain->giveNumberOfElements();
     //int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int jj, kk, n;
-    FloatMatrix charMtrx;
+    FloatMatrix charMtrx, R;
     IntArray loc;
     EModelDefaultEquationNumbering en;
 
@@ -864,26 +867,33 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
+        
+        if ( charMtrx.isNotEmpty() ) {
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+            if ( element->giveRotationMatrix(R) ) {
+                charMtrx.rotatedWith(R);
+            }
 
-        //
-        // assemble it manually
-        //
+            //
+            // assemble it manually
+            //
 #ifdef DEBUG
-        if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
-            OOFEM_ERROR("dimension mismatch");
-        }
+            if ( loc.giveSize() != charMtrx.giveNumberOfRows() ) {
+                OOFEM_ERROR("dimension mismatch");
+            }
 
 #endif
 
-        n = loc.giveSize();
+            n = loc.giveSize();
 
-        for ( int j = 1; j <= n; j++ ) {
-            jj = loc.at(j);
-            if ( jj ) {
-                for ( int k = 1; k <= n; k++ ) {
-                    kk = loc.at(k);
-                    if ( kk ) {
-                        answer.at(jj) += charMtrx.at(j, k) * vec.at(kk);
+            for ( int j = 1; j <= n; j++ ) {
+                jj = loc.at(j);
+                if ( jj ) {
+                    for ( int k = 1; k <= n; k++ ) {
+                        kk = loc.at(k);
+                        if ( kk ) {
+                            answer.at(jj) += charMtrx.at(j, k) * vec.at(kk);
+                        }
                     }
                 }
             }

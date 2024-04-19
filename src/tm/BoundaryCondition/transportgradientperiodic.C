@@ -298,7 +298,7 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
         }
     }
 
-    if ( solver->solve(*Kff, rhs, sol) & NM_NoSuccess ) {
+    if ( solver->solve(*Kff, rhs, sol) != CR_CONVERGED ) {
         OOFEM_ERROR("Failed to solve Kff");
     }
     // Compute the solution to each of the pertubation of eps

@@ -37,6 +37,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 #include "precond.h"
 
@@ -94,7 +95,7 @@ public:
     /// Destructor
     virtual ~IMLSolver() {}
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "IMLSolver"; }

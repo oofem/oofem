@@ -36,6 +36,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+#include "convergedreason.h"
 #include "floatarray.h"
 extern "C" {
 #include <spooles/misc.h>
@@ -92,7 +93,7 @@ public:
     /**
      * Solves the given linear system by LDL^T factorization.
      */
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    ConvergedReason solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     /// Initializes receiver from given record.
     void initializeFrom(InputRecord &ir) override;

@@ -127,7 +127,7 @@ public:
 
     void  drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
 
-    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) ;
 
 #endif
 

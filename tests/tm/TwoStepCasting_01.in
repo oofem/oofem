@@ -46,11 +46,11 @@ Set 5 nodes 2 5 6
 Set 6 nodes 4 1 2 3 4
 
 #%BEGIN_CHECK%
-#NODE tStep 2 number 1 dof 10 unknown d value 2.63153425e+01
+#NODE tStep 2 number 1 dof 10 unknown d value 2.63154331e+01
 #NODE tStep 2 number 6 dof 10 unknown d value 1.00000000e+01
 #ELEMENT tStep 2 number 2 gp 3 keyword 39 component 1 value 0.0
-#NODE tStep 10 number 1 dof 10 unknown d value 5.72301431e+01
-#NODE tStep 10 number 6 dof 10 unknown d value 3.96264363e+01
-#ELEMENT tStep 10 number 1 gp 3 keyword 39 component 1 value 0.505587
-#ELEMENT tStep 10 number 2 gp 3 keyword 39 component 1 value 0.350953
+#NODE tStep 10 number 1 dof 10 unknown d value 5.72302290e+01
+#NODE tStep 10 number 6 dof 10 unknown d value 3.96247063e+01
+#ELEMENT tStep 10 number 1 gp 3 keyword 39 component 1 value 5.05586458e-01
+#ELEMENT tStep 10 number 2 gp 3 keyword 39 component 1 value 3.50943937e-01
 #%END_CHECK%
