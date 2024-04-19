@@ -47,7 +47,7 @@
 ///@name Input fields for SUPG
 //@{
 #define _IFT_SUPG_Name "supg"
-#define _IFT_SUPG_deltat "deltat"
+//#define _IFT_SUPG_deltat "deltat"
 #define _IFT_SUPG_deltatFunction "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"
 #define _IFT_SUPG_alpha "alpha"
@@ -120,7 +120,7 @@ protected:
     FloatArray eNorm;
 
     ///@todo Use ScalarFunction here!
-    double deltaT = 1.;
+  //    double deltaT = 1.;
     int deltaTF = 0;
     /// Convergence tolerance.
     double atolv = 1., rtolv = 1.;

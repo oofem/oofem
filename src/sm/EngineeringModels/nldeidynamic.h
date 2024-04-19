@@ -49,7 +49,6 @@
 //@{
 #define _IFT_NlDEIDynamic_Name "nldeidynamic"
 #define _IFT_NlDEIDynamic_dumpcoef "dumpcoef"
-#define _IFT_NlDEIDynamic_deltat "deltat"
 #define _IFT_NlDEIDynamic_drflag "drflag"
 #define _IFT_NlDEIDynamic_tau "tau"
 #define _IFT_NlDEIDynamic_py "py"
@@ -103,8 +102,6 @@ protected:
     FloatArray internalForces;
     /// Dumping coefficient (C = dumpingCoef * MassMtrx).
     double dumpingCoef;
-    /// Time step.
-    double deltaT;
     /// Flag indicating the need for initialization.
     int initFlag;
     /// Optional reduction factor for time step deltaT

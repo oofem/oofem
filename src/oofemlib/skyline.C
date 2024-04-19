@@ -47,6 +47,7 @@
 #include "contact/contactdefinition.h"
 #include "contact/contactelement.h"
 #include "unknownnumberingscheme.h"
+#include "../mpm/integral.h"
 
 
 #include <climits>
@@ -370,6 +371,27 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
                     if ( jj > 0 ) {
                         mht.at(jj) = min( maxle, mht.at(jj) );
                     }
+                }
+            }
+        }
+    }
+
+    IntArray locr, locc;
+    // loop over integrals 
+    for (auto &in: eModel->giveIntegralList()) {
+        // loop over integral domain
+        for (auto &elem: in->set.giveElementList()) {
+            // get code numbers for integral.term on element
+            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), in->term, s) ;
+            maxle = INT_MAX;
+            for ( int ii : locr ) {
+                if ( ii > 0 ) {
+                    maxle = min(maxle, ii);
+                }
+            }
+            for ( int jj : locc ) {
+                if ( jj > 0 ) {
+                    mht.at(jj) = min( maxle, mht.at(jj) );
                 }
             }
         }

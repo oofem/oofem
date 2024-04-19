@@ -247,7 +247,7 @@ SUPG :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, _IFT_SUPG_deltat);
+    //IR_GIVE_FIELD(ir, deltaT, _IFT_SUPG_deltat);
     deltaTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaTF, _IFT_SUPG_deltatFunction);
 
@@ -415,7 +415,7 @@ SUPG :: giveSolutionStepWhenIcApply(bool force)
     return master->giveSolutionStepWhenIcApply();
   } else {
     if ( !stepWhenIcApply ) {
-        double dt = deltaT / this->giveVariableScale(VST_Time);
+      double dt = this->giveDeltaT() / this->giveVariableScale(VST_Time);
 
         stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, dt, 0);
     }
@@ -427,7 +427,7 @@ SUPG :: giveSolutionStepWhenIcApply(bool force)
 TimeStep *
 SUPG :: giveNextStep()
 {
-    double dt = deltaT;
+  double dt = this->giveDeltaT();
 
     Domain *domain = this->giveDomain(1);
 
@@ -573,7 +573,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
     double loadLevel;
-    int currentIterations;
+    int currentIterations = 0;
     this->updateInternalRHS( this->internalForces, tStep, this->giveDomain(1), &this->eNorm );
     ConvergedReason status = this->nMethod->solve(*this->lhs,
                                             externalForces,

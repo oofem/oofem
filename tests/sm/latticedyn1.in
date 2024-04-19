@@ -18,6 +18,6 @@ ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 t 2 0. 0.1 f(t) 2 0.0 1.0
 
 #%BEGIN_CHECK% 
-#NODE tStep 22 number 3 dof 3 unknown d value 6.61634340e-09 tolerance 1.e-12
-#REACTION tStep 22 number 1 dof 3 value 1.3303e+01 tolerance 1.e-3
+#NODE tStep 24 number 3 dof 3 unknown d value 6.61634340e-09 tolerance 1.e-12
+#REACTION tStep 24 number 1 dof 3 value 1.3303e+01 tolerance 1.e-3
 #%END_CHECK%

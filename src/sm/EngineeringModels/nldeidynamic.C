@@ -84,8 +84,6 @@ NlDEIDynamic :: initializeFrom(InputRecord &ir)
     StructuralEngngModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
-    IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
-
     reductionFactor = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, reductionFactor, _IFT_NlDEIDynamic_reduct);
  
@@ -153,7 +151,7 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     int istep = 0;
     double totalTime = 0;
     StateCounterType counter = 1;
-
+    double deltaT = this->giveDeltaT();
     if ( currentStep ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
@@ -187,7 +185,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // Creates system of governing eq's and solves them at given time step.
     //
-
+    double deltaT = this->giveDeltaT();
     Domain *domain = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     double maxOm = 0.;
@@ -289,7 +287,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         // Set-up numerical model.
         //
 
-        // Try to determine the best deltaT,
+        // Try to determine the best deltaT
 	double maxDt = reductionFactor * 2.0 / sqrt(maxOm);
         int newNumberOfSteps = this->numberOfSteps;
         double newDeltaT = 0;
@@ -299,11 +297,12 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 	  newDeltaT = maxDt;
 	  newNumberOfSteps = floor(numberOfSteps*deltaT/newDeltaT);
 	  this->giveMetaStep(1)->setNumberOfSteps(newNumberOfSteps);
-	  this->deltaT = newDeltaT;
+	  deltaT = newDeltaT;
+	  this->setDeltaT(deltaT);
 	  tStep->setTimeIncrement(deltaT);
 	  
 	  // Print reduced time step increment and minimum period Tmin
-	  OOFEM_LOG_RELEVANT("deltaT reduced to %e, Tmin is %e, nsteps is %d\n", this->deltaT, maxDt * M_PI, newNumberOfSteps);	  
+	  OOFEM_LOG_RELEVANT("deltaT reduced to %e, Tmin is %e, nsteps is %d\n", deltaT, maxDt * M_PI, newNumberOfSteps);	  
         }
 
         for ( int j = 1; j <= neq; j++ ) {
@@ -313,7 +312,6 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
-        return;
     } // end of init step
 
 #ifdef VERBOSE
@@ -714,7 +712,7 @@ void NlDEIDynamic :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( !stream.write(deltaT) ) {
+    if ( !stream.write(this->giveDeltaT()) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 }
@@ -741,8 +739,8 @@ void NlDEIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
     if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    if ( !stream.read(deltaT) ) {
+    double dT = this->giveDeltaT();
+    if ( !stream.read(dT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 }

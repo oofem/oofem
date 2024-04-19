@@ -434,7 +434,6 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
 #endif
     }
-
     //</RESTRICTED_SECTION>
 }
 

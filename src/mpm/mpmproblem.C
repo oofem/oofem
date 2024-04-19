@@ -45,17 +45,22 @@
 #include "unknownnumberingscheme.h"
 #include "dofdistributedprimaryfield.h"
 #include "primaryfield.h"
+#include "maskedprimaryfield.h"
+#include "nrsolver.h"
+#include "activebc.h"
+#include "boundarycondition.h"
+#include "outputmanager.h"
 #include "mpm.h"
 
 namespace oofem {
 REGISTER_EngngModel(MPMProblem);
 
-MPMLhsAssembler :: MPMLhsAssembler(double alpha, double deltaT) : 
+UPLhsAssembler :: UPLhsAssembler(double alpha, double deltaT) : 
     MatrixAssembler(), alpha(alpha), deltaT(deltaT)
 {}
 
 
-void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+void UPLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
 {
     FloatMatrix contrib;
     IntArray locu, locp;
@@ -85,22 +90,7 @@ void MPMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, Time
     answer.assemble(contrib, locp, locu);
 }
 
-void MPMRhsAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
-{
-    vec.clear();
-    FloatArray contrib;
-    IntArray locu, locp;
-    MPElement *e = dynamic_cast<MPElement*>(&element);
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
-
-    //e->giveCharacteristicVector(contrib, MomentumBalance_Rhs, mode, tStep);
-    vec.assemble(contrib, locu);
-    //e->giveCharacteristicVector(contrib, MassBalance_Rhs, mode, tStep);
-    contrib.times((-1.0)*this->alpha*this->deltaT);
-    vec.assemble(contrib, locp);
-}
-void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+void UPResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
 {
     FloatArray contrib;
     IntArray locu, locp;
@@ -128,18 +118,34 @@ void MPMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element
     contrib.times(-1.0*alpha*deltaT);
     vec.assemble(contrib, locp);
 
-    vec.negated();
+    //vec.negated();
 }
+
+
 
 MPMProblem :: MPMProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master)
 {
     ndomains = 1;
 }
 
+NumericalMethod *MPMProblem :: giveNumericalMethod(MetaStep *mStep)
+{
+    if ( !nMethod ) {
+        nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
+    }
+    return nMethod.get();
+}
+
+
+  
 void
 MPMProblem :: initializeFrom(InputRecord &ir)
 {
     EngngModel :: initializeFrom(ir);
+
+    int val = SMT_Skyline;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
+    this->sparseMtrxType = ( SparseMtrxType ) val;
 
     if ( ir.hasField(_IFT_MPMProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_MPMProblem_initt);
@@ -150,467 +156,433 @@ MPMProblem :: initializeFrom(InputRecord &ir)
     } else if ( ir.hasField(_IFT_MPMProblem_deltatfunction) ) {
         IR_GIVE_FIELD(ir, dtFunction, _IFT_MPMProblem_deltatfunction);
     } else if ( ir.hasField(_IFT_MPMProblem_prescribedtimes) ) {
-        IR_GIVE_FIELD(ir, discreteTimes, _IFT_MPMProblem_prescribedtimes);
+        IR_GIVE_FIELD(ir, prescribedTimes, _IFT_MPMProblem_prescribedtimes);
     } else {
         throw ValueInputException(ir, "none", "Time step not defined");
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_MPMProblem_alpha);
-
-
-    int val = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_MPMProblem_nsmax);
-    nsmax = val;
-
-    IR_GIVE_FIELD(ir, rtol, _IFT_MPMProblem_rtol);
-
-    NR_Mode = nrsolverModifiedNRM;
-    MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, _IFT_MPMProblem_manrmsteps);
-    if ( MANRMSteps > 0 ) {
-        NR_Mode = nrsolverAccelNRM;
-    } else {
-        NR_Mode = nrsolverModifiedNRM;
+    problemType = "up"; // compatibility mode @TODO Remove default value
+    IR_GIVE_OPTIONAL_FIELD(ir, problemType, _IFT_MPMProblem_problemType);
+    if (!(problemType == "up")) {
+      throw ValueInputException(ir, "none", "Problem type not recognized");
     }
-    NR_Mode = nrsolverFullNRM; // bp
+    OOFEM_LOG_RELEVANT("MPM: %s formulation\n", problemType.c_str());
+    
+    this->keepTangent = ir.hasField(_IFT_MPMProblem_keepTangent);
+    field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 2, this->alpha);
 
-    //secure equation renumbering, otherwise keep efficient algorithms
-    if ( ir.hasField(_IFT_MPMProblem_changingproblemsize) ) {
-        changingProblemSize = true;
-        UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
-    } else {
-        UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
+    // read field export flag
+    exportFields.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_MPMProblem_exportFields);
+    if ( exportFields.giveSize() ) {
+        FieldManager *fm = this->giveContext()->giveFieldManager();
+        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
+            if ( exportFields.at(i) == FT_Displacements ) {
+                FieldPtr _displacementField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {D_u, D_v, D_w} ) );
+                fm->registerField( _displacementField, ( FieldType ) exportFields.at(i) );
+            } else if ( exportFields.at(i) == FT_Pressure ) {
+                FieldPtr _pressureField( new MaskedPrimaryField ( ( FieldType ) exportFields.at(i), this->field.get(), {P_f} ) );
+                fm->registerField( _pressureField, ( FieldType ) exportFields.at(i) );
+            }
+        }
     }
 }
-
-TimeStep *
-MPMProblem :: giveNextStep()
-{
-    int istep = this->giveNumberOfFirstStep();
-    double totalTime = this->initT;
-    double intrinsicTime;
-    StateCounterType counter = 1;
-
-    if ( currentStep ) {
-        istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
-        counter = currentStep->giveSolutionStateCounter() + 1;
-    } else {
-        // first step -> generate initial step
-        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
-    }
-
-    previousStep = std :: move(currentStep);
-    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
-    //set intrinsic time to time of integration
-    intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
-    currentStep->setIntrinsicTime(intrinsicTime);
-    return currentStep.get();
-}
-
-
-void MPMProblem :: solveYourselfAt(TimeStep *tStep)
-{
-    // creates system of governing eq's and solves them at given time step
-    // first assemble problem at current time step
-
-    // Right hand side
-    FloatArray rhs;
-    double solutionErr, incrementErr;
-    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
-#ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
-#endif
-    //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
-    if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-
-        jacobianMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( !jacobianMatrix ) {
-            OOFEM_ERROR("sparse matrix creation failed");
-        }
-
-        jacobianMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
-#ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling LHS matrix\n");
-#endif
-    }
-    //create previous solution from IC or from previous tStep
-    if ( tStep->isTheFirstStep() ) {
-        if ( !stepWhenIcApply ) {
-            stepWhenIcApply = std::make_unique<TimeStep>( *tStep->givePreviousStep() );
-        }
-        this->applyIC(stepWhenIcApply.get()); //insert solution to hash=1(previous), if changes in equation numbering
-    }
-
-    //Predictor
-    FloatArray *solutionVector;
-    UnknownsField->advanceSolution(tStep);
-    solutionVector = UnknownsField->giveSolutionVector(tStep);
-
-    //Initialize and give solutionVector from previous solution
-    if ( changingProblemSize ) {
-        if ( !tStep->isTheFirstStep() ) {
-            //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
-            copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
-        }
-
-        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), *solutionVector, EModelDefaultEquationNumbering() );
-    } else {
-        //copy previous solution vector to actual
-        *solutionVector = *UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
-    }
-
-    this->updateInternalState(tStep); //insert to hash=0(current), if changes in equation numbering
-
-    FloatArray solutionVectorIncrement(neq);
-    int nite = 0;
-
-    OOFEM_LOG_INFO("Time            Iter       ResidNorm       IncrNorm\n__________________________________________________________\n");
-
-
-    do {
-        nite++;
-
-        // Corrector
-#ifdef VERBOSE
-        // printf("\nAssembling conductivity and capacity matrices");
-#endif
-
-        if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
-            jacobianMatrix->zero();
-            MPMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
-            //Assembling left hand side 
-            this->assemble( *jacobianMatrix, tStep, jacobianAssembler,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        }
-
-        rhs.resize(neq);
-        rhs.zero();
-        //edge or surface load on element
-        //add internal source vector on elements
-        //this->assembleVectorFromElements( rhs, tStep, TransportExternalForceAssembler(), VM_Total,
-        //                                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add nodal load
-
-        this->assembleVectorFromDofManagers( rhs, tStep, ExternalForceAssembler(), VM_Total,
-                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromBC (rhs, tStep, ExternalForceAssembler(), VM_Total,
-                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        // subtract the rhs part depending on previous solution
-        this->assembleVectorFromElements( rhs, tStep, MPMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total,
-                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        // set-up numerical model
-        this->giveNumericalMethod( this->giveCurrentMetaStep() );
-
-        // call numerical model to solve arised problem
-#ifdef VERBOSE
-        //OOFEM_LOG_INFO("Solving ...\n");
-#endif
-
-        // compute norm of residuals from balance equations
-        solutionErr = rhs.computeNorm();
-
-        linSolver->solve(*jacobianMatrix, rhs, solutionVectorIncrement);
-
-        solutionVector->add(solutionVectorIncrement);
-        this->updateInternalState(tStep); //insert to hash=0(current), if changes in equation numbering
-        // compute error in the solutionvector increment
-        incrementErr = solutionVectorIncrement.computeNorm();
-
-        // update solution state counter
-        //TauStep.incrementStateCounter();
-        tStep->incrementStateCounter();
-
-        OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
-
-        currentIterations = nite;
-
-        if ( nite >= nsmax ) {
-            OOFEM_ERROR("convergence not reached after %d iterations", nsmax);
-        }
-    } while ( ( fabs(solutionErr) > rtol ) || ( fabs(incrementErr) > rtol ) );
-}
-
 
 double MPMProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation
-// This function translates this request to numerical method language
 {
-    if ( this->requiresUnknownsDictionaryUpdate() ) {
-        if ( mode == VM_Incremental ) { //get difference between current and previous time variable
-            return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
-        } else if ( mode == VM_TotalIntrinsic ) { // intrinsic value only for current step
-            return this->alpha * dof->giveUnknowns()->at(0) + (1.-this->alpha) * dof->giveUnknowns()->at(1);
-        }
-        int hash = this->giveUnknownDictHashIndx(mode, tStep);
-        if ( dof->giveUnknowns()->includes(hash) ) {
-            return dof->giveUnknowns()->at(hash);
-        } else {
-            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
-        }
-    }
-
-    double t = tStep->giveTargetTime();
-    TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
-
-    if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID() );
-    }
-
-    if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
-        ///@todo Shouldn't it be enough to just run this?
-        //UnknownsField->giveUnknownValue(dof, mode, currentStep);
-        double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, currentStep);
-        double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, previousStep);
-        double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();
-        if ( mode == VM_Velocity ) {
-            return ( rtdt - rt ) / currentStep->giveTimeIncrement();
-        } else if ( mode == VM_TotalIntrinsic ) {
-            // only supported for current step
-            return this->alpha * rtdt + ( 1. - this->alpha ) * rt; 
-        } else if ( mode == VM_Total ) {
-            return psi * rtdt + ( 1. - psi ) * rt;
-        } else if ( mode == VM_Incremental ) {
-            if ( previousStep->isIcApply() ) {
-                return 0;
-            } else {
-                return ( rtdt - rt );
-            }
-        } else {
-            OOFEM_ERROR("Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
-        }
-    } else {
-        OOFEM_ERROR("time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
-    }
-
-    return 0.; // to make compiler happy;
+    return this->field->giveUnknownValue(dof, mode, tStep);
 }
 
-
-void
-MPMProblem :: applyIC(TimeStep *stepWhenIcApply)
-{
-    Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    FloatArray *solutionVector;
-    double val;
-
-#ifdef VERBOSE
-    OOFEM_LOG_INFO("Applying initial conditions\n");
-#endif
-
-    UnknownsField->advanceSolution(stepWhenIcApply);
-    solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
-    solutionVector->resize(neq);
-    solutionVector->zero();
-
-    for ( auto &node : domain->giveDofManagers() ) {
-
-        for ( Dof *dof: *node ) {
-            // ask for initial values obtained from
-            // bc (boundary conditions) and ic (initial conditions)
-            if ( !dof->isPrimaryDof() ) {
-                continue;
-            }
-
-            int jj = dof->__giveEquationNumber();
-            if ( jj ) {
-                val = dof->giveUnknown(VM_Total, stepWhenIcApply);
-                solutionVector->at(jj) = val;
-                //update in dictionary, if the problem is growing/decreasing
-                if ( this->changingProblemSize ) {
-                    dof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
-                }
-            }
-        }
-    }
-
-    // update element state according to given ic
-    for ( auto &elem : domain->giveElements() ) {
-        Element *element = elem.get() ;
-        element->updateInternalState(stepWhenIcApply);
-        element->updateYourself(stepWhenIcApply);
-    }   
-}
-
-void
-MPMProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep)
-{
-    //Copy the last known temperature to be a previous solution
-    for ( auto &domain: domainList ) {
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( auto &node : domain->giveDofManagers() ) {
-                for ( Dof *dof: *node ) {
-                    double val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
-                    dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
-                }
-            }
-        }
-    }
-}
-
-
-void
-MPMProblem :: updateYourself(TimeStep *tStep)
-{
-    //this->updateInternalState(tStep);
-    //Set intrinsic time for a staggered problem here. This is important for materials such as hydratingconcretemat, who keep history of intrinsic times.
-    for ( auto &domain: domainList ) {
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            //update temperature vector
-            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ), EModelDefaultEquationNumbering() );
-            //update Rhs vector
-            //UnknownsField->update(VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering());
-        }
-
-        if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
-            for ( auto &elem : domain->giveElements() ) {
-                elem->updateInternalState(tStep);
-            }
-
-            internalVarUpdateStamp = tStep->giveSolutionStateCounter();
-        }
-    }
-    EngngModel :: updateYourself(tStep);
-}
-
-
-int
-MPMProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
-{
-    if ( mode == VM_Total ) { //Nodal temperature
-        if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() ) { //current time
-            return 0;
-        } else if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
-            return 1;
-        } else {
-            OOFEM_ERROR("No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
-        }
-    } else {
-        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
-    }
-
-    return 0;
-}
-
-void
-MPMProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
-{
-    // update DoF unknowns dictionary. Store the last and previous temperature only, see giveUnknownDictHashIndx
-    for ( Dof *dof: *inode ) {
-        int eqNum = dof->__giveEquationNumber();
-        double val;
-        if ( dof->hasBc(tStep) ) { // boundary condition
-            val = dof->giveBcValue(VM_Total, tStep);
-        } else {
-            FloatArray *vect = this->UnknownsField->giveSolutionVector(tStep);
-            val = vect->at(eqNum);
-        }
-
-        //update temperature, which is present in every node
-        dof->updateUnknownsDictionary(tStep, VM_Total, val);
-    }
-}
-
-
-void
-MPMProblem :: updateInternalState(TimeStep *tStep)
-{
-    for ( auto &domain: domainList ) {
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( auto &dman : domain->giveDofManagers() ) {
-                //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(dman.get(), tStep);
-            }
-        }
-
-        for ( auto &elem : domain->giveElements() ) {
-            elem->updateInternalState(tStep);
-        }
-    }
-}
 
 double
 MPMProblem :: giveDeltaT(int n)
 {
-    if ( giveDtFunction() ) {
-        return giveDtFunction()->evaluateAtTime(n);
-    }
-
-    if ( discreteTimes.giveSize() > 0 ) {
+    if ( this->dtFunction ) {
+        return this->giveDomain(1)->giveFunction(this->dtFunction)->evaluateAtTime(n);
+    } else if ( this->prescribedTimes.giveSize() > 0 ) {
         return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
+    } else {
+        return this->deltaT;
     }
-
-    return deltaT;
-}
-
-
-void
-MPMProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
-{
-    Domain *domain = this->giveDomain(1);
-
-    for ( auto &node : domain->giveDofManagers() ) {
-        for ( Dof *dof: *node ) {
-            double val = dof->giveUnknown(mode, fromTime);
-            dof->updateUnknownsDictionary(toTime, mode, val);
-        }
-    }
-}
-
-Function *
-MPMProblem :: giveDtFunction()
-// Returns the load-time function of the receiver.
-{
-    if ( !dtFunction ) {
-        return NULL;
-    }
-
-    return giveDomain(1)->giveFunction(dtFunction);
 }
 
 double
 MPMProblem :: giveDiscreteTime(int iStep)
 {
-    if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
-        return ( discreteTimes.at(iStep) );
-    }
-
-    if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
-        return ( initT );
+    if ( iStep > 0 && iStep <= this->prescribedTimes.giveSize() ) {
+        return ( this->prescribedTimes.at(iStep) );
+    } else if ( iStep == 0 ) {
+        return initT;
     }
 
     OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
-TimeStep *
-MPMProblem :: giveSolutionStepWhenIcApply(bool force)
+
+TimeStep *MPMProblem :: giveNextStep()
+{
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
+    }
+
+    double dt = this->giveDeltaT(currentStep->giveNumber()+1);
+    previousStep = std :: move(currentStep);
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
+    currentStep->setIntrinsicTime(previousStep->giveTargetTime() + alpha * dt);
+    return currentStep.get();
+}
+
+
+TimeStep *MPMProblem :: giveSolutionStepWhenIcApply(bool force)
 {
     if ( master && (!force)) {
         return master->giveSolutionStepWhenIcApply();
     } else {
         if ( !stepWhenIcApply ) {
-            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT( giveNumberOfFirstStep() ), giveDeltaT( giveNumberOfFirstStep() ), 0);
+            double dt = this->giveDeltaT(1);
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT, dt, 0);
+            // The initial step goes from [-dt, 0], so the intrinsic time is at: -deltaT  + alpha*dt
+            stepWhenIcApply->setIntrinsicTime(-dt + alpha * dt);
         }
 
         return stepWhenIcApply.get();
     }
 }
 
-NumericalMethod *MPMProblem :: giveNumericalMethod(MetaStep *mStep)
-// only one has reason for LinearStatic
-//     - SolutionOfLinearEquations
+void MPMProblem :: solveYourselfAt(TimeStep *tStep)
 {
-    if ( !linSolver ) { 
-        linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-        if ( !linSolver ) {
-            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+    OOFEM_LOG_INFO( "\nSolving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    
+    Domain *d = this->giveDomain(1);
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+
+    if ( tStep->isTheFirstStep() ) {
+        this->applyIC();
+    }
+
+    field->advanceSolution(tStep);
+    field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+
+    if ( !effectiveMatrix ) {
+        effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+    }
+
+    OOFEM_LOG_INFO("Assembling external forces\n");
+    FloatArray externalForces(neq);
+    externalForces.zero();
+    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
+    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
+
+    // set-up numerical method
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
+    OOFEM_LOG_INFO("Solving for %d unknowns...\n", neq);
+
+    internalForces.resize(neq);
+
+    FloatArray incrementOfSolution;
+    double loadLevel;
+    int currentIterations = 0;
+    this->updateInternalRHS(this->internalForces, tStep, this->giveDomain(1), &this->eNorm); /// @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
+    ConvergedReason status = this->nMethod->solve(*this->effectiveMatrix,
+                                                  externalForces,
+                                                  nullptr, // ignore
+                                                  this->solution,
+                                                  incrementOfSolution,
+                                                  this->internalForces,
+                                                  this->eNorm,
+                                                  loadLevel, // ignore
+                                                  SparseNonLinearSystemNM :: rlm_total, // ignore
+                                                  currentIterations, // ignore
+                                                  tStep);
+    tStep->numberOfIterations = currentIterations;
+    tStep->convergedReason = status;
+}
+
+
+void
+MPMProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    ///@todo NRSolver should report when the solution changes instead of doing it this way.
+    this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
+    /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
+    this->field->applyBoundaryCondition(tStep);
+}
+
+
+void
+MPMProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    // F_eff = F(T^(k)) + C * dT/dt^(k)
+    answer.zero();
+    if (this->problemType == "up") {
+      this->assembleVector(answer, tStep, UPResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
+    } else {
+      OOFEM_ERROR ("unsupported problemType");
+    }
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void
+MPMProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    // K_eff = (a*K + C/dt)
+    if ( !this->keepTangent || !this->hasTangent ) {
+        mat.zero();
+        if (this->problemType == "up") {
+          UPLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
+          //Assembling left hand side 
+          this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
+                          EModelDefaultEquationNumbering(), d );
+        } else {
+          OOFEM_ERROR ("unsupported problemType");
+        }
+        
+        this->hasTangent = true;
+    }
+}
+
+
+void
+MPMProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+{
+    ///@todo NRSolver should report when the solution changes instead of doing it this way.
+    this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
+    /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
+    this->field->applyBoundaryCondition(tStep);
+
+    if ( cmpn == InternalRhs ) {
+        // F_eff = F(T^(k)) + C * dT/dt^(k)
+        this->internalForces.zero();
+        if (this->problemType == "up") {
+          this->assembleVector(this->internalForces, tStep, UPResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, &eNorm);
+        }
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+    } else if ( cmpn == NonLinearLhs ) {
+        // K_eff = (a*K + C/dt)
+        if ( !this->keepTangent || !this->hasTangent ) {
+            this->effectiveMatrix->zero();
+            if (this->problemType == "up") {
+              UPLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
+              //Assembling left hand side 
+              this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
+                              EModelDefaultEquationNumbering(), d );
+            } 
+            this->hasTangent = true;
+        }
+    } else {
+        OOFEM_ERROR("Unknown component");
+    }
+}
+
+
+void
+MPMProblem :: applyIC()
+{
+    Domain *domain = this->giveDomain(1);
+    OOFEM_LOG_INFO("Applying initial conditions\n");
+
+    this->field->applyDefaultInitialCondition();
+
+    // set initial field IP values (needed by some nonlinear materials)
+    TimeStep *s = this->giveSolutionStepWhenIcApply();
+    for ( auto &elem : domain->giveElements() ) {
+        Element *element = elem.get();
+        element->updateInternalState(s);
+        element->updateYourself(s);
+    }
+}
+
+
+bool
+MPMProblem :: requiresEquationRenumbering(TimeStep *tStep)
+{
+    ///@todo This method should be set as the default behavior instead of relying on a user specified flag. Then this function should be removed.
+    if ( tStep->isTheFirstStep() ) {
+        return true;
+    }
+    // Check if Dirichlet b.c.s has changed.
+    Domain *d = this->giveDomain(1);
+    for ( auto &gbc : d->giveBcs() ) {
+        ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
+        BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
+        // We only need to consider Dirichlet b.c.s
+        if ( bc || ( active_bc && ( active_bc->requiresActiveDofs() || active_bc->giveNumberOfInternalDofManagers() ) ) ) {
+            // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
+            if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
+                return true;
+            }
         }
     }
-    return linSolver.get();
+    return false;
 }
+
+int
+MPMProblem :: forceEquationNumbering()
+{
+    this->effectiveMatrix = nullptr;
+    return EngngModel :: forceEquationNumbering();
+}
+
+
+void
+MPMProblem :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
+        return; // Do not print even Solution step header
+    }
+
+    EngngModel :: printOutputAt(file, tStep);
+
+
+    /*
+    // computes and prints reaction forces in all supported or restrained dofs
+    fprintf(file, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
+    
+    IntArray restrDofMans, restrDofs, eqn;
+    int di=1;
+    //from StructuralEngngModel :: buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, 1);
+    // determine number of restrained dofs
+    Domain *domain = this->giveDomain(di);
+    int numRestrDofs = this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() );
+    int ndofMan = domain->giveNumberOfDofManagers();
+    int rindex, count = 0;
+
+    // initialize corresponding dofManagers and dofs for each restrained dof
+    restrDofMans.resize(numRestrDofs);
+    restrDofs.resize(numRestrDofs);
+    eqn.resize(numRestrDofs);
+
+    for ( int i = 1; i <= ndofMan; i++ ) {
+        DofManager *inode = domain->giveDofManager(i);
+        for ( Dof *jdof: *inode ) {
+            if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
+                rindex = jdof->__givePrescribedEquationNumber();
+                if ( rindex ) {
+                    count++;
+                    restrDofMans.at(count) = i;
+                    restrDofs.at(count) = jdof->giveDofID();
+                    eqn.at(count) = rindex;
+                } else {
+                    // NullDof has no equation number and no prescribed equation number
+                    //_error("No prescribed equation number assigned to supported DOF");
+                }
+            }
+        }
+    }
+    // Trim to size.
+    restrDofMans.resizeWithValues(count);
+    restrDofs.resizeWithValues(count);
+    eqn.resizeWithValues(count);
+    
+    //restrDofMans.printYourself();
+    //restrDofs.printYourself();
+    //eqn.printYourself();
+    
+    //from StructuralEngngModel :: computeReaction()
+    FloatArray internal, external;
+    internal.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
+    internal.zero();
+    
+    // Add internal forces
+    this->assembleVector( internal, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di), &this->eNorm );
+    // Subtract external loading
+    external.resize(internal.giveSize());
+    this->assembleVector( external, tStep, ExternalForceAssembler(), VM_Total,                   EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di), &this->eNorm );
+    
+    internal.subtract(external);
+    //internal.printYourself();
+    
+    //
+    // loop over reactions and print them
+    //
+    for ( int i = 1; i <= restrDofMans.giveSize(); i++ ) {
+        if ( domain->giveOutputManager()->testDofManOutput(restrDofMans.at(i), tStep) ) {
+            fprintf(file, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
+                    domain->giveDofManager( restrDofMans.at(i) )->giveLabel(),
+                    restrDofs.at(i), internal.at( eqn.at(i) ),
+                    domain->giveDofManager( restrDofMans.at(i) )->giveDofWithID( restrDofs.at(i) )->giveBcId() );
+        }
+    }
+    */
+}
+
+
+void
+MPMProblem :: updateYourself(TimeStep *tStep)
+{
+    EngngModel :: updateYourself(tStep);
+}
+
+void
+MPMProblem :: saveContext(DataStream &stream, ContextMode mode)
+{
+    EngngModel :: saveContext(stream, mode);
+    field->saveContext(stream);
+}
+
+
+void
+MPMProblem :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    EngngModel :: restoreContext(stream, mode);
+    field->restoreContext(stream);
+}
+
+
+int
+MPMProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
+{
+    return tStep->giveNumber() % 2;
+}
+
+
+int
+MPMProblem :: requiresUnknownsDictionaryUpdate()
+{
+    return true;
+}
+
+int
+MPMProblem :: checkConsistency()
+{
+  return EngngModel :: checkConsistency();
+}
+
+
+void
+MPMProblem :: updateDomainLinks()
+{
+    EngngModel :: updateDomainLinks();
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
+}
+
+
+FieldPtr MPMProblem::giveField(FieldType key, TimeStep *tStep)
+{
+    /* Note: the current implementation uses MaskedPrimaryField, that is automatically updated with the model progress, 
+        so the returned field always refers to active solution step. 
+    */
+
+    if ( tStep != this->giveCurrentStep()) {
+        OOFEM_ERROR("Unable to return field representation for non-current time step");
+    }
+    if ( key == FT_Displacements ) {
+      return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{D_u, D_v, D_w} );
+    } else if ( key == FT_Pressure ) {
+        return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{P_f} );
+    } else {
+        return FieldPtr();
+    }
+}
+
 
 
 } // end namespace oofem

@@ -265,7 +265,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( neq == 0 ) { // Allows for fully prescribed/empty problems.
-        return;
+        return ;
     }
 
     incrementOfDisplacementVector.resize(neq);

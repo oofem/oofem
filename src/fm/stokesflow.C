@@ -141,10 +141,10 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     }
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
+    timeStepController->initMetaStepAttributes( this->giveCurrentMetaStep() );
 #if 1
     double loadLevel;
-    int currentIterations;
+    int currentIterations = 0;
     this->updateInternalRHS( this->internalForces, tStep, d, &this->eNorm );
     ConvergedReason status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,

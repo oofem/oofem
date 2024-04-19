@@ -1,9 +1,9 @@
 mp05.out
 Test of mpm uptetra21 element
-mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtol 1.e-6 
+mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtolv 1.e-6 
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
-ndofman 10 nelem 1 nbc 3 ncrosssect 0 nic 1 nltf 1 nmat 1 nset 5
+ndofman 10 nelem 1 nbc 3 ncrosssect 1 nic 1 nltf 1 nmat 1 nset 5
 node 1 coords 3 0 0 0 
 node 2 coords 3 1 0 0 
 node 3 coords 3 0 1 0
@@ -18,9 +18,10 @@ node 8 coords 3 0 0 0.5
 node 9 coords 3 0.5 0 0.5
 node 10 coords 3 0 0.5 0.5
 #
-uptetra21 1 nodes 10 1 2 3 4 5 6 7 8 9 10 crosssect 0 mat 1
+uptetra21 1 nodes 10 1 2 3 4 5 6 7 8 9 10 
 #
-upm 1 
+dummycs 1 mat 1 set 1
+upm 1 d 1.0
 #
 # displacement bottom
 boundarycondition 1 loadtimefunction 1 set 2 values 3 0 0 0   dofs 3 1 2 3 

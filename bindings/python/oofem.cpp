@@ -57,6 +57,7 @@ namespace py = pybind11;
 #include "datastream.h"
 #include "timediscretizationtype.h"
 #include "statecountertype.h"
+#include "convergedreason.h"
 
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
@@ -85,6 +86,7 @@ namespace py = pybind11;
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "internalstatetype.h"
+#include "materialmode.h"
 
 #include "integrationrule.h"
 #include "gausspoint.h"
@@ -92,6 +94,7 @@ namespace py = pybind11;
 #include "dynamicinputrecord.h"
 
 #include "classfactory.h"
+#include "exportregion.h"
 #include "unknownnumberingscheme.h"
 #include "vtkxmlexportmodule.h"
 #include "vtkmemoryexportmodule.h"
@@ -101,6 +104,11 @@ namespace py = pybind11;
 #include "unstructuredgridfield.h"
 #include "dofmanvalfield.h"
 #include "pythonfield.h"
+
+// mpm experimental
+#include "integral.h"
+#include "mpm.h"
+
 #include <iostream>
 #include "oofemutil.h"
 #ifdef _OPENMP
@@ -254,9 +262,9 @@ public:
             void initializeFrom(InputRecord &ir)  override {
                 PYBIND11_OVERLOAD (void, EngngModelBase, initializeFrom, ir);
             }
-            int instanciateDefaultMetaStep(InputRecord &ir)  override {
+      /*int instanciateDefaultMetaStep(InputRecord &ir)  override {
                 PYBIND11_OVERLOAD (int, EngngModelBase, instanciateDefaultMetaStep, ir);
-            }
+		}*/
             void updateAttributes(MetaStep *mStep)  override {
                 PYBIND11_OVERLOAD (void, EngngModelBase, updateAttributes, mStep);
             }
@@ -967,6 +975,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDomainEquations", &oofem::EngngModel::giveNumberOfDomainEquations)
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
+        .def("addIntegral", &oofem::EngngModel::py_addIntegral, py::keep_alive<0, 1>())
         ;
 
     py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
@@ -1213,6 +1222,11 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
+        .def(py::init<int, oofem::Domain*>())
+        .def("setElementList", &oofem::Set::setElementList, "Sets element list")
+        .def("setBoundaryList", &oofem::Set::setBoundaryList, "Sets list of element boundaries")
+        .def("setNodeList", &oofem::Set::setNodeList, "Set DofMan list")
+        .def("setEdgeList", &oofem::Set::setEdgeList, "Sets edge list")
     ;
 
 
@@ -1243,34 +1257,34 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::HOMExportModule, oofem::ExportModule>(m, "HOMExportModule")
       ;
 
-    py::class_<oofem::VTKPiece>(m, "VTKPiece")
-      .def("giveNumberOfNodes", &oofem::VTKPiece::giveNumberOfNodes)
-      .def("giveNodeCoords", &oofem::VTKPiece::giveNodeCoords)
-      .def("giveNumberOfCells", &oofem::VTKPiece::giveNumberOfCells)
-      .def("giveCellConnectivity", &oofem::VTKPiece::giveCellConnectivity)
-      .def("giveCellType", &oofem::VTKPiece::giveCellType)
-      .def("giveCellOffset", &oofem::VTKPiece::giveCellOffset)
-      .def("givePrimaryVarInNode", &oofem::VTKPiece::givePrimaryVarInNode)
-      .def("giveInternalVarInNode", &oofem::VTKPiece::giveInternalVarInNode)
-      .def("giveCellVar", &oofem::VTKPiece::giveCellVar)
+    py::class_<oofem::ExportRegion>(m, "ExportRegion")
+      .def("giveNumberOfNodes", &oofem::ExportRegion::giveNumberOfNodes)
+      .def("giveNodeCoords", &oofem::ExportRegion::giveNodeCoords)
+      .def("giveNumberOfCells", &oofem::ExportRegion::giveNumberOfCells)
+      .def("giveCellConnectivity", &oofem::ExportRegion::giveCellConnectivity)
+      .def("giveCellType", &oofem::ExportRegion::giveCellType)
+      .def("giveCellOffset", &oofem::ExportRegion::giveCellOffset)
+      .def("givePrimaryVarInNode", &oofem::ExportRegion::givePrimaryVarInNode)
+      .def("giveInternalVarInNode", &oofem::ExportRegion::giveInternalVarInNode)
+      .def("giveCellVar", &oofem::ExportRegion::giveCellVar)
 
-      .def("getVertices", &oofem::VTKPiece::getVertices, py::return_value_policy::move)
-      .def("getCellConnectivity", &oofem::VTKPiece::getCellConnectivity, py::return_value_policy::move)
-      .def("getCellTypes", &oofem::VTKPiece::getCellTypes, py::return_value_policy::move)
-      .def("getPrimaryVertexValues", &oofem::VTKPiece::getPrimaryVertexValues, py::return_value_policy::move)
-      .def("getInternalVertexValues", &oofem::VTKPiece::getInternalVertexValues, py::return_value_policy::move)
-      .def("getCellValues", &oofem::VTKPiece::getCellValues, py::return_value_policy::move)
+      .def("getVertices", &oofem::ExportRegion::getVertices, py::return_value_policy::move)
+      .def("getCellConnectivity", &oofem::ExportRegion::getCellConnectivity, py::return_value_policy::move)
+      .def("getCellTypes", &oofem::ExportRegion::getCellTypes, py::return_value_policy::move)
+      .def("getPrimaryVertexValues", &oofem::ExportRegion::getPrimaryVertexValues, py::return_value_policy::move)
+      .def("getInternalVertexValues", &oofem::ExportRegion::getInternalVertexValues, py::return_value_policy::move)
+      .def("getCellValues", &oofem::ExportRegion::getCellValues, py::return_value_policy::move)
       ;
 
     py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
       ;
 
     py::class_<oofem::VTKXMLExportModule, oofem::VTKBaseExportModule>(m, "VTKXMLExportModule")
-      .def("getVTKPieces", &oofem::VTKXMLExportModule::getVTKPieces,  py::return_value_policy::reference)
+      .def("getExportRegions", &oofem::VTKXMLExportModule::getExportRegions,  py::return_value_policy::reference)
       ;
 
     py::class_<oofem::VTKMemoryExportModule, oofem::VTKBaseExportModule>(m, "VTKMemoryExportModule")
-      .def("getVTKPieces", &oofem::VTKMemoryExportModule::getVTKPieces,  py::return_value_policy::reference)
+      .def("getExportRegions", &oofem::VTKMemoryExportModule::getExportRegions,  py::return_value_policy::reference)
       ;
 
     py::class_<oofem::SparseMtrx>(m, "SparseMtrx")
@@ -1293,6 +1307,45 @@ PYBIND11_MODULE(oofempy, m) {
         .def("printYourself", &oofem::SparseMtrx::printYourself)
     ;
 
+    py::class_<oofem::SparseLinearSystemNM>(m, "SparseLinearSystemNM")
+        .def("solve", (oofem::ConvergedReason (oofem::SparseLinearSystemNM::*) (SparseMtrx &A, FloatArray &b, FloatArray &x)) &oofem::SparseLinearSystemNM::solve)
+    ;
+
+    /* MPM stuff (experimental)*/
+    
+    py::enum_<oofem::Variable::VariableType>(m, "VariableType")
+        .value("scalar", oofem::Variable::VariableType::scalar)
+        .value("vector", oofem::Variable::VariableType::vector)
+    ;
+    py::enum_<oofem::Variable::VariableQuantity>(m, "VariableQuantity")
+        .value("Displacement", oofem::Variable::VariableQuantity::Displacement)
+        .value("Temperature", oofem::Variable::VariableQuantity::Temperature)
+        .value("Pressure", oofem::Variable::VariableQuantity::Pressure)
+        .value("VolumeFraction", oofem::Variable::VariableQuantity::VolumeFraction)
+    ;
+
+    py::class_<oofem::FEInterpolation>(m,"FEInterpolation")
+    ;
+ 
+    py::class_<oofem::Variable>(m, "Variable")
+        .def(py::init<const oofem::FEInterpolation&, oofem::Variable::VariableQuantity, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
+        .def_readonly("dofIDs", &oofem::Variable::dofIDs)
+        .def_readonly("type", &oofem::Variable::type)
+        .def_readonly("q", &oofem::Variable::q)
+    ;
+
+    py::class_<oofem::Term>(m, "Term")
+    ;
+
+    py::class_<oofem::Integral>(m, "Integral")
+        .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term&>())
+        .def("initialize", &oofem::Integral::initialize)
+        .def("assemble_dw", &oofem::Integral::assemble_dw)
+        .def("assemble_c", &oofem::Integral::assemble_c)
+    ;
+
+
+    /* end mpm experimental */
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
@@ -1624,6 +1677,22 @@ PYBIND11_MODULE(oofempy, m) {
         .value("IntSource_wh", oofem::MatResponseMode::IntSource_wh)
     ;
 
+    py::enum_<oofem::MaterialMode>(m, "MaterialMode")
+        .value("_Unknown", oofem::MaterialMode::_Unknown)
+        .value("_3dMat", oofem::MaterialMode::_3dMat)
+        .value("_PlaneStress", oofem::MaterialMode::_PlaneStress)
+        .value("_PlaneStrain", oofem::MaterialMode::_PlaneStrain)
+        .value("_1dMat", oofem::MaterialMode::_1dMat)
+        .value("_1dHeat", oofem::MaterialMode::_1dHeat)
+        .value("_2dHeat", oofem::MaterialMode::_2dHeat)
+        .value("_3dHeat", oofem::MaterialMode::_3dHeat)
+        .value("_2dUP", oofem::MaterialMode::_2dUP)
+        .value("_3dUP", oofem::MaterialMode::_3dUP)
+        .value("_2dUPV", oofem::MaterialMode::_2dUPV)
+        .value("_3dUPV", oofem::MaterialMode::_3dUPV)
+    ;
+
+
     py::enum_<oofem::TimeDiscretizationType>(m,"TimeDiscretizationType")
         .value("TD_Unspecified", oofem::TimeDiscretizationType::TD_Unspecified)
         .value("TD_ThreePointBackward", oofem::TimeDiscretizationType::TD_ThreePointBackward)
@@ -1672,8 +1741,13 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("vtkmemory", &vtkmemory, py::return_value_policy::move);
     m.def("homExport", &homExport, py::return_value_policy::move);
     m.def("createSet", &createSet, py::return_value_policy::move);
-
-
+    // mpm experimental
+    m.def("skyline", &skyline, py::return_value_policy::move);
+    m.def("ldltfactorization", &ldltFactorization, py::return_value_policy::move);
+    m.def("q1", &q1, py::return_value_policy::move);
+    m.def("fei2dquadlin", &fei2dquadlin, py::return_value_policy::move);
+    m.def("myTerm", &myTerm, py::return_value_policy::move);
+    m.def("upm", &upm, py::return_value_policy::move);
 //std::shared_ptr<oofem::Field>
     py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
         .def(py::init<oofem::FieldType>())  

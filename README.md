@@ -9,10 +9,11 @@ OOFEM is parallel, object-oriented finite element code for solving mechanical, t
 OOFEM is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 
-Copyright (C) 1993 - 2021   Borek Patzak
+Copyright (C) 1993 - 2024   Borek Patzak
     
 ## Getting Started
 ### What is here
+
 The source directory tree holds source code to the OOFEM package.  
 ```
   OOFEM_TOP_DIR
@@ -84,33 +85,6 @@ To run the tests, go to your build directory and run ctest
 ```
 ctest
 ```
-
-
-### Additional instructions 
-* Instead of cmake you can use ccmake which uses an ncurses interface, 
-  or cmake-gui for a GUI. Use the command make help for a list of all targets. 
-
-* You can find detailed installation (including installation on Windows)
-  instruction on OOFEM wiki (http://www.oofem.org/wiki/doku.php?id=installation)
-
-* To get support check out oofem wiki (www.oofem.org/wiki) and
-  oofem forum (www.oofem.org/forum) as well.
-
-
-### Running oofem 
-The oofem program prints out the available options when run without
-any option. To run a specific job, you can enter
-```
-oofem -f input_file_name
-```
-## Documentation
-You may find OOFEM documentation [here](http://oofem.org/en/manual).
-
-
-
-## Further information
-Please consult oofem home page (http://www.oofem.org) for 
-more documentation, manuals and new versions.
 
 ## Authors
 

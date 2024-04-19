@@ -61,6 +61,7 @@ class StaticStructural : public StructuralEngngModel, public XfemSolverInterface
 {
 protected:
     FloatArray solution;
+    FloatArray solution_old;
     FloatArray internalForces;
     FloatArray eNorm;
     FloatArray referenceForces, externalForces;
@@ -70,7 +71,6 @@ public:
 protected:
 
     std :: unique_ptr< DofDistributedPrimaryField >field;
-
     SparseMtrxType sparseMtrxType;
 
     std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
@@ -109,7 +109,7 @@ public:
     int forceEquationNumbering() override;
 
     double giveLoadLevel() override { return loadLevel; }
-    TimeStep *giveNextStep() override;
+    //TimeStep *giveNextStep() override;
     double giveEndOfTimeOfInterest() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
@@ -128,6 +128,27 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
+
+    TimeStep *giveCurrentStep(bool force = false) override {
+      if ( master && (!force)) {
+            return master->giveCurrentStep();
+        } else {
+	    return timeStepController->giveCurrentStep();
+        }
+    }
+    /** Returns previous time step.
+     *  @param force when set to true then previous step of receiver is returned instead of master (default)
+     */
+    TimeStep *givePreviousStep(bool force = false) override {
+        if ( master && (!force)) {
+            return master->givePreviousStep();
+        } else {
+	  return timeStepController->givePreviousStep();
+        }
+    }
+
+  void restartYourself(TimeStep *tS) override;
+  
 };
 } // end namespace oofem
 #endif // staticstructural_h

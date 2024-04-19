@@ -236,8 +236,8 @@ TimeStep *NonLinearDynamic :: giveNextStep()
 
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
-            if ( mStepNum > nMetaSteps ) {
-                OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
+            if ( mStepNum > this->giveNumberOfMetaSteps() ) {
+	      OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, this->giveNumberOfMetaSteps());
             }
         }
     }
@@ -344,7 +344,7 @@ NonLinearDynamic :: initializeYourself(TimeStep *tStep)
     }
 }
 
-void
+int
 NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 {
     // creates system of governing eq's and solves them at given time step
@@ -484,6 +484,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         - a6 *previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
+    return currentIterations;
 }
 
 

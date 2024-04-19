@@ -53,7 +53,7 @@
  #include "communicator.h"
 #endif
 
-#define ZZNRM_ZERO_VALUE 1.e-12
+#define ZZNRM_ZERO_VALUE 1.e-40
 
 namespace oofem {
 REGISTER_NodalRecoveryModel(ZZNodalRecoveryModel, NodalRecoveryModel :: NRM_ZienkiewiczZhu);

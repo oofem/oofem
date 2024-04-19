@@ -37,17 +37,23 @@
 
 #include "oofemcfg.h"
 #include "inputrecord.h"
-
+#include "floatarray.h"
+#include "timestepreductionstrategy.h"
 #include <memory>
 
 ///@name Input fields for meta step
 //@{
 #define _IFT_MetaStep_Name "metastep"
 #define _IFT_MetaStep_nsteps "nsteps"
+#define _IFT_MetaStep_finalT "finalt"
+#define _IFT_MetaStep_deltaT "deltat"
+#define _IFT_MetaStep_prescribedTimes "prescribedtimes"
+#define _IFT_MetaStep_timeReductionStrategyType "treductiontype"
 //@}
 
 namespace oofem {
 class EngngModel;
+class TimeStepReductionStrategy;
 
 /**
  * Class representing meta step. The meta step instance represent sequence of
@@ -69,13 +75,30 @@ protected:
     /// Number of subsequent steps the receiver represent
     int numberOfSteps;
     /// Intrinsic time increment.
-    double deltaT;
+    double deltaT = 1;
+    /// final time of the metastep
+    double finalTime = 0;
     /// Engineering model attributes.
     std::unique_ptr<InputRecord> attributes;
     /// Start solution step number for which receiver is responsible.
     int sindex;
     /// Receiver number.
     int number;
+    /// Specified times where the problem is solved    
+    FloatArray prescribedTimes;
+    /// Associated time function for time step increment.
+    int dtFunction = 0;
+    /// Specified times where the problem is solved merge with prescribedTimes
+    FloatArray discreteTimes;
+    ///
+    std :: string timeStepReductionStrategyType = "NoReductionStrategy";
+    ///
+    std :: unique_ptr<TimeStepReductionStrategy> timeStepReductionStrategy;
+    ///
+    double minDeltaT;
+    double maxDeltaT;
+    int requiredIterations;
+
 public:
     /**
      * Constructor. Creates a new meta step.
@@ -112,6 +135,43 @@ public:
     int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
+
+    int giveNumberOfMaxTimeStepReductions(){return timeStepReductionStrategy->giveNumberOfMaxTimeStepReductions();}
+    /// Returns final time of the meta step
+    double giveFinalTime(){return finalTime;}
+    void setFinalTime(double ft){finalTime = ft;}
+    void recomputeFinalTime(int nSteps) {finalTime =  nSteps * deltaT;}
+
+    
+    /** 
+     * Returns time function for time step increment.
+     * Used time function should provide step lengths as function of step number.
+     * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
+     */
+    Function *giveDtFunction(){return NULL;}
+    
+    /**
+     * Returns the time step length for given step number n, initial step is number 0.
+     */
+    double giveDeltaT(){return this->deltaT;}
+    void setDeltaT(double dT){this->deltaT = dT;}
+    double giveDeltaT(int n, std::unique_ptr<TimeStep> &previousStep);
+    
+    /**
+     * Returns time for time step number n (array discreteTimes must be specified)
+     */
+    double giveDiscreteTime(int n){return discreteTimes.at(n);}
+    void checkDiscreteTimes(){;}
+
+    void reduceTimeStep();
+    void adaptTimeStep(int nIter, double targetTime);
+
+    void setTimeStepReductionFactor(double tStepRedFactor);
+    //returns TimeStepReductionStrategy
+    TimeStepReductionStrategy* giveTimeStepReductionStrategy() {return timeStepReductionStrategy.get();}
+    
+
+    
 };
 } // end namespace oofem
 #endif // metastep_h

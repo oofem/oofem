@@ -58,6 +58,9 @@
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
 #include "monitormanager.h"
+#include "timestepcontroller.h"
+// mpm experimental
+#include "../mpm/integral.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -72,7 +75,6 @@
 #define _IFT_EngngModel_contextoutputstep "contextoutputstep"
 #define _IFT_EngngModel_renumberFlag "renumber"
 #define _IFT_EngngModel_profileOpt "profileopt"
-#define _IFT_EngngModel_nmsteps "nmsteps"
 #define _IFT_EngngModel_nonLinFormulation "nonlinform"
 #define _IFT_EngngModel_eetype "eetype"
 #define _IFT_EngngModel_parallelflag "parallelflag"
@@ -112,6 +114,7 @@ class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
+// mpm experimental
 
 
 /**
@@ -208,6 +211,11 @@ protected:
     int ndomains;
     /// List of problem domains.
     std :: vector< std :: unique_ptr< Domain > > domainList;
+
+    /// experimental mpm 
+    std :: vector < std :: unique_ptr< Integral > > integralList;
+
+    //@todo: To be deleted as it is moved to TimeStepController
     /// Total number of time steps.
     int numberOfSteps;
     /// Total number of equation in current time step.
@@ -224,10 +232,9 @@ protected:
     bool profileOpt;
     /// Equation numbering completed flag.
     int equationNumberingCompleted;
-    /// Number of meta steps.
-    int nMetaSteps;
-    /// List of problem metasteps.
-    std :: vector< MetaStep > metaStepList;
+
+   
+    //@todo: To be deleted as they are moved to TimeStepController
     /// Solution step when IC (initial conditions) apply.
     std :: unique_ptr< TimeStep > stepWhenIcApply;
     /// Current time step.
@@ -276,7 +283,8 @@ protected:
     enum fMode nonLinFormulation;
     /// Error estimator. Useful for adaptivity, or simply printing errors output.
     std::unique_ptr<ErrorEstimator> defaultErrEstimator;
-
+    /// Time Step controller is responsible for collecting data from analysis and elements and select the appropriate at for next step, or step reduction in case of convergence problems
+    std::unique_ptr<TimeStepController> timeStepController;
     /// Domain rank in a group of collaborating processes (0..groupSize-1).
     int rank;
     /// Total number of collaborating processes.
@@ -346,6 +354,20 @@ public:
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return (int)domainList.size(); }
 
+    /// mpm experimental
+    std :: vector < std :: unique_ptr< Integral > > & giveIntegralList() {
+        return this->integralList;
+    }
+    void addIntegral (std :: unique_ptr< Integral > obj) {
+        integralList.push_back(std::move(obj));
+    }
+    // Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
+    void py_addIntegral(Integral *obj) {
+        int size = integralList.size();
+        integralList.resize(size+1);
+        integralList[size].reset(obj);
+    }
+    // end mpm experimental
     const std :: string &giveDescription() const { return simulationDescription; }
     const time_t &giveStartTime() { return startTime; }
     bool giveSuppressOutput() const { return suppressOutput; }
@@ -402,6 +424,8 @@ public:
         contextOutputMode = COM_UserDefined;
         contextOutputStep = cStep;
     }
+    double giveDeltaT(){return this->timeStepController->giveDeltaT();}
+    void setDeltaT(double dT){return this->timeStepController->setDeltaT(dT);}
     /**
      * Sets domain mode to given mode.
      * @param pmode Problem mode.
@@ -447,13 +471,14 @@ public:
      * and updates previous step).
      */
     virtual void solveYourself();
+    virtual void restartYourself(TimeStep *tS){;}
     /**
      * Solves problem for given time step. Should assemble characteristic matrices and vectors
      * if necessary and solve problem using appropriate numerical method. After finishing solution,
      * this->updateYourself function for updating solution state and then this->terminate
      * function (for updating nodal and element values) should be called.
      */
-    virtual void solveYourselfAt(TimeStep *tStep) { }
+    virtual void solveYourselfAt(TimeStep *tStep) {}
     /**
      * Terminates the solution of time step. Default implementation calls prinOutput() service and if specified,
      * context of whole domain is stored and output for given time step is printed.
@@ -625,11 +650,7 @@ public:
     virtual void initializeFrom(InputRecord &ir);
     /// Instanciate problem domains by calling their instanciateYourself() service
     int instanciateDomains(DataReader &dr);
-    /// Instanciate problem meta steps by calling their instanciateYourself() service
-    int instanciateMetaSteps(DataReader &dr);
-    /// Instanciate default metastep, if nmsteps is zero
-    virtual int instanciateDefaultMetaStep(InputRecord &ir);
-
+   
     /**
      * Update receiver attributes according to step metaStep attributes.
      * Allows the certain parameters or attributes to be updated for particular metastep.
@@ -645,7 +666,9 @@ public:
      * Calls updateAttributes. At the end the meta step input reader finish() service
      * is called in order to allow for unread attribute check.
      */
-    void initMetaStepAttributes(MetaStep *mStep);
+     void initMetaStepAttributes(MetaStep *mStep) {
+       this->timeStepController->initMetaStepAttributes(mStep);
+}
     /**
      * Stores the state of model to output stream. Stores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated
@@ -687,7 +710,8 @@ public:
       if ( master && (!force)) {
             return master->giveCurrentStep();
         } else {
-            return currentStep.get();
+	//return timeStepController->giveCurrentStep();
+	  return currentStep.get();
         }
     }
     /** Returns previous time step.
@@ -697,11 +721,12 @@ public:
         if ( master && (!force)) {
             return master->givePreviousStep();
         } else {
-            return previousStep.get();
+	  //return timeStepController->givePreviousStep();
+	    return previousStep.get();
         }
     }
     /// Returns next time step (next to current step) of receiver.
-    virtual TimeStep *giveNextStep() { return NULL; }
+    virtual TimeStep *giveNextStep() { return this->timeStepController->giveNextStep(); }
     /** Generate new time step (and associate metastep).
      *  The advantage of this method is that the associated metasteps 
      *  are generated on the fly, which is not the case of giveNextStep method, 
@@ -738,9 +763,9 @@ public:
         }
     }
     /// Return number of meta steps.
-    int giveNumberOfMetaSteps() { return nMetaSteps; }
+    int giveNumberOfMetaSteps() { return this->timeStepController->giveNumberOfMetaSteps(); }
     /// Returns the i-th meta step.
-    MetaStep *giveMetaStep(int i);
+    MetaStep *giveMetaStep(int i) {return this->timeStepController->giveMetaStep(i);}
     /** Returns total number of steps.
      *  @param force when set to true then receiver reply is returned instead of master (default)
      */
@@ -748,8 +773,15 @@ public:
         if ( master && (!force)) {
             return master->giveNumberOfSteps();
         } else {
-            return numberOfSteps;
+	    //return numberOfSteps;
+	    return timeStepController->giveNumberOfSteps();
         }
+    }
+    /** Returns final time of the simulation
+     */
+    virtual double giveFinalTime()
+    {
+      return timeStepController->giveFinalTime();
     }
     /// Returns end of time interest (time corresponding to end of time integration).
     virtual double giveEndOfTimeOfInterest() { return 0.; }
@@ -998,6 +1030,9 @@ public:
     void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
+    /// return time at the begining of analysis
+    virtual double giveInitialTime(){return 0.;}
+
 protected:
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
@@ -1144,7 +1179,7 @@ public:
     EngngModel *giveEngngModel() { return this; }
     virtual bool isElementActivated( int elemNum ) { return true; }
     virtual bool isElementActivated( Element *e ) { return true; }
-
+    TimeStepController* giveTimeStepController() { return this->timeStepController.get(); }
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc);

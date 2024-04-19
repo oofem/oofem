@@ -218,7 +218,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     FloatArray incrementOfSolution;
     double loadLevel;
-    int currentIterations;
+    int currentIterations = 0;
     this->updateInternalRHS(this->internalForces, tStep, this->giveDomain(1), &this->eNorm); /// @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
     this->nMethod->solve(*this->effectiveMatrix,
                          externalForces,

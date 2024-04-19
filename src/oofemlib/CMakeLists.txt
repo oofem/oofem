@@ -21,6 +21,8 @@ set (core_unsorted
     contact/contactelement.C
     prescribedmean.C
     bctracker.C
+    timestepcontroller.C
+    timestepreductionstrategy.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -31,6 +33,7 @@ set (core_unsorted
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
+    convergenceexception.C
     # Deprecated?
     rowcol.C skyline.C skylineu.C
     ldltfact.C
@@ -176,6 +179,7 @@ set (core_export
     outputmanager.C
     exportmodule.C
     exportmodulemanager.C
+    exportregion.C
     outputexportmodule.C
     errorcheckingexportmodule.C
     vtkexportmodule.C
@@ -190,7 +194,12 @@ set (core_export
     matlabexportmodule.C
     gpexportmodule.C
     solutionstatusexportmodule.C
+    vtkhdf5exportmodule.C
     )
+
+if (USE_VMAP)
+    list (APPEND core_export vmapexportmodule.C)
+endif()
 
 set (core_monitors
     monitormanager.C
@@ -243,6 +252,7 @@ set (core_fei
     fei3dtrquad.C
     fei3dtetlin.C
     fei3dtetquad.C
+    fei3dhexaconst.C
     fei3dhexalin.C
     fei3dhexaquad.C
     fei3dhexatriquad.C
@@ -378,7 +388,6 @@ endif ()
 if (USE_OOFEG)
     list (APPEND core ${core_oofeg})
 endif ()
-
 
 add_library (core
     ${LIB_TYPE}

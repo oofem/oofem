@@ -77,7 +77,12 @@ namespace oofem {
     ENUM_ITEM(_2dFlow) \
     ENUM_ITEM(_2dAxiFlow) \
     ENUM_ITEM(_3dFlow) \
-\
+  \
+    ENUM_ITEM(_2dUP) \
+    ENUM_ITEM(_3dUP) \
+    ENUM_ITEM(_2dUPV) \
+    ENUM_ITEM(_3dUPV) \
+  \
     ENUM_ITEM(_1dLattice) \
     ENUM_ITEM(_2dLattice)			\
     ENUM_ITEM(_3dLattice) \

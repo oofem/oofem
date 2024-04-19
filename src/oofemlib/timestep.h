@@ -51,6 +51,8 @@
 namespace oofem {
 class EngngModel;
 class DataStream;
+class Element;
+class Material;
 
 /**
  * Class representing solution step. The timeStep instance may represent either
@@ -105,6 +107,8 @@ protected:
     int subStepNumber;
     /// Corresponding meta step number.
     int mStepNumber;
+
+    //@todo: Move to time step controller?
     /// Time discretization.
     TimeDiscretizationType timeDiscretization;
  public:
@@ -224,6 +228,15 @@ public:
     void restoreContext(DataStream &stream);
 
     std :: string errorInfo(const char *func) { return std :: string("TimeStep::") + func; }
+    /**
+     * Setting of suggested reduction factor
+     */
+    void setTimeStepReductionFactor(double tsrf);
+
+
+
+    
+
 };
 } // end namespace oofem
 #endif // timestep_h

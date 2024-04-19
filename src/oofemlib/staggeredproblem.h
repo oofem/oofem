@@ -215,7 +215,7 @@ public:
 
     EngngModel *giveSlaveProblem(int i) override;
     int giveNumberOfSlaveProblems() override { return (int)inputStreamNames.size(); }
-    int instanciateDefaultMetaStep(InputRecord &ir) override;
+    //int instanciateDefaultMetaStep(InputRecord &ir) override;
 
 protected:
     int instanciateSlaveProblems();

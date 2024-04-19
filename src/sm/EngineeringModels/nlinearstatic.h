@@ -185,6 +185,8 @@ public:
     LoadBalancerMonitor *giveLoadBalancerMonitor() override;
 
 #endif
+    /// return time at the begining of analysis
+    double giveInitialTime() override {return 1.;}
 
 protected:
     void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,

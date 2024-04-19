@@ -210,7 +210,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     FloatArray incrementOfSolution;
     double loadLevel;
-    int currentIterations;
+    int currentIterations = 0;
     this->nMethod->solve(*this->conductivityMatrix,
                          externalForces,
                          NULL,

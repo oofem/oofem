@@ -270,6 +270,7 @@ public:
     void setNumber(int nn) { this->number = nn; }
     /// Returns domain serial (version) number.
     int giveSerialNumber() { return this->serialNumber; }
+    ///
 
     // management of the mesh components
     /**
@@ -573,6 +574,8 @@ public:
     domainType giveDomainType() { return dType; }
     /// Sets domain type
     void setDomainType(domainType _dType) { this->dType = _dType; }
+    const std::string getDomainTypeString() {return std::string(__domainTypeToString(this->dType));}
+
     /**
      * Checks internal consistency of domain and all domain components.
      * The checkConsistency of all domain components is invoked.

@@ -35,6 +35,7 @@ set (tm_boundary
     BoundaryCondition/transportgradientneumann.C
     BoundaryCondition/transportgradientdirichlet.C
     BoundaryCondition/transportgradientperiodic.C
+    BoundaryCondition/userdefbctemplate.C
     )
 
 set (tm_cs

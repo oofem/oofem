@@ -48,6 +48,132 @@ set (sm_loads
     Loads/structeigenstrainload.C
     )
 
+set (sm_material
+    Materials/abaqususermaterial.C
+    Materials/structuralmaterial.C
+    Materials/linearelasticmaterial.C
+    Materials/isolinearelasticmaterial.C
+    Materials/anisolinearelasticmaterial.C
+    Materials/ortholinearelasticmaterial.C
+    Materials/BoneMaterials/trabbonematerial.C 
+    Materials/BoneMaterials/trabbonenl3d.C 
+    Materials/BoneMaterials/trabbonenl.C 
+    Materials/BoneMaterials/trabbone3d.C 
+    Materials/BoneMaterials/trabboneembed.C 
+    Materials/BoneMaterials/trabbonenlembed.C 
+    Materials/BoneMaterials/trabbonegrad3d.C
+    Materials/ConcreteMaterials/concrete2.C 
+    Materials/ConcreteMaterials/concrete3.C 
+    Materials/ConcreteMaterials/concretedpm.C 
+    Materials/ConcreteMaterials/concretedpm2.C
+    Materials/ConcreteMaterials/idm1.C 
+    Materials/ConcreteMaterials/idmnl1.C 
+    Materials/ConcreteMaterials/idmgrad.C
+    Materials/ConcreteMaterials/mazarsmodel.C 
+    Materials/ConcreteMaterials/mazarsmodelnl.C
+    Materials/ConcreteMaterials/mplasticmaterial2.C
+    Materials/ConcreteMaterials/compodamagemat.C
+    Materials/ConcreteMaterials/concretefcm.C
+    Materials/ConcreteMaterials/concretefcmviscoelastic.C
+    Materials/ConcreteMaterials/frcfcm.C
+    Materials/ConcreteMaterials/frcfcmnl.C
+    Materials/RheoChainMaterials/rheoChM.C 
+    Materials/RheoChainMaterials/maxwellChM.C 
+    Materials/RheoChainMaterials/kelvinChM.C
+    Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/RheoChainMaterials/cebfip78.C
+    Materials/RheoChainMaterials/doublepowerlaw.C
+    Materials/RheoChainMaterials/b3mat.C
+    Materials/RheoChainMaterials/b3solidmat.C
+    Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/mpsdammat.C
+    Materials/RheoChainMaterials/eurocode2creep.C
+    Materials/structuralfe2material.C
+    Materials/structuralslipfe2material.C
+    Materials/rcsd.C 
+    Materials/rcsde.C 
+    Materials/rcsdnl.C
+    Materials/m4.C
+    Materials/microplane_m1.C
+    Materials/druckerPragerPlasticitySM.C
+    Materials/druckerpragercutmat.C
+    Materials/j2mat.C
+    Materials/mdm.C
+    Materials/micromaterial.C
+    Materials/misesmat.C 
+    Materials/misesmatgrad.C 
+    Materials/misesmatnl.C
+    Materials/rankinemat.C
+    Materials/rankinematgrad.C
+    Materials/rankinematnl.C
+    Materials/dustmat.C
+    Materials/lsmastermat.C
+    Materials/lsmastermatgrad.C
+    Materials/simplevitrificationmaterial.C
+    Materials/anisodamagemodel.C
+    Materials/winklerpasternak.C
+    Materials/winklermodel.C
+    Materials/structmatsettable.C
+    Materials/tutorialmaterial.C
+    Materials/graddamagematerialextensioninterface.C    
+    Materials/rcm2.C
+    Materials/isodamagemodel.C
+    Materials/steelrelaxmat.C
+    Materials/fcm.C
+    #Mixed pressure material interface
+    Materials/MixedPressure/mixedpressurematerialextensioninterface.C
+    #Hyperelastic materials
+    Materials/HyperelasticMaterials/basehyperelasticmaterial.C    
+    Materials/HyperelasticMaterials/mooneyrivlincompressiblematerial.C
+    Materials/HyperelasticMaterials/blatzkomaterial.C
+    Materials/HyperelasticMaterials/simopistermaterial.C
+    Materials/HyperelasticMaterials/ogdencompressiblematerial.C
+    Materials/HyperelasticMaterials/hyperelasticmaterial1d.C
+    #Lattice models
+    Materials/LatticeMaterials/latticematstatus.C
+    Materials/LatticeMaterials/latticestructuralmaterial.C	
+    Materials/LatticeMaterials/latticelinearelastic.C
+    Materials/LatticeMaterials/latticedamage.C
+    Materials/LatticeMaterials/latticeviscoelastic.C
+    Materials/LatticeMaterials/latticedamageviscoelastic.C
+    Materials/LatticeMaterials/latticebondplasticity.C
+    Materials/LatticeMaterials/latticeplasticitydamage.C
+    Materials/LatticeMaterials/latticeslip.C
+    Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
+    Materials/1D/isoasymm1d.C
+    Materials/timesteptestmaterial.C
+)
+
+if (USE_MFRONT)
+    list (APPEND sm_material Materials/mfrontusermaterial.C)
+endif ()
+
+if (USE_BOOSTPYTHON_BINDINGS AND USE_PYTHON_EXTENSION)
+    list (APPEND sm_material Materials/structuralpythonmaterial.C)
+endif ()
+
+set (sm_interface_materials
+    Materials/InterfaceMaterials/structuralinterfacematerial.C
+    Materials/InterfaceMaterials/bondceb.C
+    Materials/InterfaceMaterials/cohint.C
+    Materials/InterfaceMaterials/intmatelastic.C
+    Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
+    Materials/InterfaceMaterials/intmatbilinczjansson.C
+    Materials/InterfaceMaterials/intmatbilinearcz.C
+    Materials/InterfaceMaterials/intmatbilinczelastic.C
+    Materials/InterfaceMaterials/intmatbilinczfagerstromrate.C
+    Materials/InterfaceMaterials/intmatisodamage.C
+    Materials/InterfaceMaterials/intmatisodamagetable.C
+    Materials/InterfaceMaterials/intmatcoulombcontact.C
+    Materials/InterfaceMaterials/intmatdummycz.C    
+    Materials/InterfaceMaterials/Deprecated/isointerfacedamage01.C
+    Materials/InterfaceMaterials/Deprecated/isointerfacedamage02.C
+    Materials/InterfaceMaterials/Deprecated/simpleinterfacemat.C
+    Materials/InterfaceMaterials/masonry02.C
+    Materials/InterfaceMaterials/mat_cebfip90.C
+    Materials/InterfaceMaterials/linkslip.C
+    )
+
 set (sm_error
     ErrorEstimators/huertaerrorestimator.C
     ErrorEstimators/zzerrorestimator.C

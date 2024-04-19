@@ -309,8 +309,8 @@ TimeStep *NonLinearStatic :: giveNextStep()
 	
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
-            if ( mStepNum > nMetaSteps ) {
-                OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
+            if ( mStepNum > this->giveNumberOfMetaSteps() ) {
+                OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, this->giveNumberOfMetaSteps());
             }
         }
     } else {
@@ -377,7 +377,7 @@ void NonLinearStatic :: solveYourself()
 void
 NonLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
-    proceedStep(1, tStep);
+  proceedStep(1, tStep);
 }
 
 

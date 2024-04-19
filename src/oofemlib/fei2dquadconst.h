@@ -69,6 +69,8 @@ public:
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
 
     int giveNumberOfNodes() const override { return 4; }
+    void giveCellDofMans(IntArray& nodes, IntArray &internalDofMans, Element* elem) const override {nodes={}; internalDofMans={1};}
+
 
 protected:
     /**

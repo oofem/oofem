@@ -164,7 +164,7 @@ protected:
     void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                   const UnknownNumberingScheme &, Domain *domain) override;
 
-    void proceedStep(int di, TimeStep *tStep);
+    int proceedStep(int di, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
 
     void packMigratingData(TimeStep *tStep) override;

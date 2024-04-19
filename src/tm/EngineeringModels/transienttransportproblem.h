@@ -131,6 +131,19 @@ public:
     const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }
     const char *giveClassName() const override { return "TransientTransportProblem"; }
     fMode giveFormulation() override { return TL; }
+
+  /** nlinear statics number starts simulation at time = 0
+   */
+  double giveFinalTime() override
+  {
+    if(prescribedTimes.giveSize()) {
+      return prescribedTimes.at(prescribedTimes.giveSize());
+    } else {
+      return deltaT * numberOfSteps;
+    }
+  }
+
+  
 };
 } // end namespace oofem
 #endif // transienttransportproblem_h

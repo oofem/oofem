@@ -78,6 +78,8 @@
 #include "fracturemanager.h"
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
+#include "timestepreductionstrategy.h"
+
 
 
 namespace oofem {
@@ -513,5 +515,17 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
 {
     return cf_store(loadBalancerList, name, creator);
 }
+
+
+std::unique_ptr<TimeStepReductionStrategy> ClassFactory :: createTimeStepReductionStrategy(const char *name, int number)
+{
+  return cf_create<TimeStepReductionStrategy>(timeStepReductionStrategyList, name, number);
+}
+
+bool ClassFactory :: registerTimeStepReductionStrategy(const char *name, std::unique_ptr<TimeStepReductionStrategy> ( *creator )(int ) )
+{
+  return cf_store(timeStepReductionStrategyList, name,creator);
+}
+  
 
 } // End namespace oofem

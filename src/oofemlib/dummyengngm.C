@@ -53,7 +53,7 @@ void
 DummyEngngModel :: initializeFrom(InputRecord &ir)
 {
     this->numberOfSteps = 1;
-    this->nMetaSteps   = 0;
+    //    this->nMetaSteps   = 0;
     this->suppressOutput = true;
     
 }
@@ -73,6 +73,6 @@ TimeStep *DummyEngngModel :: giveNextStep()
 
 void DummyEngngModel :: solveYourselfAt(TimeStep *tStep)
 {
-
 }
+
 } // end namespace oofem

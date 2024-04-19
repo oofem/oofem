@@ -259,7 +259,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         nextDisplacementVector.add(-deltaT, velocityVector);
 
-        return;
+	//@todo:
+        //return;
     } // end of init step
 
 #ifdef VERBOSE

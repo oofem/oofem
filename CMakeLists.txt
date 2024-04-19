@@ -102,6 +102,7 @@ set (PARDISO_ORG_DIR CACHE PATH "Manual pardiso-project.org directory (sparse di
 set (PARDISO_ORG_LIB CACHE PATH "Manual pardiso-project.org library's name with complete path (sparse direct solver)")
 #set (BOOST_DIR CACHE PATH "Manual Boost directory")
 set (PYBIND_DIR CACHE PATH "Manual pybind11 directory")
+set (VMAP_DIR CACHE PATH "VMAP directory")
 
 #######################################################################
 ######################## Options ######################################
@@ -143,6 +144,7 @@ option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable fro
 option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
+option (USE_VMAP "Enable VMAP export" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -549,9 +551,12 @@ if (USE_TRIANGLE)
 endif ()
 
 if (USE_HDF5)
-    find_package(HDF5 REQUIRED "CXX")
+    find_package(HDF5 REQUIRED COMPONENTS CXX HL)
     include_directories(${HDF5_INCLUDE_DIRS})
-    list (APPEND EXT_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+    list (APPEND EXT_LIBS ${HDF5_LIBRARIES})
+    add_definitions (-D__HDF_MODULE)
+    find_package(ZLIB)
+    list (APPEND EXT_LIBS ${ZLIB_LIBRARIES})
 endif ()
 
 if (USE_TINYXML)
@@ -655,6 +660,29 @@ if (USE_PYBIND_BINDINGS)
     endif()
     set (USE_SHARED_LIB ON)
 endif()
+
+if (USE_VMAP)
+    # VMAP library support 
+
+    #HDF5 required
+    SET(HDF5_NO_FIND_PACKAGE_CONFIG_FILE 1)
+    SET(HDF5_USE_STATIC_LIBRARIES ON)
+    SET(HDF5_FIND_COMPONENTS CXX HL)
+    INCLUDE(FindHDF5)
+
+    if (VMAP_DIR)
+        find_library (VMAP_LIB VMAP DOC "VMAP library" PATH "${VMAP_DIR}/build_Linux/lib")
+        include_directories ("${VMAP_DIR}/src")
+        include_directories (${HDF5_INCLUDE_DIRS})
+    else ()
+        find_library (VMAP_LIB VMAP DOC "VMAP library")
+    endif ()
+    if (${VMAP_LIB} STREQUAL "VMAP_LIB-NOTFOUND")
+        message (FATAL_ERROR "VMAP not found")
+    endif ()
+    list (APPEND EXT_LIBS ${VMAP_LIB} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+    list (APPEND MODULE_LIST "VMAP")
+endif ()
 
 #######################################################################
 ######################## Configuration ################################
@@ -972,6 +1000,12 @@ if (USE_SM AND USE_MFRONT)
     endforeach (case)
 endif()
 
+if (USE_MPM)
+    file (GLOB mpm_tests RELATIVE "${oofem_TEST_DIR}/mpm" "${oofem_TEST_DIR}/mpm/*.in")
+    foreach (case ${mpm_tests})
+        add_test (NAME "test_mpm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/mpm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
 
 ######################## Benchmarks ########################################
 

@@ -340,6 +340,7 @@ public:
      */
     inline const int *givePointer() const { return values.data(); }
     inline int *givePointer() { return values.data(); }
+    inline std::vector<int>& getStdVector() {return values;}
 
     /**
      * Stores array to output stream.

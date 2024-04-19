@@ -53,6 +53,7 @@ namespace oofem {
 #define _IFT_Set_elementBoundaries "elementboundaries" ///< Interleaved array of element index + boundary number
 #define _IFT_Set_elementEdges "elementedges" ///< Interleaved array of element index + edge number
 #define _IFT_Set_elementSurfaces "elementsurfaces" ///< Interleaved array of element index + surface number
+#define _IFT_Set_internalElementNodes "internalelementnodes" ///< Interleaved array of element index + internal node number
 //@}
 
 class EntityRenumberingFunction;
@@ -72,6 +73,7 @@ protected:
     IntArray elementBoundaries; /// Element numbers + boundary numbers (interleaved).
     IntArray elementEdges; /// Element numbers + edge numbers (interleaved).
     IntArray elementSurfaces; /// Element numbers + surface numbers (interleaved).
+    IntArray elementInternalNodes; /// Element numbers + internal dof manager numbers (interleaved).
     IntArray nodes; ///< Node numbers.
     IntArray totalNodes; ///< Unique set of nodes (computed).
 
@@ -107,6 +109,11 @@ public:
      * @return List of element surfaces.
      */
     const IntArray &giveSurfaceList();
+    /**
+     * Returns list of internal element dof managers within set 
+     * @return List of internal element dofManagers.
+     */
+    const IntArray &giveInternalElementDofManagerList();
     /**
      * Returns list of all nodes within set.
      * This list is computed automatically, based on all elements, boundaries, edges, and specified nodes within the set.

@@ -4013,7 +4013,10 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
                 ir->setRecordKeywordField(_IFT_AdaptiveNonLinearStatic_Name, 0);
                 ir->setField(1, _IFT_EngngModel_nsteps);
-                ir->setField(nmstep, _IFT_EngngModel_nmsteps);
+
+		
+		//@todo: Solve the following commented line as meta steps were mover to timestepcontroller
+                //ir->setField(nmstep, _IFT_EngngModel_nmsteps);
                 ir->setField(renumber, _IFT_EngngModel_renumberFlag);
                 ir->setField(1, "equilmc");
                 ir->setField(1, "controlmode");

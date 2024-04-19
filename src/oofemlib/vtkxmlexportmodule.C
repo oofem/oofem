@@ -326,7 +326,7 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
 
 bool
-VTKXMLExportModule::writeVTKPieceProlog(VTKPiece &vtkPiece, TimeStep *tStep)
+VTKXMLExportModule::writeVTKPieceProlog(ExportRegion &vtkPiece, TimeStep *tStep)
 {
    // Writes a VTK piece header + geometry to file.
    // This could be the whole domain (most common case) or it can be a
@@ -433,7 +433,7 @@ VTKXMLExportModule::writeVTKPieceProlog(VTKPiece &vtkPiece, TimeStep *tStep)
 }
 
 bool
-VTKXMLExportModule::writeVTKPieceEpilog(VTKPiece &vtkPiece, TimeStep *tStep)
+VTKXMLExportModule::writeVTKPieceEpilog(ExportRegion &vtkPiece, TimeStep *tStep)
 {
     if ( !vtkPiece.giveNumberOfCells() ) {
         return false;
@@ -448,7 +448,7 @@ VTKXMLExportModule::writeVTKPieceEpilog(VTKPiece &vtkPiece, TimeStep *tStep)
 
 
 bool
-VTKXMLExportModule::writeVTKPieceVariables(VTKPiece &vtkPiece, TimeStep *tStep)
+VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tStep)
 {
     // Write a VTK piece variables to file.
     // This could be the whole domain (most common case) or it can be a
@@ -574,7 +574,7 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
 
 
 void
-VTKXMLExportModule::writeIntVars(VTKPiece &vtkPiece)
+VTKXMLExportModule::writeIntVars(ExportRegion &vtkPiece)
 {
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
@@ -696,7 +696,7 @@ VTKXMLExportModule::writeVTKCellData(FloatArray &valueArray)
 
 
 void
-VTKXMLExportModule::writePrimaryVars(VTKPiece &vtkPiece)
+VTKXMLExportModule::writePrimaryVars(ExportRegion &vtkPiece)
 {
     for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
@@ -737,7 +737,7 @@ VTKXMLExportModule::writePrimaryVars(VTKPiece &vtkPiece)
 
 
 void
-VTKXMLExportModule::writeExternalForces(VTKPiece &vtkPiece)
+VTKXMLExportModule::writeExternalForces(ExportRegion &vtkPiece)
 {
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
@@ -775,7 +775,7 @@ VTKXMLExportModule::writeExternalForces(VTKPiece &vtkPiece)
 }
 
 void
-VTKXMLExportModule::writeCellVars(VTKPiece &vtkPiece)
+VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
 {
     FloatArray valueArray;
     int numCells = vtkPiece.giveNumberOfCells();
@@ -891,7 +891,7 @@ VTKXMLExportModule::writeGPVTKCollection()
 
 // Export of composite elements
 
-void VTKXMLExportModule::exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep)
+void VTKXMLExportModule::exportCompositeElement(ExportRegion &vtkPiece, Element *el, TimeStep *tStep)
 {
     VTKXMLExportModuleElementInterface *interface =
         static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
@@ -902,7 +902,7 @@ void VTKXMLExportModule::exportCompositeElement(VTKPiece &vtkPiece, Element *el,
     }
 }
 
-void VTKXMLExportModule::exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep)
+void VTKXMLExportModule::exportCompositeElement(std::vector< ExportRegion > &vtkPieces, Element *el, TimeStep *tStep)
 {
     VTKXMLExportModuleElementInterface *interface =
         static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
