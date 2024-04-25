@@ -2,7 +2,7 @@ homog03.out
 Elastic homogenization of 2x2 quad elements with periodic boudnary conditions using master-slave and kinematic constrains, loaded by displacement
 StaticStructural nsteps 1 rtolf 1e-3 nmodules 2
 errorcheck
-#vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4 stype 2
+#vtkxml tstep_all domain_all cellvars 1 103 primvars 1 1 vars 2 1 4 stype 2
 hom tstep_all ists 2 4 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

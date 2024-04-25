@@ -71,7 +71,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
- class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface,  public VTKXMLExportModuleElementInterface
+ class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface, public VTKXMLExportModuleElementInterface
 {
 protected:
     /// Geometry interpolator only.

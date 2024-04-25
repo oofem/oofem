@@ -744,6 +744,25 @@ LIBeam3dNL::computeTempCurv(FloatArray &answer, TimeStep *tStep)
     }
 }
 
+void
+LIBeam3dNL :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                              InternalStateType type, TimeStep *tStep)
+{
+    GaussPoint* gp = integrationRulesArray[0]->getIntegrationPoint(0);
+    this->giveIPValue(answer, gp, type, tStep);
+}
+
+Interface *
+LIBeam3dNL :: giveInterface(InterfaceType interface)
+{
+    if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
+
 
 #ifdef __OOFEG
 void LIBeam3dNL::drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)

@@ -957,6 +957,12 @@ public:
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     /**
+     * Returns unit vector of local coordinate system of receiver
+     * If local system is equal to global one, returns unit vectors.
+     */
+    virtual void giveLocalCoordinateSystemVector(InternalStateType isttype, FloatArray &answer);
+    
+    /**
      * Computes mid-plane normal of receiver at integration point.
      * Only for plane elements in space (3d)  (shells, plates, ....).
      * @param answer The mid plane normal.

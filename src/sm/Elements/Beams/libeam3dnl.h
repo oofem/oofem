@@ -36,6 +36,8 @@
 #define libeam3dnl_h
 
 #include "sm/Elements/nlstructuralelement.h"
+#include "nodalaveragingrecoverymodel.h"
+
 
 ///@name Input fields for LIBeam3dNL
 //@{
@@ -51,7 +53,7 @@ namespace oofem {
  * Based on Element due to Simo and Vu-Quoc, description taken from
  * Crisfield monograph.
  */
-class LIBeam3dNL : public NLStructuralElement
+class LIBeam3dNL : public NLStructuralElement, public NodalAveragingRecoveryModelInterface
 {
 private:
     /// Initial length.
@@ -94,6 +96,9 @@ public:
     void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
+    Interface *giveInterface(InterfaceType it) override;
+    
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;

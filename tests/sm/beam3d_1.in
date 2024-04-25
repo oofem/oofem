@@ -3,7 +3,7 @@ Homework www sm40 no. 10
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
 StaticStructural nsteps 1 nmodules 1
-#vtkxml tstep_all primvars 1 1 vars 1 7 stype 0
+#vtkxml tstep_all primvars 1 1 vars 4 7 146 147 148 stype 0
 errorcheck
 domain 3dShell
 OutputManager tstep_all dofman_all element_all

@@ -1208,6 +1208,29 @@ Element :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 0;
 }
 
+void
+Element :: giveLocalCoordinateSystemVector(InternalStateType isttype, FloatArray &answer)
+{
+    int col = 0;
+    FloatMatrix rotMat;
+    
+    if ( isttype == IST_X_LCS ) {
+        col = 1;
+    } else if ( isttype == IST_Y_LCS ) {
+        col = 2;
+    } else if ( isttype == IST_Z_LCS ) {
+        col = 3;
+    } else {
+        OOFEM_ERROR("Only IST_X_LCS, IST_Y_LCS, IST_Z_LCS options are permitted, you provided %s", __InternalStateTypeToString(isttype));
+    }
+    
+    if ( !this->giveLocalCoordinateSystem(rotMat) ) {
+        rotMat.resize(3, 3);
+        rotMat.beUnitMatrix();
+    }
+    answer.beRowOf(rotMat, col);
+}
+
 
 void
 Element :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *)
@@ -1261,6 +1284,9 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
     } else if ( type == IST_ElementNumber ) {
         answer.resize(1);
         answer.at(1) = this->giveNumber();
+        return 1;
+    } else if ( type == IST_X_LCS || type == IST_Y_LCS || type == IST_Z_LCS ) {
+        this->giveLocalCoordinateSystemVector(type, answer);
         return 1;
     } else {
         return this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);

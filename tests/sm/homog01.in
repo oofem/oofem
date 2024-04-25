@@ -2,7 +2,7 @@ homog01.out
 Elastic homogenization of 2x2 quad elements with periodic boundary conditions and shear eigenstrain load
 LinearStatic nsteps 1 nmodules 3
 errorcheck
-#vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4 stype 1
+#vtkxml tstep_all domain_all cellvars 1 103 primvars 1 1 vars 2 1 4 stype 1
 #hom tstep_all ists 2 1 4
 hom tstep_all ists 3 1 4 115 strain_energy regionsets 2 1 2
 hom tstep_all ists 2 2 5 strain_energy regionsets 2 1 2
