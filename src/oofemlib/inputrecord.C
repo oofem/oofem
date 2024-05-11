@@ -156,7 +156,7 @@ MissingKeywordInputException::MissingKeywordInputException(const InputRecord& ir
     InputException(ir, std::move(kw), n)
 {
     msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record + "\"";
+          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"")+ "\"";
 }
 
 
@@ -164,7 +164,7 @@ BadFormatInputException::BadFormatInputException(const InputRecord& ir, std::str
     InputException(ir, std::move(kw), n)
 {
     msg = "Bad format for keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record + "\"";
+          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
 }
 
 
@@ -173,7 +173,7 @@ ValueInputException::ValueInputException(const InputRecord& ir, std::string kw, 
 {
     msg = "Value input error for keyword \"" + keyword + "\"" + \
           "\nReason: \"" + reason + "\"\n" + \
-          "\nRecord: \"" + record + "\"";
+          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
 }
 
 
