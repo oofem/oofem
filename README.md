@@ -104,7 +104,7 @@ any option. To run a specific job, you can enter
 oofem -f input_file_name
 ```
 ## Documentation
-You may find OOFEM documentation [here]([http://oofem.org/en/manual](https://www.oofem.org/doku.php?id=en:manual)).
+You may find OOFEM documentation [here](https://www.oofem.org/doku.php?id=en:manual).
 
 
 
