@@ -82,7 +82,7 @@ When input line begins with ’#’ character, then it is ignored by the
 parser and can serve as a comment inside input file.
 
 Long input records can be splitted into multiple input lines using 
-continuation character '\' at the end of each intermediate input line.
+continuation character '\\' at the end of each intermediate input line.
 Also, from the input file one can include another file using @include directive.
 The synatx is following:
 
