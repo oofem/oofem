@@ -248,6 +248,7 @@ set (core_fei
     fei3dhexatriquad.C
     fei3dwedgelin.C 
     fei3dwedgequad.C
+    fei3dhexaconst.C
     )
 
 set (core_xfem
