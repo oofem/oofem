@@ -52,7 +52,7 @@
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofArray(), loadArray(), partitions()
+    FEMComponent(n, aDomain), dofArray(), loadArray(), globalNumber(n), partitions()
 {
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
