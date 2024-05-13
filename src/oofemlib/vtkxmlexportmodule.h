@@ -153,11 +153,11 @@ public:
     std::ofstream fileStream;
 #endif
 
-    VTKPiece defaultVTKPiece;
+    ExportRegion defaultVTKPiece;
 
-    std::vector< VTKPiece >defaultVTKPieces;
+    std::vector< ExportRegion >defaultVTKPieces;
     
-    VTKPiece& getVTKPieces() {return this->defaultVTKPiece;}
+    ExportRegion& getExportRegions() {return this->defaultVTKPiece;}
 protected:
 
     /// Returns the filename for the given time step.
@@ -166,26 +166,26 @@ protected:
     /// Returns the output stream for given solution step.
     std::ofstream giveOutputStream(TimeStep *tStep);
 
-    void writeIntVars(VTKPiece &vtkPiece);
-    void writeXFEMVars(VTKPiece &vtkPiece);
-    void writePrimaryVars(VTKPiece &vtkPiece);
-    void writeCellVars(VTKPiece &vtkPiece);
-    void writeExternalForces(VTKPiece &vtkPiece);
+    void writeIntVars(ExportRegion &vtkPiece);
+    void writeXFEMVars(ExportRegion &vtkPiece);
+    void writePrimaryVars(ExportRegion &vtkPiece);
+    void writeCellVars(ExportRegion &vtkPiece);
+    void writeExternalForces(ExportRegion &vtkPiece);
     /**
      * Writes Piece header+geometry
      * @return true if piece is not empty and thus written
      */
-    bool writeVTKPieceEpilog(VTKPiece &vtkPiece, TimeStep *tStep);
+    bool writeVTKPieceEpilog(ExportRegion &vtkPiece, TimeStep *tStep);
     /**
      * Writes Piece variables
      * @return true if piece is not empty and thus written
      */
-    bool writeVTKPieceVariables(VTKPiece &vtkPiece, TimeStep *tStep);
+    bool writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tStep);
     /**
      * Writes piece epiloque
      * @return true if piece is not empty and thus written
      */
-    bool writeVTKPieceProlog(VTKPiece &vtkPiece, TimeStep *tStep);
+    bool writeVTKPieceProlog(ExportRegion &vtkPiece, TimeStep *tStep);
     /**
      * Exports given internal variables directly in integration points (raw data, no smoothing)
      * @param valIDs the UnknownType values identifying the internal variables to export
@@ -213,8 +213,8 @@ protected:
 #endif
 
     // Export of composite elements (built up from several subcells)
-    void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
-    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
+    void exportCompositeElement(ExportRegion &vtkPiece, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std::vector< ExportRegion > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 /**
@@ -228,8 +228,8 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
-    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
-    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

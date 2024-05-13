@@ -1802,7 +1802,7 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF<3> &localCoords
 }
 
 void
-Shell7Base :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+Shell7Base :: giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     vtkPieces.resize(1);
     this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
@@ -1810,7 +1810,7 @@ Shell7Base :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArr
 }
 
 void 
-Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
+Shell7Base :: giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
 {
     int numCells = this->layeredCS->giveNumberOfLayers();
     const int numCellNodes  = 15; // quadratic wedge

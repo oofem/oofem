@@ -1245,7 +1245,7 @@ Beam3d :: computeInternalForcesFromBodyLoadVectorAtPoint(FloatArray &answer, Loa
 
 
 void
-Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+Beam3d :: giveCompositeExportData(std :: vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     // divide element into several small ones
     vtkPieces.resize(1);

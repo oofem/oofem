@@ -350,7 +350,7 @@ TrPlaneStress2dXFEM :: giveElementDofIDMask(IntArray &answer) const
 }
 
 void
-TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     vtkPieces.resize(1);
 

@@ -124,10 +124,10 @@ protected:
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) override;
 
     // VTK
-    void giveCompositeExportData(std::vector < VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
-    void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
-    void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
-    void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    void giveCompositeExportData(std::vector < ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveCompositeExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveCZExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
     FloatArrayF<3> vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF<3> &localCoords, int layer, TimeStep *tStep) override;
     void giveDisUnknownsAt(const FloatArrayF<3> &lCoords, EnrichmentItem *ei, const FloatArray &solVec, FloatArrayF<3> &x, FloatArrayF<3> &m, double &gam, TimeStep *tStep);

@@ -2121,7 +2121,7 @@ Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArrayF<3> &lcoords, EnrichmentIte
 
 
 void
-Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+Shell7BaseXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     vtkPieces.resize(1);
     this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
@@ -2130,14 +2130,14 @@ Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, In
 
 
 void
-Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+Shell7BaseXFEM :: giveCompositeExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     this->giveCZExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
     //this->giveShellExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
 }
 
 void
-Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+Shell7BaseXFEM :: giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     int numSubCells = 1;
 
@@ -2599,7 +2599,7 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
 }
 
 void
-Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+Shell7BaseXFEM :: giveCZExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
 
     int numSubCells = 1;
