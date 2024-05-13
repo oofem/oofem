@@ -78,7 +78,7 @@ public:
 
     std::ofstream fileStreamCross;
 
-    VTKPiece defaultVTKPieceCross;
+    ExportRegion defaultVTKPieceCross;
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -94,18 +94,18 @@ public:
 
     const char *giveClassName() const override { return "VTKXMLLatticeExportModule"; }
 
-    bool writeVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep);
+    bool writeVTKPieceCross(ExportRegion &vtkPiece, TimeStep *tStep);
 
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
+    void setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tStep, Set& region) override;
 
-    void writeCellVarsCross(VTKPiece &vtkPiece);
+    void writeCellVarsCross(ExportRegion &vtkPiece);
 
-    void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, Set& region);
+    void setupVTKPieceCross(ExportRegion &vtkPiece, TimeStep *tStep, Set& region);
 
-    int initRegionNodeNumbering(VTKPiece& piece, Domain *domain, TimeStep *tStep, Set& region) override;
+    int initRegionNodeNumbering(ExportRegion& piece, Domain *domain, TimeStep *tStep, Set& region) override;
 
-    void exportPrimaryVars(VTKPiece &piece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
-    void exportIntVars(VTKPiece &piece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
+    void exportPrimaryVars(ExportRegion &piece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
+    void exportIntVars(ExportRegion &piece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // vtkxmllatticeexportmodule_h

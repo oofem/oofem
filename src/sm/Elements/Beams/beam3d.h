@@ -71,7 +71,7 @@ class FEI3dLineLin;
  * @author Mikael Öhman
  * @author (several other authors)
  */
- class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface, public VTKXMLExportModuleElementInterface
+ class Beam3d : public BeamBaseElement, public FiberedCrossSectionInterface, public Beam3dSubsoilMaterialInterface,  public VTKXMLExportModuleElementInterface
 {
 protected:
     /// Geometry interpolator only.
@@ -191,7 +191,7 @@ public:
     */
     FloatMatrixF<6,6> B3SSMI_getUnknownsGtoLRotationMatrix() const override;
 
-    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

@@ -155,7 +155,7 @@ protected:
     void giveUpdatedSolutionVector_d(FloatArray &answer, TimeStep *tStep);
 
     // VTK interface
-    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    virtual void giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
 
     // N and B matrices

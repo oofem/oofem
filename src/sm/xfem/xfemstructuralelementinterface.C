@@ -1593,7 +1593,7 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std :: vec
     }
 }
 
-void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std :: vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     const int numCells = mSubTri.size();
     vtkPieces [ 0 ].setNumberOfCells(numCells);

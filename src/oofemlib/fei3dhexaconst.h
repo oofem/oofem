@@ -32,20 +32,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef fei3dhexalin_h
-#define fei3dhexalin_h
+#ifndef fei3dhexaconst_h
+#define fei3dhexaconst_h
 
 #include "feinterpol3d.h"
 
 namespace oofem {
 
 /**
- * Class representing implementation of linear hexahedra interpolation class.
+ * Class representing implementation of hexahedra constant interpolation class.
  */
-class OOFEM_EXPORT FEI3dHexaLin : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dHexaConst : public FEInterpolation3d
 {
 public:
-    FEI3dHexaLin() : FEInterpolation3d(1) { }
+    FEI3dHexaConst() : FEInterpolation3d(1) { }
 
     integrationDomain giveIntegrationDomain() const override { return _Cube; }
     Element_Geometry_Type giveGeometryType() const override { return EGT_hexa_1; }
@@ -54,17 +54,12 @@ public:
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
     // Bulk
-    static FloatArrayF<8> evalN(const FloatArrayF<3> &lcoords);
-    static std::pair<double, FloatMatrixF<3,8>> evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo);
-    static FloatMatrixF<3,8> evaldNdxi(const FloatArrayF<3> &lcoords);
-
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    void evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes() const override { return 8; }
-    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4,5,6,7,8}; internalDofMans={};}
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={}; internalDofMans={1};}
 
 
     // Edge
@@ -83,9 +78,6 @@ public:
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     IntArray computeLocalSurfaceMapping(int iedge) const override;
 
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const override;
-
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
     std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
 
@@ -93,4 +85,4 @@ protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 } // end namespace oofem
-#endif //  fei3dhexalin_h
+#endif //  fei3dhexaconst_h

@@ -105,6 +105,30 @@ NodeErrorCheckingRule :: NodeErrorCheckingRule(const std :: string &line, double
     }
 }
 
+
+bool 
+NodeErrorCheckingRule :: getValue(double &answer, Domain *domain, TimeStep *tStep)
+{
+    DofManager *dman = domain->giveGlobalDofManager(number);
+    if ( !dman ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return false;
+        } else {
+            OOFEM_WARNING("Dof manager %d not found.", number);
+            return false;
+        }
+    }
+
+    if ( dman->giveParallelMode() == DofManager_remote || dman->giveParallelMode() == DofManager_null ) {
+        return false;
+    }
+
+    Dof *dof = dman->giveDofWithID(dofid);
+    answer = dof->giveUnknown(mode, tStep);
+    return true;
+}
+
+
 bool
 NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
@@ -140,6 +164,93 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     return check;
 }
 
+
+InternalElementDofManErrorCheckingRule::InternalElementDofManErrorCheckingRule (const std :: string &line, double tol) :
+    ErrorCheckingRule(tol)
+{
+    char unknown;
+    int ret = std :: sscanf(line.c_str(), "#ELEMENTNODE tStep %d number %d dofman %d dof %d unknown %c value %le tolerance %le",
+                  &tstep, & number, &idofman, & dofid, & unknown, & value, & tolerance);
+    if ( ret < 5 ) {
+        OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
+    }
+
+    if ( unknown == 'd' ) {
+        mode = VM_Total;
+    } else if ( unknown == 'v' ) {
+        mode = VM_Velocity;
+    } else if ( unknown == 'a' ) {
+        mode = VM_Acceleration;
+    } else {
+        OOFEM_ERROR("Can't recognize unknown '%c'", unknown);
+    }
+}
+
+bool
+InternalElementDofManErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
+{
+    // Rule doesn't apply yet.
+    if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
+        return true;
+    }
+
+    Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return true;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+    if ( element->giveParallelMode() != Element_local ) {
+        return true;
+    }
+    DofManager *dman = element->giveInternalDofManager(idofman);
+    if ( !dman ) {
+        OOFEM_WARNING("Internal DofManager %d on element %d not found.", idofman, number);
+        return false;
+    }
+
+    Dof *dof = dman->giveDofWithID(dofid);
+
+    double dmanValue = dof->giveUnknown(mode, tStep);
+    bool check = checkValue(dmanValue);
+    if ( !check ) {
+        OOFEM_WARNING("Check failed in %s: tstep %d, node %d, dof %d, mode %d:\n"
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), tstep, number, dofid, mode,
+                      dmanValue, value, fabs(dmanValue-value), tolerance );
+    }
+    return check;
+}
+
+bool
+InternalElementDofManErrorCheckingRule :: getValue(double &answer, Domain *domain, TimeStep *tStep)
+{
+    Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return false;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+    if ( element->giveParallelMode() != Element_local ) {
+        return false;
+    }
+    DofManager *dman = element->giveInternalDofManager(idofman);
+    if ( !dman ) {
+        OOFEM_WARNING("Internal DofManager %d on element %d not found.", idofman, number);
+        return false;
+    }
+
+    Dof *dof = dman->giveDofWithID(dofid);
+
+    answer = dof->giveUnknown(mode, tStep);
+    return true;
+}
 
 ElementErrorCheckingRule :: ElementErrorCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol), irule(0)
@@ -208,6 +319,41 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     }
     return check;
 }
+
+
+bool
+ElementErrorCheckingRule :: getValue(double & answer, Domain *domain, TimeStep *tStep)
+{
+    FloatArray ipval;
+    Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return false;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+        if ( element->giveParallelMode() != Element_local ) {
+            return false;
+        }
+
+    // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
+    GaussPoint *gp = element->giveIntegrationRule(irule)->getIntegrationPoint(gpnum-1);
+    element->giveIPValue(ipval, gp, ist, tStep);
+
+    if ( component > ipval.giveSize() || component < 1 ) {
+        OOFEM_WARNING("Check failed in %s: element %d, gpnum %d, ist %d, component %d:\n"
+                      "Component not found!", 
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), number, gpnum, ist, component);
+        ipval.printYourself();
+        return false;
+    }
+
+    answer = ipval.at(component);
+    return true;
+}
+
 
 BeamElementErrorCheckingRule :: BeamElementErrorCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
@@ -284,6 +430,52 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 }
 
 
+bool
+BeamElementErrorCheckingRule :: getValue(double& answer, Domain *domain, TimeStep *tStep)
+{
+    FloatArray val;
+    Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return false;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+    if ( element->giveParallelMode() != Element_local ) {
+        return false;
+    }
+
+    if (ist == BET_localEndDisplacement) {
+        element->computeVectorOf(VM_Total, tStep, val);
+    } else if (ist ==  BET_localEndForces) {
+#ifdef __SM_MODULE 
+        if(Beam2d* b = dynamic_cast<Beam2d*>(element)) b->giveEndForcesVector(val, tStep);
+        else if(Beam3d* b = dynamic_cast<Beam3d*>(element)) b->giveEndForcesVector(val, tStep);
+        else {
+            OOFEM_WARNING("Element %d has no beam interface.", number);
+            return false;
+        }
+#else
+        OOFEM_WARNING("Element %d has no beam interface.", number);
+        return false;
+#endif
+    }
+
+    if ( component > val.giveSize() || component < 1 ) {
+        OOFEM_WARNING("Check failed in %s: beam_element %d, ist %d, component %d:\n"
+                      "Component not found!",
+                      domain->giveEngngModel()->giveOutputBaseFileName().c_str(), number, ist, component);
+        val.printYourself();
+        return false;
+    }
+
+    answer = val.at(component);
+    return true;
+}
+
+
 ReactionErrorCheckingRule :: ReactionErrorCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
 {
@@ -350,6 +542,46 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 #endif
 }
 
+bool
+ReactionErrorCheckingRule :: getValue(double &answer, Domain *domain, TimeStep *tStep)
+{
+
+#ifdef __SM_MODULE
+    //EngngModel *emodel = domain->giveEngngModel();
+    StructuralEngngModel *emodel = static_cast< StructuralEngngModel* >( domain->giveEngngModel() );
+    ///@todo These would be easier to use if they just returned some more useable structure. Perhaps embed inside a PrimaryField, or just some std::pair/tuple.
+    ///Now we instead have two calls and have to decipher the information from that.
+    //std :: map< int, std :: map< int, double > > reactionForces; // reactionForces[nodeNumber][dofid] like this
+    //emodel->computeReaction(std :: reactionForces, tStep, domain->giveNumber());
+    FloatArray reactionForces;
+    IntArray restrDofMans, restrDofs, eqn;
+    emodel->buildReactionTable(restrDofMans, restrDofs, eqn, tStep, domain->giveNumber());
+    emodel->computeReaction(reactionForces, tStep, domain->giveNumber());
+
+    bool found = false;
+    int index;
+    for ( index = 1; index <= restrDofs.giveSize(); ++index ) {
+        if ( restrDofs.at(index) == dofid && domain->giveNode(restrDofMans.at(index))->giveLabel() == number ) {
+            found = true;
+            break;
+        }
+    }
+    if ( !found ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return false;
+        } else {
+            OOFEM_WARNING("Reaction force node: %d dof: %d not found.", number, dofid);
+            return false;
+        }
+    }
+
+    answer = reactionForces.at(index);
+    return true;
+#else
+    OOFEM_WARNING("Reaction forces only supported for structural problems yet");
+    return false;
+#endif
+}
 
 LoadLevelErrorCheckingRule :: LoadLevelErrorCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
@@ -381,6 +613,13 @@ LoadLevelErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     return check;
 }
 
+bool
+LoadLevelErrorCheckingRule :: getValue(double& answer, Domain *domain, TimeStep *tStep)
+{
+
+    answer = domain->giveEngngModel()->giveLoadLevel();
+    return true;
+}
 
 EigenValueErrorCheckingRule :: EigenValueErrorCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
@@ -410,6 +649,30 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     }
     return check;
 }
+bool
+EigenValueErrorCheckingRule :: getValue(double&answer, Domain *domain, TimeStep *tStep)
+{
+    answer = domain->giveEngngModel()->giveEigenValue(number);
+    return true;
+}
+
+TimeCheckingRule :: TimeCheckingRule(const std :: string &line, double tol) :
+    ErrorCheckingRule(tol)
+{
+}
+
+bool
+TimeCheckingRule :: check(Domain *domain, TimeStep *tStep)
+{
+    return true;
+}
+bool
+TimeCheckingRule :: getValue(double&answer, Domain *domain, TimeStep *tStep)
+{
+    answer = tStep->giveTargetTime();
+    return true;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -461,6 +724,8 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord &ir)
     if ( errorCheckingRules.size() == 0 && !writeChecks ) {
         OOFEM_WARNING("No rules found (possibly wrong file or syntax).");
     }
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->extractorMode, _IFT_ErrorCheckingExportModule_extractormode);
 }
 
 void
@@ -472,22 +737,56 @@ ErrorCheckingExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 #endif
 
-    // Error checking rules are hardcoded to domain 1 always.
-    Domain *domain = emodel->giveDomain(1);
+    if (!this->extractorMode) {
+        // Error checking rules are hardcoded to domain 1 always.
+        Domain *domain = emodel->giveDomain(1);
 
-    OOFEM_LOG_INFO("Checking rules...\n");
-    for ( auto &rule: this->errorCheckingRules ) {
-        this->allPassed &= rule->check(domain, tStep);
-    }
-
-    if ( !tStep->isNotTheLastStep() ) {
-        if ( !this->allPassed ) {
-            OOFEM_ERROR("Rule not passed, exiting with error");
+        OOFEM_LOG_INFO("Checking rules...\n");
+        for ( auto &rule: this->errorCheckingRules ) {
+            this->allPassed &= rule->check(domain, tStep);
         }
-    }
 
-    if ( this->writeChecks ) {
-        this->writeCheck(domain, tStep);
+        if ( !tStep->isNotTheLastStep() ) {
+            if ( !this->allPassed ) {
+                OOFEM_ERROR("Rule not passed, exiting with error");
+            }
+        }
+
+        if ( this->writeChecks ) {
+            this->writeCheck(domain, tStep);
+        }
+    } else {
+
+        // Error checking rules are hardcoded to domain 1 always.
+        Domain *domain = emodel->giveDomain(1);
+
+        double value;
+        for ( auto &rule: this->errorCheckingRules ) {
+            bool result = rule->getValue(value, domain, tStep);
+            if (result) {
+                fprintf (outputFile, "%+12.8e ", value);
+            } else {
+                fprintf (outputFile, "%12s","-");
+            }
+        }
+        fprintf(outputFile, "\n");
+    }
+}
+
+void
+ErrorCheckingExportModule::initialize()
+{
+    if (this->extractorMode) {
+        char filename [100];    
+        sprintf( filename, "%s.m%d", this->emodel->giveOutputBaseFileName().c_str(), this->number);
+        this->outputFile = fopen(filename, "w");
+    }
+}
+
+void ErrorCheckingExportModule::terminate()
+{
+    if (this->extractorMode) {
+        fclose (this->outputFile);   
     }
 }
 
@@ -565,15 +864,16 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
         if ( line.compare(0, 12, "#%END_CHECK%") == 0 ) {
             return NULL;
         }
-        if ( line.size() > 2 && line[0] == '#' && line[1] != '#') {
-            if (line.compare(0, 5, "#TIME") != 0 ) {
-                break;
-            }
+        if (line.size() > 2 && line[0] == '#' && line[1] != '#') {
+            break;
         }
+        
     }
 
     if ( line.compare(0, 5, "#NODE") == 0 ) {
         return std::make_unique<NodeErrorCheckingRule>(line, errorTolerance);
+    } else if ( line.compare(0, 12, "#ELEMENTNODE") == 0 ) {
+        return std::make_unique<InternalElementDofManErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 8, "#ELEMENT") == 0 ) {
         return std::make_unique<ElementErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 13, "#BEAM_ELEMENT") == 0 ) {
@@ -584,6 +884,8 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
         return std::make_unique<LoadLevelErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 7, "#EIGVAL") == 0 ) {
         return std::make_unique<EigenValueErrorCheckingRule>(line, errorTolerance);
+    } else if ( line.compare(0, 5, "#TIME") == 0 ) {
+        return std::make_unique<TimeCheckingRule>(line, errorTolerance);
     } else {
         OOFEM_ERROR("Unsupported rule '%s'", line.c_str());
         return nullptr;

@@ -66,6 +66,8 @@ public:
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes() const override { return 4; }
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4};internalDofMans={};}
+
 
     bool inside(const FloatArray &lcoords) const override;
 

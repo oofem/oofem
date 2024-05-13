@@ -129,7 +129,7 @@ VTKXMLLatticeExportModule::giveSwitches(IntArray &answer, int location) {
 }
 
 void
-VTKXMLLatticeExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set &region)
+VTKXMLLatticeExportModule::setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tStep, Set &region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -235,7 +235,7 @@ VTKXMLLatticeExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Se
 
 
 void
-VTKXMLLatticeExportModule::setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep, Set& region)
+VTKXMLLatticeExportModule::setupVTKPieceCross(ExportRegion &vtkPieceCross, TimeStep *tStep, Set& region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -461,7 +461,7 @@ VTKXMLLatticeExportModule::doOutputNormal(TimeStep *tStep, bool forcedOutput)
 
 
 int
-VTKXMLLatticeExportModule::initRegionNodeNumbering(VTKPiece& vtkPiece, Domain *domain, TimeStep *tStep, Set& region)
+VTKXMLLatticeExportModule::initRegionNodeNumbering(ExportRegion& vtkPiece, Domain *domain, TimeStep *tStep, Set& region)
 {
     int nnodes = domain->giveNumberOfDofManagers();
     int elementNode, node;
@@ -611,7 +611,7 @@ VTKXMLLatticeExportModule::initRegionNodeNumbering(VTKPiece& vtkPiece, Domain *d
 
 
 void
-VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
+VTKXMLLatticeExportModule::exportPrimaryVars(ExportRegion &vtkPiece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
@@ -692,7 +692,7 @@ VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set& region, In
 
 
 void
-VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
+VTKXMLLatticeExportModule::exportIntVars(ExportRegion &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
@@ -742,7 +742,7 @@ VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArr
 
 
 bool
-VTKXMLLatticeExportModule::writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep)
+VTKXMLLatticeExportModule::writeVTKPieceCross(ExportRegion &vtkPieceCross, TimeStep *tStep)
 {
     if ( !vtkPieceCross.giveNumberOfCells() ) {
         return false;
@@ -822,7 +822,7 @@ VTKXMLLatticeExportModule::writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep 
 }
 
 void
-VTKXMLLatticeExportModule::writeCellVarsCross(VTKPiece &vtkPiece)
+VTKXMLLatticeExportModule::writeCellVarsCross(ExportRegion &vtkPiece)
 {
     FloatArray valueArray;
     int numCells = vtkPiece.giveNumberOfCells();

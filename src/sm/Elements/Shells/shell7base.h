@@ -233,8 +233,8 @@ protected:
     virtual FloatArrayF< 3 >vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF< 3 > &localCoords, int layer, TimeStep *tStep);
     virtual FloatArrayF< 3 >vtkEvalInitialGlobalCZCoordinateAt(const FloatArrayF< 3 > &localCoords, int interface);
 
-    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) override;
-    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    void giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    virtual void giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
     std::vector< FloatArray >giveFictiousNodeCoordsForExport(int layer);
     std::vector< FloatArray >giveFictiousCZNodeCoordsForExport(int interface);

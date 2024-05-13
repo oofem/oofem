@@ -10,8 +10,8 @@ vtkxmlPy = oofempy.vtkmemory(1, problem, domain_all=True, tstep_all=True, dofman
 vtkxmlPy.initialize()
 vtkxmlPy.doOutput(problem.giveCurrentStep(), False)
 
-for p in vtkxmlPy.getVTKPieces():
-#p = vtkxmlPy.getVTKPieces()[0]
+for p in vtkxmlPy.getExportRegions():
+#p = vtkxmlPy.getExportRegions()[0]
     print ("Piece:", p)
     print(p.getVertices())
     print(p.getCellConnectivity())

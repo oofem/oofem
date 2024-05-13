@@ -40,7 +40,7 @@
 namespace oofem {
 class Material;
 class IntegrationRule;
-class VTKPiece;
+class ExportRegion;
 class StructuralFE2MaterialStatus;
 /**
  * Provides Xfem interface for a structural element.
@@ -101,7 +101,7 @@ public:
     std :: vector< Triangle >mSubTri;
 
     /// VTK Interface
-    void giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    void giveSubtriangulationCompositeExportData(std :: vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
     /// Help functions for VTK export.
     void computeIPAverageInTriangle(FloatArray &answer, IntegrationRule *iRule, Element *elem, InternalStateType isType, TimeStep *tStep, const Triangle &iTri);

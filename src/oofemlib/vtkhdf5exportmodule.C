@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "vtkxmlexportmodule.h"
+#include "vtkhdf5exportmodule.h"
 #include "element.h"
 #include "gausspoint.h"
 #include "timestep.h"
@@ -67,126 +67,304 @@
  #include <vtkDoubleArray.h>
  #include <vtkCellArray.h>
  #include <vtkCellData.h>
- #include <vtkXMLUnstructuredGridWriter.h>
- #include <vtkXMLPUnstructuredGridWriter.h>
+ #include <vtkHDF5UnstructuredGridWriter.h> // @check!
+ #include <vtkHDF5PUnstructuredGridWriter.h>
  #include <vtkUnstructuredGrid.h>
  #include <vtkSmartPointer.h>
 #endif
 
+#ifdef __HDF_MODULE
+#include <H5Cpp.h>
+#endif
+
 namespace oofem {
-REGISTER_ExportModule(VTKXMLExportModule)
+REGISTER_ExportModule(VTKHDF5ExportModule)
 
 
-VTKXMLExportModule::VTKXMLExportModule(int n, EngngModel *e) : VTKBaseExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
+VTKHDF5ExportModule::VTKHDF5ExportModule(int n, EngngModel *e) : VTKBaseExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {}
 
 
-VTKXMLExportModule::~VTKXMLExportModule() {}
+VTKHDF5ExportModule::~VTKHDF5ExportModule() {}
 
 
 void
-VTKXMLExportModule::initializeFrom(InputRecord &ir)
+VTKHDF5ExportModule::initializeFrom(InputRecord &ir)
 {
     ExportModule::initializeFrom(ir);
 
     int val;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, externalForcesToExport, _IFT_VTKXMLExportModule_externalForces); // Macro - see unknowntype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, ipInternalVarsToExport, _IFT_VTKXMLExportModule_ipvars); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKHDF5ExportModule_cellvars); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKHDF5ExportModule_vars); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKHDF5ExportModule_primvars); // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, externalForcesToExport, _IFT_VTKHDF5ExportModule_externalForces); // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, ipInternalVarsToExport, _IFT_VTKHDF5ExportModule_ipvars); // Macro - see internalstatetype.h
 
     val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKHDF5ExportModule_stype); // Macro
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 }
 
 
 void
-VTKXMLExportModule::initialize()
+VTKHDF5ExportModule::initialize()
 {
     this->smoother = nullptr;
     this->primVarSmoother = nullptr;
     VTKBaseExportModule::initialize();
+
+#ifdef __HDF_MODULE
+    char fext[100];
+    sprintf( fext, ".m%d.hdf", this->number);
+    this->fileName = this->emodel->giveOutputBaseFileName() + fext;
+    /* 
+    *  Create the named file, truncating the existing file one if any,
+    *  using default create and access property lists.
+    */
+   try {
+    H5::IntType itype(H5::PredType::NATIVE_INT);
+    H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
+
+    this->file = new H5::H5File (this->fileName, H5F_ACC_TRUNC);
+    /*
+     * Create a VTHHDF group 
+    */
+    this->topGroup = new H5::Group (file->createGroup("/VTKHDF"));
+    this->pointDataGroup = new H5::Group(topGroup->createGroup("PointData"));
+    this->cellDataGroup = new H5::Group(topGroup->createGroup("CellData"));
+    /* Create version attribute*/
+    int version[]={2,2};
+    hsize_t dims[1]={2};
+    H5::DataSpace attrSpace(1, dims);
+    H5::Attribute va = topGroup->createAttribute("Version", itype, attrSpace);
+    va.write(itype, version);
+    
+    // Create type attribute
+    H5::StrType str_type(H5::PredType::C_S1, 16); /* required by vtkhdf reader Type string with ASCII encoding and fixed length*/
+    str_type.setCset(H5T_CSET_ASCII);
+    H5::DataSpace attrSpace1(H5S_SCALAR);
+
+    H5::Attribute att = topGroup->createAttribute( "Type", str_type, attrSpace1 );
+    att.write( str_type, std::string("UnstructuredGrid"));
+
+    /* Create Unstructured grid top level datasets*/
+    hsize_t dim1[]={1};
+    hsize_t maxdim1[]={H5S_UNLIMITED};
+    H5::DataSpace ds1(1, dim1, maxdim1);
+    H5::DSetCreatPropList plist1;
+    plist1.setLayout(H5D_CHUNKED);
+    hsize_t chunk_dims1[] = {1000};
+    plist1.setChunk(1, chunk_dims1);
+    H5::DataSet NumberOfConnectivityIds = topGroup->createDataSet( "NumberOfConnectivityIds", itype, ds1, plist1 );
+    H5::DataSet numberOfPointsDSet = topGroup->createDataSet( "NumberOfPoints", itype, ds1, plist1 );
+    H5::DataSet numberOfCellsDSet = topGroup->createDataSet( "NumberOfCells", itype, ds1, plist1 );
+    
+    hsize_t dim4[]={1,3};
+    hsize_t maxdim4[]={H5S_UNLIMITED,3};
+    H5::DataSpace pointsDSpace(2, dim4, maxdim4);
+    // Create dataset creation property list to enable chunking
+    H5::DSetCreatPropList plist;
+    plist.setLayout(H5D_CHUNKED);
+    hsize_t chunk_dims2[2] = {1000, 3};
+    plist.setChunk(2, chunk_dims2);
+    H5::DataSet pointsDSet = topGroup->createDataSet( "Points", dtype, pointsDSpace, plist );
+    
+    H5::DataType ttype(H5::PredType::STD_U8LE);
+    H5::DataSet typesDSet = topGroup->createDataSet( "Types", ttype, ds1, plist1 );
+    H5::DataSet connectivityDSet = topGroup->createDataSet( "Connectivity", itype, ds1, plist1 );
+    H5::DataSet offsetsDSet = topGroup->createDataSet( "Offsets", itype, ds1, plist1 );
+
+
+
+    // Create Steps group (transient data support)
+    this->stepsGroup = new H5::Group(topGroup->createGroup("Steps"));
+    H5::DataSpace ads(H5S_SCALAR);
+    H5::Attribute nsa = this->stepsGroup->createAttribute("NSteps", itype, ads);
+    int nsteps = 0;
+    nsa.write(itype, &nsteps);
+    // create Steps data sets
+    hsize_t dim[]={1};
+    hsize_t maxdim[]={H5S_UNLIMITED};
+    H5::DataSpace stepDSpace(1, dim, maxdim);
+    // Create dataset creation property list to enable chunking
+    plist1.setLayout(H5D_CHUNKED);
+    hsize_t chunk_dims3[1] = {10};
+    plist1.setChunk(1, chunk_dims3);
+    // create Steps/Values (each entry indicates the time value for the associated time step)
+    H5::DataSet valuesDSet = this->stepsGroup->createDataSet( "Values", dtype, stepDSpace, plist1 );
+    // create PartOffsets [dims = (NSteps)]: each entry indicates at which part offset to start reading the associated time step
+    H5::DataSet poDSet = this->stepsGroup->createDataSet( "PartOffsets", itype, stepDSpace, plist1 );
+    H5::DataSet npDSet = this->stepsGroup->createDataSet( "NumberOfParts", itype, stepDSpace, plist1 );
+    // PointOffsets [dims = (NSteps)]: each entry indicates where in the VTKHDF/Points data set to start reading point coordinates for the associated time step
+    H5::DataSet pointOffsetsDSet = this->stepsGroup->createDataSet( "PointOffsets", itype, stepDSpace, plist1 );
+    // CellOffsets [dims = (NSteps, NTopologies)]: each entry indicates by how many cells to offset reading into the connectivity offset structures for the associated time step 
+    hsize_t dim2[]={1,1};
+    hsize_t maxdim2[]={H5S_UNLIMITED,1};
+    H5::DataSpace ds2(2, dim2, maxdim2);
+    H5::DSetCreatPropList plist2;
+    plist2.setLayout(H5D_CHUNKED);
+    hsize_t chunk_dims4[2] = {10,1};
+    plist2.setChunk(2, chunk_dims4);
+    H5::DataSet cellOffsetsDSet = this->stepsGroup->createDataSet( "CellOffsets", itype, ds2, plist2);
+    // ConnectivityIdOffsets [dims = (NSteps, NTopologies)]: each entry indicates by how many values to offset reading into the connectivity indexing structures for the associated time step 
+    H5::DataSet connIdOffsetsDSet = this->stepsGroup->createDataSet( "ConnectivityIdOffsets", itype, ds2, plist2);
+        
+
+    this->pointCounter = 0;
+    this->cellCounter=0;
+    this->connCounter=0;
+    this->offsetCounter=0;
+
+} catch ( H5::Exception& error) {
+    error.getDetailMsg(); // error.printErrorStack();
+    return;
+}
+
+
+#endif
+
 }
 
 
 void
-VTKXMLExportModule::terminate()
-{ }
-
-std::string
-VTKXMLExportModule::giveOutputFileName(TimeStep *tStep)
+VTKHDF5ExportModule::terminate()
 {
-    return this->giveOutputBaseFileName(tStep) + ".vtu";
+#ifdef __HDF_MODULE
+    delete topGroup;
+    delete pointDataGroup;
+    delete cellDataGroup;
+    delete stepsGroup;
+    delete file;
+#endif
 }
-
-
-std::ofstream
-VTKXMLExportModule::giveOutputStream(TimeStep *tStep)
-{
-    std::string fileName = giveOutputFileName(tStep);
-    std::ofstream streamF;
-
-    if ( pythonExport ) {
-        streamF = std::ofstream(NULL_DEVICE);//do not write anything
-    } else {
-        streamF = std::ofstream(fileName);
-    }
-
-    if ( !streamF.good() ) {
-        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
-    }
-
-    streamF.fill('0');//zero padding
-    return streamF;
-}
-
 
 void
-VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
+VTKHDF5ExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 {
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
   
 #ifdef __VTK_MODULE
-    this->fileStream = vtkSmartPointer< vtkUnstructuredGrid >::New();
+    //this->fileStream = vtkSmartPointer< vtkUnstructuredGrid >::New();
     this->nodes = vtkSmartPointer< vtkPoints >::New();
     this->elemNodeArray = vtkSmartPointer< vtkIdList >::New();
 
-#else
-    this->fileStream = this->giveOutputStream(tStep);
-    struct tm *current;
-    time_t now;
-    time(& now);
-    current = localtime(& now);
-
 #endif
+#ifdef __HDF_MODULE
+    //int rank = 0; // at present no support fro parallel partitioned output
+    H5::IntType itype(H5::PredType::NATIVE_UINT);
+    H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
 
-    // Write output: VTK header
-#ifndef __VTK_MODULE
-    this->fileStream << "<!-- TimeStep " << tStep->giveTargetTime() * timeScale << " Computed " << current->tm_year + 1900 << "-" << setw(2) << current->tm_mon + 1 << "-" << setw(2) << current->tm_mday << " at " << current->tm_hour << ":" << current->tm_min << ":" << setw(2) << current->tm_sec << " -->\n";
-    this->fileStream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
-    this->fileStream << "<UnstructuredGrid>\n";
-#endif
+    // update Steps/offset informations
+    // increment number of steps
+    H5::Attribute nstepsattr = stepsGroup->openAttribute("NSteps");
+    unsigned int steps;
+    nstepsattr.read(itype, &steps);
+    steps ++;
+    nstepsattr.write(itype, &steps);
+    // resize and update steps datasets
+    // update Steps/Values Attribute (step time values)
+    hsize_t ssize[] = {steps};
+    H5::DataSet values = stepsGroup->openDataSet("Values");
+    values.extend( ssize );
+    /* create hyperslab to update point data */
+    hsize_t     offset[] = {steps-1};
+    hsize_t     dims[1] = {1};
+    double t = tStep->giveTargetTime();
+    this->updateDataSet(values, 1, dims, offset, dtype, &t);
 
-    this->giveSmoother(); // make sure smoother is created, Necessary? If it doesn't exist it is created /JB
+    // Update Steps/PointOffsets
+    H5::DataSet pods = stepsGroup->openDataSet("PointOffsets");
+    pods.extend( ssize );
+    this->updateDataSet(pods, 1, dims, offset, itype, &this->pointCounter);
 
-    /* Loop over pieces  ///@todo: this feature has been broken but not checked if it currently works /JB
-        * Start default pieces containing all single cell elements. Elements built up from several vtk
-        * cells (composite elements) are exported as individual pieces after the default ones.
-        */
+    // Update Steps/CellOffsets
+    hsize_t ssize11[] = {steps,1};
+    H5::DataSet codset = stepsGroup->openDataSet("CellOffsets");// CellOffsets
+    codset.extend(ssize11);
+    /* create hyperslab to update point data */
+    hsize_t     offset11[] = {steps-1,0};
+    hsize_t     dims11[] = {1,1};
+    int tempdata11[1][1]={(int)this->cellCounter};
+    this->updateDataSet(codset, 2, dims11, offset11, itype, tempdata11);
+
+    // update Steps/ConnectivityIdOffsets
+    H5::DataSet cidset = stepsGroup->openDataSet("ConnectivityIdOffsets");
+    cidset.extend(ssize11);
+    this->updateDataSet(cidset, 2, dims11, offset11, itype, &this->connCounter);
+
+    // update Steps/NumberOfParts and Steps/PartOffsets
+    H5::DataSet npset = stepsGroup->openDataSet("NumberOfParts");
+    npset.extend(ssize);
+    int tval = 1;
+    this->updateDataSet(npset, 1, dims, offset, itype, &tval);
+    H5::DataSet poset = stepsGroup->openDataSet("PartOffsets");
+    poset.extend(ssize);
+    tval =steps-1;
+    this->updateDataSet(poset, 1, dims, offset, itype, &tval);
+
+
+
+    H5::DataSet pointsDSet = topGroup->openDataSet( "Points" );
+    H5::DataSet typesDSet = topGroup->openDataSet( "Types" );
+    H5::DataSet connectivityDSet = topGroup->openDataSet( "Connectivity" );
+    H5::DataSet offsetsDSet = topGroup->openDataSet( "Offsets" );
+
+
     int nPiecesToExport = this->giveNumberOfRegions(); //old name: region, meaning: sets
     int anyPieceNonEmpty = 0;
     NodalRecoveryModel *smoother = giveSmoother();
     NodalRecoveryModel *primVarSmoother = givePrimVarSmoother();
 
+    unsigned int stepPointCounter = 0, stepCellCounter = 0, stepConnCounter = 0;
+    
     for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
         // Fills a data struct (VTKPiece) with all the necessary data.
         Set* region = this->giveRegionSet(pieceNum);
         this->setupVTKPiece(this->defaultVTKPiece, tStep, *region);
+        this->writeVTKPieceProlog(this->defaultVTKPiece, tStep, pointCounter, cellCounter, connCounter, offsetCounter, 
+                                    stepPointCounter, stepCellCounter, stepConnCounter, 
+                                    pointsDSet, connectivityDSet, offsetsDSet, typesDSet); 
+
+        this->exportPrimaryVars(this->defaultVTKPiece, *region, primaryVarsToExport, *primVarSmoother, tStep);
+        this->exportIntVars(this->defaultVTKPiece, *region, internalVarsToExport, *smoother, tStep);
+        anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPiece, tStep);
+
+        this->defaultVTKPiece.clear();
+
+    }
+
+    this->pointCounter += stepPointCounter;
+    this->cellCounter += stepCellCounter;
+    this->connCounter += stepConnCounter;
+    this->offsetCounter += (stepCellCounter+1);
+
+    /* Update basic datasets*/
+    H5::DataSet numberOfPointsDSet = topGroup->openDataSet("NumberOfPoints");
+    H5::DataSet numberOfCellsDSet = topGroup->openDataSet("NumberOfCells");
+    H5::DataSet NumberOfConnectivityIds = topGroup->openDataSet("NumberOfConnectivityIds");
+
+    numberOfPointsDSet.extend(ssize);
+    numberOfCellsDSet.extend(ssize);
+    NumberOfConnectivityIds.extend(ssize);
+
+    this->updateDataSet(numberOfPointsDSet, 1, dims, offset, itype, &stepPointCounter);
+    this->updateDataSet(numberOfCellsDSet, 1, dims, offset, itype, &stepCellCounter);
+    this->updateDataSet(NumberOfConnectivityIds, 1, dims, offset, itype, &stepConnCounter);
+
+    return;
+
+#endif
+
+#if 0
+    
+    for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
+        // Fills a data struct (VTKPiece) with all the necessary data.
+        Set* region = this->giveRegionSet(pieceNum);
+        this->setupVTKPiece(this->defaultVTKPiece, tStep, *region);
+        /*
         this->writeVTKPieceProlog(this->defaultVTKPiece, tStep); 
         // Export primary, internal and XFEM variables as nodal quantities
         this->exportPrimaryVars(this->defaultVTKPiece, *region, primaryVarsToExport, *primVarSmoother, tStep);
@@ -197,250 +375,131 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
         // Write the VTK piece to file.
         anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPiece, tStep);
         this->writeVTKPieceEpilog(this->defaultVTKPiece, tStep);   
-        this->defaultVTKPiece.clear();
-    }
-
-    /*
-        * Output all composite elements - one piece per composite element
-        * Each element is responsible of setting up a VTKPiece which can then be exported
         */
-    Domain *d = emodel->giveDomain(1);
-    for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
-        const IntArray &elements = this->giveRegionSet(pieceNum)->giveElementList();
-        for ( int i = 1; i <= elements.giveSize(); i++ ) {
-            Element *el = d->giveElement(elements.at(i) );
-            if ( this->isElementComposite(el) ) {
-                if ( el->giveParallelMode() != Element_local ) {
-                    continue;
-                }
-
-#ifndef __VTK_MODULE
-                //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
-                this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
-
-                for ( int j = 0; j < ( int ) this->defaultVTKPieces.size(); j++ ) {
-                    this->writeVTKPieceProlog(this->defaultVTKPieces[j], tStep);          
-                    anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPieces [ j ],  tStep);
-                    this->writeVTKPieceEpilog(this->defaultVTKPieces[j], tStep);  
-                    this->defaultVTKPieces [ j ].clear();
-                }
-#else
-                // No support for binary export yet
+        this->defaultVTKPiece.clear();
+        }
+        
+    return;
 #endif
-            }
-        }
-    } // end loop over composite elements
-
-#ifndef __VTK_MODULE
-    if ( anyPieceNonEmpty == 0 ) {
-        // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
-        this->fileStream << "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n";
-        this->fileStream << "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n";
-        this->fileStream << "</Piece>\n";
-    }
-#endif
-
-    // Finalize the output:
-    std::string fname = giveOutputFileName(tStep);
-#ifdef __VTK_MODULE
-
- #if 0
-    // Code fragment intended for future support of composite elements in binary format
-    // Doesn't as well as I would want it to, interface to VTK is to limited to control this.
-    // * The PVTU-file is written by every process (seems to be impossible to avoid).
-    // * Part files are renamed and time step and everything else is cut off => name collisions
-    vtkSmartPointer< vtkXMLPUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLPUnstructuredGridWriter >::New();
-    writer->SetTimeStep(tStep->giveNumber() - 1);
-    writer->SetNumberOfPieces(this->emodel->giveNumberOfProcesses() );
-    writer->SetStartPiece(this->emodel->giveRank() );
-    writer->SetEndPiece(this->emodel->giveRank() );
-
-
- #else
-    vtkSmartPointer< vtkXMLUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLUnstructuredGridWriter >::New();
- #endif
-
-    writer->SetFileName(fname.c_str() );
-    //writer->SetInput(this->fileStream); // VTK 4
-    writer->SetInputData(this->fileStream); // VTK 6
-
-    // Optional - set the mode. The default is binary.
-    //writer->SetDataModeToBinary();
-    writer->SetDataModeToAscii();
-    writer->Write();
-#else
-    this->fileStream << "</UnstructuredGrid>\n</VTKFile>";
-    if(this->fileStream){
-        this->fileStream.close();
-    }
-#endif
-
-    // export raw ip values (if required), works only on one domain
-    if ( !this->ipInternalVarsToExport.isEmpty() ) {
-        this->exportIntVarsInGpAs(ipInternalVarsToExport, tStep);
-        if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
-            std::ostringstream pvdEntry;
-            std::stringstream subStep;
-            if ( tstep_substeps_out_flag ) {
-                subStep << "." << tStep->giveSubStepNumber();
-            }
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
-            this->gpPvdBuffer.push_back(pvdEntry.str() );
-            this->writeGPVTKCollection();
-        }
-    }
-
-    // Write the *.pvd-file. Currently only contains time step information. It's named "timestep" but is actually the total time.
-    // First we check to see that there are more than 1 time steps, otherwise it is redundant;
-    if ( emodel->isParallel() && emodel->giveRank() == 0 ) {
-        ///@todo Should use probably use PVTU-files instead. It is starting to get messy.
-        // For this to work, all processes must have an identical output file name.
-        for ( int i = 0; i < this->emodel->giveNumberOfProcesses(); ++i ) {
-            std::ostringstream pvdEntry;
-            std::stringstream subStep;
-            char fext [ 100 ];
-            if ( this->emodel->giveNumberOfProcesses() > 1 ) {
-                sprintf(fext, "_%03d.m%d.%d", i, this->number, tStep->giveNumber() );
-            } else {
-                sprintf(fext, "m%d.%d", this->number, tStep->giveNumber() );
-            }
-            if ( tstep_substeps_out_flag ) {
-                subStep << "." << tStep->giveSubStepNumber();
-            }
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
-            this->pvdBuffer.push_back(pvdEntry.str() );
-        }
-
-        this->writeVTKCollection();
-    } else if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel, then we only check for multiple steps.
-        std::ostringstream pvdEntry;
-        std::stringstream subStep;
-        if ( tstep_substeps_out_flag ) {
-            subStep << "." << tStep->giveSubStepNumber();
-        }
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-        this->pvdBuffer.push_back(pvdEntry.str() );
-        this->writeVTKCollection();
-    }
 }
 
-
+#ifdef __HDF_MODULE
 bool
-VTKXMLExportModule::writeVTKPieceProlog(ExportRegion &vtkPiece, TimeStep *tStep)
+VTKHDF5ExportModule::writeVTKPieceProlog(ExportRegion &vtkPiece, TimeStep *tStep, unsigned int &pointCounter, unsigned int &cellCounter, unsigned int &connCounter, unsigned int& offsetCounter,
+                                        unsigned int& stepPointCounter, unsigned int& stepCellCounter, unsigned int& stepConnCounter,
+                                        H5::DataSet &pointsDSet, H5::DataSet &connectivityDSet, H5::DataSet &offsetDSet, H5::DataSet &typeDSet)
 {
    // Writes a VTK piece header + geometry to file.
    // This could be the whole domain (most common case) or it can be a
    // (so-called) composite element consisting of several VTK cells (layered structures, XFEM, etc.).
 
     // Write output: node coords
-    int numNodes = vtkPiece.giveNumberOfNodes();
-    int numEl = vtkPiece.giveNumberOfCells();
+    unsigned int numNodes = vtkPiece.giveNumberOfNodes();
+    unsigned int numEl = vtkPiece.giveNumberOfCells();
     FloatArray coords;
+
+    H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
+    H5::IntType itype(H5::PredType::NATIVE_INT);
+    H5::DataType ttype(H5::PredType::NATIVE_UINT); /* required by vtkhdf reader datset Types of type unsigned int */
 
     if ( !vtkPiece.giveNumberOfCells() ) {
       return false;
     }
 
-#ifdef __VTK_MODULE
-    FloatArray vtkCoords(3);
-    for ( int inode = 1; inode <= numNodes; inode++ ) {
-        coords = vtkPiece.giveNodeCoords(inode);
-        vtkCoords.zero();
-        for ( int i = 1; i <= coords.giveSize(); i++ ) {
-            vtkCoords.at(i) = coords.at(i);
-        }
+    double *points = new double[numNodes*3];
 
-        this->nodes->InsertNextPoint(vtkCoords.at(1), vtkCoords.at(2), vtkCoords.at(3) );
-        this->fileStream->SetPoints(nodes);
-    }
-
-#else
-    this->fileStream << "<Piece NumberOfPoints=\"" << numNodes << "\" NumberOfCells=\"" << numEl << "\">\n";
-    this->fileStream << "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ";
-
-    for ( int inode = 1; inode <= numNodes; inode++ ) {
+    for ( unsigned int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPiece.giveNodeCoords(inode);
         ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
-        for ( int i = 1; i <= coords.giveSize(); i++ ) {
-            this->fileStream << scientific << coords.at(i) << " ";
+        for ( int i = 0; i < coords.giveSize(); i++ ) {
+            points[(inode-1)*3+i] = coords[i];
         }
-
-        for ( int i = coords.giveSize() + 1; i <= 3; i++ ) {
-            this->fileStream << scientific << 0.0 << " ";
+        for ( int i = coords.giveSize() ; i < 3; i++ ) {
+            points[(inode-1)*3+i] = 0.0;
         }
     }
 
-    this->fileStream << "</DataArray>\n</Points>\n";
-#endif
+    /*
+     * Extend the dataset. This call assures that dataset is at least 3 x 3.
+     */
+      hsize_t psize[] = {pointCounter+numNodes, 3};
+      pointsDSet.extend( psize );
+    /* create hyperslab to update point data */
+      hsize_t     offset[] = {pointCounter, 0};
+      hsize_t      dims1[] = { numNodes, 3};            /* data1 dimensions */
+      this->updateDataSet(pointsDSet, 2, dims1, offset, dtype, points);
 
+    delete(points);
+    
 
     // Write output: connectivity, offsets, cell types
-
     // output the connectivity data
-#ifdef __VTK_MODULE
-    this->fileStream->Allocate(numEl);
-#else
-    this->fileStream << "<Cells>\n";
-    this->fileStream << " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ";
-#endif
+
     IntArray cellNodes;
-    for ( int ielem = 1; ielem <= numEl; ielem++ ) {
+    unsigned int connectivitySize=0;
+    for ( unsigned int ielem = 1; ielem <= numEl; ielem++ ) {
+        connectivitySize+=vtkPiece.giveCellConnectivity(ielem).giveSize();
+    }
+    IntArray conn(connectivitySize);
+    IntArray offsets(numEl+1);
+    unsigned int * types = new unsigned int [numEl];
+    int cp = 0;
+
+    offsets.at(1)=0;
+    for ( unsigned int ielem = 1; ielem <= numEl; ielem++ ) {
+        offsets.at(ielem+1) = vtkPiece.giveCellOffset(ielem);
+        types[ielem-1] = vtkPiece.giveCellType(ielem);
         cellNodes = vtkPiece.giveCellConnectivity(ielem);
-
-#ifdef __VTK_MODULE
-        elemNodeArray->Reset();
-        elemNodeArray->SetNumberOfIds(cellNodes.giveSize() );
-#endif
-        for ( int i = 1; i <= cellNodes.giveSize(); i++ ) {
-#ifdef __VTK_MODULE
-            elemNodeArray->SetId(i - 1, cellNodes.at(i) - 1);
-#else
-            this->fileStream << cellNodes.at(i) - 1 << " ";
-#endif
+        for ( int i = 0; i < cellNodes.giveSize(); i++ ) {
+            conn[cp++]=cellNodes[i]-1;
         }
-
-#ifdef __VTK_MODULE
-        this->fileStream->InsertNextCell(vtkPiece.giveCellType(ielem), elemNodeArray);
-#else
-        this->fileStream << " ";
-#endif
     }
 
-#ifndef __VTK_MODULE
-    this->fileStream << "</DataArray>\n";
+    H5::DataSpace cspace = connectivityDSet.getSpace();
+    H5::DataSpace ospace = offsetDSet.getSpace();
+    H5::DataSpace tspace =     typeDSet.getSpace();
 
-    // output the offsets (index of individual element data in connectivity array)
-    this->fileStream << " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ";
+    hsize_t csize[] = {connectivitySize+connCounter};
+    connectivityDSet.extend( csize );
+    hsize_t cellsize[] = {numEl+cellCounter};
+    hsize_t cellsize1[] = {numEl+offsetCounter+1};
+    offsetDSet.extend( cellsize1 );
+    typeDSet.extend(cellsize);
 
-    for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        this->fileStream << vtkPiece.giveCellOffset(ielem) << " ";
-    }
+    /* create hyperslab to update point data */
+      hsize_t     coffset[] = {connCounter};
+      hsize_t     cdims[] = {connectivitySize };            /* data1 dimensions */
+      this->updateDataSet(connectivityDSet, 1, cdims, coffset, itype, conn.givePointer());
+      
 
-    this->fileStream << "</DataArray>\n";
 
+    /* create hyperslab to update cell data */
+      hsize_t     celloffset[] = {cellCounter};
+      hsize_t     offsetOffset[] = {offsetCounter};
+      hsize_t     celldims[] = {numEl };            /* data1 dimensions */
+      hsize_t     celldims1[] = {numEl+1};            /* data1 dimensions */
+    this->updateDataSet(offsetDSet, 1, celldims1, offsetOffset, itype, offsets.givePointer());
+    this->updateDataSet(typeDSet, 1, celldims, celloffset, ttype, types);
 
-    // output cell (element) types
-    this->fileStream << " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ";
-    for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        this->fileStream << vtkPiece.giveCellType(ielem) << " ";
-    }
-
-    this->fileStream << "</DataArray>\n";
-    this->fileStream << "</Cells>\n";
-#endif
+    delete(types);
+    
+    stepPointCounter+=numNodes;
+    stepCellCounter = numEl;
+    stepConnCounter = connectivitySize;
     return true;
+
 
 }
 
 bool
-VTKXMLExportModule::writeVTKPieceEpilog(ExportRegion &vtkPiece, TimeStep *tStep)
+VTKHDF5ExportModule::writeVTKPieceEpilog(ExportRegion &vtkPiece, TimeStep *tStep)
 {
     if ( !vtkPiece.giveNumberOfCells() ) {
         return false;
     }
 
 #ifndef __VTK_MODULE
-    this->fileStream << "</Piece>\n";
+    //this->fileStream << "</Piece>\n";
 #endif
     return true;
 }
@@ -448,7 +507,7 @@ VTKXMLExportModule::writeVTKPieceEpilog(ExportRegion &vtkPiece, TimeStep *tStep)
 
 
 bool
-VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tStep)
+VTKHDF5ExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tStep)
 {
     // Write a VTK piece variables to file.
     // This could be the whole domain (most common case) or it can be a
@@ -461,10 +520,10 @@ VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tSt
 
 #ifndef __VTK_MODULE 
     ///@todo giveDataHeaders is currently not updated wrt the new structure -> no file names in headers /JB
-    std::string pointHeader, cellHeader;
-    this->giveDataHeaders(pointHeader, cellHeader);
+    //std::string pointHeader, cellHeader;
+    //this->giveDataHeaders(pointHeader, cellHeader);
 
-    this->fileStream << pointHeader.c_str();
+    //this->fileStream << pointHeader.c_str();
 #endif
 
     this->writePrimaryVars(vtkPiece);       // Primary field
@@ -476,20 +535,20 @@ VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tSt
     //}
 
 #ifndef __VTK_MODULE
-    this->fileStream << "</PointData>\n";
-    this->fileStream << cellHeader.c_str();
+    //this->fileStream << "</PointData>\n";
+    //this->fileStream << cellHeader.c_str();
 #endif
     this->writeCellVars(vtkPiece);          // Single cell variables ( if given in the integration points then an average will be exported)
 
 #ifndef __VTK_MODULE
-    this->fileStream << "</CellData>\n";
+    //this->fileStream << "</CellData>\n";
 #endif
     return true;
 }
 
-#ifndef __VTK_MODULE
+#ifdef __VTK_MODULE
 void
-VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellHeader)
+VTKHDF5ExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellHeader)
 {
     std::string scalars, vectors, tensors;
 
@@ -537,7 +596,7 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
         }
     }
 
-    // print header
+    // print header 
     pointHeader = "<PointData Scalars=\"" + scalars + "\" "
                   +  "Vectors=\"" + vectors + "\" "
                   +  "Tensors=\"" + tensors + "\" >\n";
@@ -574,52 +633,74 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
 
 
 void
-VTKXMLExportModule::writeIntVars(ExportRegion &vtkPiece)
+VTKHDF5ExportModule::writeIntVars(ExportRegion &vtkPiece)
 {
+
+    H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
+    H5::DataSet dset;
+    unsigned int varIndx;
+    
     int n = internalVarsToExport.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        int ncomponents;
+        unsigned int ncomponents;
 
         const char *name = __InternalStateTypeToString(type);
         ( void ) name;//silence warning
-        int numNodes = vtkPiece.giveNumberOfNodes();
+        unsigned int numNodes = vtkPiece.giveNumberOfNodes();
         FloatArray valueArray;
         valueArray = vtkPiece.giveInternalVarInNode(type, 1);
         ncomponents = valueArray.giveSize();
         ( void ) ncomponents;//silence warning
+     
+#ifdef __HDF_MODULE
+        if (this->pointDataGroup->nameExists(name)) {
+            dset = this->pointDataGroup->openDataSet( name );
+            hsize_t dim[2];
+            dset.getSpace().getSimpleExtentDims(dim); // get existing dimensions to append the data
+            varIndx = dim[0]; 
+        } else {
+            hsize_t dim4[]={1,ncomponents};
+            hsize_t maxdim4[]={H5S_UNLIMITED,ncomponents};
+            H5::DataSpace pointsDSpace(2, dim4, maxdim4);
+            // Create dataset creation property list to enable chunking
+            H5::DSetCreatPropList plist;
+            plist.setLayout(H5D_CHUNKED);
+            hsize_t chunk_dims[2] = {1000, ncomponents};
+            plist.setChunk(2, chunk_dims);
+            dset = this->pointDataGroup->createDataSet( name, dtype, pointsDSpace, plist );
+            varIndx = 0;    
 
-        // Header
-#ifdef __VTK_MODULE
-        vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray >::New();
-        varArray->SetName(name);
-        varArray->SetNumberOfComponents(ncomponents);
-        varArray->SetNumberOfTuples(numNodes);
+        }   
+        // extend the dataset
+        hsize_t psize[] = {varIndx+numNodes, ncomponents};
+        dset.extend( psize );
 
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.giveInternalVarInNode(type, inode);
-            for ( int i = 1; i <= ncomponents; ++i ) {
-                varArray->SetComponent(inode - 1, i - 1, valueArray.at(i) );
+        hsize_t     offset[2];
+        hsize_t      dims1[2] = { numNodes, ncomponents};
+        H5::DataSpace dspace = dset.getSpace();
+        H5::DataSpace mem_space(2, dims1, nullptr);
+        double *pdata = new double[numNodes*ncomponents];
+        for ( unsigned int inode = 1; inode <= numNodes; inode++ ) {
+            FloatArray &valueArray = vtkPiece.giveInternalVarInNode(type, inode);
+            for (unsigned int i=0; i<ncomponents; i++) {
+                pdata[(inode-1)*ncomponents+i]=valueArray(i);
             }
         }
-
-        this->writeVTKPointData(name, varArray);
-
-#else
-
-        this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.giveInternalVarInNode(type, inode);
-            this->writeVTKPointData(valueArray);
-        }
-
+        /* create hyperslab to update point data */
+        offset[0] = varIndx;
+        offset[1] = 0;
+        //dspace.selectNone();
+        dspace.selectHyperslab( H5S_SELECT_SET, dims1, offset );
+        /*
+            * Write the data to the hyperslab.
+        */
+        //dspace = dset->getSpace();
+        dset.write( pdata, dtype, mem_space, dspace );
+        delete pdata;
+        //this->fileStream << "</DataArray>\n";
 #endif
-        // Footer
-#ifndef __VTK_MODULE
-        this->fileStream << "</DataArray>\n";
-#endif
-    
-    } //end of for
+    }
 }
 
 
@@ -629,7 +710,7 @@ VTKXMLExportModule::writeIntVars(ExportRegion &vtkPiece)
 //----------------------------------------------------
 #ifdef __VTK_MODULE
 void
-VTKXMLExportModule::writeVTKPointData(const char *name, vtkSmartPointer< vtkDoubleArray >varArray)
+VTKHDF5ExportModule::writeVTKPointData(const char *name, vtkSmartPointer< vtkDoubleArray >varArray)
 {
     // Write the data to file
     int ncomponents = varArray->GetNumberOfComponents();
@@ -650,11 +731,11 @@ VTKXMLExportModule::writeVTKPointData(const char *name, vtkSmartPointer< vtkDoub
 }
 #else
 void
-VTKXMLExportModule::writeVTKPointData(FloatArray &valueArray)
+VTKHDF5ExportModule::writeVTKPointData(FloatArray &valueArray)
 {
     // Write the data to file
     for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
-        this->fileStream << scientific << valueArray.at(i) << " ";
+        //this->fileStream << scientific << valueArray.at(i) << " ";
     }
 }
 #endif
@@ -662,7 +743,7 @@ VTKXMLExportModule::writeVTKPointData(FloatArray &valueArray)
 
 #ifdef __VTK_MODULE
 void
-VTKXMLExportModule::writeVTKCellData(const char *name, vtkSmartPointer< vtkDoubleArray >varArray)
+VTKHDF5ExportModule::writeVTKCellData(const char *name, vtkSmartPointer< vtkDoubleArray >varArray)
 {
     // Write the data to file
     int ncomponents = varArray->GetNumberOfComponents();
@@ -685,28 +766,55 @@ VTKXMLExportModule::writeVTKCellData(const char *name, vtkSmartPointer< vtkDoubl
 #else
 
 void
-VTKXMLExportModule::writeVTKCellData(FloatArray &valueArray)
+VTKHDF5ExportModule::writeVTKCellData(FloatArray &valueArray)
 {
     // Write the data to file ///@todo exact copy of writeVTKPointData so remove
     for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
-        this->fileStream << valueArray.at(i) << " ";
+        //this->fileStream << valueArray.at(i) << " ";
     }
 }
 #endif
 
 
 void
-VTKXMLExportModule::writePrimaryVars(ExportRegion &vtkPiece)
+VTKHDF5ExportModule::writePrimaryVars(ExportRegion &vtkPiece)
 {
+    H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
+    H5::DataSet dset;
+    int primvarIndx;
+    
+
     for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         InternalStateValueType valType = giveInternalStateValueType(type);
-        int ncomponents = giveInternalStateTypeSize(valType);
+        unsigned int ncomponents = giveInternalStateTypeSize(valType);
         ( void ) ncomponents; //silence the warning
-        int numNodes = vtkPiece.giveNumberOfNodes();
+        unsigned int numNodes = vtkPiece.giveNumberOfNodes();
         const char *name = __UnknownTypeToString(type);
         ( void ) name; //silence the warning
+#ifdef __HDF_MODULE
+        if (this->pointDataGroup->nameExists(name)) {
+            dset = this->pointDataGroup->openDataSet( name );
+            hsize_t dim[2];
+            dset.getSpace().getSimpleExtentDims(dim); // get existing dimensions to append the data
+            primvarIndx = dim[0]; 
+        } else {
+            hsize_t dim4[]={1,ncomponents};
+            hsize_t maxdim4[]={H5S_UNLIMITED,ncomponents};
+            H5::DataSpace pointsDSpace(2, dim4, maxdim4);
+            // Create dataset creation property list to enable chunking
+            H5::DSetCreatPropList plist;
+            plist.setLayout(H5D_CHUNKED);
+            hsize_t chunk_dims[2] = {1000, ncomponents};
+            plist.setChunk(2, chunk_dims);
+            dset = this->pointDataGroup->createDataSet( name, dtype, pointsDSpace, plist );
+            primvarIndx = 0;    
 
+        }   
+        // extend the dataset
+        hsize_t psize[] = {primvarIndx+numNodes, ncomponents};
+        dset.extend( psize );
+#endif
         // Header
 #ifdef __VTK_MODULE
         vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray >::New();
@@ -714,7 +822,7 @@ VTKXMLExportModule::writePrimaryVars(ExportRegion &vtkPiece)
         varArray->SetNumberOfComponents(ncomponents);
         varArray->SetNumberOfTuples(numNodes);
 
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
+        for ( unsigned int inode = 1; inode <= numNodes; inode++ ) {
             FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(type, inode);
             for ( int j = 1; j <= ncomponents; ++j ) {
                 varArray->SetComponent(inode - 1, j - 1, valueArray.at(j) );
@@ -724,20 +832,36 @@ VTKXMLExportModule::writePrimaryVars(ExportRegion &vtkPiece)
         this->writeVTKPointData(name, varArray);
 
 #else
-        this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
+        hsize_t     offset[2];
+        hsize_t      dims1[2] = { numNodes, ncomponents};
+        H5::DataSpace dspace = dset.getSpace();
+        H5::DataSpace mem_space(2, dims1, nullptr);
+        double *pdata = new double[numNodes*ncomponents];
+        for ( unsigned int inode = 1; inode <= numNodes; inode++ ) {
             FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(type, inode);
-            this->writeVTKPointData(valueArray);
+            for (unsigned int i=0; i<ncomponents; i++) {
+                pdata[(inode-1)*ncomponents+i]=valueArray(i);
+            }
         }
-        this->fileStream << "</DataArray>\n";
-
+        /* create hyperslab to update point data */
+        offset[0] = primvarIndx;
+        offset[1] = 0;
+        //dspace.selectNone();
+        dspace.selectHyperslab( H5S_SELECT_SET, dims1, offset );
+        /*
+            * Write the data to the hyperslab.
+        */
+        //dspace = dset->getSpace();
+        dset.write( pdata, dtype, mem_space, dspace );
+        delete pdata;
+        //this->fileStream << "</DataArray>\n";
 #endif
     }
 }
 
 
 void
-VTKXMLExportModule::writeExternalForces(ExportRegion &vtkPiece)
+VTKHDF5ExportModule::writeExternalForces(ExportRegion &vtkPiece)
 {
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
@@ -764,18 +888,18 @@ VTKXMLExportModule::writeExternalForces(ExportRegion &vtkPiece)
         this->writeVTKPointData(name.c_str(), varArray);
 
 #else
-        this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
+        //this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             FloatArray &valueArray = vtkPiece.giveLoadInNode(i, inode);
             this->writeVTKPointData(valueArray);
         }
-        this->fileStream << "</DataArray>\n";
+        //this->fileStream << "</DataArray>\n";
 #endif
     }
 }
 
 void
-VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
+VTKHDF5ExportModule::writeCellVars(ExportRegion &vtkPiece)
 {
     FloatArray valueArray;
     int numCells = vtkPiece.giveNumberOfCells();
@@ -802,119 +926,23 @@ VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
         this->writeVTKCellData(name, cellVarsArray);
 
 #else
-        this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
+        //this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
         valueArray.resize(ncomponents);
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(type, ielem);
             this->writeVTKCellData(valueArray);
         }
-        this->fileStream << "</DataArray>\n";
+        //this->fileStream << "</DataArray>\n";
 #endif
     
     }//end of for
 }
 
-void
-VTKXMLExportModule::writeVTKCollection()
-{
-    struct tm *current;
-    time_t now;
-    time(& now);
-    current = localtime(& now);
-    char buff [ 1024 ];
-    std::string fname;
+#endif
 
-    if ( tstep_substeps_out_flag ) {
-        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".substep.pvd";
-    } else {
-        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".pvd";
-    }
-
-    std::ofstream streamP;
-    if ( pythonExport ) {
-        streamP = std::ofstream(NULL_DEVICE);//do not write anything
-    } else {
-        streamP = std::ofstream(fname.c_str() );
-    }
-
-    if ( !streamP.good() ) {
-        OOFEM_ERROR("failed to open file %s", fname.c_str() );
-    }
-
-    sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
-    //     outfile << buff;
-
-    streamP << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
-    for ( auto pvd : this->pvdBuffer ) {
-        streamP << pvd << "\n";
-    }
-
-    streamP << "</Collection>\n</VTKFile>";
-
-    if (streamP){
-        streamP.close();
-    }
-}
-
-void
-VTKXMLExportModule::writeGPVTKCollection()
-{
-    struct tm *current;
-    time_t now;
-    time(& now);
-    current = localtime(& now);
-    char buff [ 1024 ];
-    std::string fname;
-
-    if ( tstep_substeps_out_flag ) {
-        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".substep.gp.pvd";
-    } else {
-        fname = this->emodel->giveOutputBaseFileName() + ".m" + std::to_string(this->number) + ".gp.pvd";
-    }
-
-    std::ofstream outfile(fname.c_str() );
-
-    sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
-    //     outfile << buff;
-
-    outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
-    for ( auto pvd : this->gpPvdBuffer ) {
-        outfile << pvd << "\n";
-    }
-
-    outfile << "</Collection>\n</VTKFile>";
-
-    if (outfile){
-        outfile.close();
-    }
-}
-
-// Export of composite elements
-
-void VTKXMLExportModule::exportCompositeElement(ExportRegion &vtkPiece, Element *el, TimeStep *tStep)
-{
-    VTKXMLExportModuleElementInterface *interface =
-        static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
-    if ( interface ) {
-        interface->giveCompositeExportData(vtkPiece, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
-
-        //this->writeVTKPiece(this->defaultVTKPiece, tStep);
-    }
-}
-
-void VTKXMLExportModule::exportCompositeElement(std::vector< ExportRegion > &vtkPieces, Element *el, TimeStep *tStep)
-{
-    VTKXMLExportModuleElementInterface *interface =
-        static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
-    if ( interface ) {
-        interface->giveCompositeExportData(vtkPieces, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
-
-        //this->writeVTKPiece(this->defaultVTKPiece, tStep);
-    }
-}
 
 NodalRecoveryModel *
-VTKXMLExportModule::giveSmoother()
+VTKHDF5ExportModule::giveSmoother()
 {
     Domain *d = emodel->giveDomain(1);
 
@@ -927,7 +955,7 @@ VTKXMLExportModule::giveSmoother()
 
 
 NodalRecoveryModel *
-VTKXMLExportModule::givePrimVarSmoother()
+VTKHDF5ExportModule::givePrimVarSmoother()
 {
     Domain *d = emodel->giveDomain(1);
 
@@ -938,9 +966,9 @@ VTKXMLExportModule::givePrimVarSmoother()
     return this->primVarSmoother.get();
 }
 
-
+#ifdef __HDF_MODULE
 void
-VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
+VTKHDF5ExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nc = 0;
@@ -1098,6 +1126,18 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         streamG.close();
     }
 }
+#endif
 
+#ifdef __HDF_MODULE
+void VTKHDF5ExportModule::updateDataSet (H5::DataSet& dset, int rank, hsize_t* dim, hsize_t* offset, H5::DataType type, const void* data)
+{
+    H5::DataSpace dspace = dset.getSpace();
+    /* create hyperslab to update point data */
+    dspace.selectHyperslab( H5S_SELECT_SET, dim, offset );
+    H5::DataSpace mem_space(rank, dim, nullptr);
+    dset.write(data, type, mem_space, dspace );
+}
+
+#endif
 
 } // end namespace oofem

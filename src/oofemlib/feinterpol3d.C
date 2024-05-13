@@ -134,6 +134,12 @@ double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, con
     return -1.0;
 }
 
+double FEInterpolation3d :: edgeEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+    OOFEM_ERROR("Not implemented");
+    return -1.0;
+}
+
 IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary) const
 {
     return this->computeLocalSurfaceMapping(boundary);

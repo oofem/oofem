@@ -136,6 +136,8 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); return 0.; }
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    double boundaryEdgeEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
 
 
     /**@name Surface interpolation services */

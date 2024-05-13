@@ -986,7 +986,7 @@ Shell7BasePhFi :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeTyp
 // VTK export
 
 void 
-Shell7BasePhFi :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
+Shell7BasePhFi :: giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
 {   
 
     int numCells = this->layeredCS->giveNumberOfLayers();
