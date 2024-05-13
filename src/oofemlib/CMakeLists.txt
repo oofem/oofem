@@ -191,6 +191,7 @@ set (core_export
     matlabexportmodule.C
     gpexportmodule.C
     solutionstatusexportmodule.C
+    vtkhdf5exportmodule.C
     )
 
 set (core_monitors
