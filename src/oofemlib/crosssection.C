@@ -87,7 +87,7 @@ CrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateTyp
         answer.at(1) = this->giveNumber();
         return 1;
     }
-    return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep);
+    return this->giveMaterial(ip)->giveIPValue(answer, ip, type, tStep);
 }
 
 
