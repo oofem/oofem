@@ -68,7 +68,7 @@ public:
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes() const override { return 10; }
-    void giveCellDofMans(IntArray& nodes, Element* elem) const override {nodes={1,2,3,4,5,6,7,8,9,10};}
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4,5,6,7,8,9,10}; internalDofMans={};}
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
      * @param cellgeo Underlying cell geometry.

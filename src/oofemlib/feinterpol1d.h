@@ -72,6 +72,17 @@ public:
     { throw std::runtime_error("Functions not supported for this interpolator."); }
     //@}
 
+    /**@name Edge interpolation services */
+    void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    double boundaryEdgeEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    //@}
+
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.

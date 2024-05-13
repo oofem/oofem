@@ -164,10 +164,10 @@ public:
      * But for elements with mixed interpolation, we need to select subset of nodes 
      * (quadratic triangle with linear interpolation). This method can query element geometry type (from given element)
      * and compile the nodal set.
-     * @brief Returns all element nodes (including on edges and surfaces) defining the approximation
+     * @brief Returns list of element nodes (and list of internal dof managers) (including on edges and surfaces) defining the approximation
      * @note Required by mpm module
      */
-    virtual void giveCellDofMans(IntArray& nodes, Element* elem) const {}
+    virtual void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const {}
     /**
      * Evaluates the array of interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
@@ -269,6 +269,15 @@ public:
      * @todo
      */
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const = 0;
+    /**
+     * Evaluates the normal out of the edge at given point.
+     * @param answer Contains resulting normal vector.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Surface mapping jacobian.
+     */
+    virtual double boundaryEdgeEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const = 0;
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
