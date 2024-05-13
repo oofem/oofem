@@ -83,11 +83,11 @@ def test_5():
         problem.terminate( currentStep )
         print("TimeStep %d finished" % (timeStep))
 
-        for p in vtkPy.getVTKPieces():
+        for p in vtkPy.getExportRegions():
                 print ("Piece:", p)
                 print("Vertices:", p.getVertices())
                 print("Cells:", p.getCellConnectivity())
-                print("CellTypes:", p.getCellTypes(vtkPy))
+                print("CellTypes:", p.getCellTypes())
                 temperature = p.getPrimaryVertexValues(oofempy.UnknownType.Temperature);
                 print ("Temperature:", temperature)
 
