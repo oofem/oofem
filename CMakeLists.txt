@@ -975,6 +975,12 @@ if (USE_SM AND USE_MFRONT)
     endforeach (case)
 endif()
 
+if (USE_MPM)
+    file (GLOB mpm_tests RELATIVE "${oofem_TEST_DIR}/mpm" "${oofem_TEST_DIR}/mpm/*.in")
+    foreach (case ${mpm_tests})
+        add_test (NAME "test_mpm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/mpm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
 
 ######################## Benchmarks ########################################
 
