@@ -103,6 +103,9 @@ namespace oofem {
         ENUM_ITEM_WITH_VALUE(S_u, 51) /* Macroscopic reinforcement slip field in x-direction */          \
         ENUM_ITEM_WITH_VALUE(S_v, 52) /* Macroscopic reinforcement slip field in y-direction */          \
         ENUM_ITEM_WITH_VALUE(S_w, 53) /* Macroscopic reinforcement slip field in z-direction */          \
+\
+        ENUM_ITEM_WITH_VALUE(VF, 54) /* Volume fraction */          \
+      
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.
