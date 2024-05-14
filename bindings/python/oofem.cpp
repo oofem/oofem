@@ -105,6 +105,13 @@ namespace py = pybind11;
 #include "pythonfield.h"
 #include <iostream>
 #include "oofemutil.h"
+
+#ifdef __MPM_MODULE
+    // mpm experimental
+    #include "integral.h"
+    #include "mpm.h"
+#endif
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -969,6 +976,9 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDomainEquations", &oofem::EngngModel::giveNumberOfDomainEquations)
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
+    #ifdef __MPM_MODULE
+        .def("addIntegral", &oofem::EngngModel::py_addIntegral, py::keep_alive<0, 1>())
+    #endif
         ;
 
     py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
@@ -1300,7 +1310,45 @@ PYBIND11_MODULE(oofempy, m) {
         .def("printYourself", &oofem::SparseMtrx::printYourself)
     ;
 
+    py::class_<oofem::SparseLinearSystemNM>(m, "SparseLinearSystemNM")
+        .def("solve", (oofem::ConvergedReason (oofem::SparseLinearSystemNM::*) (SparseMtrx &A, FloatArray &b, FloatArray &x)) &oofem::SparseLinearSystemNM::solve)
+    ;
 
+#ifdef __MPM_MODULE
+    /* MPM stuff (experimental)*/
+
+    py::enum_<oofem::Variable::VariableType>(m, "VariableType")
+        .value("scalar", oofem::Variable::VariableType::scalar)
+        .value("vector", oofem::Variable::VariableType::vector)
+    ;
+    py::enum_<oofem::Variable::VariableQuantity>(m, "VariableQuantity")
+        .value("Displacement", oofem::Variable::VariableQuantity::Displacement)
+        .value("Temperature", oofem::Variable::VariableQuantity::Temperature)
+        .value("Pressure", oofem::Variable::VariableQuantity::Pressure)
+        .value("VolumeFraction", oofem::Variable::VariableQuantity::VolumeFraction)
+    ;
+
+    py::class_<oofem::FEInterpolation>(m,"FEInterpolation")
+    ;
+
+    py::class_<oofem::Variable>(m, "Variable")
+        .def(py::init<const oofem::FEInterpolation&, oofem::Variable::VariableQuantity, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
+        .def_readonly("dofIDs", &oofem::Variable::dofIDs)
+        .def_readonly("type", &oofem::Variable::type)
+        .def_readonly("q", &oofem::Variable::q)
+    ;
+
+    py::class_<oofem::Term>(m, "Term")
+    ;
+
+    py::class_<oofem::Integral>(m, "Integral")
+        .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term&>())
+        .def("initialize", &oofem::Integral::initialize)
+        .def("assemble_dw", &oofem::Integral::assemble_dw)
+        .def("assemble_c", &oofem::Integral::assemble_c)
+    ;
+    /* end mpm experimental */
+#endif
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
@@ -1631,6 +1679,22 @@ PYBIND11_MODULE(oofempy, m) {
         .value("IntSource_wh", oofem::MatResponseMode::IntSource_wh)
     ;
 
+    py::enum_<oofem::MaterialMode>(m, "MaterialMode")
+        .value("_Unknown", oofem::MaterialMode::_Unknown)
+        .value("_3dMat", oofem::MaterialMode::_3dMat)
+        .value("_PlaneStress", oofem::MaterialMode::_PlaneStress)
+        .value("_PlaneStrain", oofem::MaterialMode::_PlaneStrain)
+        .value("_1dMat", oofem::MaterialMode::_1dMat)
+        .value("_1dHeat", oofem::MaterialMode::_1dHeat)
+        .value("_2dHeat", oofem::MaterialMode::_2dHeat)
+        .value("_3dHeat", oofem::MaterialMode::_3dHeat)
+        .value("_2dUP", oofem::MaterialMode::_2dUP)
+        .value("_3dUP", oofem::MaterialMode::_3dUP)
+        .value("_2dUPV", oofem::MaterialMode::_2dUPV)
+        .value("_3dUPV", oofem::MaterialMode::_3dUPV)
+    ;
+
+
     py::enum_<oofem::TimeDiscretizationType>(m,"TimeDiscretizationType")
         .value("TD_Unspecified", oofem::TimeDiscretizationType::TD_Unspecified)
         .value("TD_ThreePointBackward", oofem::TimeDiscretizationType::TD_ThreePointBackward)
@@ -1680,6 +1744,15 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("homExport", &homExport, py::return_value_policy::move);
     m.def("createSet", &createSet, py::return_value_policy::move);
 
+#ifdef __MPM_MODULE
+    // mpm experimental
+    m.def("skyline", &skyline, py::return_value_policy::move);
+    m.def("ldltfactorization", &ldltFactorization, py::return_value_policy::move);
+    m.def("q1", &q1, py::return_value_policy::move);
+    m.def("fei2dquadlin", &fei2dquadlin, py::return_value_policy::move);
+    m.def("myTerm", &myTerm, py::return_value_policy::move);
+    m.def("upm", &upm, py::return_value_policy::move);
+#endif
 
 //std::shared_ptr<oofem::Field>
     py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
