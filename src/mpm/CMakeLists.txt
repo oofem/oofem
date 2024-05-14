@@ -2,7 +2,7 @@ set (mpm_element
     termlibrary.C
     termlibrary2.C
     prototype.C
-    #prototype2.C
+    prototype2.C
     up.C
     )
 
