@@ -97,7 +97,30 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(MomentumBalance_PressureResidual, 260) \
     ENUM_ITEM_WITH_VALUE(MassBalance_StressRateResidual, 261) \
     ENUM_ITEM_WITH_VALUE(MassBalance_PressureResidual, 262) \
-    ENUM_ITEM_WITH_VALUE(MassBalance_PressureRateResidual, 263)
+    ENUM_ITEM_WITH_VALUE(MassBalance_PressureRateResidual, 263) \
+    ENUM_ITEM_WITH_VALUE(FluidViscosity, 264) \
+    /* MPM UPV */ \
+    ENUM_ITEM_WITH_VALUE(MassBalance_UdotTerm, 265) \
+    ENUM_ITEM_WITH_VALUE(MassBalance_VTerm, 266) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_1, 267) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_2, 268) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_3, 269) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_4, 270) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_5, 271) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_2, 272)       \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_3, 273)       \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_4, 274)           \
+    ENUM_ITEM_WITH_VALUE(MassBalance_UdotTerm_Residual, 275)    \
+    ENUM_ITEM_WITH_VALUE(MassBalance_VTerm_Residual, 276)       \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_1_Residual, 277) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_2_Residual, 278) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_3_Residual, 279) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_4_Residual, 280) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalanceMatrix_5_Residual, 281) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_2_Residual, 282)       \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_3_Residual, 283)       \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_4_Residual, 284)       \
+    ENUM_ITEM_WITH_VALUE(InitialVolumeFraction, 285)
     
 
 

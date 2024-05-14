@@ -83,6 +83,10 @@ void Set :: initializeFrom(InputRecord &ir)
 
     this->elementSurfaces.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementSurfaces, _IFT_Set_elementSurfaces);
+
+    this->elementInternalNodes.clear();
+    IR_GIVE_OPTIONAL_FIELD(ir, this->elementInternalNodes, _IFT_Set_internalElementNodes);
+
 }
 
 
@@ -104,6 +108,9 @@ void Set :: giveInputRecord(DynamicInputRecord &input)
     }
     if ( this->giveSurfaceList().giveSize() ) {
         input.setField(this->elementSurfaces, _IFT_Set_elementSurfaces);
+    }
+    if ( this->giveInternalElementDofManagerList().giveSize() ) {
+        input.setField(this->elementInternalNodes, _IFT_Set_internalElementNodes);
     }
 }
 
@@ -140,6 +147,8 @@ const IntArray &Set :: giveBoundaryList() { return elementBoundaries; }
 const IntArray &Set :: giveEdgeList() { return elementEdges; }
 
 const IntArray &Set :: giveSurfaceList() { return elementSurfaces; }  
+
+const IntArray &Set :: giveInternalElementDofManagerList() { return this->elementInternalNodes;}
 
 const IntArray &Set :: giveNodeList()
 {
@@ -225,6 +234,7 @@ void Set :: clear()
     this->elementBoundaries.clear();
     this->elements.clear();
     this->nodes.clear();
+    this->elementInternalNodes.clear();
     this->totalNodes.clear();
 }
 
@@ -253,6 +263,9 @@ void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
     for ( int i = 1; i <= elementEdges.giveSize(); i += 2 ) {
         elementEdges.at(i) = f(elementEdges.at(i), ERS_Element);
     }
+    for ( int i = 1; i <= this->elementInternalNodes.giveSize(); i += 2 ) {
+        elementInternalNodes.at(i) = f(elementInternalNodes.at(i), ERS_Element);
+    }
 
     mElementListIsSorted = false;
 }
@@ -276,6 +289,9 @@ void Set :: saveContext(DataStream &stream, ContextMode mode)
         if ( ( iores = nodes.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
+        if ( ( iores = this->elementInternalNodes.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
     }
 }
 
@@ -295,6 +311,9 @@ void Set :: restoreContext(DataStream &stream, ContextMode mode)
             THROW_CIOERR(iores);
         }
         if ( ( iores = nodes.restoreYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = this->elementInternalNodes.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
