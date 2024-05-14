@@ -61,7 +61,7 @@ class PoissonTerm : public Term {
     }
 
 
-    void evaluate_dw (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) const override {
+    void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) const override {
         const FEInterpolation & si = field.interpolation;
         const FEInterpolation &ti = testField.interpolation;
         FloatMatrix bs, bt;
@@ -76,8 +76,8 @@ class PoissonTerm : public Term {
         answer.beProductTOf(gc, bt);
     }
 
-    void evaluate_c (FloatArray&, MPElement& cell, GaussPoint*gp, TimeStep* tstep) const override {}
-    void getDimensions_dw(Element& cell) const override {}
+    void evaluate (FloatArray&, MPElement& cell, GaussPoint*gp, TimeStep* tstep) const override {}
+    void getDimensions(Element& cell) const override {}
     void initializeCell(Element& cell) const override {}
 };
 
@@ -120,17 +120,26 @@ class PoissonElement : public MPElement {
 
         }
     }
-    void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const override {
-        answer.enumerate(this->giveNumberOfDofManagers());
+
+    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int n) const override {
+        answer = {n};
+    }
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+        answer={};
+    }
+
+    int getNumberOfSurfaceDOFs() const override {return 0;}
+    int getNumberOfEdgeDOFs() const override {return 0;}
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+        answer.clear();
+    }
+    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+        answer.clear();
     }
     
     const char *giveInputRecordName() const override {return "pe";}
     
-    double computeVolumeAround(GaussPoint *gp) override {
-        double determinant = fabs( this->interpol.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-        double weight = gp->giveWeight();
-        return determinant * weight ;
-    }
+    const FEInterpolation& getGeometryInterpolation() const override {return  this->interpol;}
 };
 
 REGISTER_Element(PoissonElement)
