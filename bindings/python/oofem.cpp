@@ -39,6 +39,7 @@ namespace py = pybind11;
 
 #include <string>
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "floatarrayf.h"

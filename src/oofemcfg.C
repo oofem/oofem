@@ -1,16 +1,16 @@
 #include "oofem_version.h"
 #include "oofemcfg.h"
 
-const char* PRG_VERSION =  "OOFEM version" __OOFEM_MAJOR_VERSION "." __OOFEM_MINOR_VERSION;
-const char* OOFEM_VERSION = __OOFEM_VERSION;
-const char* OOFEM_COPYRIGHT = __OOFEM_COPYRIGHT;
-const char* OOFEM_GIT_HASH = __OOFEM_GIT_HASH;
-const char* OOFEM_GIT_REPOURL = __OOFEM_GIT_REPOURL;
-const char* OOFEM_GIT_BRANCH = __OOFEM_GIT_BRANCH;
+OOFEM_EXPORT const char* PRG_VERSION =  "OOFEM version" __OOFEM_MAJOR_VERSION "." __OOFEM_MINOR_VERSION;
+OOFEM_EXPORT const char* OOFEM_VERSION = __OOFEM_VERSION;
+OOFEM_EXPORT const char* OOFEM_COPYRIGHT = __OOFEM_COPYRIGHT;
+OOFEM_EXPORT const char* OOFEM_GIT_HASH = __OOFEM_GIT_HASH;
+OOFEM_EXPORT const char* OOFEM_GIT_REPOURL = __OOFEM_GIT_REPOURL;
+OOFEM_EXPORT const char* OOFEM_GIT_BRANCH = __OOFEM_GIT_BRANCH;
 #
 
 
-const char* PRG_HEADER_SM = ""
+OOFEM_EXPORT const char* PRG_HEADER_SM = ""
 "____________________________________________________\n"
 "  ____  ____  __________  ___ \n"
 " / __ \\/ __ \\/ __/ __/  |/  /___  _______\n"
@@ -19,7 +19,7 @@ const char* PRG_HEADER_SM = ""
 __OOFEM_COPYRIGHT " /__/\n"
 "____________________________________________________\n";
 
-const char* PRG_HEADER = ""
+OOFEM_EXPORT const char* PRG_HEADER = ""
 "############################################################## www.oofem.org ###\n"
 "  ____  ____  __________  ___\n"
 " / __ \\/ __ \\/ __/ __/  |/  /___  _______\n"
@@ -30,7 +30,7 @@ const char* PRG_HEADER = ""
 "Git URL:" __OOFEM_GIT_REPOURL ",\n    branch:" __OOFEM_GIT_BRANCH ", hash:" __OOFEM_GIT_HASH "\n\n";
 
                                
-const char* HOST_TYPE = __HOST_TYPE;
-const char* HOST_NAME = __HOST_NAME;
-const char* MODULE_LIST = __MODULE_LIST;
+OOFEM_EXPORT const char* HOST_TYPE = __HOST_TYPE;
+OOFEM_EXPORT const char* HOST_NAME = __HOST_NAME;
+OOFEM_EXPORT const char* MODULE_LIST = __MODULE_LIST;
 
