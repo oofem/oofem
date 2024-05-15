@@ -136,6 +136,9 @@ int main(int argc, char *argv[])
 
     int rank = 0;
 
+    // print header to redirected output
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
+
 #ifdef __PARALLEL_MODE
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
@@ -283,9 +286,6 @@ int main(int argc, char *argv[])
         oofem_logger.appendErrorTo( errOutputFileName.str() );
     }
 
-    // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
-
     OOFEMTXTDataReader dr( inputFileName.str() );
     auto problem = :: InstanciateProblem(dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
@@ -364,10 +364,6 @@ void oofem_print_help()
     printf("\n");
     oofem_print_epilog();
 }
-
-#ifndef HOST_TYPE
- #define HOST_TYPE "unknown"
-#endif
 
 void oofem_print_version()
 {
