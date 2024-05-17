@@ -75,6 +75,15 @@ StructuralMaterial::hasMaterialModeCapability(MaterialMode mode) const
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
+void 
+StructuralMaterial::giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) 
+{
+    if (type == CharType::StiffnessMatrix) {
+        return this->giveStiffnessMatrix(answer, MatResponseMode::TangentStiffness, gp, tStep);
+    } else {
+        OOFEM_ERROR("Not implemented");
+    }
+}
 
 void
 StructuralMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
