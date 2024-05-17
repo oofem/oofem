@@ -180,6 +180,7 @@ py::object staticStructural(py::args args, py::kwargs kw) { return createEngngMo
 
 py::object transientTransport(py::args args, py::kwargs kw) { return createEngngModelOfType("transienttransport", args, kw); }
 
+py::object dummyProblem(py::args args, py::kwargs kw) { return createEngngModelOfType("dummy", args, kw); }
 
 
 /*****************************************************
@@ -196,7 +197,9 @@ py::object domain(py::args args, py::kwargs kw)
     d->setDomainType(dType);
     // output manager record
     oofem::OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
-    d->giveOutputManager()->initializeFrom(omir);
+    if ( !engngModel->giveSuppressOutput() ) {
+        d->giveOutputManager()->initializeFrom(omir);
+    }
     py::object ret = py::cast(d.release());
     /* ????????????????????
     // sets the last created domain as default one for furtherscript
@@ -438,19 +441,19 @@ py::object fei2dquadlin(py::args args, py::kwargs kw) { return createInterpolati
 #include "prototype2.h"
 py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
 {
-    if (type == "MyTerm") {
+    if (type == "BTSigmaTerm") {
         if (len(args)>2) {
             oofem::Variable & f = args[0].cast<oofem::Variable &>();
             oofem::Variable & tf = args[1].cast<oofem::Variable &>();
             oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
-            std::unique_ptr<Term> t = std::make_unique<MyTerm>(f, tf, m);
+            std::unique_ptr<Term> t = std::make_unique<BTSigmaTerm>(f, tf, m);
             return py::cast(t.release());
         }
     }
     return py::none();
 }
 
-py::object myTerm(py::args args, py::kwargs kw) { return createTermOfType("MyTerm",args,kw); }
+py::object BTSigma_Term(py::args args, py::kwargs kw) { return createTermOfType("BTSigmaTerm",args,kw); }
 
 #endif
 

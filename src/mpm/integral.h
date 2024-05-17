@@ -66,7 +66,7 @@ namespace oofem {
             }
         } 
         // evaluate term contribution to weak form on given cell at given point 
-        void assemble_dw (SparseMtrx& dest, const UnknownNumberingScheme &s, TimeStep* tStep) const {
+        void assemble_lhs (SparseMtrx& dest, const UnknownNumberingScheme &s, TimeStep* tStep) const {
             FloatMatrix contrib;
             IntArray locr, locc;
 
@@ -87,7 +87,7 @@ namespace oofem {
             }
         }
         // evaluate contribution (all vars known) on given cell
-        void assemble_c (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep) {
+        void assemble_rhs (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep) {
             FloatArray contrib;
             IntArray locr, locc;
 

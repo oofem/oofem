@@ -1344,8 +1344,8 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::Integral>(m, "Integral")
         .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term&>())
         .def("initialize", &oofem::Integral::initialize)
-        .def("assemble_dw", &oofem::Integral::assemble_dw)
-        .def("assemble_c", &oofem::Integral::assemble_c)
+        .def("assemble_lhs", &oofem::Integral::assemble_lhs)
+        .def("assemble_rhs", &oofem::Integral::assemble_rhs)
     ;
     /* end mpm experimental */
 #endif
@@ -1704,8 +1704,17 @@ PYBIND11_MODULE(oofempy, m) {
         .value("TD_Explicit", oofem::TimeDiscretizationType::TD_Explicit)
     ;
 
+    py::enum_<oofem::ConvergedReason>(m, "ConvergedReason")
+        .value("CR_UNKNOWN", oofem::ConvergedReason::CR_UNKNOWN)
+        .value("CR_CONVERGED", oofem::ConvergedReason::CR_CONVERGED)
+        .value("CR_DIVERGED_ITS", oofem::ConvergedReason::CR_DIVERGED_ITS)
+        .value("CR_DIVERGED_TOL", oofem::ConvergedReason::CR_DIVERGED_TOL)
+        .value("CR_FAILED", oofem::ConvergedReason::CR_FAILED)
+    ;
+
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);
+    m.def("dummyProblem", &dummyProblem, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
     m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
@@ -1750,7 +1759,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("ldltfactorization", &ldltFactorization, py::return_value_policy::move);
     m.def("q1", &q1, py::return_value_policy::move);
     m.def("fei2dquadlin", &fei2dquadlin, py::return_value_policy::move);
-    m.def("myTerm", &myTerm, py::return_value_policy::move);
+    m.def("BTSigmaTerm", &BTSigma_Term, py::return_value_policy::move);
     m.def("upm", &upm, py::return_value_policy::move);
 #endif
 

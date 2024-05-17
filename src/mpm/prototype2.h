@@ -20,10 +20,10 @@
 //@}
 
 namespace oofem {
-    class MyTerm : public Term {
+    class BTSigmaTerm : public Term {
         protected:
         public:
-        MyTerm (const Variable &testField, const Variable& unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
+        BTSigmaTerm (const Variable &testField, const Variable& unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
 
         /**
          * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -157,7 +157,7 @@ namespace oofem {
             // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
             interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
 
-            if ((mmode == _3dUP) || (mmode == _3dUPV)) {
+            if ((mmode == _3dUP) || (mmode == _3dUPV) || (mode==_3dMat)) {
                 // 3D mode only now
                 answer.resize(6, nnodes*ndofs);
                 for (int i = 0; i< nnodes; i++) {
@@ -182,6 +182,15 @@ namespace oofem {
 
                     answer(5, i*ndofs+0) = dndx(i, 1);
                     answer(5, i*ndofs+1) = dndx(i, 0);
+                }
+            } else if ((mmode == _PlaneStress)) {
+                answer.resize(3, nnodes*ndofs);
+                for (int i = 0; i< nnodes; i++) {
+                    answer(0, i*ndofs+0) = dndx(i, 0);
+                    answer(1, i*ndofs+1) = dndx(i, 1);
+
+                    answer(2, i*ndofs+0) = dndx(i, 1);
+                    answer(2, i*ndofs+1) = dndx(i, 0);
                 }
             }
         }
@@ -214,7 +223,7 @@ namespace oofem {
             Set myset (1, domain);
             FEI2dQuadLin interpol(1,2);
             Variable u = Variable(interpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
-	        MyTerm mt(u,u, _2dUP);
+	        BTSigmaTerm mt(u,u, _2dUP);
             myset.setElementList({1});
             this->integralList.push_back(std::make_unique<Integral>(domain, myset, mt));
             Integral *i = this->integralList[0].get();
@@ -227,7 +236,7 @@ namespace oofem {
                 effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             }
-            i->assemble_dw (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+            i->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
             effectiveMatrix->printYourself();
         }
 
