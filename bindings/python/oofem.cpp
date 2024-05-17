@@ -1725,6 +1725,24 @@ PYBIND11_MODULE(oofempy, m) {
         ;   
 #endif
 
-
+// Utility function to test presence of compiled oofem modules
+    m.def("hasModule", [](const std::string &name) {
+#ifdef __SM_MODULE
+        if (name == "sm") return true;
+#endif
+#ifdef __TM_MODULE
+        if (name == "tm") return true;
+#endif
+#ifdef __FM_MODULE
+        if (name == "fm") return true;
+#endif
+#ifdef __AM_MODULE
+        if (name == "am") return true;
+#endif
+#ifdef __MPM_MODULE
+        if (name == "mpm") return true;
+#endif
+        return false;
+    });
     m.def("test", &test);
  }
