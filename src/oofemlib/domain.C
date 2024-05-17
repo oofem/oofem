@@ -1264,6 +1264,32 @@ Domain :: createDofs()
         }
     }
 
+    // Step 2c. THis will apply BC set to internal element nodes.
+    for ( int i = 1; i <= this->giveNumberOfBoundaryConditions(); ++i ) {
+        GeneralBoundaryCondition *gbc = this->giveBc(i);
+        if ( gbc->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
+            // Loop over nodes in set and store the bc number in each dof.
+            Set *set = this->giveSet( gbc->giveSetNumber() );
+            BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc);
+            if ( bc ) {
+                const IntArray &appliedDofs = gbc->giveDofIDs();
+                const IntArray &internalelementnodes = set->giveInternalElementDofManagerList();
+                for ( int indx = 1; indx <= internalelementnodes.giveSize()/2; ++indx ) {
+                    int ielem = internalelementnodes.at(indx*2-1);
+                    int idofman = internalelementnodes.at(indx*2);
+                    for ( int idof = 1; idof <= appliedDofs.giveSize(); ++idof ) {
+                        // test if element internal dofman has the dof
+                        DofManager* idman = this->giveElement(ielem)->giveInternalDofManager(idofman);
+                        if (idman && idman->hasDofID((DofIDItem) appliedDofs.at(idof))) {
+                            // assign bc to existing DOF
+                            idman->giveDofWithID((DofIDItem) appliedDofs.at(idof))->setBcId(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Step 3. Same for initial conditions as for boundary conditions in step 2.
     std :: vector< std :: map< int, int > > dof_ic( this->giveNumberOfDofManagers() );
@@ -1303,7 +1329,7 @@ Domain :: createDofs()
         for ( int id: node_dofs [ i - 1 ] ) {
             // Find bc and ic if there are any, otherwise zero.
             int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
-            int icid = dof_ic [ i - 1 ].find(id) != dof_ic [ i - 1 ].end() ? dof_ic [ i - 1 ] [ id ] : 0;
+            //int icid = dof_ic [ i - 1 ].find(id) != dof_ic [ i - 1 ].end() ? dof_ic [ i - 1 ] [ id ] : 0;
 
             // Determine the doftype:
             dofType dtype = DT_master;
@@ -1334,14 +1360,24 @@ Domain :: createDofs()
             if ( !dman->hasDofID((DofIDItem)id) ) {
 
                 Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
-                dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
-                dof->setIcId(icid);
                 // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
                 if ( dtype == DT_simpleSlave ) {
                     static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
                 }
                 dman->appendDof(dof);
             }
+        }
+        // assign bc & ic data on all dofs (existing & newly created ones)
+        for ( Dof *dof: *dman ) {
+            // Find bc and ic if there are any, otherwise zero.
+            DofIDItem id = dof->giveDofID();
+            int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
+            int icid = dof_ic [ i - 1 ].find(id) != dof_ic [ i - 1 ].end() ? dof_ic [ i - 1 ] [ id ] : 0;
+	    // preserve existing BC and IC if set (required for adaptivity, BC and IC set by mesher)
+	    if (dof->isPrimaryDof()) {
+	      if (dof->giveBcId()==0) dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
+	      if (dof->giveIcId()==0) dof->setIcId(icid);
+	    }
         }
     }
 
