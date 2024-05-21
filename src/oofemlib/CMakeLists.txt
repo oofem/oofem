@@ -42,6 +42,8 @@ set (core_unsorted
     loadbalancer.C
     #
     vtkhdf5reader.C
+    #
+    oofemcfg.C
     )
 
 #oofegutils
