@@ -70,7 +70,6 @@ protected:
     H5::Group *topGroup;
      /// Steps group
     H5::Group *stepsGroup;
-#endif
     /// Number of steps
     unsigned int numSteps;
     /// step values (times)
@@ -79,6 +78,7 @@ protected:
     unsigned int numPointData;
     /// Number of cell data
     unsigned int numCellData;
+#endif
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     VTKHDF5Reader();
@@ -90,9 +90,11 @@ public:
     void readMesh(UnstructuredGridField&, TimeStep* tStep);
     void readField(UnstructuredGridField&, TimeStep* tStep, const std::string &field_name);
 protected:
+#ifdef __HDF_MODULE
     void readDataSet (H5::DataSet& dset, int rank, hsize_t* dim, hsize_t* offset, H5::DataType type, void* data);
     void getTimeStepOffsets(TimeStep* tStep, int& nParts, int& pOffset, int& pointOffset, int& cellOffset, int& connIdOffset, int &offsetOfOffset, int& nPoints, int &nCells, int& nconectivities);
     Element_Geometry_Type giveElementGeometryType(int vtkCellType);
+#endif
 
 };
 

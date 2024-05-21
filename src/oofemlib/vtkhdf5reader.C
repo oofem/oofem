@@ -45,26 +45,35 @@
 
 namespace oofem {
 
+#ifndef __HDF_MODULE
+VTKHDF5Reader::VTKHDF5Reader()
+{
+    OOFEM_ERROR("VTKHDF5Reader: HDF5 module not available, cannot read VTKHDF5 files");
+}
+
+
+VTKHDF5Reader::~VTKHDF5Reader() {}
+void VTKHDF5Reader::initialize(std::string &fileName) {}
+void VTKHDF5Reader::finalize() {}       
+void VTKHDF5Reader::readMesh(UnstructuredGridField&, TimeStep* tStep) {}
+void VTKHDF5Reader::readField(UnstructuredGridField&, TimeStep* tStep, const std::string &field_name) {}
+
+#else
+
+
 VTKHDF5Reader::VTKHDF5Reader(): stepValues()
 {
     this->fileName = "";
     this->file = NULL;
-#ifndef __HDF_MODULE
-    OOFEM_ERROR("VTKHDF5Reader: HDF5 module not available, cannot read VTKHDF5 files");
-#endif
 }
-
 
 VTKHDF5Reader::~VTKHDF5Reader() {
    this->finalize();
 }
 
-
-
 void
 VTKHDF5Reader::initialize (std::string& filename)
 {
-#ifdef __HDF_MODULE
     this->fileName = filename;
     // open hdf5 file with fileName
     this->file = new H5::H5File(fileName, H5F_ACC_RDONLY);
@@ -99,24 +108,19 @@ VTKHDF5Reader::initialize (std::string& filename)
     values.getSpace().getSimpleExtentDims(dim);
     this->stepValues.resize(dim[0]);
     values.read(this->stepValues.givePointer(), values.getDataType());
-#endif
 }   
 
 void VTKHDF5Reader::finalize()
 {
-#ifdef __HDF_MODULE
     if ( this->file ) {
         delete this->topGroup;
         delete this->stepsGroup;
         delete this->file;
         this->file=NULL;
     }
-#endif
-
 }
 
 
-#ifdef __HDF_MODULE
 void VTKHDF5Reader::readDataSet (H5::DataSet& dset, int rank, hsize_t* dim, hsize_t* offset, H5::DataType type, void* data)
 {
     H5::DataSpace dspace = dset.getSpace();
@@ -126,7 +130,6 @@ void VTKHDF5Reader::readDataSet (H5::DataSet& dset, int rank, hsize_t* dim, hsiz
     dset.read(data, type, mem_space, dspace );
 }
 
-#endif
 void VTKHDF5Reader::getTimeStepOffsets(TimeStep* tStep, int& nParts, int& pOffset, int& pointOffset, int& cellOffset, int& connIdOffset, int& offsetOfOffset, int& nPoints, int &nCells, int& nconectivities) {
     H5::IntType itype(H5::PredType::NATIVE_UINT);
     H5::DataType dtype(H5::PredType::NATIVE_DOUBLE);
@@ -332,6 +335,6 @@ void VTKHDF5Reader::readField(UnstructuredGridField& field, TimeStep* tStep, con
     return;
 }
 
-
+#endif // __HDF_MODULE
 
 } // end namespace oofem

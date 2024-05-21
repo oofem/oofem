@@ -36,10 +36,8 @@
 #include "timestep.h"
 #include "classfactory.h"
 #include "field.h"
-#ifdef __HDF_MODULE
 #include "vtkhdf5reader.h"
 #include "unstructuredgridfield.h"
-#endif
 
 namespace oofem {
 REGISTER_BoundaryCondition(ExternalTemperatureFieldLoad);
@@ -76,14 +74,12 @@ ExternalTemperatureFieldLoad :: initializeFrom(InputRecord &ir)
     set = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
     
-#ifdef __HDF_MODULE
     IR_GIVE_OPTIONAL_FIELD(ir, vtkhdfFilename, _IFT_ExternalTemperatureFieldLoad_VTKHDF5FileName); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, vtkhdfFieldname, _IFT_ExternalTemperatureFieldLoad_VTKHDF5FieldName); // Macro - see internalstatetype.h
     foreignField =  std::make_shared<UnstructuredGridField>(0,0,0.);
     this->vtkReader.initialize(vtkhdfFilename);
     vtkhdffielddefined = true;
     readerStateCounter = 0;
-#endif
 }
 
 } // end namespace oofem

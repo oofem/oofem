@@ -37,10 +37,7 @@
 
 #include <memory> // std::shared_ptr
 #include "structtemperatureload.h"
-#ifdef __HDF_MODULE
 #include "vtkhdf5reader.h"
-#endif
-
 
 ///@name Input fields for ExternalTemperatureFieldLoad
 //@{
@@ -66,13 +63,11 @@ class Field;
 class ExternalTemperatureFieldLoad : public StructuralTemperatureLoad
 {
 protected:
-#ifdef __HDF_MODULE
     VTKHDF5Reader vtkReader;
     StateCounterType readerStateCounter;
     bool vtkhdffielddefined = false;
     std::string vtkhdfFilename;
     std::string vtkhdfFieldname;
-#endif
 public:
     // make public so that it can be simply set from python
     std::shared_ptr<Field> foreignField;
