@@ -44,7 +44,7 @@
 
 ///@name Input fields for ExternalTemperatureFieldLoad
 //@{
-#define _IFT_ExternalTemperatureFieldLoad_Name "foreigntempfieldload"
+#define _IFT_ExternalTemperatureFieldLoad_Name "externaltempfieldload"
 #define _IFT_ExternalTemperatureFieldLoad_VTKHDF5FileName "vtkhdf5filename"
 #define _IFT_ExternalTemperatureFieldLoad_VTKHDF5FieldName "vtkhdf5fieldname"
 //@}
