@@ -102,6 +102,7 @@ namespace py = pybind11;
 
 #include "uniformgridfield.h"
 #include "unstructuredgridfield.h"
+#include "vtkhdf5reader.h"
 #include "dofmanvalfield.h"
 #include "pythonfield.h"
 #include <iostream>
@@ -1685,11 +1686,7 @@ PYBIND11_MODULE(oofempy, m) {
 //std::shared_ptr<oofem::Field>
     py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
         .def(py::init<oofem::FieldType>())  
-//         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)
-        
-        .def("evaluateAt", [](oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep){
-            return std::make_tuple(answer,coords);//TODO-how to invoke the function if it does not exist yet?
-        })
+        .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("giveType", &oofem::Field::giveType)
         .def("setType", &oofem::Field::setType)
         ;
@@ -1715,6 +1712,13 @@ PYBIND11_MODULE(oofempy, m) {
         .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
         ;
     
+    py::class_<oofem::VTKHDF5Reader>(m, "VTKHDF5Reader")
+        .def(py::init<>())
+        .def("initialize", &oofem::VTKHDF5Reader::initialize)
+        .def("finalize", &oofem::VTKHDF5Reader::finalize)
+        .def("readMesh", &oofem::VTKHDF5Reader::readMesh)
+        .def("readField", &oofem::VTKHDF5Reader::readField)
+        ;
         
 //depends on Python.h
 #ifdef _PYBIND_BINDINGS       
