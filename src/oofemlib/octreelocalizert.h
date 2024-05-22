@@ -62,7 +62,7 @@ class IntArray;
 template< class T >class OctreeSpatialLocalizerT;
 
 
-#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 800
+#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 500
 
 #define TEMPLATED_OCTREE_MAX_DEPTH 8
 
@@ -348,43 +348,23 @@ public:
      * @param testedBBX Tested bounding box
      * @returns BoundingBoxStatus status
      */
-    OctantRec :: BoundingBoxStatus testBoundingBox(BoundingBox &testedBBX)
+    OctantRec :: BoundingBoxStatus testBoundingBox(BoundingBox &A)
     {
-        int i, test = 0;
-        double BBXSize = testedBBX.giveSize();
-        FloatArray BBXOrigin;
-        testedBBX.giveOrigin(BBXOrigin);
-        int BBXOriginInside = this->containsPoint(BBXOrigin);
-        if ( BBXOriginInside ) {
-            for ( i = 1; i <= 3; i++ ) {
-                if ( localizer->giveOctreeMaskValue(i) ) {
-                    if ( this->size > ( BBXSize + ( BBXOrigin.at(i) - this->origin.at(i) ) ) ) {
-                        test = 1;
-                    }
-                }
-            }
+        double aSize = A.giveSize();
+        FloatArray sA,eA;
+        A.giveOrigin(sA);
+        eA = sA;
+        eA.add(aSize);
 
-            if ( test ) {
-                return OctantRec :: BBS_InsideCell;
-            } else {
-                return OctantRec :: BBS_ContainsCell;
-            }
+        bool sAInside = this->containsPoint(sA);
+        bool eAInside = this->containsPoint(eA);
+        if (sAInside && eAInside) {
+            return OctantRec :: BBS_InsideCell;
+        } else if (sAInside || eAInside) {
+            return OctantRec :: BBS_ContainsCell;
         } else {
-            for ( i = 1; i <= 3; i++ ) {
-                if ( localizer->giveOctreeMaskValue(i) ) {
-                    if ( BBXOrigin.at(i) > ( this->size + this->origin.at(i) ) ) {
-                        return OctantRec :: BBS_OutsideCell;
-                    } else {
-                        if ( BBXOrigin.at(i) + BBXSize > this->origin.at(i) ) {
-                            return OctantRec :: BBS_ContainsCell;
-                        } else {
-                            return OctantRec :: BBS_OutsideCell;
-                        }
-                    }
-                }
-            }
+            return OctantRec :: BBS_OutsideCell;
         }
-	return OctantRec :: BBS_OutsideCell;
     }
 
     /**
