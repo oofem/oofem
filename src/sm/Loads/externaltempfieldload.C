@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2024   Borek Patzak
  *
  *
  *
@@ -32,32 +32,54 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "foreigntempfieldload.h"
+#include "externaltempfieldload.h"
 #include "timestep.h"
 #include "classfactory.h"
 #include "field.h"
+#include "vtkhdf5reader.h"
+#include "unstructuredgridfield.h"
 
 namespace oofem {
-REGISTER_BoundaryCondition(ForeignTemperatureFieldLoad);
+REGISTER_BoundaryCondition(ExternalTemperatureFieldLoad);
 
 void
-ForeignTemperatureFieldLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
+ExternalTemperatureFieldLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
     if(!foreignField){
-        OOFEM_ERROR("ForeignTemperatureFieldLoad: foreignField must be assigned from python (is NULL).")  }
+        OOFEM_ERROR("ExternalTemperatureFieldLoad: foreignField must be assigned from python (is NULL).")  }
 
     if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
         OOFEM_ERROR("unknown mode (%s)", __ValueModeTypeToString(mode) );
     }
 
+    if (this->vtkhdffielddefined)
+    {
+        if (this->readerStateCounter != tStep->giveSolutionStateCounter())
+        {
+            this->readerStateCounter = tStep->giveSolutionStateCounter();
+            this->vtkReader.readMesh(*((UnstructuredGridField*)foreignField.get()), tStep);
+            this->vtkReader.readField(*((UnstructuredGridField*)foreignField.get()), tStep, vtkhdfFieldname);
+        }
+    }
+
     if(foreignField->evaluateAt(answer, coords, mode, tStep)){
-        OOFEM_ERROR("ForeignTemperatureFieldLoad::foreignField.evaluateAt(...) failed.");
+        OOFEM_ERROR("ExternalTemperatureFieldLoad::foreignField.evaluateAt(...) failed.");
     }
 }
 
 void
-ForeignTemperatureFieldLoad :: initializeFrom(InputRecord &ir)
+ExternalTemperatureFieldLoad :: initializeFrom(InputRecord &ir)
 {
+    set = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, vtkhdfFilename, _IFT_ExternalTemperatureFieldLoad_VTKHDF5FileName); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, vtkhdfFieldname, _IFT_ExternalTemperatureFieldLoad_VTKHDF5FieldName); // Macro - see internalstatetype.h
+    foreignField =  std::make_shared<UnstructuredGridField>(0,0,0.);
+    this->vtkReader.initialize(vtkhdfFilename);
+    vtkhdffielddefined = true;
+    readerStateCounter = 0;
 }
+
 } // end namespace oofem

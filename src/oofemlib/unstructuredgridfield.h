@@ -312,6 +312,17 @@ public:
     }
     virtual ~UnstructuredGridField() { }
 
+    void initialize(int nvert, int ncells, double octreeOriginShift = 0.0) 
+    {
+        this->timeStamp = this->octreeTimeStamp = 0;
+        this->vertexList.resize(nvert);
+        this->cellList.resize(ncells);
+        this->valueList.resize(nvert);
+        this->octreeOriginShift = octreeOriginShift;
+    }
+    int giveNumberOfVertices() const { return vertexList.size(); }
+    int giveNumberOfCells() const { return cellList.size(); }
+    
     void setVertexValue(int num, const FloatArray &vv) {
         valueList [ num - 1 ] = vv;
     }

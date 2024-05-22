@@ -641,7 +641,7 @@ if (USE_PYBIND_BINDINGS)
     endif ()
     include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${Python_LIBRARIES})
-    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${oofem_SOURCE_DIR}/src/oofemcfg.C ${PYBIND11_HEADERS})
+    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
     set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
@@ -773,12 +773,12 @@ endif ()
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/main.C)
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
   add_dependencies(oofem version)
 
   target_link_libraries (oofem liboofem)
 else ()
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
   add_dependencies(oofem version)
 
   target_link_libraries (oofem ${EXT_LIBS})
@@ -794,10 +794,10 @@ endif ()
 if (USE_OOFEG)
     #  OOFEG target:
     if (USE_SHARED_LIB)
-        add_executable (oofeg ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/oofeg.C)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
         target_link_libraries (oofeg liboofem)
     else ()
-        add_executable (oofeg ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
         target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
@@ -805,22 +805,22 @@ if (USE_OOFEG)
 endif ()
 
 
-add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/benchmark.C)
+add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
 add_dependencies(liboofem_benchmark version)
 set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (liboofem_benchmark liboofem benchmark)
 
 # Example of using liboofem with dynamic input record:
-add_executable(beam2d_1 ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
 add_dependencies(beam2d_1 version)
 set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (beam2d_1 liboofem)
 
-add_executable(hexgrid ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
+add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
 set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries (hexgrid liboofem)
 
-add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
+add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
 set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_link_libraries(dream3d_analysis liboofem)
 
