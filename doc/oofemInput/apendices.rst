@@ -708,3 +708,16 @@ Currently, the supported export modules are following
    | Example of input record:
    | ``solutionstatus`` ``tstep_all`` ``fmt m:s:a:nite:t:dt:st:cr``
 
+- Error checking module
+   Error checking rule used for regressions tests. It compares the user-selected computed results with the reference results.
+   The individual rules are defined in a separate section with dedicated syntax, that can be part of the input file itself, or defined in external file.
+   Their syntax follows the syntax of Extractor package, namely its `Value records section <https://www.oofem.org/resources/doc/extractorInput/html/node2.html>`_.
+   
+   The syntax of the error checking module is following:
+
+   ``errorcheck`` [``filename #(s)``] [``extract``]
+   
+   By default the module performs the regression tests and issues the error when one or more tests fail.
+   The module can also be used to extract user-selected quantities rather than testing them against expected values. This can be done by adding ``extract`` keyword to the input record of the module.
+   The ``filename`` parameter allows to specify filename (with path) in which the rules are defined, insted of input file itself (the default).
+
