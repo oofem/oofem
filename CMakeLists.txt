@@ -680,6 +680,10 @@ configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
+configure_file (
+  "${oofem_SOURCE_DIR}/src/oofemenv.h.in"
+  "${oofem_BINARY_DIR}/oofemenv.h"
+)
 
 #######################################################################
 ######################## Targets ######################################

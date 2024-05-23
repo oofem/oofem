@@ -35,7 +35,7 @@
 #ifndef nodalrecoverymodel_h
 #define nodalrecoverymodel_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "interface.h"

@@ -35,7 +35,7 @@
 #ifndef engngm_h
 #define engngm_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 #include "intarray.h"
 #include "fieldmanager.h"

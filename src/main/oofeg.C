@@ -53,6 +53,7 @@
 #include "node.h"
 #include "intarray.h"
 #include "oofemcfg.h"
+#include "oofemenv.h"
 #include "errorestimator.h"
 #include "remeshingcrit.h"
 #include "drawmode.h"

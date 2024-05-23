@@ -35,7 +35,7 @@
 #ifndef combuff_h
 #define combuff_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "datastream.h"
 #include "parallel.h"
 

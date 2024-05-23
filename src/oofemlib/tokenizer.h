@@ -37,7 +37,7 @@
 #include <vector>
 #include <string>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 /**

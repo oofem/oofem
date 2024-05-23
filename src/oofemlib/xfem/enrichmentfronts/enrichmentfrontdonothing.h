@@ -37,7 +37,7 @@
 
 #define _IFT_EnrFrontDoNothing_Name "enrfrontdonothing"
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include <vector>
 #include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"

@@ -35,7 +35,7 @@
 #ifndef processcomm_h
 #define processcomm_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "combuff.h"
 #include "commbufftype.h"
 #include "communicatormode.h"

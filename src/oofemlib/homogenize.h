@@ -35,7 +35,7 @@
 #ifndef homogenize_h
 #define homogenize_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "error.h"

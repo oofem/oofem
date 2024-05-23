@@ -35,7 +35,7 @@
 #ifndef delaunay_h
 #define delaunay_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <vector>
 

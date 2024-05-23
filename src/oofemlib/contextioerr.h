@@ -37,7 +37,7 @@
 
 #include <exception>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "contextioresulttype.h"
 
 namespace oofem {

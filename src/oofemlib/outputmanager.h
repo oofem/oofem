@@ -35,7 +35,7 @@
 #ifndef outputmanager_h
 #define outputmanager_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "range.h"
 #include "inputrecord.h"

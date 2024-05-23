@@ -35,7 +35,7 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"

@@ -35,6 +35,7 @@
 #include <vector>
 #include <cstdio>
 
+#include "oofemcfg.h"
 #include "outputexportmodule.h"
 #include "engngm.h"
 #include "domain.h"

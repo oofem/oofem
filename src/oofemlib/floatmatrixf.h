@@ -37,7 +37,7 @@
 #ifndef floatmatrixf_h
 #define floatmatrixf_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "floatmatrix.h"

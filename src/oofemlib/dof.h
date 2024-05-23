@@ -37,7 +37,7 @@
 
 #include <cstdio>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "unknowntype.h"

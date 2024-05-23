@@ -37,7 +37,7 @@
 
 #include "floatarray.h"
 #include "intarray.h"
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <vector>
 

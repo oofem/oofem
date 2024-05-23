@@ -35,7 +35,7 @@
 #ifndef datastream_h
 #define datastream_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <sstream>
 #include <cstdio>

@@ -35,7 +35,7 @@
 #ifndef feinterpol_h
 #define feinterpol_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "error.h"
 #include "inputrecord.h"
 #include "intarray.h"

@@ -35,7 +35,7 @@
 #ifndef logger_h
 #define logger_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 //#include "util.h"
 
 #include <cstdio>

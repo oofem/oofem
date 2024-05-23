@@ -33,6 +33,7 @@
  */
 
 #include "solutionstatusexportmodule.h"
+#include "oofemcfg.h"
 #include "engngm.h"
 #include "timestep.h"
 #include "classfactory.h"

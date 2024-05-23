@@ -35,7 +35,7 @@
 #ifndef domain_h
 #define domain_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"

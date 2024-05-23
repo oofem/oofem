@@ -37,7 +37,7 @@
 
 #define _IFT_EnrFrontExtend_Name "enrfrontextend"
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include <vector>
 #include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"

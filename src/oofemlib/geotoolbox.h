@@ -38,7 +38,7 @@
 #include <list>
 #include <cstdlib>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 
 #ifdef __OOFEG

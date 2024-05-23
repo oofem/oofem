@@ -35,7 +35,7 @@
 #ifndef parallelcontext_h
 #define parallelcontext_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #ifdef __PARALLEL_MODE
  #include "parallelordering.h"
 #endif

@@ -41,6 +41,7 @@
 
 #include "engngm.h"
 #include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include "oofemtxtdatareader.h"
 #include "datastream.h"

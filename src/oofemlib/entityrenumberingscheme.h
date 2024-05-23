@@ -38,7 +38,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "error.h"
 
 namespace oofem {

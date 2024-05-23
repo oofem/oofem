@@ -35,7 +35,7 @@
 #ifndef floatarrayf_h
 #define floatarrayf_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "datastream.h"

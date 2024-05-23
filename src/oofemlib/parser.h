@@ -35,7 +35,7 @@
 #ifndef parser_h
 #define parser_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 #define Parser_CMD_LENGTH 1024
