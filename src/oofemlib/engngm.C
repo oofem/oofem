@@ -894,7 +894,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                     ma.matrixFromSurfaceLoad(mat, *element, sLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
-                        bNodes = element->giveInterpolation()->boundaryGiveNodes(boundary);
+                        bNodes = element->giveInterpolation()->boundaryGiveNodes(boundary, element->giveGeometryType());
                         if ( element->computeDofTransformationMatrix(R, bNodes, true) ) {
                             mat.rotatedWith(R);
                         }
@@ -919,7 +919,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                     ma.matrixFromEdgeLoad(mat, *element, eLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
-                        bNodes = element->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
+                        bNodes = element->giveInterpolation()->boundaryEdgeGiveNodes(boundary, element->giveGeometryType());
                         if ( element->computeDofTransformationMatrix(R, bNodes, true) ) {
                             mat.rotatedWith(R);
                         }

@@ -196,7 +196,7 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
         Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(thisOrder, side [ thisSide ].at(ielement)));
+        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(thisOrder, side [ thisSide ].at(ielement), thisElement->giveGeometryType()));
 
         for ( GaussPoint *gp: *iRule ) {
 
@@ -433,12 +433,12 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     // Use correct interpolation for the dofid on which the condition is applied
     FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids[0] );
 
-    auto bnodes = interpolation->boundaryGiveNodes(boundary);
+    auto bnodes = interpolation->boundaryGiveNodes(boundary, e->giveGeometryType());
 
     B.resize(bnodes.giveSize(), ndof);
     B.zero();
 
-    std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
+    std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary, e->giveGeometryType()));
 
     for ( GaussPoint *gp: *iRule ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -508,7 +508,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            auto bNodes = interpolation->boundaryGiveNodes(side [ thisSide ].at(ielement));
+            auto bNodes = interpolation->boundaryGiveNodes(side [ thisSide ].at(ielement), thisElement->giveGeometryType());
 
             thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, r_s);
             thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, c_s);
@@ -516,7 +516,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             B.resize(bNodes.giveSize()*ndofids, ndofids*tcount);
             B.zero();
 
-            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
+            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary, thisElement->giveGeometryType()));
 
             for ( auto &gp: *iRule ) {
                 auto const &lcoords = gp->giveNaturalCoordinates();
@@ -695,7 +695,7 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            auto bNodes = interpolation->boundaryGiveNodes(boundary);
+            auto bNodes = interpolation->boundaryGiveNodes(boundary, thisElement->giveGeometryType());
 
             thisElement->giveBoundaryLocationArray(sideLocation, bNodes, dofids, s, &masterDofIDs);
             thisElement->computeBoundaryVectorOf(bNodes, dofids, VM_Total, tStep, a);
@@ -705,7 +705,7 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             B.resize(bNodes.giveSize(), ndof);
             B.zero();
 
-            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
+            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary, thisElement->giveGeometryType()));
 
             // Where we test with velocity
             vProd.resize(bNodes.giveSize()*dofids.giveSize());
@@ -824,7 +824,7 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
 
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, side [ thisSide ].at(ielement) ));
+            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, side [ thisSide ].at(ielement), thisElement->giveGeometryType() ));
 
             for ( auto gp: *iRule ) {
 

@@ -20,6 +20,10 @@ namespace py = pybind11;
 #include "skyline.h"
 #include "ldltfact.h"
 
+#ifdef __MPM_MODULE
+#include "prototype2.h"
+#endif
+
 #ifdef _MSC_VER 
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
@@ -253,6 +257,8 @@ py::object quad1ht(py::args args, py::kwargs &kw) { return createElementOfType("
 py::object qquad1ht(py::args args, py::kwargs &kw) { return createElementOfType("qquad1ht",args,kw); }
 // mpm experimental
 py::object q1(py::args args, py::kwargs &kw) { return createElementOfType("q1",args,kw); }
+py::object l1(py::args args, py::kwargs &kw) { return createElementOfType("l1",args,kw); }
+
 
 
 
@@ -427,11 +433,24 @@ py::object createInterpolationOfType(std::string type, py::args args, py::kwargs
         int i2 = len(args)>0?PyLong_AsUnsignedLong(args[1].ptr()):2;
         std::unique_ptr<FEInterpolation> interpol = std::make_unique<FEI2dQuadLin>(i1,i2); 
         return py::cast(interpol.release());
+    } else if (type == "fei2dlinelin") {
+        int i1 = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):1;
+        int i2 = len(args)>0?PyLong_AsUnsignedLong(args[1].ptr()):2;
+        std::unique_ptr<FEInterpolation> interpol = std::make_unique<FEI2dLineLin>(i1,i2); 
+        return py::cast(interpol.release());
     } 
+#ifdef __MPM_MODULE    
+    else if (type == "linearinterpolation") {
+        std::unique_ptr<FEInterpolation> interpol = std::make_unique<LinearInterpolation>(); 
+        return py::cast(interpol.release());
+    } 
+#endif
    return py::none();
 }
 
 py::object fei2dquadlin(py::args args, py::kwargs kw) { return createInterpolationOfType("fei2dquadlin",args,kw); }
+py::object fei2dlinelin(py::args args, py::kwargs kw) { return createInterpolationOfType("fei2dlinelin",args,kw); }
+py::object linearinterpolation(py::args args, py::kwargs kw) { return createInterpolationOfType("linearinterpolation",args,kw); }
 
 
 /******************************************************
@@ -446,7 +465,15 @@ py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
             oofem::Variable & f = args[0].cast<oofem::Variable &>();
             oofem::Variable & tf = args[1].cast<oofem::Variable &>();
             oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
-            std::unique_ptr<Term> t = std::make_unique<BTSigmaTerm>(f, tf, m);
+            std::unique_ptr<Term> t = std::make_unique<BTSigmaTerm2>(f, tf, m);
+            return py::cast(t.release());
+        }
+    } else if (type == "NTfTerm") {
+        if (len(args)>2) {
+            oofem::Variable & f = args[0].cast<oofem::Variable &>();
+            oofem::Variable & tf = args[1].cast<oofem::Variable &>();
+            oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
+            std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m);
             return py::cast(t.release());
         }
     }
@@ -454,6 +481,7 @@ py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
 }
 
 py::object BTSigma_Term(py::args args, py::kwargs kw) { return createTermOfType("BTSigmaTerm",args,kw); }
+py::object NTf_Term(py::args args, py::kwargs kw) { return createTermOfType("NTfTerm",args,kw); }
 
 #endif
 

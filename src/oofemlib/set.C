@@ -168,7 +168,7 @@ const IntArray &Set :: giveNodeList()
             auto e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
             auto boundary = this->elementBoundaries.at(ibnd * 2);
             auto fei = e->giveInterpolation();
-            auto bNodes = fei->boundaryGiveNodes(boundary);
+            auto bNodes = fei->boundaryGiveNodes(boundary, e->giveGeometryType());
             for ( int inode = 1; inode <= bNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( bNodes.at(inode) )->giveNumber() ) = 1;
             }
@@ -178,7 +178,7 @@ const IntArray &Set :: giveNodeList()
             auto e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
             auto edge = this->elementEdges.at(iedge * 2);
             auto fei = e->giveInterpolation();
-            auto eNodes = fei->boundaryEdgeGiveNodes(edge);
+            auto eNodes = fei->boundaryEdgeGiveNodes(edge, e->giveGeometryType());
             for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }
@@ -188,7 +188,7 @@ const IntArray &Set :: giveNodeList()
             auto e = this->domain->giveElement( this->elementSurfaces.at(isurf * 2 - 1) );
             auto surf = this->elementSurfaces.at(isurf * 2);
             auto fei = e->giveInterpolation();
-            auto eNodes = fei->boundarySurfaceGiveNodes(surf);
+            auto eNodes = fei->boundarySurfaceGiveNodes(surf, e->giveGeometryType());
             for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }

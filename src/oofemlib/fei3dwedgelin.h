@@ -50,15 +50,15 @@ class OOFEM_EXPORT FEI3dWedgeLin : public FEInterpolation3d
 public:
     FEI3dWedgeLin() : FEInterpolation3d(1) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Wedge; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_1; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Wedge; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_1; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override
     {
         if (ib <= 2) return _Triangle;
         else return _Square;
     }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return this->giveBoundaryIntegrationDomain(isurf); }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type egt) const override { return this->giveBoundaryIntegrationDomain(isurf, egt); }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
 
     // Bulk
     static FloatArrayF<6> evalN(const FloatArrayF<3> &lcoords);
@@ -88,12 +88,12 @@ public:
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     IntArray computeLocalSurfaceMapping(int iSurf) const override;
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
-    std::unique_ptr<IntegrationRule> giveSurfaceIntegrationRule(int order, int isurf) const
-    { return giveBoundaryIntegrationRule(order, isurf); }
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveSurfaceIntegrationRule(int order, int isurf, const Element_Geometry_Type egt) const
+    { return giveBoundaryIntegrationRule(order, isurf, egt); }
 
-    int giveNumberOfNodes() const override { return 6; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 6; }
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

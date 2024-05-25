@@ -18,5 +18,6 @@
 namespace oofem {
     REGISTER_EngngModel(TestProblem);    
     REGISTER_Element(Q1Element)
+    REGISTER_Element(L1Element)
 
 } // end namespace oofem

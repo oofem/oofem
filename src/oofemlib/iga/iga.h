@@ -64,6 +64,7 @@ public:
 
     int giveNumberOfVertices() const override { return elem->giveNumberOfNodes(); }
     const FloatArray &giveVertexCoordinates(int i) const override { return elem->giveNode(i)->giveCoordinates(); }
+    const Element_Geometry_Type giveGeometryType() const override {return elem->giveGeometryType();}
 };
 
 
@@ -105,7 +106,7 @@ public:
 #endif
 
 protected:
-    virtual int giveNsd() = 0; // this info is available also from interpolation. Do we need it here ???
+    virtual int giveNsd(const Element_Geometry_Type) = 0; // this info is available also from interpolation. Do we need it here ???
 };
 
 

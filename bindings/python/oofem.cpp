@@ -189,6 +189,9 @@ public:
         oofem::MaterialMode giveMaterialMode() override {
             PYBIND11_OVERLOAD (oofem::MaterialMode, ElementBase, giveMaterialMode,);
         }
+        oofem::Element_Geometry_Type giveGeometryType() const override {
+            PYBIND11_OVERLOAD_PURE (oofem::Element_Geometry_Type, ElementBase, giveGeometryType,);
+        }
         const char *giveClassName() const override {
             PYBIND11_OVERLOAD_PURE (const char*, ElementBase, giveClassName,);
         }
@@ -1760,8 +1763,14 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("skyline", &skyline, py::return_value_policy::move);
     m.def("ldltfactorization", &ldltFactorization, py::return_value_policy::move);
     m.def("q1", &q1, py::return_value_policy::move);
+    m.def("l1", &l1, py::return_value_policy::move);
+
     m.def("fei2dquadlin", &fei2dquadlin, py::return_value_policy::move);
+    m.def("fei2dlinelin", &fei2dlinelin, py::return_value_policy::move);
+    m.def("linearinterpolation", &linearinterpolation, py::return_value_policy::move);
     m.def("BTSigmaTerm", &BTSigma_Term, py::return_value_policy::move);
+    m.def("NTfTerm", &NTf_Term, py::return_value_policy::move);
+
     m.def("upm", &upm, py::return_value_policy::move);
 #endif
 

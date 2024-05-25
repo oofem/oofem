@@ -808,7 +808,7 @@ public:
      * it is required only for some specialized tasks.
      * @return Geometry type of element.
      */
-    virtual Element_Geometry_Type giveGeometryType() const;
+    virtual Element_Geometry_Type giveGeometryType() const = 0;
     /**
      * Returns the element spatial dimension (1, 2, or 3).
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.

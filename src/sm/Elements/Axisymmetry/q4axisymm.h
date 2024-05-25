@@ -69,6 +69,8 @@ public:
     Interface *giveInterface(InterfaceType) override;
     const char *giveInputRecordName() const override { return _IFT_Q4Axisymm_Name; }
     const char *giveClassName() const override { return "Q4axisymm"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
+
     void initializeFrom(InputRecord &ir) override;
 
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;

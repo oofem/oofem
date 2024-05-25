@@ -189,7 +189,7 @@ FEI2dQuadBiQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry
 }
 
 
-std::unique_ptr<IntegrationRule> FEI2dQuadBiQuad :: giveIntegrationRule(int order) const
+std::unique_ptr<IntegrationRule> FEI2dQuadBiQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);

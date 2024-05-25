@@ -130,7 +130,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             mTriInterp.local2global( global, gp->giveNaturalCoordinates(),
-                                     FEIVertexListGeometryWrapper(coords) );
+                                     FEIVertexListGeometryWrapper(coords, EGT_triangle_1) );
 
             newGPCoord.push_back(global);
 
@@ -251,7 +251,7 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
                 // Compute global gp coordinate in the element from local gp coord in the sub triangle
                 FloatArray global;
                 mTriInterp.local2global( global, gp->giveNaturalCoordinates(),
-                                         FEIVertexListGeometryWrapper(gCoords) );
+                                         FEIVertexListGeometryWrapper(gCoords, EGT_triangle_1) );
 
 
                 // Compute local gp coordinate in the element from global gp coord in the element

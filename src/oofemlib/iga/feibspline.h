@@ -84,7 +84,7 @@ public:
         nsd(nsd)
     {}
 
-    integrationDomain giveIntegrationDomain() const override {
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type egt) const override {
         if ( nsd == 3 ) {
             return _Cube;
         } else if ( nsd == 2 ) {
@@ -95,9 +95,9 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_unknown; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_unknown; }
 
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override {
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override {
         if ( nsd == 3 ) {
             return _Square;
         } else if ( nsd == 2 ) {
@@ -108,7 +108,7 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override {
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override {
         if ( nsd == 3 ) {
             return _Square;
         } else if ( nsd == 2 ) {
@@ -117,7 +117,7 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override {
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override {
         if ( nsd >= 2 ) {
             return _Line;
         } else {
@@ -125,10 +125,10 @@ public:
         }
     }
 
-    int giveNsd()  const override { return nsd; }
+    int giveNsd(const Element_Geometry_Type)  const override { return nsd; }
     void initializeFrom(InputRecord &ir) override;
 
-    IntArray boundaryEdgeGiveNodes(int boundary) const override
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); return {}; }
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
@@ -152,12 +152,12 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    IntArray boundarySurfaceGiveNodes(int boundary) const override
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); return {}; }
     //@}
 
 
-    IntArray boundaryGiveNodes(int boundary) const override
+    IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const override
     { OOFEM_ERROR("Not implemented"); return {}; }
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Not implemented"); }
@@ -190,11 +190,11 @@ public:
     const char *giveClassName() const { return "BSplineInterpolation"; }
     bool hasSubPatchFormulation() const override { return true; }
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override
     { OOFEM_ERROR("Not supported."); return nullptr; }
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type) const override
     { OOFEM_ERROR("Not supported."); return nullptr; }
-    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, Element_Geometry_Type) const override
     { OOFEM_ERROR("Not supported."); return nullptr; }
 
 protected:

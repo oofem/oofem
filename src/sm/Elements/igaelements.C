@@ -155,7 +155,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
     EASValsSetFillStyle(FILL_SOLID);
     const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    int j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd(this->giveGeometryType());
     FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign [ 4 ];
 
@@ -267,7 +267,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tS
     EASValsSetEdgeFlag(true);
     const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    int j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd(this->giveGeometryType());
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -469,7 +469,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
     EASValsSetEdgeFlag(true);
     const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    int j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd(this->giveGeometryType());
     FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign [ 4 ];
 
@@ -582,7 +582,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetEdgeFlag(true);
     const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    int j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd(this->giveGeometryType());
     FloatArray c [ 8 ], cg [ 8 ];
     IntArray sign [ 8 ];
 

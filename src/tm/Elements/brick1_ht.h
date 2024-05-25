@@ -69,6 +69,8 @@ public:
     int computeNumberOfDofs() override { return 8; }
     void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_1;}
+
 
     Interface *giveInterface(InterfaceType t) override;
     int testElementExtension(ElementExtension ext) override

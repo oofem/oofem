@@ -74,6 +74,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QTruss1d_Name; }
     const char *giveClassName() const override { return "QTruss1d"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_2;}
+
 
     MaterialMode giveMaterialMode() override { return _1dMat; }
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;

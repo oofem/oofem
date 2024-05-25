@@ -130,7 +130,7 @@ double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, con
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) / 2.0;
 }
 
-IntArray FEI2dLineLin :: boundaryEdgeGiveNodes(int boundary) const
+IntArray FEI2dLineLin :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return {1, 2};
 }
@@ -169,7 +169,7 @@ double FEI2dLineLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return x2 * y1 - x1 * y2;
 }
 
-std::unique_ptr<IntegrationRule> FEI2dLineLin :: giveIntegrationRule(int order) const
+std::unique_ptr<IntegrationRule> FEI2dLineLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);

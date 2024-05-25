@@ -658,7 +658,7 @@ double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetQuad :: giveIntegrationRule(int order) const
+FEI3dTetQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 3);
@@ -667,7 +667,7 @@ FEI3dTetQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTetQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);

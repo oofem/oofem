@@ -370,7 +370,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         int numPointsPerSeg = 1;
         ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
     } else {
-        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex, e->giveGeometryType());
     }
 
     oTangent.clear();

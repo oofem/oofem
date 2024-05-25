@@ -47,11 +47,11 @@ class OOFEM_EXPORT FEI2dQuadLin : public FEInterpolation2d
 public:
     FEI2dQuadLin(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Square; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_1; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Line; }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _Square; }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Square; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_quad_1; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Line; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _Square; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
 
     double giveArea(const FEICellGeometry &cellgeo) const override;
 
@@ -65,7 +65,7 @@ public:
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    int giveNumberOfNodes() const override { return 4; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 4; }
     void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4};internalDofMans={};}
 
 
@@ -73,14 +73,14 @@ public:
 
     // Edge
     IntArray computeLocalEdgeMapping(int iedge) const override;
-    int giveNumberOfEdges() const override { return 4; }
+    int giveNumberOfEdges(const Element_Geometry_Type) const override { return 4; }
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const override;
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
 
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

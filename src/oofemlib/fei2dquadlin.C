@@ -383,7 +383,7 @@ double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule> 
-FEI2dQuadLin :: giveIntegrationRule(int order) const
+FEI2dQuadLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);

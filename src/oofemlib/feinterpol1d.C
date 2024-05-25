@@ -46,7 +46,7 @@ void FEInterpolation1d :: boundaryEvalN(FloatArray &answer, int boundary, const 
     answer.at(1) = 1.;
 }
 
-IntArray FEInterpolation1d :: boundaryGiveNodes(int boundary) const
+IntArray FEInterpolation1d :: boundaryGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     throw std::runtime_error("Not implemented");
 }
@@ -67,7 +67,7 @@ void FEInterpolation1d :: boundaryLocal2Global(FloatArray &answer, int boundary,
     answer = cellgeo.giveVertexCoordinates(boundary);
 }
 
-std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveIntegrationRule(int order) const
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
@@ -75,15 +75,15 @@ std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveIntegrationRule(int or
     return std::move(iRule);
 }
 
-std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int boundary)  const
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt)  const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     iRule->SetUpPoint(_Unknown);
     return std::move(iRule);
 }
 
-std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary) const
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
-    return this->giveIntegrationRule(order);
+    return this->giveIntegrationRule(order, egt);
 }
 } // end namespace oofem

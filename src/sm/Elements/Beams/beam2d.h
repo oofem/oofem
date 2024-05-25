@@ -135,6 +135,8 @@ public:
     double computeVolumeAround(GaussPoint *gp) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
+
     const char *giveClassName() const override { return "Beam2d"; }
     const char *giveInputRecordName() const override { return _IFT_Beam2d_Name; }
     void initializeFrom(InputRecord &ir) override;

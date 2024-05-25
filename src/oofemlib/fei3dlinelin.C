@@ -202,7 +202,7 @@ FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dLineLin :: giveIntegrationRule(int order) const
+FEI3dLineLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);
@@ -211,7 +211,7 @@ FEI3dLineLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about this.
     OOFEM_ERROR("Not supported");

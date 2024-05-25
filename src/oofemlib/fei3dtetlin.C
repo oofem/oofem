@@ -475,7 +475,7 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetLin :: giveIntegrationRule(int order) const
+FEI3dTetLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 0);
@@ -484,7 +484,7 @@ FEI3dTetLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);

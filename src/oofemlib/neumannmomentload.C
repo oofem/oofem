@@ -77,7 +77,7 @@ NeumannMomentLoad :: computeXbar()
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *i = thisElement->giveInterpolation();
 
-        auto iRule = i->giveIntegrationRule(3);
+        auto iRule = i->giveIntegrationRule(3, thisElement->giveGeometryType() );
 
         FloatArray coord;
         for ( auto &gp: *iRule ) {

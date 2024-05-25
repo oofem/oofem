@@ -353,10 +353,10 @@ class MPElement : public Element {
         return 0;
     }
     IntArray giveBoundarySurfaceNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary);
+        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
     }
     IntArray giveBoundaryEdgeNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary);
+        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
     }
 
 

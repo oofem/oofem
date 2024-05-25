@@ -83,7 +83,7 @@ LinQuad3DPlaneStress::giveCellGeometryWrapper()
         return cellGeometryWrapper;
     } else {
         this->computeLocalNodalCoordinates(lc);
-        return (cellGeometryWrapper = new FEIVertexListGeometryWrapper(lc));
+        return (cellGeometryWrapper = new FEIVertexListGeometryWrapper(lc, this->giveGeometryType()));
     }
 }
 

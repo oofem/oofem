@@ -290,10 +290,10 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
         if ( minPhi * maxPhi < mLevelSetTol ) { // If the level set function changes sign within the element.
             // Count the number of element edges intersected by the interface
             //int numEdges = nElNodes; // TODO: Is this assumption always true?
-            int numEdges = el->giveInterpolation()->giveNumberOfEdges(); //JIM
+            int numEdges = el->giveInterpolation()->giveNumberOfEdges(el->giveGeometryType()); //JIM
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex);
+                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex, el->giveGeometryType());
 
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
@@ -615,10 +615,10 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
         //      int numEdges = element->giveNumberOfBoundarySides();
         //int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
-        int numEdges = element->giveInterpolation()->giveNumberOfEdges();
+        int numEdges = element->giveInterpolation()->giveNumberOfEdges(element->giveGeometryType());
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-            const auto &bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex);
+            const auto &bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex, element->giveGeometryType());
 
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();

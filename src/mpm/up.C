@@ -144,7 +144,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfSurfaceDOFs());
@@ -153,7 +153,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
@@ -172,7 +172,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfEdgeDOFs());
@@ -181,7 +181,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }

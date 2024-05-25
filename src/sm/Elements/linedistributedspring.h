@@ -74,6 +74,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LineDistributedSpring_Name; }
     const char *giveClassName() const override { return "LineDistributedSpring"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
+
     void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return this->dofs.giveSize(); }

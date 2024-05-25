@@ -86,7 +86,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArr
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
         e->giveBoundaryLocationArray(rows [ pos ], bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(cols [ pos ], bNodes, this->dofs, c_s);
@@ -114,7 +114,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *t
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
         e->giveBoundaryLocationArray(r_loc, bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(c_loc, bNodes, this->dofs, c_s);
@@ -150,7 +150,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
         e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterdofids);
         this->computeLoadVectorFromElement(fe, e, boundary, tStep);
@@ -173,7 +173,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
     if ( !fei ) {
         OOFEM_ERROR("No interpolation available for element.");
     }
-    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side) );
+    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side, e->giveGeometryType()) );
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     int nodes = e->giveNumberOfNodes();
@@ -284,7 +284,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
     if ( !fei ) {
         OOFEM_ERROR("No interpolation or default integration available for element.");
     }
-    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side) );
+    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side, e->giveGeometryType()) );
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
 
@@ -299,7 +299,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >(fei);
 
         ///@todo More of this grunt work should be moved to the interpolation classes
-        const auto &bnodes = fei2d->boundaryGiveNodes(side);
+        const auto &bnodes = fei2d->boundaryGiveNodes(side, e->giveGeometryType());
         int nodes = bnodes.giveSize();
         FloatMatrix xy(2, nodes);
         for ( int i = 1; i <= nodes; i++ ) {

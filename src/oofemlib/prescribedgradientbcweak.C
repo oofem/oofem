@@ -1839,7 +1839,7 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
     	int elIndex = boundaries.at(pos * 2 - 1);
         Element *e = this->giveDomain()->giveElement( elIndex );
         int boundary = boundaries.at(pos * 2);
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
         DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
         int startNodeInd = startNode->giveNumber();
         DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
@@ -1896,7 +1896,7 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
         // Add the start and end nodes of the segment
         DofManager *startNode = e->giveDofManager(bNodes [ 0 ]);

@@ -43,7 +43,7 @@ namespace oofem {
 
 void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes();
+    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v.size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
@@ -68,7 +68,7 @@ void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& inter
 
 void evalB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes();
+    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v.size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));

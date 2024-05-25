@@ -78,6 +78,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LWedge_Name; }
     const char *giveClassName() const override { return "LWedge"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_wedge_1;}
+
 };
 } // end namespace oofem
 #endif

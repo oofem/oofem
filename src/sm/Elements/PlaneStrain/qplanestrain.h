@@ -61,6 +61,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QPlaneStrain_Name; }
     const char *giveClassName() const override { return "QPlaneStrain"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
+
 
     int testElementExtension(ElementExtension ext) override { return 0; } ///@todo //check this probably ok now when derived from PE-element
 

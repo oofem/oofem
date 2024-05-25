@@ -179,7 +179,7 @@ StructuralElement :: computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, 
 {
     FloatArray n_vec;
     this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd() );
+    answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd(this->giveGeometryType()) );
 }
 
 
@@ -252,7 +252,7 @@ StructuralElement :: computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, con
 {
     FloatArray n_vec;
     this->giveInterpolation()->boundaryEdgeEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd() );
+    answer.beNMatrixOf(n_vec, this->giveInterpolation()->giveNsd(this->giveGeometryType()) );
 }
 
 
@@ -330,7 +330,7 @@ StructuralElement :: giveNumberOfIPForMassMtrxIntegration()
     // \int_V N^T*N dV => (order of the approximation)*2 (constant density assumed)
     ///TODO this is without the jacobian and density
     int order = this->giveInterpolation()->giveInterpolationOrder();
-    return iRule->getRequiredNumberOfIntegrationPoints(this->giveInterpolation()->giveIntegrationDomain(), 2 * order);
+    return iRule->getRequiredNumberOfIntegrationPoints(this->giveInterpolation()->giveIntegrationDomain(this->giveGeometryType()), 2 * order);
 }
 
 void
