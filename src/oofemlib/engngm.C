@@ -489,6 +489,15 @@ EngngModel :: forceEquationNumbering()
     return this->numberOfEquations;
 }
 
+void
+EngngModel::initializeYourself (TimeStep *tStep)
+{
+    // needed only of BCs are changing, no way to get this information now
+    // so to be safe, we alvays reinitialize
+    for ( auto &domain: domainList ) { 
+        domain->giveBCTracker()->initialize();
+    }
+}
 
 void
 EngngModel :: solveYourself()
