@@ -51,15 +51,15 @@ Further, the module is initialized and output is prepared.
     vtkxmlPy.initialize()
     vtkxmlPy.doOutput(problem.giveCurrentStep(), False)
 
-The vtkmemory module allows in memory access to so called VTKPieces, objects representing piece (subset of mesh) to visualize.
-VTKPieces contain all needed information and data about piece geometry, connectivity and about exported variables.
+The vtkmemory module allows in memory access to so called ExportRegions, objects representing piece (subset of mesh) to visualize.
+ExportRegions contain all needed information and data about piece geometry, connectivity and about exported variables.
 We start looping over the pieces, request data needed to instanciate pyvista UnstructuredGrid instance and 
 attach exported variables to it.
 
 .. code-block:: python3
 
-    for p in vtkxmlPy.getVTKPieces():
-    #p = vtkxmlPy.getVTKPieces()[0]
+    for p in vtkxmlPy.getExportRegions():
+    #p = vtkxmlPy.getExportRegions()[0]
         print ("Piece:", p)
         print(p.getVertices())
         print(p.getCellConnectivity())

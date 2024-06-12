@@ -39,6 +39,7 @@ namespace py = pybind11;
 
 #include <string>
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "floatarrayf.h"
@@ -85,6 +86,7 @@ namespace py = pybind11;
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "internalstatetype.h"
+#include "materialmode.h"
 
 #include "integrationrule.h"
 #include "gausspoint.h"
@@ -92,6 +94,7 @@ namespace py = pybind11;
 #include "dynamicinputrecord.h"
 
 #include "classfactory.h"
+#include "exportregion.h"
 #include "unknownnumberingscheme.h"
 #include "vtkxmlexportmodule.h"
 #include "vtkmemoryexportmodule.h"
@@ -1213,6 +1216,11 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
+        .def(py::init<int, oofem::Domain*>())
+        .def("setElementList", &oofem::Set::setElementList, "Sets element list")
+        .def("setBoundaryList", &oofem::Set::setBoundaryList, "Sets list of element boundaries")
+        .def("setNodeList", &oofem::Set::setNodeList, "Set DofMan list")
+        .def("setEdgeList", &oofem::Set::setEdgeList, "Sets edge list")
     ;
 
 
@@ -1243,34 +1251,34 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::HOMExportModule, oofem::ExportModule>(m, "HOMExportModule")
       ;
 
-    py::class_<oofem::VTKPiece>(m, "VTKPiece")
-      .def("giveNumberOfNodes", &oofem::VTKPiece::giveNumberOfNodes)
-      .def("giveNodeCoords", &oofem::VTKPiece::giveNodeCoords)
-      .def("giveNumberOfCells", &oofem::VTKPiece::giveNumberOfCells)
-      .def("giveCellConnectivity", &oofem::VTKPiece::giveCellConnectivity)
-      .def("giveCellType", &oofem::VTKPiece::giveCellType)
-      .def("giveCellOffset", &oofem::VTKPiece::giveCellOffset)
-      .def("givePrimaryVarInNode", &oofem::VTKPiece::givePrimaryVarInNode)
-      .def("giveInternalVarInNode", &oofem::VTKPiece::giveInternalVarInNode)
-      .def("giveCellVar", &oofem::VTKPiece::giveCellVar)
+     py::class_<oofem::ExportRegion>(m, "ExportRegion")
+      .def("giveNumberOfNodes", &oofem::ExportRegion::giveNumberOfNodes)
+      .def("giveNodeCoords", &oofem::ExportRegion::giveNodeCoords)
+      .def("giveNumberOfCells", &oofem::ExportRegion::giveNumberOfCells)
+      .def("giveCellConnectivity", &oofem::ExportRegion::giveCellConnectivity)
+      .def("giveCellType", &oofem::ExportRegion::giveCellType)
+      .def("giveCellOffset", &oofem::ExportRegion::giveCellOffset)
+      .def("givePrimaryVarInNode", &oofem::ExportRegion::givePrimaryVarInNode)
+      .def("giveInternalVarInNode", &oofem::ExportRegion::giveInternalVarInNode)
+      .def("giveCellVar", &oofem::ExportRegion::giveCellVar)
 
-      .def("getVertices", &oofem::VTKPiece::getVertices, py::return_value_policy::move)
-      .def("getCellConnectivity", &oofem::VTKPiece::getCellConnectivity, py::return_value_policy::move)
-      .def("getCellTypes", &oofem::VTKPiece::getCellTypes, py::return_value_policy::move)
-      .def("getPrimaryVertexValues", &oofem::VTKPiece::getPrimaryVertexValues, py::return_value_policy::move)
-      .def("getInternalVertexValues", &oofem::VTKPiece::getInternalVertexValues, py::return_value_policy::move)
-      .def("getCellValues", &oofem::VTKPiece::getCellValues, py::return_value_policy::move)
+      .def("getVertices", &oofem::ExportRegion::getVertices, py::return_value_policy::move)
+      .def("getCellConnectivity", &oofem::ExportRegion::getCellConnectivity, py::return_value_policy::move)
+      .def("getCellTypes", &oofem::ExportRegion::getCellTypes, py::return_value_policy::move)
+      .def("getPrimaryVertexValues", &oofem::ExportRegion::getPrimaryVertexValues, py::return_value_policy::move)
+      .def("getInternalVertexValues", &oofem::ExportRegion::getInternalVertexValues, py::return_value_policy::move)
+      .def("getCellValues", &oofem::ExportRegion::getCellValues, py::return_value_policy::move)
       ;
 
     py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
       ;
 
     py::class_<oofem::VTKXMLExportModule, oofem::VTKBaseExportModule>(m, "VTKXMLExportModule")
-      .def("getVTKPieces", &oofem::VTKXMLExportModule::getVTKPieces,  py::return_value_policy::reference)
+      .def("getExportRegions", &oofem::VTKXMLExportModule::getExportRegions,  py::return_value_policy::reference)
       ;
 
     py::class_<oofem::VTKMemoryExportModule, oofem::VTKBaseExportModule>(m, "VTKMemoryExportModule")
-      .def("getVTKPieces", &oofem::VTKMemoryExportModule::getVTKPieces,  py::return_value_policy::reference)
+      .def("getExportRegions", &oofem::VTKMemoryExportModule::getExportRegions,  py::return_value_policy::reference)
       ;
 
     py::class_<oofem::SparseMtrx>(m, "SparseMtrx")

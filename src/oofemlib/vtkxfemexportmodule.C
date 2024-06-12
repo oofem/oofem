@@ -114,7 +114,7 @@ VTKXMLXFemExportModule::giveOutputStream(TimeStep *tStep)
 }
 
 void
-VTKXMLXFemExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
+VTKXMLXFemExportModule::exportIntVars(ExportRegion &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray answer;
@@ -187,7 +187,7 @@ VTKXMLXFemExportModule::getNodalVariableFromXFEMST(FloatArray &answer, Node *nod
 
 
 bool
-VTKXMLXFemExportModule::writeXFEMVars(VTKPiece &vtkPiece, int field, int enrItIndex)
+VTKXMLXFemExportModule::writeXFEMVars(ExportRegion &vtkPiece, int field, int enrItIndex)
 {
     Domain *d = emodel->giveDomain(1);
     XfemManager *xFemMan = d->giveXfemManager();

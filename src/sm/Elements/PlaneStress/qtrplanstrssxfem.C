@@ -264,7 +264,7 @@ QTrPlaneStress2dXFEM :: computeField(ValueModeType mode, TimeStep *tStep, const 
 }
 
 void
-QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     vtkPieces.resize(1);
 

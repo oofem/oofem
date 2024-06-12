@@ -53,244 +53,6 @@
 
 namespace oofem {
 
-void
-VTKPiece::setNumberOfNodes(int numNodes)
-{
-    this->numNodes = numNodes;
-    this->nodeCoords.resize(numNodes);
-}
-
-void
-VTKPiece::setNumberOfCells(int numCells)
-{
-    this->numCells = numCells;
-    this->connectivity.resize(numCells);
-    this->elCellTypes.resize(numCells);
-    this->elOffsets.resize(numCells);
-}
-
-void
-VTKPiece::setConnectivity(int cellNum, IntArray &nodes)
-{
-    this->connectivity [ cellNum - 1 ] = nodes;
-}
-
-void
-VTKPiece::setNodeCoords(int nodeNum, const FloatArray &coords)
-{
-    this->nodeCoords [ nodeNum - 1 ] = coords;
-}
-
-void
-VTKPiece::setNumberOfPrimaryVarsToExport(const IntArray& primVars, int numNodes)
-{
-  for (int it=1; it<= primVars.giveSize(); it++) {
-    UnknownType type = (UnknownType) primVars.at(it);
-    this->nodeVars [type].resize(numNodes);
-  }
-}
-
-void
-VTKPiece::setNumberOfLoadsToExport(int numVars, int numNodes)
-{
-    this->nodeLoads.resize(numVars);
-    for ( int i = 1; i <= numVars; i++ ) {
-        this->nodeLoads [ i - 1 ].resize(numNodes);
-    }
-}
-
-void
-VTKPiece::setNumberOfInternalVarsToExport(const IntArray& ists, int numNodes)
-{
-    for ( int i = 1; i <= ists.giveSize(); i++ ) {
-      InternalStateType itype = (InternalStateType) ists.at(i);
-        this->nodeVarsFromIS [ itype ].resize(numNodes);
-    }
-}
-
-void
-VTKPiece::setNumberOfInternalXFEMVarsToExport(int numVars, int numEnrichmentItems, int numNodes)
-{
-    this->nodeVarsFromXFEMIS.resize(numVars);
-    for ( int i = 1; i <= numVars; i++ ) {
-        this->nodeVarsFromXFEMIS [ i - 1 ].resize(numEnrichmentItems);
-        for ( int j = 1; j <= numEnrichmentItems; j++ ) {
-            this->nodeVarsFromXFEMIS [ i - 1 ] [ j - 1 ].resize(numNodes);
-        }
-    }
-}
-
-void
-VTKPiece::setNumberOfCellVarsToExport(const IntArray& cellVars, int numCells)
-{
-     for ( int i = 1; i <= cellVars.giveSize(); i++ ) {
-       InternalStateType type = (InternalStateType) cellVars.at(i);
-        this->cellVars [ type ].resize(numCells);
-    }
-}
-
-void
-VTKPiece::setPrimaryVarInNode(UnknownType type, int nodeNum, FloatArray valueArray)
-{
-  this->nodeVars [ type ] [ nodeNum - 1 ] = std::move(valueArray);
-}
-
-void
-VTKPiece::setLoadInNode(int varNum, int nodeNum, FloatArray valueArray)
-{
-    this->nodeLoads [ varNum - 1 ] [ nodeNum - 1 ] = std::move(valueArray);
-}
-
-void
-VTKPiece::setInternalVarInNode(InternalStateType type, int nodeNum, FloatArray valueArray)
-{
-    this->nodeVarsFromIS [ type ] [ nodeNum - 1 ] = std::move(valueArray);
-}
-
-void
-VTKPiece::setInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum, FloatArray valueArray)
-{
-    this->nodeVarsFromXFEMIS [ varNum - 1 ] [ eiNum - 1 ] [ nodeNum - 1 ] = std::move(valueArray);
-}
-
-
-void
-VTKPiece::setCellVar(InternalStateType type, int cellNum, FloatArray valueArray)
-{
-    this->cellVars [ type ] [ cellNum - 1 ] = std::move(valueArray);
-}
-
-void
-VTKPiece::clear()
-{
-    ///@todo Will this give a memory leak? / JB
-    numCells = 0;
-    numNodes = 0;
-    this->connectivity.clear();
-    this->elCellTypes.clear();
-    this->elOffsets.clear();
-    this->cellVars.clear();
-    this->nodeCoords.clear();
-    this->nodeVars.clear();
-    this->nodeVarsFromIS.clear();
-    this->nodeVarsFromXFEMIS.clear();
-}
-
-#ifdef _PYBIND_BINDINGS
-
-py::array_t<double>
-VTKPiece::getVertices () {
-  double* result = new double[this->numNodes*3];
-  for (int i=0; i<this->numNodes; i++) {
-    FloatArray &c = this->giveNodeCoords(i+1);
-    for (int j=0; j<c.giveSize(); j++) {
-      result[i*3+j]=c[j];
-    }
-    for (int j=c.giveSize(); j<3; j++) {
-      result[i*3+j] = 0.0;
-    }
-  }
-  return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, 3}, &result[0]);
-}
-
-py::array_t<int>
-VTKPiece::getCellConnectivity () {
-  int reqSize = 0;
-  for (int i=0; i<this->numCells; i++) {
-    reqSize++;
-    reqSize+=this->giveCellConnectivity(i+1).giveSize();
-  }
-  int* result = new int[reqSize];
-  int pos=0;
-  for (int i=0; i<this->numCells; i++) {
-    IntArray &c = this->giveCellConnectivity(i+1);
-    int csize = c.giveSize();
-    result[pos++]=csize;
-    for (int i = 0; i<csize; i++) {
-      result[pos++]=c[i]-1;
-    }
-  }
-  return py::array_t<int>(reqSize, result);
-}
-
-py::array_t<int>
-VTKPiece::getCellTypes (VTKBaseExportModule& m) {
-  int* result = new int[this->numCells];
-  for (int i=0; i<this->numCells; i++) {
-    result[i]=m.giveCellType(this->regionElInd.at(i+1));
-  }
-  return py::array_t<int>(this->numCells, result);     
-}
-
-py::array_t<double>
-VTKPiece::getPrimaryVertexValues (UnknownType u) {
-
-  if (this->nodeVars.find(u) != this->nodeVars.end()) {
-    // key exists
-    std::vector<FloatArray>& nodalVars = this->nodeVars[u];
-    // get size of nodal record
-    int recSize = nodalVars[0].giveSize();    
-    double* result = new double[this->numNodes*recSize];
-    int counter = 0;
-    for (int i=0;i<this->numNodes; i++) {
-      FloatArray& v = nodalVars[i];
-      for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
-      }
-    }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, recSize}, result);
-    //return py::array_t<double>(this->numNodes*recSize, result);     
-  } else {
-    return py::array_t<double>(0);
-  }
-}
-
-py::array_t<double>
-VTKPiece::getInternalVertexValues(InternalStateType u) {
-  if (this->nodeVarsFromIS.find(u)!=this->nodeVarsFromIS.end()) {
-    // key exists
-    std::vector<FloatArray>& nodalVars = this->nodeVarsFromIS[u];
-    // get size of nodal record
-    int recSize = nodalVars[0].giveSize();
-    double* result = new double[this->numNodes*recSize];
-    int counter = 0;
-    for (int i=0;i<this->numNodes; i++) {
-      FloatArray& v = nodalVars[i];
-      for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
-      }
-    }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, recSize}, result);
-  } else {
-    return py::array_t<double>(0);   
-  }
-}
-  
-py::array_t<double>
-VTKPiece::getCellValues(InternalStateType u) {
-  if (this->cellVars.find(u)!=this->cellVars.end()) {
-    // key exists
-    std::vector<FloatArray>& cv = this->cellVars[u];
-    // get size of nodal record
-    int recSize = cv[0].giveSize();
-    double* result = new double[this->numCells*recSize];
-    int counter = 0;
-    for (int i=0;i<this->numCells; i++) {
-      FloatArray& v = cv[i];
-      for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
-      }
-    }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numCells, recSize}, result);
-  } else {
-    return py::array_t<double>(0);   
-  }
-}
-
-#endif
-
-
-// End of VTKPiece class implementation
 
 // Beginning of VTKBaseExportModule
 
@@ -493,7 +255,7 @@ VTKBaseExportModule::isElementComposite(Element *elem)
 }
 
 void
-VTKBaseExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set &region)
+VTKBaseExportModule::setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tStep, Set &region)
 {
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
@@ -609,7 +371,7 @@ VTKBaseExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set &reg
 // Primary variables - readily available in the nodes
 //----------------------------------------------------
 void
-VTKBaseExportModule::exportPrimaryVars(VTKPiece &vtkPiece, Set &region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
+VTKBaseExportModule::exportPrimaryVars(ExportRegion &vtkPiece, Set &region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
@@ -796,7 +558,7 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
 // Internal variables and XFEM realted fields (keyword "vars" in OOFEM input file)
 //----------------------------------------------------
 void
-VTKBaseExportModule::exportIntVars(VTKPiece &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
+VTKBaseExportModule::exportIntVars(ExportRegion &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     InternalStateType isType;
@@ -909,7 +671,7 @@ VTKBaseExportModule::getNodalVariableFromIS(FloatArray &answer, Node *node, Time
 //----------------------------------------------------
 
 void
-VTKBaseExportModule::exportCellVars(VTKPiece &vtkPiece, Set& region, IntArray& cellVarsToExport, TimeStep *tStep)
+VTKBaseExportModule::exportCellVars(ExportRegion &vtkPiece, Set& region, IntArray& cellVarsToExport, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
@@ -1015,7 +777,7 @@ VTKBaseExportModule::getCellVariableFromIS(FloatArray &answer, Element *el, Inte
 
 
 int
-VTKBaseExportModule::initRegionNodeNumbering(VTKPiece& piece, 
+VTKBaseExportModule::initRegionNodeNumbering(ExportRegion& piece, 
                                             Domain *domain, TimeStep *tStep, Set& region)
 {
     // regionG2LNodalNumbers is array with mapping from global numbering to local region numbering.
@@ -1115,7 +877,7 @@ VTKBaseExportModule::computeIPAverage(FloatArray &answer, IntegrationRule *iRule
 // Load vectors
 //----------------------------------------------------
 void
-VTKBaseExportModule::exportExternalForces(VTKPiece &vtkPiece, Set& region, IntArray& externalForcesToExport, TimeStep *tStep)
+VTKBaseExportModule::exportExternalForces(ExportRegion &vtkPiece, Set& region, IntArray& externalForcesToExport, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     //this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.

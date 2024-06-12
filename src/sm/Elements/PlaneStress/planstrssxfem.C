@@ -314,7 +314,7 @@ void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 }
 
 void
-PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+PlaneStress2dXfem :: giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     vtkPieces.resize(1);
 

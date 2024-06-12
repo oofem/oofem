@@ -9,7 +9,7 @@ OOFEM is parallel, object-oriented finite element code for solving mechanical, t
 OOFEM is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 
-Copyright (C) 1993 - 2021   Borek Patzak
+Copyright (C) 1993 - 2024   Borek Patzak
     
 ## Getting Started
 ### What is here
@@ -104,7 +104,7 @@ any option. To run a specific job, you can enter
 oofem -f input_file_name
 ```
 ## Documentation
-You may find OOFEM documentation [here](http://oofem.org/en/manual).
+You may find OOFEM documentation [here](https://www.oofem.org/doku.php?id=en:manual).
 
 
 

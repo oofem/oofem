@@ -74,7 +74,7 @@ VTKMemoryExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
   
   // loop over regular pieces only (no support for composite elements at present)
   for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
-    VTKPiece& p = this->vtkPieces[pieceNum-1];
+    ExportRegion& p = this->vtkPieces[pieceNum-1];
     p.clear();
     // Fills a data struct (VTKPiece) with all the necessary data.
     Set* region = this->giveRegionSet(pieceNum);
@@ -88,8 +88,8 @@ VTKMemoryExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
   }
 }
 
-std::vector< VTKPiece>& 
-VTKMemoryExportModule::getVTKPieces() {
+std::vector< ExportRegion>& 
+VTKMemoryExportModule::getExportRegions() {
   return this->vtkPieces;
 }
 

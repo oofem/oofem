@@ -74,13 +74,13 @@ public:
 
     const char *giveClassName() const override { return "VTKXMLPeriodicExportModule"; }
 
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
+    void setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tStep, Set& region) override;
 
-    int initRegionNodeNumbering(VTKPiece& piece,
+    int initRegionNodeNumbering(ExportRegion& piece,
                                 Domain *domain, TimeStep *tStep, Set& region) override;
 
-    void exportPrimaryVars(VTKPiece &vtkPiece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
-    void exportIntVars(VTKPiece &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
+    void exportPrimaryVars(ExportRegion &vtkPiece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
+    void exportIntVars(ExportRegion &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // vtkxmlperiodicexportmodule_h

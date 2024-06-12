@@ -73,7 +73,7 @@ QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord &ir)
 
 
 void
-QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set & region)
+QuasicontinuumVTKXMLExportModule :: setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tStep, Set & region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -169,7 +169,7 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
 
 
 int
-QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(VTKPiece& piece,
+QuasicontinuumVTKXMLExportModule :: initRegionNodeNumbering(ExportRegion& piece,
                                                             Domain *domain, TimeStep *tStep, Set& region)
 {
     // regionG2LNodalNumbers is array with mapping from global numbering to local region numbering.

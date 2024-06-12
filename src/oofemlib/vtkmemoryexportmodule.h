@@ -89,7 +89,7 @@ protected:
     IntArray ipInternalVarsToExport;
 
 
-  std::vector< VTKPiece > vtkPieces;
+  std::vector< ExportRegion > vtkPieces;
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     VTKMemoryExportModule(int n, EngngModel *e);
@@ -97,7 +97,7 @@ public:
     virtual ~VTKMemoryExportModule();
     void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
-    std::vector< VTKPiece>& getVTKPieces(); 
+    std::vector< ExportRegion>& getExportRegions(); 
 };
 
 } // end namespace oofem

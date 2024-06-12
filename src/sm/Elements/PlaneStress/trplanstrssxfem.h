@@ -106,7 +106,7 @@ public:
     void giveElementDofIDMask(IntArray &answer) const override;
 
     /// VTK Interface
-    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) override;
+    void giveCompositeExportData(std::vector< ExportRegion > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) override;
 
 };
 } /* namespace oofem */
