@@ -2,6 +2,7 @@ testMooneyRivlin2.out
 test of Mooney-Rivlin material with C_1 = 10, C_2 = 10, and K = 0. See ogden2.in for the same case modeled by compressible Ogden material with alpha_1 = 2, alpha_2 = -2, mu_1 = 20, and mu_2 = -20.
 ###########################################
 NonLinearStatic nsteps 1 renumber 1 nmodules 1 controllmode 1 rtolv 1.e-11 stiffMode 0 manrmsteps 1 maxiter 10
+#StaticStructural nsteps 1 renumber 1 nmodules 1 rtolv 1.e-11 stiffMode 0 manrmsteps 1 maxiter 10
 errorcheck
 ###########################################
 Domain 3d

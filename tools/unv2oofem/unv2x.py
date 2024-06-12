@@ -70,7 +70,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Tria1PlateSubSoil",oofem_elemProp[-1]))
-        oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [0,2,4,1,3,5], [[0,1,2],[2,3,4],[4,5,0]],[]))
         oofem_elemProp.append(oofem_elementProperties("QTrPlStrSlip", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))
         oofem_elemProp.append(oofem_elementProperties("Tria2PlateSubSoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked

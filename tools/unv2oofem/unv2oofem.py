@@ -234,7 +234,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             words=s.split()
             #if len(words)==0:#skip empty lines
                 #continue
-            if (words[0].lower()=='set'):
+            if (words[0].lower()=='set' and words[2].lower()!='quote'):
                 setID=int(words[1])
 
                 if (words[2].lower()=='nodes'):
@@ -264,10 +264,13 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                             setElements.extend([thisSet[1], thisSet[2]])
 
                 of.write('%s %s %s %u ' % ( words[0], words[1], words[2], len(setElements)) )
+                
                 for setElement in setElements:
                     of.write('%u ' % setElement)
                 of.write('\n')
 
+            elif (words[0].lower()=='set' and words[2].lower()=='quote'):
+                of.write('%s %s %s\n' % ( words[0], words[1], ' '.join(words[3:])))
             else:
                 of.write('%s\n' % s)
 

@@ -497,7 +497,15 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
         lz.normalize();
     } else if ( this->zaxis.giveSize() > 0 ) {
         lz = this->zaxis;
+        lz.normalize();
         lz.add(lz.dotProduct(lx), lx);
+        lz.normalize();
+    } else if ( this->yaxis.giveSize() > 0 ) {
+        ly = this->yaxis;
+        ly.normalize();
+        ly.add(ly.dotProduct(lx), lx);
+        ly.normalize();
+        lz.beVectorProductOf(ly, lx);
         lz.normalize();
     } else {
         FloatMatrix rot(3, 3);
@@ -550,8 +558,12 @@ Beam3d :: initializeFrom(InputRecord &ir)
 
     referenceNode = 0;
     referenceAngle = 0;
+    this->yaxis.clear();
     this->zaxis.clear();
-    if ( ir.hasField(_IFT_Beam3d_zaxis) ) {
+    
+    if ( ir.hasField(_IFT_Beam3d_yaxis) ) {
+        IR_GIVE_FIELD(ir, this->yaxis, _IFT_Beam3d_yaxis);
+    } else if ( ir.hasField(_IFT_Beam3d_zaxis) ) {
         IR_GIVE_FIELD(ir, this->zaxis, _IFT_Beam3d_zaxis);
     } else if ( ir.hasField(_IFT_Beam3d_refnode) ) {
         IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
