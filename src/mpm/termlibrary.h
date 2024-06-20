@@ -84,8 +84,9 @@ class BTSigTerm : public Term {
  */
 class gNTfTerm : public Term {
     protected:
+    CharType lhsType, rhsType;
     public:
-    gNTfTerm (const Variable &testField, const Variable& unknownField) ;
+    gNTfTerm (const Variable &testField, const Variable& unknownField, CharType lhsType, CharType rhsType) ;
 
     /**
      * @brief Evaluates $\bf{H}$ matrix, the linearization of $w^T(\grad N)^T f(p)$, i.e. $(\grad N)^T \bf{k}/\mu \grad p = \bf{H}$
@@ -205,8 +206,9 @@ class NTamTBTerm : public Term {
  */
 class NTcN : public Term {
     protected:
+        CharType ctype;
     public:
-    NTcN (const Variable &testField, const Variable& unknownField) ;
+    NTcN (const Variable &testField, const Variable& unknownField, CharType ctype) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)

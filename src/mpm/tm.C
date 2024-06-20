@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2024   Borek Patzak
  *
  *
  *
@@ -34,6 +34,7 @@
 
 
 #include "mpm.h"
+#include "termlibrary3.h"
 #include "termlibrary.h"
 #include "element.h"
 #include "gausspoint.h"
@@ -58,13 +59,19 @@ namespace oofem {
 
 
 /**
- * @brief Base class for (3D) UP elements
+ * @brief Base class for fully coupled, nonlinear thermo mechanical elements
  * 
  */
-class UPElement : public MPElement {
+class TMElement : public MPElement {
         
+    private:
+        virtual int  giveNumberOfUDofs() const = 0;
+        virtual int  giveNumberOfTDofs() const = 0;
+        virtual const Variable& getU() const = 0;
+        virtual const Variable& getT() const = 0;
+
     public:
-    UPElement(int n, Domain* d): 
+    TMElement(int n, Domain* d): 
         MPElement(n,d) { }
 
     // Note: performance can be probably improved once it will be possible 
@@ -77,25 +84,24 @@ class UPElement : public MPElement {
             int udofs = this->giveNumberOfUDofs();
             answer.resize(udofs,udofs);
             answer.zero();
-            this->integrateTerm_dw (answer, BTSigTerm(getU(),getU()), ir, tStep) ;
-        } else if (type == MomentumBalance_PressureCouplingMatrix) {
-            answer.resize(this->giveNumberOfUDofs(),this->giveNumberOfPDofs());
+            this->integrateTerm_dw (answer, TMBTSigTerm (getU(),getU(), getT()), ir, tStep) ;
+        } else if (type == MomentumBalance_ThermalCouplingMatrix) {
+            int udofs = this->giveNumberOfUDofs();
+            int tdofs = this->giveNumberOfTDofs(); 
+            answer.resize(udofs,tdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, BTamNTerm(getU(),getP()), ir, tStep) ;
-        } else if (type == MassBalance_PermeabilityMatrix) {
-            int pdofs = this->giveNumberOfPDofs();
-            answer.resize(pdofs,pdofs);
+            this->integrateTerm_dw (answer, BDalphaPiTerm (getU(),getT(), VM_TotalIntrinsic), ir, tStep) ;
+            this->integrateTerm_dw (answer, BTdSigmadT(getU(),getT()), ir, tStep) ;
+        } else if (type == EnergyBalance_ConductivityMatrix) {
+            int tdofs = this->giveNumberOfTDofs();
+            answer.resize(tdofs,tdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, gNTfTerm(getP(), getP(), PermeabilityMatrix, FluidMassBalancePressureContribution), ir, tStep) ;
-        } else if (type == MassBalance_CompresibilityMatrix) {
-            int pdofs = this->giveNumberOfPDofs();
-            answer.resize(pdofs,pdofs);
+            this->integrateTerm_dw (answer, TMgNTfTerm(getT(),getT(), ConductivityMatrix, InternalFluxVector), ir, tStep) ;
+        } else if (type == EnergyBalance_CapacityMatrix) {
+            int tdofs = this->giveNumberOfTDofs();
+            answer.resize(tdofs,tdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, NTcN(getP(), getP(), CompressibilityCoefficient), ir, tStep) ;
-        } else if (type == MassBalance_StressCouplingMatrix) {
-            answer.resize(this->giveNumberOfPDofs(),this->giveNumberOfUDofs());
-            answer.zero();
-            this->integrateTerm_dw (answer, NTamTBTerm(getP(), getU()), ir, tStep) ;
+            this->integrateTerm_dw (answer, NTcN(getT(), getT(), CapacityMatrix), ir, tStep) ;
         } else {
 	        OOFEM_ERROR("Unknown characteristic matrix type");
 	    }
@@ -106,23 +112,12 @@ class UPElement : public MPElement {
         if (type == MomentumBalance_StressResidual) {
             answer.resize(this->giveNumberOfUDofs());
             answer.zero();
-            this->integrateTerm_c (answer, BTSigTerm(getU(),getU()), ir, tStep) ;
-        } else if (type == MomentumBalance_PressureResidual) {
-            answer.resize(this->giveNumberOfUDofs());
+            this->integrateTerm_c (answer, TMBTSigTerm(getU(),getU(),getT()), ir, tStep) ;
+        } else if (type == EnergyBalance_Residual) {
+            answer.resize(this->giveNumberOfTDofs());
             answer.zero();
-            this->integrateTerm_c(answer, BTamNTerm(getU(),getP()), ir, tStep) ;
-        } else if (type == MassBalance_StressRateResidual) {
-            answer.resize(this->giveNumberOfPDofs());
-            answer.zero();
-            this->integrateTerm_c (answer, NTamTBTerm(getP(), getU()), ir, tStep) ;
-        } else if (type == MassBalance_PressureResidual) {
-            answer.resize(this->giveNumberOfPDofs());
-            answer.zero();
-            this->integrateTerm_c (answer, gNTfTerm(getP(), getP(), PermeabilityMatrix, FluidMassBalancePressureContribution), ir, tStep) ;
-        } else if (type == MassBalance_PressureRateResidual) {
-            answer.resize(this->giveNumberOfPDofs());
-            answer.zero();
-            this->integrateTerm_c (answer, NTcN(getP(), getP(), CompressibilityCoefficient), ir, tStep) ;   
+            this->integrateTerm_c(answer, TMgNTfTerm(getT(),getT(), ConductivityMatrix, InternalFluxVector), ir, tStep) ;
+            this->integrateTerm_c (answer, NTcN(getT(), getT(), CapacityMatrix), ir, tStep) ;
         } else if (type == ExternalForcesVector) {
           answer.zero();
         } else {
@@ -137,10 +132,10 @@ class UPElement : public MPElement {
             return;
         }
 
-        IntArray locu, locp;
+        IntArray locu, loct;
         FloatArray contrib, contrib2;
         getSurfaceLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getSurfaceLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
+        getSurfaceLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
@@ -152,10 +147,10 @@ class UPElement : public MPElement {
         answer.assemble(contrib, locu);
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
-        answer.assemble(contrib2, locp);
+        this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
+        answer.assemble(contrib2, loct);
     }
 
     void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override {
@@ -165,10 +160,10 @@ class UPElement : public MPElement {
             return;
         }
 
-        IntArray locu, locp;
+        IntArray locu, loct;
         FloatArray contrib, contrib2;
         getEdgeLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getEdgeLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
+        getEdgeLocalCodeNumbers (loct, Variable::VariableQuantity::Pressure) ;
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
@@ -180,10 +175,10 @@ class UPElement : public MPElement {
         answer.assemble(contrib, locu);
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
-        answer.assemble(contrib2, locp);
+        this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
+        answer.assemble(contrib2, loct);
     }
 
 
@@ -228,118 +223,27 @@ class UPElement : public MPElement {
     }
   //virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const = 0; 
     //virtual void giveDofManDofIDMask(int inode, IntArray &answer) const =0;
-    private:
-        virtual int  giveNumberOfUDofs() const = 0;
-        virtual int  giveNumberOfPDofs() const = 0;
-        virtual const Variable& getU() const = 0;
-        virtual const Variable& getP() const = 0;
+
 };
 
+
+
 /**
- * @brief 3D Tetrahedra element with quadratic interpolation for displacements, linear interpolation for pressure
+ * @brief 3D Equal order linear Brick TS Element
  * 
  */
-class UPTetra21 : public UPElement {
+class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
+        const static FEInterpolation & tInterpol;
         const static FEInterpolation & uInterpol;
-        const static Variable& p;
-        const static Variable& u;
-
-      
-    public:
-    UPTetra21(int n, Domain* d): 
-        UPElement(n,d) 
-    {
-        numberOfDofMans  = 10;
-        numberOfGaussPoints = 4;
-        this->computeGaussPoints();
-    }
-
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (q == Variable::VariableQuantity::Displacement) {
-          //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,33,34 };
-          int o = (num-1)*4+1-(num>4)*(num-5);
-          answer = {o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Pressure) {
-          if (num<=4) {
-            //answer = {4, 8, 12, 16};
-            answer={num*4};
-          } else {
-            answer={};
-          }
-        }
-    }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        answer={};
-    }
-
-    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
-        if (inode >0 && inode <5) {
-            answer = {1,2,3,11};
-        } else {
-            answer= {1,2,3};
-        }
-    }
-    int giveNumberOfDofs() override { return 34; }
-    const char *giveInputRecordName() const override {return "uptetra21";}
-    const FEInterpolation& getGeometryInterpolation() const override {return this->uInterpol;}
-  
-    Element_Geometry_Type giveGeometryType() const override {
-        return EGT_tetra_2;
-    }
-    int getNumberOfSurfaceDOFs() const override {return 21;}
-    int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        if (q == Variable::VariableQuantity::Displacement) {
-        answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 16,17,18, 19,20,21};
-        } else {
-        answer ={4, 8, 12};
-        }
-    }
-  void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
-
-    private:
-        virtual int  giveNumberOfUDofs() const override {return 30;} 
-        virtual int  giveNumberOfPDofs() const override {return 4;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
-        void computeGaussPoints() override {
-            if ( integrationRulesArray.size() == 0 ) {
-                integrationRulesArray.resize( 1 );
-                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
-                integrationRulesArray [ 0 ]->SetUpPointsOnTetrahedra(numberOfGaussPoints, _3dUP);
-            }
-        }
-};
-
-const FEInterpolation & UPTetra21::uInterpol = FEI3dTetQuad();
-const FEInterpolation & UPTetra21::pInterpol = FEI3dTetLin();
-const Variable& UPTetra21::p = Variable(UPTetra21::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPTetra21::u = Variable(UPTetra21::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
-
-#define _IFT_UPTetra21_Name "uptetra21"
-REGISTER_Element(UPTetra21)
-
-/**
- * @brief 3D Equal order linear Brick UP Element
- * 
- */
-class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
-    protected:
-        //FEI3dTetLin pInterpol;
-        //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& p;
+        const static Variable& t;
         const static Variable& u;
       
     public:
-    UPBrick11(int n, Domain* d): 
-        UPElement(n,d), ZZNodalRecoveryModelInterface(this)
+    TMBrick11(int n, Domain* d): 
+        TMElement(n,d), ZZNodalRecoveryModelInterface(this)
     {
         numberOfDofMans  = 8;
         numberOfGaussPoints = 8;
@@ -352,7 +256,7 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 21,22,23, 25,26,27, 29,30,31 };
           int o = (num-1)*4+1;
           answer={o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Pressure) {
+        } else if (q == Variable::VariableQuantity::Temperature) {
           //answer = {4, 8, 12, 16, 20, 24, 28, 32};
           answer={num*4};
         }
@@ -362,14 +266,14 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
     }
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
-            answer = {1,2,3,11};
+            answer = {1,2,3,10};
     }
     int giveNumberOfDofs() override { return 32; }
-    const char *giveInputRecordName() const override {return "upbrick11";}
-    const char *giveClassName() const override { return "UPBrick11"; }
+    const char *giveInputRecordName() const override {return "tmbrick11";}
+    const char *giveClassName() const override { return "TMBrick11"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->pInterpol;}
+    const FEInterpolation& getGeometryInterpolation() const override {return this->tInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_hexa_1;
@@ -396,122 +300,35 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
 
 private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
-        virtual int  giveNumberOfPDofs() const override {return 8;}
+        virtual int  giveNumberOfTDofs() const override {return 8;}
         virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
+        virtual const Variable& getT() const override {return t;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
                 integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
-                integrationRulesArray [ 0 ]->SetUpPointsOnCube(numberOfGaussPoints, _3dUP);
+                integrationRulesArray [ 0 ]->SetUpPointsOnCube(numberOfGaussPoints, _3dMat);
             }
         }
 };
 
-const FEInterpolation & UPBrick11::uInterpol = FEI3dHexaLin();
-const FEInterpolation & UPBrick11::pInterpol = FEI3dHexaLin();
-const Variable& UPBrick11::p = Variable(UPBrick11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPBrick11::u = Variable(UPBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const FEInterpolation & TMBrick11::uInterpol = FEI3dHexaLin();
+const FEInterpolation & TMBrick11::tInterpol = FEI3dHexaLin();
+const Variable& TMBrick11::t = Variable(TMBrick11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable& TMBrick11::u = Variable(TMBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
-#define _IFT_UPBrick11_Name "upbrick11"
-REGISTER_Element(UPBrick11)
-
-/**
- * @brief 2D Equal order linear Quad UP Element
- * 
- */
-class UPQuad11 : public UPElement {
-    protected:
-        //FEI3dTetLin pInterpol;
-        //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& p;
-        const static Variable& u;
-       
-    public:
-    UPQuad11(int n, Domain* d): 
-        UPElement(n,d)
-    {
-        numberOfDofMans  = 4;
-        numberOfGaussPoints = 4;
-        this->computeGaussPoints();
-    }
-
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4 p4*/
-        if (q == Variable::VariableQuantity::Displacement) {
-          //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15 };
-          int o = (num-1)*3+1;
-          answer={o, o+1};
-        } else if (q == Variable::VariableQuantity::Pressure) {
-          //answer = {4, 8, 12, 16};
-          answer={num*3};
-        }
-    }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        answer={};
-    }
-
-    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
-            answer = {1,2,11};
-    }
-    int giveNumberOfDofs() override { return 12; }
-    const char *giveInputRecordName() const override {return "upquad11";}
-    
-    const FEInterpolation& getGeometryInterpolation() const override {return this->pInterpol;}
-  
-    Element_Geometry_Type giveGeometryType() const override {
-        return EGT_quad_1;
-    }
-    int getNumberOfSurfaceDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        answer={};
-    }
-
-    int getNumberOfEdgeDOFs() const override  {return 6;}
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override  {
-        if (q == Variable::VariableQuantity::Displacement) {
-            answer={1,2, 4,5};
-        } else {
-            answer ={3, 6};
-        }
-    }
-  
+#define _IFT_TMBrick11_Name "tmbrick11"
+REGISTER_Element(TMBrick11)
 
 
-private:
-        virtual int  giveNumberOfUDofs() const override {return 8;} 
-        virtual int  giveNumberOfPDofs() const override {return 4;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
-        void computeGaussPoints() override {
-            if ( integrationRulesArray.size() == 0 ) {
-                integrationRulesArray.resize( 1 );
-                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
-                integrationRulesArray [ 0 ]->SetUpPointsOnSquare(numberOfGaussPoints, _2dUP);
-            }
-        }
-};
+#define _IFT_TMSimpleMaterial_Name "tmm"
+#define _IFT_TMSimpleMaterial_E "e"
+#define _IFT_TMSimpleMaterial_nu "nu"
+#define _IFT_TMSimpleMaterial_lambda "lambda"
+#define _IFT_TMSimpleMaterial_alpha "alpha"
+#define _IFT_TMSimpleMaterial_c "c"
 
-const FEInterpolation & UPQuad11::uInterpol = FEI2dQuadLin(1,2);
-const FEInterpolation & UPQuad11::pInterpol = FEI2dQuadLin(1,2);
-const Variable& UPQuad11::p = Variable(UPQuad11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPQuad11::u = Variable(UPQuad11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
-
-#define _IFT_UPQuad11_Name "upquad11"
-REGISTER_Element(UPQuad11)
-
-
-
-#define _IFT_UPSimpleMaterial_Name "upm"
-#define _IFT_UPSimpleMaterial_E "e"
-#define _IFT_UPSimpleMaterial_nu "nu"
-#define _IFT_UPSimpleMaterial_k "k"
-#define _IFT_UPSimpleMaterial_alpha "alpha"
-#define _IFT_UPSimpleMaterial_c "c"
-
-class UPMaterialStatus : public MaterialStatus
+class TMMaterialStatus : public MaterialStatus
 {
 protected:
     /// Equilibrated strain vector in reduced form
@@ -522,9 +339,13 @@ protected:
     FloatArray tempStressVector;
     /// Temporary strain vector in reduced form (to find balanced state)
     FloatArray tempStrainVector;
+    /// Temporary flux 
+    FloatArray tempFluxVector;
+    /// Equilibrated flux
+    FloatArray fluxVector;
 public:
     /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
-    UPMaterialStatus (GaussPoint * g) : MaterialStatus(g), strainVector(), stressVector(),
+    TMMaterialStatus (GaussPoint * g) : MaterialStatus(g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector() 
     {}
 
@@ -536,10 +357,16 @@ public:
     const FloatArray &giveTempStrainVector() const { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
     const FloatArray &giveTempStressVector() const { return tempStressVector; }
+    /// Returns the const pointer to receiver's temporary flux vector.
+    const FloatArray &giveTempFluxVector() const { return tempFluxVector; }
+    /// Returns the const pointer to receiver's flux vector.
+    const FloatArray &giveFluxVector() const { return fluxVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
     /// Assigns tempStrainVector to given vector v
     void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+    /// Assigns tempFluxVector to given vector v
+    void letTempFluxVectorBe(const FloatArray &v) { tempFluxVector = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override {
         MaterialStatus :: printOutputAt(file, tStep);
@@ -552,6 +379,11 @@ public:
         for ( auto &var : stressVector ) {
             fprintf( file, " %+.4e", var );
         }
+
+        fprintf(file, "\n              fluxes");
+        for ( auto &var : fluxVector ) {
+            fprintf( file, " %+.4e", var );
+        }
         fprintf(file, "\n");
     }
 
@@ -559,25 +391,26 @@ public:
         MaterialStatus :: initTempStatus();
         tempStressVector = stressVector;
         tempStrainVector = strainVector;
+        tempFluxVector = fluxVector;
     }
     void updateYourself(TimeStep *tStep) override {
         MaterialStatus :: updateYourself(tStep);
         stressVector = tempStressVector;
         strainVector = tempStrainVector;
+        fluxVector = tempFluxVector;
     }
-    const char *giveClassName() const override {return "UPMaterialStatus";}
+    const char *giveClassName() const override {return "TMMaterialStatus";}
 
 };
 
-class UPSimpleMaterial : public Material {
+class TMSimpleMaterial : public Material {
     protected:
         double e, nu; // elastic isotropic constants
-        double k; // isotropic permeability
-        double alpha; // Biot constant = 1-K_t/K_s (Kt bulk moduli of the porous medium, Ks bulk moduli of solid phase)
-        double c; // 1/Q, where Q is combined compressibility of the fluid and solid phases (1/Q=n/Kt+(b-n)/Ks, where n is porosity)
-        double muw; // dynamic viscosity of water
+        double lambda; // isotropic conductivity
+        double alpha; // thermal expansion coefficient
+        double c; // thermal capacity
     public:
-  UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; alpha=1.0; c=0.1; muw = 1.0;}
+  TMSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; lambda=1.0; alpha=1.0; c=0.1;}
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
         MaterialMode mmode = gp->giveMaterialMode();
@@ -603,34 +436,51 @@ class UPSimpleMaterial : public Material {
             answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
             answer.times(ee);
-        } else if (type == PermeabilityMatrix) {
-            if (mmode == _3dUP) {
+        } else if (type == EnergyBalance_DSigmaDTMatrix) {
+            answer.resize(6,1);
+            answer.zero();
+        } else if (type == ConductivityMatrix) {
+            if (mmode == _3dMat) {
                 answer.resize(3,3);
                 answer.beUnitMatrix();
-                answer.times(this->k/this->muw);
-            } else if (mmode == _2dUP) {
-                answer.resize(2,2);
-                answer.beUnitMatrix();
-                answer.times(this->k);
+                answer.times(this->lambda);
             }
+        } else {
+            OOFEM_ERROR("Unknown characteristic matrix type");
         }
     }
-
+    /**
+     * @param flux Generalized strain vector, flux.at(1-6) containing total strain vector, flux(7-9) temperature gradient, flux(10) temperature
+     */
     void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {
+        TMMaterialStatus *status = static_cast< TMMaterialStatus * >( this->giveStatus(gp) );
         if (type == InternalForcesVector) {
             FloatMatrix d;
-            UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
-
+            FloatArray eps(6);
+            for (int i=0; i<6; i++) {
+                eps(i) = flux(i);
+            }
+            double t = flux(9);
+            eps(0)-= t*alpha;
+            eps(1)-= t*alpha;
+            eps(2)-= t*alpha;
+ 
             this->giveCharacteristicMatrix(d, StiffnessMatrix, gp, tStep);
-            answer.beProductOf(d, flux);
+
+            answer.beProductOf(d, eps);
             // update gp status
             status->letTempStrainVectorBe(flux);
             status->letTempStressVectorBe(answer);
 
-        }else if (type == FluidMassBalancePressureContribution) {
+        } else if (type == InternalFluxVector) {
             FloatMatrix k;
-            this->giveCharacteristicMatrix(k, PermeabilityMatrix, gp, tStep);
-            answer.beProductOf(k, flux);
+            FloatArray grad(3);
+            this->giveCharacteristicMatrix(k, ConductivityMatrix, gp, tStep);
+            grad(0) = flux(6);
+            grad(1) = flux(7);
+            grad(2) = flux(8);
+            answer.beProductOf(k, grad);
+            status->letTempFluxVectorBe(answer);
         }
     }
 
@@ -638,7 +488,7 @@ class UPSimpleMaterial : public Material {
     double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
         if (type == BiotConstant) {
             return alpha;
-        } else if (type == CompressibilityCoefficient) {
+        } else if (type == CapacityMatrix) {
             return c;
         } else {
             return 0.0;
@@ -648,21 +498,21 @@ class UPSimpleMaterial : public Material {
     void initializeFrom(InputRecord &ir) override {
         Material :: initializeFrom(ir);
 
-        IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_UPSimpleMaterial_E);
-        IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_UPSimpleMaterial_nu);
-        IR_GIVE_OPTIONAL_FIELD(ir, k, _IFT_UPSimpleMaterial_k);
-        IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_UPSimpleMaterial_alpha);
-        IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_UPSimpleMaterial_c);
+        IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_TMSimpleMaterial_E);
+        IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_TMSimpleMaterial_nu);
+        IR_GIVE_OPTIONAL_FIELD(ir, lambda, _IFT_TMSimpleMaterial_lambda);
+        IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_TMSimpleMaterial_alpha);
+        IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_TMSimpleMaterial_c);
 
     };
     //   void giveInputRecord(DynamicInputRecord &input) override {};
     void giveInputRecord(DynamicInputRecord &input) override {};
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new UPMaterialStatus(gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TMMaterialStatus(gp); }
 
-    const char *giveClassName() const override {return "UPSimpleMaterial";}
-    const char *giveInputRecordName() const override {return _IFT_UPSimpleMaterial_Name;}
+    const char *giveClassName() const override {return "TMSimpleMaterial";}
+    const char *giveInputRecordName() const override {return _IFT_TMSimpleMaterial_Name;}
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override {
-        UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
+        TMMaterialStatus *status = static_cast< TMMaterialStatus * >( this->giveStatus(gp) );
         if ( type == IST_StrainTensor ) {
             answer = status->giveStrainVector(); 
             return 1;
@@ -676,6 +526,6 @@ class UPSimpleMaterial : public Material {
     }
 
 };
-REGISTER_Material(UPSimpleMaterial)
+REGISTER_Material(TMSimpleMaterial)
 
 } // end namespace oofem

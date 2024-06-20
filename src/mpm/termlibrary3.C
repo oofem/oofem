@@ -1,0 +1,157 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2024   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include "mpm.h"
+#include "termlibrary3.h"
+#include "termlibrary2.h"
+#include "element.h"
+#include "material.h"
+#include "crosssection.h"
+
+namespace oofem {
+
+
+
+
+
+TMBTSigTerm::TMBTSigTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) : BTSigTerm(testField, unknownField), temperatureField(temperatureField) {}
+
+void TMBTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
+    FloatArray u, eps, sig, gradT;
+    FloatMatrix B, dndx ;
+    cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
+    this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    eps.beProductOf(B, u);
+
+    FloatArray rt, Nt;
+    cell.getUnknownVector(rt, temperatureField, VM_TotalIntrinsic, tstep);
+    // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
+    this->temperatureField.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));
+    // evaluate temperature gradient at given point
+    gradT.beTProductOf(dndx, rt);
+    // evaluate temperature at given point
+    this->temperatureField.interpolation.evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));
+    double t = Nt.dotProduct(rt);
+    eps.append(gradT); // construct generalized strain vector
+    eps.append(t); // add temperature
+
+    
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
+    answer.beTProductOf(B, sig);
+}
+
+TMgNTfTerm::TMgNTfTerm (const Variable &testField, const Variable& unknownField, CharType lhsType, CharType rhsType) : gNTfTerm(testField, unknownField, lhsType, rhsType) {}
+void TMgNTfTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const {
+    FloatArray sv(10), Nt, p, gradp, fp;
+    FloatMatrix B;
+    cell.getUnknownVector(p, this->field, VM_TotalIntrinsic, tstep);
+    this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
+    this->field.interpolation.evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));
+    double t = Nt.dotProduct(p);
+    gradp.beProductOf(B, p);
+    sv(6) = gradp(0);
+    sv(7) = gradp(1);
+    sv(8) = gradp(2);
+    sv(9) = t;
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, sv, rhsType, gp, tstep); // update
+    answer.beTProductOf(B, fp);
+}
+
+
+
+BDalphaPiTerm::BDalphaPiTerm (const Variable &testField, const Variable& unknownField, ValueModeType m) : Term(testField, unknownField), m(m) {}
+
+
+void BDalphaPiTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
+    FloatMatrix D, alphaPi, B, DaPI, BDaPI;
+    FloatArray Nt;
+    // alphaPi term
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, ConductivityMatrix, gp, tstep);  // 3x3 in 3D
+    // expand it 
+    alphaPi.resize(6,1);
+    alphaPi.zero();
+    alphaPi(0,0) = -D(0,0);
+    alphaPi(1,0) = -D(1,1);
+    alphaPi(2,0) = -D(2,2);
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);  // 3x3 in 3D
+    evalB(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    this->field.interpolation.evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+
+    DaPI.beProductOf(D, alphaPi);
+    BDaPI.beTProductOf(B,DaPI);
+    FloatMatrix Ntm(Nt, true);
+    answer.beProductOf(BDaPI,Ntm);
+
+}
+
+void BDalphaPiTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
+    // this is a partial linearization of BtSigma term with respect to temperature
+    // thus the residual (rhs) contribution should come from BtSigma term
+    answer.resize(this->testField.interpolation.giveNumberOfNodes(cell.giveGeometryType())*this->testField.size);
+    answer.zero();
+}
+
+void BDalphaPiTerm::getDimensions(Element& cell) const  {}
+void BDalphaPiTerm::initializeCell(Element& cell) const  {}
+
+
+BTdSigmadT::BTdSigmadT (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+
+
+void BTdSigmadT::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
+    FloatMatrix D, B, DB;
+    FloatArray Nt;
+    // aplhaPi term
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, EnergyBalance_DSigmaDTMatrix, gp, tstep);
+    this->field.interpolation.evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    evalB(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    FloatMatrix Ntm(Nt, true);
+    DB.beProductOf(D, Ntm);
+    //answer.plusProductSymmUpper(B, DB, 1.0);
+    answer.beTProductOf(B,DB);
+}
+
+void BTdSigmadT::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
+    // this is a partial linearization of BtSigma term with respect to temperature
+    // thus the residual (rhs) contribution should come from BtSigma term
+    answer.resize(this->testField.interpolation.giveNumberOfNodes(cell.giveGeometryType())*this->testField.size);
+    answer.zero();
+}
+
+void BTdSigmadT::getDimensions(Element& cell) const  {}
+void BTdSigmadT::initializeCell(Element& cell) const  {}
+
+
+
+} // end namespace oofem

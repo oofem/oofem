@@ -76,7 +76,7 @@ void BTSigTerm::grad(FloatMatrix& answer, const Variable &v, const FEInterpolati
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
 
-    if ((mmode == _3dUP) || (mmode == _3dUPV)) {
+    if ((mmode == _3dMat)|| (mmode == _3dUP) || (mmode == _3dUPV)) {
         // 3D mode only now
         answer.resize(6, nnodes*ndofs);
         for (int i = 0; i< nnodes; i++) {
@@ -108,12 +108,12 @@ void BTSigTerm::grad(FloatMatrix& answer, const Variable &v, const FEInterpolati
 //wTgNTfTerm class (H)
 
 
-gNTfTerm::gNTfTerm (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+gNTfTerm::gNTfTerm (const Variable &testField, const Variable& unknownField, CharType lhst, CharType rtype) : Term(testField, unknownField), lhsType(lhst), rhsType(rtype) {}
 
 
 void gNTfTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
     FloatMatrix D, B, DB;
-    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, PermeabilityMatrix, gp, tstep); // update
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, lhsType, gp, tstep); // update
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     DB.beProductOf(D, B);
     answer.beTProductOf(B, DB);
@@ -125,7 +125,7 @@ void gNTfTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, Ti
     cell.getUnknownVector(p, this->field, VM_TotalIntrinsic, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates());
     gradp.beProductOf(B, p);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, gradp, FluidMassBalancePressureContribution, gp, tstep); // update
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, gradp, rhsType, gp, tstep); // update
     answer.beTProductOf(B, fp);
 }
 
@@ -277,13 +277,13 @@ void NTamTBTerm::grad(FloatMatrix& answer, const Variable &v, const FEInterpolat
 
 // NTcN Term (S(dp/dt))
 
-NTcN::NTcN (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+NTcN::NTcN (const Variable &testField, const Variable& unknownField, CharType ctype) : Term(testField, unknownField), ctype(ctype) {}
 
 void NTcN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
     FloatArray Np;
     this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     answer.beDyadicProductOf(Np, Np);
-    answer.times(e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(CompressibilityCoefficient, gp, tstep));
+    answer.times(e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(ctype, gp, tstep));
 }
 
 void NTcN::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {

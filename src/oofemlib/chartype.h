@@ -120,7 +120,17 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(MomentumBalance_2_Residual, 282)       \
     ENUM_ITEM_WITH_VALUE(MomentumBalance_3_Residual, 283)       \
     ENUM_ITEM_WITH_VALUE(MomentumBalance_4_Residual, 284)       \
-    ENUM_ITEM_WITH_VALUE(InitialVolumeFraction, 285)
+    ENUM_ITEM_WITH_VALUE(InitialVolumeFraction, 285) \
+    /* MPM ThermoMechanics*/ \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_ConductivityMatrix, 300) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_CapacityMatrix, 301) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_StressCouplingMatrix, 302) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_Residual, 303) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_TemperatureResidual, 304) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_DSigmaDTMatrix, 305) \
+    ENUM_ITEM_WITH_VALUE(InternalFluxVector, 306) \
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_ThermalCouplingMatrix, 307) 
+
     
 
 
