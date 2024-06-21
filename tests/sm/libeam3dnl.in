@@ -1,5 +1,5 @@
-libean3dnl.out
-Non-Linear cantiliver
+libeam3dnl.out
+Non-Linear cantilever. Critical load is 1*1*pi^2/(2*8)^2 = 0.0385531
 #LinearStatic 1 nsteps 1
 #LinearStability nroot 4 rtolv 1.e-8
 StaticStructural nsteps 6 solverType "calm" maxiter 30 stepLength 1.0471976 minStepLength 1.0471976  rtolf 1e-4 Psi 0.0 manrmsteps 1 HPC 2 9 6 nmodules 1
