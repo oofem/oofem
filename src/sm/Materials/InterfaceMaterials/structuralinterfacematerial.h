@@ -95,7 +95,7 @@ public:
     virtual double giveFirstPKTraction_1d(double jump, double reducedF, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatArrayF<2> giveFirstPKTraction_2d(const FloatArrayF<2> &jump, const FloatMatrixF<2,2> &reducedF, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
-    { OOFEM_ERROR("not implemented "); return FloatArrayF<3>(); }
+    { OOFEM_ERROR("not implemented ");  }
 
     virtual double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatArrayF<2> giveEngTraction_2d(const FloatArrayF<2> &jump, GaussPoint *gp, TimeStep *tStep) const;

@@ -250,7 +250,6 @@ CCTPlate3d::giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||

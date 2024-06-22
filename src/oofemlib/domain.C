@@ -212,7 +212,6 @@ Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
         return res->second;
     } else {
         OOFEM_ERROR("Material not found.")
-        return res->second;
     }
 }
 
@@ -228,7 +227,6 @@ Domain :: giveLoad(int n)
         return answer;
     } else {
         OOFEM_ERROR("cannot cast boundary condition %d to Load class", n);
-        return NULL;
     }
 #else
     return static_cast< Load * >( bcList[n-1].get() );

@@ -188,7 +188,6 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
         this->mode = HEE_nlinear;
     } else {
         OOFEM_ERROR("Unsupported analysis type");
-        this->mode = HEE_linear;
     }
 
     // check if each node has default number of dofs

@@ -121,10 +121,10 @@ public:
     /**
      * Sets all BBOx parameters in ince
      */
-    void init (FloatArray& origin, double size, IntArray &mask)
+    void init (FloatArray& _origin, double _size, IntArray &mask)
     {
-      this->origin = origin;
-      this->size   = size;
+      this->origin = _origin;
+      this->size   = _size;
       this->spatialMask = mask;
     }
     bool contains(const FloatArray& coords) const
@@ -310,7 +310,6 @@ public:
 
         if ( this->isTerminalOctant() ) {
             // create corresponding child octants
-            int i, j, k;
             FloatArray childOrigin(3);
 
             for ( i = 0; i <= octantMask.at(1); i++ ) {

@@ -85,7 +85,7 @@ public:
     void applyBoundaryCondition(TimeStep *tStep) override;
     void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
-    FloatArray *giveSolutionVector(TimeStep *tStep) override { OOFEM_ERROR("DEPRECATED"); return nullptr; }
+    FloatArray *giveSolutionVector(TimeStep *tStep) override { OOFEM_ERROR("DEPRECATED"); }
 
     void setInitialGuess(DofManager &dman, TimeStep *tStep, TimeStep *prev);
     void advanceSolution(TimeStep *tStep) override;

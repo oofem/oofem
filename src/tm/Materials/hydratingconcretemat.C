@@ -186,7 +186,6 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
         conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
-        conduct = 0.;
     }
 
     //Parallel Voigt model, 20 W/m/K for steel
@@ -208,10 +207,8 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tS
         capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp, tStep);
     } else if ( capacityType == 1 ) { ////calculate from 5-component model
         OOFEM_ERROR("Calculate from 5-component model, not implemented in capacityType %d\n", capacityType);
-        capacityConcrete = 0.;
     } else {
         OOFEM_ERROR("Unknown capacityType %d\n", capacityType);
-        capacityConcrete = 0.;
     }
 
     //Parallel Voigt model, 500 J/kg/K for steel
@@ -233,10 +230,8 @@ double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tSt
         concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp, tStep);
     } else if ( densityType == 1 ) { //calculate from 5-component model - not implemented
         OOFEM_ERROR("Calculate from 5-component model, not implemented in densityType %d\n", densityType);
-        concreteBulkDensity = 0.;
     } else {
         OOFEM_ERROR("Unknown densityType %d\n", densityType);
-        concreteBulkDensity = 0.;
     }
 
     //Parallel Voigt model, 7850 kg/m3 for steel

@@ -74,7 +74,7 @@ public:
     PrescribedGradientHomogenization() { }
     virtual ~PrescribedGradientHomogenization() { }
 
-    virtual double domainSize() { OOFEM_ERROR("Not implemented."); return 0.0; }
+    virtual double domainSize() { OOFEM_ERROR("Not implemented."); }
 
     /**
      * Initializes receiver according to object description stored in input record.

@@ -115,7 +115,6 @@ Set *ExportModule :: giveRegionSet(int i)
         return emodel->giveDomain(1)->giveSet(setid);
     } else {
         OOFEM_ERROR ("Bad set index");
-        return & this->defaultElementSet;
     }
   }
 }

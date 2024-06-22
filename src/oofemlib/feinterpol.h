@@ -85,12 +85,10 @@ public:
     int giveNumberOfVertices() const override
     {
         OOFEM_ERROR("no reference geometry");
-        return 0;
     }
     const FloatArray &giveVertexCoordinates(int i) const override
     {
         OOFEM_ERROR("no reference geometry");
-        return tmp;
     }
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
@@ -437,7 +435,6 @@ public:
     virtual double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo) const 
     {
         OOFEM_ERROR("Not implemented");
-        return 0.;
     }
     /// Returns boundary integration domain
     virtual integrationDomain giveBoundaryIntegrationDomain(int boundary) const = 0;
@@ -492,14 +489,14 @@ public:
      * Returns number of edges.
      */
     virtual int giveNumberOfEdges() const 
-    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1; }
+    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); }
     //@}
 
     /**
      * Returns the number of geometric nodes of the receiver.
      */
     virtual int giveNumberOfNodes() const
-    { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); return -1; }
+    { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); }
     //@}
 
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?

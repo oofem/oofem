@@ -580,7 +580,6 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR( "there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
-        return 0;
     }
 
     if ( in < jn ) {
@@ -619,7 +618,6 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR( "there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
-        return 0;
     }
 
     if ( in < jn ) {
@@ -3435,7 +3433,6 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             _element = new Subdivision :: RS_Tetra(i, mesh, i, enodes);
         } else {
             OOFEM_ERROR("Unsupported element geometry (element %d)", i);
-            _element = NULL;
         }
         _element->setGlobalNumber( domain->giveElement(i)->giveGlobalNumber() );
 #ifdef __PARALLEL_MODE
@@ -3573,7 +3570,6 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         dof = new SimpleSlaveDof( node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
                         OOFEM_ERROR("unsupported DOF type");
-                        dof = nullptr;
                     }
                 }
                 node->appendDof(dof);

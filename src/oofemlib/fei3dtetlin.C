@@ -348,7 +348,6 @@ FEI3dTetLin :: computeLocalEdgeMapping(int iedge) const
         return {3, 4};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
     }
 }
 

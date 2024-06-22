@@ -72,7 +72,6 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
             return val1 - val0;
         } else {
             OOFEM_ERROR("Unknown value mode requested");
-            return 0;
         }
     }
 

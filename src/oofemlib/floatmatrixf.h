@@ -140,7 +140,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    double at(int i, int j) const
+    double at(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -153,7 +153,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double &at(int i, int j)
+    inline double &at(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -165,7 +165,7 @@ public:
      * Direct value access (column major). Implements 0-based indexing.
      * @param i Position in data.
      */
-    double &operator[](int i)
+    double &operator[](std::size_t i)
     {
         return values[ i ];
     }
@@ -173,7 +173,7 @@ public:
      * Direct value access (column major). Implements 0-based indexing.
      * @param i Position in data.
      */
-    double operator[](int i) const
+    double operator[](std::size_t i) const
     {
         return values[ i ];
     }
@@ -184,7 +184,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    double &operator()(int i, int j)
+    double &operator()(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);
@@ -196,7 +196,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    double operator()(int i, int j) const
+    double operator()(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);
@@ -210,7 +210,7 @@ public:
      * @param c Columns to extract.
      */
     template<std::size_t R, std::size_t C>
-    FloatMatrixF<R,C> operator()(int const (&r)[R], int const (&c)[C]) const
+    FloatMatrixF<R,C> operator()(std::size_t const (&r)[R], std::size_t const (&c)[C]) const
     {
         FloatMatrixF<R,C> x;
         for ( std::size_t i = 0; i < R; ++i ) {
@@ -238,7 +238,7 @@ public:
      * @param src Array to set at column c.
      * @param c Column to set.
      */
-    void setColumn(const FloatArrayF<N> &src, int c)
+    void setColumn(const FloatArrayF<N> &src, std::size_t c)
     {
         for ( std::size_t i = 0; i < N; i++ ) {
             (*this)(i, c) = src[i];
@@ -250,7 +250,7 @@ public:
      * @param src Array to set at column c.
      * @param c Column to set.
      */
-    FloatArrayF<N> column(int j) const
+    FloatArrayF<N> column(std::size_t j) const
     {
         FloatArrayF<N> c;
         for ( std::size_t i = 0; i < N; i++ ) {

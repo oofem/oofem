@@ -411,7 +411,7 @@ void
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
 }
@@ -434,7 +434,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
     return -1;
@@ -458,7 +458,6 @@ FEI3dTetQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 4, 10};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
     }
 }
 
@@ -467,7 +466,6 @@ FEI3dTetQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeomet
 {
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
-    return -1;
 }
 
 void

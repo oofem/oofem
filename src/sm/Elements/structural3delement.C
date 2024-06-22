@@ -390,7 +390,6 @@ int
 Structural3DElement::computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
     OOFEM_ERROR("surface local coordinate system not supported");
-    return 1;
 }
 
 
@@ -439,6 +438,5 @@ Structural3DElement::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEd
     //
     ///@todo how should this be supported
     OOFEM_ERROR("egde local coordinate system not supported");
-    return 1;
 }
 } // end namespace oofem

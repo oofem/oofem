@@ -90,8 +90,8 @@ public:
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
     std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
-    std::unique_ptr<IntegrationRule> giveSurfaceIntegrationRule(int order, int isurf) const
-    { return giveBoundaryIntegrationRule(order, isurf); }
+    std::unique_ptr<IntegrationRule> giveSurfaceIntegrationRule(int _order, int _isurf) const
+    { return giveBoundaryIntegrationRule(_order, _isurf); }
 
     int giveNumberOfNodes() const override { return 6; }
 

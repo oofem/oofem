@@ -1733,7 +1733,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
         OOFEM_ERROR("volume inconsistency (%5.2f)", __err * 100);
-
+        /*
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
             for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
@@ -1742,6 +1742,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
                 __area += dV;
             }
         }
+        */
     }
 }
 

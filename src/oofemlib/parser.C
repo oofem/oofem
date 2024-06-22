@@ -95,14 +95,12 @@ double Parser :: term(bool get) // multiply and divide
                 break;
             }
             OOFEM_ERROR("divide by 0");
-            return 1;
         case MOD:
             if ( ( d = prim(true) ) ) {
                 left = fmod(left,d);
                 break;
             }
             OOFEM_ERROR("divide by 0");
-            return 1;
         case POW:
             left = pow( left, prim(true) );
             break;
@@ -146,7 +144,6 @@ double Parser :: prim(bool get) // handle primaries
         double e = expr(true);
         if ( curr_tok != RP ) {
             OOFEM_ERROR(") expected");
-            return 1;
         }
 
         get_token(); // eat ')'
@@ -214,7 +211,6 @@ double Parser :: prim(bool get) // handle primaries
 
     default:
         OOFEM_ERROR("primary expected");
-        return 1;
     }
 }
 
@@ -230,7 +226,6 @@ double Parser :: agr(bool get)
         double e = expr(true);
         if ( curr_tok != RP ) {
             OOFEM_ERROR(") expected");
-            return 1;
         }
 
         get_token(); // eat ')'
@@ -238,7 +233,6 @@ double Parser :: agr(bool get)
     }
     default:
         OOFEM_ERROR("function argument expected");
-        return 1;
     }
 }
 
@@ -359,7 +353,6 @@ Parser :: Token_value Parser :: get_token()
         }
 
         OOFEM_ERROR("bad token");
-        return curr_tok = PRINT;
     }
 }
 

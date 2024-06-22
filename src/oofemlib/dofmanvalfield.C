@@ -130,15 +130,12 @@ DofManValueField::evaluateAt(FloatArray &answer, const FloatArray &coords, Value
                 }
             } else { // mapping from global to local coordinates failed
                 OOFEM_ERROR("Error in mapping from global to local coordinates\n");
-                result = 1; // failed
             }
         } else {  // element without interpolation
             OOFEM_ERROR("Error in element without interpolation\n");
-            result = 1; // failed
         }
     } else { // no element containing given point found
         OOFEM_ERROR("Point out of defined elements\n");
-        result = 1; // failed
     }
     return result;
 }

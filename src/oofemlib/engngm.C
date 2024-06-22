@@ -2114,7 +2114,6 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
         return result;
 #else
         OOFEM_ERROR("Support for parallel mode not compiled in.");
-        return 0;
 #endif
     } else {
         return 1;
@@ -2154,7 +2153,6 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
         return result;
 #else
         OOFEM_ERROR("Support for parallel mode not compiled in.");
-        return 0;
 #endif
     } else {
         return 1;

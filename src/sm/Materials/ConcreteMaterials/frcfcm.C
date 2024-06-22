@@ -840,7 +840,6 @@ FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shea
                 crackB = 2;
             } else {
                 OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-                crackA = crackB = 0; // happy compiler
             }
 
             if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {

@@ -112,7 +112,7 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n * m) {}
+    FloatMatrix(int  n, int m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
     /**
@@ -165,7 +165,7 @@ public:
      * @param i Required number of rows.
      * @param j Required number of columns.
      */
-    void checkBounds(int i, int j) const;
+    void checkBounds(std::size_t i, std::size_t j) const;
     /// Returns number of rows of receiver.
     inline int giveNumberOfRows() const { return nRows; }
     /// Returns number of columns of receiver.
@@ -184,7 +184,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double at(int i, int j) const
+    inline double at(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -197,7 +197,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double &at(int i, int j)
+    inline double &at(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -211,7 +211,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double &operator()(int i, int j)
+    inline double &operator()(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);
@@ -223,7 +223,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double operator()(int i, int j) const
+    inline double operator()(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);

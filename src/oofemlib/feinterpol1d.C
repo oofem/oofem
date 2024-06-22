@@ -54,7 +54,6 @@ IntArray FEInterpolation1d :: boundaryGiveNodes(int boundary) const
 double FEInterpolation1d :: boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
-    return 1.;
 }
 
 double FEInterpolation1d :: boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 

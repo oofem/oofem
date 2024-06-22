@@ -223,7 +223,6 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
 #ifdef DEBUG
     if ( ( ic < 1 ) || ( ic > 3 ) ) {
         OOFEM_ERROR("Can't return non-existing coordinate (index not in range 1..3)");
-        return 0.;
     }
 #endif
 

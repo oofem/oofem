@@ -474,7 +474,6 @@ TR_SHELL11 :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     // test the parameter
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates - size mismatch");
-        exit(1);
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3] is defined
@@ -682,7 +681,6 @@ TR_SHELL11 :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( type == GlobalForceTensor || type == GlobalMomentTensor ||

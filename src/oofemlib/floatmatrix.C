@@ -181,7 +181,7 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >ma
 }
 
 
-void FloatMatrix :: checkBounds(int i, int j) const
+void FloatMatrix :: checkBounds(std::size_t i, std::size_t j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {

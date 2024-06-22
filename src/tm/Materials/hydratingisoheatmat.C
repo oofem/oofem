@@ -188,7 +188,6 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
         return hydrationModel->giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
-        return 0.;
     }
 }
 

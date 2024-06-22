@@ -81,7 +81,6 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
 
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     switch ( mode ) {

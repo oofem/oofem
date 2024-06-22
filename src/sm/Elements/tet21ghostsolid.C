@@ -1211,11 +1211,11 @@ double
 tet21ghostsolid::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs(this->interpolation.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    double weight      = gp->giveWeight();
+    //double determinant = fabs(this->interpolation.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    //double weight      = gp->giveWeight();
     return ( this->computeVolume() );
 
-    return ( determinant * weight );
+    //return ( determinant * weight );
 }
 
 

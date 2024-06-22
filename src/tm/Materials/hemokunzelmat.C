@@ -239,7 +239,6 @@ HeMoKunzelMaterial :: giveMoistureContent(double h) const
         return iso_wh * ( iso_b - 1. ) * h / ( iso_b - h );
     } else {
         OOFEM_ERROR("Unknown Isotherm type");
-        return 0.;
     }
 }
 
@@ -256,7 +255,6 @@ HeMoKunzelMaterial :: giveMoistureContentDerivative(double h) const
         return iso_wh * ( iso_b - 1. ) * iso_b / ( ( iso_b - h ) * ( iso_b - h ) );
     } else {
         OOFEM_ERROR("Unknown Isotherm type");
-        return 0.;
     }
 }
 

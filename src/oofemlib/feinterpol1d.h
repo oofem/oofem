@@ -91,7 +91,6 @@ public:
     virtual double giveLength(const FEICellGeometry &cellgeo) const
     {
         OOFEM_ERROR("Not implemented in subclass.");
-        return 0;
     }
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;

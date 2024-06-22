@@ -418,7 +418,6 @@ PrimaryField :: __evaluateAt(FloatArray &answer, const FloatArray &coords,
         }
     } else {
         OOFEM_ERROR("background element does not support EIPrimaryFiledInterface");
-        return 1; // failed
     }
 #endif
 }

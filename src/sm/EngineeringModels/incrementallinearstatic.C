@@ -143,7 +143,6 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
     }
 
     OOFEM_ERROR("invalid iStep");
-    return 0.0;
 }
 
 

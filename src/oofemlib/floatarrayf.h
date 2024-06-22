@@ -96,7 +96,7 @@ public:
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &at(int i)
+    inline double &at(std::size_t i)
     {
 #ifndef NDEBUG
         return values.at( i - 1 );
@@ -109,7 +109,7 @@ public:
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double at(int i) const
+    inline double at(std::size_t i) const
     {
 #ifndef NDEBUG
         return values.at( i - 1 );
@@ -123,7 +123,7 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &operator[] (int i)
+    inline double &operator[] (std::size_t i)
     {
 #ifndef NDEBUG
         return values.at( i );
@@ -136,7 +136,7 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline const double &operator[] (int i) const { 
+    inline const double &operator[] (std::size_t i) const { 
 #ifndef NDEBUG
         return values.at( i );
 #else
@@ -149,7 +149,7 @@ public:
      * @param c Position of coefficient in array.
      */
     template<std::size_t M>
-    inline FloatArrayF<M> operator[] (int const (&c)[M]) const
+    inline FloatArrayF<M> operator[] (std::size_t const (&c)[M]) const
     {
         FloatArrayF<M> x;
         for ( std::size_t i = 0; i < M; ++i ) {

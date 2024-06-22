@@ -143,7 +143,6 @@ double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
 
     } else {
         OOFEM_ERROR("Unknown MatResponseMode");
-        return 0.;
     }
 }
 

@@ -1619,7 +1619,6 @@ MPSMaterial::computePsiR(GaussPoint *gp, TimeStep *tStep, int option) const
         return betaRH * betaRT;
     } else {
         OOFEM_ERROR("mode is not supported");
-        return 0.;
     }
 }
 
@@ -1653,7 +1652,6 @@ MPSMaterial::computePsiS(GaussPoint *gp, TimeStep *tStep) const
         return betaSH * betaST;
     } else {
         OOFEM_ERROR("mode is not supported");
-        return 0.;
     }
 }
 
@@ -1682,7 +1680,6 @@ MPSMaterial::computePsiE(GaussPoint *gp, TimeStep *tStep) const
         return hydrationTimescale * betaEH * betaET;
     } else {
         OOFEM_ERROR(" mode is not supported");
-        return 0.;
     }
 }
 
@@ -1705,7 +1702,6 @@ MPSMaterial::computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option) 
             return this->relMatAge - tStep->giveTimeIncrement() + PsiE * tStep->giveTimeIncrement();
         } else {
             OOFEM_ERROR("mode is not supported");
-            return 0.;
         }
     } else {
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );

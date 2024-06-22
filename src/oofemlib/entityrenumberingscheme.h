@@ -123,7 +123,6 @@ public:
         }
 
         OOFEM_ERROR("component label %d not found", n);
-        return 0;
     }
 
     int call(int n, EntityRenumberingScheme ers) override

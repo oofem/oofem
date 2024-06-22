@@ -234,7 +234,6 @@ LinQuad3DPlaneStress :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor
     } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||

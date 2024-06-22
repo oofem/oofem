@@ -165,7 +165,6 @@ public:
      */
     virtual double giveProperty(int aProperty, TimeStep *tStep) {
         OOFEM_ERROR("Not supported for this boundary condition.");
-        return 0;
     }
 
     void initializeFrom(InputRecord &ir) override;

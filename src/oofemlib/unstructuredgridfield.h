@@ -312,13 +312,13 @@ public:
     }
     virtual ~UnstructuredGridField() { }
 
-    void initialize(int nvert, int ncells, double octreeOriginShift = 0.0) 
+    void initialize(int nvert, int ncells, double _octreeOriginShift = 0.0) 
     {
         this->timeStamp = this->octreeTimeStamp = 0;
         this->vertexList.resize(nvert);
         this->cellList.resize(ncells);
         this->valueList.resize(nvert);
-        this->octreeOriginShift = octreeOriginShift;
+        this->octreeOriginShift = _octreeOriginShift;
     }
     int giveNumberOfVertices() const { return vertexList.size(); }
     int giveNumberOfCells() const { return cellList.size(); }
@@ -341,8 +341,8 @@ public:
         return & this->vertexList [ num - 1 ];
     }
 
-    void addCell(int num, Element_Geometry_Type type, IntArray &vertices) { //1-based
-        cellList [ num - 1 ] = Cell(type, vertices, this);
+    void addCell(int num, Element_Geometry_Type _type, IntArray &vertices) { //1-based
+        cellList [ num - 1 ] = Cell(_type, vertices, this);
         this->timeStamp++;
     }
 
