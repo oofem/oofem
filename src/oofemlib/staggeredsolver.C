@@ -329,13 +329,13 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         OOFEM_LOG_INFO("StaggeredSolver:     Node            Dof             Displacement    Force\n");
         double reaction;
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            reaction = R->at( prescribedEqs.at(i) );
+            reaction = R.at( prescribedEqs.at(i) );
             if ( R0 ) {
                 reaction += R0->at( prescribedEqs.at(i) );
             }
             lastReactions.at(i) = reaction;
             OOFEM_LOG_INFO("StaggeredSolver:     %-15d %-15d %-+15.5e %-+15.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
-                           X.at( prescribedEqs.at(i) ), reaction);
+                           dg.X.at( prescribedEqs.at(i) ), reaction);
         }
         OOFEM_LOG_INFO("\n");
     }

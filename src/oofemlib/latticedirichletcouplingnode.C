@@ -185,36 +185,34 @@ LatticeDirichletCouplingNode :: computeUnknownCouplingContribution(TimeStep *ste
 #ifdef __SM_MODULE
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
-        if ( coupledModels.at(1) != 0 && !(stepN->giveNumber()<=domain->giveEngngModel()->giveNumberOfFirstStep()) ) {
+        ( static_cast<StaggeredProblem *>( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels( coupledModels );
+        if ( coupledModels.at( 1 ) != 0 && !( stepN->giveNumber() <= domain->giveEngngModel()->giveNumberOfFirstStep() ) ) {
             LatticeStructuralElement *coupledElement;
             for ( int i = 1; i <= nCouplingElements; i++ ) {
                 couplingGpCoords.zero();
-                coupledElement  = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement( couplingElements.at(i) ) );
+                coupledElement = static_cast<LatticeStructuralElement *>( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at( 1 ) )->giveDomain( 1 )->giveElement( couplingElements.at( i ) ) );
 
-                coupledElement->giveGpCoordinates(couplingGpCoords);
-		if(coupledElement->hasBeenUpdated() == 1){
-		  normalStress = coupledElement->giveOldNormalStress();
-		}
-		else{
-		  normalStress = coupledElement->giveNormalStress();
-		}
-		  
-		if(normalStress > 0.){
-		  normalStress = 0.;
-		}
+                coupledElement->giveGpCoordinates( couplingGpCoords );
+                if ( coupledElement->hasBeenUpdated() == 1 ) {
+                    normalStress = coupledElement->giveOldNormalStress();
+                } else {
+                    normalStress = coupledElement->giveNormalStress();
+                }
 
-                distance = sqrt( pow(couplingGpCoords.at(1) - coordinates.at(1), 2.) + pow(couplingGpCoords.at(2) - coordinates.at(2), 2.) );
+                if ( normalStress > 0. ) {
+                    normalStress = 0.;
+                }
 
-                nominator = nominator + distance * normalStress;
+                distance = sqrt( pow( couplingGpCoords.at( 1 ) - coordinates.at( 1 ), 2. ) + pow( couplingGpCoords.at( 2 ) - coordinates.at( 2 ), 2. ) );
+
+                nominator   = nominator + distance * normalStress;
                 denominator = denominator + distance;
             }
 
             result = nominator / denominator;
         }
-
+    }
 #endif
-}
 
 return result;
 }
