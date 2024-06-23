@@ -51,7 +51,7 @@ int DataStream :: read(std :: string &data)
         data = "";
         return 0;
     }
-    data = std::string(str.data(), str.size());
+    data = std::string(str.data(), n);
     return 1;
 }
 
@@ -177,6 +177,11 @@ int FileDataStream :: givePackSizeOfBool(std::size_t count)
 int FileDataStream :: givePackSizeOfLong(std::size_t count)
 {
     return (int) (sizeof(long)*count);
+}
+
+int FileDataStream :: givePackSizeOfSizet(std::size_t count)
+{
+    return (int) (sizeof(std::size_t)*count);
 }
 
 }

@@ -133,6 +133,7 @@ public:
     virtual int givePackSizeOfChar(std::size_t count) = 0;
     virtual int givePackSizeOfBool(std::size_t count) = 0;
     virtual int givePackSizeOfLong(std::size_t count) = 0;
+    virtual int givePackSizeOfSizet(std::size_t count) = 0;
     //@}
 };
 
@@ -190,6 +191,8 @@ public:
     int givePackSizeOfChar(std::size_t count) override;
     int givePackSizeOfBool(std::size_t count) override;
     int givePackSizeOfLong(std::size_t count) override;
+    int givePackSizeOfSizet(std::size_t count) override;
+
 };
 
 } // end namespace oofem
