@@ -1897,7 +1897,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream &stream)
 int
 FloatMatrix :: givePackSize(DataStream &buff) const
 {
-    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(1) +
+    return buff.givePackSizeOfSizet(1) + buff.givePackSizeOfSizet(1) +
            buff.givePackSizeOfDouble(nRows * nColumns);
 }
 

@@ -838,7 +838,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream &stream)
 //        -1 if id od class id is not correct
 {
     // read size
-    int size;
+    std::size_t size;
     if ( !stream.read(size) ) {
         return CIO_IOERR;
     }
@@ -859,7 +859,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream &stream)
 
 int FloatArray :: givePackSize(DataStream &buff) const
 {
-    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfDouble(this->giveSize());
+    return buff.givePackSizeOfSizet(1) + buff.givePackSizeOfDouble(this->giveSize());
 }
 
 // IML compat
