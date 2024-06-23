@@ -342,7 +342,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         OOFEM_ERROR("unsupported mode");
     }
 
-    return 0.0;
+    // return 0.0;
 }
 
 int
@@ -474,7 +474,7 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
         OOFEM_ERROR("History not available for relative step no. %d to step no. %d (actualStepNumber = %d)", shift, tStepo, actualStepNumber);
     }
 
-    return 0;
+    // return 0;
 }
 
 

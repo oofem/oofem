@@ -1419,7 +1419,7 @@ double FloatMatrix :: giveDeterminant() const
         OOFEM_ERROR("sorry, cannot compute the determinant of a matrix larger than 3x3");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 
@@ -1640,7 +1640,7 @@ double FloatMatrix :: computeNorm(char p) const
      *  return sqrt(eigs(0));
      * } */else {
         OOFEM_ERROR("p == %d not implemented.\n", p);
-        return 0.0;
+        // return 0.0;
     }
 #  endif
 }

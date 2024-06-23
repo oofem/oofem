@@ -136,7 +136,6 @@ public:
     double give(int aProperty, GaussPoint *gp) const override
     {
         OOFEM_ERROR("not implemented yet");
-        return 0.0;
     }
     FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d) override;
     FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d) override;

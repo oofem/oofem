@@ -97,7 +97,7 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
         OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
 
-    return 0.0;
+    // return 0.0;
 }
 
 

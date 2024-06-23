@@ -110,10 +110,11 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
     }
 
     OOFEM_ERROR("Should not happen!");
-
+/*
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
+*/
 }
 
 void

@@ -611,8 +611,6 @@ FiberedCrossSection::giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
     } else {
         throw std::runtime_error("Unsupported mode");
     }
-
-    return _Unknown;
 }
 
 

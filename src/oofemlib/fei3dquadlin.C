@@ -51,7 +51,7 @@ double
 FEI3dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: evaldNdx - Not supported");
-    return 0.;
+    //return 0.;
 }
 
 
@@ -78,7 +78,7 @@ int
 FEI3dQuadLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: global2local - Not supported");
-    return -1;
+    //return -1;
 
 }
 
@@ -154,7 +154,7 @@ FEI3dQuadLin :: computeLocalEdgeMapping(int iedge) const
         return { 4, 1 };
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        // return {};
     }
 }
 
@@ -163,7 +163,7 @@ FEI3dQuadLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeomet
 {
     ///@todo Implement this
     OOFEM_ERROR("FEI3dQuadLin :: edgeComputeLength - Not supported");
-    return -1;
+    //return -1;
 }
 
 void
@@ -273,7 +273,7 @@ double
 FEI3dQuadLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: surfaceGiveTransformationJacobian - Not supported yet");
-    return 0;
+    //return 0;
 }
 
 IntArray
@@ -298,7 +298,7 @@ FEI3dQuadLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     ///@todo Not sure about what defines boundaries on these elements.
     OOFEM_ERROR("FEI3dQuadLin :: giveBoundaryIntegrationRule - Not supported");
-    return nullptr;
+    //return nullptr;
 }
 
 
@@ -307,7 +307,7 @@ FEI3dQuadLin :: giveArea(const FEICellGeometry &cellgeo) const
 {
     ///@todo Not sure about what defines boundaries on these elements.
     OOFEM_ERROR("FEI3dQuadLin :: giveArea - Not supported");
-    return 0.;
+    //return 0.;
 
 }
 } // end namespace oofem

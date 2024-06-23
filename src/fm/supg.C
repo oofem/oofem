@@ -1012,7 +1012,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
         OOFEM_ERROR("unknown variable type");
     }
 
-    return 0.0;
+    //return 0.0;
 }
 
 void
@@ -1131,8 +1131,6 @@ SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
     } else {
         OOFEM_ERROR("unsupported solution step");
     }
-
-    return 0;
 }
 
 void

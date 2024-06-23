@@ -103,7 +103,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *t
     }
 
     OOFEM_ERROR("Not implemented yet.");
-
+#if 0
     FloatMatrix Ke;
     IntArray r_loc, c_loc;
 
@@ -128,6 +128,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *t
         if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
 #endif
     }
+#endif
 }
 
 void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep,
@@ -253,7 +254,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         answer.symmetrized();
     }  else if ( nsd ==  3 ) {
 
-        FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
+        //FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
 
         OOFEM_ERROR("3D tangents not implemented yet.");
 #if 0

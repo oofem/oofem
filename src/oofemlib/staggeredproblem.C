@@ -581,7 +581,7 @@ StaggeredProblem :: giveSlaveProblem(int i)
         OOFEM_ERROR("Undefined problem");
     }
 
-    return NULL;
+    // return NULL;
 }
 
 

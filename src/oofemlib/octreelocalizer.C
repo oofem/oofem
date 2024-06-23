@@ -89,7 +89,7 @@ OctantRec :: giveChild(int xi, int yi, int zi)
         OOFEM_ERROR("invalid child index (%d,%d,%d)", xi, yi, zi);
     }
 
-    return nullptr;
+    // return nullptr;
 }
 
 

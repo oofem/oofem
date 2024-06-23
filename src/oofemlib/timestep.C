@@ -136,8 +136,6 @@ TimeStep *TimeStep :: givePreviousStep()
     } else {
         OOFEM_ERROR("Could not return previous step of noncurrent step");
     }
-
-    return NULL; // to make compiler happy
 }
 
 

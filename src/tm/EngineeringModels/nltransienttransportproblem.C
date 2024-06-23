@@ -326,8 +326,6 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeS
     } else {
         OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
-
-    return 0;
 }
 
 void

@@ -225,7 +225,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
         return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
     }
 
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -936,7 +936,7 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
         OOFEM_ERROR("solution step out of range");
     }
 
-    return 0.0; // to make compiler happy
+    // return 0.0; // to make compiler happy
 }
 
 

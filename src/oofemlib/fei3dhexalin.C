@@ -433,7 +433,7 @@ FEI3dHexaLin :: computeLocalEdgeMapping(int iedge) const
         return {8, 5};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 

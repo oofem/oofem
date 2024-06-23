@@ -507,8 +507,6 @@ NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, Tim
     } else {
         OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
-
-    return 0;
 }
 
 

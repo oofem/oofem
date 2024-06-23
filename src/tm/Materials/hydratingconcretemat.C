@@ -171,7 +171,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
         OOFEM_ERROR("unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

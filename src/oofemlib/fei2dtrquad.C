@@ -312,7 +312,7 @@ FEI2dTrQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 1, 6};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 

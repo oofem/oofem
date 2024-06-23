@@ -76,7 +76,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mod
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

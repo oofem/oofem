@@ -272,7 +272,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
         OOFEM_ERROR("Can't return updatedCoordinate for non-current timestep");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

@@ -125,7 +125,7 @@ bool
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     OOFEM_ERROR("Not implemented");
-    return false;
+    //return false;
 }
 
 

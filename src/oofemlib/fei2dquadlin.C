@@ -311,7 +311,7 @@ FEI2dQuadLin :: computeLocalEdgeMapping(int iedge) const
         return {4, 1};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 

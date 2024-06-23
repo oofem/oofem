@@ -216,7 +216,7 @@ CBS :: giveTractionPressure(Dof *dof)
         OOFEM_ERROR("prescribed traction pressure requested for dof with no BC");
     }
 
-    return 0;
+    // return 0;
 }
 
 
@@ -597,7 +597,7 @@ CBS :: giveNewEquationNumber(int domain, DofIDItem id)
         OOFEM_ERROR("Unknown DofIDItem");
     }
 
-    return 0;
+    // return 0;
 }
 
 
@@ -612,7 +612,7 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
         OOFEM_ERROR("Unknown DofIDItem");
     }
 
-    return 0;
+    //return 0;
 }
 
 
@@ -646,7 +646,7 @@ double CBS :: giveVariableScale(VarScaleType varID)
         OOFEM_ERROR("unknown variable type");
     }
 
-    return 0.0;
+    //return 0.0;
 }
 
 #if 0

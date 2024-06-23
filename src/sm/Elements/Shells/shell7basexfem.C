@@ -798,7 +798,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 {
     this->OLDcomputeStiffnessMatrix(answer, rMode, tStep);
     return;
- 
+#if 0
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -954,7 +954,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         }
     }
 #endif
-
+#endif
 }
 
 

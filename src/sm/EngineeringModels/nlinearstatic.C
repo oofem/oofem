@@ -274,7 +274,6 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     } else {
        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem"); 
     }
-    return 0.0;
 }
 
 TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)

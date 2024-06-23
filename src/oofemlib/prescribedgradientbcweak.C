@@ -146,7 +146,7 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
         return mpTracElNew [ i - 1 ].mFirstNode.get();
     } else {
         OOFEM_ERROR("return mpDisplacementLock")
-        return mpDisplacementLock.get();
+        //return mpDisplacementLock.get();
     }
 }
 
@@ -1820,7 +1820,7 @@ int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
 
     OOFEM_ERROR("Could not identify side index.")
 
-    return -1;
+    //return -1;
 }
 
 void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoordUnsorted, std::vector<FloatArray> &oAllCoordUnsorted)

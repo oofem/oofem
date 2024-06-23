@@ -301,7 +301,7 @@ VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
         OOFEM_ERROR("unsupported cell type ID");
     }
 
-    return 0; // to make compiler happy
+    // return 0; // to make compiler happy
 }
 
 
@@ -363,7 +363,7 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
         OOFEM_ERROR("unsupported element geometry type");
     }
 
-    return 0;
+    // return 0;
 }
 
 //keyword "vars" in OOFEM input file

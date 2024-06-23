@@ -327,7 +327,7 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
         OOFEM_ERROR("Only the mode requiresUnknownsDictionaryUpdate() is supported");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

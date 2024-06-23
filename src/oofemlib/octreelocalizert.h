@@ -252,7 +252,6 @@ public:
         } else {
             OOFEM_ERROR("OctantRecT::giveChild invalid child index (%d,%d,%d)", xi, yi, zi);
         }
-        return NULL;
     }
 
     /**

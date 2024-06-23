@@ -352,7 +352,7 @@ double PrescribedGradientBCPeriodic :: giveBcValue(Dof *dof, ValueModeType mode,
         return this->mGradient( index % 3, index / 3 ) * this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());;
     }
     OOFEM_ERROR("Has no prescribed value from bc.");
-    return 0.0;
+    //return 0.0;
 }
 
 

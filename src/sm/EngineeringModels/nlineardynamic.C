@@ -207,8 +207,6 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
     default:
         OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
-
-    return 0.0;
 }
 
 

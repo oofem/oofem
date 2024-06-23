@@ -437,7 +437,7 @@ FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoo
     //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
-    return -1;
+    //return -1;
 }
 
 

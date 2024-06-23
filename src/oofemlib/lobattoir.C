@@ -147,8 +147,7 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
     default:
         OOFEM_ERROR("unknown integrationDomain");
     }
-
-    return -1;
+    // return -1;
 }
 
 

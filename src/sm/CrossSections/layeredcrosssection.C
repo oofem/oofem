@@ -1345,7 +1345,6 @@ LayeredCrossSection::setupIntegrationPoints(IntegrationRule &irule, int nPointsX
     default:
         OOFEM_ERROR( "Unknown mode (%d)", element->giveIntegrationDomain() );
     }
-    return 0;
 }
 
 
@@ -1515,7 +1514,7 @@ LayeredCrossSection::giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
         throw std::runtime_error("unsupported material mode");
     }
 
-    return _Unknown;
+    //return _Unknown;
 }
 
 

@@ -606,7 +606,7 @@ SPRPatchType SPRNodalRecoveryModel :: determinePatchType(Set &elementList)
     } else {
         OOFEM_ERROR("empty region set");
     }
-    return SPRPatchType_none; // to make compiler happy
+    // return SPRPatchType_none; // to make compiler happy
 }
 
 

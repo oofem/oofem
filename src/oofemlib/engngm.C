@@ -1856,7 +1856,7 @@ EngngModel :: giveDomain(int i)
         OOFEM_ERROR("Undefined domain");
     }
 
-    return NULL;
+    // return NULL;
 }
 
 void
@@ -1901,7 +1901,7 @@ EngngModel :: giveMetaStep(int i)
         OOFEM_ERROR("undefined metaStep (%d)", i);
     }
 
-    return NULL;
+    // return NULL;
 }
 
 void

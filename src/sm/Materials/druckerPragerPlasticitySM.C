@@ -536,7 +536,7 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
     default:
         OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
     }
-    return FloatMatrixF<6,6>();
+    // return FloatMatrixF<6,6>();
 }
 
 FloatMatrixF<6,6>

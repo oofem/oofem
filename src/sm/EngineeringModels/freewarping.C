@@ -211,7 +211,7 @@ double FreeWarping :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, 
         OOFEM_ERROR("Unknown is of undefined type for this problem");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 
