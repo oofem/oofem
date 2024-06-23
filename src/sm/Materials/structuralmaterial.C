@@ -1942,7 +1942,7 @@ StructuralMaterial::sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDi
             pVal.at(maxJ) = pVal.at(i);
             pVal.at(i) = swap;
             for ( int k = 1; k <= 3; k++ ) {
-                double swap = pDir.at(k, maxJ);
+                swap = pDir.at(k, maxJ);
                 pDir.at(k, maxJ) = pDir.at(k, i);
                 pDir.at(k, i) = swap;
             }

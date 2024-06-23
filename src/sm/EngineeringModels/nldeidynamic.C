@@ -296,7 +296,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 	if ( deltaT > maxDt ) {
 	  //Scale number of steps based on reduced time step        
 	  newDeltaT = maxDt;
-	  newNumberOfSteps = floor(numberOfSteps*deltaT/newDeltaT);
+	  newNumberOfSteps = (int) floor(numberOfSteps*deltaT/newDeltaT);
 	  this->giveMetaStep(1)->setNumberOfSteps(newNumberOfSteps);
 	  this->deltaT = newDeltaT;
 	  tStep->setTimeIncrement(deltaT);

@@ -506,7 +506,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec &rootCell, int nodeNum,
     OctantRec *currCell = this->findTerminalContaining(rootCell, coords);
     // request cell node list
     nodeContainerType &cellNodeList = currCell->giveNodeList();
-    int nCellItems = cellNodeList.size();
+    int nCellItems = (int) cellNodeList.size();
     int cellDepth = currCell->giveCellDepth();
     // check for refinement criteria
     // should also include max refinement level criteria

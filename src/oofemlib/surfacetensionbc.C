@@ -256,7 +256,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
 
         OOFEM_ERROR("3D tangents not implemented yet.");
-
+#if 0
         //FloatMatrix tmp(3 *nodes, 3 *nodes);
         FloatMatrix dNdx;
         FloatArray n;
@@ -273,6 +273,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             //answer.plusProductSymmUpper(A,B, dV);
             ///@todo  Derive expressions for this.
         }
+#endif
     } else {
         OOFEM_WARNING("Only 2D or 3D is possible!");
     }

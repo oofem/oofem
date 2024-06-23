@@ -136,7 +136,7 @@ public:
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &at(int i)
+    inline double &at(std::size_t i)
     {
 #ifndef NDEBUG
         this->checkBounds( i );
@@ -148,7 +148,7 @@ public:
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double at(int i) const
+    inline double at(std::size_t i) const
     {
 #ifndef NDEBUG
         this->checkBounds( i );
@@ -161,11 +161,11 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &operator() (int i) { return this->operator[](i); }
-    inline double &operator[] (int i)
+    inline double &operator() (std::size_t i) { return this->operator[](i); }
+    inline double &operator[] (std::size_t i)
     {
 #ifndef NDEBUG
-        if ( i >= this->giveSize() ) {
+        if ( i >= values.size()) {
             OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
         }
 #endif
@@ -176,10 +176,10 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline const double &operator() (int i) const { return this->operator[](i); } 
-    inline const double &operator[] (int i) const { 
+    inline const double &operator() (std::size_t i) const { return this->operator[](i); } 
+    inline const double &operator[] (std::size_t i) const {
 #ifndef NDEBUG
-        if ( i >= this->giveSize() ) {
+        if ( i >= values.size() ) {
             OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
         }
 #endif
@@ -191,11 +191,11 @@ public:
      * mismatch found.
      * @param i Required size of receiver.
      */
-    void checkBounds(int i) const
+    void checkBounds(std::size_t i) const
     {
         if ( i <= 0 ) {
             OOFEM_ERROR("array error on index : %d <= 0", i);
-        } else if ( i > this->giveSize() ) {
+        } else if ( i > values.size()) {
             OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
         }
     }
@@ -217,7 +217,7 @@ public:
      * @param s New size.
      * @param allocChunk Additional space to allocate.
      */
-    void resizeWithValues(int s, int allocChunk = 0);
+    void resizeWithValues(std::size_t s, std::size_t allocChunk = 0);
     /**
      * Resizes receiver towards requested size. Array is zeroed.
      * @param s New size.
@@ -240,6 +240,7 @@ public:
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
     int giveSize() const { return (int)this->values.size(); }
+    std::size_t size() const { return this->values.size(); }
     /// Returns true if receiver is not empty.
     bool isNotEmpty() const { return !this->values.empty(); }
     /// Returns true if receiver is empty.
@@ -367,7 +368,7 @@ public:
      * @param b Array which receiver comes from.
      * @param n Only first n entries are taken.
      */
-    void beDifferenceOf(const FloatArray &a, const FloatArray &b, int n);
+    void beDifferenceOf(const FloatArray &a, const FloatArray &b, std::size_t n);
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
@@ -382,7 +383,7 @@ public:
      * @param src Sub-vector to be added.
      * @param si Determines the position (receiver's 1-based index) of first src value to be added.
      */
-    void addSubVector(const FloatArray &src, int si);
+    void addSubVector(const FloatArray &src, std::size_t si);
     /**
      * Assembles the array fe (typically, the load vector of a finite
      * element) into the receiver, using loc as location array.
@@ -448,7 +449,7 @@ public:
      * @param x Vector to contract to receiver.
      * @param size Number of elements to contract. May not be larger than
      */
-    double dotProduct(const FloatArray &x, int size) const;
+    double dotProduct(const FloatArray &x, std::size_t size) const;
 
     /**
      * Normalizes receiver. Euclidean norm is used, after operation receiver
@@ -527,7 +528,7 @@ public:
     /**
      * Reciever will be set to a given row in a matrix
      */
-    void beRowOf(const FloatMatrix &mat, int row);
+    void beRowOf(const FloatMatrix &mat, std::size_t row);
     
     contextIOResultType storeYourself(DataStream &stream) const;
     contextIOResultType restoreYourself(DataStream &stream);

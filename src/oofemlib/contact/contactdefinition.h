@@ -97,7 +97,7 @@ public:
                       const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s); 
     
     ContactElement *giveContactElement(const int num) { return this->masterElementList[num-1]; }
-    int giveNumbertOfContactElements() { return this->masterElementList.size(); }
+    int giveNumbertOfContactElements() { return (int) this->masterElementList.size(); }
     void addContactElement(ContactElement *cEl) { this->masterElementList.push_back(cEl); }
     // objects can be of different kinds
     // nodes, segments, surfaces, analytical functions

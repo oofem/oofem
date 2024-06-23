@@ -849,7 +849,7 @@ ConcreteFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
   if ( type == IST_TensileStrength ) {
     answer.resize(1);
     answer.at(1) = this->giveTensileStrength(gp, tStep);   
-    return 1.;
+    return 1;
     
   } else if ( type == IST_ResidualTensileStrength ) {
 

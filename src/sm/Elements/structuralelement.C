@@ -478,7 +478,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     int n, nLoads;
     Load *load;
     FloatArray gCoords, temperature;
-    int nbc = domain->giveNumberOfBoundaryConditions();
+    //int nbc = domain->giveNumberOfBoundaryConditions();
 
     if ( this->computeGlobalCoordinates(gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
@@ -521,7 +521,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     int n, nLoads;
     Load *load;
     FloatArray gCoords, eigenstrain;
-    int nbc = domain->giveNumberOfBoundaryConditions();
+    //int nbc = domain->giveNumberOfBoundaryConditions();
 
     if ( this->computeGlobalCoordinates(gCoords, gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");

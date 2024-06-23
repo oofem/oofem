@@ -189,11 +189,11 @@ public:
     const char *giveClassName() const { return "BSplineInterpolation"; }
     bool hasSubPatchFormulation() const override { return true; }
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int _order) const override
     { OOFEM_ERROR("Not supported."); }
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int _order, int boundary) const override
     { OOFEM_ERROR("Not supported."); }
-    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int _order, int boundary) const override
     { OOFEM_ERROR("Not supported."); }
 
 protected:

@@ -320,8 +320,8 @@ public:
         this->valueList.resize(nvert);
         this->octreeOriginShift = _octreeOriginShift;
     }
-    int giveNumberOfVertices() const { return vertexList.size(); }
-    int giveNumberOfCells() const { return cellList.size(); }
+    int giveNumberOfVertices() const { return (int)vertexList.size(); }
+    int giveNumberOfCells() const { return (int)cellList.size(); }
     
     void setVertexValue(int num, const FloatArray &vv) {
         valueList [ num - 1 ] = vv;

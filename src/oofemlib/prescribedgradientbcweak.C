@@ -1390,7 +1390,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     for ( auto & el : mpTracElNew ) {
 
         i = 0;
-
         for ( auto &line : el.mInteriorSegments ) {
             FloatArray xS = line.giveVertex(1);
             xS.resizeWithValues(2);

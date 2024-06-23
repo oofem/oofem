@@ -275,7 +275,7 @@ Grid :: fastMarch(int &eFlag)
             // If valid for consideration
             if ( isInDomain(ni, nj, m, n) && !Frozen [ nInd ] ) {
                 int tmpFlag;
-                double time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
+                time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
                 // If T(ni,nj) has not been previously calculated
                 if ( !narrowBand->isInHeap(nInd) ) {
                     narrowBand->insert(time, nInd);
@@ -334,7 +334,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag)
     if ( ( CrossVals [ 1 ] == Inf ) && ( CrossVals [ 2 ] == Inf ) &&
          ( CrossVals [ 5 ] == Inf ) && ( CrossVals [ 6 ] == Inf ) ) {
         eFlag = 0;
-        double time = Inf;
+        time = Inf;
         return time;
     }
 

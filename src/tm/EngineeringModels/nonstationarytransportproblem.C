@@ -551,7 +551,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
 
 void
-NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
+NonStationaryTransportProblem :: applyIC(TimeStep *_stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
@@ -562,8 +562,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
 
-    UnknownsField->advanceSolution(stepWhenIcApply);
-    solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
+    UnknownsField->advanceSolution(_stepWhenIcApply);
+    solutionVector = UnknownsField->giveSolutionVector(_stepWhenIcApply);
     solutionVector->resize(neq);
     solutionVector->zero();
 
@@ -578,11 +578,11 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
             int jj = dof->__giveEquationNumber();
             if ( jj ) {
-                val = dof->giveUnknown(VM_Total, stepWhenIcApply);
+                val = dof->giveUnknown(VM_Total, _stepWhenIcApply);
                 solutionVector->at(jj) = val;
                 //update in dictionary, if the problem is growing/decreasing
                 if ( this->changingProblemSize ) {
-                    dof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
+                    dof->updateUnknownsDictionary(_stepWhenIcApply, VM_Total, val);
                 }
             }
         }
@@ -592,7 +592,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     //project initial temperature to integration points
 
     //     for ( int j = 1; j <= nelem; j++ ) {
-    //         domain->giveElement(j)->updateInternalState(stepWhenIcApply);
+    //         domain->giveElement(j)->updateInternalState(_stepWhenIcApply);
     //     }
 
 #ifdef __CEMHYD_MODULE
@@ -604,10 +604,10 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         //assign status to each integration point on each element
         if ( cem ) {
             cem->initMaterial(element); //create microstructures and statuses on specific GPs
-            element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
-            element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
+            element->updateInternalState(_stepWhenIcApply);   //store temporary unequilibrated temperature
+            element->updateYourself(_stepWhenIcApply);   //store equilibrated temperature
             cem->clearWeightTemperatureProductVolume(element);
-            cem->storeWeightTemperatureProductVolume(element, stepWhenIcApply);
+            cem->storeWeightTemperatureProductVolume(element, _stepWhenIcApply);
         }
     }
 
@@ -624,8 +624,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     // update element state according to given ic
     for ( auto &elem : domain->giveElements() ) {
         TransportElement *element = static_cast< TransportElement * >( elem.get() );
-        element->updateInternalState(stepWhenIcApply);
-        element->updateYourself(stepWhenIcApply);
+        element->updateInternalState(_stepWhenIcApply);
+        element->updateYourself(_stepWhenIcApply);
     }
 }
 

@@ -143,7 +143,7 @@ public:
 
     FailureCriteriaType giveType() { return this->type; }
     FractureManager *giveFractureManager() { return this->fMan; }
-    void setType(FailureCriteriaType type) { this->type = type; }
+    void setType(FailureCriteriaType _type) { this->type = _type; }
 
     virtual void initializeFrom(InputRecord &ir);
     int instanciateYourself(DataReader &dr);

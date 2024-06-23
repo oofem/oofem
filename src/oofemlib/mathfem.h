@@ -63,6 +63,19 @@ inline int min(int i, int j)
 inline long min(long i, long j)
 { return ( i <= j ? i : j ); }
 
+/// Returns smaller value from two given long decimals
+inline unsigned long min(unsigned long i, unsigned long j)
+{
+    return (i <= j ? i : j);
+}
+
+#ifdef _MSC_VER
+/// Returns smaller value from two given decimals
+inline std::size_t min(std::size_t i, std::size_t j)
+{ return ( i <= j ? i : j ); }
+#endif
+
+
 /// Returns smaller value from two given floats
 inline double min(double i, double j)
 { return ( i <= j ? i : j ); }

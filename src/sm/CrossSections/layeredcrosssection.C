@@ -1161,7 +1161,7 @@ LayeredCrossSection::initializeFrom(InputRecord &ir)
     if ( numberOfLayers != layerMaterials.giveSize() ) {
         if ( layerMaterials.giveSize() == 1 ) {
             OOFEM_WARNING("Assuming same material in all layers");
-            double temp = layerMaterials.at(1);
+            int temp = layerMaterials.at(1);
             layerMaterials.resize(numberOfLayers);
             layerMaterials.zero();
             layerMaterials.add(temp);
@@ -1623,12 +1623,12 @@ LayeredCrossSection::setupLayeredIntegrationRule(std::vector< std::unique_ptr< I
 {
     // Loop over each layer and set up an integration rule as if each layer was an independent element
     // @todo - only works for wedge integration at the moment
-    int numberOfLayers     = this->giveNumberOfLayers();
+    int nLayers     = this->giveNumberOfLayers();
     int numPointsThickness = this->giveNumIntegrationPointsInLayer();
 
     integrationRulesArray.clear();
-    integrationRulesArray.reserve(numberOfLayers);
-    for ( int i = 0; i < numberOfLayers; i++ ) {
+    integrationRulesArray.reserve(nLayers);
+    for ( int i = 0; i < nLayers; i++ ) {
         integrationRulesArray.emplace_back(new LayeredIntegrationRule(i + 1, el) );
         integrationRulesArray.back()->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
     }
@@ -1654,7 +1654,7 @@ LayeredCrossSection::mapLayerGpCoordsToShellCoords(std::vector< std::unique_ptr<
 {
     double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpoints lie at +-1
     double totalThickness = this->computeIntegralThick();
-    int number = 1;
+    int indx = 1;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         for ( GaussPoint *gp: * layerIntegrationRulesArray [ layer - 1 ] ) {
             // Map local layer cs to local shell cs
@@ -1665,8 +1665,8 @@ LayeredCrossSection::mapLayerGpCoordsToShellCoords(std::vector< std::unique_ptr<
             FloatArray lcoords = gp->giveNaturalCoordinates();
             lcoords.at(3) = xinew;
             gp->setNaturalCoordinates(lcoords);
-            gp->number = number;   // fix gp ordering
-            number++;
+            gp->number = indx;   // fix gp ordering
+            indx++;
         }
     }
 }

@@ -945,7 +945,7 @@ IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
     }
 
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    int size = status->giveIntegrationDomainList()->size();
+    indexType size = status->giveIntegrationDomainList()->size();
     // just a guess (size/10) found optimal
     // cost *= (1.0 + (size/10)*0.5);
     cost *= ( 1.0 + size / 15.0 );

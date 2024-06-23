@@ -535,9 +535,9 @@ QClinearStatic :: transformMeshToParticles(Domain *d, std :: vector< FloatArray 
     // number of particles (nodes in domain)
     //int nop = this->giveDomain(1)->giveNumberOfDofManagers() ; // TO DO we assume that all DofManagers all nodes (particles)
     // number of (mesh) nodes
-    int nomn = nodeCoords.size();
+    int nomn = (int) nodeCoords.size();
     // number of (mesh) element
-    int nome = meshNodes.size();
+    int nome = (int) meshNodes.size();
 
     //newMeshNodes=meshNodes;
     std :: vector< IntArray >newMeshNodes;

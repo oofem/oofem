@@ -83,6 +83,9 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
     initialGuessType = IG_None;
+    deltaT = 1.0;
+    dtFunction = 0;
+    currentIterations = 0;
 }
 
 
@@ -787,8 +790,8 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
-    Timer timer;
-    timer.startTimer();
+    Timer _timer;
+    _timer.startTimer();
 #endif
 
     LinearStatic :: assemble(answer, tStep, ma, s, domain);
@@ -804,8 +807,8 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     }
 
 #ifdef TIME_REPORT
-    timer.stopTimer();
-    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", timer.getUtime() );
+    _timer.stopTimer();
+    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", _timer.getUtime() );
 #endif
 }
 

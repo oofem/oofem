@@ -805,7 +805,7 @@ Circle :: computeNumberOfIntersectionPoints(Element *element)
     std :: vector< FloatArray >intersecPoints;
 
     this->computeIntersectionPoints(element, intersecPoints);
-    return intersecPoints.size();
+    return (int) intersecPoints.size();
 }
 
 bool Circle :: isOutside(BasicGeometry *bg)
@@ -1267,7 +1267,7 @@ void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField( "PolygonLine", 1 );
 
     FloatArray points;
-    int nVert = mVertices.size();
+    int nVert = (int) mVertices.size();
     points.resize(nVert * 2);
 
     for ( int i = 0; i < nVert; i++ ) {
@@ -1611,7 +1611,7 @@ PolygonLine :: computeNumberOfIntersectionPoints(Element *element)
 {
     std :: vector< FloatArray >intersecPoints;
     this->computeIntersectionPoints(element, intersecPoints);
-    return intersecPoints.size();
+    return (int) intersecPoints.size();
 }
 
 bool PolygonLine :: isOutside(BasicGeometry *bg)

@@ -98,7 +98,7 @@ public:
      * @param i Position of coefficient in array.
      * @return Value at position.
      */
-    inline int &at(int i)
+    inline int &at(std::size_t i)
     {
 #ifndef NDEBUG
         this->checkBounds(i);
@@ -111,7 +111,7 @@ public:
      * @param i position of coefficient in array.
      * @return Value at position.
      */
-    inline int at(int i) const
+    inline int at(std::size_t i) const
     {
 #ifndef NDEBUG
         this->checkBounds(i);
@@ -124,8 +124,8 @@ public:
      * @param i Position of coefficient in array.
      * @return Value at position.
      */
-    inline int &operator() (int i) { return this->operator[](i); }
-    inline int &operator[] (int i)
+    inline int &operator() (std::size_t i) { return this->operator[](i); }
+    inline int &operator[] (std::size_t i)
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1);
@@ -138,8 +138,8 @@ public:
      * @param i position of coefficient in array.
      * @return Value at position.
      */
-    inline const int &operator() (int i) const { return this->operator[](i); }
-    inline const int &operator[] (int i) const
+    inline const int &operator() (std::size_t i) const { return this->operator[](i); }
+    inline const int &operator[] (std::size_t i) const
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1);
@@ -153,11 +153,11 @@ public:
      * mismatch found.
      * @param i Required size of receiver
      */
-    void checkBounds(int i) const
+    void checkBounds(std::size_t i) const
     {
         if ( i <= 0 ) {
             OOFEM_ERROR("array error on index : %d <= 0", i);
-        } else if ( i > this->giveSize() ) {
+        } else if ( i > values.size()) {
             OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
         }
     }
@@ -206,6 +206,7 @@ public:
     void followedBy(int b, int allocChunk = 0);
     /// @return Size of receiver.
     int giveSize() const { return (int)values.size(); }
+    std::size_t size() const { return values.size(); }
     /**
      * Checks if receiver is empty (i.e., zero sized).
      * @return True is size is zero.

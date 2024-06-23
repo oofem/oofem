@@ -84,7 +84,7 @@ private:
         double value;
     };
     name *table [ Parser_TBLSZ ];
-    double number_value;
+    double number_value =0.0;
     char string_value [ Parser_CMD_LENGTH ];
     const char *parsedLine;
 

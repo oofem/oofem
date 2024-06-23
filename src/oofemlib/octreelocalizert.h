@@ -88,7 +88,7 @@ protected:
 
 public:
     /// Constructor
-    BoundingBox() : spatialMask(3) { }
+    BoundingBox() : size(0), spatialMask(3)  { }
 
     /// Destructor
     ~BoundingBox() { }
