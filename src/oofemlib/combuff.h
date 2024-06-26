@@ -41,6 +41,25 @@
 
 namespace oofem {
 
+#include <stdint.h>
+#include <limits.h>
+
+#if SIZE_MAX == UCHAR_MAX
+   #define my_MPI_SIZE_T MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+   #define my_MPI_SIZE_T MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+   #define my_MPI_SIZE_T MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+   #define my_MPI_SIZE_T MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+   #define my_MPI_SIZE_T MPI_UNSIGNED_LONG_LONG
+#else
+   #error "what is happening here?"
+#endif
+
+
+
  #define __CommunicationBuffer_ALLOC_CHUNK 1024
 /**
  * Type with size equal to one byte (sizeof (ComBuff_BYTE_TYPE) should be 1).
@@ -52,7 +71,7 @@ class OOFEM_EXPORT MPIBuffer
 {
 protected:
     /// Size and current position in buffer in bytes (sizeof(char)).
-    int size, curr_pos;
+    std::size_t size, curr_pos;
     /// Dynamic flag (if true, buffer can grow, but reallocation is needed).
     bool isDynamic;
     /// Buffer. Dynamically allocated.
@@ -66,7 +85,7 @@ protected:
 
 public:
     /// Constructor. Creates buffer of given size, using given communicator for packing.
-    MPIBuffer(int size, bool dynamic = 0);
+    MPIBuffer(std::size_t size, bool dynamic = 0);
     /// Constructor. Creates empty buffer, using given communicator for packing.
     MPIBuffer(bool dynamic = 0);
     /// Destructor.
@@ -80,16 +99,16 @@ public:
      * @param newSize new buffer size in bytes.
      * @return nonzero if successful.
      */
-    int resize(int newSize);
+    int resize(std::size_t newSize);
     /**
      * Initializes buffer to empty state. All packed data are lost.
      */
     virtual void init();
 
     /// @return Current buffer size.
-    int giveSize() { return size; }
+    std::size_t giveSize() { return size; }
     /// @return Remaining space.
-    int giveAvailableSpace() { return ( size - curr_pos ); }
+    std::size_t giveAvailableSpace() { return ( size - curr_pos ); }
     /**
      * Returns associated MPI request handle
      */
@@ -104,7 +123,7 @@ public:
      * @param type Determines type of array values.
      * @return Nonzero if successful.
      */
-    int packArray(MPI_Comm communicator, const void *src, int n, MPI_Datatype type);
+    int packArray(MPI_Comm communicator, const void *src, std::size_t n, MPI_Datatype type);
     /**
      * Unpacks array of values of given type from buffer.
      * @param communicator Communicator handle.
@@ -113,7 +132,7 @@ public:
      * @param type Determines type of array values.
      * @return Nonzero if successful.
      */
-    int unpackArray(MPI_Comm communicator, void *dest, int n, MPI_Datatype type);
+    int unpackArray(MPI_Comm communicator, void *dest, std::size_t n, MPI_Datatype type);
 
 
     /**@name Methods for determining pack size of datatype to pack/unpack to/from buffer */
@@ -125,7 +144,7 @@ public:
      * @param size Size of array to pack.
      * @return Pack size required.
      */
-    int givePackSize(MPI_Comm communicator, MPI_Datatype type, int size);
+    int givePackSize(MPI_Comm communicator, MPI_Datatype type, std::size_t size);
     //@}
 
     /**@name Services for buffer sending/receiving */
@@ -147,7 +166,7 @@ public:
      * @param communicator Request communicator (handle).
      * @return MPI_SUCCESS if ok.
      */
-    virtual int iRecv(MPI_Comm communicator, int source, int tag, int count = 0);
+    virtual int iRecv(MPI_Comm communicator, int source, int tag, std::size_t count = 0);
     /**
      * Tests if the operation identified by this->request is complete.
      * In such case, true is returned and
@@ -189,7 +208,7 @@ public:
 
 private:
     /// @return Current buffer position.
-    int givePosition() { return curr_pos; }
+    std::size_t givePosition() { return curr_pos; }
 };
 
 
@@ -210,7 +229,7 @@ class OOFEM_EXPORT CommunicationBuffer: public DataStream
 protected:
     MPI_Comm communicator;
 public:
-    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) : communicator(comm) { }
+    CommunicationBuffer(MPI_Comm comm, std::size_t size, bool dynamic = 0) : communicator(comm) { }
     /// Constructor. Creates empty buffer, using given communicator for packing
     CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) : communicator(comm) { }
     /// Destructor.
@@ -224,7 +243,7 @@ public:
      * @param newSize New buffer size in bytes.
      * @return Nonzero if successful.
      */
-    virtual int resize(int newSize) = 0;
+    virtual int resize(std::size_t newSize) = 0;
     /**
      * Initializes buffer to empty state. All packed data are lost.
      */
@@ -241,11 +260,13 @@ public:
     using DataStream::write;
     int write(bool data) override;
 
-    int givePackSizeOfInt(int count) override;
-    int givePackSizeOfDouble(int count) override;
-    int givePackSizeOfChar(int count) override;
-    int givePackSizeOfBool(int count) override;
-    int givePackSizeOfLong(int count) override;
+    int givePackSizeOfInt(std::size_t count) override;
+    int givePackSizeOfDouble(std::size_t count) override;
+    int givePackSizeOfChar(std::size_t count) override;
+    int givePackSizeOfBool(std::size_t count) override;
+    int givePackSizeOfLong(std::size_t count) override;
+    int givePackSizeOfSizet(std::size_t count) override;
+
 
     /**@name Services for buffer sending/receiving */
     //@{
@@ -264,7 +285,7 @@ public:
      * If zero (default value) buffer is not resized.
      * @return MPI_SUCCESS if ok.
      */
-    virtual int iRecv(int source, int tag, int count = 0) = 0;
+    virtual int iRecv(int source, int tag, std::size_t count = 0) = 0;
     /**
      * Tests if the operation identified by this->request is complete.
      * In such case, true is returned and
@@ -304,39 +325,44 @@ public:
     /// Destructor.
     virtual ~StaticCommunicationBuffer() { }
 
-    int resize(int newSize) override { return MPIBuffer :: resize(newSize); }
+    int resize(std::size_t newSize) override { return MPIBuffer :: resize(newSize); }
 
     void init() override { return MPIBuffer :: init(); }
     void initForPacking() override { this->init(); }
     void initForUnpacking() override { this->init(); }
 
     using CommunicationBuffer::write;
-    int write(const int *src, int n) override
+    int write(const int *src, std::size_t n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_INT); }
-    int write(const long *src, int n) override
+    int write(const long *src, std::size_t n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_LONG); }
-    int write(const unsigned long *src, int n) override
+    int write(const unsigned long *src, std::size_t n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_UNSIGNED_LONG); }
-    int write(const double *src, int n) override
+    int write(const double *src, std::size_t n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_DOUBLE); }
-    int write(const char *src, int n) override
+    int write(const char *src, std::size_t n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_CHAR); }
 
     using CommunicationBuffer::read;
-    int read(int *dest, int n) override
+    int read(int *dest, std::size_t n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_INT); }
-    int read(long *dest, int n) override
+    int read(long *dest, std::size_t n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_LONG); }
-    int read(unsigned long *dest, int n) override
+    int read(unsigned long *dest, std::size_t n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_UNSIGNED_LONG); }
-    int read(double *dest, int n) override
+    int read(double *dest, std::size_t n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_DOUBLE); }
-    int read(char *dest, int n) override
+    int read(char *dest, std::size_t n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_CHAR); }
+
+    #ifdef _MSC_VER
+    int read(std::size_t* data, std::size_t count) override { return MPIBuffer :: unpackArray(this->communicator, data, count, my_MPI_SIZE_T); }
+    int write(const std::size_t* data, std::size_t count) override { return MPIBuffer :: packArray(this->communicator, data, count, my_MPI_SIZE_T); }
+    #endif
 
     int iSend(int dest, int tag) override { return MPIBuffer :: iSend(this->communicator, dest, tag); }
 
-    int iRecv(int source, int tag, int count = 0) override { return MPIBuffer :: iRecv(this->communicator, source, tag, count); }
+    int iRecv(int source, int tag, std::size_t count = 0) override { return MPIBuffer :: iRecv(this->communicator, source, tag, count); }
 
     int testCompletion() override { return MPIBuffer :: testCompletion(); }
 

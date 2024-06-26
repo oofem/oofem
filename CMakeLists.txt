@@ -111,10 +111,10 @@ option (USE_SHARED_LIB "Build shared library" ON)
 option (USE_MFRONT "Build shared library" OFF)
 
 # Parallel stuff
-option (USE_PARALLEL "Enable parallel support" OFF)
+option (USE_MPI_PARALLEL "Enable MPI-based, distributed memory parallel support" OFF)
 option (USE_METIS "Enable metis support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
-option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
+option (USE_OPENMP_PARALLEL "Enable OpenMP, shared memory parallelism" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
@@ -144,7 +144,7 @@ option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to p
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
     set (USE_MPI ON)
 endif ()
@@ -225,7 +225,7 @@ if (USE_DSS)
     list (APPEND MODULE_LIST "dss")
 endif ()
 
-if (USE_OPENMP)
+if (USE_OPENMP_PARALLEL)
     include (FindOpenMP)
     if (OPENMP_FOUND)
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -898,7 +898,7 @@ include (CTest)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
     file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     foreach (case ${parallel_tests})
@@ -1031,7 +1031,7 @@ endif()
 if (N EQUAL 0)
   set (N 1)
 endif ()
-if (USE_OPENMP) # OPENMP will use all processors by default
+if (USE_OPENMP_PARALLEL) # OPENMP will use all processors by default
   set (N 1)
 endif ()
 

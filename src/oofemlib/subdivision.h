@@ -269,8 +269,8 @@ public:
         void drawGeometry() override;
 #endif
 #ifdef __PARALLEL_MODE
-        void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() {
+        void numberSharedEdges(int iNode, IntArray &connNodes) override;
+        void makeSharedEdges() override {
             shared_edges.resize(3);
             shared_edges.zero();
         }
@@ -296,8 +296,8 @@ public:
         void drawGeometry() override;
 #endif
 #ifdef __PARALLEL_MODE
-        void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() {
+        void numberSharedEdges(int iNode, IntArray &connNodes) override;
+        void makeSharedEdges() override {
             shared_edges.resize(6);
             shared_edges.zero();
         }

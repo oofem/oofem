@@ -43,7 +43,7 @@
 
 namespace oofem {
 #ifdef __USE_MPI
-MPIBuffer :: MPIBuffer(int size, bool dynamic)
+MPIBuffer :: MPIBuffer(std::size_t size, bool dynamic)
 {
     this->size = 0;
     curr_pos = 0;
@@ -75,7 +75,7 @@ MPIBuffer :: ~MPIBuffer()
 
 
 int
-MPIBuffer :: resize(int newSize)
+MPIBuffer :: resize(std::size_t newSize)
 {
     // do not shrink
     if ( size >= newSize ) {
@@ -120,7 +120,7 @@ MPIBuffer :: init()
 #ifdef __USE_MPI
 
 int
-MPIBuffer :: packArray(MPI_Comm communicator, const void *src, int n, MPI_Datatype type)
+MPIBuffer :: packArray(MPI_Comm communicator, const void *src, std::size_t n, MPI_Datatype type)
 {
     int _size;
     // ask MPI for packing size for integer
@@ -139,15 +139,23 @@ MPIBuffer :: packArray(MPI_Comm communicator, const void *src, int n, MPI_Dataty
     }
 
     void *__src = const_cast< void * >(src);   // throw away const
-    return ( MPI_Pack(__src, n, type, this->buff, this->size,
-                      & this->curr_pos, communicator) == MPI_SUCCESS );
+    // MPI_Pack requires int for current position
+    int _currPosInt = static_cast<int>(this->curr_pos);
+    int result = (MPI_Pack(__src, n, type, this->buff, this->size,
+                          & _currPosInt, communicator) == MPI_SUCCESS );
+    this->curr_pos = static_cast<std::size_t>(_currPosInt);
+    return result;
 }
 
 int
-MPIBuffer :: unpackArray(MPI_Comm communicator, void *dest, int n, MPI_Datatype type)
+MPIBuffer :: unpackArray(MPI_Comm communicator, void *dest, std::size_t n, MPI_Datatype type)
 {
-    return ( MPI_Unpack(this->buff, this->size, & this->curr_pos,
-                        dest, n, type, communicator) == MPI_SUCCESS );
+     // MPI_Pack requires int for current position                                                                  
+    int _currPosInt = static_cast<int>(this->curr_pos);    
+    int result = (MPI_Unpack(this->buff, this->size, & _currPosInt,
+                            dest, n, type, communicator) == MPI_SUCCESS );
+    this->curr_pos = static_cast<std::size_t>(_currPosInt); 
+    return result;
 }
 
 int
@@ -159,7 +167,7 @@ MPIBuffer :: iSend(MPI_Comm communicator, int dest, int tag)
 
 
 int
-MPIBuffer :: iRecv(MPI_Comm communicator, int source, int tag, int count)
+MPIBuffer :: iRecv(MPI_Comm communicator, int source, int tag, std::size_t count)
 {
     if ( count ) {
         if ( count >= this->size ) {
@@ -215,11 +223,11 @@ MPIBuffer :: bcast(MPI_Comm communicator, int root)
 
 
 int
-MPIBuffer :: givePackSize(MPI_Comm communicator, MPI_Datatype type, int size)
+MPIBuffer :: givePackSize(MPI_Comm communicator, MPI_Datatype type, std::size_t size)
 {
-    int requredSpace;
-    MPI_Pack_size(size, type, communicator, & requredSpace);
-    return requredSpace;
+    int requiredSpace;
+    MPI_Pack_size(size, type, communicator, & requiredSpace);
+    return requiredSpace;
 }
 
 
@@ -268,39 +276,47 @@ int CommunicationBuffer :: write(bool data)
     return this->write(& val, 1);
 }
 
-int CommunicationBuffer :: givePackSizeOfInt(int count)
+int CommunicationBuffer :: givePackSizeOfInt(std::size_t count)
 {
     int requiredSpace;
-    MPI_Pack_size(count, MPI_INT, communicator, & requiredSpace);
+    MPI_Pack_size(count, my_MPI_SIZE_T, communicator, & requiredSpace);
     return requiredSpace;
 }
 
-int CommunicationBuffer :: givePackSizeOfDouble(int count)
+int CommunicationBuffer :: givePackSizeOfDouble(std::size_t count)
 {
     int requiredSpace;
     MPI_Pack_size(count, MPI_DOUBLE, communicator, & requiredSpace);
     return requiredSpace;
 }
 
-int CommunicationBuffer :: givePackSizeOfChar(int count)
+int CommunicationBuffer :: givePackSizeOfChar(std::size_t count)
 {
     int requiredSpace;
     MPI_Pack_size(count, MPI_CHAR, communicator, & requiredSpace);
     return requiredSpace;
 }
 
-int CommunicationBuffer :: givePackSizeOfBool(int count)
+int CommunicationBuffer :: givePackSizeOfBool(std::size_t count)
 {
     int requiredSpace;
     MPI_Pack_size(count, MPI_CHAR, communicator, & requiredSpace);
     return requiredSpace;
 }
 
-int CommunicationBuffer :: givePackSizeOfLong(int count)
+int CommunicationBuffer :: givePackSizeOfLong(std::size_t count)
 {
     int requiredSpace;
     MPI_Pack_size(count, MPI_LONG, communicator, & requiredSpace);
     return requiredSpace;
 }
+
+int CommunicationBuffer :: givePackSizeOfSizet(std::size_t count)
+{
+    int requiredSpace;
+    MPI_Pack_size(count, my_MPI_SIZE_T, communicator, & requiredSpace);
+    return requiredSpace;
+}
+
 
 } // end namespace oofem

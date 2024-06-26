@@ -86,7 +86,9 @@ void Set :: initializeFrom(InputRecord &ir)
 
     this->elementInternalNodes.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementInternalNodes, _IFT_Set_internalElementNodes);
-
+#if 0
+    this->inputRec = ir.clone();
+#endif
 }
 
 
@@ -246,23 +248,65 @@ void Set :: updateLocalNumbering(EntityRenumberingFunctor &f)
 
 void Set :: updateLocalNodeNumbering(EntityRenumberingFunctor &f)
 {
+    int localNum;
+    IntArray mappedNumbers;
+
     for ( int i = 1; i <= nodes.giveSize(); i++ ) {
-        nodes.at(i) = f(nodes.at(i), ERS_DofManager);
+        try {
+            localNum = f(nodes.at(i), ERS_DofManager);
+        } catch ( std :: out_of_range &e ) {
+//#ifndef __PARALLEL_MODE
+            OOFEM_WARNING("Set :: updateLocalNodeNumbering - Node %d not found", nodes.at(i));
+//#endif
+            continue;       
+        }
+        mappedNumbers.followedBy(localNum,10);
     }
+    nodes = mappedNumbers;
 }
 
 void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
 {
+    int localNum;
+    IntArray mappedNumbers;
     for ( int i = 1; i <= elements.giveSize(); i++ ) {
-        elements.at(i) = f(elements.at(i), ERS_Element);
+        try {
+            localNum = f(elements.at(i), ERS_Element);
+        } catch ( std :: out_of_range &e ) {
+//#ifndef __PARALLEL_MODE
+            OOFEM_WARNING("Set :: updateLocalElementNumbering - Element %d with indx %d not found", elements.at(i), i);
+//#endif
+            continue;
+        }
+        mappedNumbers.followedBy(localNum,10);
     }
+    elements = mappedNumbers;
+
     ///@todo Check order of element number and boundary number (same for edges)
+    mappedNumbers.resize(0);
     for ( int i = 1; i <= elementBoundaries.giveSize(); i += 2 ) {
-        elementBoundaries.at(i) = f(elementBoundaries.at(i), ERS_Element);
+        try {
+            localNum = f(elementBoundaries.at(i), ERS_Element);
+        } catch ( std :: out_of_range &e ) {
+            continue;
+        }
+        mappedNumbers.followedBy(localNum,10);
+        mappedNumbers.followedBy(elementBoundaries.at(i+1));
     }
+    elementBoundaries = mappedNumbers;
+
+    mappedNumbers.resize(0);
     for ( int i = 1; i <= elementEdges.giveSize(); i += 2 ) {
-        elementEdges.at(i) = f(elementEdges.at(i), ERS_Element);
+        try {
+            localNum = f(elementEdges.at(i), ERS_Element);
+        } catch ( std :: out_of_range &e ) {
+            continue;
+        }
+        mappedNumbers.followedBy(localNum,10);
+        mappedNumbers.followedBy(elementEdges.at(i+1));
     }
+    elementEdges = mappedNumbers;
+        
     for ( int i = 1; i <= this->elementInternalNodes.giveSize(); i += 2 ) {
         elementInternalNodes.at(i) = f(elementInternalNodes.at(i), ERS_Element);
     }

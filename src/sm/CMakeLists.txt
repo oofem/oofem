@@ -124,7 +124,7 @@ set (sm
     ${sm_quasicontinuum} 
     )
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     list (APPEND sm ${sm_parallel})
 endif ()
 

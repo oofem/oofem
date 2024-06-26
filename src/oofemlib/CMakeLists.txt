@@ -378,7 +378,7 @@ set (core
     ${core_mapping}
     )
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     list (APPEND core ${core_parallel})
 endif ()
 

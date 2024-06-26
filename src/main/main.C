@@ -137,9 +137,6 @@ int main(int argc, char *argv[])
 
     int rank = 0;
 
-    // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
-
 #ifdef __PARALLEL_MODE
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
@@ -147,6 +144,10 @@ int main(int argc, char *argv[])
     oofem_logger.setComm(MPI_COMM_WORLD);
  #endif
 #endif
+
+    // print header to redirected output
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
+
 
     //
     // check for options

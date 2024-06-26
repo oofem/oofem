@@ -73,26 +73,28 @@ public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
 
-    int givePackSizeOfInt(int count) override { return send_buff->givePackSizeOfInt(count); }
-    int givePackSizeOfDouble(int count) override { return send_buff->givePackSizeOfDouble(count); }
-    int givePackSizeOfChar(int count) override { return send_buff->givePackSizeOfChar(count); }
-    int givePackSizeOfBool(int count) override { return send_buff->givePackSizeOfBool(count); }
-    int givePackSizeOfLong(int count) override { return send_buff->givePackSizeOfLong(count); }
+    int givePackSizeOfInt(std::size_t count) override { return send_buff->givePackSizeOfInt(count); }
+    int givePackSizeOfDouble(std::size_t count) override { return send_buff->givePackSizeOfDouble(count); }
+    int givePackSizeOfChar(std::size_t count) override { return send_buff->givePackSizeOfChar(count); }
+    int givePackSizeOfBool(std::size_t count) override { return send_buff->givePackSizeOfBool(count); }
+    int givePackSizeOfLong(std::size_t count) override { return send_buff->givePackSizeOfLong(count); }
+    int givePackSizeOfSizet(std::size_t count) override { return send_buff->givePackSizeOfSizet(count); }
+
 
     using DataStream::write;
-    int write(const int *data, int count) override { return send_buff->write(data, count); }
-    int write(const long *data, int count) override { return send_buff->write(data, count); }
-    int write(const unsigned long *data, int count) override { return send_buff->write(data, count); }
-    int write(const double *data, int count) override { return send_buff->write(data, count); }
-    int write(const char *data, int count) override { return send_buff->write(data, count); }
+    int write(const int *data, std::size_t count) override { return send_buff->write(data, count); }
+    int write(const long *data, std::size_t count) override { return send_buff->write(data, count); }
+    int write(const unsigned long *data, std::size_t count) override { return send_buff->write(data, count); }
+    int write(const double *data, std::size_t count) override { return send_buff->write(data, count); }
+    int write(const char *data, std::size_t count) override { return send_buff->write(data, count); }
     int write(bool data) override { return send_buff->write(data); }
 
     using DataStream::read;
-    int read(int *data, int count) override { return this->recv_buff->read(data, count); }
-    int read(long *data, int count) override { return this->recv_buff->read(data, count); }
-    int read(unsigned long *data, int count) override { return this->recv_buff->read(data, count); }
-    int read(double *data, int count) override { return this->recv_buff->read(data, count); }
-    int read(char *data, int count) override { return this->recv_buff->read(data, count); }
+    int read(int *data, std::size_t count) override { return this->recv_buff->read(data, count); }
+    int read(long *data, std::size_t count) override { return this->recv_buff->read(data, count); }
+    int read(unsigned long *data, std::size_t count) override { return this->recv_buff->read(data, count); }
+    int read(double *data, std::size_t count) override { return this->recv_buff->read(data, count); }
+    int read(char *data, std::size_t count) override { return this->recv_buff->read(data, count); }
     int read(bool &data) override { return recv_buff->read(data); }
 
     /// Initializes send buffer to empty state. All packed data are lost.
@@ -146,8 +148,8 @@ public:
      */
     void clearBuffers() { }
 
-    void resizeSendBuffer(int size) { send_buff->resize(size); }
-    void resizeReceiveBuffer(int size) { recv_buff->resize(size); }
+    void resizeSendBuffer(std::size_t size) { send_buff->resize(size); }
+    void resizeReceiveBuffer(std::size_t size) { recv_buff->resize(size); }
 
     /**@name Methods for manipulating/testing receiver state */
     //@{
