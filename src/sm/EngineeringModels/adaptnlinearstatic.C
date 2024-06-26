@@ -55,7 +55,7 @@
 #include "oofem_terminate.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallelcontext.h"
  #include "loadbalancer.h"
 #endif
@@ -75,7 +75,7 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
     meshPackage = MPT_T3D;
     equilibrateMappedConfigurationFlag = 0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     this->preMappingLoadBalancingFlag = false;
 #endif
 }
@@ -121,7 +121,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     //this->terminate( this->giveCurrentStep() );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( preMappingLoadBalancingFlag ) {
         this->balanceLoad( this->giveCurrentStep() );
     }
@@ -518,7 +518,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // this->forceEquationNumbering();
     this->updateDomainLinks();
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         // set up communication patterns
         this->initializeCommMaps(true);
@@ -940,7 +940,7 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 LoadBalancer *
 AdaptiveNonLinearStatic :: giveLoadBalancer()
 {

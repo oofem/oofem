@@ -72,7 +72,7 @@
 #include "contact/contactmanager.h"
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
  #include "loadbalancer.h"
@@ -128,7 +128,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     numProcs = 1;
     rank = 0;
     nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
     lb = NULL;
@@ -155,7 +155,7 @@ EngngModel :: ~EngngModel()
         fclose(outputStream);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     delete communicator;
     delete nonlocCommunicator;
     delete commBuff;
@@ -291,7 +291,7 @@ EngngModel :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, _IFT_EngngModel_parallelflag);
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /* Load balancing support */
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_loadBalancingFlag);
@@ -318,7 +318,7 @@ EngngModel :: initializeFrom(InputRecord &ir)
         fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
         fprintf(outputStream, "%s\n", simulationDescription.c_str());
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->isParallel() ) {
             fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
         }
@@ -549,7 +549,7 @@ EngngModel :: solveYourself()
                         this->giveCurrentStep()->giveNumber(), _steptime);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( loadBalancingFlag ) {
                 this->balanceLoad( this->giveCurrentStep() );
             }
@@ -598,7 +598,7 @@ EngngModel :: updateAttributes(MetaStep *mStep)
         this->giveNumericalMethod(mStep1)->initializeFrom(ir);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->initializeFrom(ir);
     }
@@ -1037,7 +1037,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
 {
     if ( eNorms ) {
         int maxdofids = domain->giveMaxDofID();
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->isParallel() ) {
             int val;
             MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_MAX, this->comm);
@@ -2072,7 +2072,7 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 void
 EngngModel :: initializeCommMaps(bool forceInit)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // Set up communication patterns.
     communicator->setUpCommunicationMaps(this, true, forceInit);
     if ( nonlocalExt ) {
@@ -2088,7 +2088,7 @@ int
 EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
 {
     if ( isParallel() ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         int result = 1;
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
@@ -2127,7 +2127,7 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
 {
 
     if ( isParallel() && nonlocalExt ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         int result = 1;
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
@@ -2159,7 +2159,7 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
     }
 }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 void
 EngngModel :: balanceLoad(TimeStep *tStep)
 {

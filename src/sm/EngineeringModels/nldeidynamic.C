@@ -46,7 +46,7 @@
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
 #endif
@@ -96,7 +96,7 @@ NlDEIDynamic :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, pyEstimate, _IFT_NlDEIDynamic_py);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
     communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                         this->giveNumberOfProcesses());
@@ -208,7 +208,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
             this->computeLoadVector(loadRefVector, VM_Total, tStep);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // Compute the processor part of load vector norm pMp
             this->pMp = 0.0;
             double my_pMp = 0.0;
@@ -341,7 +341,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         // compute load factor
         pt = 0.0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         double my_pt = 0.0;
         for ( auto &dman : domain->giveDofManagers() ) {
             dofManagerParallelMode dofmanmode = dman->giveParallelMode();
@@ -385,7 +385,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         // Compute relative error.
         double err = 0.0;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         double my_err = 0.0;
 
         for ( auto &dman : domain->giveDofManagers() ) {
@@ -634,7 +634,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
     this->updateSharedDofManagers(massMatrix, EModelDefaultEquationNumbering(), MassExchangeTag);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // Determine maxOm over all processes.
  #ifdef __USE_MPI
     double globalMaxOm;

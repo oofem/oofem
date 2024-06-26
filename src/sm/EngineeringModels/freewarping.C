@@ -52,7 +52,7 @@
 
 //#define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__); // km???
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -105,7 +105,7 @@ FreeWarping :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),

@@ -42,7 +42,7 @@
 #include "engngm.h"
 #include "classfactory.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "processcomm.h"
  #include "problemcomm.h"
 #endif
@@ -73,7 +73,7 @@ SPRNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, T
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     this->initCommMaps();
 #endif
 
@@ -114,7 +114,7 @@ SPRNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, T
                                        dofManToDetermine, a, regType);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     this->exchangeDofManValues(dofManValues, dofManPatchCount, regionNodalNumbers, regionValSize);
 #endif
 
@@ -611,12 +611,12 @@ SPRPatchType SPRNodalRecoveryModel :: determinePatchType(Set &elementList)
 
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 void
 SPRNodalRecoveryModel :: initCommMaps()
 {
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
         commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);

@@ -145,7 +145,7 @@ option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 
 if (USE_MPI_PARALLEL)
-    add_definitions (-D__PARALLEL_MODE)
+    add_definitions (-D__MPI_PARALLEL_MODE)
     set (USE_MPI ON)
 endif ()
 

@@ -89,14 +89,14 @@ public:
 class OOFEM_EXPORT IGAElement : public Element
 {
 protected:
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     IntArray knotSpanParallelMode;
 #endif
 public:
     IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
     void initializeFrom(InputRecord &ir) override;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     elementParallelMode giveKnotSpanParallelMode(int) const override;
 #endif
 

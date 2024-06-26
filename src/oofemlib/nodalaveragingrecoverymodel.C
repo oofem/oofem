@@ -39,7 +39,7 @@
 #include "engngm.h"
 #include "classfactory.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
  #include "communicator.h"
@@ -67,7 +67,7 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     bool parallel = this->domain->giveEngngModel()->isParallel();
     if ( parallel ) {
         this->initCommMaps();
@@ -131,7 +131,7 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
         }
     } // end assemble element contributions
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( parallel ) {
         this->exchangeDofManValues(lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
     }
@@ -160,7 +160,7 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
     return 1;
 }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 void
 NodalAveragingRecoveryModel :: initCommMaps()

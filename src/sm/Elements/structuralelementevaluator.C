@@ -356,7 +356,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
     // force updating strains & stresses
     for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
             continue;
         }
@@ -390,7 +390,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote ) {
             continue;
         }

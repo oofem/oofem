@@ -36,7 +36,7 @@
 #define parallelcontext_h
 
 #include "oofemenv.h"
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallelordering.h"
 #endif
 
@@ -56,7 +56,7 @@ class OOFEM_EXPORT ParallelContext
 protected:
     int di;
     EngngModel *emodel;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
 #endif
@@ -108,7 +108,7 @@ public:
     void accumulate(const FloatArray &local, FloatArray &global);
     //@}
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
 #endif

@@ -274,7 +274,7 @@ void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if (this->giveParallelMode() == Element_remote) {
       EASValsSetColor( gc.getRemoteElementColor() );
       EASValsSetEdgeColor( gc.getRemoteElementEdgeColor() );

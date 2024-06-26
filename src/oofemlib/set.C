@@ -255,7 +255,7 @@ void Set :: updateLocalNodeNumbering(EntityRenumberingFunctor &f)
         try {
             localNum = f(nodes.at(i), ERS_DofManager);
         } catch ( std :: out_of_range &e ) {
-//#ifndef __PARALLEL_MODE
+//#ifndef __MPI_PARALLEL_MODE
             OOFEM_WARNING("Set :: updateLocalNodeNumbering - Node %d not found", nodes.at(i));
 //#endif
             continue;       
@@ -273,7 +273,7 @@ void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
         try {
             localNum = f(elements.at(i), ERS_Element);
         } catch ( std :: out_of_range &e ) {
-//#ifndef __PARALLEL_MODE
+//#ifndef __MPI_PARALLEL_MODE
             OOFEM_WARNING("Set :: updateLocalElementNumbering - Element %d with indx %d not found", elements.at(i), i);
 //#endif
             continue;

@@ -155,7 +155,7 @@ IntArray read_int_dataset(const DataSet &d)
 
 int main(int argc, char *argv[])
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
     int rank;
     MPI_Init(& argc, & argv);

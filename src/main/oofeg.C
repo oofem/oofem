@@ -325,7 +325,7 @@ main(int argc, char *argv[])
                     oofem_logger.setLogLevel(level);
                 }
             }   else if ( strcmp(argv [ i ], "-p") == 0 ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
                 parallelFlag = true;
 #else
                 fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");

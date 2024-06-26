@@ -59,7 +59,7 @@
 #include "initmodulemanager.h"
 #include "monitormanager.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
 #endif
 
@@ -283,7 +283,7 @@ protected:
     int numProcs;
     /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
     int nonlocalExt;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
  #ifdef __USE_MPI
@@ -549,7 +549,7 @@ public:
      */
     virtual int giveCurrentNumberOfIterations() {return 1;}
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Returns the communication object of reciever.
     MPI_Comm giveParallelComm() { return this->comm; }
     /**
@@ -1124,7 +1124,7 @@ public:
      * @return Upper bound of space needed.
      */
     virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) { return 0; }
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /**
      * Recovers the load balance between processors, if needed. Uses load balancer monitor and load balancer
      * instances to decide if rebalancing is needed (monitor) and to repartition the domain (load balancer).

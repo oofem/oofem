@@ -52,7 +52,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
 {
     int indx = 0;
     numberOfGaussPoints = 1;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     int numberOfKnotSpans = 0;
 
 #endif
@@ -69,7 +69,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
     } else if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         numberOfKnotSpans = numberOfKnotSpansU * numberOfKnotSpansV;
 #endif
         const IntArray *knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
@@ -113,7 +113,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
         int numberOfKnotSpansW = this->giveInterpolation()->giveNumberOfKnotSpans(3);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         numberOfKnotSpans = numberOfKnotSpansU * numberOfKnotSpansV * numberOfKnotSpansW;
 #endif
         const IntArray *knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
@@ -166,7 +166,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
         throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
     
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // read optional knot span parallel mode
     this->knotSpanParallelMode.resize(numberOfKnotSpans);
     // set Element_local as default
@@ -178,7 +178,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 elementParallelMode
 IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
 {
@@ -194,7 +194,7 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
     return Element_local; //to make compiler happy
 }
 
-#endif // __PARALLEL_MODE
+#endif // __MPI_PARALLEL_MODE
 
 
 // integration elements are setup in the same way as for IGAElement for now HUHU

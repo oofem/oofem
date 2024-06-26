@@ -76,7 +76,7 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
  #include "datastream.h"
@@ -110,7 +110,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
     axisymm = false;
     freeDofID = MaxDofID;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     dmanMapInitialized = elementMapInitialized = false;
     transactionManager = NULL;
 #endif
@@ -148,7 +148,7 @@ Domain :: clear()
     ///@todo bp: how to clear/reset topology data?
     topology = nullptr;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     transactionManager = nullptr;
 #endif
 }
@@ -1589,7 +1589,7 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
     }
 }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 DomainTransactionManager *
 Domain :: giveTransactionManager()

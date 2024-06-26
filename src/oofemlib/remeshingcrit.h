@@ -63,7 +63,7 @@ class OOFEM_EXPORT RemeshingCriteria : public FEMComponent
 protected:
     ErrorEstimator *ee;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Common Communicator buffer.
     CommunicatorBuff *commBuff;
     /// Communicator.

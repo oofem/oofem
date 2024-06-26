@@ -63,7 +63,7 @@
  #include "t3d.h"
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -169,7 +169,7 @@ QClinearStatic :: initializeFrom(InputRecord &ir)
         generateInterpolationElements = 0;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
         communicator = new NodeCommunicator( this, commBuff, this->giveRank(),

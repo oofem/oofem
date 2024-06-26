@@ -63,7 +63,7 @@ std :: vector< inclusion > getInclusionsInBox(FloatArray corner, double rveSize,
 
 int main(int argc, char *argv[])
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
     int rank;
     MPI_Init(& argc, & argv);

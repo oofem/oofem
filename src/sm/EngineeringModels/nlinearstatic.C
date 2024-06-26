@@ -55,7 +55,7 @@
 #include "unknownnumberingscheme.h"
 #include "function.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
  #include "loadbalancer.h"
@@ -203,7 +203,7 @@ NonLinearStatic :: initializeFrom(InputRecord &ir)
         updateElasticStiffnessFlag = true;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
@@ -775,7 +775,7 @@ NonLinearStatic :: updateDomainLinks()
     LinearStatic :: updateDomainLinks();
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->setDomain( this->giveDomain(1) );
     }
@@ -916,7 +916,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int 
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {

@@ -680,7 +680,7 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
         fprintf( outputStream, "\nStarting analysis on: %s\n", ctime( &this->startTime ) );
         fprintf( outputStream, "%s\n", simulationDescription.c_str() );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->isParallel() ) {
             fprintf( outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name );
         }
@@ -1001,7 +1001,7 @@ void AdditiveManufacturingProblem ::solveYourself()
                     sp->giveCurrentStep()->giveNumber(), _steptime );
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( loadBalancingFlag ) {
                 this->balanceLoad( sp->giveCurrentStep() );
             }

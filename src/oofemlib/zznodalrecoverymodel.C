@@ -48,7 +48,7 @@
 #include <sstream>
 #include <set>
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -80,7 +80,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() ) {
         this->initCommMaps();
     }
@@ -155,7 +155,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         }
     } // end assemble element contributions
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() ) {
         this->exchangeDofManValues(lhs, rhs, regionNodalNumbers);
     }
@@ -280,12 +280,12 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 void
 ZZNodalRecoveryModel :: initCommMaps()
 {
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
         commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
