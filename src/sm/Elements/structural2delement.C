@@ -166,7 +166,6 @@ Structural2DElement::giveCharacteristicLength(const FloatArray &normalToCrackPla
 
 
 
-
 // Edge support
 
 void
@@ -224,7 +223,20 @@ Structural2DElement::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEd
     return 1;
 }
 
-
+void
+Structural2DElement::computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    OOFEM_WARNING("PlaneStressElement::computeInitialStressMatrix. Not implemented!");
+    FloatMatrix dNdx;
+    int cols;
+    
+    GaussPoint* gp = integrationRulesArray[0]->getIntegrationPoint(0);
+    this->giveInterpolation()->evaldNdx(dNdx, gp->giveNaturalCoordinates(), * this->giveCellGeometryWrapper() );
+    cols=dNdx.giveNumberOfRows()*2;
+    
+    answer.resize(cols,cols);
+    answer.zero();
+}
 
 
 
@@ -343,9 +355,6 @@ PlaneStressElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatRe
         answer.rotatedWith(Q, 't');
     }
 }
-
-
-
 
 
 // Plane strain
@@ -471,8 +480,6 @@ PlaneStrainElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatRe
         answer.rotatedWith(Q, 't');
     }
 }
-
-
 
 
 // Axisymmetry
