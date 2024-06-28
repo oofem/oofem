@@ -1,0 +1,57 @@
+tm02.out
+Test of mpm tm mpm formulation, single element, transient, prescribed nodal flux
+# final time 500, initial time step 1 
+mpmproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 keeptangent ptype "tm" smtype 1
+#vtkxml tstep_all domain_all primvars 2 1 6
+errorcheck
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 8 nelem 1 nbc 5 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 7
+node 1 coords 3 0.            0.           0. 
+node 2 coords 3 3.0           0.           0. 
+node 3 coords 3 3.0           2.0          0. 
+node 4 coords 3 0.0           2.0          0. 
+node 5 coords 3 0.0           0.           1.0 
+node 6 coords 3 3.0           0.           1.0
+node 7 coords 3 3.0           2.0          1.0 
+node 8 coords 3 0.0           2.0          1.0 
+#
+tmbrick11 1 nodes 8 1 2 3 4 5 6 7 8 crosssect 0 mat 1
+#
+dummycs 1 mat 1 set 1
+# thermo-mechanical material model
+tmm 1 d 1.0 e 5. nu 0.3 lambda 0.2 c 0.05 alpha 1.0
+#
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 2 values 1 0   dofs 1 1 
+# y-displacement
+boundarycondition 2 loadtimefunction 1 set 3 values 1 0   dofs 1 2 
+# z-displacement
+boundarycondition 3 loadtimefunction 1 set 4 values 1 0   dofs 1 3 
+# temperature prescribed (bleeding=pressure set to zero?)
+boundarycondition 4 loadtimefunction 1 set 5 values 1 0.0 dofs 1 10 
+# temperature  dicrete nodal flux (q=4*0.25/A, T(1) = 5/6 = 0.8333333333333334)
+nodalload 5 loadtimefunction 2 dofs 1 10 Components 1 0.25 set 6
+#
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 1. 10. f(t) 4 0. 0. 1.0 1.0 
+set 1 elements 1 1
+# x-bc
+set 2 nodes 2 1 4 
+# y-bc
+set 3 nodes 2 1 2 
+# z-bc
+set 4 noderanges {(1 4)}
+# top surface (load + )
+set 5 noderanges {(1 4)}
+# flux
+set 6 nodes 4 5 6 7 8
+# all nodes
+set 7 noderanges {(1 8)}
+#%BEGIN_CHECK%
+#NODE tStep 10 number 7 dof 3 unknown d value 4.16666667e-01 tolerance 1.e-5
+#NODE tStep 10 number 7 dof 10 unknown d value 0.833333334 tolerance 1.e-5
+#NODE tStep 10 number 8 dof 3 unknown d value 4.16666667e-01 tolerance 1.e-5
+#NODE tStep 10 number 8 dof 10 unknown d value 0.833333334 tolerance 1.e-5
+#%END_CHECK%
