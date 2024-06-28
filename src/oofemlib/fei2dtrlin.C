@@ -257,7 +257,7 @@ FEI2dTrLin :: computeLocalEdgeMapping(int iedge) const
         return {3, 1};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 

@@ -249,7 +249,6 @@ double
 InterpolatingFuction :: evaluateAtTime(double t)
 {
     OOFEM_ERROR("InterpolatingFunction needs coordinates to evaluate.");
-    return 0.;
 }
 
 

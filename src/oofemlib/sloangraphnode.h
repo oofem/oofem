@@ -37,7 +37,7 @@
 
 #include <list>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 class SloanGraph;

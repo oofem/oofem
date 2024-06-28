@@ -35,7 +35,7 @@
 #ifndef precond_h
 #define precond_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 #include "sparsemtrx.h"
 #include "inputrecord.h"

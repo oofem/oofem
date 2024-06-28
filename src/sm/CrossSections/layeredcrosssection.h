@@ -236,19 +236,16 @@ public:
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
 

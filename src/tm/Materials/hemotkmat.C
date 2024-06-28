@@ -154,7 +154,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         OOFEM_ERROR("Unknown MatResponseMode");
     }
 
-    return 0.0; // to make compiler happy
+    // return 0.0; // to make compiler happy
 }
 
 
@@ -357,7 +357,7 @@ HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return false; // to make compiler happy
+    // return false; // to make compiler happy
 }
 
 int

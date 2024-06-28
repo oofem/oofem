@@ -402,7 +402,7 @@ FEI3dWedgeQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 6, 15};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -410,7 +410,7 @@ FEI3dWedgeQuad :: computeLocalEdgeMapping(int iedge) const
 double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -478,7 +478,7 @@ FEI3dWedgeQuad :: computeLocalSurfaceMapping(int isurf) const
         return {3, 1, 4, 6, 9, 13, 12, 15};
     } else {
         OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
-        return {};
+        // return {};
     }
 }
 

@@ -192,7 +192,6 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
     default:
     {
         OOFEM_ERROR("Material mode %s not supported", __MaterialModeToString(mMode) );
-        i_max = 0;
     }
     }
 

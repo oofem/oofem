@@ -127,11 +127,11 @@ Grid :: setZeroValues(FloatMatrix *gridCoords)
             i = m;
         }
         // determine the index of the nearest grid node
-        int CPInd = ij2ind(i, j, m);
+        int CPInd = ij2ind((int)i, (int)j, (int)m);
 
         // Calculate time-distance of nearest grid node and freeze the value
-        double Fij = F.at(i, j);
-        T.at(i, j) = sqrt( ( i - CPy ) * ( i - CPy ) + ( j - CPx ) * ( j - CPx ) ) / Fij;
+        double Fij = F.at((size_t)i, (size_t)j);
+        T.at((size_t)i, (size_t)j) = sqrt( ( i - CPy ) * ( i - CPy ) + ( j - CPx ) * ( j - CPx ) ) / Fij;
         Frozen [ CPInd ] = true;
 
         // For four direct neighbors or all eight neighbours of the nearest grid node, do the same
@@ -139,8 +139,8 @@ Grid :: setZeroValues(FloatMatrix *gridCoords)
 
         if ( initDiag <= 0. ) { // initialize direct neighbors only
             for ( int neigh = 0; neigh < 4; neigh++ ) {
-                int ni = i + iOffsets [ neigh ];
-                int nj = j + jOffsets [ neigh ];
+                int ni = (int)(i + iOffsets [ neigh ]);
+                int nj = (int)(j + jOffsets [ neigh ]);
                 if ( isInDomain(ni, nj, m, n) ) {
                     int nInd = ij2ind(ni, nj, m);
                     double time;
@@ -159,8 +159,8 @@ Grid :: setZeroValues(FloatMatrix *gridCoords)
             }
         } else { // initialize all neighbors
             for ( int neigh = 0; neigh < 8; neigh++ ) {
-                int ni = i + iOffsets_full [ neigh ];
-                int nj = j + jOffsets_full [ neigh ];
+                int ni = (int) (i + iOffsets_full [ neigh ]);
+                int nj = (int) (j + jOffsets_full [ neigh ]);
                 if ( isInDomain(ni, nj, m, n) ) {
                     int nInd = ij2ind(ni, nj, m);
                     double time;
@@ -275,7 +275,7 @@ Grid :: fastMarch(int &eFlag)
             // If valid for consideration
             if ( isInDomain(ni, nj, m, n) && !Frozen [ nInd ] ) {
                 int tmpFlag;
-                double time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
+                time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
                 // If T(ni,nj) has not been previously calculated
                 if ( !narrowBand->isInHeap(nInd) ) {
                     narrowBand->insert(time, nInd);
@@ -334,7 +334,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag)
     if ( ( CrossVals [ 1 ] == Inf ) && ( CrossVals [ 2 ] == Inf ) &&
          ( CrossVals [ 5 ] == Inf ) && ( CrossVals [ 6 ] == Inf ) ) {
         eFlag = 0;
-        double time = Inf;
+        time = Inf;
         return time;
     }
 

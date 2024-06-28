@@ -67,7 +67,7 @@ public:
 
  #ifdef __USE_MPI
     /// Constructor. Creates buffer of given size, using given communicator for packing.
-    CommunicationPacket(MPI_Comm comm, int size, int num);
+    CommunicationPacket(MPI_Comm comm, std::size_t size, int num);
     /// Constructor. Creates empty buffer, using given communicator for packing.
     CommunicationPacket(MPI_Comm comm, int num);
  #endif
@@ -99,7 +99,7 @@ public:
      * @param communicator Communicator request handle.
      * @return MIP_Succes if ok.
      */
-    int iRecv(MPI_Comm communicator, int source, int tag, int count = 0) override;
+    int iRecv(MPI_Comm communicator, int source, int tag, std::size_t count = 0) override;
     /**
      * Tests if the operation identified by this->request is complete.
      * In such case, true is returned and
@@ -175,13 +175,13 @@ protected:
     bool completed;
 public:
     /// Constructor. Creates buffer of given size, using given communicator for packing.
-    DynamicCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0);
+    DynamicCommunicationBuffer(MPI_Comm comm, std::size_t size, bool dynamic = 0);
     /// Constructor. Creates empty buffer, using given communicator for packing.
     DynamicCommunicationBuffer(MPI_Comm comm, bool dynamic = 0);
     /// Destructor.
     virtual ~DynamicCommunicationBuffer();
 
-    int resize(int newSize) override { return 1; }
+    int resize(std::size_t newSize) override { return 1; }
     void init() override;
 
     /// Initialize for packing.
@@ -189,31 +189,31 @@ public:
     /// Initialize for Unpacking (data already received).
     void initForUnpacking() override;
 
-    int write(const int *src, int n) override
+    int write(const int *src, std::size_t n) override
     { return __write(src, n, MPI_INT); }
-    int write(const long *src, int n) override
+    int write(const long *src, std::size_t n) override
     { return __write(src, n, MPI_LONG); }
-    int write(const unsigned long *src, int n) override
+    int write(const unsigned long *src, std::size_t n) override
     { return __write(src, n, MPI_UNSIGNED_LONG); }
-    int write(const double *src, int n) override
+    int write(const double *src, std::size_t n) override
     { return __write(src, n, MPI_DOUBLE); }
-    int write(const char *src, int n) override
+    int write(const char *src, std::size_t n) override
     { return __write(src, n, MPI_CHAR); }
 
-    int read(int *dest, int n) override
+    int read(int *dest, std::size_t n) override
     { return __read(dest, n, MPI_INT); }
-    int read(long *dest, int n) override
+    int read(long *dest, std::size_t n) override
     { return __read(dest, n, MPI_LONG); }
-    int read(unsigned long *dest, int n) override
+    int read(unsigned long *dest, std::size_t n) override
     { return __read(dest, n, MPI_UNSIGNED_LONG); }
-    int read(double *dest, int n) override
+    int read(double *dest, std::size_t n) override
     { return __read(dest, n, MPI_DOUBLE); }
-    int read(char *dest, int n) override
+    int read(char *dest, std::size_t n) override
     { return __read(dest, n, MPI_CHAR); }
 
 
     int iSend(int dest, int tag) override;
-    int iRecv(int source, int tag, int count = 0) override;
+    int iRecv(int source, int tag, std::size_t count = 0) override;
     int bcast(int root) override;
 
     /**

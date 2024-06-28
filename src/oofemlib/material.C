@@ -67,7 +67,6 @@ double
 Material :: giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) 
 {
     OOFEM_ERROR( "Characteristic value %s(%d) on element %d and GP %d not defined", __CharTypeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
-    return 0.0;
 }
 
 bool

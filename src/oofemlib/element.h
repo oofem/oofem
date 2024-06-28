@@ -237,7 +237,6 @@ public:
      */
     virtual DofManager *giveInternalDofManager(int i) const {
         OOFEM_ERROR("No such DOF available on Element %d", number);
-        return NULL;
     }
     //@}
     /**
@@ -885,7 +884,7 @@ public:
       * @param normalToCrackPlane Normal to the expected crack band.
      * @return Element size corresponding to the given direction (expected width of the crack band).
      */
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane) { OOFEM_ERROR("Function not overloaded, which probably means that the crack band approach should not be used for this element"); return 0.; }
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane) { OOFEM_ERROR("Function not overloaded, which probably means that the crack band approach should not be used for this element"); }
     /**
      * Returns the size of element in the given direction if the direction is in the XY plane,
      * otherwise gives the mean size defined as the square root of the element area.

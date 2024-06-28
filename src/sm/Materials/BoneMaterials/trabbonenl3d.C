@@ -414,7 +414,6 @@ int
 TrabBoneNL3D :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     abort();
-    return 0;
  #if 0
     IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
@@ -430,7 +429,6 @@ int
 TrabBoneNL3D :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     abort();
-    return 0;
  #if 0
     int result;
     IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
@@ -447,7 +445,6 @@ int
 TrabBoneNL3D :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     abort();
-    return 0;
  #if 0
     // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
     // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);

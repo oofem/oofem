@@ -143,7 +143,6 @@ double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
 
     } else {
         OOFEM_ERROR("Unknown MatResponseMode");
-        return 0.;
     }
 }
 
@@ -181,7 +180,7 @@ HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
         OOFEM_ERROR( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return false; // to make compiler happy
+    // return false; // to make compiler happy
 }
 
 int

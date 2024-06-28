@@ -144,7 +144,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
         OOFEM_ERROR("unknown mode");
     }
 
-    return 0; // to make compiler happy
+    //return 0; // to make compiler happy
 }
 
 

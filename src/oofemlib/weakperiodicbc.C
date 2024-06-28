@@ -425,7 +425,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 {
 
     OOFEM_ERROR("Function obsolete");
-
+#if 0
     FloatArray gcoords;
 
     FEInterpolation *geoInterpolation = e->giveInterpolation();
@@ -476,6 +476,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
             }
         }
     }
+#endif
 }
 
 void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale, void* lock)

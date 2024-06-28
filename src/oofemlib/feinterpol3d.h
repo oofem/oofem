@@ -191,10 +191,9 @@ public:
     //@}
 
     std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int _order, int boundary) const override
     {
         OOFEM_ERROR("Not overloaded"); 
-        return nullptr;
     };
     IntArray boundarySurfaceGiveNodes(int boundary) const override;
 };

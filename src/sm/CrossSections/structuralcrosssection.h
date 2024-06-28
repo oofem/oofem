@@ -353,7 +353,7 @@ public:
     int testCrossSectionExtension(CrossSectExtension ext) override { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
     ///@todo This shouldn't  be optional
-    Material *giveMaterial(IntegrationPoint *ip) const override { OOFEM_ERROR("Missing implementation"); return nullptr; }
+    Material *giveMaterial(IntegrationPoint *ip) const override { OOFEM_ERROR("Missing implementation"); }
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return nullptr; }
 
     virtual void createMaterialStatus(GaussPoint &iGP) = 0;

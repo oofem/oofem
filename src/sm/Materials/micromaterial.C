@@ -120,7 +120,6 @@ FloatArrayF<6> MicroMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &to
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead");
-    return zeros<6>();
 
     //     int nelem = microDomain->giveNumberOfElements();
     //     //int nnodes = microDomain->giveNumberOfDofManagers();
@@ -546,7 +545,6 @@ int MicroMaterial :: giveDofEquationNumber(Dof *dof) const
         break;
     default:
         OOFEM_ERROR("Node numbering undefined");
-        return 0;
     }
 }
 

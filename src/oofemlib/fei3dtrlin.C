@@ -51,7 +51,7 @@ double
 FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: evaldNdx - Not supported");
-    return 0.;
+    //return 0.;
 }
 
 
@@ -97,7 +97,7 @@ int
 FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: global2local - Not supported");
-    return -1;
+    //return -1;
 
 }
 
@@ -171,7 +171,7 @@ FEI3dTrLin :: computeLocalEdgeMapping(int iedge) const
         return { 3, 1 };
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -180,7 +180,7 @@ FEI3dTrLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry
 {
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeComputeLength - Not supported");
-    return -1;
+    //return -1;
 }
 
 void
@@ -281,7 +281,7 @@ double
 FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: surfaceGiveTransformationJacobian - Not supported yet");
-    return 0;
+    //return 0;
 }
 
 IntArray
@@ -306,7 +306,7 @@ FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrLin :: giveBoundaryIntegrationRule - Not supported");
-    return nullptr;
+    //return nullptr;
 }
 
 

@@ -50,7 +50,6 @@ FloatArrayF< 6 >
 FiberedCrossSection::giveRealStress_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 6 >();
 }
 
 
@@ -58,7 +57,6 @@ FloatArrayF< 4 >
 FiberedCrossSection::giveRealStress_PlaneStrain(const FloatArrayF< 4 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 4 >();
 }
 
 
@@ -66,7 +64,6 @@ FloatArrayF< 3 >
 FiberedCrossSection::giveRealStress_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 3 >();
 }
 
 
@@ -74,7 +71,6 @@ FloatArrayF< 1 >
 FiberedCrossSection::giveRealStress_1d(const FloatArrayF< 1 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 1 >();
 }
 
 
@@ -82,7 +78,6 @@ FloatArrayF< 2 >
 FiberedCrossSection::giveRealStress_Warping(const FloatArrayF< 2 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported\n");
-    return zeros< 2 >();
 }
 
 
@@ -92,7 +87,6 @@ FloatArrayF< 9 >
 FiberedCrossSection::giveFirstPKStress_3d(const FloatArrayF< 9 > &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 9 >();
 }
 
 
@@ -100,7 +94,6 @@ FloatArrayF< 5 >
 FiberedCrossSection::giveFirstPKStress_PlaneStrain(const FloatArrayF< 5 > &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 5 >();
 }
 
 
@@ -108,7 +101,6 @@ FloatArrayF< 4 >
 FiberedCrossSection::giveFirstPKStress_PlaneStress(const FloatArrayF< 4 > &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 4 >();
 }
 
 
@@ -116,7 +108,6 @@ FloatArrayF< 1 >
 FiberedCrossSection::giveFirstPKStress_1d(const FloatArrayF< 1 > &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 1 >();
 }
 
 
@@ -126,7 +117,6 @@ FloatMatrixF< 6, 6 >
 FiberedCrossSection::giveStiffnessMatrix_3d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 6, 6 >();
 }
 
 
@@ -134,7 +124,6 @@ FloatMatrixF< 3, 3 >
 FiberedCrossSection::giveStiffnessMatrix_PlaneStress(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 3, 3 >();
 }
 
 
@@ -142,7 +131,6 @@ FloatMatrixF< 4, 4 >
 FiberedCrossSection::giveStiffnessMatrix_PlaneStrain(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 4, 4 >();
 }
 
 
@@ -150,7 +138,6 @@ FloatMatrixF< 1, 1 >
 FiberedCrossSection::giveStiffnessMatrix_1d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 1, 1 >();
 }
 
 
@@ -170,7 +157,6 @@ FloatMatrixF< 9, 9 >
 FiberedCrossSection::giveStiffnessMatrix_dPdF_3d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 9, 9 >();
 }
 
 
@@ -178,7 +164,6 @@ FloatMatrixF< 4, 4 >
 FiberedCrossSection::giveStiffnessMatrix_dPdF_PlaneStress(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 4, 4 >();
 }
 
 
@@ -186,7 +171,6 @@ FloatMatrixF< 5, 5 >
 FiberedCrossSection::giveStiffnessMatrix_dPdF_PlaneStrain(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 5, 5 >();
 }
 
 
@@ -194,7 +178,6 @@ FloatMatrixF< 1, 1 >
 FiberedCrossSection::giveStiffnessMatrix_dPdF_1d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 1, 1 >();
 }
 
 
@@ -203,7 +186,6 @@ FloatArrayF< 3 >
 FiberedCrossSection::giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 3 >();
 }
 
 
@@ -265,7 +247,6 @@ FloatArrayF< 5 >
 FiberedCrossSection::giveGeneralizedStress_Plate(const FloatArrayF< 5 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 5 >();
 }
 
 
@@ -273,14 +254,12 @@ FloatArrayF< 8 >
 FiberedCrossSection::giveGeneralizedStress_Shell(const FloatArrayF< 8 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 8 >();
 }
 
 FloatArrayF< 9 >
 FiberedCrossSection::giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 9 >();
 }
 
 
@@ -288,14 +267,12 @@ FloatArrayF< 4 >
 FiberedCrossSection::giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported in given cross-section (yet).");
-    return zeros< 4 >();
 }
 
 FloatArrayF< 3 >
 FiberedCrossSection::giveGeneralizedStress_PlateSubSoil(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported in given cross-section.");
-    return zeros< 3 >();
 }
 
 void
@@ -323,7 +300,6 @@ FloatMatrixF< 3, 3 >
 FiberedCrossSection::give2dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 3, 3 >();
 }
 
 
@@ -379,7 +355,6 @@ FloatMatrixF< 5, 5 >
 FiberedCrossSection::give2dPlateStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 5, 5 >();
 }
 
 
@@ -387,28 +362,24 @@ FloatMatrixF< 8, 8 >
 FiberedCrossSection::give3dShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 8, 8 >();
 }
 
 FloatMatrixF< 9, 9 >
 FiberedCrossSection::give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 9, 9 >();
 }
 
 FloatMatrixF< 4, 4 >
 FiberedCrossSection::giveMembraneRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 4, 4 >();
 }
 
 FloatMatrixF< 3, 3 >
 FiberedCrossSection::give2dPlateSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 3, 3 >();
 }
 
 
@@ -640,8 +611,6 @@ FiberedCrossSection::giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
     } else {
         throw std::runtime_error("Unsupported mode");
     }
-
-    return _Unknown;
 }
 
 

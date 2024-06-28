@@ -37,7 +37,7 @@
 
 #define _IFT_EnrFrontLinearBranchFuncOneEl_Name "enrfrontlinearbranchfunconeel"
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include <vector>
 #include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"

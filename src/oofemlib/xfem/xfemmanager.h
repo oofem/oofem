@@ -35,7 +35,7 @@
 #ifndef xfemmanager_h
 #define xfemmanager_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "datareader.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"

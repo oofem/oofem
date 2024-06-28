@@ -559,7 +559,6 @@ ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int
                     crackB = 2;
                 } else {
                     OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-                    crackA = crackB = 0; // happy compiler
                 }
 
                 // total number of parallel cracks in both directions
@@ -581,7 +580,6 @@ ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int
             Geff = G * D2tot / ( G + D2tot );
         } else {
             OOFEM_ERROR("Unknown Shear Mode");
-            Geff = 0.; // happy compiler
         }
     }
 
@@ -774,7 +772,6 @@ ConcreteFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) {
             dir_2 = 2;
         } else {
             OOFEM_ERROR("Unexpected number for shear stress (must be either 4, 5 or 6).");
-            dir_1 = dir_2 = 0; // happy compiler
         }
 
         // from temporary strain
@@ -793,7 +790,6 @@ ConcreteFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) {
 
     } else {
         OOFEM_ERROR("Unexpected shearStrengthType");
-        maxTau = 0.; // happy compiler
     }
 
     return maxTau;
@@ -853,7 +849,7 @@ ConcreteFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
   if ( type == IST_TensileStrength ) {
     answer.resize(1);
     answer.at(1) = this->giveTensileStrength(gp, tStep);   
-    return 1.;
+    return 1;
     
   } else if ( type == IST_ResidualTensileStrength ) {
 

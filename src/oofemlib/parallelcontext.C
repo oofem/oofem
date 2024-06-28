@@ -41,7 +41,7 @@ namespace oofem {
 //#define ParallelContext_debug_print
 
 ParallelContext :: ParallelContext(EngngModel *e)
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     : n2g(), n2l()
 #endif
 {
@@ -56,7 +56,7 @@ ParallelContext :: init(int newDi)
 {
     di = newDi;
     ///@todo Should we even do this here? The user of the requested ParallelContext will just set this manually instead.
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         ///@todo This shouldn't be hardcoded to just the default numbering schemes. In fact, this shouldn't even have "prescribed" and "free", just use the given numbering.
         n2g.init( emodel, di, EModelDefaultEquationNumbering() );
@@ -74,14 +74,14 @@ ParallelContext :: init(int newDi)
 int
 ParallelContext :: giveNumberOfLocalEqs()
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         return n2g.giveNumberOfLocalEqs();
     } else {
 #endif
     return emodel->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 }
 #endif
 }
@@ -90,14 +90,14 @@ ParallelContext :: giveNumberOfLocalEqs()
 int
 ParallelContext :: giveNumberOfGlobalEqs()
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         return n2g.giveNumberOfGlobalEqs();
     } else {
 #endif
     return emodel->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 }
 #endif
 }
@@ -126,7 +126,7 @@ ParallelContext :: isLocal(DofManager *dman)
 double
 ParallelContext :: localNorm(const FloatArray &src)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         double norm2 = 0.0, norm2_tot;
         int size = src.giveSize();
@@ -147,7 +147,7 @@ ParallelContext :: localNorm(const FloatArray &src)
 double
 ParallelContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         double val = 0.0, val_tot = 0.0;
         int size = a.giveSize();
@@ -168,7 +168,7 @@ ParallelContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
 double
 ParallelContext :: accumulate(double local)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         double global;
         MPI_Allreduce( & local, & global, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
@@ -183,7 +183,7 @@ ParallelContext :: accumulate(double local)
 void
 ParallelContext :: accumulate(const FloatArray &local, FloatArray &global)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
         int size = local.giveSize();
         global.resize(size);
@@ -192,7 +192,7 @@ ParallelContext :: accumulate(const FloatArray &local, FloatArray &global)
     } else {
 #endif
     global = local;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 }
 #endif
 }

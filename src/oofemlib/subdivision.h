@@ -86,7 +86,7 @@ protected:
         // (in such a case the list is built on the fly)
         IntArray connectedElements;
         int globalNumber;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         dofManagerParallelMode parallel_mode;
         /**
          * List of partition sharing the shared dof manager or
@@ -103,7 +103,7 @@ public:
             this->boundary = boundary;
             this->parent = parent;
             this->globalNumber  = 0;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             this->parallel_mode = DofManager_local;
 #endif
         }
@@ -126,7 +126,7 @@ public:
         void setGlobalNumber(int gn) { this->globalNumber = gn; }
         virtual bool isIrregular() { return false; }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         void numberSharedEdges();
         dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
         void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
@@ -177,7 +177,7 @@ protected:
         // flag whether element is in bisection queue
         bool queue_flag;
         int globalNumber;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         elementParallelMode parallel_mode;
         // numbers of shared edges
         IntArray shared_edges;
@@ -191,7 +191,7 @@ public:
             this->parent = parent;
             this->queue_flag = false;
             this->globalNumber = -1;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             this->parallel_mode = Element_local;
 #endif
         }
@@ -240,7 +240,7 @@ public:
         int giveGlobalNumber() { return globalNumber; }
         void setGlobalNumber(int gn) { this->globalNumber = gn; }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         virtual void numberSharedEdges(int iNode, IntArray &connNodes) = 0;
         const IntArray *giveSharedEdges()  { return & shared_edges; }
         virtual void makeSharedEdges() = 0;
@@ -268,9 +268,9 @@ public:
 #ifdef __OOFEG
         void drawGeometry() override;
 #endif
-#ifdef __PARALLEL_MODE
-        void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() {
+#ifdef __MPI_PARALLEL_MODE
+        void numberSharedEdges(int iNode, IntArray &connNodes) override;
+        void makeSharedEdges() override {
             shared_edges.resize(3);
             shared_edges.zero();
         }
@@ -295,16 +295,16 @@ public:
 #ifdef __OOFEG
         void drawGeometry() override;
 #endif
-#ifdef __PARALLEL_MODE
-        void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() {
+#ifdef __MPI_PARALLEL_MODE
+        void numberSharedEdges(int iNode, IntArray &connNodes) override;
+        void makeSharedEdges() override {
             shared_edges.resize(6);
             shared_edges.zero();
         }
 #endif
     };
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     class RS_SharedEdge
     {
 protected:
@@ -339,12 +339,12 @@ public:
         // HUHU protected? private?
         std :: vector< std :: unique_ptr< Subdivision :: RS_Node > >nodes;
         std :: vector< std :: unique_ptr< Subdivision :: RS_Element > >elements;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         std :: vector< std :: unique_ptr< Subdivision :: RS_SharedEdge > >edges;
 #endif
         Subdivision *subdivision;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         /// Global shared node map (index is global shared node number)
         std :: map< int, Subdivision :: RS_Node * >sharedNodeMap;
         /// sharedNodeMap init flag
@@ -352,7 +352,7 @@ public:
 #endif
 
 public:
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         RS_Mesh(Subdivision * s) : nodes(), elements(), edges() {
             this->subdivision = s;
             sharedNodeMapInitialized = false;
@@ -370,7 +370,7 @@ public:
         int giveNumberOfElements() { return (int)elements.size(); }
         void addNode(Subdivision :: RS_Node *obj) { nodes.emplace_back(obj); }
         void addElement(Subdivision :: RS_Element *obj) { elements.emplace_back(obj); }
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         Subdivision :: RS_SharedEdge *giveEdge(int i) { return edges[i-1].get(); }
         int giveNumberOfEdges() { return (int)edges.size(); }
         void addEdge(Subdivision :: RS_SharedEdge *obj) { edges.emplace_back(obj); }
@@ -430,7 +430,7 @@ protected:
     bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
     void assignGlobalNumbersToElements(Domain *d);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /**
      * Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
      * exchanged between any partitions.

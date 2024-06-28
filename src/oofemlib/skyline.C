@@ -724,9 +724,9 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
                 adrb.at(ise) = ib;
 
                 /*  vynulovani prvku radku v poli a  */
-                for ( int j = i + 1; j <= neq; j++ ) {
-                    if ( j - ( adr.at(j + 1) - adr.at(j) ) < i ) {
-                        mtrx [ adr.at(j) + j - i ] = 0.0;
+                for ( int jj = i + 1; jj <= neq; jj++ ) {
+                    if ( jj - ( adr.at(jj + 1) - adr.at(jj) ) < i ) {
+                        mtrx [ adr.at(jj) + jj - i ] = 0.0;
                     }
                 }
             }

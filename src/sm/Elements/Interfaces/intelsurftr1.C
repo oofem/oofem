@@ -193,7 +193,7 @@ bool
 IntElSurfTr1 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     OOFEM_ERROR("Not implemented");
-    return false;
+    //return false;
 }
 
 ///@todo this code not tested, onlu copied from interfaceelem3dtrlin.C //JB

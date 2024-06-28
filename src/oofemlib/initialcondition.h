@@ -93,7 +93,7 @@ public:
      * @param i Initial condition number.
      * @param d Domain to which new object will belongs.
      */
-    InitialCondition(int i, Domain * d) : FEMComponent(i, d), initialValueDictionary() { }
+    InitialCondition(int i, Domain * d) : FEMComponent(i, d), initialValueDictionary(), valType(UnknownBVT), set(0), dofIDs() { }
     /// Destructor.
     virtual ~InitialCondition() { }
 

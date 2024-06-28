@@ -356,7 +356,6 @@ double &CompCol :: at(int i, int j)
     }
 
     OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
-    return val[0]; // return to suppress compiler warning message
 }
 
 
@@ -373,7 +372,7 @@ double CompCol :: at(int i, int j) const
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     }
-    return 0.; // return to suppress compiler warning message
+    // return 0.; // return to suppress compiler warning message
 }
 
 double CompCol :: operator() (int i, int j)  const
@@ -389,7 +388,7 @@ double CompCol :: operator() (int i, int j)  const
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     }
-    return 0.; // return to suppress compiler warning message
+    // return 0.; // return to suppress compiler warning message
 }
 
 double &CompCol :: operator() (int i, int j)
@@ -403,7 +402,6 @@ double &CompCol :: operator() (int i, int j)
     }
 
     OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
-    return val[0]; // return to suppress compiler warning message
 }
 
 } // end namespace oofem

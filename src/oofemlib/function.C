@@ -70,7 +70,7 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
         OOFEM_ERROR("unsupported mode(%d)", mode);
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

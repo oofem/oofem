@@ -191,7 +191,6 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
     }
 
     OOFEM_ERROR("Iteration did not converge after 100000 iterations\nS.norm=%e, err=%e, relErr=%e", vS.computeNorm(), reducedvS.computeNorm(), reducedvS.computeNorm() / vS.computeNorm() );
-    return FloatArray();
 }
 
 
@@ -386,7 +385,6 @@ StructuralMaterial::giveFirstPKStressVector_StressControl(const FloatArray &redu
     }
 
     OOFEM_ERROR("Iteration did not converge");
-    return FloatArray();
 }
 
 
@@ -1078,14 +1076,12 @@ FloatMatrixF< 3, 3 >
 StructuralMaterial::give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
-    return FloatMatrixF< 3, 3 >();
 }
 
 FloatMatrixF< 6, 6 >
 StructuralMaterial::give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
-    return FloatMatrixF< 6, 6 >();
 }
 
 void
@@ -1946,7 +1942,7 @@ StructuralMaterial::sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDi
             pVal.at(maxJ) = pVal.at(i);
             pVal.at(i) = swap;
             for ( int k = 1; k <= 3; k++ ) {
-                double swap = pDir.at(k, maxJ);
+                swap = pDir.at(k, maxJ);
                 pDir.at(k, maxJ) = pDir.at(k, i);
                 pDir.at(k, i) = swap;
             }

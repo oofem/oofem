@@ -131,7 +131,7 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp) const
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
 
-    return 0.0;
+    //return 0.0;
 }
 
 double
@@ -144,7 +144,7 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, E
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
 
-    return 0.0;
+    // return 0.0;
 }
 
 

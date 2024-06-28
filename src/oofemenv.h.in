@@ -1,0 +1,18 @@
+/* Headers */
+#include <cstddef>
+
+/* Define if execinfo.h defined */
+#cmakedefine HAVE_EXECINFO_H 1
+
+/* Symbols */
+/* Define if cbrt is defined */
+#cmakedefine HAVE_CBRT 1
+
+/* Define if isnan is defined */
+#cmakedefine HAVE_ISNAN 1
+
+/* Define type used to represent array indices and array sizes*/
+typedef std::size_t indexType;
+
+@OOFEM_EXPORT_HEADER@
+

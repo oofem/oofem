@@ -436,7 +436,7 @@ double MixedGradientPressureDirichlet :: giveBcValue(Dof *dof, ValueModeType mod
         return this->devGradient( dev_id.findFirstIndexOf(dof->giveDofID()) );
     }
     OOFEM_ERROR("Has no prescribed value from bc.");
-    return 0.0;
+    //return 0.0;
 }
 
 

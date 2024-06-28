@@ -222,7 +222,7 @@ attribute values are following:
 
 | The general format of record is
 | [``attribute1_keyword #(type)``] ``...``
-  [``attributeXX_keyword #(type)``]
+  [``attributeXX_keyword #(type)``] <``ver. 1.6``>
 
 The keywords and their values are separated by one or more spaces.
 Please note, that a single record cooresponds to one input line in input
@@ -231,7 +231,7 @@ file.
 When some attribute is enclosed in brackets [ ], then it’s use is
 optional and often overwrites the default behavior or adds additional
 (but optional) information or property (for example adds a loading to
-node).
+node). The angle brackets < > are used to indicate the solver version requirements.
 
 | Example of input record.
 | As an example, consider the following record description:

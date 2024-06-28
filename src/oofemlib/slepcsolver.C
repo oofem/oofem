@@ -108,7 +108,7 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
         /*
          * Create eigensolver context
          */
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         MPI_Comm comm = engngModel->giveParallelComm();
 #else
         MPI_Comm comm = PETSC_COMM_SELF;

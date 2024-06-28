@@ -69,8 +69,6 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 
     default: OOFEM_ERROR("unsupported ValueModeType");
     }
-
-    return 0;
 }
 
 
@@ -256,7 +254,6 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
-        return ISVT_SCALAR; // To make compiler happy.
     }
 }
 

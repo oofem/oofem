@@ -50,6 +50,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 {
     this->stateFilter = 0;
     this->regionFilter = 1;
+    this->patchDomain = NULL;
 }
 
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
@@ -279,7 +280,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, const FloatArray &
     a.zero();
 
     // determine the value from patch
-    int size = patchGPList.size();
+    int size = (int) patchGPList.size();
     if ( size == 1 ) {
         GaussPoint *srcgp  = *patchGPList.begin();
         srcgp->giveElement()->giveIPValue(answer, srcgp, type, tStep);
@@ -360,8 +361,6 @@ int
 MMALeastSquareProjection :: mapStatus(MaterialStatus &oStatus) const
 {
     OOFEM_ERROR("not implemented yet.")
-
-    return 0;
 }
 
 void

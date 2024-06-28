@@ -413,9 +413,9 @@ Currently, the only supported initialization module is
         element number and the Gauss point number, in agreement with the
         mesh specified in later sections.
 
-   |-  Each line referring to a Gauss point should contain the following data:
-        ``elnum #(in)`` ``gpnum #(in)`` ``coords #(ra)``
-        ``ng #(in)`` ``var_1_id #(in)`` ``values_1 #(ra)`` ``...`` ``var_ng_id #(in)`` ``values_ng #(ra)``
+   | -  Each line referring to a Gauss point should contain the following data:
+      |  ``elnum #(in)`` ``gpnum #(in)`` ``coords #(ra)``
+      | ``ng #(in)`` ``var_1_id #(in)`` ``values_1 #(ra)`` ``...`` ``var_ng_id #(in)`` ``values_ng #(ra)``
 
        -  ``elnum`` is the element number
 
@@ -434,7 +434,7 @@ Currently, the only supported initialization module is
 
        -  ``values_ng``  are the values of variables in group number ng
 
-   -  | Example:
+   | -  Example:
       |   ``37 4 3 0.02 0.04 0.05 3 52 1 0.23 62 1 0.049 1 6 0 -2.08e+07 0 0 0 0``
           means that Gauss point number 4 of element number 37 has
          coordinates :math:`x=0.02`, :math:`y=0.04` and :math:`z=0.05`
@@ -496,7 +496,7 @@ Optional parameter ``timeScale`` scales time in output. In transport problem, ba
 
 Currently, the supported export modules are following
 
--  VTK export, **DEPRECATED - Use VTKXML**
+-  VTK export, **DEPRECATED - Use VTKXML or vtkhdf5 **
 
    ``vtk`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
    [``stype #(in)``] [``regionstoskip #(ia)``]
@@ -504,9 +504,19 @@ Currently, the supported export modules are following
    ``vtkxml`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
    [``ipvars #(ia)``] [``stype #(in)``] 
 
-   -  The vtk module is obsolete, use vtkxml instead. Vtkxml allows to
+   | <``ver 1.6``> 
+   | ``vtkhdf5`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
+     [``ipvars #(ia)``] [``stype #(in)``] 
+
+   -  The vtk module is obsolete, use vtkxml or vtkhdf5 instead. Vtkxml allows to
       export results recovered on region by region basis and has more
-      features.
+      features. The vtkxml export module exports result into vtu files, one file for each solution step (vtk ustructured grids).
+      The vtkhdf5 export module exports results into vtk hdf5 file (single hdf file fro all time steps). 
+      Both output formats can be visualized using Paraview.
+
+      The vtkhdf5 export module requires HDF5 library and oofem has to be configured with USE_HDF5=ON. 
+      The HDF5 library version 1.14 (or later) is recommended.
+
 
    -  The array ``vars`` contains identifiers for those internal
       variables which are to be exported. These variables will be
@@ -659,4 +669,55 @@ Currently, the supported export modules are following
      gives an additive contribution to the total value of the
      corresponding variable. This can be exploited e.g. to evaluate the
      total dissipated energy over the entire domain.
+
+- Solution status monitor <``ver 1.6``>
+   | The Solution status monitor creates a report on problem solution. Its content is configurable, see below. 
+   | The syntax of solutionstatus export module is following:
+   | ``solutionstatus`` [``fmt #(s)``] 
+   | 
+   | The fmt parameter allows to control what will be reported for each solution step. The fmt string contains data codes separated by colon. 
+   | The following data codes are supported:
+
++-----------+--------------------------------------------------------------------------+
+| Data code | Description                                                              |
++===========+==========================================================================+
+|m          | Meta step number                                                         |
++-----------+--------------------------------------------------------------------------+
+|s          | Solution step number                                                     |
++-----------+--------------------------------------------------------------------------+
+|a          | Attempt number                                                           |
++-----------+--------------------------------------------------------------------------+
+|nite       | Number of iterations                                                     |
++-----------+--------------------------------------------------------------------------+
+|t          | Solution step target time                                                |
++-----------+--------------------------------------------------------------------------+
+|dt         | Solution step time increment                                             |
++-----------+--------------------------------------------------------------------------+
+|st         | Time spend on solving solution step [s]                                  |
++-----------+--------------------------------------------------------------------------+
+|cr         | | Convergence reason status                                              |
+|           | | - *Converged*                                                          |
+|           | | - *Diverged_I* (Convergence not reached with maximum iteration limit)  |
+|           | | - *Diverged_T* (Diverged solution)                                     |
+|           | | - *Failed*                                                             |
++-----------+--------------------------------------------------------------------------+
+|\-         | Placeholder, will print ‘-‘                                              |
++-----------+--------------------------------------------------------------------------+
+
+   | The default fmt string is "m:s:a:nite:t:dt:st:cr"
+   | Example of input record:
+   | ``solutionstatus`` ``tstep_all`` ``fmt m:s:a:nite:t:dt:st:cr``
+
+- Error checking module
+   Error checking rule used for regressions tests. It compares the user-selected computed results with the reference results.
+   The individual rules are defined in a separate section with dedicated syntax, that can be part of the input file itself, or defined in external file.
+   Their syntax follows the syntax of Extractor package, namely its `Value records section <https://www.oofem.org/resources/doc/extractorInput/html/node2.html>`_.
+   
+   The syntax of the error checking module is following:
+
+   ``errorcheck`` [``filename #(s)``] [``extract``]
+   
+   By default the module performs the regression tests and issues the error when one or more tests fail.
+   The module can also be used to extract user-selected quantities rather than testing them against expected values. This can be done by adding ``extract`` keyword to the input record of the module.
+   The ``filename`` parameter allows to specify filename (with path) in which the rules are defined, insted of input file itself (the default).
 

@@ -157,7 +157,6 @@ MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
 {
     OOFEM_ERROR("not implemented yet.")
 
-    return 0;
 }
 
 

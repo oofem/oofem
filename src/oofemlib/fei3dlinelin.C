@@ -166,7 +166,7 @@ double
 FEI3dLineLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("no surfaces available");
-    return 0.0;
+    //return 0.0;
 }
 
 void
@@ -181,14 +181,14 @@ FEI3dLineLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
                                                   const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("no surfaces available");
-    return 0.0;
+    //return 0.0;
 }
 
 IntArray
 FEI3dLineLin :: computeLocalSurfaceMapping(int isurf) const
 {
     OOFEM_ERROR("no surfaces available");
-    return {};
+    //return {};
 }
 
 
@@ -215,6 +215,6 @@ FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary) const
 {
     ///@todo Not sure about this.
     OOFEM_ERROR("Not supported");
-    return nullptr;
+    //return nullptr;
 }
 } // end namespace oofem

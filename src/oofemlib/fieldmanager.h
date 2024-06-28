@@ -35,7 +35,7 @@
 #ifndef fieldmanager_h
 #define fieldmanager_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "field.h"
 
 #include <map>

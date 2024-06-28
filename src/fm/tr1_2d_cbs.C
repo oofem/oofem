@@ -545,17 +545,17 @@ void
 TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep)
 {
     // computes pressure terms on RHS for density equation
-    FloatArray p;
+    FloatArray pv;
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
 
-    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), pv);
     answer.resize(9);
     answer.zero();
 
     double dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
-        dpdx += b [ i ] * p.at(i + 1);
-        dpdy += c [ i ] * p.at(i + 1);
+        dpdx += b [ i ] * pv.at(i + 1);
+        dpdy += c [ i ] * pv.at(i + 1);
     }
 
     for ( int i = 0; i < 3; i++ ) {
@@ -585,16 +585,16 @@ void
 TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
 {
     //Evaluates the RHS of velocity correction step
-    FloatArray p, u;
+    FloatArray pv, u;
     double ar3;
     double usum, vsum, coeff;
 
 
-    this->computeVectorOfPressures(VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, pv);
 
     double dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
-        double pn1 = p.at(i + 1);
+        double pn1 = pv.at(i + 1);
         dpdx += b [ i ] * pn1;
         dpdy += c [ i ] * pn1;
     }
@@ -607,11 +607,11 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     answer.at(2) = answer.at(5) = answer.at(8) = -ar3 * dpdy;
 
 
-    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), pv);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
     dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
-        double pn1 = p.at(i + 1);
+        double pn1 = pv.at(i + 1);
         dpdx += b [ i ] * pn1;
         dpdy += c [ i ] * pn1;
     }

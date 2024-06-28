@@ -35,7 +35,7 @@
 #ifndef parallelordering_h
 #define parallelordering_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "dofmanager.h"
 

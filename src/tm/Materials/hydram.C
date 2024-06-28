@@ -313,7 +313,7 @@ HydrationModel :: giveCharacteristicValue(double T, double h, MatResponseMode rm
         OOFEM_ERROR("wrong MatResponseMode.");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 double

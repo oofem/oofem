@@ -35,7 +35,7 @@
 #ifndef parser_h
 #define parser_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 #define Parser_CMD_LENGTH 1024
@@ -84,7 +84,7 @@ private:
         double value;
     };
     name *table [ Parser_TBLSZ ];
-    double number_value;
+    double number_value =0.0;
     char string_value [ Parser_CMD_LENGTH ];
     const char *parsedLine;
 

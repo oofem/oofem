@@ -55,7 +55,7 @@
 #include "classfactory.h"
 #include "assemblercallback.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -132,7 +132,7 @@ StaticStructural :: initializeFrom(InputRecord &ir)
 
     mRecomputeStepAfterPropagation = ir.hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     ///@todo Where is the best place to create these?
     if ( isParallel() ) {
         delete communicator;
@@ -227,7 +227,7 @@ double StaticStructural :: giveEndOfTimeOfInterest()
 void StaticStructural :: solveYourself()
 {
     ///@todo Generalize this to engngmodel?
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps

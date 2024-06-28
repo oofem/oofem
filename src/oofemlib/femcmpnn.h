@@ -43,7 +43,7 @@
 
 #include <string>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "interfacetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

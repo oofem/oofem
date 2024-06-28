@@ -145,6 +145,6 @@ double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords,
 std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order) const
 {
     OOFEM_ERROR("Not supported.");
-    return nullptr;
+    //return nullptr;
 }
 } // end namespace oofem

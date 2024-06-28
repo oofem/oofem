@@ -493,7 +493,6 @@ RankineMat :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeSt
         return {E * (1.0 - om)};
     } else {
         OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
-        return {0.};
     }
 }
 

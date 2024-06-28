@@ -888,7 +888,6 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
         return std::make_unique<TimeCheckingRule>(line, errorTolerance);
     } else {
         OOFEM_ERROR("Unsupported rule '%s'", line.c_str());
-        return nullptr;
     }
 }
 

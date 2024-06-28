@@ -37,7 +37,7 @@
 #include "util.h"
 
 #include <cstdarg>
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include <mpi.h>
 #endif
 
@@ -57,7 +57,7 @@ Logger :: Logger(logLevelType level) :
     logLevel(level),
     numberOfWrn(0),
     numberOfErr(0)
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     ,comm(MPI_COMM_SELF)
 #endif
 {}
@@ -149,7 +149,7 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 {
     int rank = 0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     MPI_Comm_rank(this->comm, & rank);
 #endif
     (void)rank;//prevent a warning about unused variable
@@ -243,7 +243,7 @@ Logger :: setLogLevel(int level)
     }
 }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 void
 Logger :: setComm(MPI_Comm comm)
 {
@@ -256,12 +256,12 @@ Logger :: printStatistics()
 {
     int rank = 0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     MPI_Comm_rank(this->comm, & rank);
 #endif
 
     int totalNumberOfErr = numberOfErr, totalNumberOfWrn = numberOfWrn;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     MPI_Reduce(& numberOfErr, & totalNumberOfErr, 1, MPI_INT, MPI_SUM, 0, this->comm);
     MPI_Reduce(& numberOfWrn, & totalNumberOfWrn, 1, MPI_INT, MPI_SUM, 0, this->comm);
 #endif

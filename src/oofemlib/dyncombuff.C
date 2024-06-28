@@ -40,7 +40,7 @@
 #include "error.h"
 
 namespace oofem {
-CommunicationPacket :: CommunicationPacket(MPI_Comm comm, int size, int num) : MPIBuffer(max(size, __CommunicationPacket_DEFAULT_SIZE), false)
+  CommunicationPacket :: CommunicationPacket(MPI_Comm comm, std::size_t size, int num) : MPIBuffer(max(size, __CommunicationPacket_DEFAULT_SIZE), false)
 {
     this->EOF_Flag = false;
     this->number = num;
@@ -81,7 +81,7 @@ CommunicationPacket :: iSend(MPI_Comm communicator, int dest, int tag)
 
 
 int
-CommunicationPacket :: iRecv(MPI_Comm communicator, int source, int tag, int count)
+CommunicationPacket :: iRecv(MPI_Comm communicator, int source, int tag, std::size_t count)
 {
     if ( count ) {
         if ( count >= this->size ) {
@@ -148,7 +148,7 @@ CommunicationPacket :: unpackHeader(MPI_Comm comm)
 
 CommunicationPacketPool DynamicCommunicationBuffer :: packetPool;
 
-DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, int size, bool dynamic) :
+  DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, std::size_t size, bool dynamic) :
     CommunicationBuffer(comm, size, dynamic), packet_list()
 {
     number_of_packets = 0;
@@ -278,7 +278,7 @@ DynamicCommunicationBuffer :: iSend(int dest, int tag)
 
 
 int
-DynamicCommunicationBuffer :: iRecv(int source, int tag, int count)
+DynamicCommunicationBuffer :: iRecv(int source, int tag, std::size_t count)
 {
     this->init();
     number_of_packets = 0;

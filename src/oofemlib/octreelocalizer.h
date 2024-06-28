@@ -35,7 +35,7 @@
 #ifndef octreelocalizer_h
 #define octreelocalizer_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "spatiallocalizer.h"
 #include "floatarray.h"
 #include "intarray.h"

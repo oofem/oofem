@@ -201,7 +201,6 @@ TrPlanestressRotAllman3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTe
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {} else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||

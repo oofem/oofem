@@ -35,7 +35,7 @@
 #ifndef sloangraph_h
 #define sloangraph_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "sloangraphnode.h"
 #include "sloanlevelstruct.h"
 #include "dofmanager.h"

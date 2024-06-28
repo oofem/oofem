@@ -63,14 +63,12 @@ double
 LocalGaussianRandomFunction :: evaluateVelocityAtTime(double t)
 {
     OOFEM_ERROR("Can't generate velocity of random number");
-    return 0.;
 }
 
 double
 LocalGaussianRandomFunction :: evaluateAccelerationAtTime(double t)
 {
     OOFEM_ERROR("Can't generate acceleration of random number");
-    return 0.;
 }
 
 void
@@ -224,7 +222,6 @@ double LocalGaussianRandomFunction :: normal01CdfInverse(double p)
 
         if ( r <= 0.0 ) {
             OOFEM_ERROR("r < 0.0!");
-            return -1.0;
         }
 
         r = sqrt( -log(r) );

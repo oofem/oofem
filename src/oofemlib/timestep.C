@@ -51,6 +51,7 @@ TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCo
     number(n), version(0), subStepNumber(0), mStepNumber(mn), timeDiscretization(td), numberOfIterations(0), numberOfAttempts(0), convergedReason(ConvergedReason::CR_UNKNOWN)
 {
     // Target time and intrinsic time is the same in the constructor.
+    this->solutionTime = 0.0;
 }
 
 TimeStep :: TimeStep(EngngModel *e)
@@ -66,6 +67,8 @@ TimeStep :: TimeStep(EngngModel *e)
     subStepNumber = 0;
     numberOfIterations = 0;
     numberOfAttempts = 0;
+    timeDiscretization = TimeDiscretizationType::TD_Unspecified;
+    solutionTime = 0.0;
     convergedReason = ConvergedReason::CR_UNKNOWN;
 }
 
@@ -83,6 +86,8 @@ TimeStep :: TimeStep(const TimeStep &src)
     numberOfIterations = src.numberOfIterations;
     numberOfAttempts = src.numberOfAttempts;
     convergedReason = src.convergedReason;
+    timeDiscretization = src.timeDiscretization;
+    solutionTime = src.solutionTime;
 }
 
 TimeStep :: TimeStep(const TimeStep &previous, double dt)
@@ -98,6 +103,8 @@ TimeStep :: TimeStep(const TimeStep &previous, double dt)
     subStepNumber = 0;
     numberOfIterations = 0;
     numberOfAttempts = 0;
+    timeDiscretization = previous.timeDiscretization;
+    solutionTime = 0.0;
     convergedReason = ConvergedReason::CR_UNKNOWN;
 }
 
@@ -129,8 +136,6 @@ TimeStep *TimeStep :: givePreviousStep()
     } else {
         OOFEM_ERROR("Could not return previous step of noncurrent step");
     }
-
-    return NULL; // to make compiler happy
 }
 
 

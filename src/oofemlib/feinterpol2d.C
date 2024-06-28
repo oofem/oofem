@@ -66,7 +66,6 @@ double FEInterpolation2d :: boundaryEdgeEvalNormal(FloatArray &answer, int isurf
 double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented in subclass.");
-    return 0;
 }
 
 #define POINT_TOL 1.e-3

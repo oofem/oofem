@@ -57,7 +57,7 @@ using namespace std;
 #include "unknownnumberingscheme.h"
 #include "assemblercallback.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "loadbalancer.h"
  #include "problemcomm.h"
  #include "processcomm.h"
@@ -162,7 +162,7 @@ NonLinearDynamic :: initializeFrom(InputRecord &ir)
     MANRMSteps = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, _IFT_NRSolver_manrmsteps);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
@@ -189,7 +189,6 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
 
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     switch ( mode ) {
@@ -208,8 +207,6 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
     default:
         OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
-
-    return 0.0;
 }
 
 
@@ -786,7 +783,7 @@ NonLinearDynamic :: updateDomainLinks()
     EngngModel :: updateDomainLinks();
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->setDomain( this->giveDomain(1) );
     }
@@ -937,7 +934,7 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {

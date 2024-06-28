@@ -35,7 +35,7 @@
 #ifndef nummet_h
 #define nummet_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

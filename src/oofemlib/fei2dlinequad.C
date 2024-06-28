@@ -237,7 +237,7 @@ void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
 double FEI2dLineQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
-    return 0.0;
+    //return 0.0;
 }
 
 double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const

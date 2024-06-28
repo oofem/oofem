@@ -35,7 +35,7 @@
 #ifndef contable_h
 #define contable_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <vector>
 

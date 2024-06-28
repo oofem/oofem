@@ -35,7 +35,7 @@
 #ifndef dictionr_h
 #define dictionr_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "pair.h"
 #include "error.h"
 #include "contextioresulttype.h"

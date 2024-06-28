@@ -35,7 +35,7 @@
 #ifndef geometry_h
 #define geometry_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "error.h"
 #include "floatarray.h"
 #include "inputrecord.h"

@@ -37,7 +37,7 @@
 
 #include "chartype.h"
 #include "valuemodetype.h"
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "datareader.h"
 #include "inputrecord.h"
 

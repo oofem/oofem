@@ -331,7 +331,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(int iedge) const
         return {3, 6};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        // return {};
     }
 }
 
@@ -340,7 +340,7 @@ double
 FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -396,7 +396,7 @@ FEI3dWedgeLin :: computeLocalSurfaceMapping(int isurf) const
         return {3, 1, 4, 6};
     } else {
         throw std::range_error("invalid surface number");
-        return {};
+        //return {};
     }
 }
 
@@ -406,7 +406,7 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
                                                    const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0;
+    // return 0;
 }
 
 

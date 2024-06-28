@@ -37,7 +37,7 @@
 #include "element.h"
 #include "dofmanager.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
 #endif
 
@@ -49,7 +49,7 @@ NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList()
     domain = d;
     this->valType = IST_Undefined;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     communicator = NULL;
     commBuff = NULL;
     initCommMap = true;
@@ -59,7 +59,7 @@ NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList()
 
 NodalRecoveryModel :: ~NodalRecoveryModel()
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     delete communicator;
     delete commBuff;
 #endif

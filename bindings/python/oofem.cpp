@@ -39,6 +39,7 @@ namespace py = pybind11;
 
 #include <string>
 
+#include "oofemenv.h"
 #include "oofemcfg.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -102,6 +103,7 @@ namespace py = pybind11;
 
 #include "uniformgridfield.h"
 #include "unstructuredgridfield.h"
+#include "vtkhdf5reader.h"
 #include "dofmanvalfield.h"
 #include "pythonfield.h"
 #include <iostream>
@@ -1685,11 +1687,7 @@ PYBIND11_MODULE(oofempy, m) {
 //std::shared_ptr<oofem::Field>
     py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
         .def(py::init<oofem::FieldType>())  
-//         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)
-        
-        .def("evaluateAt", [](oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep){
-            return std::make_tuple(answer,coords);//TODO-how to invoke the function if it does not exist yet?
-        })
+        .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("giveType", &oofem::Field::giveType)
         .def("setType", &oofem::Field::setType)
         ;
@@ -1715,6 +1713,13 @@ PYBIND11_MODULE(oofempy, m) {
         .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
         ;
     
+    py::class_<oofem::VTKHDF5Reader>(m, "VTKHDF5Reader")
+        .def(py::init<>())
+        .def("initialize", &oofem::VTKHDF5Reader::initialize)
+        .def("finalize", &oofem::VTKHDF5Reader::finalize)
+        .def("readMesh", &oofem::VTKHDF5Reader::readMesh)
+        .def("readField", &oofem::VTKHDF5Reader::readField)
+        ;
         
 //depends on Python.h
 #ifdef _PYBIND_BINDINGS       
@@ -1725,6 +1730,24 @@ PYBIND11_MODULE(oofempy, m) {
         ;   
 #endif
 
-
+// Utility function to test presence of compiled oofem modules
+    m.def("hasModule", [](const std::string &name) {
+#ifdef __SM_MODULE
+        if (name == "sm") return true;
+#endif
+#ifdef __TM_MODULE
+        if (name == "tm") return true;
+#endif
+#ifdef __FM_MODULE
+        if (name == "fm") return true;
+#endif
+#ifdef __AM_MODULE
+        if (name == "am") return true;
+#endif
+#ifdef __MPM_MODULE
+        if (name == "mpm") return true;
+#endif
+        return false;
+    });
     m.def("test", &test);
  }

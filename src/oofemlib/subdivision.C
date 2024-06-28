@@ -59,7 +59,7 @@
  #include "oofeggraphiccontext.h"
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
  #include "problemcomm.h"
  #include "communicator.h"
@@ -117,7 +117,7 @@ int Subdivision :: RS_Node :: buildTopLevelNodeConnectivity(ConnectivityTable *c
 
     for ( int el : connElems ) {
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -150,7 +150,7 @@ void Subdivision :: RS_Element :: buildTopLevelNodeConnectivity(Subdivision :: R
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 int
 Subdivision :: RS_Node :: importConnectivity(ConnectivityTable *ct)
@@ -477,7 +477,7 @@ Subdivision :: RS_Tetra :: evaluateLongestEdge()
         // array ed contains edge numbers (1 to 6) connecting the node with each node (1 to 4)
         // (indexing from 1, zero means, that node is not connected by an edge with itself)
         int ed [ 4 ] [ 4 ] = { { 0, 1, 3, 4 }, { 1, 0, 2, 5 }, { 3, 2, 0, 6 }, { 4, 5, 6, 0 } };
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         int g_nd [ 4 ];
 #endif
         bool swap;
@@ -485,7 +485,7 @@ Subdivision :: RS_Tetra :: evaluateLongestEdge()
         // sort node ids
         for ( i = 0; i < 4; i++ ) {
             l_nd [ i ] = nodes.at(i + 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             g_nd [ i ] = mesh->giveNode(l_nd [ i ])->giveGlobalNumber();
 #endif
         }
@@ -494,13 +494,13 @@ Subdivision :: RS_Tetra :: evaluateLongestEdge()
         while ( swap ) {
             swap = false;
             for ( i = 0; i < 3; i++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
                 if ( g_nd [ i ] > g_nd [ i + 1 ] ) {
 #else
                 if ( l_nd [ i ] > l_nd [ i + 1 ] ) {
 #endif
                     int tmp;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
                     tmp = g_nd [ i ];
                     g_nd [ i ] = g_nd [ i + 1 ];
                     g_nd [ i + 1 ] = tmp;
@@ -580,7 +580,6 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR( "there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
-        return 0;
     }
 
     if ( in < jn ) {
@@ -619,7 +618,6 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR( "there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
-        return 0;
     }
 
     if ( in < jn ) {
@@ -655,7 +653,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
     bool boundary = false;
     FloatArray coords;
     Subdivision :: RS_Element *elem;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Subdivision :: RS_SharedEdge *edge;
 #endif
 
@@ -688,7 +686,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
  #endif
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] RS_Triangle::bisecting %d nodes %d %d %d, leIndex %d, new irregular %d\n", mesh->giveSubdivision()->giveRank(), this->number, nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
 #endif
@@ -738,7 +736,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
             }
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         else {
             // check if there are (potentionally) shared edges
             if ( shared_edges.giveSize() ) {
@@ -794,7 +792,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
     Domain *dorig;
     RS_IrregularNode *irregular;
     const IntArray *iElems, *jElems;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Subdivision :: RS_SharedEdge *edge;
 #endif
 
@@ -955,7 +953,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
             // do not print global numbers of irregulars as these may not be available yet
             OOFEM_LOG_INFO( "[%d] Irregular %d added on %d [%d] (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
@@ -981,7 +979,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 
             shared = boundary = false;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // check if there are (potentionally) shared edges
             if ( shared_edges.giveSize() ) {
                 // check if the edge is (really) shared
@@ -1054,7 +1052,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                         }
 
  #ifdef DEBUG_INFO
-  #ifdef __PARALLEL_MODE
+  #ifdef __MPI_PARALLEL_MODE
                         // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                         // do not print global numbers of irregulars as these may not be available yet
                         OOFEM_LOG_INFO( "[%d] Irregular %d added on %d [%d] (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
@@ -1127,7 +1125,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
                     // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                     // do not print global numbers of irregulars as these may not be available yet
                     OOFEM_LOG_INFO( "[%d] Irregular %d added on %d [%d] (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
@@ -1232,7 +1230,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                             elem->setIrregular(eInd, iNum);
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
                             // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                             // do not print global numbers of irregulars as these may not be available yet
                             OOFEM_LOG_INFO( "[%d] Irregular %d added on %d [%d] (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
@@ -1299,7 +1297,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
         IntArray _nodes(3);
         Subdivision :: RS_Triangle *child;
         Subdivision :: RS_Element *ngb;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         bool ishared = false, jshared = false, kshared = false;
 #endif
 
@@ -1332,7 +1330,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
         jnode = ( inode < 3 ) ? inode + 1 : 1;
         knode = ( jnode < 3 ) ? jnode + 1 : 1;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( shared_edges.giveSize() ) {
             if ( shared_edges.at(iedge) ) {
                 ishared = true;
@@ -1361,7 +1359,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
             child->setNeighbor(2, childNum + 2);
             child->setNeighbor(3, childNum + 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( kshared ) {
                 child->makeSharedEdges();
@@ -1381,7 +1379,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor(1, childNum - 1);
             child->setNeighbor(2, childNum + 2);
             child->setNeighbor( 3, -this->giveNeighbor(jedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( jshared ) {
                 child->makeSharedEdges();
@@ -1401,7 +1399,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(iedge) );
             child->setNeighbor(2, childNum - 2);
             child->setNeighbor( 3, -this->giveNeighbor(kedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || kshared ) {
                 child->makeSharedEdges();
@@ -1428,7 +1426,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor(2, childNum - 2);
             child->setNeighbor( 3, -this->giveNeighbor(iedge) );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared ) {
                 child->makeSharedEdges();
@@ -1443,7 +1441,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(inode) )->eraseConnectedElement( this->giveNumber() );
@@ -1491,7 +1489,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
             child->setNeighbor( 2, -this->giveNeighbor(iedge) );
             child->setNeighbor(3, childNum + 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || kshared ) {
                 child->makeSharedEdges();
@@ -1517,7 +1515,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor(1, childNum - 1);
             child->setNeighbor(2, childNum + 1);
             child->setNeighbor( 3, -this->giveNeighbor(jedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( jshared ) {
                 child->makeSharedEdges();
@@ -1537,7 +1535,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(jedge) );
             child->setNeighbor(2, childNum - 1);
             child->setNeighbor( 3, -this->giveNeighbor(iedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared ) {
                 child->makeSharedEdges();
@@ -1552,7 +1550,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(inode) )->eraseConnectedElement( this->giveNumber() );
@@ -1594,7 +1592,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
             child->setNeighbor(2, childNum + 1);
             child->setNeighbor(3, childNum + 2);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( kshared ) {
                 child->makeSharedEdges();
@@ -1614,7 +1612,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(iedge) );
             child->setNeighbor(2, childNum - 1);
             child->setNeighbor( 3, -this->giveNeighbor(kedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || kshared ) {
                 child->makeSharedEdges();
@@ -1640,7 +1638,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor(1, childNum - 2);
             child->setNeighbor( 2, -this->giveNeighbor(iedge) );
             child->setNeighbor( 3, -this->giveNeighbor(jedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared ) {
                 child->makeSharedEdges();
@@ -1655,7 +1653,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(inode) )->eraseConnectedElement( this->giveNumber() );
@@ -1697,7 +1695,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor( 1, -this->giveNeighbor(kedge) );
             child->setNeighbor( 2, -this->giveNeighbor(iedge) );
             child->setNeighbor(3, childNum + 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || kshared ) {
                 child->makeSharedEdges();
@@ -1723,7 +1721,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             child->setNeighbor(1, childNum - 1);
             child->setNeighbor( 2, -this->giveNeighbor(iedge) );
             child->setNeighbor( 3, -this->giveNeighbor(jedge) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared ) {
                 child->makeSharedEdges();
@@ -1738,7 +1736,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(inode) )->eraseConnectedElement( this->giveNumber() );
@@ -1814,7 +1812,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
         IntArray _nodes(4);
         Subdivision :: RS_Tetra *child;
         Subdivision :: RS_Element *ngb;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         int eNum = this->mesh->giveNumberOfEdges();
         Subdivision :: RS_SharedEdge *_edge;
         bool ishared = false, jshared = false, kshared = false;
@@ -1867,7 +1865,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
         this->children.resize(2);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( shared_edges.giveSize() ) {
             if ( shared_edges.at(iedge) ) {
                 ishared = true;
@@ -1964,7 +1962,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 }
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             int i_shared_id = 0, n_shared_id = 0;
 
             // check whether new edges are potentially shared
@@ -2039,7 +2037,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             // neihgbor4 of child1 is changed to negative during subdivision (if any) of child2
             child->setNeighbor(4, childNum + 1);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || kshared || iishared || jjshared ) {
                 child->makeSharedEdges();
@@ -2066,7 +2064,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             OOFEM_LOG_INFO("[%d] Child %d generated on parent %d [%d] (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
                            mesh->giveSubdivision()->giveRank(), childNum,
                            this->number, this->giveGlobalNumber(), this->leIndex,
@@ -2119,7 +2117,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
             // neihgbor2 of child2 is changed to negative during subdivision (if any) of child1
             child->setNeighbor(2, childNum - 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared || iishared || kkshared ) {
                 child->makeSharedEdges();
@@ -2145,7 +2143,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(inode) )->eraseConnectedElement( this->giveNumber() );
@@ -2177,7 +2175,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             OOFEM_LOG_INFO("[%d] Child %d generated on parent %d [%d] (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
                            mesh->giveSubdivision()->giveRank(), childNum,
                            this->number, this->giveGlobalNumber(), this->leIndex,
@@ -2205,7 +2203,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
             // set connected elements to nonshared nodes on outer boundary
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( !ishared ) {
 #endif
             if ( mesh->giveNode( irregular_nodes.at(iedge) )->giveNumber() < 0 ) {                   // check for marked local irregular
@@ -2217,7 +2215,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
             // update connectivity of both end nodes of iedge if not shared
             // and ONLY if there is already list of connected elements
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(jnode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(jnode) )->giveConnectedElements()->giveSize() ) {
@@ -2225,11 +2223,11 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(jnode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(knode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(knode) )->giveConnectedElements()->giveSize() ) {
@@ -2237,18 +2235,18 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(knode) )->insertConnectedElement(childNum);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( !iishared ) {
 #endif
             // update connectivity of both end nodes of iiedge if not shared
             // and ONLY if there is already list of connected elements
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(inode) )->giveConnectedElements()->giveSize() ) {
@@ -2257,10 +2255,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(inode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(nnode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(nnode) )->giveConnectedElements()->giveSize() ) {
@@ -2269,10 +2267,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(nnode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
         } else {
@@ -2343,7 +2341,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 }
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             int j_shared_id = 0, k_shared_id = 0;
 
             // check whether new edges are potentially shared
@@ -2416,7 +2414,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
             // neihgbor3 of child1 is changed to negative during subdivision (if any) of child2
             child->setNeighbor(3, childNum + 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jshared || kshared || iishared ) {
                 child->makeSharedEdges();
@@ -2443,7 +2441,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             OOFEM_LOG_INFO("[%d] Child %d generated on parent %d [%d] (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
                            mesh->giveSubdivision()->giveRank(), childNum,
                            this->number, this->giveGlobalNumber(), this->leIndex,
@@ -2496,7 +2494,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
             // neihgbor1 of child2 is changed to negative during subdivision (if any) of child1
             child->setNeighbor(1, childNum - 1);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set shared info
             if ( ishared || jjshared || kkshared || iishared ) {
                 child->makeSharedEdges();
@@ -2522,7 +2520,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // set connected elements
             if ( mesh->giveNode( nodes.at(jnode) )->giveParallelMode() == DofManager_shared ) {
                 mesh->giveNode( nodes.at(jnode) )->eraseConnectedElement( this->giveNumber() );
@@ -2554,7 +2552,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             OOFEM_LOG_INFO("[%d] Child %d generated on parent %d [%d] (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
                            mesh->giveSubdivision()->giveRank(), childNum,
                            this->number, this->giveGlobalNumber(), this->leIndex,
@@ -2582,7 +2580,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 #endif
 
             // set connected elements to nonshared nodes on outer boundary
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( !iishared ) {
 #endif
             if ( mesh->giveNode( irregular_nodes.at(iiedge) )->giveNumber() < 0 ) {                   // check for marked local irregular
@@ -2594,7 +2592,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
             // update connectivity of both end nodes of iiedge if not shared
             // and ONLY if there is already list of connected elements
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(inode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(inode) )->giveConnectedElements()->giveSize() ) {
@@ -2602,10 +2600,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(inode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(nnode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(nnode) )->giveConnectedElements()->giveSize() ) {
@@ -2613,18 +2611,18 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(nnode) )->insertConnectedElement(childNum);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( !ishared ) {
 #endif
             // update connectivity of both end nodes of iedge if not shared
             // and ONLY if there is already list of connected elements
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(jnode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(jnode) )->giveConnectedElements()->giveSize() ) {
@@ -2633,10 +2631,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(jnode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveNode( nodes.at(knode) )->giveParallelMode() != DofManager_shared ) {                // update already done
 #endif
             if ( mesh->giveNode( nodes.at(knode) )->giveConnectedElements()->giveSize() ) {
@@ -2645,10 +2643,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 mesh->giveNode( nodes.at(knode) )->insertConnectedElement(childNum - 1);
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         }
 #endif
         }
@@ -3028,7 +3026,7 @@ Subdivision :: RS_Triangle :: importConnectivity(ConnectivityTable *ct)
                 continue;
             }
 
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -3056,7 +3054,7 @@ Subdivision :: RS_Triangle :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3075,7 +3073,7 @@ Subdivision :: RS_Triangle :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3098,7 +3096,7 @@ Subdivision :: RS_Triangle :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3137,7 +3135,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3164,7 +3162,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
                 continue;
             }
 
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -3196,7 +3194,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3230,7 +3228,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3408,7 +3406,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                                            domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, tStep ),
                                            domain->giveNode ( i )->isBoundary() );
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         _node->setParallelMode( domain->giveNode(i)->giveParallelMode() );
         _node->setPartitions( * domain->giveNode(i)->givePartitionList() );
 #endif
@@ -3435,10 +3433,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             _element = new Subdivision :: RS_Tetra(i, mesh, i, enodes);
         } else {
             OOFEM_ERROR("Unsupported element geometry (element %d)", i);
-            _element = NULL;
         }
         _element->setGlobalNumber( domain->giveElement(i)->giveGlobalNumber() );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         _element->setParallelMode( domain->giveElement(i)->giveParallelMode() );
 #endif
         this->mesh->addElement(_element);
@@ -3447,7 +3444,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
     // import connectivities for local elements only
     for ( int i = 1; i <= nelems; i++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( this->mesh->giveElement(i)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3456,7 +3453,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         this->mesh->giveElement(i)->importConnectivity( domain->giveConnectivityTable() );
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // import connectivities for shared nodes only
     // build global shared node map (for top level only)
     this->mesh->initGlobalSharedNodeMap();
@@ -3496,7 +3493,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
  #ifdef DRAW_MESH_BEFORE_BISECTION
     nelems = mesh->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-  #ifdef __PARALLEL_MODE
+  #ifdef __MPI_PARALLEL_MODE
         if ( this->mesh->giveElement(i)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3528,7 +3525,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             continue;
         }
 
-  #ifdef __PARALLEL_MODE
+  #ifdef __MPI_PARALLEL_MODE
         if ( this->mesh->giveElement(i)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3573,14 +3570,13 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         dof = new SimpleSlaveDof( node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
                         OOFEM_ERROR("unsupported DOF type");
-                        dof = nullptr;
                     }
                 }
                 node->appendDof(dof);
             }
 
             node->setGlobalNumber( parentNodePtr->giveGlobalNumber() );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             node->setParallelMode( parentNodePtr->giveParallelMode() );
             node->setPartitionList( parentNodePtr->givePartitionList() );
 #endif
@@ -3750,7 +3746,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             }
 
             node->setGlobalNumber( mesh->giveNode(inode)->giveGlobalNumber() );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             node->setParallelMode( mesh->giveNode(inode)->giveParallelMode() );
             node->setPartitionList( mesh->giveNode(inode)->givePartitions() );
 #endif
@@ -3767,7 +3763,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nterminals = 0;
     nelems = mesh->giveNumberOfElements();
     for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(ielem)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3778,13 +3774,13 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         }
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     IntArray parentElemMap(nterminals);
 #endif
     ( * dNew )->resizeElements(nterminals);
     int eNum = 0;
     for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( mesh->giveElement(ielem)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -3796,7 +3792,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
         eNum++;
         parent = mesh->giveElement(ielem)->giveTopParent();
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         parentElemMap.at(eNum) = parent;
 #endif
         if ( parent ) {
@@ -3807,7 +3803,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             auto elem = classFactory.createElement(name.c_str(), eNum, * dNew);
             elem->initializeFrom(ir);
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // not subdivided elements inherit globNum, subdivided give -1
             // local elements have array partitions empty !
@@ -3909,7 +3905,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );
 
     timer.stopTimer();
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
                    ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, timer.getUtime() );
 #else
@@ -3920,7 +3916,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
  
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     nnodes = ( * dNew )->giveNumberOfDofManagers();
     for ( int inode = 1; inode <= nnodes; inode++ ) {
@@ -4007,7 +4003,7 @@ Subdivision :: bisectMesh()
     RS_Element *elem;
     RS_Node *node;
     //std::queue<int> subdivqueue;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     int remote_elems = 0;
     int myrank = this->giveRank();
     int problem_size = this->giveNumberOfProcesses();
@@ -4021,7 +4017,7 @@ Subdivision :: bisectMesh()
     for ( int in = 1; in <= nnodes; in++ ) {
         maxlocalglobal = max( maxlocalglobal, mesh->giveNode(in)->giveGlobalNumber() );
     }
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // determine max global number on all partitions
     MPI_Allreduce(& maxlocalglobal, & maxglobalnumber, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 #else
@@ -4034,7 +4030,7 @@ Subdivision :: bisectMesh()
 
 
         nnodes_old = nnodes;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: entering bisection loop %d\n", myrank, ++loop);
 #else
         OOFEM_LOG_INFO("Subdivision::bisectMesh: entering bisection loop %d\n", ++loop);
@@ -4043,7 +4039,7 @@ Subdivision :: bisectMesh()
         // process only newly created elements in pass 2 and more
         for ( ie = nelems_old + 1; ie <= nelems; ie++ ) {
             elem = mesh->giveElement(ie);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // skip bisection of remote elements (in first pass only (nelems_old = 0));
             // in pass 2 and more there should be no remote elements because
             // only newly created elements are processed
@@ -4060,7 +4056,7 @@ Subdivision :: bisectMesh()
                 continue;
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // bisect local elements only
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
@@ -4086,11 +4082,11 @@ Subdivision :: bisectMesh()
 
 
 
-#ifndef __PARALLEL_MODE
+#ifndef __MPI_PARALLEL_MODE
                 repeat = 1;                // force repetition in seqeuntial run
 #endif
                 /*
-                 * #ifdef __PARALLEL_MODE
+                 * #ifdef __MPI_PARALLEL_MODE
                  * OOFEM_LOG_INFO("[%d] Subdivision: scheduling element %d[%d] for bisection, dens=%lf rdens=%lf\n", myrank, ie, elem->giveGlobalNumber(), iedensity, rdensity);
                  ******#else
                  * OOFEM_LOG_INFO("Subdivision: scheduling element %d for bisection, dens=%lf rdens=%lf\n", ie, iedensity, rdensity);
@@ -4100,21 +4096,21 @@ Subdivision :: bisectMesh()
         }
 
 #ifdef DEBUG_INFO
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
         OOFEM_LOG_INFO("[%d] (with %d nodes and %d elems)\n", myrank, nnodes_old, terminal_local_elems + remote_elems);
  #else
         OOFEM_LOG_INFO("(with %d nodes and %d elems)\n", nnodes_old, terminal_local_elems);
  #endif
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         for ( value = 0; value == 0; value = exchangeSharedIrregulars() ) {
 #endif
         // loop over subdivision queue to bisect all local elements there
         while ( !subdivqueue.empty() ) {
             elem = mesh->giveElement( subdivqueue.front() );
 #ifdef DEBUG_CHECK
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 OOFEM_ERROR( "nonlocal element %d not expected for bisection", elem->giveNumber() );
             }
@@ -4126,7 +4122,7 @@ Subdivision :: bisectMesh()
             subdivqueue.pop();
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         // in parallel communicate with neighbours the irregular nodes on shared bondary
         }
 
@@ -4135,7 +4131,7 @@ Subdivision :: bisectMesh()
         int in;
         nnodes = mesh->giveNumberOfNodes();
 
-#ifndef __PARALLEL_MODE
+#ifndef __MPI_PARALLEL_MODE
         int myrank = 0;
 #endif
         // assign global numbers to newly introduced irregulars while
@@ -4157,7 +4153,7 @@ Subdivision :: bisectMesh()
             }
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
  #endif
@@ -4192,7 +4188,7 @@ Subdivision :: bisectMesh()
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         // finally, communicate global numbers assigned to shared irregulars
         this->assignGlobalNumbersToSharedIrregulars();
         for ( in = nnodes_old+1; in <= nnodes; in++ ) {
@@ -4237,7 +4233,7 @@ Subdivision :: bisectMesh()
                 continue;
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -4246,7 +4242,7 @@ Subdivision :: bisectMesh()
             elem->generate(sharedEdgesQueue);
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( globalIrregulars ) {
             // exchange shared edges
             // this must be done after globnums are assigned to new shared irregulars
@@ -4271,7 +4267,7 @@ Subdivision :: bisectMesh()
                 continue;
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -4282,7 +4278,7 @@ Subdivision :: bisectMesh()
         }
 
 #if 0
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
         int global_repeat = 0;
 
         // determine whether any partition needs additional bisection pass
@@ -4305,7 +4301,7 @@ Subdivision :: bisectMesh()
  #endif
 #endif
     } // end bisection loop
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if (partitionsIrregulars) {
       delete[] partitionsIrregulars;
     }
@@ -4329,7 +4325,7 @@ Subdivision :: smoothMesh()
     char buffer [ 1024 ];
     int len;
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision::smoothMesh\n", this->giveRank() );
 #else
     OOFEM_LOG_INFO("Subdivision::smoothMesh\n");
@@ -4347,7 +4343,7 @@ Subdivision :: smoothMesh()
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -4377,7 +4373,7 @@ Subdivision :: smoothMesh()
             continue;
         }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -4398,7 +4394,7 @@ Subdivision :: smoothMesh()
     }
 
 #ifdef DEBUG_SMOOTHING
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision::smoothMesh: connectivity node_id: elem_ids\n", this->giveRank() );
  #else
     OOFEM_LOG_INFO("Subdivision::smoothMesh: connectivity node_id: elem_ids\n");
@@ -4487,7 +4483,7 @@ Subdivision :: smoothMesh()
     }
 
 #ifdef DEBUG_SMOOTHING
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision::smoothMesh: connectivity node_id: node_ids\n", this->giveRank() );
  #else
     OOFEM_LOG_INFO("Subdivision::smoothMesh: connectivity node_id: node_ids\n");
@@ -4585,7 +4581,7 @@ Subdivision :: smoothMesh()
 #else
         for ( in = 1; in <= nnodes; in++ ) {
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             if ( ( mesh->giveNode(in)->giveParallelMode() == DofManager_shared ) ||
                 ( mesh->giveNode(in)->giveParallelMode() == DofManager_null ) ) {
                 continue;                                                                                 // skip shared and remote node
@@ -4657,7 +4653,7 @@ Subdivision :: smoothMesh()
 bool
 Subdivision :: isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( node->isIrregular() ) {
         if ( node->giveParallelMode() == DofManager_local ) {
             return true;
@@ -4690,7 +4686,7 @@ void
 Subdivision :: assignGlobalNumbersToElements(Domain *d)
 {
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
     int problem_size = this->giveNumberOfProcesses();
     int myrank = this->giveRank();
@@ -4779,7 +4775,7 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 bool
 Subdivision :: exchangeSharedIrregulars()
 {

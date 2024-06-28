@@ -35,7 +35,7 @@
 #ifndef domaintransactionmanager_h
 #define domaintransactionmanager_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <map>
 
