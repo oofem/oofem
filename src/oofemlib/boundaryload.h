@@ -164,8 +164,8 @@ public:
      * See cltypes.h file for details.
      */
     bcType giveType() const override { return lType; }
-    virtual double giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict);
-    double giveProperty(int aProperty, TimeStep *tStep) override;
+    virtual double giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict) const;
+    double giveProperty(int aProperty, TimeStep *tStep) const override;
     /// Return temperature offset
     virtual double giveTemperOffset(void);
     /// Expression to multiply all properties

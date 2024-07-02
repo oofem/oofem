@@ -135,6 +135,34 @@ class BTdSigmadT : public Term {
 };
 
 
+/// @brief evaluates flux due to convection BC ∫(Nt)a(T-Te)ds, Te being external temperature and a being convective heat transfer coefficient 
+class NTaTmTe : public Term {
+    protected:
+        BoundaryLoad* bl;
+        int boundaryID;
+        char boundaryType;
+    public:
+    NTaTmTe (const Variable &testField, const Variable& unknownField, BoundaryLoad* bl, int boundaryID, char boundaryType) ;
+
+    /**
+     * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
+     * 
+     * @param answer 
+     * @param e 
+     * @param coords 
+     */
+    void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override;
+    /**
+     * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
+     * 
+     * @param cell 
+     * @param coords 
+     */
+    void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
+    void getDimensions(Element& cell) const override;
+    void initializeCell(Element& cell) const override;
+};
+
 
 } // end namespace oofem
 #endif // termlibrary_h

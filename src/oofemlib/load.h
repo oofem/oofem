@@ -157,17 +157,7 @@ public:
      * @return Approximation order of load geometry.
      */
     virtual int giveApproxOrder() { return 0; }
-    /**
-     * Returns the value of a property 'aProperty'. Property must be identified
-     * by unique integer id.
-     * @param aProperty id of property requested
-     * @return property value
-     */
-    virtual double giveProperty(int aProperty, TimeStep *tStep) {
-        OOFEM_ERROR("Not supported for this boundary condition.");
-        return 0;
-    }
-
+    
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 

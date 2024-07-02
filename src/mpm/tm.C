@@ -117,6 +117,7 @@ class TMElement : public MPElement {
             answer.resize(this->giveNumberOfTDofs());
             answer.zero();
             this->integrateTerm_c(answer, TMgNTfTerm(getT(),getT(), ConductivityMatrix, InternalFluxVector), ir, tStep) ;
+            answer.times(-1.0);
             this->integrateTerm_c (answer, NTcN(getT(), getT(), CapacityMatrix), ir, tStep) ;
         } else if (type == ExternalForcesVector) {
           answer.zero();
@@ -125,60 +126,122 @@ class TMElement : public MPElement {
 	    }
     }
 
+    void giveCharacteristicMatrixFromBC(FloatMatrix &answer, CharType type, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) override {
+        if (bc->giveType() == ConvectionBC) {
+            BoundaryLoad *bbc = dynamic_cast<BoundaryLoad*>(bc);
+            if (bbc) {
+                FloatMatrix contrib;
+                IntArray loc;
+                int iorder = getU().interpolation.giveInterpolationOrder()+bbc->giveApproxOrder();
+                std::unique_ptr<IntegrationRule> ir;
+                answer.clear();
+                if (bbc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
+                        ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(iorder, 1, this->giveGeometryType());
+                        //this->integrateSurfaceTerm_dw(contrib, NTf_Surface(getT(), BoundaryFluxFunctor(bbc, boundaryID, getT().dofIDs,'s'), boundaryID), ir.get(), boundaryID, tStep);
+                        this->integrateSurfaceTerm_dw(answer, NTaTmTe(getT(), getT(), bbc, boundaryID, 's'), ir.get(), boundaryID, tStep);
+                } else if (bbc->giveBCGeoType() == bcGeomType::EdgeLoadBGT) {
+                        ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(iorder, 1, this->giveGeometryType());
+                        //this->integrateSurfaceTerm_dw(contrib, NTf_Surface(getT(), BoundaryFluxFunctor(bbc, boundaryID, getT().dofIDs,'e'), boundaryID), ir.get(), boundaryID, tStep);
+                        this->integrateSurfaceTerm_dw(answer, NTaTmTe(getT(), getT(), bbc, boundaryID, 'e'), ir.get(), boundaryID, tStep);
+                } else {
+                    OOFEM_ERROR("Unsupported boundary condition geometry type");
+                }
+            }
+        } else {
+            answer.clear();
+        }
+    }
+
+
+    virtual void giveCharacteristicVectorFromBC(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) override {
+        
+        if ((type == EnergyBalance_ConvectionBCResidual) && (bc->giveType() == ConvectionBC)) {
+            BoundaryLoad *bl = dynamic_cast<BoundaryLoad*>(bc);
+            IntArray loct, tc;
+            FloatArray contrib2;
+            answer.clear();            
+            int o = getT().interpolation.giveInterpolationOrder()+bl->giveApproxOrder();
+            if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
+                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundaryID, this->giveGeometryType());
+                this->integrateSurfaceTerm_c(answer, NTaTmTe(getT(), getT(), bl, boundaryID, 's'), ir2.get(), boundaryID, tStep);
+            } else {
+                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundaryID, this->giveGeometryType());
+                this->integrateEdgeTerm_c(answer, NTaTmTe(getT(), getT(), bl, boundaryID, 'e'), ir2.get(), boundaryID, tStep);
+            }
+        } else {
+            answer.clear();
+        }
+
+    }
+
     void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true) override {
-        answer.resize(giveNumberOfDofs());
+        answer.resize(this->getNumberOfSurfaceDOFs());
         answer.zero();
+        
         if ( type != ExternalForcesVector ) {
             return;
         }
 
-        IntArray locu, loct;
-        FloatArray contrib, contrib2;
-        getSurfaceLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getSurfaceLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
+        bcType bct = load->giveType();
+        if (bct == TransmissionBC ) {
+        
+            IntArray locu, loct;
+            FloatArray contrib, contrib2;
+            getSurfaceLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
+            getSurfaceLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
 
-        // integrate traction contribution (momentum balance)
-        int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
+            // integrate traction contribution (momentum balance)
+            int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+            this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
+            answer.assemble(contrib, locu);
 
-        answer.resize(this->getNumberOfSurfaceDOFs());
-        answer.zero();
-        answer.assemble(contrib, locu);
+            // integrate mass (fluid) flux normal to the boundary (mass balance) 
+            o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+            this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
+            contrib2.times(-1.0);
+            answer.assemble(contrib2, loct);
 
-        // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
-        answer.assemble(contrib2, loct);
+        } else if (bct == ConvectionBC) {
+            // convection handled in residual evaluation
+        } else {
+            OOFEM_ERROR("Unsupported boundary condition type");
+        }
     }
 
     void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override {
-        answer.resize(giveNumberOfDofs());
+        answer.resize(this->getNumberOfEdgeDOFs());
         answer.zero();
+        
         if ( type != ExternalForcesVector ) {
             return;
         }
+        
+        bcType bct = load->giveType();
+        if (bct == TransmissionBC ) {
+            IntArray locu, loct;
+            FloatArray contrib, contrib2;
+            getEdgeLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
+            getEdgeLocalCodeNumbers (loct, Variable::VariableQuantity::Pressure) ;
 
-        IntArray locu, loct;
-        FloatArray contrib, contrib2;
-        getEdgeLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getEdgeLocalCodeNumbers (loct, Variable::VariableQuantity::Pressure) ;
+            // integrate traction contribution (momentum balance)
+            int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+            this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
+            answer.assemble(contrib, locu);
 
-        // integrate traction contribution (momentum balance)
-        int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
-
-        answer.resize(this->getNumberOfEdgeDOFs());
-        answer.zero();
-        answer.assemble(contrib, locu);
-
-        // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
-        answer.assemble(contrib2, loct);
+            // integrate mass (fluid) flux normal to the boundary (mass balance) 
+            o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+            this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
+            contrib2.times(-1.0);
+            answer.assemble(contrib2, loct);
+        } else if (bct == ConvectionBC) {
+            // convection handled in residual evaluation
+        } else {
+            OOFEM_ERROR("Unsupported boundary condition type");
+        }
     }
 
 
@@ -476,9 +539,9 @@ class TMSimpleMaterial : public Material {
             FloatMatrix k;
             FloatArray grad(3);
             this->giveCharacteristicMatrix(k, ConductivityMatrix, gp, tStep);
-            grad(0) = flux(6);
-            grad(1) = flux(7);
-            grad(2) = flux(8);
+            grad(0) = -flux(6);
+            grad(1) = -flux(7);
+            grad(2) = -flux(8);
             answer.beProductOf(k, grad);
             status->letTempFluxVectorBe(answer);
         }

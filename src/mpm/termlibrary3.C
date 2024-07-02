@@ -153,5 +153,43 @@ void BTdSigmadT::getDimensions(Element& cell) const  {}
 void BTdSigmadT::initializeCell(Element& cell) const  {}
 
 
+NTaTmTe:: NTaTmTe (const Variable &testField, const Variable& unknownField, BoundaryLoad* _bl, int bid, char btype) : Term(testField, unknownField), bl(_bl), boundaryID(bid), boundaryType(btype) {};
+void NTaTmTe::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
+    FloatArray Nt;
+    if (boundaryType == 's') {
+        this->testField.interpolation.boundarySurfaceEvalN(Nt, boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    } else {
+        this->testField.interpolation.boundaryEdgeEvalN(Nt, boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    }
+    answer.resize(Nt.giveSize(), Nt.giveSize());
+    answer.zero();
+    answer.plusDyadUnsym(Nt, Nt, this->bl->giveProperty('a', tstep));
+}
+
+void NTaTmTe::evaluate (FloatArray& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
+    FloatArray Nt, rt, Te, coords;
+    if (boundaryType == 's') {
+        this->testField.interpolation.boundarySurfaceEvalN(Nt, boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    } else {
+        this->testField.interpolation.boundaryEdgeEvalN(Nt, boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    }
+    // get surface unknown vector
+    
+    e.getBoundaryUnknownVector(rt, this->field, VM_TotalIntrinsic, this->boundaryID, this->boundaryType, tstep);
+    double t = Nt.dotProduct(rt);
+    answer= Nt;
+    if ( this->bl->giveFormulationType() == Load :: FT_Entity ) {
+        coords = gp->giveNaturalCoordinates();
+    } else {
+        //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+        e.getGeometryInterpolation().boundarySurfaceLocal2global(coords, this->boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    }
+    this->bl->computeValues(Te, tstep, coords, this->field.dofIDs, VM_TotalIntrinsic);
+    answer *= this->bl->giveProperty('a', tstep)*(t-Te.at(1));
+}
+
+void NTaTmTe::getDimensions(Element& cell) const  {}
+void NTaTmTe::initializeCell(Element& cell) const  {}
+
 
 } // end namespace oofem

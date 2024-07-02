@@ -129,7 +129,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(EnergyBalance_TemperatureResidual, 304) \
     ENUM_ITEM_WITH_VALUE(EnergyBalance_DSigmaDTMatrix, 305) \
     ENUM_ITEM_WITH_VALUE(InternalFluxVector, 306) \
-    ENUM_ITEM_WITH_VALUE(MomentumBalance_ThermalCouplingMatrix, 307) 
+    ENUM_ITEM_WITH_VALUE(MomentumBalance_ThermalCouplingMatrix, 307) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_ConvectionBCMatrix, 308) \
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_ConvectionBCResidual, 309) 
+
 
     
 
