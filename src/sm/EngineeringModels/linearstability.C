@@ -129,6 +129,7 @@ LinearStability :: initializeFrom(InputRecord &ir)
         }
 
         // Temporary fix (Todo: uncomment following line)
+        //fprintf(outputStream, "%s", PRG_HEADER);
         fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
         fprintf(outputStream, "%s\n", simulationDescription.c_str());
     }
