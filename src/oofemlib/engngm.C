@@ -313,7 +313,8 @@ EngngModel :: initializeFrom(InputRecord &ir)
             OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
         }
 
-        fprintf(outputStream, "%s", PRG_HEADER);
+        // Temporary fix (Todo: uncomment following line)
+        //fprintf(outputStream, "%s", PRG_HEADER);
         fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
         fprintf(outputStream, "%s\n", simulationDescription.c_str());
 

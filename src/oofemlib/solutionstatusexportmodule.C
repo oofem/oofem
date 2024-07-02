@@ -119,7 +119,8 @@ SolutionStatusExportModule::initialize()
   sprintf( filename, "%s.m%d", this->emodel->giveOutputBaseFileName().c_str(), this->number);
   this->outputFile = fopen(filename, "w");
 
-  fprintf(outputFile,"%s (%s, %s), GitHash: %s\n", PRG_VERSION, HOST_TYPE, MODULE_LIST, OOFEM_GIT_HASH);
+  // Temporary fix (Todo: uncomment following line)
+  //fprintf(outputFile,"%s (%s, %s), GitHash: %s\n", PRG_VERSION, HOST_TYPE, MODULE_LIST, OOFEM_GIT_HASH);
   time_t currtime = time(NULL);
   fprintf(outputFile,"%s\n\n", ctime(& currtime));
   this->printRecsHeader();
