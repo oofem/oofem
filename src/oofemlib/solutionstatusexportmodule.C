@@ -148,7 +148,7 @@ SolutionStatusExportModule :: checkRecs()
     }
   }
   if (notrecognized.size()) {
-    OOFEM_WARNING ("SolutionStatusExportModule: invalid tokens detected:", notrecognized); 
+    OOFEM_WARNING ("SolutionStatusExportModule: invalid tokens detected: %s", notrecognized.c_str());
   }
 }
 
