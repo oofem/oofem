@@ -268,7 +268,7 @@ void NTmuVfSNTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* 
 
     this->field.interpolation.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     Nd.beNMatrixOf (N, testField.size);
-    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(S, PermeabilityMatrix,  gp, tstep);
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(S, Permeability,  gp, tstep);
     double m = e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(FluidViscosity, gp, tstep);
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
     SI.beInverseOf(S);

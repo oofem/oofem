@@ -181,9 +181,9 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
     double conduct;
 
     if ( conductivityType == 0 ) { //given from input file
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep);
+        conduct = IsotropicHeatTransferMaterial :: giveProperty('k', gp, tStep);
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
+        conduct = IsotropicHeatTransferMaterial :: giveProperty('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
     }
@@ -204,7 +204,7 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tS
     double capacityConcrete;
 
     if ( capacityType == 0 ) { //given from OOFEM input file
-        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp, tStep);
+        capacityConcrete = IsotropicHeatTransferMaterial :: giveProperty('c', gp, tStep);
     } else if ( capacityType == 1 ) { ////calculate from 5-component model
         OOFEM_ERROR("Calculate from 5-component model, not implemented in capacityType %d\n", capacityType);
     } else {
@@ -227,7 +227,7 @@ double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tSt
     double concreteBulkDensity;
 
     if ( densityType == 0 ) { //get from input file
-        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp, tStep);
+        concreteBulkDensity = IsotropicHeatTransferMaterial :: giveProperty('d', gp, tStep);
     } else if ( densityType == 1 ) { //calculate from 5-component model - not implemented
         OOFEM_ERROR("Calculate from 5-component model, not implemented in densityType %d\n", densityType);
     } else {

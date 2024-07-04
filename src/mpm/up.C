@@ -579,9 +579,9 @@ class UPSimpleMaterial : public Material {
     public:
   UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; alpha=1.0; c=0.1; muw = 1.0;}
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
         MaterialMode mmode = gp->giveMaterialMode();
-        if (type == StiffnessMatrix) {
+        if (type == TangentStiffness) {
             double ee;
 
             ee = e / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
@@ -603,7 +603,7 @@ class UPSimpleMaterial : public Material {
             answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
             answer.times(ee);
-        } else if (type == PermeabilityMatrix) {
+        } else if (type == Permeability) {
             if (mmode == _3dUP) {
                 answer.resize(3,3);
                 answer.beUnitMatrix();
@@ -616,12 +616,12 @@ class UPSimpleMaterial : public Material {
         }
     }
 
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {
-        if (type == InternalForcesVector) {
+    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
+        if (type == Stress) {
             FloatMatrix d;
             UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
 
-            this->giveCharacteristicMatrix(d, StiffnessMatrix, gp, tStep);
+            this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
             answer.beProductOf(d, flux);
             // update gp status
             status->letTempStrainVectorBe(flux);
@@ -629,13 +629,13 @@ class UPSimpleMaterial : public Material {
 
         }else if (type == FluidMassBalancePressureContribution) {
             FloatMatrix k;
-            this->giveCharacteristicMatrix(k, PermeabilityMatrix, gp, tStep);
+            this->giveCharacteristicMatrix(k, Permeability, gp, tStep);
             answer.beProductOf(k, flux);
         }
     }
 
 
-    double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
+    double giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
         if (type == BiotConstant) {
             return alpha;
         } else if (type == CompressibilityCoefficient) {

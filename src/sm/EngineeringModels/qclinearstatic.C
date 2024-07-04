@@ -280,7 +280,7 @@ void QClinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
     // initialize node eq numbering (for actived nodes only)
     if ( !qcEquationNumbering.giveIsInitializedFlag() ) {
-        qcEquationNumbering.init(this->giveDomain(1), activatedNodeList, tStep);
+        qcEquationNumbering.init2(this->giveDomain(1), activatedNodeList, tStep);
     }
     LinearStatic :: solveYourselfAt(tStep);
 }

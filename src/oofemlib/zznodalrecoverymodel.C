@@ -243,7 +243,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    double volume = 0.0;
+    //double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     FEInterpolation *interpol = element->giveInterpolation();
@@ -256,14 +256,14 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     int size = element->giveNumberOfDofManagers();
     fullAnswer.resize(size, size);
     fullAnswer.zero();
-    double pok = 0.0;
+    //double pok = 0.0;
 
     for ( GaussPoint *gp: *iRule ) {
         double dV = element->computeVolumeAround(gp);
         interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         fullAnswer.plusDyadSymmUpper(n, dV);
-        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
-        volume += dV;
+        //pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
+        //volume += dV;
     }
 
 

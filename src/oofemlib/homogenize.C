@@ -43,7 +43,7 @@ Homogenize :: Homogenize()
 void Homogenize :: voigt(FloatMatrix &PhaseMatrix)
 {
     double k, mu;
-    double volTot = 0.;
+    //double volTot = 0.;
     int NumPhases = PhaseMatrix.giveNumberOfRows();
 
     checkVolFraction(PhaseMatrix);
@@ -54,7 +54,7 @@ void Homogenize :: voigt(FloatMatrix &PhaseMatrix)
         ENuToKMu(PhaseMatrix(r, 1), PhaseMatrix(r, 2), k, mu);
         k_hmg += k * PhaseMatrix(r, 0);
         mu_hmg += mu * PhaseMatrix(r, 0);
-        volTot += PhaseMatrix(r, 0);
+        //volTot += PhaseMatrix(r, 0);
     }
 
     kMuToENu(k_hmg, mu_hmg, E_hmg, nu_hmg);
@@ -175,7 +175,7 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
 {
     double f_r, E_r, nu_r, k_r, mu_r;
     double E_m, nu_m, k_m, mu_m;
-    double fr_tot = 0.;
+    //double fr_tot = 0.;
     double nom_k_MT = 0., denom_k_MT = 0., nom_mu_MT = 0., denom_mu_MT = 0.;
     double k_S_denom = 0., mu_S_denom = 0.;
     double alpha_m, beta_m;
@@ -200,7 +200,7 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
         E_r = PhaseMatrix(r, 1);
         nu_r = PhaseMatrix(r, 2);
 
-        fr_tot += f_r;
+        //fr_tot += f_r;
         ENuToKMu(E_r, nu_r, k_r, mu_r);
 
         nom_k_MT += f_r * k_r / ( 1. + alpha_m * ( k_r / k_m - 1. ) );
@@ -244,7 +244,7 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
 {
     double f_r, E_r, nu_r, k_r, mu_r;
     double k_SCS, mu_SCS, nom_k_SCS, denom_k_SCS, nom_mu_SCS, denom_mu_SCS;
-    double fr_tot;
+    //double fr_tot;
     double alpha_m = 0., beta_m = 0.;
     double k_S_denom = 0., mu_S_denom = 0.;
     int numRows = PhaseMatrix.giveNumberOfRows();
@@ -258,7 +258,7 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
 
     /*iteration for nonlinear equations*/
     for ( int i = 1; i < 100; i++ ) {
-        fr_tot = 0.;
+        //fr_tot = 0.;
         nom_k_SCS = 0;
         denom_k_SCS = 0;
         nom_mu_SCS = 0;
@@ -268,7 +268,7 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
             E_r = PhaseMatrix(r, 1);
             nu_r = PhaseMatrix(r, 2);
 
-            fr_tot += f_r;
+            //fr_tot += f_r;
 
             ENuToKMu(E_r, nu_r, k_r, mu_r);
 

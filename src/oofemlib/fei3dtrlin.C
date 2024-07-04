@@ -153,7 +153,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeGiveTransformationJacobian - Not supported");
     return -1;

@@ -638,7 +638,7 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
 
         //Check external ambient temperature field first
         FieldPtr tf;
-        if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+        if ((tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient))){
             tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
         } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
@@ -1016,7 +1016,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
 
             FieldPtr tf;
             FloatArray gcoords;
-            if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+            if ((tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient))){
                 //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
                 this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 

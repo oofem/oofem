@@ -1541,7 +1541,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             //gp->setWeight (gp->giveWeight()*a/area);
         }
     }
-
+#if 0
     // internal test -> compute receiver area
     double dV, __area = 0.0;
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
@@ -1552,21 +1552,21 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
         }
     }
 
-    /*
-     * double __err = fabs(__area-area)/area;
-     * if (__err > 1.e-6) {
-     * OOFEM_WARNING("volume inconsistency (%5.2f\%)", __err*100);
-     *
-     * __area=0.0;
-     * for (ifluid = 0; ifluid< 2; ifluid++) {
-     *  for (GaussPoint *gp: *integrationRulesArray[ifluid]) {
-     *    dV = this->computeVolumeAroundID(gp,id[ifluid], vcoords[ifluid]) ;
-     *    // compute integral here
-     *    __area += dV;
-     *  }
-     * }
-     * }
-     */
+    
+    double __err = fabs(__area-area)/area;
+    if (__err > 1.e-6) {
+      OOFEM_WARNING("volume inconsistency (%5.2f\%)", __err*100);
+      
+      __area=0.0;
+      for (ifluid = 0; ifluid< 2; ifluid++) {
+        for (GaussPoint *gp: *integrationRulesArray[ifluid]) {
+          dV = this->computeVolumeAroundID(gp,id[ifluid], vcoords[ifluid]) ;
+          // compute integral here
+          __area += dV;
+        }
+      }
+    }
+#endif
 }
 
 

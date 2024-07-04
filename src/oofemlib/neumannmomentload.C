@@ -103,7 +103,7 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
 
     computeXbar();
 
-    double factor;
+    //double factor;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
         OOFEM_ERROR("mode not supported");

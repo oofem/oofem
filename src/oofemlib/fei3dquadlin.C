@@ -134,7 +134,7 @@ FEI3dQuadLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dQuadLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    // const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("FEI3dQuadLin :: edgeGiveTransformationJacobian - Not supported");
     return -1;

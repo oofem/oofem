@@ -45,7 +45,7 @@ BTSigTerm::BTSigTerm (const Variable &testField, const Variable& unknownField) :
 
 void BTSigTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatMatrix D, B, DB;
-    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, StiffnessMatrix, gp, tstep);
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, TangentStiffness, gp, tstep);
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     DB.beProductOf(D, B);
     //answer.plusProductSymmUpper(B, DB, 1.0);
@@ -58,7 +58,7 @@ void BTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, T
     cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
     this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     eps.beProductOf(B, u);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, Stress, gp, tstep);
     answer.beTProductOf(B, sig);
 }
 
@@ -113,7 +113,7 @@ gNTfTerm::gNTfTerm (const Variable &testField, const Variable& unknownField) : T
 
 void gNTfTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
     FloatMatrix D, B, DB;
-    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, PermeabilityMatrix, gp, tstep); // update
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, Permeability, gp, tstep); // update
     this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates());
     DB.beProductOf(D, B);
     answer.beTProductOf(B, DB);

@@ -44,7 +44,7 @@ QuasicontinuumNumberingscheme :: QuasicontinuumNumberingscheme() :
 { }
 
 void
-QuasicontinuumNumberingscheme :: init(Domain *domain, std :: vector< bool >activatedNodeList, TimeStep *tStep)
+QuasicontinuumNumberingscheme :: init2(Domain *domain, std :: vector< bool >activatedNodeList, TimeStep *tStep)
 {
     isInitialized = true;
     /*

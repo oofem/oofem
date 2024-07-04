@@ -85,9 +85,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector, 214) \
     /* MPM */ \
     ENUM_ITEM_WITH_VALUE(PermeabilityMatrix, 250) \
-    ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 251) \
-    ENUM_ITEM_WITH_VALUE(BiotConstant, 252) \
-    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 253) \
+    /*ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 251)*/ \
+    /*ENUM_ITEM_WITH_VALUE(BiotConstant, 252) */                        \
+    /*ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 253)*/           \
     ENUM_ITEM_WITH_VALUE(MomentumBalance_StiffnessMatrix, 254) \
     ENUM_ITEM_WITH_VALUE(MomentumBalance_PressureCouplingMatrix, 255) \
     ENUM_ITEM_WITH_VALUE(MassBalance_PermeabilityMatrix, 256) \
@@ -98,7 +98,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(MassBalance_StressRateResidual, 261) \
     ENUM_ITEM_WITH_VALUE(MassBalance_PressureResidual, 262) \
     ENUM_ITEM_WITH_VALUE(MassBalance_PressureRateResidual, 263) \
-    ENUM_ITEM_WITH_VALUE(FluidViscosity, 264) \
+    /*ENUM_ITEM_WITH_VALUE(FluidViscosity, 264)*/               \
     /* MPM UPV */ \
     ENUM_ITEM_WITH_VALUE(MassBalance_UdotTerm, 265) \
     ENUM_ITEM_WITH_VALUE(MassBalance_VTerm, 266) \

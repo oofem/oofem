@@ -401,7 +401,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     }
 
     //slaveMasterOnBoundary.printYourself();
-#  ifdef DEBUG
+#  if 0
     //check of the transformation matrix - the sum of each third column must be either zero or one
     double sum;
     for ( int i = 1; i <= slaveMasterOnBoundary.giveNumberOfRows(); i++ ) {
@@ -412,7 +412,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             }
         }
 
-        //OOFEM_LOG_INFO("Sum of %i row of transformation matrix row %f\n", i, sum);
+        OOFEM_LOG_INFO("Sum of %i row of transformation matrix row %f\n", i, sum);
     }
 
 #  endif

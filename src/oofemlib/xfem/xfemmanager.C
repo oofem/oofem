@@ -474,7 +474,8 @@ void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 //	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
 
 	for(auto &nucCrit : mNucleationCriteria) {
-		std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
+          //std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
+          std::vector<std::unique_ptr<EnrichmentItem>> eiList = nucCrit->nucleateEnrichmentItems();
 
 		if(eiList.size() > 0) {
 //			printf("eiList.size(): %lu\n", eiList.size() );

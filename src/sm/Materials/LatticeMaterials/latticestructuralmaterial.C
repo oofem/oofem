@@ -100,7 +100,7 @@ LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, 
     FloatArrayF< 6 >tempStrain;
     tempStrain [ 0 ] = strain;
     auto answer = giveLatticeStress3d(tempStrain, gp, tStep);
-    return answer [ { 0 } ];
+    return answer [ 0 ];
 }
 
 FloatArrayF< 3 >

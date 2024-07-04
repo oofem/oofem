@@ -169,7 +169,7 @@ FEI2dQuadBiQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lc, const FEICel
 
 
 std::pair<double, FloatMatrixF<2,9>>
-FEI2dQuadBiQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadBiQuad :: _evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const
 {
     auto dn = evaldNdxi(lcoords);
     FloatMatrixF<2,2> jacT;

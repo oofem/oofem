@@ -106,7 +106,7 @@ public:
     }
 
     FailureCriteriaStatus() { }
-    ~FailureCriteriaStatus() { } // must destroy object correctly
+    virtual ~FailureCriteriaStatus() { } // must destroy object correctly
     Element *el;
 
     std :: vector< std :: vector< FloatArray > >quantities;
@@ -137,7 +137,7 @@ public:
         this->number = number;
         this->fMan = fMan;
     };
-    ~FailureCriteria() { } // must destroy object correctly
+    virtual ~FailureCriteria() { } // must destroy object correctly
 
     std :: vector< FailureCriteriaStatus * >list;
 
@@ -174,6 +174,7 @@ private:
 public:
     DamagedNeighborLayered(int number, FractureManager * fracMan) :
         FailureCriteria(number,  fracMan) { }
+    virtual ~DamagedNeighborLayered() {}
 
     bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus) override;
     const char *giveClassName() const override { return "DamagedNeighborLayered"; }

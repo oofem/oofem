@@ -71,7 +71,7 @@ MisesMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPo
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(stress);
-    return stress[{0}];
+    return stress[0];
 }
 
 
