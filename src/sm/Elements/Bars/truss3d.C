@@ -81,8 +81,8 @@ Truss3d::giveInterface(InterfaceType interface)
 void
 Truss3d::NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.clear();
-    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -131,6 +131,28 @@ Truss3d::computeLength()
     return this->interp.giveLength(FEIElementGeometryWrapper(this) );
 }
 
+
+void
+Truss3d::computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    // computes initial stress matrix of receiver (or geometric stiffness matrix)
+    double area, NForce, contrib;
+    double l0 = this->computeLength();
+    FloatArray stress, strain;
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    
+    this->computeStrainVector(strain, gp, tStep);
+    this->computeStressVector(stress, strain, gp, tStep);
+    area = this->giveCrossSection()->give(CS_Area, gp);
+    NForce = stress.at(1)*area;
+    contrib = NForce / l0;
+    
+    answer.resize(6, 6);
+    answer.zero();
+
+    answer.at(2,2)=answer.at(3,3)=answer.at(5,5)=answer.at(6,6) = contrib;
+    answer.at(2,5)=answer.at(5,2)=answer.at(3,6)=answer.at(6,3) = -contrib;
+}
 
 void
 Truss3d::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)

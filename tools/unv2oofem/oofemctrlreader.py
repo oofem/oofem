@@ -47,6 +47,7 @@ def Line2Int(line):
 #Structure holding OOFEM's element properties
 class oofem_elementProperties:
     def __init__(self,name,nodeMaskOrPointer,edgeMask=None,faceMask=None):
+        self.representsBoundaryLoad = False
         if (edgeMask!=None):
             self.name=name#string - name as OOFEM elements
             self.nodeMask=nodeMaskOrPointer#list of nodes in the sequence of OOFEM
@@ -212,7 +213,7 @@ class CTRLParser:
                                 #check that elemName exists in a list and assign
                                 for n in range(len(self.oofem_elemProp)):
                                     if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
-                                        __gr.oofem_etypemap[unvetype]= n
+                                        __gr.oofem_etypemap[unvetype] = n
                                         break
                                 else:
                                     print ("OOFEM element %s not found in OOFEM's list of eligible elements" % elemName)

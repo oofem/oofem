@@ -113,7 +113,7 @@ public:
     double giveEndOfTimeOfInterest() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    fMode giveFormulation() override { return TL; }
+    //fMode giveFormulation() override { return TL; }
 
     bool requiresEquationRenumbering(TimeStep *tStep) override;
 
