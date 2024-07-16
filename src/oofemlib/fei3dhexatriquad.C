@@ -582,7 +582,7 @@ FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo) co
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaTriQuad :: giveIntegrationRule(int order) const
+FEI3dHexaTriQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo Verify: Is +15 correct for dealing with "detJ"? If it is, perhaps we shouldn't go for exact integration since it is likely overkill.
@@ -592,7 +592,7 @@ FEI3dHexaTriQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo Verify: Is +6 correct for dealing with "detJ" on this surface?

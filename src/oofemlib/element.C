@@ -841,25 +841,25 @@ Element :: initForNewStep()
 IntArray
 Element::giveBoundaryEdgeNodes(int boundary) const
 {
-    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
 }
 
 IntArray
 Element::giveBoundarySurfaceNodes(int boundary) const
 {
-    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary);
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
 }
 
 std::unique_ptr<IntegrationRule>
 Element::giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-    return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order, boundary);
+    return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order, boundary, this->giveGeometryType());
 }
 
 std::unique_ptr<IntegrationRule>
 Element::giveBoundarySurfaceIntegrationRule(int order, int boundary)
 {
-    return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order, boundary);
+    return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order, boundary, this->giveGeometryType());
 }
 
 
@@ -1506,17 +1506,18 @@ integrationDomain
 Element :: giveIntegrationDomain() const
 {
     FEInterpolation *fei = this->giveInterpolation();
-    return fei ? fei->giveIntegrationDomain() : _UnknownIntegrationDomain;
+    return fei ? fei->giveIntegrationDomain(this->giveGeometryType()) : _UnknownIntegrationDomain;
 }
 
-
+/*
 Element_Geometry_Type
 Element :: giveGeometryType() const
 {
-    FEInterpolation *fei = this->giveInterpolation();
-    return fei ? fei->giveGeometryType() : EGT_unknown;
+    return EGT_unknown;
+    //FEInterpolation *fei = this->giveInterpolation();
+    //return fei ? fei->giveGeometryType() : EGT_unknown;
 }
-
+*/
 
 bool
 Element :: computeGtoLRotationMatrix(FloatMatrix &answer)

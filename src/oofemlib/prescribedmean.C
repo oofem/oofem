@@ -95,8 +95,8 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
-        auto iRule = (elementEdges) ? (interpolator->giveBoundaryIntegrationRule(3, sides.at(i))) :
-                                                  (interpolator->giveIntegrationRule(3));
+        auto iRule = (elementEdges) ? (interpolator->giveBoundaryIntegrationRule(3, sides.at(i), thisElement->giveGeometryType())) :
+                                                  (interpolator->giveIntegrationRule(3, thisElement->giveGeometryType()));
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray lcoords = gp->giveNaturalCoordinates();
@@ -107,7 +107,7 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
 
             if (elementEdges) {
                 // Compute boundary integral
-                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i) );
+                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i), thisElement->giveGeometryType() );
                 interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
                 detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
                 // Retrieve locations for dofs on boundary
@@ -181,8 +181,8 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
         auto iRule = elementEdges ?
-            interpolator->giveBoundaryIntegrationRule(3, sides.at(i)) :
-            interpolator->giveIntegrationRule(3);
+            interpolator->giveBoundaryIntegrationRule(3, sides.at(i), thisElement->giveGeometryType()) :
+            interpolator->giveIntegrationRule(3, thisElement->giveGeometryType());
 
         for ( auto &gp: *iRule ) {
             FloatArray lcoords = gp->giveNaturalCoordinates();
@@ -192,7 +192,7 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
             if (elementEdges) {
                 // Compute integral
-                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i) );
+                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i), thisElement->giveGeometryType() );
                 thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
                 interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
                 detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
@@ -298,8 +298,8 @@ PrescribedMean :: computeDomainSize()
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
         auto iRule = elementEdges ?
-            interpolator->giveBoundaryIntegrationRule(3, sides.at(i)) :
-            interpolator->giveIntegrationRule(3);
+            interpolator->giveBoundaryIntegrationRule(3, sides.at(i), thisElement->giveGeometryType()) :
+            interpolator->giveIntegrationRule(3, thisElement->giveGeometryType());
 
         for ( auto &gp: *iRule ) {
             FloatArray lcoords = gp->giveNaturalCoordinates();

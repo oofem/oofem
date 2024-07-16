@@ -65,7 +65,7 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *tStep)
+                                                 GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

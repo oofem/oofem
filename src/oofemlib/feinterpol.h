@@ -69,6 +69,7 @@ public:
     virtual ~FEICellGeometry() { }
     virtual int giveNumberOfVertices() const = 0;
     virtual const FloatArray &giveVertexCoordinates(int i) const = 0;
+    virtual const Element_Geometry_Type giveGeometryType() const = 0;
 };
 
 
@@ -90,6 +91,10 @@ public:
     {
         OOFEM_ERROR("no reference geometry");
     }
+    const Element_Geometry_Type giveGeometryType() const override
+    {
+        return EGT_unknown;
+    }
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 
@@ -109,6 +114,9 @@ public:
     {
         return elem->giveNode(i)->giveCoordinates();
     }
+    const Element_Geometry_Type giveGeometryType() const override {
+        return elem->giveGeometryType();
+    }
 };
 
 
@@ -119,13 +127,15 @@ class OOFEM_EXPORT FEIVertexListGeometryWrapper : public FEICellGeometry
 {
 protected:
     const std::vector< FloatArray > &coords;
+    Element_Geometry_Type gtype;
 
 public:
-    FEIVertexListGeometryWrapper(const std::vector< FloatArray > &coords) : 
-        FEICellGeometry(), coords(coords) { }
+    FEIVertexListGeometryWrapper(const std::vector< FloatArray > &coords, const Element_Geometry_Type gt) : 
+        FEICellGeometry(), coords(coords), gtype(gt) { }
     virtual ~FEIVertexListGeometryWrapper() { }
     int giveNumberOfVertices() const override { return (int)this->coords.size(); }
     const FloatArray &giveVertexCoordinates(int i) const override { return this->coords [ i - 1 ]; }
+    const Element_Geometry_Type giveGeometryType() const override {return gtype;}
 };
 
 /**
@@ -148,11 +158,11 @@ public:
     /**
      * Returns the integration domain of the interpolator.
      */
-    virtual integrationDomain giveIntegrationDomain() const = 0;
+    virtual integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const = 0;
     /**
      * Returns the geometry type fo the interpolator.
      */
-    virtual Element_Geometry_Type giveGeometryType() const = 0;
+    virtual const Element_Geometry_Type giveGeometryType() const = 0;
     /**
      * Returns the interpolation order.
      */
@@ -207,7 +217,7 @@ public:
     /**
      * Returns a matrix containing the local coordinates for each node corresponding to the interpolation
      */
-    virtual void giveLocalNodeCoords(FloatMatrix &answer) const
+    virtual void giveLocalNodeCoords(FloatMatrix &answer, const Element_Geometry_Type) const
     {
         OOFEM_ERROR("FEInterpolation::giveLocalNodeCoords: not implemented");
     }
@@ -249,7 +259,7 @@ public:
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
      */
-    virtual std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const;
+    virtual std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const;
     //@}
 
     /** @name Edge boundary functions.
@@ -295,20 +305,20 @@ public:
      */
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const = 0;
     /// Returns boundary integration domain
-    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary) const = 0;
+    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary, const Element_Geometry_Type) const = 0;
     /**
      * Sets up a suitable integration rule for integrating over the requested boundary.
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const ;
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, const Element_Geometry_Type) const ;
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual IntArray boundaryEdgeGiveNodes(int boundary) const = 0;
+    virtual IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const = 0;
     //@}
 
     /**@name Surface interpolation services 
@@ -360,20 +370,20 @@ public:
      */
     virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const = 0;
     /// Returns boundary integration domain
-    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary) const = 0;
+    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary, const Element_Geometry_Type) const = 0;
     /**
      * Sets up a suitable integration rule for integrating over the requested boundary.
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary) const ;
+    virtual std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary, const Element_Geometry_Type) const ;
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual IntArray boundarySurfaceGiveNodes(int boundary) const = 0;
+    virtual IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const = 0;
     //@}
 
     /** @name General boundary interpolation functions.
@@ -388,7 +398,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual IntArray boundaryGiveNodes(int boundary) const = 0;
+    virtual IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const = 0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
@@ -437,14 +447,14 @@ public:
         OOFEM_ERROR("Not implemented");
     }
     /// Returns boundary integration domain
-    virtual integrationDomain giveBoundaryIntegrationDomain(int boundary) const = 0;
+    virtual integrationDomain giveBoundaryIntegrationDomain(int boundary, const Element_Geometry_Type) const = 0;
     /**
      * Sets up a suitable integration rule for integrating over the requested boundary.
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const;
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const;
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */
@@ -484,18 +494,18 @@ public:
     /**
      * Returns number of spatial dimensions.
      */
-    virtual int giveNsd() const = 0;
+    virtual int giveNsd(const Element_Geometry_Type) const = 0;
     /**
      * Returns number of edges.
      */
-    virtual int giveNumberOfEdges() const 
+    virtual int giveNumberOfEdges(const Element_Geometry_Type) const 
     { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); }
     //@}
 
     /**
      * Returns the number of geometric nodes of the receiver.
      */
-    virtual int giveNumberOfNodes() const
+    virtual int giveNumberOfNodes(const Element_Geometry_Type) const
     { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); }
     //@}
 

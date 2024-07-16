@@ -305,7 +305,7 @@ FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dTrLin :: giveIntegrationRule(int order) const
+FEI2dTrLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);

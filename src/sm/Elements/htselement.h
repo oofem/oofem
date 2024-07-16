@@ -64,6 +64,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_HTSelement_Name; }
     const char *giveClassName() const override { return "HTSelement"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_unknown;}
+
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int) override { }

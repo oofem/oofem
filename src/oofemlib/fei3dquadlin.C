@@ -285,7 +285,7 @@ FEI3dQuadLin :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dQuadLin :: giveIntegrationRule(int order) const
+FEI3dQuadLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order);
@@ -294,7 +294,7 @@ FEI3dQuadLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dQuadLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dQuadLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about what defines boundaries on these elements.
     OOFEM_ERROR("FEI3dQuadLin :: giveBoundaryIntegrationRule - Not supported");

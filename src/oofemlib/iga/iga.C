@@ -63,7 +63,7 @@ void IGAElement :: initializeFrom(InputRecord &ir)
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
     // generate individual IntegrationElements; one for each nonzero knot span
-    int nsd = this->giveNsd();
+    int nsd = this->giveNsd(this->giveGeometryType());
     if ( nsd == 1 ) {
         //HUHU
     } else if ( nsd == 2 ) {
@@ -215,7 +215,7 @@ void IGATSplineElement :: initializeFrom(InputRecord &ir)
 
 
     // generate individual IntegrationElements; one for each nonzero knot span
-    int nsd = giveNsd();
+    int nsd = giveNsd(this->giveGeometryType());
     if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
@@ -304,7 +304,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
  #endif
 
     const FloatArray *knotVector = interp->giveKnotVector();
-    int nsd = this->giveNsd();
+    int nsd = this->giveNsd(this->giveGeometryType());
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
@@ -1009,7 +1009,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
  #endif
 
     const FloatArray *knotVector = interp->giveKnotVector();
-    int nsd = interp->giveNsd();
+    int nsd = interp->giveNsd(this->giveGeometryType());
 
     se->computeVectorOf(VM_Total, tStep, u);
 

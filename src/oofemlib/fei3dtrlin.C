@@ -293,7 +293,7 @@ FEI3dTrLin :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveIntegrationRule(int order) const
+FEI3dTrLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
@@ -302,7 +302,7 @@ FEI3dTrLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrLin :: giveBoundaryIntegrationRule - Not supported");

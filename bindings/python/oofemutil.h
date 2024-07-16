@@ -15,6 +15,15 @@ namespace py = pybind11;
 #include "set.h"
 
 
+#include "feinterpol.h"
+#include "fei2dquadlin.h"
+#include "skyline.h"
+#include "ldltfact.h"
+
+#ifdef __MPM_MODULE
+#include "prototype2.h"
+#endif
+
 #ifdef _MSC_VER 
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
@@ -153,9 +162,10 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     engngm->initializeFrom(ir);
 
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
-      oofem::OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
+        oofem::OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
-      engngm->instanciateDefaultMetaStep(ir);
+        engngm->instanciateDefaultMetaStep(ir);
+        //engngm->giveTimeStepController()->instanciateDefaultMetaStep(ir);
     }
 
     engngm->Instanciate_init();
@@ -174,6 +184,7 @@ py::object staticStructural(py::args args, py::kwargs kw) { return createEngngMo
 
 py::object transientTransport(py::args args, py::kwargs kw) { return createEngngModelOfType("transienttransport", args, kw); }
 
+py::object dummyProblem(py::args args, py::kwargs kw) { return createEngngModelOfType("dummy", args, kw); }
 
 
 /*****************************************************
@@ -190,7 +201,9 @@ py::object domain(py::args args, py::kwargs kw)
     d->setDomainType(dType);
     // output manager record
     oofem::OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
-    d->giveOutputManager()->initializeFrom(omir);
+    if ( !engngModel->giveSuppressOutput() ) {
+        d->giveOutputManager()->initializeFrom(omir);
+    }
     py::object ret = py::cast(d.release());
     /* ????????????????????
     // sets the last created domain as default one for furtherscript
@@ -242,6 +255,10 @@ py::object lspace(py::args args, py::kwargs &kw) { return createElementOfType("l
 py::object tr1ht(py::args args, py::kwargs &kw) { return createElementOfType("tr1ht",args,kw); }
 py::object quad1ht(py::args args, py::kwargs &kw) { return createElementOfType("quad1ht",args,kw); }
 py::object qquad1ht(py::args args, py::kwargs &kw) { return createElementOfType("qquad1ht",args,kw); }
+// mpm experimental
+py::object q1(py::args args, py::kwargs &kw) { return createElementOfType("q1",args,kw); }
+py::object l1(py::args args, py::kwargs &kw) { return createElementOfType("l1",args,kw); }
+
 
 
 
@@ -326,6 +343,7 @@ py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm
 py::object isoHeat(py::args args, py::kwargs kw) { return createMaterialOfType("isoheat",args,kw); }
 py::object j2mat(py::args args, py::kwargs kw) { return createMaterialOfType("j2mat",args,kw); }
 py::object steel1(py::args args, py::kwargs kw) { return createMaterialOfType("steel1",args,kw); }
+py::object upm(py::args args, py::kwargs kw) { return createMaterialOfType("upm",args,kw); }
 
 
 /*****************************************************
@@ -403,3 +421,84 @@ py::object createSetOfType(const char* type, py::args args, py::kwargs kw)
 }
 
 py::object createSet(py::args args, py::kwargs kw) { return createSetOfType("set",args,kw); }
+
+
+/******************************************************
+ * Interpolations
+*******************************************************/
+py::object createInterpolationOfType(std::string type, py::args args, py::kwargs kw)
+{
+    if (type == "fei2dquadlin") {
+        int i1 = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):1;
+        int i2 = len(args)>0?PyLong_AsUnsignedLong(args[1].ptr()):2;
+        std::unique_ptr<FEInterpolation> interpol = std::make_unique<FEI2dQuadLin>(i1,i2); 
+        return py::cast(interpol.release());
+    } else if (type == "fei2dlinelin") {
+        int i1 = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):1;
+        int i2 = len(args)>0?PyLong_AsUnsignedLong(args[1].ptr()):2;
+        std::unique_ptr<FEInterpolation> interpol = std::make_unique<FEI2dLineLin>(i1,i2); 
+        return py::cast(interpol.release());
+    } 
+#ifdef __MPM_MODULE    
+    else if (type == "linearinterpolation") {
+        std::unique_ptr<FEInterpolation> interpol = std::make_unique<LinearInterpolation>(); 
+        return py::cast(interpol.release());
+    } 
+#endif
+   return py::none();
+}
+
+py::object fei2dquadlin(py::args args, py::kwargs kw) { return createInterpolationOfType("fei2dquadlin",args,kw); }
+py::object fei2dlinelin(py::args args, py::kwargs kw) { return createInterpolationOfType("fei2dlinelin",args,kw); }
+py::object linearinterpolation(py::args args, py::kwargs kw) { return createInterpolationOfType("linearinterpolation",args,kw); }
+
+
+/******************************************************
+ * Terms
+*******************************************************/
+#ifdef __MPM_MODULE
+#include "prototype2.h"
+py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
+{
+    if (type == "BTSigmaTerm") {
+        if (len(args)>2) {
+            oofem::Variable & f = args[0].cast<oofem::Variable &>();
+            oofem::Variable & tf = args[1].cast<oofem::Variable &>();
+            oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
+            std::unique_ptr<Term> t = std::make_unique<BTSigmaTerm2>(f, tf, m);
+            return py::cast(t.release());
+        }
+    } else if (type == "NTfTerm") {
+        if (len(args)>2) {
+            oofem::Variable & f = args[0].cast<oofem::Variable &>();
+            oofem::Variable & tf = args[1].cast<oofem::Variable &>();
+            oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
+            std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m);
+            return py::cast(t.release());
+        }
+    }
+    return py::none();
+}
+
+py::object BTSigma_Term(py::args args, py::kwargs kw) { return createTermOfType("BTSigmaTerm",args,kw); }
+py::object NTf_Term(py::args args, py::kwargs kw) { return createTermOfType("NTfTerm",args,kw); }
+
+#endif
+
+/************************************************************
+ * Sparse matrices
+*************************************************************/
+py::object skyline() {
+    std::unique_ptr<SparseMtrx> t = std::make_unique<Skyline>();
+    return py::cast(t.release()); 
+}
+
+/************************************************************
+ * Linear sparse solvers
+*************************************************************/
+py::object ldltFactorization(py::args args, py::kwargs kw) {
+    oofem::Domain* domain = len(args)>0? args[0].cast<oofem::Domain *>() : nullptr;
+    oofem::EngngModel *emodel = len(args)>1? args[1].cast<oofem::EngngModel *>() : nullptr;
+    std::unique_ptr<SparseLinearSystemNM> t = std::make_unique<LDLTFactorization>(domain, emodel);
+    return py::cast(t.release()); 
+}

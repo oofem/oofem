@@ -101,7 +101,7 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc) const
 
 
 void
-FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer) const
+FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer,const Element_Geometry_Type) const
 {
 
     answer.resize(3,6);
@@ -384,7 +384,7 @@ FEI3dTrQuad :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrQuad :: giveIntegrationRule(int order) const
+FEI3dTrQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
@@ -393,7 +393,7 @@ FEI3dTrQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");

@@ -84,6 +84,8 @@ public:
     int computeNumberOfDofs() override { return 6; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
     double computeVolumeAround(GaussPoint *gp) override;
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
+
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam2d_Name; }

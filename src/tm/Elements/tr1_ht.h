@@ -63,6 +63,8 @@ public:
     // definition
     const char *giveInputRecordName() const override { return _IFT_Tr1_ht_Name; }
     const char *giveClassName() const override { return "Tr1_htElement"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
 
     int computeNumberOfDofs() override { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
     void initializeFrom(InputRecord &ir) override;

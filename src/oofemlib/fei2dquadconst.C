@@ -142,7 +142,7 @@ FEI2dQuadConst :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeom
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dQuadConst :: giveIntegrationRule(int order) const
+FEI2dQuadConst :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);

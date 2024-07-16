@@ -116,6 +116,9 @@ public:
             {
                 return ( ( cell->getVertex(i) )->getCoordinates() );
             }
+            const Element_Geometry_Type giveGeometryType() const override {
+                return cell->itype;
+            }
         };
 
 public:
@@ -123,7 +126,7 @@ public:
             itype = EGT_unknown;
             mesh = NULL;
         }
-        Cell(Element_Geometry_Type t, IntArray &v, UnstructuredGridField *m) {
+        Cell(const Element_Geometry_Type t, IntArray &v, UnstructuredGridField *m) {
             itype = t;
             vertices = v;
             mesh = m;
@@ -341,8 +344,8 @@ public:
         return & this->vertexList [ num - 1 ];
     }
 
-    void addCell(int num, Element_Geometry_Type _type, IntArray &vertices) { //1-based
-        cellList [ num - 1 ] = Cell(_type, vertices, this);
+    void addCell(int num, const Element_Geometry_Type type, IntArray &vertices) { //1-based
+        cellList [ num - 1 ] = Cell(type, vertices, this);
         this->timeStamp++;
     }
 

@@ -49,6 +49,7 @@
 #include "nrsolver.h"
 #include "activebc.h"
 #include "boundarycondition.h"
+#include "boundaryload.h"
 #include "outputmanager.h"
 #include "mpm.h"
 
@@ -122,6 +123,109 @@ void UPResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element,
 }
 
 
+TMLhsAssembler :: TMLhsAssembler(double alpha, double deltaT) : 
+    MatrixAssembler(), alpha(alpha), deltaT(deltaT)
+{}
+
+
+void TMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    FloatMatrix contrib;
+    IntArray locu, loct;
+    MPElement *e = dynamic_cast<MPElement*>(&el);
+    int ndofs = e->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+
+    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
+    e->getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature);
+
+    e->giveCharacteristicMatrix(contrib, MomentumBalance_StiffnessMatrix, tStep);
+    contrib.times(this->alpha);
+    answer.assemble(contrib, locu, locu);
+    e->giveCharacteristicMatrix(contrib, MomentumBalance_ThermalCouplingMatrix, tStep);
+    contrib.times(this->alpha);
+    answer.assemble(contrib, locu, loct);
+
+    e->giveCharacteristicMatrix(contrib, EnergyBalance_ConductivityMatrix, tStep);
+    contrib.times(this->alpha);
+    answer.assemble(contrib, loct, loct);
+    e->giveCharacteristicMatrix(contrib, EnergyBalance_CapacityMatrix, tStep);
+    contrib.times(1/tStep->giveTimeIncrement());
+    answer.assemble(contrib, loct, loct);
+
+    // @bp: experimental: evaluate element load linearization as part of residual
+    // note: extend bctracker to track bc applied via sets and directly on elements!
+    // node: ideally all external load assembled using term concept as part of residual vector! (including nodes)
+    // this would allow for consistent assembly of linearized terms as well.
+    BCTracker *bct = el.giveDomain()->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(el.giveNumber());
+    // loop over all boundary conditions applied to the element
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+        BoundaryLoad *bc = dynamic_cast<BoundaryLoad*>(el.giveDomain()->giveBc((*it).bcNumber));
+        int boundaryID = (*it).boundaryId;
+        if (bc) {
+            if (bc->giveType() == ConvectionBC) {
+                e->giveCharacteristicMatrixFromBC(contrib, EnergyBalance_ConvectionBCMatrix, tStep, bc, boundaryID);
+                if(contrib.isNotEmpty()) {
+                    contrib.times(this->alpha);
+                    if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
+                        e->getSurfaceElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                    } else {
+                        e->getEdgeElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                    }
+                    answer.assemble(contrib, loct, loct);
+                }
+            }
+        }
+    
+    }
+
+}
+
+void TMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    FloatArray contrib;
+    IntArray locu, loct;
+    MPElement *e = dynamic_cast<MPElement*>(&element);
+    int ndofs = e->giveNumberOfDofs();
+    vec.resize(ndofs);
+    vec.zero();
+
+    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
+    e->getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature);
+
+    e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
+    vec.assemble(contrib, locu);
+    
+    e->giveCharacteristicVector(contrib, EnergyBalance_Residual, mode, tStep);
+    vec.assemble(contrib, loct);
+
+    BCTracker *bct = e->giveDomain()->giveBCTracker();
+    BCTracker::entryListType bcList = bct->getElementRecords(element.giveNumber());
+    // loop over all boundary conditions applied to the element
+    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+        BoundaryLoad *bc = dynamic_cast<BoundaryLoad*>(element.giveDomain()->giveBc((*it).bcNumber));
+        int boundaryID = (*it).boundaryId;
+        if (bc) {
+            if (bc->giveType() == ConvectionBC) {
+                e->giveCharacteristicVectorFromBC(contrib, EnergyBalance_ConvectionBCResidual, mode, tStep, bc, boundaryID);
+                if(contrib.isNotEmpty()) {
+                    if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
+                        e->getSurfaceElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                    } else {
+                        e->getEdgeElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                    }
+                    vec.assemble(contrib, loct);
+                }
+            }
+        }
+    
+    }
+
+}
+
+
 
 MPMProblem :: MPMProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master)
 {
@@ -164,7 +268,7 @@ MPMProblem :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, alpha, _IFT_MPMProblem_alpha);
     problemType = "up"; // compatibility mode @TODO Remove default value
     IR_GIVE_OPTIONAL_FIELD(ir, problemType, _IFT_MPMProblem_problemType);
-    if (!(problemType == "up")) {
+    if (!((problemType == "up")||(problemType == "tm"))) {
       throw ValueInputException(ir, "none", "Problem type not recognized");
     }
     OOFEM_LOG_RELEVANT("MPM: %s formulation\n", problemType.c_str());
@@ -321,6 +425,8 @@ MPMProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, 
     answer.zero();
     if (this->problemType == "up") {
       this->assembleVector(answer, tStep, UPResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
+    } else if (this->problemType == "tm") {
+      this->assembleVector(answer, tStep, TMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
     } else {
       OOFEM_ERROR ("unsupported problemType");
     }
@@ -339,6 +445,11 @@ MPMProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
           //Assembling left hand side 
           this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
                           EModelDefaultEquationNumbering(), d );
+        } else if (this->problemType == "tm") {
+            TMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
+            //Assembling left hand side 
+            this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
+                            EModelDefaultEquationNumbering(), d );
         } else {
           OOFEM_ERROR ("unsupported problemType");
         }
@@ -362,6 +473,10 @@ MPMProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
         this->internalForces.zero();
         if (this->problemType == "up") {
           this->assembleVector(this->internalForces, tStep, UPResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, &eNorm);
+        } else if (this->problemType == "tm") {
+          this->assembleVector(this->internalForces, tStep, TMResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, &eNorm);
+        } else {
+          OOFEM_ERROR ("unsupported problemType");
         }
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
     } else if ( cmpn == NonLinearLhs ) {
@@ -373,7 +488,14 @@ MPMProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
               //Assembling left hand side 
               this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
                               EModelDefaultEquationNumbering(), d );
-            } 
+            } else if (this->problemType == "tm") {
+                TMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
+                //Assembling left hand side 
+                this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
+                                EModelDefaultEquationNumbering(), d );
+            } else {
+              OOFEM_ERROR ("unsupported problemType");
+            }
             this->hasTangent = true;
         }
     } else {
@@ -578,6 +700,8 @@ FieldPtr MPMProblem::giveField(FieldType key, TimeStep *tStep)
       return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{D_u, D_v, D_w} );
     } else if ( key == FT_Pressure ) {
         return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{P_f} );
+    } else if ( key == FT_Temperature ) {
+        return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{T_f} );
     } else {
         return FieldPtr();
     }

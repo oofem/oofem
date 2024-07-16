@@ -61,7 +61,7 @@ MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode) const
 
 
 void
-MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

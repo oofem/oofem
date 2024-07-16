@@ -63,6 +63,8 @@ namespace oofem {
     ENUM_ITEM(BiotConstant) \
     ENUM_ITEM(CompressibilityCoefficient) \
     ENUM_ITEM(FluidViscosity) \
+    ENUM_ITEM(Flux) \
+    ENUM_ITEM(DSigmaDT)
 
 /**
  * Describes the character of characteristic material matrix.

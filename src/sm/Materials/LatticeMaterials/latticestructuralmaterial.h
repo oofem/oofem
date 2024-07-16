@@ -82,7 +82,7 @@ public:
     void giveStiffnessMatrix(FloatMatrix &answer,
                              MatResponseMode mode,
                              GaussPoint *gp,
-                             TimeStep *tStep) override;
+                             TimeStep *tStep) const override;
 
     virtual bool hasAnalyticalTangentStiffness() const { return true; }
 

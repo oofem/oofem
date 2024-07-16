@@ -929,7 +929,7 @@ MITC4Shell::computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     for ( int _i = 0; _i < 4; _i++ ) {
         lc [ _i ] = this->giveLocalCoordinates( this->giveNode(_i + 1)->giveCoordinates() );
     }
-    bool inplane = interp_lin.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
+    bool inplane = interp_lin.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc, interp_lin.giveGeometryType()) ) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
@@ -1080,7 +1080,7 @@ MITC4Shell::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     lc [ 1 ] = lcF [ 1 ];
     lc [ 2 ] = lcF [ 2 ];
     lc [ 3 ] = lcF [ 3 ];
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, interp_lin.giveGeometryType()) );
     return detJ * gp->giveWeight();
 }
 

@@ -1,0 +1,55 @@
+tm11.out
+patch test of TMTetra11 elements
+mpmproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 keeptangent ptype "tm" smtype 1
+#vtkxml tstep_all domain_all primvars 2 1 6
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 6 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 2 nset 6
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 2. 0. 0.
+node 3 coords 3 2. 3. 0.
+node 4 coords 3 0. 3. 0.
+node 5 coords 3 0. 0. 1.
+node 6 coords 3 2. 0. 1.
+node 7 coords 3 2. 3. 1.
+node 8 coords 3 0. 3. 1.
+#
+TMTetra11 1 nodes 4 1 2 4 5
+TMTetra11  2 nodes 4 5 6 2 4
+TMTetra11  3 nodes 4 5 8 6 4
+TMTetra11 4 nodes 4 3 4 2 7
+TMTetra11  5 nodes 4 7 8 4 2
+TMTetra11  6 nodes 4 8 7 6 2
+dummycs 1 mat 1 set 1
+# thermo-mechanical material model
+tmm 1 d 1.0 e 5. nu 0.3 lambda 0.2 c 0.5 alpha 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2  values 2 0 0 set 6
+# temperature prescribed (bleeding=pressure set to zero?)
+boundarycondition 3 loadtimefunction 1 set 5 values 1 2.0 dofs 1 10 
+# prescribed flux (q=1/6.)
+#boundarycondition 4 loadtimefunction 2 set 6 values 1 2.0 dofs 1 10 
+#nodalload 4 loadtimefunction 2 dofs 1 10 Components 1 0.1666666667 set 6
+#nodalload 4 loadtimefunction 2 dofs 1 3 Components 1 0.0 set 6
+constantsurfaceload 4 loadtimefunction 2 loadtype 3 dofs 1 10 cstype 0  components 1 4.0 properties 1 a 1.0 set 4 
+#
+initialcondition 1 set 5 conditions 1 u 2.0 dofs 1 10
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 1. 100. f(t) 4 0. 0. 1.0 1.0 
+Set 1 elementranges {(1 6)}
+Set 2 nodes 4  1 2 3 4
+Set 3 nodes 4  1 2 3 4
+Set 4 elementboundaries 4 3 1 6 1 
+Set 5 noderanges {(1 4)}
+set 6 
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+##
+## Note: this is the exact solution
+#NODE tStep 10 number 7 dof 3 unknown d value  4.45590439e+00 tolerance 1.e-5
+#NODE tStep 10 number 7 dof 10 unknown d value 3.66666666667 tolerance 1.e-5
+##
+##
+#%END_CHECK%

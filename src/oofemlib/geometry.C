@@ -269,10 +269,10 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     const double LineLength = giveLength();
     const double absTol = relTol*std::max(LineLength, XfemTolerances::giveCharacteristicElementLength() );
 
-    const int numEdges = element->giveInterpolation()->giveNumberOfEdges();
+    const int numEdges = element->giveInterpolation()->giveNumberOfEdges(element->giveGeometryType());
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-        auto bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex);
+        auto bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex, element->giveGeometryType());
 
         const int nsLoc = bNodes.at(1);
         const int neLoc = bNodes.at( bNodes.giveSize() );

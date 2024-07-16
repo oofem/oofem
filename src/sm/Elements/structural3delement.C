@@ -305,7 +305,7 @@ Structural3DElement::computeNumberOfDofs()
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask;
     this->giveDofManDofIDMask(-1, dofIdMask); // ok for standard elements
-    return this->giveInterpolation()->giveNumberOfNodes() * dofIdMask.giveSize();
+    return this->giveInterpolation()->giveNumberOfNodes(this->giveGeometryType()) * dofIdMask.giveSize();
 }
 
 

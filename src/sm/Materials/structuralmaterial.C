@@ -75,6 +75,15 @@ StructuralMaterial::hasMaterialModeCapability(MaterialMode mode) const
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
+void 
+StructuralMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
+{
+    if (type == TangentStiffness) {
+        return this->giveStiffnessMatrix(answer, MatResponseMode::TangentStiffness, gp, tStep);
+    } else {
+        OOFEM_ERROR("Not implemented");
+    }
+}
 
 void
 StructuralMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
@@ -603,7 +612,7 @@ StructuralMaterial::giveEshelbyStressVector_PlaneStrain(FloatArray &answer, Gaus
 void
 StructuralMaterial::giveStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode,
-                                        GaussPoint *gp, TimeStep *tStep)
+                                        GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
