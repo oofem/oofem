@@ -336,4 +336,22 @@ NTf_Edge::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeSte
 }
 
 
+// A external flux term $S=(N)^T f$, where $f$ is functor evaluating the flux. 
+NTf_Body::NTf_Body (const Variable &testField, const NTfFunctor& f) : Term (testField, testField), f(f) {}
+
+void 
+NTf_Body::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tStep) const {
+  FloatArray nvec, flux;
+  FloatMatrix N;
+  const FloatArray& lc = gp->giveNaturalCoordinates();
+
+  this->f.evaluate(flux, lc, cell, this->testField, tStep);
+  
+  this->testField.interpolation.evalN(nvec, lc, FEIElementGeometryWrapper(&cell));
+  N.beNMatrixOf(nvec, testField.size);
+  answer.beTProductOf(N, flux);
+  
+}
+
+
 } // end namespace oofem

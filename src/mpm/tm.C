@@ -53,6 +53,7 @@
 #include "matstatus.h"
 
 #include "boundaryload.h"
+#include "bodyload.h"
 #include "zznodalrecoverymodel.h"
 
 namespace oofem {
@@ -244,6 +245,27 @@ class TMElement : public MPElement {
         }
     }
 
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override {
+        answer.resize(this->giveNumberOfDofs());
+        answer.zero();
+        if (type == ExternalForcesVector) {
+            if (load->giveBCValType() == ForceLoadBVT) {
+                FloatArray contribu, contribt;
+                IntArray locu, loct;
+                getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
+                getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
+                this->integrateTerm_c(contribu, NTf_Body(getU(), BodyFluxFunctor(load, getU().dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
+                this->integrateTerm_c(contribt, NTf_Body(getT(), BodyFluxFunctor(load, getT().dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
+                answer.assemble(contribu, locu);
+                answer.assemble(contribt, loct);
+            } else {
+                OOFEM_ERROR("Unsupported body load type");
+            }
+        } else {
+            OOFEM_ERROR("Unsupported load type");
+        }
+    }
+
 
     int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const Variable::VariableQuantity q, char btype) override {
         if (q == Variable::VariableQuantity::Displacement) {
@@ -382,6 +404,99 @@ const Variable& TMBrick11::u = Variable(TMBrick11::uInterpol, Variable::Variable
 
 #define _IFT_TMBrick11_Name "tmbrick11"
 REGISTER_Element(TMBrick11)
+
+
+/**
+ * @brief 3D Equal order linear Tetrahedra TS Element
+ * 
+ */
+class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
+    protected:
+        //FEI3dTetLin pInterpol;
+        //FEI3dTetQuad uInterpol;
+        const static FEInterpolation & tInterpol;
+        const static FEInterpolation & uInterpol;
+        const static Variable& t;
+        const static Variable& u;
+      
+    public:
+    TMTetra11(int n, Domain* d): 
+        TMElement(n,d), ZZNodalRecoveryModelInterface(this)
+    {
+        numberOfDofMans  = 4;
+        numberOfGaussPoints = 4;
+        this->computeGaussPoints();
+    }
+
+  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+        /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
+        if (q == Variable::VariableQuantity::Displacement) {
+          //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15};
+          int o = (num-1)*4+1;
+          answer={o, o+1, o+2};
+        } else if (q == Variable::VariableQuantity::Temperature) {
+          //answer = {4, 8, 12, 16};
+          answer={num*4};
+        }
+    }
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+        answer={};
+    }
+
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
+            answer = {1,2,3,10};
+    }
+    int giveNumberOfDofs() override { return 16; }
+    const char *giveInputRecordName() const override {return "tmtetra11";}
+    const char *giveClassName() const override { return "TMTetra11"; }
+
+    
+    const FEInterpolation& getGeometryInterpolation() const override {return this->tInterpol;}
+  
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_tetra_1;
+    }
+    int getNumberOfSurfaceDOFs() const override {return 12;}
+    int getNumberOfEdgeDOFs() const override {return 0;}
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+        if (q == Variable::VariableQuantity::Displacement) {
+        answer={1,2,3, 5,6,7, 9,10,11};
+        } else {
+        answer ={4, 8, 12};
+        }
+    }
+    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    Interface *giveInterface(InterfaceType it) override {
+        if (it == ZZNodalRecoveryModelInterfaceType) {
+            return this;
+        } else {
+            return NULL;
+        }
+    }
+
+
+
+private:
+        virtual int  giveNumberOfUDofs() const override {return 12;} 
+        virtual int  giveNumberOfTDofs() const override {return 4;}
+        virtual const Variable& getU() const override {return u;}
+        virtual const Variable& getT() const override {return t;}
+        void computeGaussPoints() override {
+            if ( integrationRulesArray.size() == 0 ) {
+                integrationRulesArray.resize( 1 );
+                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
+                integrationRulesArray [ 0 ]->SetUpPointsOnTetrahedra(numberOfGaussPoints, _3dMat);
+            }
+        }
+};
+
+const FEInterpolation & TMTetra11::uInterpol = FEI3dTetLin();
+const FEInterpolation & TMTetra11::tInterpol = FEI3dTetLin();
+const Variable& TMTetra11::t = Variable(TMTetra11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable& TMTetra11::u = Variable(TMTetra11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+
+#define _IFT_TMTetra11_Name "tmtetra11"
+REGISTER_Element(TMTetra11)
 
 
 #define _IFT_TMSimpleMaterial_Name "tmm"
