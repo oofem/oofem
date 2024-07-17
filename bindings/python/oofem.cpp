@@ -508,7 +508,7 @@ public:
         void giveInputRecord(oofem::DynamicInputRecord &input) override {
            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveInputRecord, input);
         }
-        void giveStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+        void giveStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveStiffnessMatrix, std::ref(answer), mode, gp, tStep);
         }
         void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) override {
