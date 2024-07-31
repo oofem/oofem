@@ -50,7 +50,7 @@ void TMBTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp,
     this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
 
     
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, MatResponseMode::Stress, gp, tstep);
     answer.beTProductOf(B, sig);
 }
 
@@ -201,7 +201,7 @@ void InternalTMFluxSourceTerm::evaluate (FloatArray& answer, MPElement& cell, Ga
     FloatArray eps, n, f;
     FloatMatrix B, N;
     this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(f, eps, EnergyBalance_InternalSourceVector, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(f, eps, MatResponseMode::IntSource, gp, tstep);
     this->testField.interpolation.evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));    
     N.beNMatrixOf(n, testField.size);
     answer.beTProductOf(N, f);

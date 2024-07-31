@@ -119,7 +119,7 @@ class TMElement : public MPElement {
             answer.zero();
             this->integrateTerm_c(answer, TMgNTfTerm(getT(),getT(), Conductivity, Flux), ir, tStep) ;
             answer.times(-1.0);
-            this->integrateTerm_c (answer, NTcN(getT(), getT(), CapacityMatrix), ir, tStep) ;
+            this->integrateTerm_c (answer, NTcN(getT(), getT(), Capacity), ir, tStep) ;
             // add internal (material generated) heat source r(T) to the residual
             FloatArray temp;
             this->integrateTerm_c(temp, InternalTMFluxSourceTerm(getT(),getU(),getT()), ir, tStep);
@@ -663,7 +663,7 @@ class TMSimpleMaterial : public Material {
             grad(2) = -flux(8);
             answer.beProductOf(k, grad);
             status->letTempFluxVectorBe(answer);
-        } else if (type == EnergyBalance_InternalSourceVector) {
+        } else if (type == IntSource) {
             answer.resize(1);
             answer.zero();
         } else {
