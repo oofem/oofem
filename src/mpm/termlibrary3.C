@@ -42,33 +42,37 @@
 namespace oofem {
 
 
-
-
-
 TMBTSigTerm::TMBTSigTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) : BTSigTerm(testField, unknownField), temperatureField(temperatureField) {}
 
 void TMBTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
-    FloatArray u, eps, sig, gradT;
-    FloatMatrix B, dndx ;
+    FloatArray eps, sig;
+    FloatMatrix B;
+    this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
+
+    
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, InternalForcesVector, gp, tstep);
+    answer.beTProductOf(B, sig);
+}
+
+void TMBTSigTerm::computeTMgeneralizedStrain (FloatArray& answer, FloatMatrix& B, MPElement& cell, const FloatArray& lcoords, MaterialMode mmode, TimeStep* tstep) const {
+    FloatArray u, gradT;
+    FloatMatrix dndx ;
+    answer.resize(0);
     cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
-    this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
-    eps.beProductOf(B, u);
+    this->grad(B, this->field, this->field.interpolation, cell, lcoords, mmode);
+    answer.beProductOf(B, u);
 
     FloatArray rt, Nt;
     cell.getUnknownVector(rt, temperatureField, VM_TotalIntrinsic, tstep);
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    this->temperatureField.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));
+    this->temperatureField.interpolation.evaldNdx(dndx, lcoords, FEIElementGeometryWrapper(&cell));
     // evaluate temperature gradient at given point
     gradT.beTProductOf(dndx, rt);
     // evaluate temperature at given point
-    this->temperatureField.interpolation.evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));
+    this->temperatureField.interpolation.evalN(Nt, lcoords, FEIElementGeometryWrapper(&cell));
     double t = Nt.dotProduct(rt);
-    eps.append(gradT); // construct generalized strain vector
-    eps.append(t); // add temperature
-
-    
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, Stress, gp, tstep);
-    answer.beTProductOf(B, sig);
+    answer.append(gradT); // construct generalized strain vector
+    answer.append(t); // add temperature
 }
 
 TMgNTfTerm::TMgNTfTerm (const Variable &testField, const Variable& unknownField, MatResponseMode lhsType, MatResponseMode rhsType) : gNTfTerm(testField, unknownField, lhsType, rhsType) {}
@@ -190,6 +194,18 @@ void NTaTmTe::evaluate (FloatArray& answer, MPElement& e, GaussPoint* gp, TimeSt
 
 void NTaTmTe::getDimensions(Element& cell) const  {}
 void NTaTmTe::initializeCell(Element& cell) const  {}
+
+InternalTMFluxSourceTerm::InternalTMFluxSourceTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) : TMBTSigTerm(testField, unknownField, temperatureField) {}
+
+void InternalTMFluxSourceTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
+    FloatArray eps, n, f;
+    FloatMatrix B, N;
+    this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(f, eps, EnergyBalance_InternalSourceVector, gp, tstep);
+    this->testField.interpolation.evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));    
+    N.beNMatrixOf(n, testField.size);
+    answer.beTProductOf(N, f);
+}
 
 
 } // end namespace oofem

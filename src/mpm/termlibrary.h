@@ -305,6 +305,7 @@ class BodyFluxFunctor: public NTfFunctor {
     }
 };
 
+
 /**
  * @brief A external flux term $S=(N)^T f$, where $f$ is functor evaluating the flux. 
  */

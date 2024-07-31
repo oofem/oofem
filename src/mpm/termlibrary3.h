@@ -58,6 +58,7 @@ class TMBTSigTerm : public BTSigTerm {
      * @param coords 
      */
     void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;    
+    void computeTMgeneralizedStrain (FloatArray& answer, FloatMatrix&B, MPElement& cell, const FloatArray& lcoords, MaterialMode mmode, TimeStep* tstep) const;
 };
 /**
  * @brief momentum balance term (lhs only) (\int (\partial N)^T D (-\alpha\Pi))
@@ -162,6 +163,21 @@ class NTaTmTe : public Term {
     void getDimensions(Element& cell) const override;
     void initializeCell(Element& cell) const override;
 };
+
+
+class InternalTMFluxSourceTerm : public TMBTSigTerm {
+    protected:
+    public:
+    InternalTMFluxSourceTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) ;
+    /**
+     * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
+     * 
+     * @param cell 
+     * @param coords 
+     */
+    void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;    
+};
+
 
 
 } // end namespace oofem
