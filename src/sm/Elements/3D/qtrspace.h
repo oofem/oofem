@@ -84,6 +84,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QTRSpace_Name; }
     const char *giveClassName() const override { return "QTRSpace"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_2;}
+
 };
 } // end namespace oofem
 #endif

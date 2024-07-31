@@ -62,6 +62,14 @@ class Range;
 /**
  * Set of elements, boundaries, edges and/or nodes.
  * Describes a collection of components which are given easy access to for example boundary conditions.
+ * 
+ * @note bp: sets are defined using component labels (global numbers). In the initialization, the sets are resolved to local component numbers.
+ * In parallel mode (MPI), the sets are resolved to local component numbers on each processor, but set definition is TYPICALLY duplicated on all processors.
+ * In turn, the sets are resolved to local component numbers on each processor. As the set definition can contain global component, 
+ * hat are not present on the processor, these entries are removed from the set during resolution process.
+ * To support also dynamic load balancing, the set resolution has to be done after each load balancing step and thus we need to keep the original set definition.
+ * This can be achieved by keeping the original input record of the set.
+ *   
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT Set : public FEMComponent
@@ -76,7 +84,10 @@ protected:
     IntArray elementInternalNodes; /// Element numbers + internal dof manager numbers (interleaved).
     IntArray nodes; ///< Node numbers.
     IntArray totalNodes; ///< Unique set of nodes (computed).
-
+#if 0
+    /// receiver original input record
+    std::unique_ptr<InputRecord> inputRec;
+#endif
 public:
     /**
      * Creates a empty set with given number and belonging to given domain.

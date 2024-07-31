@@ -62,6 +62,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_Quad1_ht_Name; }
     const char *giveClassName() const override { return "Quad1_ht"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
+
 
     //int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 4 : 8; }
     int computeNumberOfDofs() override { return 4; }

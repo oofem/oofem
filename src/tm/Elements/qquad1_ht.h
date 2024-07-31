@@ -64,6 +64,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_QQuad1_ht_Name; }
     const char *giveClassName() const override { return "QQuad1_ht"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
+
 
     int computeNumberOfDofs() override { return 4; }
     void initializeFrom(InputRecord &ir) override;

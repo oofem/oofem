@@ -223,7 +223,7 @@ void LatticeDirichletCouplingNode :: printOutputAt(FILE *stream, TimeStep *stepN
 {
     int i;
 
-#if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
+#if defined( __MPI_PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
     fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
 #else
     fprintf( stream, "%-8s%8d:\n", this->giveClassName(), this->giveGlobalNumber() );

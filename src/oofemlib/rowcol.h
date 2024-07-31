@@ -35,7 +35,7 @@
 #ifndef rowcol_h
 #define rowcol_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include "vector"
 

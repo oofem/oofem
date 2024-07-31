@@ -1,0 +1,6 @@
+brazil_2d_nl.oofem.out
+#%BEGIN_CHECK% tolerance 1.e-5
+#LOADLEVEL tStep 30 value 110.857521
+#NODE  tStep 30 number 7 dof 2 unknown d value -1.08831150e-02
+#NODE  tStep 30 number 3 dof 1 unknown d value  1.33260159e-03
+#%END_CHECK%

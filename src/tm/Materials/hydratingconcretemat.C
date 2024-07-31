@@ -171,7 +171,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
         OOFEM_ERROR("unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
 
-    return 0.;
+    // return 0.;
 }
 
 
@@ -181,12 +181,11 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
     double conduct;
 
     if ( conductivityType == 0 ) { //given from input file
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep);
+        conduct = IsotropicHeatTransferMaterial :: giveProperty('k', gp, tStep);
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
+        conduct = IsotropicHeatTransferMaterial :: giveProperty('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
-        conduct = 0.;
     }
 
     //Parallel Voigt model, 20 W/m/K for steel
@@ -205,13 +204,11 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tS
     double capacityConcrete;
 
     if ( capacityType == 0 ) { //given from OOFEM input file
-        capacityConcrete = IsotropicHeatTransferMaterial :: give('c', gp, tStep);
+        capacityConcrete = IsotropicHeatTransferMaterial :: giveProperty('c', gp, tStep);
     } else if ( capacityType == 1 ) { ////calculate from 5-component model
         OOFEM_ERROR("Calculate from 5-component model, not implemented in capacityType %d\n", capacityType);
-        capacityConcrete = 0.;
     } else {
         OOFEM_ERROR("Unknown capacityType %d\n", capacityType);
-        capacityConcrete = 0.;
     }
 
     //Parallel Voigt model, 500 J/kg/K for steel
@@ -230,13 +227,11 @@ double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tSt
     double concreteBulkDensity;
 
     if ( densityType == 0 ) { //get from input file
-        concreteBulkDensity = IsotropicHeatTransferMaterial :: give('d', gp, tStep);
+        concreteBulkDensity = IsotropicHeatTransferMaterial :: giveProperty('d', gp, tStep);
     } else if ( densityType == 1 ) { //calculate from 5-component model - not implemented
         OOFEM_ERROR("Calculate from 5-component model, not implemented in densityType %d\n", densityType);
-        concreteBulkDensity = 0.;
     } else {
         OOFEM_ERROR("Unknown densityType %d\n", densityType);
-        concreteBulkDensity = 0.;
     }
 
     //Parallel Voigt model, 7850 kg/m3 for steel

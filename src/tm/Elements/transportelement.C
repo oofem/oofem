@@ -572,7 +572,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
-    std :: unique_ptr< IntegrationRule > iRule( interp->giveIntegrationRule( load->giveApproxOrder() + 1 + interp->giveInterpolationOrder()) );
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveIntegrationRule( load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), this->giveGeometryType()) );
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
         this->computeVectorOf(dofid, VM_TotalIntrinsic, tStep, unknowns);
@@ -621,7 +621,7 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
     std :: unique_ptr< IntegrationRule > iRule( this->giveBoundarySurfaceIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
-        const auto &bNodes = interp->boundaryGiveNodes(boundary);
+        const auto &bNodes = interp->boundaryGiveNodes(boundary, this->giveGeometryType());
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 
@@ -638,7 +638,7 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
 
         //Check external ambient temperature field first
         FieldPtr tf;
-        if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+        if ((tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient))){
             tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
         } else if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(val, tStep, lcoords, mode);
@@ -695,7 +695,7 @@ TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLo
             OOFEM_ERROR("Load property multexpr not implemented for coupled fields");
         }
         IntArray dofid;
-        const auto &bNodes = interp->boundaryGiveNodes(boundary);
+        const auto &bNodes = interp->boundaryGiveNodes(boundary, this->giveGeometryType());
         this->giveElementDofIDMask(dofid);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
@@ -744,7 +744,7 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
     if ( load->propertyMultExpr.isDefined() ) {
         IntArray dofid;
         this->giveElementDofIDMask(dofid);
-        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary);
+        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
         this->giveElementDofIDMask(dofid);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
@@ -806,7 +806,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
         IntArray dofid;
         this->giveElementDofIDMask(dofid);
-        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary);
+        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 
@@ -956,7 +956,7 @@ TransportElement :: computeBodyBCSubVectorAt(FloatArray &answer, Load *load,
     FloatArray val, globalIPcoords, n;
     answer.resize( this->giveNumberOfDofManagers() );
 
-    std :: unique_ptr< IntegrationRule > iRule( this->giveInterpolation()->giveIntegrationRule(load->giveApproxOrder()) );
+    std :: unique_ptr< IntegrationRule > iRule( this->giveInterpolation()->giveIntegrationRule(load->giveApproxOrder(), this->giveGeometryType()) );
     for ( GaussPoint *gp : *iRule ) {
         double dV = this->computeVolumeAround(gp);
         this->computeNAt( n, gp->giveNaturalCoordinates() );
@@ -1016,7 +1016,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
 
             FieldPtr tf;
             FloatArray gcoords;
-            if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
+            if ((tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient))){
                 //this->computeEdgeIpGlobalCoords(gcoords, lcoords, iEdge);
                 this->giveInterpolation()->boundaryEdgeLocal2Global( gcoords, iEdge, lcoords, FEIElementGeometryWrapper(this) );
                 

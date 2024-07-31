@@ -141,7 +141,7 @@ LinkSlip :: evaluateBondStress(const double kappa) const
         OOFEM_ERROR("Unknown bond model type. Type should be 0, 1 or 2.");
     }
     
-    return 0.; //Should not be here. 
+    // return 0.; //Should not be here. 
 }
 
 

@@ -53,6 +53,8 @@ public:
     double computeVolumeAround(GaussPoint *gp) override;
     const char *giveInputRecordName() const override { return _IFT_TrAxisym1_ht_Name; }
     const char *giveClassName() const override { return "TrAxisym1_htElement"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
 
     double giveThicknessAt(const FloatArray &gcoords) override;
 

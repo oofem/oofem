@@ -87,6 +87,6 @@ MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
         OOFEM_ERROR("source not set.");
     }
 
-    return 0;
+    //return 0;
 }
 } // end namespace oofem

@@ -66,8 +66,8 @@ class ContactMaterial; // write this
 class OOFEM_EXPORT ContactDefinitionNode2Node : public ContactDefinition
 {
 private:
-    double epsN;
-    double epsT; // these should be 'contactmaterial' par
+  //double epsN;
+  //double epsT; // these should be 'contactmaterial' par
 
 public:
 

@@ -125,7 +125,7 @@ bool
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     OOFEM_ERROR("Not implemented");
-    return false;
+    //return false;
 }
 
 
@@ -143,7 +143,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
         lncp[ i - 1 ].beProductOf(lcs, this->giveNode(i)->giveCoordinates());
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp, this->giveGeometryType()) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

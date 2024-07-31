@@ -122,7 +122,6 @@ WinklerMaterial::give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *g
         return answer;
     } else {
         OOFEM_ERROR ("C1 attribute size error (shouldequal to 6 for 3dBeamSubsoil mode)");
-        return FloatMatrixF<6,6>();
     }
 }
 

@@ -270,7 +270,7 @@ FEI3dHexaConst :: computeLocalEdgeMapping(int iedge) const
         return {8, 5};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -334,7 +334,7 @@ FEI3dHexaConst :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaConst :: giveIntegrationRule(int order) const
+FEI3dHexaConst :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 0);
@@ -343,7 +343,7 @@ FEI3dHexaConst :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dHexaConst :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dHexaConst :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);

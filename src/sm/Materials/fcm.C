@@ -1074,7 +1074,6 @@ FCMMaterial :: isIntactForShear(GaussPoint *gp, int i) {
         normal_2 = 2;
     } else {
         OOFEM_ERROR("Unexpected number for shear stress (must be either 4, 5 or 6).");
-        normal_1 = normal_2 = 0;
     }
 
     // any crack had existed in previous steps - newly inserted condition
@@ -1875,7 +1874,6 @@ FCMMaterial :: computeTotalD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
             crackB = 2;
         } else {
             OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-            crackA = crackB = 0;
         }
 
         if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {
@@ -1947,7 +1945,6 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
             crackB = 2;
         } else {
             OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-            crackA = crackB = 0;
         }
 
         if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {
@@ -2066,7 +2063,6 @@ FCMMaterial :: giveNumberOfCracksForShearDirection(GaussPoint *gp, int i)
         dir_2 = 2;
     } else {
         OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-        dir_1 = dir_2 = 0;
     }
 
     N = max( this->giveNumberOfCracksInDirection(gp, dir_1), this->giveNumberOfCracksInDirection(gp, dir_2) );

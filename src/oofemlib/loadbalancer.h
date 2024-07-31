@@ -35,7 +35,7 @@
 #ifndef loadbalancer_h
 #define loadbalancer_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 #include "floatarray.h"
 

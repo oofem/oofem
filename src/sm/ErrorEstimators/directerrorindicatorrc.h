@@ -84,7 +84,7 @@ protected:
     /// Actual values (densities) state counter.
     StateCounterType stateCounter;
     RemeshingStrategy currStrategy;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     std :: map< int, double >sharedDofManDensities;
     std :: map< int, double >sharedDofManIndicatorVals;
     bool dofManDensityExchangeFlag;
@@ -124,7 +124,7 @@ protected:
      */
     double giveDofManIndicator(int num, TimeStep *tStep);
     double giveLocalDofManIndicator(int num, TimeStep *tStep);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     void exchangeDofManDensities();
     int packSharedDofManLocalDensities(ProcessCommunicator &processComm);
     int unpackSharedDofManLocalDensities(ProcessCommunicator &processComm);

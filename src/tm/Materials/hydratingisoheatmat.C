@@ -159,7 +159,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
                     aux.zero();
                 }
 
-                aux.times( 1. / give('d', gp, tStep) );
+                aux.times( 1. / giveProperty('d', gp, tStep) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), tStep->giveNumber(),
                         tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
                         giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
@@ -174,9 +174,9 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
 {
     if ( rmode == Capacity ) {
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
-            return this->give('c', gp, tStep) * this->give('d', gp, tStep) / 1000;                            // Zero capacity before cast
+            return this->giveProperty('c', gp, tStep) * this->giveProperty('d', gp, tStep) / 1000;                            // Zero capacity before cast
         } else {
-            return this->give('c', gp, tStep) * this->give('d', gp, tStep);
+            return this->giveProperty('c', gp, tStep) * this->giveProperty('d', gp, tStep);
         }
     } else if ( !hydrationLHS ) {
         return 0;
@@ -185,10 +185,9 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
         double t = status->giveTempTemperature();
         double h = status->giveTempHumidity(); // TODO CHECK
 
-        return hydrationModel->giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
+        return hydrationModel->_giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
-        return 0.;
     }
 }
 

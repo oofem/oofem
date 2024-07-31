@@ -146,7 +146,7 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
         return mpTracElNew [ i - 1 ].mFirstNode.get();
     } else {
         OOFEM_ERROR("return mpDisplacementLock")
-        return mpDisplacementLock.get();
+        //return mpDisplacementLock.get();
     }
 }
 
@@ -1390,7 +1390,6 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     for ( auto & el : mpTracElNew ) {
 
         i = 0;
-
         for ( auto &line : el.mInteriorSegments ) {
             FloatArray xS = line.giveVertex(1);
             xS.resizeWithValues(2);
@@ -1821,7 +1820,7 @@ int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
 
     OOFEM_ERROR("Could not identify side index.")
 
-    return -1;
+    //return -1;
 }
 
 void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoordUnsorted, std::vector<FloatArray> &oAllCoordUnsorted)
@@ -1839,7 +1838,7 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
     	int elIndex = boundaries.at(pos * 2 - 1);
         Element *e = this->giveDomain()->giveElement( elIndex );
         int boundary = boundaries.at(pos * 2);
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
         DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
         int startNodeInd = startNode->giveNumber();
         DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
@@ -1896,7 +1895,7 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
         // Add the start and end nodes of the segment
         DofManager *startNode = e->giveDofManager(bNodes [ 0 ]);

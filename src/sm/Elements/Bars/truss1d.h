@@ -98,6 +98,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_Truss1d_Name; }
     const char *giveClassName() const override { return "Truss1d"; }
     MaterialMode giveMaterialMode() override { return _1dMat; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
+
 
     // NodalAveragingRecoveryMInterface
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

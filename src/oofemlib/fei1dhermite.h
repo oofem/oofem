@@ -50,8 +50,8 @@ protected:
 public:
     FEI1dHermite(int coordIndx) : FEInterpolation1d(2), cindx(coordIndx) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Line; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Line; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     double giveLength(const FEICellGeometry &cellgeo) const override;
 
@@ -65,7 +65,7 @@ public:
     int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    int giveNumberOfNodes() const override { return 2; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 2; }
 };
 } // end namespace oofem
 #endif

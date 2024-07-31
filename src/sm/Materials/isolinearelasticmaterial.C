@@ -259,7 +259,7 @@ IsotropicLinearElasticMaterial :: giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix
 
 
 void
-IsotropicLinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+IsotropicLinearElasticMaterial :: giveRealStressVectorUP_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -281,7 +281,7 @@ IsotropicLinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, Ga
 
 
 void
-IsotropicLinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+IsotropicLinearElasticMaterial :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
 {
     FloatArray strainVector;
     FloatMatrix d;

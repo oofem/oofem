@@ -44,7 +44,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 #include "processcomm.h"
 #include "datastream.h"
 #include "communicator.h"
@@ -56,7 +56,7 @@ namespace oofem {
   //#define __VERBOSE_PARALLEL
   //#define LoadBalancer_debug_print
 
-#ifndef __PARALLEL_MODE
+#ifndef __MPI_PARALLEL_MODE
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
@@ -573,5 +573,5 @@ LoadBalancerMonitor :: initializeFrom(InputRecord &ir)
     }
 }
 
-#endif // end __PARALLEL_MODE
+#endif // end __MPI_PARALLEL_MODE
 } // end namespace oofem

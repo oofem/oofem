@@ -88,7 +88,7 @@ RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 void
-RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const 
 //
 // Returns characteristic material matrix of the receiver
 //

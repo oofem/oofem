@@ -355,7 +355,7 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateTy
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    double volume = 0.0;
+    //double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     FEInterpolation *interpol = this->giveInterpolation();
@@ -368,14 +368,14 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateTy
     int size = 3; //this->giveNumberOfDofManagers();
     fullAnswer.resize(size, size);
     fullAnswer.zero();
-    double pok = 0.0;
+    //double pok = 0.0;
 
     for ( auto &gp : *iRule ) {
         double dV = this->computeVolumeAround(gp);
         interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         fullAnswer.plusDyadSymmUpper(n, dV);
-        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
-        volume += dV;
+        //pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
+        //volume += dV;
     }
 
     fullAnswer.symmetrized();

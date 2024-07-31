@@ -95,6 +95,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LSpace_Name; }
     const char *giveClassName() const override { return "LSpace"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_1;}
+
     void initializeFrom(InputRecord &ir) override;
 
 #ifdef __OOFEG

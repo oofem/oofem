@@ -86,7 +86,6 @@ void FluidMaterialEvaluator :: solveYourself()
     if ( ndim == 1 ) {
         OOFEM_ERROR("1d flow not supported (should be added)")
         //mode = _1dFlow;
-        mode = _Unknown;
     } else if ( ndim == 2 ) {
         mode = _2dFlow;
     } else {

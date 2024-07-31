@@ -61,7 +61,7 @@ MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode) const
 
 
 void
-MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -205,7 +205,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, T
 
     // === plastic loading ===
     // yield stress at the beginning of the step
-    double sigmaY = this->give('s', gp, tStep) + H * kappa;
+    double sigmaY = this->giveS( gp, tStep) + H * kappa;
     // trial deviatoric stress and its norm
     StressVector trialStressDev(status->giveTrialStressDev(), _PlaneStrain);
     double trialS = trialStressDev.computeStressNorm();
@@ -260,7 +260,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *
     if ( dKappa > 0.0 ) {
         double tempDamage = status->giveTempDamage();
         double damage = status->giveDamage();
-        double sigmaY = this->give('s', gp, tStep) + H * kappa;
+        double sigmaY = this->giveS(gp, tStep) + H * kappa;
         // trial deviatoric stress and its norm
         const FloatArrayF<6> trialStressDev = status->giveTrialStressDev();
         /*****************************************************/

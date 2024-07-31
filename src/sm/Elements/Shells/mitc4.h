@@ -101,6 +101,8 @@ public:
     void postInitialize() override;
     int computeNumberOfDofs() override { return 24; }
     int computeNumberOfGlobalDofs() override { return 24; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
+
 
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;

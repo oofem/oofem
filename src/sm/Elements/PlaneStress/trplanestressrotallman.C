@@ -109,8 +109,8 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
     answer.zero();
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(lxy) );
-    this->interp.evalN( L, iLocCoord, FEIVertexListGeometryWrapper(lxy));
+    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(lxy, this->qinterpolation.giveGeometryType()) );
+    this->interp.evalN( L, iLocCoord, FEIVertexListGeometryWrapper(lxy, this->interp.giveGeometryType()));
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(4) / 2. + n.at(6) / 2.;
     answer.at(1, 4) = answer.at(2, 5) = n.at(2) + n.at(4) / 2. + n.at(5) / 2.;
@@ -136,7 +136,7 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     std::vector< FloatArray > lxy;
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
+    this->qinterpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy, this->qinterpolation.giveGeometryType()) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -194,7 +194,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
     std::vector< FloatArray > lxy; 
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(lxy) );
+    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(lxy, this->qinterpolation.giveGeometryType()) );
 
     // evaluate (dv/dx-du/dy)/2. at element center
     b.at(1, 1) = -1.0 * ( dnx.at(1, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(6, 2) );
@@ -261,7 +261,7 @@ TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, G
     FEI2dTrQuad qi(1, 2);
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    qi.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
+    qi.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy, qi.giveGeometryType()) );
     const auto &en = qi.computeLocalEdgeMapping(iedge); // get edge mapping
     this->interp.edgeEvalN( l, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(3, 6);

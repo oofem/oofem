@@ -93,10 +93,10 @@ private:
     double calcTime(int i, int j, double Fij, int ord, int &eFlag);
 
     /// Utility methods
-    int ij2ind(int i, int j, int m) { return ( ( i - 1 ) + ( j - 1 ) * m ); }
-    int ind2i(int ind, int m) { return 1 + ind - ( ind / m ) * m; }
-    int ind2j(int ind, int m) { return ( ( ind ) / m ) + 1; }
-    bool isInDomain(int i, int j, int m, int n) { return ( ( i >= 1 ) && ( j >= 1 ) && ( i <= m ) && ( j <= n ) ); }
+    int ij2ind(int _i, int _j, int _m) { return ( ( _i - 1 ) + ( _j - 1 ) * _m ); }
+    int ind2i(int ind, int _m) { return 1 + ind - ( ind / _m ) * _m; }
+    int ind2j(int ind, int _m) { return ( ( ind ) / _m ) + 1; }
+    bool isInDomain(int i, int j, int _m, int _n) { return ( ( i >= 1 ) && ( j >= 1 ) && ( i <= _m ) && ( j <= _n ) ); }
 };
 } // end namespace oofem
 #endif // grid_h

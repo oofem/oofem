@@ -357,10 +357,9 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         if ( !interp2d ) {
             OOFEM_ERROR("failed to cast to FEInterpolation2d.")
         }
-        const auto &edgeNodes = interp2d->computeLocalEdgeMapping(iBndIndex);
-
-//        const auto &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
-//        const auto &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
+        // const auto &edgeNodes = interp2d->computeLocalEdgeMapping(iBndIndex);
+        // const auto &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
+        // const auto &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
 
         std :: vector< Line >segments;
         std :: vector< FloatArray >intersecPoints;
@@ -370,7 +369,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         int numPointsPerSeg = 1;
         ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
     } else {
-        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex, e->giveGeometryType());
     }
 
     oTangent.clear();

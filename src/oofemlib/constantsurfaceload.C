@@ -65,7 +65,7 @@ ConstantSurfaceLoad :: giveInputRecord(DynamicInputRecord &input)
 void
 ConstantSurfaceLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
-    if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
+    if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) && ( mode != VM_TotalIntrinsic ) ) {
         OOFEM_ERROR("mode not supported");
     }
 

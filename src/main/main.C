@@ -41,6 +41,7 @@
 
 #include "engngm.h"
 #include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include "oofemtxtdatareader.h"
 #include "datastream.h"
@@ -50,7 +51,7 @@
 #include "contextioerr.h"
 #include "oofem_terminate.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "dyncombuff.h"
 #endif
 
@@ -136,16 +137,17 @@ int main(int argc, char *argv[])
 
     int rank = 0;
 
-    // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
-
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
     oofem_logger.setComm(MPI_COMM_WORLD);
  #endif
 #endif
+
+    // print header to redirected output
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
+
 
     //
     // check for options
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
             } else if ( strcmp(argv [ i ], "-p") == 0 ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
                 parallelFlag = true;
 #else
                 fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
@@ -272,7 +274,7 @@ int main(int argc, char *argv[])
     PyRun_SimpleString("sys.path.append(\".\")");
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( parallelFlag ) {
         inputFileName << "." << rank;
         outputFileName << "." << rank;
@@ -335,7 +337,7 @@ int main(int argc, char *argv[])
     }
 
     problem->terminateAnalysis();
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( parallelFlag ) {
         DynamicCommunicationBuffer :: printInfo();
     }
@@ -411,7 +413,7 @@ void oofem_debug(EngngModel &emodel)
     //FloatMatrix k;
     //((BsplinePlaneStressElement*)emodel.giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     //LoadBalancer* lb = emodel.giveDomain(1)->giveLoadBalancer();
     //lb->calculateLoadTransfer();
     //lb->migrateLoad();

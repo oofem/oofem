@@ -49,17 +49,17 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-std::array< std::array< int, 3 >, 3 >StructuralMaterial::vIindex = {
-    1, 6, 5,
-    9, 2, 4,
-    8, 7, 3
-};
+std::array< std::array< int, 3 >, 3 >StructuralMaterial::vIindex = {{
+  {1, 6, 5},
+  {9, 2, 4},
+  {8, 7, 3}
+}};
 
-std::array< std::array< int, 3 >, 3 >StructuralMaterial::svIndex = {
-    1, 6, 5,
-    6, 2, 4,
-    5, 4, 3
-};
+std::array< std::array< int, 3 >, 3 >StructuralMaterial::svIndex = {{
+    {1, 6, 5},
+    {6, 2, 4},
+    {5, 4, 3}
+}};
 
 
 StructuralMaterial::StructuralMaterial(int n, Domain *d) : Material(n, d) { }
@@ -75,6 +75,15 @@ StructuralMaterial::hasMaterialModeCapability(MaterialMode mode) const
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
+void 
+StructuralMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
+{
+    if (type == TangentStiffness) {
+        return this->giveStiffnessMatrix(answer, MatResponseMode::TangentStiffness, gp, tStep);
+    } else {
+        OOFEM_ERROR("Not implemented");
+    }
+}
 
 void
 StructuralMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
@@ -191,7 +200,6 @@ StructuralMaterial::giveRealStressVector_StressControl(const FloatArray &reduced
     }
 
     OOFEM_ERROR("Iteration did not converge after 100000 iterations\nS.norm=%e, err=%e, relErr=%e", vS.computeNorm(), reducedvS.computeNorm(), reducedvS.computeNorm() / vS.computeNorm() );
-    return FloatArray();
 }
 
 
@@ -386,7 +394,6 @@ StructuralMaterial::giveFirstPKStressVector_StressControl(const FloatArray &redu
     }
 
     OOFEM_ERROR("Iteration did not converge");
-    return FloatArray();
 }
 
 
@@ -605,7 +612,7 @@ StructuralMaterial::giveEshelbyStressVector_PlaneStrain(FloatArray &answer, Gaus
 void
 StructuralMaterial::giveStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode,
-                                        GaussPoint *gp, TimeStep *tStep)
+                                        GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -1078,14 +1085,12 @@ FloatMatrixF< 3, 3 >
 StructuralMaterial::give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
-    return FloatMatrixF< 3, 3 >();
 }
 
 FloatMatrixF< 6, 6 >
 StructuralMaterial::give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
-    return FloatMatrixF< 6, 6 >();
 }
 
 void
@@ -1946,7 +1951,7 @@ StructuralMaterial::sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDi
             pVal.at(maxJ) = pVal.at(i);
             pVal.at(i) = swap;
             for ( int k = 1; k <= 3; k++ ) {
-                double swap = pDir.at(k, maxJ);
+                swap = pDir.at(k, maxJ);
                 pDir.at(k, maxJ) = pDir.at(k, i);
                 pDir.at(k, i) = swap;
             }

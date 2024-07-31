@@ -86,6 +86,8 @@ public:
     const char *giveClassName() const override { return "Tet21Stokes"; }
     const char *giveInputRecordName() const override { return _IFT_Tet21Stokes_Name; }
     MaterialMode giveMaterialMode() override { return _3dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_2;}
+
 
     int computeNumberOfDofs() override;
 

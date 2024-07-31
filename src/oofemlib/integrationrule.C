@@ -288,7 +288,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         OOFEM_ERROR("unknown mode (%d)", mode);
     }
 
-    return 0;
+    //return 0;
 }
 
 int
@@ -304,8 +304,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPointsXY,
     default:
         OOFEM_ERROR("Unknown mode (%d)", mode);
     }
-
-    return 0;
+    //return 0;
 }
 
 int
@@ -324,8 +323,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
     default:
         OOFEM_ERROR("unknown mode");
     }
-
-    return 0;
+    //return 0;
 }
 
 

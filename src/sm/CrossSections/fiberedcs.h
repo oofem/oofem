@@ -136,7 +136,6 @@ public:
     double give(int aProperty, GaussPoint *gp) const override
     {
         OOFEM_ERROR("not implemented yet");
-        return 0.0;
     }
     FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d) override;
     FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d) override;
@@ -165,19 +164,16 @@ public:
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override
     {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
 

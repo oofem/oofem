@@ -153,6 +153,8 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+
 
     /**
      * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
@@ -166,7 +168,7 @@ public:
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
-                                     TimeStep *tStep);
+                                     TimeStep *tStep) const;
 
     /**
      * Computes the real stress vector for given total strain and integration point.

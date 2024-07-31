@@ -119,10 +119,10 @@ protected:
     double density = 0.;
 
     /// Type of conductivity and capcity laws.
-    int conType = 0.;
+    int conType = 0;
 
     /// Type of conductivity and capcity laws.
-    int capacity = 0.;
+    int capacity = 0;
 
     /// Relative saturated water content
     double thetaS = 0.;

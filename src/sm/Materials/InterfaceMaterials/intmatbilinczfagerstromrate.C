@@ -296,7 +296,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(const FloatArrayF<3> &d
 }
 
 
-const double tolerance = 1.0e-12; // small number
+//const double tolerance = 1.0e-12; // small number
 void
 IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord &ir)
 {

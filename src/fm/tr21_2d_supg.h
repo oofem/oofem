@@ -70,6 +70,8 @@ public:
     const char *giveClassName() const override { return "TR21_2D_SUPG"; }
     const char *giveInputRecordName() const override { return _IFT_TR21_2D_SUPG_Name; }
     MaterialMode giveMaterialMode() override { return _2dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_2;}
+
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;

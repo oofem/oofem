@@ -81,6 +81,8 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "CohesiveSurface3d"; }
     const char *giveInputRecordName() const override { return _IFT_CohesiveSurface3d_Name; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_unknown;}
+
 
     // input and output
     void initializeFrom(InputRecord &ir) override;

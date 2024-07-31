@@ -424,7 +424,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
             if(i == 0)
                 elemNumber = atoi(token);
             else if (i >= 1 && i<=4)
-                dofManagers.at(i) = atof(token);
+                dofManagers.at(i) = atoi(token);
             else
                 break;
             token = std::strtok(nullptr, " ");
@@ -457,7 +457,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
             if(i == 0)
                 elemNumber = atoi(token);
             else if (i >= 1 && i<=4)
-                dofManagers.at(i) = atof(token);
+                dofManagers.at(i) = atoi(token);
             else
                 break;
             token = std::strtok(nullptr, " ");
@@ -699,7 +699,7 @@ T3DInterface :: createVTKExportMesh(const char *t3dOutFile,std::vector<FloatArra
       if(i == 0)
 	  {}//elemNumber = atoi(token);
       else if (i >= 1 && i<=3)
-	dofManagers.at(i) = atof(token) - 1;
+	    dofManagers.at(i) = atoi(token) - 1;
       else
 	break;
       token = std::strtok(NULL, " ");
@@ -830,7 +830,7 @@ T3DInterface :: createQCInterpolationMesh(const char *t3dOutFile,std::vector<Flo
       if(i == 0)
 	  {}//elemNumber = atoi(token);
       else if (i >= 1 && i<=3)
-	dofManagers.at(i) = atof(token);
+	    dofManagers.at(i) = atoi(token);
       else
 	break;
       token = std::strtok(NULL, " ");
@@ -858,7 +858,7 @@ T3DInterface :: createQCInterpolationMesh(const char *t3dOutFile,std::vector<Flo
       if(i == 0)
 	  {}//elemNumber = atoi(token);
       else if (i >= 1 && i<=4)
-	dofManagers.at(i) = atof(token);
+	    dofManagers.at(i) = atoi(token);
       else
 	break;
       token = std::strtok(NULL, " ");

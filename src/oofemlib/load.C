@@ -141,7 +141,7 @@ Load :: isDofExcluded(int indx)
         OOFEM_ERROR("dof index out of range");
     }
 
-    return 0;
+    //return 0;
 }
 
 

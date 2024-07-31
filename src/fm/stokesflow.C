@@ -209,11 +209,11 @@ void StokesFlow :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, D
 }
 
 
-void StokesFlow :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+void StokesFlow :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *enorm)
 {
     answer.zero();
     this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), d, eNorm);
+                         EModelDefaultEquationNumbering(), d, enorm);
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 }
 

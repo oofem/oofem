@@ -90,7 +90,7 @@ TrPlanestressRotAllman3d :: computeVolumeAround(GaussPoint *gp)
     this->computeLocalNodalCoordinates(lc);
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, this->interp.giveGeometryType()) ) );
     return detJ * weight * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
 }
 
@@ -201,7 +201,6 @@ TrPlanestressRotAllman3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTe
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {} else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||

@@ -97,7 +97,7 @@ public:
         }
     }
 
-    void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;

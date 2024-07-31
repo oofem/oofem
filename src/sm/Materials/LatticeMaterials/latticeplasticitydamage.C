@@ -856,7 +856,6 @@ LatticePlasticityDamage::give3dLatticeStiffnessMatrix(MatResponseMode mode, Gaus
         return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
-        return elastic;
     }
 }
 

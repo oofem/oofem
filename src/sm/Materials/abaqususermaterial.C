@@ -50,8 +50,8 @@
 namespace oofem {
 REGISTER_Material(AbaqusUserMaterial);
 
-int const AbaqusUserMaterial::abq2oo9[ 9 ] = { 0, 1, 2, 5, 4, 3, 6, 8, 7 };
-int const AbaqusUserMaterial::abq2oo6[ 6 ] = { 0, 1, 2, 5, 4, 3 };
+std::size_t const AbaqusUserMaterial::abq2oo9[ 9 ] = { 0, 1, 2, 5, 4, 3, 6, 8, 7 };
+std::size_t const AbaqusUserMaterial::abq2oo6[ 6 ] = { 0, 1, 2, 5, 4, 3 };
 
 AbaqusUserMaterial::AbaqusUserMaterial(int n, Domain *d) :
     StructuralMaterial(n, d)

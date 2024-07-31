@@ -51,7 +51,7 @@ int DataStream :: read(std :: string &data)
         data = "";
         return 0;
     }
-    data = std::string(str.data(), str.size());
+    data = std::string(str.data(), n);
     return 1;
 }
 
@@ -78,91 +78,110 @@ FileDataStream :: ~FileDataStream()
     fclose(this->stream);
 }
 
-int FileDataStream :: read(int *data, int count)
+int FileDataStream :: read(int *data, std::size_t count)
 {
-    return ( (int)fread(data, sizeof( int ), count, stream) == count );
+    return ( fread(data, sizeof( int ), count, stream) == count );
     //this->stream.read(reinterpret_cast< char* >(data), sizeof(int)*count);
     //return this->stream.good();
 }
 
-int FileDataStream :: read(unsigned long *data, int count)
+int FileDataStream :: read(unsigned long *data, std::size_t count)
 {
-    return ( (int)fread(data, sizeof( unsigned long ), count, stream) == count );
+    return ( fread(data, sizeof( unsigned long ), count, stream) == count );
 }
 
-int FileDataStream :: read(long *data, int count)
+int FileDataStream :: read(long *data, std::size_t count)
 {
-    return ( (int)fread(data, sizeof( long ), count, stream) == count );
+    return ( fread(data, sizeof( long ), count, stream) == count );
 }
 
-int FileDataStream :: read(double *data, int count)
+#ifdef _MSC_VER
+int FileDataStream::read(std::size_t* data, std::size_t count)
 {
-    return ( (int)fread(data, sizeof( double ), count, stream) == count );
+    return (fread(data, sizeof(std::size_t), count, stream) == count);
+}
+#endif
+
+int FileDataStream :: read(double *data, std::size_t count)
+{
+    return ( fread(data, sizeof( double ), count, stream) == count );
 }
 
-int FileDataStream :: read(char *data, int count)
+int FileDataStream :: read(char *data, std::size_t count)
 {
-    return ( (int)fread(data, sizeof( char ), count, stream) == count );
+    return ( fread(data, sizeof( char ), count, stream) == count );
 }
 
 int FileDataStream :: read(bool &data)
 {
-    return ( (int)fread(& data, sizeof( bool ), 1, stream) == 1 );
+    return ( fread(& data, sizeof( bool ), 1, stream) == 1 );
 }
 
-int FileDataStream :: write(const int *data, int count)
+int FileDataStream :: write(const int *data, std::size_t count)
 {
-    return ( (int)fwrite(data, sizeof( int ), count, stream) == count );
+    return ( fwrite(data, sizeof( int ), count, stream) == count );
 }
 
-int FileDataStream :: write(const unsigned long *data, int count)
+int FileDataStream :: write(const unsigned long *data, std::size_t count)
 {
-    return ( (int)fwrite(data, sizeof( unsigned long ), count, stream) == count );
+    return ( fwrite(data, sizeof( unsigned long ), count, stream) == count );
 }
 
-int FileDataStream :: write(const long *data, int count)
+#ifdef _MSC_VER
+int FileDataStream::write(const std::size_t* data, std::size_t count)
 {
-    return ( (int)fwrite(data, sizeof( long ), count, stream) == count );
+    return (fwrite(data, sizeof(std::size_t), count, stream) == count);
+}
+#endif
+
+int FileDataStream :: write(const long *data, std::size_t count)
+{
+    return ( fwrite(data, sizeof( long ), count, stream) == count );
 }
 
-int FileDataStream :: write(const double *data, int count)
+int FileDataStream :: write(const double *data, std::size_t count)
 {
-    return ( (int)fwrite(data, sizeof( double ), count, stream) == count );
+    return ( fwrite(data, sizeof( double ), count, stream) == count );
 }
 
-int FileDataStream :: write(const char *data, int count)
+int FileDataStream :: write(const char *data, std::size_t count)
 {
-    return ( (int)fwrite(data, sizeof( char ), count, stream) == count );
+    return ( fwrite(data, sizeof( char ), count, stream) == count );
 }
 
 int FileDataStream :: write(bool data)
 {
-    return ( (int)fwrite(& data, sizeof( bool ), 1, stream) == 1 );
+    return ( fwrite(& data, sizeof( bool ), 1, stream) == 1 );
 }
 
-int FileDataStream :: givePackSizeOfInt(int count)
+int FileDataStream :: givePackSizeOfInt(std::size_t count)
 {
-    return sizeof(int)*count;
+    return (int) (sizeof(int)*count);
 }
 
-int FileDataStream :: givePackSizeOfDouble(int count)
+int FileDataStream :: givePackSizeOfDouble(std::size_t count)
 {
-    return sizeof(double)*count;
+    return (int) (sizeof(double)*count);
 }
 
-int FileDataStream :: givePackSizeOfChar(int count)
+int FileDataStream :: givePackSizeOfChar(std::size_t count)
 {
-    return sizeof(char)*count;
+    return (int) (sizeof(char)*count);
 }
 
-int FileDataStream :: givePackSizeOfBool(int count)
+int FileDataStream :: givePackSizeOfBool(std::size_t count)
 {
-    return sizeof(bool)*count;
+    return (int) (sizeof(bool)*count);
 }
 
-int FileDataStream :: givePackSizeOfLong(int count)
+int FileDataStream :: givePackSizeOfLong(std::size_t count)
 {
-    return sizeof(int)*count;
+    return (int) (sizeof(long)*count);
+}
+
+int FileDataStream :: givePackSizeOfSizet(std::size_t count)
+{
+    return (int) (sizeof(std::size_t)*count);
 }
 
 }

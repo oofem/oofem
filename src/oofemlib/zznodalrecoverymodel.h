@@ -85,7 +85,7 @@ private:
      */
     void initRegionMap(IntArray &regionMap, InternalStateType type);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     void initCommMaps();
     void exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
     int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);

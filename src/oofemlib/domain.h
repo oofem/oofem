@@ -35,13 +35,13 @@
 #ifndef domain_h
 #define domain_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
 #include "error.h"
 #include "bctracker.h"
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "entityrenumberingscheme.h"
 #endif
 
@@ -225,7 +225,7 @@ public:
     int freeDofID;
 private:
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /**
      * Transaction manager. The purpose of this class is to
      * make the domain modification (in terms of adding and deleting components) versatile.
@@ -652,7 +652,7 @@ public:
      */
     void setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld = true);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /**@name Domain transaction support methods.
      * The purpose of these methods is to provide a unified approach
      * for changing domain at runtime (meaning mainly adding and deleting dofmanagers and elements).

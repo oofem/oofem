@@ -83,7 +83,7 @@ Truss3dnl2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
   answer.clear();
   for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
     StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
-    this->computeBmatrixAt(gp, B, tStep, u);
+    this->_computeBmatrixAt(gp, B, tStep, u);
     if ( useUpdatedGpRecord == 1 ) {
       vStress = matStat->givePVector();
     } else {
@@ -93,7 +93,7 @@ Truss3dnl2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 	vStrain.zero();
       }
       // compute strain tensor, i.e., Biot strain
-      auto vStrain = this->computeStrainVector(gp, u);
+      auto vStrain = this->_computeStrainVector(gp, u);
       // compute stress tensor, i.e., firt Piola-Kirchhoff
       vStress = this->giveStructuralCrossSection()->giveFirstPKStresses(vStrain, gp, tStep);
     }
@@ -150,7 +150,7 @@ Truss3dnl2 :: computeDeformedLength(const FloatArray &d)
 
   
 FloatArray
-Truss3dnl2 :: computeStrainVector(GaussPoint *gp, const FloatArray &d)
+Truss3dnl2 :: _computeStrainVector(GaussPoint *gp, const FloatArray &d)
 {
   FloatArray answer(1);
   auto l = this->computeDeformedLength(d);
@@ -178,7 +178,7 @@ Truss3dnl2 :: computeStiffnessMatrix(FloatMatrix &answer,
   if ( integrationRulesArray.size() == 1 ) {
     FloatMatrix B, D, DB, Ksigma;
     for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
-      this->computeBmatrixAt(gp, B, tStep, u);
+      this->_computeBmatrixAt(gp, B, tStep, u);
       this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
       double dV = this->computeVolumeAround(gp);
       DB.beProductOf(D, B);
@@ -209,7 +209,7 @@ Truss3dnl2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode r
 
   
 void
-Truss3dnl2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, const FloatArray &d)
+Truss3dnl2 :: _computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, const FloatArray &d)
 {
   double L = computeLength();
   double l = computeDeformedLength(d);
@@ -261,7 +261,7 @@ Truss3dnl2 :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode
   answer = A;
   answer.subtract(AxxA);
   answer.times(1./l/L);
-  auto stress = this->giveStructuralCrossSection()->giveFirstPKStresses(this->computeStrainVector(gp, d), gp, tStep);
+  auto stress = this->giveStructuralCrossSection()->giveFirstPKStresses(this->_computeStrainVector(gp, d), gp, tStep);
 
    // prevent zero initial stress stiffness
    if ( stress.at(1) == 0 ) {

@@ -80,6 +80,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QWedge_Name; }
     const char *giveClassName() const override { return "QWedge"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_wedge_2;}
+
 };
 } // end namespace oofem
 #endif

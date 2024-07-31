@@ -104,7 +104,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx &Lhs, Vec b, Vec x)
  #pragma omp critical
 #endif
     if ( !Lhs.kspInit ) {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         MPI_Comm comm = engngModel->giveParallelComm();
 #else
         MPI_Comm comm = PETSC_COMM_SELF;

@@ -36,6 +36,7 @@
 
 #include "mpm.h"
 #include "boundaryload.h"
+#include "bodyload.h"
 
 namespace oofem {
 /**
@@ -84,8 +85,9 @@ class BTSigTerm : public Term {
  */
 class gNTfTerm : public Term {
     protected:
+    MatResponseMode lhsType, rhsType;
     public:
-    gNTfTerm (const Variable &testField, const Variable& unknownField) ;
+    gNTfTerm (const Variable &testField, const Variable& unknownField, MatResponseMode lhsType, MatResponseMode rhsType) ;
 
     /**
      * @brief Evaluates $\bf{H}$ matrix, the linearization of $w^T(\grad N)^T f(p)$, i.e. $(\grad N)^T \bf{k}/\mu \grad p = \bf{H}$
@@ -205,8 +207,9 @@ class NTamTBTerm : public Term {
  */
 class NTcN : public Term {
     protected:
+        MatResponseMode ctype;
     public:
-    NTcN (const Variable &testField, const Variable& unknownField) ;
+    NTcN (const Variable &testField, const Variable& unknownField, MatResponseMode ctype) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -273,6 +276,36 @@ class BoundaryFluxFunctor: public NTfFunctor {
     }
 };
 
+class BodyFluxFunctor: public NTfFunctor {
+    protected:
+        BodyLoad *load;
+        IntArray dofIDs;
+    public:
+    BodyFluxFunctor(BodyLoad *load, const IntArray& dofIDs) : load(load), dofIDs(dofIDs) {}
+
+    void evaluate(FloatArray& answer, const FloatArray& lcoords, MPElement& cell, const Variable &testField, TimeStep* tStep) const override {
+
+        ValueModeType mode = VM_Total;
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+            load->computeValues(answer, tStep, lcoords, dofIDs, mode);
+        } else {
+            FloatArray globalIPcoords;
+            testField.interpolation.local2global(globalIPcoords, lcoords, FEIElementGeometryWrapper(&cell) );
+            load->computeValues(answer, tStep, globalIPcoords, dofIDs, mode);
+        }
+
+        ///@todo Make sure this part is correct.
+        // We always want the global values in the end, so we might as well compute them here directly:
+        // transform force
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            // then just keep it in global c.s
+        } else {
+            OOFEM_ERROR("Body load in local coordinate system not supported yet.")
+        }
+    }
+};
+
+
 /**
  * @brief A external flux term $S=(N)^T f$, where $f$ is functor evaluating the flux. 
  */
@@ -333,6 +366,34 @@ class NTf_Edge : public Term {
     
 };
 
+/**
+ * @brief A external flux term $S=(N)^T f$, where $f$ is functor evaluating the flux. 
+ */
+class NTf_Body : public Term {
+    protected:
+        const NTfFunctor& f;
+    public:
+  NTf_Body (const Variable &testField, const NTfFunctor& f) ;
+
+    /**
+     * @brief Evaluates the linearization of term (the lhs contribution)
+     * 
+     * @param answer 
+     * @param e 
+     * @param coords 
+     */
+    void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {}
+    /**
+     * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
+     * 
+     * @param cell 
+     * @param coords 
+     */
+    void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override ;
+    void getDimensions(Element& cell) const override {}
+    void initializeCell(Element& cell) const override {}
+    
+};
 
 } // end namespace oofem
 #endif // termlibrary_h

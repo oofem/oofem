@@ -63,7 +63,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QPlaneStress2d_Name; }
     const char *giveClassName() const override { return "QPlaneStress2d"; }
-
+    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_2; }
     Interface *giveInterface(InterfaceType it) override;
 
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

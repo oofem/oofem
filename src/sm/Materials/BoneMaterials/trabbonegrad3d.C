@@ -56,7 +56,7 @@ TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode) const
 }
 void
 TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+                                      MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

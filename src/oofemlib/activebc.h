@@ -171,7 +171,6 @@ public:
     virtual int giveNumberOfMasterDofs(ActiveDof *dof)
     {
         OOFEM_ERROR("Not supported by bc.");
-        return 0;
     }
     /**
      * Give the pointer to master dof belonging to active DOF.
@@ -182,7 +181,6 @@ public:
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
     {
         OOFEM_ERROR("Not supported by bc.");
-        return nullptr;
     }
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
     {
@@ -199,7 +197,6 @@ public:
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
         OOFEM_ERROR("Not supported by bc.");
-        return 0.0;
     }
     /**
      * Computes the value of the dof.
@@ -211,7 +208,6 @@ public:
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
         OOFEM_ERROR("Not supported by bc.");
-        return 0.0;
     }
     //@}
 };

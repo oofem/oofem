@@ -137,17 +137,17 @@ public:
      * @brief Returns characteristic matrix of the receiver
      * 
      */
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {}
     /**
      * @brief Returns characteristic vector of the receiver
      * 
      */
-    virtual void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) {}
+    virtual void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {}
     /**
      * @brief Returns characteristic value of the receiver
      * 
      */
-    virtual double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep);
+    virtual double giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const ;
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially

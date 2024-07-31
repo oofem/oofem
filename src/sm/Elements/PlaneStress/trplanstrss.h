@@ -78,6 +78,7 @@ public:
     double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) override;
     double giveParentElSize() const override { return 0.5; }
     Interface *giveInterface(InterfaceType) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

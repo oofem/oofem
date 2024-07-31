@@ -366,7 +366,7 @@ public:
         }
 
         OOFEM_ERROR("Could not compute distance.")
-        return 0.0;
+        //return 0.0;
     }
 
 private:
@@ -435,7 +435,7 @@ public:
         }
 
         OOFEM_ERROR("Could not compute distance.")
-        return 0.0;
+        //return 0.0;
     }
 
 private:

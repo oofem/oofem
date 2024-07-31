@@ -60,9 +60,9 @@ MixedPressureMaterialExtensionInterface :: giveRealStressVector(FloatArray &answ
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        this->giveRealStressVector_3d(answer, gp, reducedStrain, pressure, tStep);
+        this->giveRealStressVectorUP_3d(answer, gp, reducedStrain, pressure, tStep);
     } else if ( mode == _PlaneStrain ) {
-        this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, pressure, tStep);
+        this->giveRealStressVectorUP_PlaneStrain(answer, gp, reducedStrain, pressure, tStep);
     } else {
         OOFEM_ERROR("Unknown material mode for the mixed u-p formulation");
     }
@@ -88,11 +88,11 @@ MixedPressureMaterialExtensionInterface ::  giveDeviatoricConstitutiveMatrix(Flo
 
 
 void
-MixedPressureMaterialExtensionInterface :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+MixedPressureMaterialExtensionInterface :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
 {
     FloatArray vE, vS;
     StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
-    this->giveRealStressVector_3d(vS, gp, vE, pressure, tStep);
+    this->giveRealStressVectorUP_3d(vS, gp, vE, pressure, tStep);
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, _PlaneStrain);
 }
 }

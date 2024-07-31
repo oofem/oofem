@@ -41,7 +41,7 @@
 
 
 // remove
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "datareader.h"
 #include "inputrecord.h"
 #include "intarray.h"

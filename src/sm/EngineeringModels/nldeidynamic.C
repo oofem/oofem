@@ -46,7 +46,7 @@
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
 #endif
@@ -96,7 +96,7 @@ NlDEIDynamic :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, pyEstimate, _IFT_NlDEIDynamic_py);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
     communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                         this->giveNumberOfProcesses());
@@ -124,7 +124,6 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     switch ( mode ) {
@@ -144,7 +143,7 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
         OOFEM_ERROR("Unknown is of undefined type for this problem");
     }
 
-    return 0.;
+    // return 0.;
 }
 
 
@@ -209,7 +208,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
             this->computeLoadVector(loadRefVector, VM_Total, tStep);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
             // Compute the processor part of load vector norm pMp
             this->pMp = 0.0;
             double my_pMp = 0.0;
@@ -297,7 +296,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 	if ( deltaT > maxDt ) {
 	  //Scale number of steps based on reduced time step        
 	  newDeltaT = maxDt;
-	  newNumberOfSteps = floor(numberOfSteps*deltaT/newDeltaT);
+	  newNumberOfSteps = (int) floor(numberOfSteps*deltaT/newDeltaT);
 	  this->giveMetaStep(1)->setNumberOfSteps(newNumberOfSteps);
 	  this->deltaT = newDeltaT;
 	  tStep->setTimeIncrement(deltaT);
@@ -342,7 +341,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         // compute load factor
         pt = 0.0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         double my_pt = 0.0;
         for ( auto &dman : domain->giveDofManagers() ) {
             dofManagerParallelMode dofmanmode = dman->giveParallelMode();
@@ -386,7 +385,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         // Compute relative error.
         double err = 0.0;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
         double my_err = 0.0;
 
         for ( auto &dman : domain->giveDofManagers() ) {
@@ -635,7 +634,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
     this->updateSharedDofManagers(massMatrix, EModelDefaultEquationNumbering(), MassExchangeTag);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // Determine maxOm over all processes.
  #ifdef __USE_MPI
     double globalMaxOm;

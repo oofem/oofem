@@ -86,6 +86,8 @@ public:
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
     MaterialMode giveMaterialMode() override { return _2dPlate; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
     int testElementExtension(ElementExtension ext) override { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
     void computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords) override;

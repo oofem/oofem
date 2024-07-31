@@ -721,7 +721,7 @@ protected:
     int newtonIter = 0;
 
     /// Type of softening function used.
-    int softeningType = 0.;
+    int softeningType = 0;
 
     /// Input parameter which simulates a loading rate. Only for debugging purposes.
     double deltaTime = 0.;

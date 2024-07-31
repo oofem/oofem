@@ -193,7 +193,7 @@ VTKBaseExportModule::giveNumberOfNodesPerCell(int cellType)
         OOFEM_ERROR("unsupported cell type ID");
     }
 
-    return 0; // to make compiler happy
+    // return 0; // to make compiler happy
 }
 
 

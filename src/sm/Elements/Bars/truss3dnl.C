@@ -82,8 +82,8 @@ Truss3dnl :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int u
   
   for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
     StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
-    this->computeBmatrixAt(gp, B, tStep, true);
-    this->computeBmatrixAt(gp, Be, tStep);
+    this->_computeBmatrixAt(gp, B, tStep, true);
+    this->_computeBmatrixAt(gp, Be, tStep);
     if ( useUpdatedGpRecord == 1 ) {
       vStress = matStat->giveStressVector();
     } else {
@@ -152,7 +152,7 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
   if ( integrationRulesArray.size() == 1 ) {
     FloatMatrix B, D, DB, Ksigma;
     for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
-      this->computeBmatrixAt(gp, B, tStep, true);
+      this->_computeBmatrixAt(gp, B, tStep, true);
       this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
       double dV = this->computeVolumeAround(gp);
       DB.beProductOf(D, B);
@@ -175,7 +175,7 @@ Truss3dnl :: computeStiffnessMatrix(FloatMatrix &answer,
   
   
 void
-Truss3dnl :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin)
+Truss3dnl :: _computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, bool lin)
 {
   FloatMatrix Bl, Bnl;
   this->computeBlMatrixAt(gp, Bl);
@@ -233,7 +233,7 @@ Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode 
     FloatArray d, strain;
     FloatMatrix B;
     this->computeVectorOf(VM_Total, tStep, d);
-    this->computeBmatrixAt(gp, B, tStep);	  
+    this->_computeBmatrixAt(gp, B, tStep);	  
     strain.beProductOf(B, d);
     // add influence of initial stress/stretch
     double l2 = initialStretch*initialStretch;

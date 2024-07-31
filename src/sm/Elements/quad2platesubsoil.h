@@ -68,6 +68,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Quad2PlateSubSoil_Name; }
     const char *giveClassName() const override { return "Quad2PlateSubSoil"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
+
     void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 8; }

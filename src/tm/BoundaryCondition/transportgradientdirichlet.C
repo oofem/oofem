@@ -446,9 +446,9 @@ void TransportGradientDirichlet :: computeXi()
             FloatArray b;
             
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
-            const auto &bNodes = interp->boundaryEdgeGiveNodes(edge);
+            const auto &bNodes = interp->boundaryEdgeGiveNodes(edge, e->giveGeometryType());
             int order = interp->giveInterpolationOrder();
-            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge) );
+            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge, e->giveGeometryType()) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             // Compute integral of B'*D*B and N:
@@ -550,7 +550,7 @@ void TransportGradientDirichlet :: computeXi()
 
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
             int order = interp->giveInterpolationOrder();
-            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, surf) );
+            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, surf, e->giveGeometryType()) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             for ( auto &gp: *ir ) {
@@ -585,7 +585,7 @@ void TransportGradientDirichlet :: computeXi()
             }
             Ke.symmetrized();
 
-            const auto &bNodes = interp->boundaryGiveNodes(surf);
+            const auto &bNodes = interp->boundaryGiveNodes(surf, e->giveGeometryType());
             IntArray loc(bNodes.giveSize());
             FloatMatrix cvec(bNodes.giveSize(), 3);
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {

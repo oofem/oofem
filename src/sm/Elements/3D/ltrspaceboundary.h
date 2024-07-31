@@ -94,6 +94,8 @@ public:
     void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundary_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundary"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_1;}
+
 
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep) override;

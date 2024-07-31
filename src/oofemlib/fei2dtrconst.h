@@ -46,8 +46,8 @@ class OOFEM_EXPORT FEI2dTrConst : public FEInterpolation2d
 public:
     FEI2dTrConst(int ind1, int ind2) : FEInterpolation2d(0, ind1, ind2) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Triangle; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
     // Bulk
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -63,9 +63,9 @@ public:
     void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
 
-    int giveNumberOfNodes() const override { return 3; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 3; }
 
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

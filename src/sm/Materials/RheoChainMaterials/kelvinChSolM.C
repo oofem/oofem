@@ -237,7 +237,6 @@ double
 KelvinChainSolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
-    return 0.;
 }
 
 

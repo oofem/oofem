@@ -161,7 +161,7 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
         return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 0;
+    // return 0;
 }
 
 

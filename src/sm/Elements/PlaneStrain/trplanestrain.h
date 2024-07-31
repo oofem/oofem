@@ -97,6 +97,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TrPlaneStrain_Name; }
     const char *giveClassName() const override { return "TrPlaneStrain"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
     void initializeFrom(InputRecord &ir) override;
 
 protected:

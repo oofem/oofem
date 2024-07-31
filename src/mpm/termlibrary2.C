@@ -43,7 +43,7 @@ namespace oofem {
 
 void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes();
+    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v.size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
@@ -68,13 +68,13 @@ void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& inter
 
 void evalB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes();
+    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v.size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
     interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
     answer.resize(6, nnodes*ndofs);
     answer.zero();
-    if (mmode == _3dUPV) {
+    if ((mmode == _3dUPV)||(mmode == _3dMat)) {
         // 3D mode 
         for (int i = 0; i< nnodes; i++) {
             answer(0, i*ndofs+0) = dndx(i, 0); // e_11
@@ -268,7 +268,7 @@ void NTmuVfSNTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* 
 
     this->field.interpolation.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     Nd.beNMatrixOf (N, testField.size);
-    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(S, PermeabilityMatrix,  gp, tstep);
+    e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(S, Permeability,  gp, tstep);
     double m = e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(FluidViscosity, gp, tstep);
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
     SI.beInverseOf(S);

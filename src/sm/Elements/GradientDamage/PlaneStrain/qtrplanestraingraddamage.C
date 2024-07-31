@@ -113,11 +113,11 @@ QTrPlaneStrainGradDamage :: computeGaussPoints()
 }
 
 void
-QTrPlaneStrainGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTrPlaneStrainGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    FloatArray n;
-    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 1);
+  //FloatArray n;
+  this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+  //answer.beNMatrixOf(n, 1);
 }
 
 void

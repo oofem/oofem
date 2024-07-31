@@ -143,7 +143,7 @@ ConcreteFCMViscoElastic::giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
     if ( type == IST_TensileStrength ) {
         answer.resize(1);
         answer.at(1) = status->giveTensileStrength();
-        return 1.;
+        return 1;
     } else if ( type == IST_ResidualTensileStrength ) {
         double sigma;
         int nCracks;

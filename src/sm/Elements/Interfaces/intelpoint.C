@@ -92,7 +92,7 @@ IntElPoint :: giveMaterialMode()
 
     default: OOFEM_ERROR("Unsupported coord mode");
     }
-    return _1dInterface; // to make the compiler happy
+    //return _1dInterface; // to make the compiler happy
 }
 
 
@@ -277,7 +277,7 @@ IntElPoint :: computeNumberOfDofs()
         OOFEM_ERROR("Unsupported mode");
     }
 
-    return 0; // to suppress compiler warning
+    //return 0; // to suppress compiler warning
 }
 
 

@@ -91,6 +91,7 @@ public:
     const char *giveClassName() const override { return "Tr1BubbleStokes"; }
     const char *giveInputRecordName() const override { return _IFT_Tr1BubbleStokes_Name; }
     MaterialMode giveMaterialMode() override { return _2dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
 
     int computeNumberOfDofs() override;
 

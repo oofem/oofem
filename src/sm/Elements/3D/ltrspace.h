@@ -76,6 +76,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LTRSpace_Name; }
     const char *giveClassName() const override { return "LTRSpace"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_1;}
+
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

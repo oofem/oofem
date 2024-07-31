@@ -158,7 +158,7 @@ protected:
 
     /// type of post-peak behavior in the normal direction to the crack plane
     enum SofteningType { ST_NONE, ST_Exponential, ST_Linear, ST_Hordijk, ST_UserDefinedCrack, ST_LinearHardeningStrain, ST_UserDefinedStrain, ST_Unknown };
-    SofteningType softType;
+    SofteningType softType = ST_NONE;
 
     /// type of reduction of the shear stiffness caused by cracking
     enum ShearRetentionType { SHR_NONE, SHR_Const_ShearRetFactor, SHR_Const_ShearFactorCoeff, SHR_UserDefined_ShearRetFactor, SHR_Unknown };

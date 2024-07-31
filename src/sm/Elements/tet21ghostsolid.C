@@ -1211,11 +1211,11 @@ double
 tet21ghostsolid::computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs(this->interpolation.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    double weight      = gp->giveWeight();
+    //double determinant = fabs(this->interpolation.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    //double weight      = gp->giveWeight();
     return ( this->computeVolume() );
 
-    return ( determinant * weight );
+    //return ( determinant * weight );
 }
 
 
@@ -1398,10 +1398,10 @@ tet21ghostsolid::computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLo
     FloatArray n_vec, f(18);
     FloatMatrix n, T;
     FloatArray force;
-    int nsd = fei->giveNsd();
+    int nsd = fei->giveNsd(this->giveGeometryType());
 
     f.zero();
-    auto iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
+    auto iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary, this->giveGeometryType());
 
     for ( auto &gp : * iRule ) {
         FloatArray lcoords = gp->giveNaturalCoordinates();

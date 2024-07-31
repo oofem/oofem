@@ -234,7 +234,6 @@ FloatArrayF<3> IntMatBilinearCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &
     }
 
     OOFEM_ERROR("No convergence in.");
-    return {0., 0., 0.};
 }
 
 FloatMatrixF<3,3> IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const

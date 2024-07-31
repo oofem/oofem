@@ -178,7 +178,7 @@ void TransportGradientNeumann :: assembleVector(FloatArray &answer, TimeStep *tS
                 int boundary = boundaries[pos * 2 + 1];
 
                 // Fetch the element information;
-                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
                 e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
                 e->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, e_u);
                 this->integrateTangent(Ke, e, boundary, i, pos);
@@ -228,7 +228,7 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                 Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
                 int boundary = boundaries[pos * 2 + 1];
 
-                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
                 e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
                 e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
@@ -273,7 +273,7 @@ void TransportGradientNeumann :: giveLocationArrays(std :: vector< IntArray > &r
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
             int boundary = boundaries[pos * 2 + 1];
 
-            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
             e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
             e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
@@ -358,7 +358,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
             int boundary = boundaries[pos * 2 + 1];
 
-            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
             e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, fnum);
 
             this->integrateTangent(Ke, e, boundary, i, pos);
@@ -474,7 +474,7 @@ void TransportGradientNeumann :: computeEta()
 
             FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
             int order = interp->giveInterpolationOrder();
-            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
+            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary, e->giveGeometryType()) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             for ( auto &gp: *ir ) {
@@ -516,7 +516,7 @@ void TransportGradientNeumann :: computeEta()
 
             FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
             int order = interp->giveInterpolationOrder();
-            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
+            std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary, e->giveGeometryType()) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(d, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
 
             eta[i][pos].resize(ir->giveNumberOfIntegrationPoints());
@@ -549,7 +549,7 @@ void TransportGradientNeumann :: integrateTangent(FloatMatrix &oTangent, Element
     //FEInterpolation *interpUnknown = e->giveInterpolation(this->dofs[0]);
 
     int order = interp->giveInterpolationOrder();
-    std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary) );
+    std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryIntegrationRule(order, boundary, e->giveGeometryType()) );
 
     oTangent.clear();
 

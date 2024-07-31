@@ -179,7 +179,7 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
         e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
         // For most uses, *loc_r == *loc_c
@@ -261,7 +261,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder() * 3;
-    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
+    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary, el->giveGeometryType()) );
     int nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
 
     answer.clear();
@@ -291,7 +291,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder() * 3;
-    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
+    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary, el->giveGeometryType()) );
 
     FloatArray tmpAnswer;
     for ( GaussPoint *gp: *ir ) {
@@ -320,7 +320,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder() * 3;
-    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
+    std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary, el->giveGeometryType()) );
     answer.clear();
 
     for ( GaussPoint *gp: *ir ) {
@@ -406,7 +406,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary);
+            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary, el->giveGeometryType());
             el->giveBoundaryLocationArray(v_loc, bNodes, this->dofs, s, & velocityDofIDs);
             el->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, v);
 
@@ -464,7 +464,7 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep 
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary);
+            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary, el->giveGeometryType());
             el->giveBoundaryLocationArray(v_loc_r, bNodes, this->dofs, r_s);
             el->giveBoundaryLocationArray(v_loc_c, bNodes, this->dofs, c_s);
 
@@ -526,7 +526,7 @@ void MixedGradientPressureWeakPeriodic :: computeStress(FloatArray &sigmaDev, Fl
         FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
         int maxorder = this->order + interp->giveInterpolationOrder() * 3;
-        std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
+        std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary, el->giveGeometryType()) );
 
         for ( GaussPoint *gp: *ir ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();

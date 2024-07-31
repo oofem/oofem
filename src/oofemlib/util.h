@@ -35,7 +35,7 @@
 #ifndef util_h
 #define util_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "problemmode.h"
 
 #include <memory>

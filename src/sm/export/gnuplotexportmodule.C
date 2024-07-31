@@ -781,7 +781,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
             Element *e = iBC.giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
-            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary, e->giveGeometryType());
 
             std::vector<FloatArray> bndSegNodes;
 
@@ -861,7 +861,7 @@ void GnuplotExportModule::outputMesh(Domain &iDomain)
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 std::vector<FloatArray> points;
 
-                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex);
+                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex, el->giveGeometryType());
 
                 int niLoc = bNodes.at(1);
                 const auto &xS = el->giveNode(niLoc)->giveCoordinates();

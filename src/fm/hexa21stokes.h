@@ -84,6 +84,8 @@ public:
     const char *giveClassName() const override { return "Hexa21Stokes"; }
     const char *giveInputRecordName() const override { return _IFT_Hexa21Stokes_Name; }
     MaterialMode giveMaterialMode() override { return _3dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_27;}
+
 
     int computeNumberOfDofs() override;
 

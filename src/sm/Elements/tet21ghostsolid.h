@@ -66,6 +66,8 @@ public:
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_2;}
+
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     const char *giveInputRecordName() const override { return _IFT_tet21ghostsolid_Name; }

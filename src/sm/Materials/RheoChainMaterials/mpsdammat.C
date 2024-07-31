@@ -893,6 +893,6 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         return MPSMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 1; // to make the compiler happy
+    // return 1; // to make the compiler happy
 }
 }  // end namespace oofem

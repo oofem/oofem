@@ -61,12 +61,12 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     double l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
-    answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
+    answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1).at(xind) +
+                    l2 * cellgeo.giveVertexCoordinates(2).at(xind) +
+                    l3 * cellgeo.giveVertexCoordinates(3).at(xind) );
+    answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1).at(yind) +
+                    l2 * cellgeo.giveVertexCoordinates(2).at(yind) +
+                    l3 * cellgeo.giveVertexCoordinates(3).at(yind) );
 }
 
 #define POINT_TOL 1.e-3
@@ -74,13 +74,13 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 int
 FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo) const
 {
-    double x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
-    double x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
-    double x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+    double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(xind);
 
-    double y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
-    double y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
-    double y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+    double y1 = cellgeo.giveVertexCoordinates(1).at(yind);
+    double y2 = cellgeo.giveVertexCoordinates(2).at(yind);
+    double y3 = cellgeo.giveVertexCoordinates(3).at(yind);
 
     double detJ = ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
@@ -109,13 +109,13 @@ FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const
 double
 FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    double x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
-    double x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
-    double x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+    double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(xind);
 
-    double y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
-    double y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
-    double y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+    double y1 = cellgeo.giveVertexCoordinates(1).at(yind);
+    double y2 = cellgeo.giveVertexCoordinates(2).at(yind);
+    double y3 = cellgeo.giveVertexCoordinates(3).at(yind);
 
     return x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 }
@@ -150,10 +150,10 @@ FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
 
     answer.resize(2);
-    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
-    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
+    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(xind) +
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(xind) );
+    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(yind) +
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(yind) );
 }
 
 IntArray
@@ -172,18 +172,18 @@ FEI2dTrConst :: computeLocalEdgeMapping(int iedge) const
 }
 
 double
-FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
+FEI2dTrConst :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     auto nodeA = edgeNodes.at(1);
     auto nodeB = edgeNodes.at(2);
 
-    double dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    double dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    double dx = cellgeo.giveVertexCoordinates(nodeB).at(xind) - cellgeo.giveVertexCoordinates(nodeA).at(xind);
+    double dy = cellgeo.giveVertexCoordinates(nodeB).at(yind) - cellgeo.giveVertexCoordinates(nodeA).at(yind);
     return sqrt(dx * dx + dy * dy);
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dTrConst :: giveIntegrationRule(int order) const
+FEI2dTrConst :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);

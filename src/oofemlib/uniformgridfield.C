@@ -124,7 +124,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
             {i,j,k},{I,j,k},{I,J,k},{i,J,k},
             {i,j,K},{I,j,K},{I,J,K},{i,J,K}
         };
-        assert(abs(weights[0]+weights[1]+weights[2]+weights[3]+weights[4]+weights[5]+weights[6]+weights[7]-1) < 1e-5);
+        assert(fabs(weights[0]+weights[1]+weights[2]+weights[3]+weights[4]+weights[5]+weights[6]+weights[7]-1) < 1e-5);
         for(int p=0; p<8; p++){
             // std::cerr<<p<<": at "<<coords[0]<<","<<coords[1]<<","<<coords[2]<<", ijk "<<i<<","<<j<<","<<k<<" normXYZ "<<x<<","<<y<<","<<z<<std::endl;
             ret+=weights[p]*this->nodeValue3d(pts[p][0],pts[p][1],pts[p][2]);
@@ -136,7 +136,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
         const double& x(normXyz[0]); const double y(normXyz[1]); double X(1-x); double Y(1-y);
         double weights[]={X*Y,x*Y,X*y,x*y}; // TODO: check
         int pts[][2]={{i,j},{I,j},{i,J},{I,J}}; // TODO: check
-        assert(abs(weights[0]+weights[1]+weights[2]+weights[3]-1)<1e-5);
+        assert(fabs(weights[0]+weights[1]+weights[2]+weights[3]-1)<1e-5);
         for(int p=0; p<4; p++){
             // std::cerr<<p<<": at "<<coords[0]<<","<<coords[1]<<" ij "<<i<<","<<j<<" normXY "<<x<<","<<y<<std::endl;
             ret+=weights[p]*this->nodeValue2d(pts[p][0],pts[p][1]); 

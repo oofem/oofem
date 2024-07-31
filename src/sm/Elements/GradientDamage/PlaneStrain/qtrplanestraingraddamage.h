@@ -57,7 +57,7 @@ public:
 
 protected:
     void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    void computeNdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer) override;
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 

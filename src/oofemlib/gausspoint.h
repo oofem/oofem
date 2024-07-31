@@ -41,7 +41,7 @@
 #ifndef gausspoint_h
 #define gausspoint_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
 #include "element.h"

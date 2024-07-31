@@ -100,6 +100,7 @@ TrabBoneNLEmbed :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPo
 double
 TrabBoneNLEmbed :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
+  /*
     auto status = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
@@ -107,18 +108,19 @@ TrabBoneNLEmbed :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 
     auto list = status->giveIntegrationDomainList();
 
-    double nonlocalCumPlastStrain = 0.0;
+    //double nonlocalCumPlastStrain = 0.0;
     for ( auto &lir: *list ) {
         auto nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(lir.nearGp) );
         double nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
         nonlocalContribution *= lir.weight;
-        nonlocalCumPlastStrain += nonlocalContribution;
+        //nonlocalCumPlastStrain += nonlocalContribution;
     }
 
     nonlocalCumPlastStrain /= status->giveIntegrationScale(); ///@todo This is never used.
 
     //  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
     //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
+    */
     return 0.;
 }
 

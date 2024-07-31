@@ -331,7 +331,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(int iedge) const
         return {3, 6};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        // return {};
     }
 }
 
@@ -340,7 +340,7 @@ double
 FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -396,7 +396,7 @@ FEI3dWedgeLin :: computeLocalSurfaceMapping(int isurf) const
         return {3, 1, 4, 6};
     } else {
         throw std::range_error("invalid surface number");
-        return {};
+        //return {};
     }
 }
 
@@ -406,12 +406,12 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
                                                    const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0;
+    // return 0;
 }
 
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeLin :: giveIntegrationRule(int order) const
+FEI3dWedgeLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo This function below isn't supported for wedges. We must decide how we should do this.
@@ -425,7 +425,7 @@ FEI3dWedgeLin :: giveIntegrationRule(int order) const
 
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     if ( boundary <= 2 ) {

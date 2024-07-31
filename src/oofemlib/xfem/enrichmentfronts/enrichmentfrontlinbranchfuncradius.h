@@ -38,7 +38,7 @@
 #define _IFT_EnrFrontLinearBranchFuncRadius_Name "enrfrontlinearbranchfuncradius"
 #define _IFT_EnrFrontLinearBranchFuncRadius_Radius "radius"
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include <vector>
 #include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"

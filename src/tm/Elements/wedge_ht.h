@@ -65,6 +65,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Wedge_ht_Name; }
     const char *giveClassName() const override { return "Wedge_ht"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_wedge_1;}
+
 
     int computeNumberOfDofs() override { return 6; }
     void initializeFrom(InputRecord &ir) override;

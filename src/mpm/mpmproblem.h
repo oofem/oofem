@@ -86,6 +86,34 @@ public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
+/**
+ * Callback class for assembling mid point effective tangents. 
+ * @todo Need to parametrize individual contributing terms, ther locations and multilication factors.
+ */
+class TMLhsAssembler : public MatrixAssembler
+{
+protected:
+    double alpha;
+    double deltaT;
+
+public:
+    TMLhsAssembler(double alpha, double deltaT);
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+};
+
+/**
+ * Callback class for assembling residuals
+ */
+class TMResidualAssembler : public VectorAssembler
+{
+    protected:
+    double alpha;
+    double deltaT;
+public:
+    TMResidualAssembler(double alpha, double deltaT) : VectorAssembler(), alpha(alpha), deltaT(deltaT) {}
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+};
+
 
 
 /**

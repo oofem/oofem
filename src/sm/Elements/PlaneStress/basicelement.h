@@ -75,6 +75,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_BasicElement_Name; }
     // Necessary for debug messages:
     const char *giveClassName() const override { return "BasicElement"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
 
 protected:
 

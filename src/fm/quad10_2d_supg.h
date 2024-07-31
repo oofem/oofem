@@ -71,6 +71,8 @@ public:
     const char *giveClassName() const override { return "Quad1_2D_SUPG"; }
     const char *giveInputRecordName() const override { return _IFT_Quad10_2D_SUPG_Name; }
     MaterialMode giveMaterialMode() override { return _2dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
+
 
     void giveInternalDofManDofIDMask(int i, IntArray &answer) const override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;

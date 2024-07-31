@@ -72,11 +72,11 @@ class OOFEM_EXPORT FEI3dHexaQuad : public FEInterpolation3d
 public:
     FEI3dHexaQuad() : FEInterpolation3d(2) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Cube; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_hexa_2; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Square; }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _Square; }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Cube; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_hexa_2; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Square; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _Square; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
 
     double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
@@ -90,7 +90,7 @@ public:
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    int giveNumberOfNodes() const override { return 20; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 20; }
 
     // Edge
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -110,8 +110,8 @@ public:
 
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
 };
 } // end namespace oofem
 #endif

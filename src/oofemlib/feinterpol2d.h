@@ -50,7 +50,7 @@ protected:
 public:
     FEInterpolation2d(int o, int ind1, int ind2) : FEInterpolation(o), xind(ind1), yind(ind2) { }
 
-    int giveNsd() const override { return 2; }
+    int giveNsd(const Element_Geometry_Type) const override { return 2; }
 
     /**
      * Computes the exact area.
@@ -81,14 +81,14 @@ public:
        than the interpolation represents
     */
     //@{
-    IntArray boundaryEdgeGiveNodes(int boundary) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    IntArray boundaryGiveNodes(int boundary) const override;
+    IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -102,7 +102,7 @@ public:
     double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    IntArray boundarySurfaceGiveNodes(int boundary) const override;
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override;
     //@}
 
     /**@name Edge interpolation services. */

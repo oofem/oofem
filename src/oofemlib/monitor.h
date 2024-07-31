@@ -35,7 +35,7 @@
 #ifndef monitor_h
 #define monitor_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 class EngngModel;

@@ -523,12 +523,10 @@ NLStructuralElement::checkConsistency()
 {
     if ( this->nlGeometry == 2 ) {
         OOFEM_ERROR("nlGeometry = 2 is not supported anymore. If access to F is needed, then the material \n should overload giveFirstPKStressVector which has F as input.");
-        return 0;
     }
 
     if ( this->nlGeometry != 0  &&  this->nlGeometry != 1 ) {
         OOFEM_ERROR("nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
-        return 0;
     } else {
         return 1;
     }

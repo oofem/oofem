@@ -234,7 +234,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep) const;
+                                          TimeStep *tStep) const override;
 
     virtual FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     FloatMatrixF<2,2> computeTangent2D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
@@ -250,7 +250,7 @@ public:
      */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep) const = 0;
+                                           TimeStep *tStep) const override = 0;
 
     /**
      * Updates internal state of material according to new state vector.

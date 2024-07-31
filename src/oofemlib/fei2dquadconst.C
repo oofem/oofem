@@ -98,7 +98,7 @@ FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lco
 double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0.;
+    //return 0.;
 }
 
 void
@@ -126,7 +126,7 @@ FEI2dQuadConst :: computeLocalEdgeMapping(int iedge) const
         return {3, 1};
     } else {
         throw std::range_error("invalid egde number");
-        return {};
+        //return {};
     }
 }
 
@@ -142,7 +142,7 @@ FEI2dQuadConst :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeom
 }
 
 std::unique_ptr<IntegrationRule>
-FEI2dQuadConst :: giveIntegrationRule(int order) const
+FEI2dQuadConst :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);

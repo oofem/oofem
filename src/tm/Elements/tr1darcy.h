@@ -61,6 +61,8 @@ public:
     FEInterpolation *giveInterpolation() const override;
 
     MaterialMode giveMaterialMode() override { return _2dHeat; } ///@todo This isn't actually correct.
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep) override;

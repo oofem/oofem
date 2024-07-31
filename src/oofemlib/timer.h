@@ -35,7 +35,7 @@
 #ifndef timer_h
 #define timer_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <chrono>
 

@@ -71,6 +71,8 @@ public:
     int testElementExtension(ElementExtension ext) override { return 0; }
 
     Interface *giveInterface(InterfaceType) override { return NULL; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_2;}
+
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

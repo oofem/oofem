@@ -38,7 +38,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "error.h"
 
 namespace oofem {
@@ -60,7 +60,10 @@ public:
     // two possible functions to call member function. virtual cause derived
     // classes will use a pointer to an object and a pointer to a member function
     // to make the function call
-    /// Call using operator.
+    /** 
+     * Call using operator.
+     * @return New number of component. Throws std::out_of_range if not found.
+     */
     virtual int operator() (int, EntityRenumberingScheme) = 0;
     /// Call using function.
     virtual int call(int, EntityRenumberingScheme) = 0;
@@ -121,9 +124,8 @@ public:
         } else {
             OOFEM_ERROR("unsupported EntityRenumberingScheme");
         }
-
-        OOFEM_ERROR("component label %d not found", n);
-        return 0;
+        throw std::out_of_range("entry not found");
+        //OOFEM_ERROR("component label %d not found", n);
     }
 
     int call(int n, EntityRenumberingScheme ers) override

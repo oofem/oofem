@@ -74,6 +74,7 @@ public:
 
     const char *giveClassName() const override { return "Line2BoundaryElement"; }
     const char *giveInputRecordName() const override { return _IFT_Line2BoundaryElement_Name; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_2;}
 
     // Interfaces
     Interface *giveInterface(InterfaceType it) override;

@@ -481,7 +481,7 @@ double PrescribedDispSlipBCDirichletRC::domainSize( Domain *d, int set )
     if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
         //assuming that the RVE thickness is constant in 2D
         Element *e = this->giveDomain()->giveElement( this->giveDomain()->giveSet(conBoundSet)->giveBoundaryList().at(1) );
-        std::unique_ptr<IntegrationRule> ir = e->giveInterpolation()->giveIntegrationRule( e->giveInterpolation()->giveInterpolationOrder() );
+        std::unique_ptr<IntegrationRule> ir = e->giveInterpolation()->giveIntegrationRule( e->giveInterpolation()->giveInterpolationOrder(), e->giveGeometryType() );
         CrossSection *cs = e->giveCrossSection();
         GaussPoint *gp = ir->getIntegrationPoint(0);
         double thickness = cs->give(CS_Thickness, gp);

@@ -480,7 +480,7 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
 void
 Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
                                  MatResponseMode rMode,
-                                 GaussPoint *gp, TimeStep *tStep)
+                                 GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -498,7 +498,7 @@ Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
 
 void
 Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
+                                                    GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {

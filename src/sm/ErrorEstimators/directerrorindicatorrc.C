@@ -42,7 +42,7 @@
 #include "mathfem.h"
 #include "timestep.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
 #endif
 
@@ -50,7 +50,7 @@ namespace oofem {
 DirectErrorIndicatorRC :: DirectErrorIndicatorRC(int n, ErrorEstimator *e) : RemeshingCriteria(n, e)
 {
     stateCounter = -1;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     dofManDensityExchangeFlag = true;
 #endif
 }
@@ -70,7 +70,7 @@ DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indic
 double
 DirectErrorIndicatorRC :: giveDofManDensity(int num)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Domain *d = this->giveDomain();
     if ( d->giveDofManager(num)->isShared() ) {
         return this->sharedDofManDensities [ num ];
@@ -114,7 +114,7 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
 double
 DirectErrorIndicatorRC :: giveDofManIndicator(int num, TimeStep *tStep)
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     Domain *d = this->giveDomain();
     if ( d->giveDofManager(num)->isShared() ) {
         return this->sharedDofManIndicatorVals [ num ];
@@ -167,7 +167,7 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( initCommMap ) {
         communicator->setUpCommunicationMaps(d->giveEngngModel(), true, true);
         OOFEM_LOG_INFO("DirectErrorIndicatorRC :: estimateMeshDensities: initialized comm maps\n");
@@ -208,7 +208,7 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
         }
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // exchange strategies between nodes to ensure consistency
     int myStrategy = this->currStrategy, globalStrategy;
     MPI_Allreduce(& myStrategy, & globalStrategy, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
@@ -247,7 +247,7 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord &ir)
     remeshingDensityRatioToggle = 0.80;
     IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, _IFT_DirectErrorIndicatorRC_remeshingdensityratio);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     EngngModel *emodel = domain->giveEngngModel();
     commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
     communicator = new NodeCommunicator(emodel, commBuff, emodel->giveRank(),
@@ -266,7 +266,7 @@ void
 DirectErrorIndicatorRC :: reinitialize()
 {
     stateCounter = -1;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     dofManDensityExchangeFlag  = true;
     initCommMap = true;
 #endif
@@ -277,14 +277,14 @@ void
 DirectErrorIndicatorRC :: setDomain(Domain *d)
 {
     RemeshingCriteria :: setDomain(d);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     dofManDensityExchangeFlag = true;
     initCommMap = true;
 #endif
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 void
 DirectErrorIndicatorRC :: exchangeDofManDensities()
 {

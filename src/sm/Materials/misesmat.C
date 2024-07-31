@@ -132,7 +132,7 @@ MisesMat::giveRealStressVector_1d(const FloatArrayF< 1 > &totalStrain,
     status->letTempStrainVectorBe(strain);
     status->setTempDamage(omega);
     status->letTempStressVectorBe(stress);
-    return stress [ { 0 } ];
+    return stress [ 0 ];
 
 #else
     return StructuralMaterial::giveRealStressVector_1d(totalStrain, gp, tStep);
@@ -405,7 +405,7 @@ MisesMat::computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) cons
 {
     double yieldStress = 0.;
     if ( hType == 0 ) {
-        return this->give('s', gp, tStep) + this->H * kappa; // + ( this->sigInf - this->sig0 ) * (1. - exp(-expD*kappa));
+        return this->giveS(gp, tStep) + this->H * kappa; // + ( this->sigInf - this->sig0 ) * (1. - exp(-expD*kappa));
     } else {
         if ( kappa > h_eps.at(h_eps.giveSize() ) ) {
             OOFEM_ERROR("kappa outside range of specified hardening law/n");
@@ -660,7 +660,7 @@ MisesMat::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         return 1;
     } else if ( type == IST_YieldStrength ) {
         answer.resize(1);
-        answer.at(1) = this->give('s', gp, tStep);
+        answer.at(1) = this->giveS(gp, tStep);
         return 1;
     } else {
         return StructuralMaterial::giveIPValue(answer, gp, type, tStep);
@@ -729,15 +729,11 @@ MisesMatStatus::updateYourself(TimeStep *tStep)
 
 
 double
-MisesMat::give(int aProperty, GaussPoint *gp, TimeStep *tStep) const
+MisesMat::giveS(GaussPoint *gp, TimeStep *tStep) const
 {
-    if ( aProperty == 's' ) {
-        ///FIXME: const cast workaround, until all methods have been properly marked const properly:
 
-        return sig0.eval({ { "te", giveTemperature(gp, tStep) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp, tStep) );
-    }
+  return sig0.eval({ { "te", giveTemperature(gp, tStep) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp, tStep) );
 
-    return Material::give(aProperty, gp);
 }
 
 double MisesMat::giveTemperature(GaussPoint *gp, TimeStep *tStep) const

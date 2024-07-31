@@ -37,13 +37,12 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-double FEInterpolation3d :: giveVolume(const FEICellGeometry &cellgeo) const
+double FEInterpolation3d::giveVolume(const FEICellGeometry& cellgeo) const
 {
     OOFEM_ERROR("Not implemented in subclass.");
-    return 0;
 }
 
-IntArray FEInterpolation3d :: boundaryEdgeGiveNodes(int boundary) const
+IntArray FEInterpolation3d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return this->computeLocalEdgeMapping(boundary);
 }
@@ -63,7 +62,7 @@ void FEInterpolation3d :: boundaryEdgeLocal2Global(FloatArray &answer, int bound
     this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
 
-IntArray FEInterpolation3d :: boundaryGiveNodes(int boundary) const
+IntArray FEInterpolation3d :: boundaryGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return this->computeLocalSurfaceMapping(boundary);
 }
@@ -110,7 +109,7 @@ IntArray FEInterpolation3d :: computeSurfaceMapping(const IntArray &elemNodes, i
     return surfNodes;
 }
 
-std::unique_ptr<IntegrationRule> FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order, int boundary) const
+std::unique_ptr<IntegrationRule> FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
@@ -131,16 +130,14 @@ void FEInterpolation3d :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const 
 double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
-    return -1.0;
 }
 
 double FEInterpolation3d :: edgeEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
-    return -1.0;
 }
 
-IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary) const
+IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return this->computeLocalSurfaceMapping(boundary);
 }

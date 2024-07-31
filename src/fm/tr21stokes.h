@@ -89,6 +89,8 @@ public:
     const char *giveClassName() const override { return "Tr21Stokes"; }
     const char *giveInputRecordName() const override { return _IFT_Tr21Stokes_Name; }
     MaterialMode giveMaterialMode() override { return _2dFlow; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_2;}
+
 
     int computeNumberOfDofs() override;
 

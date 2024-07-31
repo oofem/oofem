@@ -35,7 +35,7 @@
 #include "remeshingcrit.h"
 #include "errorestimator.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
 #endif
 
@@ -43,7 +43,7 @@ namespace oofem {
 RemeshingCriteria :: RemeshingCriteria(int n, ErrorEstimator *e) : FEMComponent( n, e->giveDomain() )
 {
     ee = e;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     communicator = NULL;
     commBuff = NULL;
     initCommMap = true;
@@ -52,7 +52,7 @@ RemeshingCriteria :: RemeshingCriteria(int n, ErrorEstimator *e) : FEMComponent(
 
 RemeshingCriteria :: ~RemeshingCriteria()
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     delete communicator;
     delete commBuff;
 #endif

@@ -411,7 +411,7 @@ void
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
 }
@@ -434,10 +434,10 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
-    return -1;
+    //return -1;
 }
 
 
@@ -458,7 +458,6 @@ FEI3dTetQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 4, 10};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
     }
 }
 
@@ -467,7 +466,6 @@ FEI3dTetQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeomet
 {
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
-    return -1;
 }
 
 void
@@ -658,7 +656,7 @@ double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetQuad :: giveIntegrationRule(int order) const
+FEI3dTetQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 3);
@@ -667,7 +665,7 @@ FEI3dTetQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTetQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTetQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);

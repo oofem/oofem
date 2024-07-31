@@ -64,10 +64,9 @@ Material :: give(int aProperty, GaussPoint *gp) const
 }
 
 double
-Material :: giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) 
+Material :: giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
 {
-    OOFEM_ERROR( "Characteristic value %s(%d) on element %d and GP %d not defined", __CharTypeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
-    return 0.0;
+    OOFEM_ERROR( "Characteristic value %s(%d) on element %d and GP %d not defined", __MatResponseModeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
 }
 
 bool

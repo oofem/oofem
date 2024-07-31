@@ -427,7 +427,6 @@ NlIsoMoistureMaterial::giveHumidity(GaussPoint *gp, ValueModeType mode) const
     auto tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempField();
     if ( tempState > 1.0 || tempState < 0.0 ) {
         OOFEM_ERROR("Relative humidity %.3f is out of range", tempState);
-        return 0.0;
     } else {
         return tempState;
     }

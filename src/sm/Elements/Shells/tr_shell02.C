@@ -55,8 +55,8 @@ IntArray TR_SHELL02 :: loc_plate = {3, 4, 5, 9, 10, 11, 15, 16, 17};
 IntArray TR_SHELL02 :: loc_membrane = {1, 2, 6, 7, 8, 12, 13, 14, 18};
 
 TR_SHELL02 :: TR_SHELL02(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this),
-    plate(std::make_unique<DKTPlate3d>(-1, aDomain)),
-    membrane(std::make_unique<TrPlanestressRotAllman3d>(-1, aDomain))
+    plate(std::make_unique<DKTPlate3d>(n, aDomain)),
+    membrane(std::make_unique<TrPlanestressRotAllman3d>(n, aDomain))
 {
     numberOfDofMans = 3;
 }

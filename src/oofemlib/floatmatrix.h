@@ -35,7 +35,7 @@
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -92,9 +92,9 @@ class OOFEM_EXPORT FloatMatrix
 {
 protected:
     /// Number of rows.
-    int nRows;
+    std::size_t nRows;
     /// Number of columns.
-    int nColumns;
+    std::size_t nColumns;
     /// Values of matrix stored column wise.
     std :: vector< double >values;
 
@@ -112,7 +112,7 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n * m) {}
+    FloatMatrix(std::size_t  n, std::size_t m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
     /**
@@ -165,11 +165,16 @@ public:
      * @param i Required number of rows.
      * @param j Required number of columns.
      */
-    void checkBounds(int i, int j) const;
+    void checkBounds(std::size_t i, std::size_t j) const;
     /// Returns number of rows of receiver.
-    inline int giveNumberOfRows() const { return nRows; }
+    inline int giveNumberOfRows() const { return (int)nRows; }
+    inline std::size_t giveRowSize() const { return nRows; }
+
     /// Returns number of columns of receiver.
-    inline int giveNumberOfColumns() const { return nColumns; }
+    inline int giveNumberOfColumns() const { return (int)nColumns; }
+    inline std::size_t giveColSize() const { return nColumns; }
+
+
     /// Returns nonzero if receiver is square matrix.
     inline bool isSquare() const { return nRows == nColumns; }
     /// Tests for empty matrix.
@@ -184,7 +189,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double at(int i, int j) const
+    inline double at(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -197,7 +202,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double &at(int i, int j)
+    inline double &at(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i, j);
@@ -211,7 +216,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double &operator()(int i, int j)
+    inline double &operator()(std::size_t i, std::size_t j)
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);
@@ -223,7 +228,7 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    inline double operator()(int i, int j) const
+    inline double operator()(std::size_t i, std::size_t j) const
     {
 #ifndef NDEBUG
         this->checkBounds(i + 1, j + 1);
@@ -383,7 +388,7 @@ public:
      * @param topCol Index of top column of sub-matrix.
      * @param bottomCol index of bottom column of sub-matrix.
      */
-    void beSubMatrixOf(const FloatMatrix &src, int topRow, int bottomRow, int topCol, int bottomCol);
+    void beSubMatrixOf(const FloatMatrix &src, std::size_t topRow, std::size_t bottomRow, std::size_t topCol, std::size_t bottomCol);
     /**
      * Modifies receiver to be a sub-matrix of another matrix.
      * @param src Matrix from which sub-matrix is taken
@@ -529,13 +534,13 @@ public:
      * @param rows New number of rows.
      * @param cols New number of columns.
      */
-    void resize(int rows, int cols);
+    void resize(std::size_t rows, std::size_t cols);
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Note: New coefficients are initialized to zero, old are kept.
      */
-    void resizeWithData(int, int);
+    void resizeWithData(std::size_t, std::size_t);
     /**
      * Resizing that enforces reallocation of memory.
      * Data is zeroed.

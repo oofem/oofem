@@ -211,7 +211,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
             double t = status->giveTempTemperature();
             double h = status->giveTempHumidity();
             h = inverse_sorption_isotherm( h ); // compute relative humidity
-            answer = hydrationModel->giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
+            answer = hydrationModel->_giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
             if ( rmode == IntSource_ww || rmode == IntSource_hw ) {
                 answer *= give_dphi_dw( h );
             }

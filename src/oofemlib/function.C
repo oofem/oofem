@@ -64,13 +64,13 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
         return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
         return this->evaluateAtTime( tStep->giveTargetTime() ) - this->evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
-    } else if (mode == VM_Intermediate) {
+    } else if ((mode == VM_Intermediate) || (mode == VM_TotalIntrinsic)) {
       return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else {
         OOFEM_ERROR("unsupported mode(%d)", mode);
     }
 
-    return 0.;
+    // return 0.;
 }
 
 

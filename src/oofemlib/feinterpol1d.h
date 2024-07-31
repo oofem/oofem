@@ -46,11 +46,11 @@ class OOFEM_EXPORT FEInterpolation1d : public FEInterpolation
 {
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
-    int giveNsd() const override { return 1; }
+    int giveNsd(const Element_Geometry_Type) const override { return 1; }
 
     //FloatArray giveParametricCenter() const override { return {0.}; }
 
-    IntArray boundaryGiveNodes(int boundary) const override;
+    IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const  override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -68,7 +68,7 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    IntArray boundarySurfaceGiveNodes(int boundary) const override
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override
     { throw std::runtime_error("Functions not supported for this interpolator."); }
     //@}
 
@@ -91,12 +91,11 @@ public:
     virtual double giveLength(const FEICellGeometry &cellgeo) const
     {
         OOFEM_ERROR("Not implemented in subclass.");
-        return 0;
     }
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

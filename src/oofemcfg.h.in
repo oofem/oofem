@@ -1,15 +1,3 @@
-/* Headers */
-
-/* Define if execinfo.h defined */
-#cmakedefine HAVE_EXECINFO_H 1
-
-/* Symbols */
-/* Define if cbrt is defined */
-#cmakedefine HAVE_CBRT 1
-
-/* Define if isnan is defined */
-#cmakedefine HAVE_ISNAN 1
-
 @OOFEM_EXPORT_HEADER@
 
 #define __OOFEM_MAJOR_VERSION "@oofem_VERSION_MAJOR@"
@@ -20,15 +8,15 @@
 #define __HOST_NAME "@HOST_NAME@"
 #define __MODULE_LIST "@MODULE_LIST@" 
 
-extern const char* PRG_VERSION;
-extern const char* OOFEG_VERSION;
-extern const char* OOFEM_COPYRIGHT;
-extern const char* PRG_HEADER;
-extern const char* PRG_HEADER_SM;
-extern const char* HOST_TYPE;
-extern const char* HOST_NAME;
-extern const char* MODULE_LIST;
-extern const char* OOFEM_GIT_HASH;
-extern const char* OOFEM_GIT_REPOURL;
-extern const char* OOFEM_GIT_BRANCH;
+OOFEM_EXPORT extern const char* PRG_VERSION;
+OOFEM_EXPORT extern const char* OOFEG_VERSION;
+OOFEM_EXPORT extern const char* OOFEM_COPYRIGHT;
+OOFEM_EXPORT extern const char* PRG_HEADER;
+OOFEM_EXPORT extern const char* PRG_HEADER_SM;
+OOFEM_EXPORT extern const char* HOST_TYPE;
+OOFEM_EXPORT extern const char* HOST_NAME;
+OOFEM_EXPORT extern const char* MODULE_LIST;
+OOFEM_EXPORT extern const char* OOFEM_GIT_HASH;
+OOFEM_EXPORT extern const char* OOFEM_GIT_REPOURL;
+OOFEM_EXPORT extern const char* OOFEM_GIT_BRANCH;
 #

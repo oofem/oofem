@@ -208,7 +208,6 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
-        return elastic;
     }
 }
 
@@ -232,7 +231,6 @@ LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
-        return elastic;
     }
 }
 
@@ -352,7 +350,6 @@ LatticeDamage :: computeBiot(double omega, double kappa, double le) const
         }
     } else {
         OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
-        return 0.;
     }
 }
 

@@ -155,7 +155,7 @@ public:
 #endif
 
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     LoadBalancer *giveLoadBalancer() override;
     LoadBalancerMonitor *giveLoadBalancerMonitor() override;
 #endif

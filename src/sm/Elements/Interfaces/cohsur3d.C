@@ -406,7 +406,7 @@ CohesiveSurface3d :: initializeFrom(InputRecord &ir)
     if ( length <= 0. ) {
         throw ValueInputException(ir, _IFT_Element_nodes, "negative length evaluated");
         // evaluate the coordinates of the center
-        evaluateCenter(); /// @todo This will never execute. Verify this / Mikael
+        //evaluateCenter(); /// @todo This will never execute. Verify this / Mikael
     }
 
     // evaluate the local coordinate system

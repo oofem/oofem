@@ -55,7 +55,7 @@
 #include "unknownnumberingscheme.h"
 #include "function.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
  #include "loadbalancer.h"
@@ -83,6 +83,9 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
     initialGuessType = IG_None;
+    deltaT = 1.0;
+    dtFunction = 0;
+    currentIterations = 0;
 }
 
 
@@ -200,7 +203,7 @@ NonLinearStatic :: initializeFrom(InputRecord &ir)
         updateElasticStiffnessFlag = true;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
@@ -223,7 +226,6 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 {
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     int eq = dof->__giveEquationNumber();
@@ -272,7 +274,6 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     } else {
        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem"); 
     }
-    return 0.0;
 }
 
 TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)
@@ -774,7 +775,7 @@ NonLinearStatic :: updateDomainLinks()
     LinearStatic :: updateDomainLinks();
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->setDomain( this->giveDomain(1) );
     }
@@ -788,8 +789,8 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
-    Timer timer;
-    timer.startTimer();
+    Timer _timer;
+    _timer.startTimer();
 #endif
 
     LinearStatic :: assemble(answer, tStep, ma, s, domain);
@@ -805,8 +806,8 @@ NonLinearStatic :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
     }
 
 #ifdef TIME_REPORT
-    timer.stopTimer();
-    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", timer.getUtime() );
+    _timer.stopTimer();
+    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", _timer.getUtime() );
 #endif
 }
 
@@ -915,7 +916,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int 
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {

@@ -86,12 +86,12 @@ class UPElement : public MPElement {
             int pdofs = this->giveNumberOfPDofs();
             answer.resize(pdofs,pdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, gNTfTerm(getP(), getP()), ir, tStep) ;
+            this->integrateTerm_dw (answer, gNTfTerm(getP(), getP(), Permeability, FluidMassBalancePressureContribution), ir, tStep) ;
         } else if (type == MassBalance_CompresibilityMatrix) {
             int pdofs = this->giveNumberOfPDofs();
             answer.resize(pdofs,pdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, NTcN(getP(), getP()), ir, tStep) ;
+            this->integrateTerm_dw (answer, NTcN(getP(), getP(), CompressibilityCoefficient), ir, tStep) ;
         } else if (type == MassBalance_StressCouplingMatrix) {
             answer.resize(this->giveNumberOfPDofs(),this->giveNumberOfUDofs());
             answer.zero();
@@ -118,11 +118,11 @@ class UPElement : public MPElement {
         } else if (type == MassBalance_PressureResidual) {
             answer.resize(this->giveNumberOfPDofs());
             answer.zero();
-            this->integrateTerm_c (answer, gNTfTerm(getP(), getP()), ir, tStep) ;
+            this->integrateTerm_c (answer, gNTfTerm(getP(), getP(), Permeability, FluidMassBalancePressureContribution), ir, tStep) ;
         } else if (type == MassBalance_PressureRateResidual) {
             answer.resize(this->giveNumberOfPDofs());
             answer.zero();
-            this->integrateTerm_c (answer, NTcN(getP(), getP()), ir, tStep) ;   
+            this->integrateTerm_c (answer, NTcN(getP(), getP(), CompressibilityCoefficient), ir, tStep) ;   
         } else if (type == ExternalForcesVector) {
           answer.zero();
         } else {
@@ -144,7 +144,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfSurfaceDOFs());
@@ -153,7 +153,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
@@ -172,7 +172,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfEdgeDOFs());
@@ -181,7 +181,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary);
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
@@ -579,9 +579,9 @@ class UPSimpleMaterial : public Material {
     public:
   UPSimpleMaterial (int n, Domain* d) : Material (n,d) {e=1.0; nu=0.15; k=1.0; alpha=1.0; c=0.1; muw = 1.0;}
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, GaussPoint* gp, TimeStep *tStep) override {
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
         MaterialMode mmode = gp->giveMaterialMode();
-        if (type == StiffnessMatrix) {
+        if (type == TangentStiffness) {
             double ee;
 
             ee = e / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
@@ -603,7 +603,7 @@ class UPSimpleMaterial : public Material {
             answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
             answer.times(ee);
-        } else if (type == PermeabilityMatrix) {
+        } else if (type == Permeability) {
             if (mmode == _3dUP) {
                 answer.resize(3,3);
                 answer.beUnitMatrix();
@@ -616,12 +616,12 @@ class UPSimpleMaterial : public Material {
         }
     }
 
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, CharType type, GaussPoint* gp, TimeStep *tStep) override {
-        if (type == InternalForcesVector) {
+    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
+        if (type == Stress) {
             FloatMatrix d;
             UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
 
-            this->giveCharacteristicMatrix(d, StiffnessMatrix, gp, tStep);
+            this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
             answer.beProductOf(d, flux);
             // update gp status
             status->letTempStrainVectorBe(flux);
@@ -629,13 +629,13 @@ class UPSimpleMaterial : public Material {
 
         }else if (type == FluidMassBalancePressureContribution) {
             FloatMatrix k;
-            this->giveCharacteristicMatrix(k, PermeabilityMatrix, gp, tStep);
+            this->giveCharacteristicMatrix(k, Permeability, gp, tStep);
             answer.beProductOf(k, flux);
         }
     }
 
 
-    double giveCharacteristicValue(CharType type, GaussPoint* gp, TimeStep *tStep) override {
+    double giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
         if (type == BiotConstant) {
             return alpha;
         } else if (type == CompressibilityCoefficient) {

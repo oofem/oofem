@@ -237,7 +237,7 @@ void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
 double FEI2dLineQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
-    return 0.0;
+    //return 0.0;
 }
 
 double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
@@ -257,7 +257,7 @@ double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo
     return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
-std::unique_ptr<IntegrationRule> FEI2dLineQuad :: giveIntegrationRule(int order) const
+std::unique_ptr<IntegrationRule> FEI2dLineQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 1);

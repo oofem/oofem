@@ -70,7 +70,7 @@ LargeStrainMasterMaterialGrad :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LargeStrainMasterMaterialGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+LargeStrainMasterMaterialGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

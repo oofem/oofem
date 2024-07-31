@@ -185,7 +185,7 @@ Quad1MindlinShell3D::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 {
     const auto &localCoords = gp->giveNaturalCoordinates();
 
-    auto tmp = this->interp.evaldNdx( localCoords, FEIVertexListGeometryWrapper(lnodes) );
+    auto tmp = this->interp.evaldNdx( localCoords, FEIVertexListGeometryWrapper(lnodes, this->giveGeometryType()) );
     auto dn = tmp.second;
     auto n = this->interp.evalN(localCoords);
 
@@ -194,7 +194,7 @@ Quad1MindlinShell3D::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
     FloatMatrixF< 2, 4 >dns;
     if ( this->reducedIntegrationFlag ) {
         FloatArray lc(2); // set to element center coordinates
-        auto tmp = this->interp.evaldNdx( lc, FEIVertexListGeometryWrapper(lnodes) );
+        auto tmp = this->interp.evaldNdx( lc, FEIVertexListGeometryWrapper(lnodes, this->giveGeometryType()) );
         dns = tmp.second;
         ns = this->interp.evalN(lc);
     } else {
@@ -487,7 +487,7 @@ double
 Quad1MindlinShell3D::computeVolumeAround(GaussPoint *gp)
 {
     double weight = gp->giveWeight();
-    double detJ = fabs(this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) ) );
+    double detJ = fabs(this->interp.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes, this->giveGeometryType()) ) );
     return detJ * weight;
 }
 
@@ -569,7 +569,7 @@ Quad1MindlinShell3D::giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1MindlinShell3D::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes) );
+    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lnodes, this->giveGeometryType()) );
     return detJ * gp->giveWeight();
 }
 

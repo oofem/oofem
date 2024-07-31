@@ -35,7 +35,7 @@
 #ifndef exportmodule_h
 #define exportmodule_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "inputrecord.h"
 #include "range.h"

@@ -398,7 +398,6 @@ Node* LIBeam3d :: giveReferenceNode(int refNode)
     }
 
     OOFEM_ERROR("Could not find the reference node. Check numbering.");
-    return nullptr;
 }
 
 int

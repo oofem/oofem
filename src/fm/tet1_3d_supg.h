@@ -61,6 +61,8 @@ public:
     MaterialMode giveMaterialMode() override { return _3dFlow; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
+    Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_1;}
+
 
     Interface *giveInterface(InterfaceType t) override;
 
