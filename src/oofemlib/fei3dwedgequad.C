@@ -221,7 +221,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 
 
 void
-FEI3dWedgeQuad :: giveLocalNodeCoords(FloatMatrix &answer) const
+FEI3dWedgeQuad :: giveLocalNodeCoords(FloatMatrix &answer, const Element_Geometry_Type) const
 {
 
     answer.resize(3,15);
@@ -402,7 +402,7 @@ FEI3dWedgeQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 6, 15};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -410,7 +410,7 @@ FEI3dWedgeQuad :: computeLocalEdgeMapping(int iedge) const
 double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("not implemented");
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -478,7 +478,7 @@ FEI3dWedgeQuad :: computeLocalSurfaceMapping(int isurf) const
         return {3, 1, 4, 6, 9, 13, 12, 15};
     } else {
         OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
-        return {};
+        // return {};
     }
 }
 
@@ -556,7 +556,7 @@ FEI3dWedgeQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray 
 
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeQuad :: giveIntegrationRule(int order) const
+FEI3dWedgeQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo This function below isn't supported. We must decide on how to deal with wedges.
@@ -569,7 +569,7 @@ FEI3dWedgeQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dWedgeQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dWedgeQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     if ( boundary <= 2 ) {

@@ -129,7 +129,6 @@ double Dictionary :: at(int aKey) const
         next = next->giveNext();
     }
     OOFEM_ERROR("Requested key missing from dictionary");
-    return 0.;
 }
 
 

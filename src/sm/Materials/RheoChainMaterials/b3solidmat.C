@@ -529,7 +529,6 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) con
         return 1. * tHalfStep / q4;
     } else {
         OOFEM_ERROR("mode is not supported");
-        return 0.;
     }
 }
 
@@ -673,7 +672,6 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int op
         humNew = humOld + 0.5 * ( this->giveHumidityIncrement(gp, tStep) );       //linearly approximated
     } else {
         OOFEM_ERROR("invalid option parameter");
-        humNew = 0.;
     }
 
     //following section is used if humidity remains constant

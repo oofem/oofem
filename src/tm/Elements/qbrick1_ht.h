@@ -71,6 +71,8 @@ public:
     int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 20 : 40; }
     void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_2;}
+
 
     Interface *giveInterface(InterfaceType t) override;
     int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }

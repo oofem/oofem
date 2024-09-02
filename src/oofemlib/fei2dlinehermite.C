@@ -142,9 +142,9 @@ double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords,
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) * 0.5;
 }
 
-std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order) const
+std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     OOFEM_ERROR("Not supported.");
-    return nullptr;
+    //return nullptr;
 }
 } // end namespace oofem

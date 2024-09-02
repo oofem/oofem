@@ -48,11 +48,11 @@ class OOFEM_EXPORT FEI3dTetQuad : public FEInterpolation3d
 public:
     FEI3dTetQuad() : FEInterpolation3d(2) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Tetrahedra; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_tetra_2; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Triangle; }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _Triangle; }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Tetrahedra; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_tetra_2; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Triangle; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _Triangle; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
 
     double giveVolume(const FEICellGeometry &cellgeo) const override;
 
@@ -67,7 +67,7 @@ public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    int giveNumberOfNodes() const override { return 10; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 10; }
     void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4,5,6,7,8,9,10}; internalDofMans={};}
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
@@ -92,8 +92,8 @@ public:
     IntArray computeLocalSurfaceMapping(int iedge) const override;
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const override;
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
 
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

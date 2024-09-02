@@ -308,7 +308,6 @@ double &SymCompCol :: at(int i, int j)
     }
 
     OOFEM_ERROR("Array accessing exception -- out of bounds");
-    return val[0]; // return to suppress compiler warning message
 }
 
 
@@ -328,7 +327,6 @@ double SymCompCol :: at(int i, int j) const
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception -- index out of bounds (%d,%d)", i, j);
-        return ( 0 ); // return to suppress compiler warning message
     }
 }
 
@@ -348,7 +346,6 @@ double SymCompCol :: operator() (int i, int j)  const
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception, index out of bounds (%d,%d)", i, j);
-        return ( 0 ); // return to suppress compiler warning message
     }
 }
 
@@ -367,6 +364,5 @@ double &SymCompCol :: operator() (int i, int j)
     }
 
     OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
-    return val[0]; // return to suppress compiler warning message
 }
 } // end namespace oofem

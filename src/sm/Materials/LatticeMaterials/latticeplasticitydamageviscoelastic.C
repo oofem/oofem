@@ -290,7 +290,6 @@ LatticePlasticityDamageViscoelastic::give3dLatticeStiffnessMatrix(MatResponseMod
         return answer * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
-        return answer;
     }
 }
 

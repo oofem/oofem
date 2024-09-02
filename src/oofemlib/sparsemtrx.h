@@ -35,7 +35,7 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
@@ -127,7 +127,6 @@ public:
     virtual std::unique_ptr<SparseMtrx> clone() const
     {
         OOFEM_ERROR("Not implemented");
-        return nullptr;
     }
 
     /**
@@ -209,7 +208,6 @@ public:
     virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
         OOFEM_ERROR("Not implemented");
-        return 0;
     }
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
@@ -258,11 +256,10 @@ public:
     /// Returns the norm of receiver.
     virtual double computeNorm() const {
         OOFEM_ERROR("Not implemented");
-        return 0.0;
     }
 
     virtual std::unique_ptr<SparseMtrx> giveSubMatrix(const IntArray &rows, const IntArray &cols) 
-    { OOFEM_ERROR("Not implemented"); return nullptr; }
+    { OOFEM_ERROR("Not implemented"); }
     
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;

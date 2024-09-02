@@ -57,7 +57,7 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord &ir)
 }
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep) const
+IsotropicHeatTransferMaterial :: giveProperty(int aProperty, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]   
         return conductivity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
@@ -66,7 +66,7 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *t
     } else if ( aProperty == 'd' && density.isDefined() ) { //density [kg/m3]
         return density.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
     } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3/K]
-        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
+        return ( this->giveProperty('c', gp, tStep) * this->giveProperty('d', gp, tStep) );
     }
 
     return this->Material :: give(aProperty, gp);
@@ -99,7 +99,7 @@ IsotropicHeatTransferMaterial :: computeTangent3D(MatResponseMode mode, GaussPoi
 double
 IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
 {
-    return give('k', gp, tStep);
+    return giveProperty('k', gp, tStep);
 }
 
 double
@@ -108,12 +108,12 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
-        return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
+        return ( this->giveProperty('c', gp, tStep) * this->giveProperty('d', gp, tStep) );
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return 0.;
+    // return 0.;
 }
 
 
@@ -130,16 +130,16 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
         answer = FloatArray{ this->giveTemperature(gp) };
         return 1;
     } else if ( type == IST_Density ) {
-        answer = FloatArray{ this->give('d', gp, tStep) };
+        answer = FloatArray{ this->giveProperty('d', gp, tStep) };
         return 1;
     } else if ( type == IST_HeatCapacity ) {
-        answer = FloatArray{ this->give('c', gp, tStep) };
+        answer = FloatArray{ this->giveProperty('c', gp, tStep) };
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
-        answer = FloatArray{ this->give('k', gp, tStep) };
+        answer = FloatArray{ this->giveProperty('k', gp, tStep) };
         return 1;
     } else if ( type == IST_EnergyMassCapacity ) {
-        answer = FloatArray{ this->give('c', gp, tStep) * this->give('d', gp, tStep) * this->giveTemperature(gp) };
+        answer = FloatArray{ this->giveProperty('c', gp, tStep) * this->giveProperty('d', gp, tStep) * this->giveTemperature(gp) };
         return 1;
     }
 

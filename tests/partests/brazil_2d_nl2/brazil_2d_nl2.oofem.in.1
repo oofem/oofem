@@ -1,17 +1,23 @@
 brazil_2d_nl2.oofem.out.1
 2D brazilian splitting test
-staticstructural nsteps 1 nmsteps 6 nmodules 1
-nsteps 1 stiffMode 2 solverType "calm" psi 0.0 steplength 0.0002 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-nsteps 3 stiffMode 2 solverType "calm" psi 0.0 steplength 0.0001 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-nsteps 3 stiffMode 2 solverType "calm" psi 0.0 steplength 0.00002 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-nsteps 4 stiffMode 2 solverType "calm" psi 0.0 steplength 0.00001 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-nsteps 9 stiffMode 2 solverType "calm" psi 0.0 steplength 0.0001 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-nsteps 10 stiffMode 2 solverType "calm" psi 0.0 steplength 0.001 rtolf 1e-6 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 initialguess 0
-errorcheck "brazil_2d_errorcheck"
-#vtkxml tstep_all vars 3 1 2 4 primvars 1 1 stype 2
+#
+nonlinearstatic nsteps 1 nmsteps 5 renumber 0 profileopt 1 nonlocalext lstype 4 smtype 7 nmodules 1
+#
+#metastep 1
+nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 2
+nsteps 3 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 3
+nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 4
+nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 5
+nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#
+errorcheck filename "brazil_2d_errorcheck.in"
 domain PlaneStrain
 OutputManager tstep_all dofman_all element_all
-ndofman 315 nelem 276 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nset 5
+ndofman 315 nelem 276 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1
 node 2 coords 3 4.000000e+01 0.000000e+00 0.000000e+00 bc 2 0 1
 node 4 coords 3 5.000000e+00 3.968627e+01 0.000000e+00
 node 5 coords 3 0.000000e+00 3.968627e+01 0.000000e+00 bc 2 1 0
@@ -603,11 +609,6 @@ Quad1PlaneStrain 383 nodes 4 39 38 420 427 mat 2 crossSect 2
 Quad1PlaneStrain 384 nodes 4 420 421 422 427 mat 2 crossSect 2
 Quad1PlaneStrain 385 nodes 4 422 423 426 427 mat 2 crossSect 2
 Quad1PlaneStrain 386 nodes 4 423 424 425 426 mat 2 crossSect 2
-Set 1 elementranges {(1 371)}
-Set 2 elementranges {(372 386)}
-Set 3 noderanges {1 5 7 (42 79) 85 86}
-Set 4 noderanges {(1 3) (9 22)}
-Set 5 elementboundaries 2 378 1
 SimpleCS 1 thick 1.0
 SimpleCS 2 thick 1.0
 idmnl1 1 d 1.0 E 37.7e3 n 0.2 talpha 0.0 e0 6.75e-5 ef 3.0e-4 R 5.0 equivstraintype 1 regionMap 2 0 1
@@ -615,5 +616,10 @@ IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
 ##idmnl1 1 d 1.0 E 30.e3 n 0.18 talpha 0.0 e0 0.00011666666667 ef 0.0059953333333 R 5.0 equivstraintype 1 regionMap 2 0 1
 ##IsoLE  2 d 1.0 E 210.e3 n 0.3 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
-ConstantEdgeLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 0 -1.0 loadType 3 set 5 reference
+ConstantEdgeLoad 2 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
 ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK% tolerance 1.e-5
+#LOADLEVEL tStep 29 value 110.857521
+#NODE  tStep 29 number 7 dof 2 unknown d value -1.08831150e-02
+#%END_CHECK%

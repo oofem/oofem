@@ -93,8 +93,8 @@ public:
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) = 0;
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
+    virtual void giveRealStressVectorUP_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) = 0;
+    virtual void giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
     //    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) = 0;
 
     virtual void giveFiniteStrainGeneralizedStressVectors(FloatArray &sigma, GaussPoint *gp, const FloatArray &devF, double pressure, TimeStep *tStep) {; }

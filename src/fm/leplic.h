@@ -67,7 +67,7 @@ protected:
     FloatArray normal, temp_normal;
 
 public:
-    LEPlicElementInterface() : permanentVofFlag(false), vof(0.), temp_vof(0.) { }
+    LEPlicElementInterface() : permanentVofFlag(false), vof(0.), temp_vof(0.), p(0.), temp_p(0.) { }
     /**
      * @name The element interface required by LEPlicElementInterface
      */

@@ -35,6 +35,7 @@
 // please activate or de-activate next line
 //#define LIN_STAB_COMPATIBILITY_MODE
 
+#include "oofemcfg.h"
 #include "sm/EngineeringModels/linearstability.h"
 #include "timestep.h"
 #include "element.h"

@@ -35,7 +35,7 @@
 #ifndef classfactory_h
 #define classfactory_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "sparsemtrxtype.h"
 #include "errorestimatortype.h"
 #include "doftype.h"

@@ -3,6 +3,7 @@
 #include "dynamicdatareader.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "inputrecord.h"
 #include "timer.h"
 
 // Optional (only need the input fields defines)
@@ -75,7 +76,7 @@ public:
     void giveRecordKeywordField(std :: string &answer) override { answer = "node";  }
     void giveField(FloatArray &answer, InputFieldType id) override {
         if (std::string(id) == _IFT_Node_coords) answer = coords;
-        else throw MissingKeywordInputException(this*, id, recordNumber);
+        else throw MissingKeywordInputException(*this, id, recordNumber);
     }
 
     bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Node_coords; }
@@ -96,7 +97,7 @@ public:
     void giveRecordKeywordField(std :: string &answer) override { answer = _IFT_Brick1_ht_Name; }
     void giveField(IntArray &answer, InputFieldType id) override { 
         if (std::string(id) == _IFT_Element_nodes) answer = enodes;
-        else throw MissingKeywordInputException(this*, id, recordNumber);
+        else throw MissingKeywordInputException(*this, id, recordNumber);
     }
 
     bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Element_nodes; }
@@ -111,12 +112,12 @@ public:
 
     virtual void giveField(IntArray &answer, InputFieldType id) {
         if (std::string(id) == _IFT_Element_nodes) answer = enodes;
-        else throw MissingKeywordInputException(this*, id, recordNumber);
+        else throw MissingKeywordInputException(*this, id, recordNumber);
     }
     virtual void giveField(int &answer, InputFieldType id) { 
         if (std::string(id) == _IFT_Element_activityTimeFunction) answer = 2;
         else if (std::string(id) == _IFT_Element_nip) answer = 0;
-        else throw MissingKeywordInputException(this*, id, recordNumber);
+        else throw MissingKeywordInputException(*this, id, recordNumber);
     }
     virtual bool hasField(InputFieldType id) { return std::string(id) == _IFT_Element_activityTimeFunction || 
         std::string(id) == _IFT_Element_nip || std::string(id) == _IFT_Element_nodes; }
@@ -155,7 +156,7 @@ IntArray read_int_dataset(const DataSet &d)
 
 int main(int argc, char *argv[])
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
     int rank;
     MPI_Init(& argc, & argv);

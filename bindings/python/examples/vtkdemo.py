@@ -15,13 +15,13 @@ for p in vtkxmlPy.getExportRegions():
     print ("Piece:", p)
     print(p.getVertices())
     print(p.getCellConnectivity())
-    print(p.getCellTypes(vtkxmlPy))
+    print(p.getCellTypes())
     disp = p.getPrimaryVertexValues(oofempy.UnknownType.DisplacementVector)
     sig = p.getInternalVertexValues(oofempy.InternalStateType.IST_StressTensor)
     sigx = sig[:, 0]
     
-    grid = pv.UnstructuredGrid(p.getCellConnectivity(), p.getCellTypes(vtkxmlPy), p.getVertices())
-    grid.point_arrays['Sigma_xx'] = sigx
+    grid = pv.UnstructuredGrid(p.getCellConnectivity(), p.getCellTypes(), p.getVertices())
+    grid.point_data['Sigma_xx'] = sigx
     grid['Disp'] = disp
     print(grid.active_vectors)
     warped = grid.warp_by_vector('Disp', factor=1000.)

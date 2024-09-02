@@ -94,7 +94,7 @@ IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) 
 
 void
 IsotropicGradientDamageMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

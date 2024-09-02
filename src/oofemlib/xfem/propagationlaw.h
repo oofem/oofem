@@ -36,7 +36,7 @@
 #ifndef PROPAGATIONLAW_H_
 #define PROPAGATIONLAW_H_
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 
 #define _IFT_PLDoNothing_Name "propagationlawdonothing"

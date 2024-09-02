@@ -55,7 +55,7 @@
 #include "oofem_terminate.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallelcontext.h"
  #include "loadbalancer.h"
 #endif
@@ -75,7 +75,7 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
     meshPackage = MPT_T3D;
     equilibrateMappedConfigurationFlag = 0;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     this->preMappingLoadBalancingFlag = false;
 #endif
 }
@@ -121,7 +121,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     //this->terminate( this->giveCurrentStep() );
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( preMappingLoadBalancingFlag ) {
         this->balanceLoad( this->giveCurrentStep() );
     }
@@ -200,7 +200,6 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     if ( d->giveNumber() == 2 ) {
@@ -226,7 +225,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
         return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
     }
 
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -519,7 +518,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // this->forceEquationNumbering();
     this->updateDomainLinks();
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         // set up communication patterns
         this->initializeCommMaps(true);
@@ -937,11 +936,11 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
         OOFEM_ERROR("solution step out of range");
     }
 
-    return 0.0; // to make compiler happy
+    // return 0.0; // to make compiler happy
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 LoadBalancer *
 AdaptiveNonLinearStatic :: giveLoadBalancer()
 {

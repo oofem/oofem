@@ -35,7 +35,7 @@
 #ifndef ENRICHMENTFRONTREDUCEFRONT_H_
 #define ENRICHMENTFRONTREDUCEFRONT_H_
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include <vector>
 #include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"

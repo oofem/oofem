@@ -113,7 +113,7 @@ bool XfemManager :: isElementEnriched(const Element *elem)
 #else
     // An element is enriched if one of its nodes is enriched.
     for ( int n: elem->giveDofManArray() ) {
-        if ( mNodeEnrichmentItemIndices [ n - 1 ].size() > 0 ) {
+        if ( mNodeEnrichmentItemIndices.size() && mNodeEnrichmentItemIndices [ n - 1 ].size() > 0 ) {
             return true;
         }
     }
@@ -474,7 +474,8 @@ void XfemManager :: nucleateEnrichmentItems(bool &oNewItemsWereNucleated)
 //	printf("Entering XfemManager :: nucleateEnrichmentItems\n");
 
 	for(auto &nucCrit : mNucleationCriteria) {
-		std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
+          //std::vector<std::unique_ptr<EnrichmentItem>> eiList = std::move(nucCrit->nucleateEnrichmentItems());
+          std::vector<std::unique_ptr<EnrichmentItem>> eiList = nucCrit->nucleateEnrichmentItems();
 
 		if(eiList.size() > 0) {
 //			printf("eiList.size(): %lu\n", eiList.size() );

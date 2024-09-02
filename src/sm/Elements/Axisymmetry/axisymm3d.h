@@ -90,6 +90,8 @@ public:
 
     const char *giveClassName() const override { return "Axisymm3d"; }
     const char *giveInputRecordName() const override { return _IFT_Axisymm3d_Name; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
+
     void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem

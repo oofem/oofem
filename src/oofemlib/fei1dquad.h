@@ -49,11 +49,11 @@ protected:
 public:
     FEI1dQuad(int coordIndx) : FEInterpolation1d(2), cindx(coordIndx) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Line; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_line_2; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Point; }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _UnknownIntegrationDomain; }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _UnknownIntegrationDomain; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Line; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_line_2; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Point; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _UnknownIntegrationDomain; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _UnknownIntegrationDomain; }
 
     double giveLength(const FEICellGeometry &cellgeo) const override;
 
@@ -66,9 +66,9 @@ public:
     int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    int giveNumberOfNodes() const override { return 3; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 3; }
 
-    IntArray boundaryEdgeGiveNodes(int boundary) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

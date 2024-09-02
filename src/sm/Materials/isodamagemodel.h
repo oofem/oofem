@@ -295,7 +295,6 @@ protected:
      */
     virtual double damageFunctionPrime(double kappa, GaussPoint *gp) const {
         OOFEM_ERROR("not implemented");
-        return 0;
     }
 
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,TimeStep *tStep) const override;

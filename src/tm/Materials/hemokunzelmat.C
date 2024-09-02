@@ -222,7 +222,7 @@ double HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
         OOFEM_ERROR("Unknown MatResponseMode");
     }
 
-    return 0.0; // to make compiler happy
+    // return 0.0; // to make compiler happy
 }
 
 
@@ -239,7 +239,6 @@ HeMoKunzelMaterial :: giveMoistureContent(double h) const
         return iso_wh * ( iso_b - 1. ) * h / ( iso_b - h );
     } else {
         OOFEM_ERROR("Unknown Isotherm type");
-        return 0.;
     }
 }
 
@@ -256,7 +255,6 @@ HeMoKunzelMaterial :: giveMoistureContentDerivative(double h) const
         return iso_wh * ( iso_b - 1. ) * iso_b / ( ( iso_b - h ) * ( iso_b - h ) );
     } else {
         OOFEM_ERROR("Unknown Isotherm type");
-        return 0.;
     }
 }
 
@@ -397,7 +395,7 @@ HeMoKunzelMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
         OOFEM_ERROR( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return false; // to make compiler happy
+    // return false; // to make compiler happy
 }
 
 int

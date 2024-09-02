@@ -74,8 +74,8 @@ public:
 
     
 protected:
-    FloatArray computeStrainVector(GaussPoint *gp, const FloatArray &u);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, const FloatArray &u);
+    FloatArray _computeStrainVector(GaussPoint *gp, const FloatArray &u);
+    void _computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep, const FloatArray &u);
     void computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, const FloatMatrix &B, const FloatArray &d);
 
     std::pair<double,double> computeDeformedLengthAt(GaussPoint *gp, const FloatArray &d);

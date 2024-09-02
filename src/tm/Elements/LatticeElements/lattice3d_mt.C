@@ -180,7 +180,7 @@ Lattice3d_mt :: initializeFrom(InputRecord &ir)
 
     polygonCoords.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, polygonCoords, _IFT_Lattice3DMT_polycoords);
-    numberOfPolygonVertices = polygonCoords.giveSize() / 3.;
+    numberOfPolygonVertices = (int) (polygonCoords.giveSize() / 3.);
 
     crackWidths.resize(numberOfPolygonVertices);
     crackWidths.zero();

@@ -375,11 +375,11 @@ void SUPG :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain 
 }
 
 
-void SUPG :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+void SUPG :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *enorm)
 {
     answer.zero();
     this->assembleVector(answer, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
-                         EModelDefaultEquationNumbering(), d, eNorm);
+                         EModelDefaultEquationNumbering(), d, enorm);
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 }
 
@@ -472,12 +472,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->internalForces.resize(neq);
 
     if ( tStep->isTheFirstStep() ) {
-        TimeStep *stepWhenIcApply = tStep->givePreviousStep();
+        TimeStep *_stepWhenIcApply = tStep->givePreviousStep();
         if ( materialInterface ) {
             materialInterface->initialize();
         }
 
-        this->applyIC(stepWhenIcApply);
+        this->applyIC(_stepWhenIcApply);
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }
 
@@ -595,16 +595,16 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     int nite = 0;
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     int jj, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
-    FloatArray rhs, internalForces(neq);
+    FloatArray rhs, iForces(neq);
 
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    internalForces.zero();
-    this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
+    iForces.zero();
+    this->assembleVector( iForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+    this->updateSharedDofManagers(iForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 
-    rhs.beDifferenceOf(externalForces, internalForces);
+    rhs.beDifferenceOf(externalForces, iForces);
 
     //
     // corrector
@@ -703,11 +703,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //
         // assemble rhs (residual)
         //
-        internalForces.zero();
-        this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
+        iForces.zero();
+        this->assembleVector( iForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-        rhs.beDifferenceOf(externalForces, internalForces);
+        this->updateSharedDofManagers(iForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+        rhs.beDifferenceOf(externalForces, iForces);
 
         // check convergence and repeat iteration if desired
         double rnorm_mb = 0.0, rnorm_mc = 0.0;
@@ -748,11 +748,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //
             // assemble rhs (residual)
             //
-            internalForces.zero();
-            this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
+            iForces.zero();
+            this->assembleVector( iForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
                                  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-            rhs.beDifferenceOf(externalForces, internalForces);
+            this->updateSharedDofManagers(iForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+            rhs.beDifferenceOf(externalForces, iForces);
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
 
@@ -771,14 +771,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 #ifndef SUPG_IMPLICIT_INTERFACE
     if ( materialInterface ) {
  #ifdef TIME_REPORT
-        Timer timer;
-        timer.startTimer();
+        Timer _timer;
+        _timer.startTimer();
  #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
         updateElementsForNewInterfacePosition(tStep);
  #ifdef TIME_REPORT
-        timer.stopTimer();
-        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
+        _timer.stopTimer();
+        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", _timer.getUtime() );
  #endif
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }
@@ -1012,7 +1012,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
         OOFEM_ERROR("unknown variable type");
     }
 
-    return 0.0;
+    //return 0.0;
 }
 
 void
@@ -1058,7 +1058,7 @@ SUPG :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 void
 SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
 {
-    double deltaT = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
 
     int nnodes = domain->giveNumberOfDofManagers();
@@ -1073,7 +1073,7 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
                     prev_val = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
                     accel    = dof->giveUnknown( VM_Acceleration, tStep->givePreviousStep() );
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        val = prev_val +  deltaT * accel;
+                        val = prev_val +  dt * accel;
                     } else {
                         val = prev_val;
                     }
@@ -1094,7 +1094,7 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
 void
 SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
 {
-    double deltaT = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
 
@@ -1107,7 +1107,7 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
                     double val, prev_val;
                     prev_val = iDof->giveUnknown(VM_Total, tStep);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
+                        val = prev_val +  dt *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     } else {
                         val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     }
@@ -1131,14 +1131,12 @@ SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
     } else {
         OOFEM_ERROR("unsupported solution step");
     }
-
-    return 0;
 }
 
 void
 SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep)
 {
-    double deltaT = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
 
     for ( auto &node : domain->giveDofManagers() ) {
@@ -1151,8 +1149,8 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
             DofIDItem type = iDof->giveDofID();
 
             if ( jj ) {
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT)*a
-                    solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt)*a
+                    solutionVector.at(jj) += dt * accelerationVector.at(jj);
                 }
             }
         }
@@ -1171,8 +1169,8 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
                 DofIDItem type = iDof->giveDofID();
 
                 if ( jj ) {
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                        solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
+                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt*alpha)*da
+                        solutionVector.at(jj) += dt * accelerationVector.at(jj);
                     }
                 }
             }
@@ -1184,7 +1182,7 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 void
 SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep)
 {
-    double deltaT = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
 
     accelerationVector.add(incrementalSolutionVector);
@@ -1200,8 +1198,8 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
             DofIDItem type = iDof->giveDofID();
 
             if ( jj ) {
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                    solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt*alpha)*da
+                    solutionVector.at(jj) += dt * alpha * incrementalSolutionVector.at(jj);
                 } else {
                     solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
                 }
@@ -1222,8 +1220,8 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
                 DofIDItem type = iDof->giveDofID();
 
                 if ( jj ) {
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                        solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt*alpha)*da
+                        solutionVector.at(jj) += dt * alpha * incrementalSolutionVector.at(jj);
                     } else {
                         solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
                     }

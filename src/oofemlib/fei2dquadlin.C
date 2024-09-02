@@ -311,7 +311,7 @@ FEI2dQuadLin :: computeLocalEdgeMapping(int iedge) const
         return {4, 1};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -383,7 +383,7 @@ double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 std::unique_ptr<IntegrationRule> 
-FEI2dQuadLin :: giveIntegrationRule(int order) const
+FEI2dQuadLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);

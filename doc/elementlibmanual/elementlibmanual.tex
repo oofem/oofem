@@ -1176,7 +1176,9 @@ $\gamma_{rz}$) are integrated using one point integration formula.}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
-\subsection{3d Continuum Elements}
+\subsection{3D Continuum Elements}
+This section contains description of continuum elements.
+
 \subsubsection{LSpace element}
 \label{lspacesect}
 Implementation of Linear 3d  eight - node 
@@ -1195,7 +1197,7 @@ finite element. Each node has 3 degrees of freedom. The element features are sum
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacement and geometry.}
 \elementDescription{Integration}{Full integration of all strain components.}
-\elementDescription{Features}{Adaptivity support, Geometric nonlinearity support.}
+\elementDescription{Features}{Supports adaptivity, geometric nonlinearity, and layered cross section support }
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
@@ -1226,7 +1228,7 @@ finite element. Each node has 3 degrees of freedom. The element features are sum
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacement and geometry.}
 \elementDescription{Integration}{Full integration of all strain components.}
-\elementDescription{Features}{-}
+\elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
@@ -1313,7 +1315,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
 \elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
-\elementDescription{Features}{-}
+\elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
@@ -1340,12 +1342,40 @@ Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
 \elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
-\elementDescription{Features}{-}
+\elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
+
+\subsubsection{Layer stacking sequence definition for 3D elements}
+Selected 3D elements (bricks and wedge geometries) support using the LayeredCrossSection model to define layer stack as a sequence of individual layers.
+Individual layers are assumed to lie in element parametric $\xi-\eta$ plane and are stacked along parametric $\zeta$ coordinate of the element. The direction of parametric coordinates is determined by element node numbering convention, see figures with element geometries above.
+Note, that the stacking direction is in general the function of element geometry.
+
+It is important to understand concept of element and material coordinate systems.
+
+The element coordinate system (elemCS) coincides, by default, with the global coordinate system. 
+The user-defined element coordinate system can be defined using lcs parameter. 
+The lcs parameter defines an array of size 6, where the first 3 components define direction of 
+local element-axis and remaining 3 components define direction of local element y-axis. 
+The local element z axis is computed using vector product $e_z=e_x\times e_y$.
+
+The material properties of each layer are defined in material coordinate system (matCS). 
+Also the solver output for individual layers is done in matCS.
+By default, the material coordinate system coincides with global coordinate system.
+Additionally, the material coordinate system for individual layer can be rotated around material CS z-axis by angle, defined by layered cross section \param{rotations} keyword. This array parameter allows to define rotation angle for individual layers and should be defined in degrees not radians.
+If \param{matcs} element keyword is present, but no lcs element record is defined, then the following definition of elemCS is assumed: 
+$e_x=\{\frac{dx(\xi,\eta,\zeta)}{d\xi},\frac{dy(\xi,\eta,\zeta)}{d\xi},\frac{dz(\xi,\eta,\zeta)}{d\xi}\}, 
+h=\{\frac{dx(\xi,\eta,\zeta)}{d\eta},\frac{dy(\xi,\eta,\zeta)}{d\eta},\frac{dz(\xi,\eta,\zeta)}{d\eta}\},
+e_z=e_x\times h, e_y=e_z\times e_x$,
+where $\xi,\eta,\zeta$ are parametric element coordinates. 
+The strains and stresses in individual layers are always reported in material coordinate system.
+LayeredCS integration 
+The layered cross section  integration can be set up using number of integrations points in
+layer plane (\param{nintegrationpoints} parameter ) and using number of integration points per layer
+ thickness (\param{layerintegrationpoints} parameter).
 
 %-----------------------------------------------------------------------------------------------
 \clearpage

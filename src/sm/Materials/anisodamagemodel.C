@@ -1251,7 +1251,6 @@ FloatMatrixF<1,1> AnisotropicDamageMaterial :: give1dStressStiffMtrx(MatResponse
             //@todo eq 57
         }
         OOFEM_ERROR("not implemented");
-        return {0.};
     }
 }
 

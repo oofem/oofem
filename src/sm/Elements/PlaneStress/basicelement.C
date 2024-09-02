@@ -46,6 +46,7 @@ FEI2dTrLin BasicElement :: interp(1, 2);
 BasicElement :: BasicElement(int n, Domain *aDomain) : PlaneStressElement(n, aDomain)
 {
     this->numberOfGaussPoints = 1;
+    this->numberOfDofMans = 3;
 }
 
 

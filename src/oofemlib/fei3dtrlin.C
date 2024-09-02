@@ -51,7 +51,7 @@ double
 FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: evaldNdx - Not supported");
-    return 0.;
+    //return 0.;
 }
 
 
@@ -97,7 +97,7 @@ int
 FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: global2local - Not supported");
-    return -1;
+    //return -1;
 
 }
 
@@ -153,7 +153,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeGiveTransformationJacobian - Not supported");
     return -1;
@@ -171,7 +171,7 @@ FEI3dTrLin :: computeLocalEdgeMapping(int iedge) const
         return { 3, 1 };
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -180,7 +180,7 @@ FEI3dTrLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry
 {
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeComputeLength - Not supported");
-    return -1;
+    //return -1;
 }
 
 void
@@ -281,7 +281,7 @@ double
 FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrLin :: surfaceGiveTransformationJacobian - Not supported yet");
-    return 0;
+    //return 0;
 }
 
 IntArray
@@ -293,7 +293,7 @@ FEI3dTrLin :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveIntegrationRule(int order) const
+FEI3dTrLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
@@ -302,11 +302,11 @@ FEI3dTrLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTrLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrLin :: giveBoundaryIntegrationRule - Not supported");
-    return nullptr;
+    //return nullptr;
 }
 
 

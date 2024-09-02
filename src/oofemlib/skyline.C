@@ -47,7 +47,9 @@
 #include "contact/contactdefinition.h"
 #include "contact/contactelement.h"
 #include "unknownnumberingscheme.h"
-
+#ifdef __MPM_MODULE
+#include "../mpm/integral.h"
+#endif
 
 #include <climits>
 #include <cstdlib>
@@ -375,6 +377,28 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         }
     }
 
+#ifdef __MPM_MODULE
+    IntArray locr, locc;
+    // loop over integrals 
+    for (auto &in: eModel->giveIntegralList()) {
+        // loop over integral domain
+        for (auto &elem: in->set.giveElementList()) {
+            // get code numbers for integral.term on element
+            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), in->term, s) ;
+            maxle = INT_MAX;
+            for ( int ii : locr ) {
+                if ( ii > 0 ) {
+                    maxle = min(maxle, ii);
+                }
+            }
+            for ( int jj : locc ) {
+                if ( jj > 0 ) {
+                    mht.at(jj) = min( maxle, mht.at(jj) );
+                }
+            }
+        }
+    }
+#endif
 
     if ( domain->hasContactManager() ) {
         ContactManager *cMan = domain->giveContactManager();
@@ -724,9 +748,9 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
                 adrb.at(ise) = ib;
 
                 /*  vynulovani prvku radku v poli a  */
-                for ( int j = i + 1; j <= neq; j++ ) {
-                    if ( j - ( adr.at(j + 1) - adr.at(j) ) < i ) {
-                        mtrx [ adr.at(j) + j - i ] = 0.0;
+                for ( int jj = i + 1; jj <= neq; jj++ ) {
+                    if ( jj - ( adr.at(jj + 1) - adr.at(jj) ) < i ) {
+                        mtrx [ adr.at(jj) + jj - i ] = 0.0;
                     }
                 }
             }

@@ -35,7 +35,7 @@
 #ifndef engngm_h
 #define engngm_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 #include "intarray.h"
 #include "fieldmanager.h"
@@ -58,8 +58,11 @@
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
 #include "monitormanager.h"
+#ifdef __MPM_MODULE
+#include "../mpm/integral.h"
+#endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
 #endif
 
@@ -283,14 +286,13 @@ protected:
     int numProcs;
     /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
     int nonlocalExt;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
  #ifdef __USE_MPI
     /// Communication object for this engineering model.
     MPI_Comm comm;
  #endif
-
     /**@name Load balancing attributes */
     //@{
     /// Load Balancer.
@@ -309,6 +311,10 @@ protected:
 
     /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
     ProblemCommunicator *nonlocCommunicator;
+#endif
+#ifdef __MPM_MODULE
+    /// experimental mpm 
+    std :: vector < std :: unique_ptr< Integral > > integralList;
 #endif
     /// Message tags
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
@@ -484,7 +490,7 @@ public:
      * somewhere from solveYourselfAt function). Implementation must be provided.
      * Default implementation is empty.
      */
-    virtual void initializeYourself(TimeStep *tStep) { }
+    virtual void initializeYourself(TimeStep *tStep);
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
@@ -549,7 +555,7 @@ public:
      */
     virtual int giveCurrentNumberOfIterations() {return 1;}
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Returns the communication object of reciever.
     MPI_Comm giveParallelComm() { return this->comm; }
     /**
@@ -998,6 +1004,23 @@ public:
     void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
+#ifdef __MPM_MODULE
+    /// mpm experimental
+    std :: vector < std :: unique_ptr< Integral > > & giveIntegralList() {
+        return this->integralList;
+    }
+    void addIntegral (std :: unique_ptr< Integral > obj) {
+        integralList.push_back(std::move(obj));
+    }
+    // Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
+    void py_addIntegral(Integral *obj) {
+        int size = integralList.size();
+        integralList.resize(size+1);
+        integralList[size].reset(obj);
+    }
+    // end mpm experimental
+#endif
+
 protected:
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
@@ -1124,7 +1147,7 @@ public:
      * @return Upper bound of space needed.
      */
     virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) { return 0; }
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /**
      * Recovers the load balance between processors, if needed. Uses load balancer monitor and load balancer
      * instances to decide if rebalancing is needed (monitor) and to repartition the domain (load balancer).

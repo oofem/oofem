@@ -45,7 +45,7 @@
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
 #endif
 #ifdef _OPENMP
@@ -295,7 +295,7 @@ void
         } // loop over elements
 
         statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
         for ( auto &lir : *iList ) {

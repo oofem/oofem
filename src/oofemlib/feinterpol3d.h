@@ -45,7 +45,7 @@ class OOFEM_EXPORT FEInterpolation3d : public FEInterpolation
 {
 public:
     FEInterpolation3d(int o) : FEInterpolation(o) { }
-    int giveNsd() const override { return 3; }
+    int giveNsd(const Element_Geometry_Type) const override { return 3; }
 
     /**
      * Computes the exact volume.
@@ -54,7 +54,7 @@ public:
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 
-    IntArray boundaryEdgeGiveNodes(int boundary) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -73,7 +73,7 @@ public:
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { return this->surfaceGiveTransformationJacobian(isurf, lcoords, cellgeo); }
 
-    IntArray boundaryGiveNodes(int boundary) const override;
+    IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -190,13 +190,12 @@ public:
     IntArray computeSurfaceMapping(const IntArray &elemNodes, int isurf) const;
     //@}
 
-    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override
     {
         OOFEM_ERROR("Not overloaded"); 
-        return nullptr;
     };
-    IntArray boundarySurfaceGiveNodes(int boundary) const override;
+    IntArray boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type) const override;
 };
 } // end namespace oofem
 #endif // feinterpol3d_h

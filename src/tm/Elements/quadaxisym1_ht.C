@@ -100,12 +100,12 @@ QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 std::unique_ptr<IntegrationRule>
 QuadAxisym1_ht :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-    return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order+1, boundary);
+    return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order+1, boundary, this->giveGeometryType());
 }
 
 std::unique_ptr<IntegrationRule>
 QuadAxisym1_ht :: giveBoundarySurfaceIntegrationRule(int order, int boundary)
 {
-    return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order+1, boundary);
+    return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order+1, boundary, this->giveGeometryType());
 }
 } // end namespace oofem

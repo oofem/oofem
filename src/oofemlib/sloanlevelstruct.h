@@ -35,7 +35,7 @@
 #ifndef sloanlevelstruct_h
 #define sloanlevelstruct_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 
 namespace oofem {

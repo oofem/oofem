@@ -120,8 +120,8 @@ private:
     /// Name of the file that contains the umat function
     std::string filename;
 
-    static int const abq2oo9[ 9 ];
-    static int const abq2oo6[ 6 ];
+    static std::size_t const abq2oo9[ 9 ];
+    static std::size_t const abq2oo6[ 6 ];
 
 public:
     /// Constructor.

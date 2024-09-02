@@ -50,7 +50,7 @@ double
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
-    return 0.;
+    //return 0.;
 }
 
 
@@ -101,7 +101,7 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc) const
 
 
 void
-FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer) const
+FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer,const Element_Geometry_Type) const
 {
 
     answer.resize(3,6);
@@ -252,7 +252,7 @@ FEI3dTrQuad :: computeLocalEdgeMapping(int iedge) const
         return {3, 1, 6};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -261,7 +261,7 @@ FEI3dTrQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometr
 {
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
-    return -1;
+    //return -1;
 }
 
 void
@@ -370,7 +370,7 @@ double
 FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not supported yet");
-    return 0;
+    //return 0;
 }
 
 IntArray
@@ -384,7 +384,7 @@ FEI3dTrQuad :: computeLocalSurfaceMapping(int isurf) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrQuad :: giveIntegrationRule(int order) const
+FEI3dTrQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
@@ -393,11 +393,11 @@ FEI3dTrQuad :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");
-    return nullptr;
+    //return nullptr;
 }
 
 

@@ -69,7 +69,7 @@ private:
     std :: unique_ptr< EigenVectorPrimaryField > field;
     FloatArray eigVal;
     int activeVector;
-    int restoreFlag;
+    // int restoreFlag;
     SparseMtrxType sparseMtrxType;
     int numberOfRequiredEigenValues;
     /// Relative tolerance.

@@ -80,7 +80,5 @@ double
 AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
-
-    return 0.;
 }
 } // end namespace oofem

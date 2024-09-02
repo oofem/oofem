@@ -67,6 +67,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_L4Axisymm_Name; }
     const char *giveClassName() const override { return "L4Axisymm"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
 
     void initializeFrom(InputRecord &ir) override;
 

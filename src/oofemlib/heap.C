@@ -232,8 +232,8 @@ void Heap :: recurse(int row, int pad, int spacing, int S) {
     }
 
     // Calculate the first and last elements on the row
-    int beg = ( pow( 2, ( row - 1 ) ) - 1 );
-    int end = MIN( ( heapCount - 1 ), ( pow(2, row) - 2 ) );
+    int beg = (int) ( pow( 2, ( row - 1 ) ) - 1 );
+    int end = (int) MIN( ( heapCount - 1 ), ( pow(2, row) - 2 ) );
 
     // Newline and padding
     printf("\n");
@@ -256,7 +256,7 @@ void Heap :: printTree() {
     int S = 3;
     int B = 4;
 
-    int nRows = 1 + floor( log2(heapCount) );
+    int nRows = (int) (1 + floor( log2(heapCount) ));
 
     // Call recurse from the last row
     printf("\n");

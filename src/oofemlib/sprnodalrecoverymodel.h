@@ -107,7 +107,7 @@ private:
     int  giveNumberOfUnknownPolynomialCoefficients(SPRPatchType regType);
     SPRPatchType determinePatchType(Set &elementList);
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     void initCommMaps();
     void exchangeDofManValues(FloatArray &dofManValues,
                               IntArray &dofManPatchCount, IntArray &regionNodalNumbers,

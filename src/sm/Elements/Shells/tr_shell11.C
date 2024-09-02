@@ -474,7 +474,6 @@ TR_SHELL11 :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     // test the parameter
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates - size mismatch");
-        exit(1);
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3] is defined
@@ -498,7 +497,7 @@ TR_SHELL11 :: computeVolumeAround(GaussPoint *gp)
     std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, this->giveGeometryType()) ) );
     return detJ * weight; // * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
 }
 
@@ -682,7 +681,6 @@ TR_SHELL11 :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( type == GlobalForceTensor || type == GlobalMomentTensor ||

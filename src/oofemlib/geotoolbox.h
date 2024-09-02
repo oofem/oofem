@@ -38,7 +38,7 @@
 #include <list>
 #include <cstdlib>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "floatarray.h"
 
 #ifdef __OOFEG
@@ -109,7 +109,7 @@ public:
         Vertex curr;
         std :: list< Vertex > :: const_iterator iter;
 public:
-        PolygonEdgeIterator(const Polygon * p) : iter() {
+        PolygonEdgeIterator(const Polygon * p) : ptr(NULL), iter()  {
             iter = p->vertices.begin();
             if ( iter == p->vertices.end() ) {
                 last = true;

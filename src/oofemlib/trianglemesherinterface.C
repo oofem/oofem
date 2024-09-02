@@ -529,11 +529,11 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     free(output.segmentmarkerlist);
     //free(output.holelist);
     //free(output.regionlist);
+    return true;
 #else
     OOFEM_ERROR("OOFEM is not compiled with support for triangle.");
 #endif
-
-    return true;
+    
 }
 
 void TriangleMesherInterface :: fixNodeMarkers(const std :: vector< FloatArray > &nodes, std :: vector< IntArray > &n_markers,

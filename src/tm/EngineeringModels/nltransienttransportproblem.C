@@ -231,27 +231,27 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     }
 
     double t = tStep->giveTargetTime();
-    TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
+    TimeStep *pStep = this->givePreviousStep(), *cStep = this->giveCurrentStep();
 
     if ( dof->__giveEquationNumber() == 0 ) {
         OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID() );
     }
 
-    if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
+    if ( ( t >= pStep->giveTargetTime() ) && ( t <= cStep->giveTargetTime() ) ) {
         ///@todo Shouldn't it be enough to just run this?
-        //UnknownsField->giveUnknownValue(dof, mode, currentStep);
-        double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, currentStep);
-        double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, previousStep);
-        double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();
+        //UnknownsField->giveUnknownValue(dof, mode, cStep);
+        double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, cStep);
+        double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, pStep);
+        double psi = ( t - pStep->giveTargetTime() ) / cStep->giveTimeIncrement();
         if ( mode == VM_Velocity ) {
-            return ( rtdt - rt ) / currentStep->giveTimeIncrement();
+            return ( rtdt - rt ) / cStep->giveTimeIncrement();
         } else if ( mode == VM_TotalIntrinsic ) {
             // only supported for current step
             return this->alpha * rtdt + ( 1. - this->alpha ) * rt; 
         } else if ( mode == VM_Total ) {
             return psi * rtdt + ( 1. - psi ) * rt;
         } else if ( mode == VM_Incremental ) {
-            if ( previousStep->isIcApply() ) {
+            if ( pStep->isIcApply() ) {
                 return 0;
             } else {
                 return ( rtdt - rt );
@@ -260,7 +260,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
             OOFEM_ERROR("Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
         }
     } else {
-        OOFEM_ERROR("time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
+        OOFEM_ERROR("time value %f not within bounds %f and %f", t, pStep->giveTargetTime(), cStep->giveTargetTime() );
     }
 
     return 0.; // to make compiler happy;
@@ -268,17 +268,17 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
 
 
 void
-NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
+NLTransientTransportProblem :: applyIC(TimeStep *_stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
 
-    NonStationaryTransportProblem :: applyIC(stepWhenIcApply);
+    NonStationaryTransportProblem :: applyIC(_stepWhenIcApply);
 
     // update element state according to given ic
     for ( auto &elem : domain->giveElements() ) {
         TransportElement *element = static_cast< TransportElement * >( elem.get() );
-        element->updateInternalState(stepWhenIcApply);
-        element->updateYourself(stepWhenIcApply);
+        element->updateInternalState(_stepWhenIcApply);
+        element->updateYourself(_stepWhenIcApply);
     }
 }
 
@@ -326,8 +326,6 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeS
     } else {
         OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
-
-    return 0;
 }
 
 void
@@ -379,8 +377,8 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
     FloatMatrix charMtrxCond, charMtrxCap;
     FloatArray r, drdt, contrib, help;
     Element *element;
-    TimeStep *previousStep = this->givePreviousStep(); //r_t
-    TimeStep *currentStep = this->giveCurrentStep(); //r_{t+\Delta t}. Note that *tStep is a Tau step between r_t and r_{t+\Delta t}
+    TimeStep *pStep = this->givePreviousStep(); //r_t
+    TimeStep *cStep = this->giveCurrentStep(); //r_{t+\Delta t}. Note that *tStep is a Tau step between r_t and r_{t+\Delta t}
 
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
@@ -409,14 +407,14 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
          *  element -> computeVectorOf (VM_Velocity, tStep, drdt);
          */
 
-        if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
+        if ( ( t >= pStep->giveTargetTime() ) && ( t <= cStep->giveTargetTime() ) ) {
             FloatArray rp, rc;
-            element->computeVectorOf(VM_Total, currentStep, rc);
-            element->computeVectorOf(VM_Total, previousStep, rp);
+            element->computeVectorOf(VM_Total, cStep, rc);
+            element->computeVectorOf(VM_Total, pStep, rp);
 
             //approximate derivative with a difference
             drdt.beDifferenceOf(rc, rp);
-            drdt.times( 1. / currentStep->giveTimeIncrement() );
+            drdt.times( 1. / cStep->giveTimeIncrement() );
             //approximate current solution from linear interpolation
             rp.times(1 - alpha);
             rc.times(alpha);

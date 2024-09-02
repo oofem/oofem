@@ -35,7 +35,7 @@
 #ifndef nodalrecoverymodel_h
 #define nodalrecoverymodel_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "interface.h"
@@ -79,7 +79,7 @@ protected:
     StateCounterType stateCounter;
     Domain *domain;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Common Communicator buffer.
     CommunicatorBuff *commBuff;
     /// Communicator.

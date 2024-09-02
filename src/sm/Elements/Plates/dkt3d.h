@@ -127,7 +127,6 @@ public:
     int giveLocalCoordinateSystem(FloatMatrix &answer) override
     {
         OOFEM_ERROR("calling of this function id not allowed");
-        return 0;
     }
     int testElementExtension(ElementExtension ext) override
     { return ( ( ext == Element_SurfaceLoadSupport )  ? 1 : 0 ); }

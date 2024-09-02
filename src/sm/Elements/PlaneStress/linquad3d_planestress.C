@@ -83,7 +83,7 @@ LinQuad3DPlaneStress::giveCellGeometryWrapper()
         return cellGeometryWrapper;
     } else {
         this->computeLocalNodalCoordinates(lc);
-        return (cellGeometryWrapper = new FEIVertexListGeometryWrapper(lc));
+        return (cellGeometryWrapper = new FEIVertexListGeometryWrapper(lc, this->giveGeometryType()));
     }
 }
 
@@ -234,7 +234,6 @@ LinQuad3DPlaneStress :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor
     } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentTensor  ) ||

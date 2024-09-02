@@ -38,7 +38,7 @@
 //#include <iosfwd>
 #include <ostream>
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 /**

@@ -108,7 +108,7 @@ FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellG
     return 0.5 * ( cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx) );
 }
 
-IntArray FEI1dLin :: boundaryEdgeGiveNodes(int boundary) const
+IntArray FEI1dLin :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return {1, 2};
 }

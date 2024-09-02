@@ -129,7 +129,6 @@ public:
             return ghostNodes [ 1 ];
         } else {
             OOFEM_ERROR("No such DOF available on Element %d", number);
-            return nullptr;
         }
     }
     void giveInternalDofManDofIDMask(int i, IntArray &answer) const override {

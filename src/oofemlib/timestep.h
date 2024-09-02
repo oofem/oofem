@@ -40,7 +40,7 @@
 #ifndef timestep_h
 #define timestep_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "statecountertype.h"
