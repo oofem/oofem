@@ -103,7 +103,7 @@ FEI1dLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEI
 }
 
 double
-FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     return 0.5 * ( cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx) );
 }

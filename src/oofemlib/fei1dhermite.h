@@ -63,7 +63,7 @@ public:
     void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const override;
 
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 2; }
 };

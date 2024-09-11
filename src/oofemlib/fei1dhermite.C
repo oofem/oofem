@@ -141,7 +141,7 @@ FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const
 }
 
 double
-FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     // This isn't really relevant, interpolation of geometry will be just linear
     double l = this->giveLength(cellgeo);

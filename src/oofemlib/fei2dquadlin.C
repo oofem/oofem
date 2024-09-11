@@ -396,7 +396,7 @@ FEI2dQuadLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
  * FEI2dQuadlinAxi element
  */
 double
-FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);

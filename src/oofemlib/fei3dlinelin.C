@@ -109,7 +109,7 @@ FEI3dLineLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 
 
 double
-FEI3dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     return 0.5 * this->giveLength(cellgeo);
 }
@@ -193,7 +193,7 @@ FEI3dLineLin :: computeLocalSurfaceMapping(int isurf) const
 
 
 void
-FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     ///@todo Not sure about this matrix

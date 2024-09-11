@@ -450,7 +450,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);

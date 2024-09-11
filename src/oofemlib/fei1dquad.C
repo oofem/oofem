@@ -144,7 +144,7 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
 }
 
 double
-FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
+FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const 
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
     double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);

@@ -326,7 +326,7 @@ double FEI3dWedgeQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo
 
 
 double
-FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     FloatMatrix jacobianMatrix;
 
@@ -336,7 +336,7 @@ FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FE
 
 
 void
-FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;

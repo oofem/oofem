@@ -644,7 +644,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
 }
 
 
-void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     //
     // Based on Algorithm A4.4 (p. 137) for d=1

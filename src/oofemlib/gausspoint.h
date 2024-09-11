@@ -47,6 +47,7 @@
 #include "element.h"
 #include "floatarray.h"
 #include "materialmode.h"
+#include "feinterpol.h"
 
 namespace oofem {
 class Material;
@@ -107,7 +108,8 @@ private:
     double weight;
     /// Material mode of receiver.
     MaterialMode materialMode;
-
+    /// Interpolation cache
+    std::unique_ptr<FEInterpolationCache> interpolationCache;
 protected:
     // layer and fibered material support
     /// List of slave integration points.
@@ -121,7 +123,7 @@ public:
      * with given number, integration weight, coordinates and material mode.
      * @param ir Integration rule to which integration point belongs to.
      * @param n Integration point number.
-     * @param iNaturalCoord Natueral coordinates.
+     * @param iNaturalCoord Natural coordinates.
      * @param w Integration weight.
      * @param mode Material mode.
      */
@@ -173,6 +175,11 @@ public:
         } else {
             globalCoordinates = std::make_unique<FloatArray>(iCoord);
         }
+    }
+
+    inline std::unique_ptr<FEInterpolationCache> &giveInterpolationCache()
+    {
+        return interpolationCache;
     }
 
     /// Returns  integration weight of receiver.

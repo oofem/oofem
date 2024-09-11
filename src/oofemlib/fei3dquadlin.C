@@ -84,7 +84,7 @@ FEI3dQuadLin :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 
 
 void
-FEI3dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: giveJacobianMatrixAt - Not supported");
 }

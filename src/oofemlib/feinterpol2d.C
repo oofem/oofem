@@ -114,7 +114,7 @@ int FEInterpolation2d :: global2local(FloatArray &answer, const FloatArray &gcoo
 }
 
 void
-FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 {
     FloatMatrix dn;

@@ -69,7 +69,7 @@ public:
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const override;
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;

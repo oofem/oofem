@@ -81,7 +81,7 @@ public:
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
         OOFEM_ERROR("Not yet implemented, contact lazy dr for implementation");
     }
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const override;
 
     int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) const override;
     int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) const override;

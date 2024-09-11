@@ -56,11 +56,11 @@ namespace oofem {
         virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->global2local(answer, gcoords, cellgeo);
         }
-        double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
-            return this->getCellInterpolation(cellgeo.giveGeometryType())->giveTransformationJacobian(lcoords, cellgeo);
+        double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const override {
+	  return this->getCellInterpolation(cellgeo.giveGeometryType())->giveTransformationJacobian(lcoords, cellgeo, gp);
         }
-        void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
-            return this->getCellInterpolation(cellgeo.giveGeometryType())->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo );
+        void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const override {
+	  return this->getCellInterpolation(cellgeo.giveGeometryType())->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo, gp);
         }
         std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveIntegrationRule(order, egt);

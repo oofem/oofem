@@ -253,7 +253,7 @@ FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 
 
 double
-FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     FloatMatrix jacobianMatrix;
 
@@ -263,7 +263,7 @@ FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 
 void
-FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;

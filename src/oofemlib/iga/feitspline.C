@@ -337,7 +337,7 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     //
     // Based on Algorithm A4.4 (p. 137) for d=1

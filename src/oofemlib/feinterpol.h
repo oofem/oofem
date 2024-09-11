@@ -138,6 +138,24 @@ public:
     const Element_Geometry_Type giveGeometryType() const override {return gtype;}
 };
 
+
+/**
+ *  IP interpolation cache.
+ */
+class OOFEM_EXPORT FEInterpolationCache
+{
+    public:
+        bool initialized = false;
+        FloatMatrix invJac;
+        double detJac=0.0;
+    public:
+    FEInterpolationCache() { }
+    ~FEInterpolationCache() { }
+    void clear() { initialized = false; }
+    bool isInitialized() const { return initialized; }
+};
+
+
 /**
  * Class representing a general abstraction for finite element interpolation class.
  * The boundary functions denote the (numbered) region that have 1 spatial dimension (i.e. edges) or 2 spatial dimensions.
@@ -242,16 +260,18 @@ public:
      * Evaluates the determinant of the transformation.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @param gp Optional gauss point. Can be used to cache the jacobian.
      * @return Determinant of the transformation.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const;
     /**
      * Gives the jacobian matrix at the local coordinates.
      * @param jacobianMatrix The requested matrix.
      * @param lcoords Local coordinates.
      * @param cellgeo Element geometry.
+     * @param gp Optional gauss point. Can be used to cache the result.
      */
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp = NULL) const
     { OOFEM_ERROR("Not overloaded."); }
 
     /**

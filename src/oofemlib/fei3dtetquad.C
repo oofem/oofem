@@ -385,7 +385,7 @@ FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 
 
 void
-FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     FloatMatrix dNduvw, coords;
     this->evaldNdxi(dNduvw, lcoords, cellgeo);

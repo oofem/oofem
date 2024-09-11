@@ -193,7 +193,7 @@ void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->local2global(answer, lcoords, cellgeo);
 }
 
-double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     double xi = lcoords(0);
     double a1 = -0.5 + xi;
@@ -210,7 +210,7 @@ double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, co
     return sqrt(es1 * es1 + es2 * es2);
 }
 
-void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;

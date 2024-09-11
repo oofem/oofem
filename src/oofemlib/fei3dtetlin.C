@@ -243,7 +243,7 @@ FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
 
 double
-FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 

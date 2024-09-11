@@ -169,7 +169,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
 
 double
-FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
@@ -316,7 +316,7 @@ FEI2dTrLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 // FEI2dTrLinAxi element
 
 double
-FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);
@@ -327,7 +327,7 @@ FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
         r += x * N.at(i);
     }
 
-    return r * FEI2dTrLin::giveTransformationJacobian(lcoords, cellgeo);
+    return r * FEI2dTrLin::giveTransformationJacobian(lcoords, cellgeo, gp);
 }
 
 double

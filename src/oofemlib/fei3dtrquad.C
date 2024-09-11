@@ -178,7 +178,7 @@ FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 
 
 void
-FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const
 {
     OOFEM_ERROR("Not supported");
 }

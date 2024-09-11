@@ -134,7 +134,7 @@ double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const F
     return normal.normalize() * 0.5;
 }
 
-double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 
+double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, const GaussPoint* gp) const 
 {
     double x2_x1, y2_y1;
     x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
