@@ -32,7 +32,7 @@
 
 import sys
 import re
-from sets import Set
+#from sets import Set
 import getopt
 
 #debug flag
@@ -51,9 +51,9 @@ nparts = 0
 inputFileName = ''
 
 def print_usage():
-    print "\nUsage:\noofem2part -f file -n #"
-    print "where -f file sets path to input oofem (serial) file to be partitioned"
-    print "      -n #    allows to se the required number of target partitions"
+    print ("\nUsage:\noofem2part -f file -n #")
+    print ("where -f file sets path to input oofem (serial) file to be partitioned")
+    print ("      -n #    allows to se the required number of target partitions")
 
 
 # returns the value corresponding to given keyword and record
@@ -64,7 +64,7 @@ def getKeywordValue (record, kwd, optional = None):
     else:
         #issue an error if argument compulsory
         if optional == None:
-            print "\nMissing keyword \"", kwd, "\" in\n", record
+            print ("\nMissing keyword \"", kwd, "\" in\n", record)
             exit (1)
         else:
             return optional
@@ -126,7 +126,7 @@ def giveNodeMasters(inode):
             return answer
         else:
             # hanging node without masterElement
-            print "Warning: Support for hanging nodes wwithout masterElement not available"
+            print ("Warning: Support for hanging nodes wwithout masterElement not available")
             exit (1)
 
     return answer
@@ -142,7 +142,7 @@ def classifyNodes (elem_part):
     nodalpartitions=[]
     # loop over dofmans
     for i in range(ndofman):
-        nodalpartitions.append(Set())
+        nodalpartitions.append(set())
         # loop over elements sharing node
         for j in nodalconnectivity[i]:
             nodalpartitions[i].add(elem_part[j])
@@ -181,7 +181,7 @@ def classifyNodes (elem_part):
 def getPartitionNodeList (i, elem_part):
     global nodes
 
-    loc_nodes=Set()
+    loc_nodes=set()
     shared_nodes={}
     for j in range(nelem):
         ep = elem_part[j]
@@ -196,7 +196,7 @@ def getPartitionNodeList (i, elem_part):
                     if (elem_part[k] != i): 
                         local = False
                         
-                        shared_nodes.setdefault(inode, Set()).add(elem_part[k])
+                        shared_nodes.setdefault(inode, set()).add(elem_part[k])
                 if (local):
                     
                     loc_nodes.add(inode)
@@ -208,11 +208,11 @@ def getPartitionNodeList (i, elem_part):
         for m in masters:
             # mark masters as shared to make sure that master is accessible in i-th partition
             if (inode in loc_nodes) and not (m in loc_nodes): #master is on remote partition
-                shared_nodes.setdefault(inode, Set()).add(elem_part[k])
+                shared_nodes.setdefault(inode, set()).add(elem_part[k])
 
             if not ((inode in loc_nodes) and (m in loc_nodes)):
                 # add master into a list of shared nodes
-                shared_nodes.setdefault(m, Set()).add(elem_part[k])
+                shared_nodes.setdefault(m, set()).add(elem_part[k])
             
     return (loc_nodes, shared_nodes)
                     
@@ -231,19 +231,19 @@ def writePartition (i, part_vert, nodalstatuses, nodalpartitions):
     #(ln, sn) = getPartitionNodeList(i, part_vert)
     #
     if debug:
-        print "Partition ", i
-        print "  Local nodes:",
+        print ("Partition ", i)
+        print ("  Local nodes:",)
         for j in range(ndofman):
             if ((nodalstatuses[j]==LOCAL) and (i in nodalpartitions[j])):
-                print j,
-        print "  Shared nodes:", 
+                print (j,)
+        print ("  Shared nodes:",) 
         for j in range(ndofman):
             if ((nodalstatuses[j]==SHARED) and (i in nodalpartitions[j])):
-                print j,
-        print "  Elements:", 
+                print (j,)
+        print ("  Elements:",) 
         for k in range(len(part_vert)):
-            if (part_vert[k]==i): print k,
-        print "\n"
+            if (part_vert[k]==i): print (k,)
+        print ("\n")
 
     nloc = 0
     nshd = 0
@@ -278,7 +278,7 @@ def writePartition (i, part_vert, nodalstatuses, nodalpartitions):
     pfile.close()
     
     #print some stats
-    print '{0:>9d} {1:>12d} {2:>12d} {3:>10d}'.format(i, nloc, nshared, part_vert.count(i))
+    print ('{0:>9d} {1:>12d} {2:>12d} {3:>10d}'.format(i, nloc, nshared, part_vert.count(i)))
 
 
 def parseInput(infile):
@@ -353,7 +353,7 @@ def parseInput(infile):
                 nodalconnectivity[nodemap[inode]].append(ie)
                 enodes.append(nodemap[inode]) # local numbering
         else:
-            print "Unable to parse element nodal rec: ", rec
+            print ("Unable to parse element nodal rec: ", rec)
             exit (1);
         elemnodes.append(enodes)
 
@@ -393,7 +393,7 @@ parseInput (infile)
 
 #now create adjacency list 
 #nodecut assumed - elements graph verices, nodes represent edges
-adj = [Set() for i in range(nelem)] #emtpy adj list
+adj = [set() for i in range(nelem)] #emtpy adj list
 for ie in range(nelem):
     #print "element", ie
     #loop over element nodes (local numbering)
@@ -411,7 +411,7 @@ try:
     from metis import part_graph
     cuts, part_vert = part_graph(adj, nparts)
 except:
-    print "metis module not installed or internal metis error encountered"
+    print ("metis module not installed or internal metis error encountered")
     exit(0)
 
 #print "Metis"
@@ -419,8 +419,8 @@ except:
 #print " cuts:", cuts
 
 # write partitioned mesh on output
-print "Partition  local_nodes shared_nodes   elements"
-print "----------------------------------------------"
+print ("Partition  local_nodes shared_nodes   elements")
+print ("----------------------------------------------")
 nodalstatuses, nodalpart = classifyNodes(part_vert)
 for i in range (nparts):
     writePartition(i, part_vert, nodalstatuses, nodalpart)
@@ -429,4 +429,4 @@ for i in range (nparts):
 #print nodalpart
 
 
-print "Done"
+print ("Done")
