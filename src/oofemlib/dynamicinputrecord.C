@@ -165,7 +165,12 @@ void DynamicInputRecord :: giveField(double &answer, InputFieldType id)
 {
     std :: map< std :: string, double > :: iterator it = this->doubleRecord.find(id);
     if ( it == this->doubleRecord.end() ) {
-        throw MissingKeywordInputException(*this, id, recordNumber);
+        // try to look in intRecord
+        std :: map< std :: string, int > :: iterator it2 = this->intRecord.find(id);
+        if ( it2 == this->intRecord.end() ) {
+            throw MissingKeywordInputException(*this, id, recordNumber);
+        }
+        answer = it2->second;
     }
     answer = it->second;
 }
