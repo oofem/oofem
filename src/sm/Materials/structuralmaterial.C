@@ -2227,6 +2227,23 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
             answer = eigenstrain;
         }
     }
+    
+    ///Add eigenstrain field if provided externally
+    if ( ( tf = fm->giveField(FT_EigenStrain)) ) {
+        FloatArray gcoords, eigStrain;
+        int err;
+        elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
+        if ( ( err = tf->evaluateAt(eigStrain, gcoords, mode, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+        }
+
+        if ( answer.giveSize() ) {
+            answer.add(eigStrain);  
+        } else {
+            answer=eigStrain;
+        }
+    }
+    
     return answer;
 }
 
