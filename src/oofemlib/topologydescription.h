@@ -37,7 +37,7 @@
 #define topologydescription_h
 
 #include "error.h"
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 namespace oofem {
 class SpatialLocalizer;

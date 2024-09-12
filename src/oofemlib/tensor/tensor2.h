@@ -118,7 +118,7 @@ public:
      * @param nf tolerance for eigenvalue calculation
      * @return Power of a Second-order tensor
      */
-    Tensor2_3d computeTensorPower(double pow, int nf = 1e-10)
+    Tensor2_3d computeTensorPower(double pow, int nf = 10)
     {
         auto [ eVals, eVecs ] = this->eigs(nf);
         return computeTensorPowerFromEigs(eVals, eVecs, pow);
@@ -284,7 +284,7 @@ public:
      * @param nf - number of significant figures
      * @return Second-order tensor dC^m_dC
      */
-    Tensor4_3d  compute_dCm_dC(double m, int nf = 1e-10)
+    Tensor4_3d  compute_dCm_dC(double m, int nf = 10)
     {
         auto [ eVals, eVecs ] = this->eigs(nf);
         return compute_dCm_dC_fromEigs(m, eVals, eVecs);

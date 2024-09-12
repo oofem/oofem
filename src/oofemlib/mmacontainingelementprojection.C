@@ -88,7 +88,5 @@ int
 MMAContainingElementProjection :: mapStatus(MaterialStatus &oStatus) const
 {
     OOFEM_ERROR("mapStatus() is not implemented yet.")
-
-    return 0;
 }
 } // end namespace oofem

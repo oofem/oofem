@@ -216,7 +216,7 @@ CBS :: giveTractionPressure(Dof *dof)
         OOFEM_ERROR("prescribed traction pressure requested for dof with no BC");
     }
 
-    return 0;
+    // return 0;
 }
 
 
@@ -269,7 +269,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     int momneq = this->giveNumberOfDomainEquations(1, vnum);
     int presneq = this->giveNumberOfDomainEquations(1, pnum);
     int presneq_prescribed = this->giveNumberOfDomainEquations(1, pnumPrescribed);
-    double deltaT = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
 
     if ( initFlag ) {
         deltaAuxVelocity.resize(momneq);
@@ -290,7 +290,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         this->assemble( *lhs, stepWhenIcApply.get(), PressureLhsAssembler(),
                        pnum, this->giveDomain(1) );
-        lhs->times(deltaT * theta1 * theta2);
+        lhs->times(dt * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss = classFactory.createSparseMtrx(sparseMtrxType);
@@ -322,7 +322,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->zero();
         this->assemble( *lhs, stepWhenIcApply.get(), PressureLhsAssembler(),
                        pnum, this->giveDomain(1) );
-        lhs->times(deltaT * theta1 * theta2);
+        lhs->times(dt * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
@@ -338,8 +338,8 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //</RESTRICTED_SECTION>
 
     if ( tStep->isTheFirstStep() ) {
-        TimeStep *stepWhenIcApply = tStep->givePreviousStep();
-        this->applyIC(stepWhenIcApply);
+        TimeStep *_stepWhenIcApply = tStep->givePreviousStep();
+        this->applyIC(_stepWhenIcApply);
     }
 
     velocityField.advanceSolution(tStep);
@@ -365,13 +365,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //this->assembleVectorFromElements(mm, tStep, LumpedMassVectorAssembler(), VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
-        rhs.times(deltaT);
+        rhs.times(dt);
         // Depends on prescribed v
         this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsAssembler(), VM_Total, vnum, this->giveDomain(1) );
         nMethod->solve(*mss, rhs, deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
-            deltaAuxVelocity.at(i) = deltaT * rhs.at(i) / mm.at(i);
+            deltaAuxVelocity.at(i) = dt * rhs.at(i) / mm.at(i);
         }
     }
 
@@ -406,14 +406,14 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     // Depends on p:
     this->assembleVectorFromElements( rhs, tStep, CorrectionRhsAssembler(), VM_Total, vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
-        rhs.times(deltaT);
+        rhs.times(dt);
         //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsAssembler(), VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(*mss, rhs, velocityVector);
         velocityVector.add(deltaAuxVelocity);
         velocityVector.add(prevVelocityVector);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
-            velocityVector.at(i) = prevVelocityVector.at(i) + deltaAuxVelocity.at(i) + deltaT *rhs.at(i) / mm.at(i);
+            velocityVector.at(i) = prevVelocityVector.at(i) + deltaAuxVelocity.at(i) + dt *rhs.at(i) / mm.at(i);
         }
     }
     this->velocityField.update(VM_Total, tStep, velocityVector, this->vnum );
@@ -425,13 +425,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     if ( materialInterface ) {
 #ifdef TIME_REPORT
-        Timer timer;
-        timer.startTimer();
+        Timer _timer;
+        _timer.startTimer();
 #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
 #ifdef TIME_REPORT
-        timer.stopTimer();
-        OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
+        _timer.stopTimer();
+        OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", _timer.getUtime() );
 #endif
     }
 
@@ -569,7 +569,7 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 
 void
-CBS :: applyIC(TimeStep *stepWhenIcApply)
+CBS :: applyIC(TimeStep *_stepWhenIcApply)
 {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
@@ -580,8 +580,8 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     // update element state according to given ic
     for ( auto &elem : this->giveDomain(1)->giveElements() ) {
         CBSElement *element = static_cast< CBSElement * >( elem.get() );
-        element->updateInternalState(stepWhenIcApply);
-        element->updateYourself(stepWhenIcApply);
+        element->updateInternalState(_stepWhenIcApply);
+        element->updateYourself(_stepWhenIcApply);
     }
 }
 
@@ -597,7 +597,7 @@ CBS :: giveNewEquationNumber(int domain, DofIDItem id)
         OOFEM_ERROR("Unknown DofIDItem");
     }
 
-    return 0;
+    // return 0;
 }
 
 
@@ -612,7 +612,7 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
         OOFEM_ERROR("Unknown DofIDItem");
     }
 
-    return 0;
+    //return 0;
 }
 
 
@@ -646,7 +646,7 @@ double CBS :: giveVariableScale(VarScaleType varID)
         OOFEM_ERROR("unknown variable type");
     }
 
-    return 0.0;
+    //return 0.0;
 }
 
 #if 0

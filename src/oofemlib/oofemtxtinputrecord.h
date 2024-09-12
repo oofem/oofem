@@ -100,7 +100,7 @@ public:
     bool hasField(InputFieldType id) override;
     void printYourself() override;
 
-    void setLineNumber(int lineNumber) { this->lineNumber = lineNumber; }
+    void setLineNumber(int num) { this->lineNumber = num; }
 
 protected:
     int giveKeywordIndx(const char *kwd);

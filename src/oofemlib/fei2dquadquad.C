@@ -314,7 +314,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(int iedge) const
         return {4, 1, 8};
     } else {
         throw std::range_error("invalid edge number");
-        return {};
+        //return {};
     }
 }
 
@@ -362,7 +362,7 @@ FEI2dQuadQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const
 
 
 std::unique_ptr<IntegrationRule> 
-FEI2dQuadQuad :: giveIntegrationRule(int order) const
+FEI2dQuadQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 4);

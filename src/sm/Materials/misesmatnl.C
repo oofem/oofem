@@ -57,7 +57,6 @@ FloatArrayF<6>
 MisesMatNl :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3D mode not supported");
-    return zeros<6>();
 }
 
 
@@ -72,7 +71,7 @@ MisesMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPo
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(stress);
-    return stress[{0}];
+    return stress[0];
 }
 
 

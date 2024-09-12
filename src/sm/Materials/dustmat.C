@@ -515,7 +515,7 @@ DustMaterial :: giveIPValue(FloatArray &answer,
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 0;
+    // return 0;
 }
 
 MaterialStatus *

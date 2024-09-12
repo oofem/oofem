@@ -75,7 +75,7 @@ Structural2DElement::postInitialize()
 int
 Structural2DElement::giveNumberOfNodes() const
 {
-    return this->giveInterpolation()->giveNumberOfNodes();
+    return numberOfDofMans;//this->giveInterpolation()->giveNumberOfNodes(this->giveGeometryType());
 }
 
 
@@ -96,7 +96,7 @@ Structural2DElement::computeNumberOfDofs()
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask;
     this->giveDofManDofIDMask(-1, dofIdMask); // ok for standard elements
-    return this->giveInterpolation()->giveNumberOfNodes() * dofIdMask.giveSize();
+    return this->giveInterpolation()->giveNumberOfNodes(this->giveGeometryType()) * dofIdMask.giveSize();
 }
 
 

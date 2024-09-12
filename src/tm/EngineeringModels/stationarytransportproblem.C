@@ -236,11 +236,11 @@ StationaryTransportProblem :: updateSolution(FloatArray &solutionVector, TimeSte
 
 
 void
-StationaryTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+StationaryTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *enorm)
 {
     answer.zero();
     this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1), eNorm);
+                         EModelDefaultEquationNumbering(), this->giveDomain(1), enorm);
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 }
 

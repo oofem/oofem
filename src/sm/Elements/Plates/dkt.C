@@ -394,7 +394,7 @@ DKTPlate::computeVolumeAround(GaussPoint *gp)
                                lc [ 0 ].at(3), lc [ 1 ].at(3), lc [ 2 ].at(3) );
 
     weight = gp->giveWeight();
-    detJ = fabs(this->interp_lin.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs(this->interp_lin.giveTransformationJacobian(gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, this->giveGeometryType()) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 

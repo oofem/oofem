@@ -389,7 +389,6 @@ double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp) const
     } while ( nite++ < _MAZARS_MODEL_MAX_ITER );
 
     OOFEM_ERROR("tension objectivity iteration internal error - no convergence");
-    return 0.; // just to make the compiler happy
 }
 
 // evaluation of compression damage
@@ -421,7 +420,6 @@ double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp) const
     } while ( nite++ < _MAZARS_MODEL_MAX_ITER );
 
     OOFEM_ERROR("compression objectivity iteration internal error - no convergence");
-    return 0.; // just to make the compiler happy
 }
 
 void

@@ -35,7 +35,7 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "materialmode.h"
 #include "integrationdomain.h"
 #include "contextioresulttype.h"

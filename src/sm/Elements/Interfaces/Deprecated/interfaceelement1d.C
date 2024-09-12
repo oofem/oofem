@@ -121,7 +121,7 @@ InterfaceElem1d :: giveMaterialMode()
 
     default: OOFEM_ERROR("Unsupported coord mode");
     }
-    return _1dInterface; // to make the compiler happy
+    //return _1dInterface; // to make the compiler happy
 }
 
 
@@ -261,7 +261,7 @@ bool
 InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     OOFEM_ERROR("Not implemented");
-    return false;
+    //return false;
 }
 
 double
@@ -323,7 +323,7 @@ InterfaceElem1d :: computeNumberOfDofs()
         OOFEM_ERROR("unsupported mode");
     }
 
-    return 0; // to suppress compiler warning
+    //return 0; // to suppress compiler warning
 }
 
 

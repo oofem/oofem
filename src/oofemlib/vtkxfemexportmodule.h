@@ -99,7 +99,7 @@ protected:
 
     bool writeXFEMVars(ExportRegion &vtkPiece, int field, int enrItIndex);
     void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep, XFEMStateType xfemstype, Set &region, EnrichmentItem *ei);
-    void exportIntVars(ExportRegion &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
+    void exportIntVars2(ExportRegion &vtkPiece, Set& region, int field, int enrItIndex,  IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep);
     void giveDataHeaders(std::string &pointHeader, std::string &cellHeader) override;     // returns the headers
 };
 

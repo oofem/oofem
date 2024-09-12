@@ -76,7 +76,6 @@ BoundaryCondition *MasterDof :: giveBc()
     }
 
     OOFEM_ERROR("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
-    return NULL;
 }
 
 
@@ -134,7 +133,6 @@ InitialCondition *MasterDof :: giveIc()
         return  ( dofManager->giveDomain()->giveIc(ic) );
     } else {
         OOFEM_ERROR("does not know yet if has InitCond or not");
-        return NULL;
     }
 }
 

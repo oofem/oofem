@@ -1711,7 +1711,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ], approx->giveGeometryType()) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
             gp->setSubPatchCoordinates( gp->giveNaturalCoordinates() );
@@ -1733,7 +1733,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
         OOFEM_ERROR("volume inconsistency (%5.2f)", __err * 100);
-
+        /*
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
             for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
@@ -1742,6 +1742,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
                 __area += dV;
             }
         }
+        */
     }
 }
 
@@ -1753,10 +1754,10 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight *fabs( __interpolation.giveTransformationJacobian ( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly, __interpolation.giveGeometryType()) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly, __interpolation.giveGeometryType()) ) );
         return det * weight;
     }
 }

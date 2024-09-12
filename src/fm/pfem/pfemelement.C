@@ -213,7 +213,7 @@ void
 PFEMElement :: printOutputAt(FILE *file, TimeStep *tStep) const
 // Performs end-of-step operations.
 {
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
     fprintf(file, "element %d :\n", number);

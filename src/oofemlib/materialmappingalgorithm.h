@@ -35,7 +35,7 @@
 #ifndef materialmappingalgorithm_h
 #define materialmappingalgorithm_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "interface.h"
 #include "intarray.h"
 #include "inputrecord.h"

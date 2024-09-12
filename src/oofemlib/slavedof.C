@@ -202,14 +202,12 @@ double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep
 int SlaveDof :: __giveEquationNumber() const
 {
     OOFEM_ERROR("undefined");
-    return 0;
 }
 
 
 int SlaveDof :: __givePrescribedEquationNumber()
 {
     OOFEM_ERROR("undefined");
-    return 0;
 }
 
 void SlaveDof :: saveContext(DataStream &stream, ContextMode mode)

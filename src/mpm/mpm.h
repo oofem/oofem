@@ -264,20 +264,50 @@ class MPElement : public Element {
 
   /**
      Returns mapping from quantity dofs to local surface dofs
-   */
+  */
   virtual void getSurfaceLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const =0;
   virtual void getEdgeLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const =0;
-
-  /*
-  virtual void getSurfaceLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
-    IntArray dl, sn = this->getGeometryInterpolation().boundarySurfaceGiveNodes(isurf);
+  /** @brief Returns element code numbers of the unknowns associated with given boundary entity. 
+   * @param answer 
+   * @param q 
+   * @param isurf
+   */ 
+  virtual void getSurfaceElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
+    IntArray dl, sn = this->getGeometryInterpolation().boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
       this->getDofManLocalCodeNumbers(dl, q, i);
       answer.followedBy(dl);
     }
   }
-  */
+  virtual void getEdgeElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
+    IntArray dl, sn = this->getGeometryInterpolation().boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
+    answer.resize(0);
+    for (int i : sn) {
+      this->getDofManLocalCodeNumbers(dl, q, i);
+      answer.followedBy(dl);
+    }
+  }
+
+    /** 
+     * Returns boundary entity unknown vector
+     * @param ibc boundary entity ID
+     * @param bt boundary type ('s' for surface, 'e' for edge)
+    */
+    virtual void getBoundaryUnknownVector(FloatArray& answer, const Variable& field, ValueModeType mode, int ibc, char bt, TimeStep* tStep) {
+        FloatArray uloc;
+        IntArray bNodes, dofs=field.getDofManDofIDs();
+        answer.clear();
+        if (bt == 's') {
+            bNodes = this->giveBoundarySurfaceNodes(ibc);
+        } else {
+            bNodes = this->giveBoundaryEdgeNodes(ibc);
+        }
+        for (int i : bNodes) {
+            this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tStep);
+            answer.append(uloc);
+        }
+    }
   
     /// @brief  Assembles the partial element contribution into local element matrix
     /// @param answer 
@@ -353,12 +383,17 @@ class MPElement : public Element {
         return 0;
     }
     IntArray giveBoundarySurfaceNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary);
+        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
     }
     IntArray giveBoundaryEdgeNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary);
+        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
     }
-
+    virtual void giveCharacteristicMatrixFromBC(FloatMatrix &answer, CharType type, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) {
+        answer.clear();
+    }
+    virtual void giveCharacteristicVectorFromBC(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) {
+        answer.clear();
+    }
 
 };
 

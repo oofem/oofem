@@ -47,7 +47,7 @@
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -100,7 +100,7 @@ LinearStatic :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
@@ -124,7 +124,6 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 
     if ( tStep != this->giveCurrentStep() ) {
         OOFEM_ERROR("unknown time step encountered");
-        return 0.;
     }
 
     switch ( mode ) {

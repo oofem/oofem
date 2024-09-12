@@ -113,7 +113,7 @@ public:
     void giveStiffnessMatrix(FloatMatrix &answer,
                              MatResponseMode mode,
                              GaussPoint *gp,
-                             TimeStep *tStep) override;
+                             TimeStep *tStep) const override;
 
     int giveSizeOfFullHardeningVarsVector() const override { return 3; }
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const override { return 3; }
@@ -158,7 +158,7 @@ protected:
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
+                                                GaussPoint *gp, TimeStep *tStep) const;
 
     void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const override;
 

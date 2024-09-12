@@ -65,7 +65,7 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *tStep)
+                                                 GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -100,7 +100,7 @@ LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, 
     FloatArrayF< 6 >tempStrain;
     tempStrain [ 0 ] = strain;
     auto answer = giveLatticeStress3d(tempStrain, gp, tStep);
-    return answer [ { 0 } ];
+    return answer [ 0 ];
 }
 
 FloatArrayF< 3 >

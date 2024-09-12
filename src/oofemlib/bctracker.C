@@ -42,7 +42,10 @@
 #include "nodalload.h"
 #include "activebc.h"
 #include "timestep.h"
-
+#ifdef __SM_MODULE
+#include "Loads/structtemperatureload.h"
+#include "Loads/structeigenstrainload.h"
+#endif
 namespace oofem {
 
 BCTracker :: BCTracker(Domain* d) {
@@ -92,6 +95,15 @@ BCTracker::initialize() {
           this->elemList[eid-1].push_back(entry);
         }
       }
+#ifdef __SM_MODULE
+      else if ( ( load = dynamic_cast< StructuralTemperatureLoad * >(bc) ) || ( load = dynamic_cast< StructuralEigenstrainLoad * >(bc) )) { // Body load:
+        const IntArray &elements = set->giveElementList();
+        for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
+          Entry entry (ibc, 0);
+          this->elemList[elements.at(ielem)-1].push_back(entry);
+        }
+      }
+#endif
     }
   }// end loop over BCs
 }

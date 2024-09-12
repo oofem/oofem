@@ -166,7 +166,7 @@ double
 FEI3dLineLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("no surfaces available");
-    return 0.0;
+    //return 0.0;
 }
 
 void
@@ -181,14 +181,14 @@ FEI3dLineLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
                                                   const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("no surfaces available");
-    return 0.0;
+    //return 0.0;
 }
 
 IntArray
 FEI3dLineLin :: computeLocalSurfaceMapping(int isurf) const
 {
     OOFEM_ERROR("no surfaces available");
-    return {};
+    //return {};
 }
 
 
@@ -202,7 +202,7 @@ FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dLineLin :: giveIntegrationRule(int order) const
+FEI3dLineLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 {
     auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);
@@ -211,10 +211,10 @@ FEI3dLineLin :: giveIntegrationRule(int order) const
 }
 
 std::unique_ptr<IntegrationRule>
-FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary) const
+FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const
 {
     ///@todo Not sure about this.
     OOFEM_ERROR("Not supported");
-    return nullptr;
+    //return nullptr;
 }
 } // end namespace oofem

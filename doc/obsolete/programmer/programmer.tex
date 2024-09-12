@@ -1096,7 +1096,7 @@ EngngModel :: updateYourself (TimeStep* stepN)
   int nelem = domain->giveNumberOfElements ();
   for (j=1 ; j<=nelem ; j++) {
    elem = domain -> giveElement(j) ;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
    // skip remote elements (these are used as mirrors 
    // of remote elements on other domains, when nonlocal 
    // constitutive models are used. 
@@ -1172,7 +1172,7 @@ void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID ut,
   int nelem = domain -> giveNumberOfElements ();
   for ( ielem = 1; ielem <= nelem ; ielem++ ) {
     element = domain -> giveElement(ielem);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     // skip remote elements (these are used as mirrors of remote eleemnts on other domains
     // when nonlocal constitutive models are used. They introduction is necessary to
     // allow local averaging on domains without fine grain communication between domains).
@@ -1238,7 +1238,7 @@ void EngngModel :: assembleVectorFromElements
 
  for (i = 1; i <= nelem ; i++ ) {
   element = domain -> giveElement(i);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
   // skip remote elements (these are used as mirrors of remote eleemnts on other domains
   // when nonlocal constitutive models are used. They introduction is necessary to
   // allow local averaging on domains without fine grain communication between domains).
@@ -1298,7 +1298,7 @@ void EngngModel :: assemblePrescribedVectorFromElements
 
  for (i = 1; i <= nelem ; i++ ) {
   element = domain -> giveElement(i);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
   // skip remote elements (these are used as mirrors of remote eleemnts on other domains
   // when nonlocal constitutive models are used. They introduction is necessary to
   // allow local averaging on domains without fine grain communication between domains).
@@ -1619,7 +1619,7 @@ TASK:
   const char* giveClassName () const { return "LinearStatic";}
   classType giveClassID ()      const { return LinearStaticClass;}
   fMode giveFormulation () { return TL; }
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
   /**
      Determines the space necessary for send/receive buffer.
      It uses related communication map pattern to determine the maximum size needed.

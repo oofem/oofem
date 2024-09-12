@@ -32,22 +32,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef foreigntempfield_h
-#define foreigntempfield_h
+#ifndef externaltempfield_h
+#define externaltempfield_h
 
 #include <memory> // std::shared_ptr
 #include "structtemperatureload.h"
+#include "vtkhdf5reader.h"
 
-///@name Input fields for ForeignTemperatureFieldLoad
+///@name Input fields for ExternalTemperatureFieldLoad
 //@{
-#define _IFT_ForeignTemperatureFieldLoad_Name "foreigntempfieldload"
+#define _IFT_ExternalTemperatureFieldLoad_Name "externaltempfieldload"
+#define _IFT_ExternalTemperatureFieldLoad_VTKHDF5FileName "vtkhdf5filename"
+#define _IFT_ExternalTemperatureFieldLoad_VTKHDF5FieldName "vtkhdf5fieldname"
 //@}
 
 namespace oofem {
 
 class Field;
 /**
- * Class representing foreign temperature field, which asks a field object to return
+ * Class representing foreign, external temperature field, which asks a field object to return
  * temperature at given point. 
  *
  * The load time function is not used here, the field has to be updated by the user
@@ -57,8 +60,14 @@ class Field;
  * is only one mesh defined), it is typically assigned using Python bindings.
  *
  */
-class ForeignTemperatureFieldLoad : public StructuralTemperatureLoad
+class ExternalTemperatureFieldLoad : public StructuralTemperatureLoad
 {
+protected:
+    VTKHDF5Reader vtkReader;
+    StateCounterType readerStateCounter;
+    bool vtkhdffielddefined = false;
+    std::string vtkhdfFilename;
+    std::string vtkhdfFieldname;
 public:
     // make public so that it can be simply set from python
     std::shared_ptr<Field> foreignField;
@@ -67,9 +76,9 @@ public:
      * @param n Load time function number
      * @param d Domain to which new object will belongs.
      */
-    ForeignTemperatureFieldLoad(int n, Domain * d) : StructuralTemperatureLoad(n, d) { }
+    ExternalTemperatureFieldLoad(int n, Domain * d) : StructuralTemperatureLoad(n, d) { }
     /// Destructor
-    virtual ~ForeignTemperatureFieldLoad() { }
+    virtual ~ExternalTemperatureFieldLoad() { }
 
     /**
      * Computes components values of temperature field at given point (coordinates given in Global c.s.).
@@ -81,10 +90,10 @@ public:
      */
     void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    const char *giveInputRecordName() const override { return _IFT_ForeignTemperatureFieldLoad_Name; }
-    const char *giveClassName() const override { return "ForeignTemperatureFieldLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_ExternalTemperatureFieldLoad_Name; }
+    const char *giveClassName() const override { return "ExternalTemperatureFieldLoad"; }
 
     void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
-#endif // foreigntempfield_h
+#endif // externaltempfield_h

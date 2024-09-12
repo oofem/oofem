@@ -85,7 +85,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
+    double giveProperty(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
     double giveTemperature(GaussPoint *gp) const;
 };
 

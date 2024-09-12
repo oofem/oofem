@@ -8,7 +8,7 @@
 #ifndef XFEMDEBUGTOOLS_H_
 #define XFEMDEBUGTOOLS_H_
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "geometry.h"
 
 #include <fstream>

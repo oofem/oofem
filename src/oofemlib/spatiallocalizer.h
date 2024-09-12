@@ -35,7 +35,7 @@
 #ifndef spatiallocalizer_h
 #define spatiallocalizer_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "interface.h"
 #include "logger.h"
 #include "error.h"

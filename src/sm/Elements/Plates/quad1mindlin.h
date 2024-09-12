@@ -86,6 +86,8 @@ public:
 
     int computeNumberOfDofs() override { return 12; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
+    Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
+
 
     void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp) override;
 

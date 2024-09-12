@@ -48,7 +48,7 @@
 #include <sstream>
 #include <set>
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
@@ -80,7 +80,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() ) {
         this->initCommMaps();
     }
@@ -155,7 +155,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         }
     } // end assemble element contributions
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() ) {
         this->exchangeDofManValues(lhs, rhs, regionNodalNumbers);
     }
@@ -243,7 +243,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    double volume = 0.0;
+    //double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     FEInterpolation *interpol = element->giveInterpolation();
@@ -256,14 +256,14 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     int size = element->giveNumberOfDofManagers();
     fullAnswer.resize(size, size);
     fullAnswer.zero();
-    double pok = 0.0;
+    //double pok = 0.0;
 
     for ( GaussPoint *gp: *iRule ) {
         double dV = element->computeVolumeAround(gp);
         interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
         fullAnswer.plusDyadSymmUpper(n, dV);
-        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
-        volume += dV;
+        //pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
+        //volume += dV;
     }
 
 
@@ -280,12 +280,12 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 }
 
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 
 void
 ZZNodalRecoveryModel :: initCommMaps()
 {
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
         commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);

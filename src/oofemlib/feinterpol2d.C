@@ -37,7 +37,7 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary) const
+IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return this->computeLocalEdgeMapping(boundary);
 }
@@ -66,7 +66,6 @@ double FEInterpolation2d :: boundaryEdgeEvalNormal(FloatArray &answer, int isurf
 double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented in subclass.");
-    return 0;
 }
 
 #define POINT_TOL 1.e-3
@@ -141,7 +140,7 @@ bool FEInterpolation2d ::inside(const FloatArray &lcoords) const
 	OOFEM_ERROR("Not implemented.")
 }
 
-IntArray FEInterpolation2d :: boundaryGiveNodes(int boundary) const
+IntArray FEInterpolation2d :: boundaryGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
     return this->computeLocalEdgeMapping(boundary);
 }
@@ -213,9 +212,9 @@ double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, c
   return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
-IntArray FEInterpolation2d::boundarySurfaceGiveNodes(int boundary) const
+IntArray FEInterpolation2d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt) const
 {
-    int nnode = this->giveNumberOfNodes();
+    int nnode = this->giveNumberOfNodes(egt);
     IntArray answer(nnode);
     answer.enumerate(nnode);
     return answer;

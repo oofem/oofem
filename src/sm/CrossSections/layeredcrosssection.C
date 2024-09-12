@@ -93,7 +93,6 @@ LayeredCrossSection::giveRealStress_3d(const FloatArrayF< 6 > &strain, GaussPoin
         }
     } else {
         OOFEM_ERROR("Only cubes and wedges are meaningful for layered cross-sections");
-        return zeros< 6 >();
     }
 }
 
@@ -110,7 +109,6 @@ FloatArrayF< 4 >
 LayeredCrossSection::giveRealStress_PlaneStrain(const FloatArrayF< 4 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 4 >();
 }
 
 
@@ -164,7 +162,6 @@ FloatArrayF< 1 >
 LayeredCrossSection::giveRealStress_1d(const FloatArrayF< 1 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 1 >();
 }
 
 
@@ -172,7 +169,6 @@ FloatArrayF< 2 >
 LayeredCrossSection::giveRealStress_Warping(const FloatArrayF< 2 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 2 >();
 }
 
 
@@ -238,7 +234,6 @@ FloatMatrixF< 4, 4 >
 LayeredCrossSection::giveStiffnessMatrix_PlaneStrain(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 4, 4 >();
 }
 
 
@@ -246,7 +241,6 @@ FloatMatrixF< 1, 1 >
 LayeredCrossSection::giveStiffnessMatrix_1d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 1, 1 >();
 }
 
 
@@ -311,7 +305,6 @@ FloatArrayF< 6 >
 LayeredCrossSection::giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 6 >();
 }
 
 
@@ -562,7 +555,6 @@ FloatArrayF< 3 >
 LayeredCrossSection::giveGeneralizedStress_PlateSubSoil(const FloatArrayF< 3 > &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported in given cross-section (yet).");
-    return zeros< 3 >();
 }
 
 void
@@ -855,7 +847,6 @@ FloatMatrixF< 6, 6 >
 LayeredCrossSection::give3dBeamStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 6, 6 >();
 }
 
 
@@ -873,7 +864,6 @@ FloatMatrixF< 3, 3 >
 LayeredCrossSection::give2dPlateSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not implemented");
-    return FloatMatrixF< 3, 3 >();
 }
 
 
@@ -917,7 +907,6 @@ LayeredCrossSection::giveFirstPKStress_3d(const FloatArrayF< 9 > &vF, GaussPoint
         }
     } else {
         OOFEM_ERROR("Only cubes and wedges are meaningful for layered cross-sections");
-        return zeros< 9 >();
     }
 }
 
@@ -927,7 +916,6 @@ FloatArrayF< 5 >
 LayeredCrossSection::giveFirstPKStress_PlaneStrain(const FloatArrayF< 5 > &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 5 >();
 }
 
 
@@ -935,7 +923,6 @@ FloatArrayF< 4 >
 LayeredCrossSection::giveFirstPKStress_PlaneStress(const FloatArrayF< 4 > &reducedvF, GaussPoint *masterGp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 4 >();
     //@todo: implement this for large strains
     //strain eps_x, eps_y, gamma_xy
     //stress sig_x, sig_y, tau_xy
@@ -979,7 +966,6 @@ FloatArrayF< 1 >
 LayeredCrossSection::giveFirstPKStress_1d(const FloatArrayF< 1 > &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return zeros< 1 >();
 }
 
 
@@ -1050,7 +1036,6 @@ FloatMatrixF< 4, 4 >
 LayeredCrossSection::giveStiffnessMatrix_dPdF_PlaneStress(MatResponseMode rMode, GaussPoint *masterGp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 4, 4 >();
     /*@todo: implement for large strains
      * FloatMatrixF<3,3> answer;
      * double totThick = 0.;
@@ -1077,7 +1062,6 @@ FloatMatrixF< 5, 5 >
 LayeredCrossSection::giveStiffnessMatrix_dPdF_PlaneStrain(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 5, 5 >();
 }
 
 
@@ -1085,7 +1069,6 @@ FloatMatrixF< 1, 1 >
 LayeredCrossSection::giveStiffnessMatrix_dPdF_1d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
-    return FloatMatrixF< 1, 1 >();
 }
 
 
@@ -1178,7 +1161,7 @@ LayeredCrossSection::initializeFrom(InputRecord &ir)
     if ( numberOfLayers != layerMaterials.giveSize() ) {
         if ( layerMaterials.giveSize() == 1 ) {
             OOFEM_WARNING("Assuming same material in all layers");
-            double temp = layerMaterials.at(1);
+            int temp = layerMaterials.at(1);
             layerMaterials.resize(numberOfLayers);
             layerMaterials.zero();
             layerMaterials.add(temp);
@@ -1362,7 +1345,6 @@ LayeredCrossSection::setupIntegrationPoints(IntegrationRule &irule, int nPointsX
     default:
         OOFEM_ERROR( "Unknown mode (%d)", element->giveIntegrationDomain() );
     }
-    return 0;
 }
 
 
@@ -1532,7 +1514,7 @@ LayeredCrossSection::giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
         throw std::runtime_error("unsupported material mode");
     }
 
-    return _Unknown;
+    //return _Unknown;
 }
 
 
@@ -1640,12 +1622,12 @@ LayeredCrossSection::setupLayeredIntegrationRule(std::vector< std::unique_ptr< I
 {
     // Loop over each layer and set up an integration rule as if each layer was an independent element
     // @todo - only works for wedge integration at the moment
-    int numberOfLayers     = this->giveNumberOfLayers();
+    int nLayers     = this->giveNumberOfLayers();
     int numPointsThickness = this->giveNumIntegrationPointsInLayer();
 
     integrationRulesArray.clear();
-    integrationRulesArray.reserve(numberOfLayers);
-    for ( int i = 0; i < numberOfLayers; i++ ) {
+    integrationRulesArray.reserve(nLayers);
+    for ( int i = 0; i < nLayers; i++ ) {
         integrationRulesArray.emplace_back(new LayeredIntegrationRule(i + 1, el) );
         integrationRulesArray.back()->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
     }
@@ -1671,7 +1653,7 @@ LayeredCrossSection::mapLayerGpCoordsToShellCoords(std::vector< std::unique_ptr<
 {
     double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpoints lie at +-1
     double totalThickness = this->computeIntegralThick();
-    int number = 1;
+    int indx = 1;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         for ( GaussPoint *gp: * layerIntegrationRulesArray [ layer - 1 ] ) {
             // Map local layer cs to local shell cs
@@ -1682,8 +1664,8 @@ LayeredCrossSection::mapLayerGpCoordsToShellCoords(std::vector< std::unique_ptr<
             FloatArray lcoords = gp->giveNaturalCoordinates();
             lcoords.at(3) = xinew;
             gp->setNaturalCoordinates(lcoords);
-            gp->number = number;   // fix gp ordering
-            number++;
+            gp->number = indx;   // fix gp ordering
+            indx++;
         }
     }
 }

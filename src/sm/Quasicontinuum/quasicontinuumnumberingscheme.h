@@ -73,7 +73,7 @@ public:
     /**
      * Initializes the receiver
      */
-    void init(Domain *domain, std::vector<bool> activatedNodeList, TimeStep *tStep);
+    void init2(Domain *domain, std::vector<bool> activatedNodeList, TimeStep *tStep);
     bool isDefault() const override { return true; }
     int giveDofEquationNumber(Dof *dof) const override;
     int giveRequiredNumberOfDomainEquation() const override;

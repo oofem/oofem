@@ -356,7 +356,6 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(GaussPoint *gp) con
         }
     } else {
         OOFEM_ERROR("internal error no cs defined");
-        return eye<3>();
     }
     // t at (i,j) contains cosine of angle between elementAxis(i) and localMaterialAxis(j).
 }

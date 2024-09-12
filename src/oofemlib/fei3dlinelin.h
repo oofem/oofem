@@ -46,11 +46,11 @@ class OOFEM_EXPORT FEI3dLineLin : public FEInterpolation3d
 public:
     FEI3dLineLin() : FEInterpolation3d(1) { }
 
-    integrationDomain giveIntegrationDomain() const override { return _Line; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
-    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Point; }
-    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _UnknownIntegrationDomain; }
-    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _UnknownIntegrationDomain; }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Line; }
+    const Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Point; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _UnknownIntegrationDomain; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _UnknownIntegrationDomain; }
 
     double giveVolume(const FEICellGeometry &cellgeo) const override { return 0.; }
     double giveLength(const FEICellGeometry &cellgeo) const;
@@ -76,10 +76,10 @@ public:
 
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
-    int giveNumberOfNodes() const override { return 2; }
+    int giveNumberOfNodes(const Element_Geometry_Type) const override { return 2; }
 
-    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) const override;
-    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) const override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const override;
 };
 } // end namespace oofem
 #endif // fei3dlinelin_h

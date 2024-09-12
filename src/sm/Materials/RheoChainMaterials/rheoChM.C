@@ -666,7 +666,7 @@ RheoChainMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 1; // to make the compiler happy
+    // return 1; // to make the compiler happy
 }
 
 /****************************************************************************************/

@@ -38,7 +38,7 @@
 
 #pragma once
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "intarray.h"
 #include "internalstatemode.h"
 #include "internalstatetype.h"

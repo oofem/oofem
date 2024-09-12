@@ -89,7 +89,7 @@ RankineMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, Gauss
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
     nlStatus->computeWork_1d(gp, gf);
 #endif
-    return stress[{0}];
+    return stress[0];
 }
 
 

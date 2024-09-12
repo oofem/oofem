@@ -35,7 +35,7 @@
 #ifndef datastream_h
 #define datastream_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <sstream>
 #include <cstdio>
@@ -64,19 +64,24 @@ public:
      */
     //@{
     /// Reads count integer values into array pointed by data.
-    virtual int read(int *data, int count) = 0;
+    virtual int read(int *data, std::size_t count) = 0;
     int read(int &data) { return this->read(&data, 1); }
     /// Reads count unsigned long values into array pointed by data.
-    virtual int read(unsigned long *data, int count) = 0;
+    virtual int read(unsigned long *data, std::size_t count) = 0;
     int read(unsigned long &data) { return this->read(&data, 1); }
+#ifdef _MSC_VER
+    /// Reads count unsigned std::size_t values into array pointed by data.
+    virtual int read(std::size_t* data, std::size_t count) = 0;
+    int read(std::size_t& data) { return this->read(&data, 1); }
+#endif
     /// Reads count long values into array pointed by data.
-    virtual int read(long *data, int count) = 0;
+    virtual int read(long *data, std::size_t count) = 0;
     int read(long &data) { return this->read(&data, 1); }
     /// Reads count double values into array pointed by data.
-    virtual int read(double *data, int count) = 0;
+    virtual int read(double *data, std::size_t count) = 0;
     int read(double &data) { return this->read(&data, 1); }
     /// Reads count char values into array pointed by data.
-    virtual int read(char *data, int count) = 0;
+    virtual int read(char *data, std::size_t count) = 0;
     int read(char &data) { return this->read(&data, 1); }
     /// Reads a bool value from data.
     virtual int read(bool &data) = 0;
@@ -91,19 +96,24 @@ public:
      */
     //@{
     /// Writes count integer values from array pointed by data.
-    virtual int write(const int *data, int count) = 0;
+    virtual int write(const int *data, std::size_t count) = 0;
     int write(int data) { return this->write(&data, 1); }
     /// Writes count unsigned long values from array pointed by data.
-    virtual int write(const unsigned long *data, int count) = 0;
+    virtual int write(const unsigned long *data, std::size_t count) = 0;
     int write(unsigned long data) { return this->write(&data, 1); }
+#ifdef _MSC_VER
+    /// Writes count std::size_t values from array pointed by data.
+    virtual int write(const std::size_t* data, std::size_t count) = 0;
+    int write(std::size_t data) { return this->write(&data, 1); }
+#endif
     /// Writes count long values from array pointed by data.
-    virtual int write(const long *data, int count) = 0;
+    virtual int write(const long *data, std::size_t count) = 0;
     int write(long data) { return this->write(&data, 1); }
     /// Writes count double values from array pointed by data.
-    virtual int write(const double *data, int count) = 0;
+    virtual int write(const double *data, std::size_t count) = 0;
     int write(double data) { return this->write(&data, 1); }
     /// Writes count char values from array pointed by data.
-    virtual int write(const char *data, int count) = 0;
+    virtual int write(const char *data, std::size_t count) = 0;
     int write(char data) { return this->write(&data, 1); }
     /// Writes a bool value.
     virtual int write(bool data) = 0;
@@ -118,11 +128,12 @@ public:
      * These methods compute the stored size (in bytes) of an array containing "count" elements.
      */
     //@{
-    virtual int givePackSizeOfInt(int count) = 0;
-    virtual int givePackSizeOfDouble(int count) = 0;
-    virtual int givePackSizeOfChar(int count) = 0;
-    virtual int givePackSizeOfBool(int count) = 0;
-    virtual int givePackSizeOfLong(int count) = 0;
+    virtual int givePackSizeOfInt(std::size_t count) = 0;
+    virtual int givePackSizeOfDouble(std::size_t count) = 0;
+    virtual int givePackSizeOfChar(std::size_t count) = 0;
+    virtual int givePackSizeOfBool(std::size_t count) = 0;
+    virtual int givePackSizeOfLong(std::size_t count) = 0;
+    virtual int givePackSizeOfSizet(std::size_t count) = 0;
     //@}
 };
 
@@ -155,25 +166,33 @@ public:
     /// Destructor (will not close stream!)
     virtual ~FileDataStream();
 
-    int read(int *data, int count) override;
-    int read(unsigned long *data, int count) override;
-    int read(long *data, int count) override;
-    int read(double *data, int count) override;
-    int read(char *data, int count) override;
+    int read(int *data, std::size_t count) override;
+    int read(unsigned long *data, std::size_t count) override;
+#ifdef _MSC_VER
+    int read(std::size_t *data, std::size_t count) override;
+#endif
+    int read(long *data, std::size_t count) override;
+    int read(double *data, std::size_t count) override;
+    int read(char *data, std::size_t count) override;
     int read(bool &data) override;
 
-    int write(const int *data, int count) override;
-    int write(const unsigned long *data, int count) override;
-    int write(const long *data, int count) override;
-    int write(const double *data, int count) override;
-    int write(const char *data, int count) override;
+    int write(const int *data, std::size_t count) override;
+    int write(const unsigned long *data, std::size_t count) override;
+#ifdef _MSC_VER
+    int write(const std::size_t* data, std::size_t count);
+#endif
+    int write(const long *data, std::size_t count) override;
+    int write(const double *data, std::size_t count) override;
+    int write(const char *data, std::size_t count) override;
     int write(bool data) override;
 
-    int givePackSizeOfInt(int count) override;
-    int givePackSizeOfDouble(int count) override;
-    int givePackSizeOfChar(int count) override;
-    int givePackSizeOfBool(int count) override;
-    int givePackSizeOfLong(int count) override;
+    int givePackSizeOfInt(std::size_t count) override;
+    int givePackSizeOfDouble(std::size_t count) override;
+    int givePackSizeOfChar(std::size_t count) override;
+    int givePackSizeOfBool(std::size_t count) override;
+    int givePackSizeOfLong(std::size_t count) override;
+    int givePackSizeOfSizet(std::size_t count) override;
+
 };
 
 } // end namespace oofem

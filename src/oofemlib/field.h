@@ -35,7 +35,7 @@
 #ifndef field_h
 #define field_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

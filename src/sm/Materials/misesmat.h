@@ -141,7 +141,7 @@ public:
 
     FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
+    double giveS(GaussPoint *gp, TimeStep *tStep) const;
     double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
 
 protected:

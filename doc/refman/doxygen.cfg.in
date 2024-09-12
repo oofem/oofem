@@ -262,7 +262,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED             = __PARALLEL_MODE \
+PREDEFINED             = __MPI_PARALLEL_MODE \
                          __USE_MPI \
                          __FM_MODULE \
                          __SM_MODULE \

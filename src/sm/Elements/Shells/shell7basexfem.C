@@ -798,7 +798,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 {
     this->OLDcomputeStiffnessMatrix(answer, rMode, tStep);
     return;
- 
+#if 0
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -954,7 +954,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         }
     }
 #endif
-
+#endif
 }
 
 
@@ -1620,7 +1620,7 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArrayF<3> &lcoords, c
 
     FloatArray solVecEdge;
     FloatMatrix B;
-    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
+    //const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
     this->edgeComputeEnrichedBmatrixAt(lcoords, B, ei, iedge);
     this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 
@@ -2316,7 +2316,7 @@ Shell7BaseXFEM :: giveShellExportData(ExportRegion &vtkPiece, IntArray &primaryV
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
                     if ( numSubCells == 1) {
-                        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+                        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords, EGT_wedge_2);
                     } else {
                         giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
                     }
@@ -2415,7 +2415,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tS
 
 
     if ( subCell == 0) {
-        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords, EGT_wedge_2);
         // must get local z-coord in terms of the total thickness not layerwise
     } else {
         giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
@@ -2449,7 +2449,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(int interface, TimeSt
 
 
     if ( subCell == 0) {
-        this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
+        this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords, EGT_triangle_2);
         // must get local z-coord in terms of the total thickness not layerwise
     } else {
         giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
@@ -2813,7 +2813,7 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
     // composite element interpolator
     FloatMatrix localNodeCoords;
     //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
-    this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
+    this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords, EGT_triangle_2);
     int numNodes = localNodeCoords.giveNumberOfColumns();
     recoveredValues.resize(numNodes);
 

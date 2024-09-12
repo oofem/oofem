@@ -142,7 +142,7 @@ protected:
     /// thermal dilatation coeff.
     double talpha = 0.;
     /// Number of (Maxwell or Kelvin) units in the rheologic chain.
-    int nUnits = 0.;
+    int nUnits = 0;
     /// Physical age of the material at castingTime
     double relMatAge = 0.;
 

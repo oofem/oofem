@@ -354,7 +354,7 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, Gau
 }
 
 
-const double tolerance = 1.0e-12; // small number
+//const double tolerance = 1.0e-12; // small number
 void
 IntMatBilinearCZJansson :: initializeFrom(InputRecord &ir)
 {

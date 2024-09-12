@@ -188,7 +188,6 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
         this->mode = HEE_nlinear;
     } else {
         OOFEM_ERROR("Unsupported analysis type");
-        this->mode = HEE_linear;
     }
 
     // check if each node has default number of dofs
@@ -274,7 +273,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
         this->solveRefinedElementProblem(ielem, localNodeIdArray, globalNodeIdArray, tStep);
     }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
     double buffer_out [ 4 ], buffer_in [ 4 ];
 
@@ -345,7 +344,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
                 globalWENorm += eerror * eerror * iratio;
             }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #ifdef __USE_MPI
             double myGlobalWENorm = globalWENorm;
             MPI_Allreduce(& myGlobalWENorm, & globalWENorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -466,7 +465,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode err_mode, TimeStep *tStep)
 
 #ifdef EXACT_ERROR
     if ( exactFlag == true ) {
- #ifdef __PARALLEL_MODE
+ #ifdef __MPI_PARALLEL_MODE
   #ifdef __USE_MPI
         buffer_out [ 0 ] = exactENorm;
         buffer_out [ 1 ] = coarseUNorm;
@@ -749,7 +748,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     skipped = this->ee->giveNumberOfSkippedElements();
 
-#ifndef __PARALLEL_MODE
+#ifndef __MPI_PARALLEL_MODE
     globalNelems = nelem;
 #endif
 

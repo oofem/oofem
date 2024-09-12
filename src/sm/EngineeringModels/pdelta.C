@@ -47,7 +47,7 @@
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
 #endif

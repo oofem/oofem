@@ -35,7 +35,7 @@
 #ifndef interface_h
 #define interface_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 
 #include <string>
 

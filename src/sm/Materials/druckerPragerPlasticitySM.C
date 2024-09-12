@@ -478,7 +478,6 @@ DruckerPragerPlasticitySM :: computeYieldStressInShear(double kappa, double eM) 
     default:
         //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
         OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
-        return 0.;
     }
 }
 
@@ -498,7 +497,6 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
     default:
         //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
         OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
-        return 0.;
     }
 }
 
@@ -537,9 +535,8 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
 
     default:
         OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
-        break;
     }
-    return FloatMatrixF<6,6>();
+    // return FloatMatrixF<6,6>();
 }
 
 FloatMatrixF<6,6>

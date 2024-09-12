@@ -107,7 +107,6 @@ public:
             return ghostNodes [ 1 ];
         } else {
             OOFEM_ERROR("No such DOF available on Element %d", number);
-            return NULL;
         }
     }
     void giveInternalDofManDofIDMask(int i, IntArray &answer) const override {
@@ -134,6 +133,8 @@ public:
 
     double computeVolumeAround(GaussPoint *gp) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
+
+    Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
 
     const char *giveClassName() const override { return "Beam2d"; }
     const char *giveInputRecordName() const override { return _IFT_Beam2d_Name; }

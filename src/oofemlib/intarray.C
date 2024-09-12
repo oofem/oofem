@@ -238,12 +238,12 @@ void IntArray :: printYourselfToFile(const std::string filename, const bool show
 contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {
     // write size
-    if ( !stream.write(this->giveSize()) ) {
+    if ( !stream.write(this->size()) ) {
         return ( CIO_IOERR );
     }
 
     // write raw data
-    if ( !stream.write(values.data(), this->giveSize()) ) {
+    if ( !stream.write(values.data(), this->size()) ) {
         return ( CIO_IOERR );
     }
 
@@ -254,7 +254,7 @@ contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 contextIOResultType IntArray :: restoreYourself(DataStream &stream)
 {
     // read size
-    int size;
+    std::size_t size;
     if ( !stream.read(size) ) {
         return ( CIO_IOERR );
     }
@@ -273,7 +273,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream &stream)
 
 int IntArray :: givePackSize(DataStream &buff) const
 {
-    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(this->giveSize());
+    return buff.givePackSizeOfSizet(1) + buff.givePackSizeOfInt(this->giveSize());
 }
 
 

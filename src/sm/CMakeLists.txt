@@ -41,7 +41,7 @@ set (sm_emodel
 set (sm_loads
     Loads/tf1.C
     Loads/usrdeftempfield.C
-    Loads/foreigntempfieldload.C
+    Loads/externaltempfieldload.C
     Loads/rotatingboundary.C
     Loads/constantpressureload.C
     Loads/structtemperatureload.C
@@ -124,7 +124,7 @@ set (sm
     ${sm_quasicontinuum} 
     )
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     list (APPEND sm ${sm_parallel})
 endif ()
 

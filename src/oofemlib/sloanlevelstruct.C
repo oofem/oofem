@@ -96,7 +96,7 @@ void
 SloanLevelStructure :: computeDepth()
 {
     this->formYourself();
-    Depth = Structure.size();
+    Depth = (int) Structure.size();
 }
 
 void

@@ -33,6 +33,7 @@
  */
 
 #include "solutionstatusexportmodule.h"
+#include "oofemcfg.h"
 #include "engngm.h"
 #include "timestep.h"
 #include "classfactory.h"
@@ -148,7 +149,7 @@ SolutionStatusExportModule :: checkRecs()
     }
   }
   if (notrecognized.size()) {
-    OOFEM_WARNING ("SolutionStatusExportModule: invalid tokens detected:", notrecognized); 
+    OOFEM_WARNING ("SolutionStatusExportModule: invalid tokens detected: %s", notrecognized.c_str());
   }
 }
 

@@ -121,7 +121,6 @@ int
 LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
     OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
-    return 0;
 }
 
 
@@ -148,8 +147,7 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
     default:
         OOFEM_ERROR("unknown integrationDomain");
     }
-
-    return -1;
+    // return -1;
 }
 
 

@@ -260,7 +260,7 @@ public:
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
-    virtual double giveCharacteristicValue(double T, double h, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual double _giveCharacteristicValue(double T, double h, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const;
     // --- identification and auxiliary functions ---
     const char *giveInputRecordName() const override { return _IFT_HydrationModel_Name; }
     const char *giveClassName() const override { return "HydrationModel"; }

@@ -136,7 +136,7 @@ public:
     const char *giveClassName() const override { return "AdaptiveNonLinearStatic"; }
     const char *giveInputRecordName() const override { return _IFT_AdaptiveNonLinearStatic_Name; }
 
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     LoadBalancer *giveLoadBalancer() override;
     LoadBalancerMonitor *giveLoadBalancerMonitor() override;
 #endif

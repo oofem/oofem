@@ -77,7 +77,9 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QTrPlaneStrain_Name; }
     const char *giveClassName() const override { return "QTrPlaneStrain"; }
+    Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_2;}
     
+
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
     int SPRNodalRecoveryMI_giveNumberOfIP() override;

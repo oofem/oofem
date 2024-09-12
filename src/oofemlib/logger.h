@@ -35,12 +35,12 @@
 #ifndef logger_h
 #define logger_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 //#include "util.h"
 
 #include <cstdio>
 #include <string>
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
 #include <mpi.h>
 #endif
 
@@ -75,7 +75,7 @@ protected:
     logLevelType logLevel;
     /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Parallell comm
     MPI_Comm comm;
 #endif
@@ -90,7 +90,7 @@ public:
     void appendLogTo(FILE* stream);
     /// Redirects error output to given stream.
     void appendErrorTo(FILE* stream);
-#ifdef __PARALLEL_MODE
+#ifdef __MPI_PARALLEL_MODE
     /// Parallell comm
     void setComm(MPI_Comm comm);
 #endif

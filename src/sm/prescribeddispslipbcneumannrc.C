@@ -669,7 +669,7 @@ void PrescribedDispSlipBCNeumannRC :: integrateTangentStress(FloatMatrix &oTange
     int order = interp->giveInterpolationOrder();
     std :: unique_ptr< IntegrationRule > ir;
 
-    ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+    ir = interp->giveBoundaryIntegrationRule(order, iBndIndex, e->giveGeometryType());
 
     oTangent.clear();
 
@@ -734,7 +734,7 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentBStressSteel( FloatMatrix &o
     FEInterpolation *interp = e->giveInterpolation();
     int order = interp->giveInterpolationOrder();
     std :: unique_ptr< IntegrationRule > ir;
-    ir = interp->giveIntegrationRule(order);
+    ir = interp->giveIntegrationRule(order, e->giveGeometryType());
 
     oTangent.clear();
 
@@ -776,7 +776,7 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentBStressConcrete( FloatMatrix
     FEInterpolation *interp = e->giveInterpolation();
     int order = interp->giveInterpolationOrder();
     std :: unique_ptr< IntegrationRule > ir;
-    ir = interp->giveIntegrationRule(order);
+    ir = interp->giveIntegrationRule(order, e->giveGeometryType());
 
     oTangent.clear();
     Nctau.resize(ndof,ndof);
@@ -813,7 +813,7 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentRStressSteel( FloatMatrix &o
     FEInterpolation *interp = e->giveInterpolation();
     int order = interp->giveInterpolationOrder();
     std :: unique_ptr< IntegrationRule > ir;
-    ir = interp->giveIntegrationRule(order);
+    ir = interp->giveIntegrationRule(order, e->giveGeometryType());
     //Cast into StructuralElement
     StructuralElement *se = dynamic_cast<StructuralElement*>(e);
 
@@ -862,7 +862,7 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentRStressConcrete( FloatMatrix
 
     //Interpolation order
     int order = interp->giveInterpolationOrder();
-    std :: unique_ptr< IntegrationRule > ir = interp->giveBoundaryEdgeIntegrationRule(order, iBndIndex);
+    std :: unique_ptr< IntegrationRule > ir = interp->giveBoundaryEdgeIntegrationRule(order, iBndIndex, e->giveGeometryType());
 
     oTangent.clear();
 
@@ -1075,7 +1075,7 @@ void PrescribedDispSlipBCNeumannRC::computeWeightMatrix( FloatMatrix &C, const I
             FEInterpolation *interp = e->giveInterpolation();
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir;
-            ir = interp->giveIntegrationRule(order);
+            ir = interp->giveIntegrationRule(order, e->giveGeometryType());
 
             for ( auto &gp : *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -1126,7 +1126,7 @@ double PrescribedDispSlipBCNeumannRC::computeInterfaceLength( const IntArray &re
             FEInterpolation *interp = e->giveInterpolation();
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir;
-            ir = interp->giveIntegrationRule(order);
+            ir = interp->giveIntegrationRule(order, e->giveGeometryType());
 
             for ( auto &gp : *ir ) {
                 const FloatArray &lcoords = gp->giveNaturalCoordinates();
@@ -1148,7 +1148,7 @@ double PrescribedDispSlipBCNeumannRC::domainSize( Domain *d, int set )
     if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
         //assuming that the RVE thickness is constant in 2D
         Element *e = this->giveDomain()->giveElement( this->giveDomain()->giveSet( this->giveSetNumber() )->giveBoundaryList().at(1) );
-        std::unique_ptr<IntegrationRule> ir = e->giveInterpolation()->giveIntegrationRule( e->giveInterpolation()->giveInterpolationOrder() );
+        std::unique_ptr<IntegrationRule> ir = e->giveInterpolation()->giveIntegrationRule( e->giveInterpolation()->giveInterpolationOrder(), e->giveGeometryType() );
         CrossSection *cs = e->giveCrossSection();
         GaussPoint *gp = ir->getIntegrationPoint(0);
         double thickness = cs->give(CS_Thickness, gp);

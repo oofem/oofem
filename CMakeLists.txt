@@ -110,11 +110,20 @@ option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_SHARED_LIB "Build shared library" ON)
 option (USE_MFRONT "Build shared library" OFF)
 
+option (BUILD_EXTRA_BENCHMARKS "Build benchmark target" OFF)
+mark_as_advanced(BUILD_EXTRA_BENCHMARKS)
+option (BUILD_EXTRA_EXAMPLES "Build examples (beam2d_1)" OFF)
+mark_as_advanced(BUILD_EXTRA_EXAMPLES)
+option (BUILD_EXTRA_HEXGRID "Build hexgrid" OFF)
+mark_as_advanced(BUILD_EXTRA_HEXGRID)
+option (BUILD_EXTRA_DREAM3D "Build dream3d" OFF)
+mark_as_advanced(BUILD_EXTRA_DREAM3D)
+
 # Parallel stuff
-option (USE_PARALLEL "Enable parallel support" OFF)
+option (USE_MPI_PARALLEL "Enable MPI-based, distributed memory parallel support" OFF)
 option (USE_METIS "Enable metis support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
-option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
+option (USE_OPENMP_PARALLEL "Enable OpenMP, shared memory parallelism" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
@@ -144,8 +153,8 @@ option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to p
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 
-if (USE_PARALLEL)
-    add_definitions (-D__PARALLEL_MODE)
+if (USE_MPI_PARALLEL)
+    add_definitions (-D__MPI_PARALLEL_MODE)
     set (USE_MPI ON)
 endif ()
 
@@ -225,7 +234,7 @@ if (USE_DSS)
     list (APPEND MODULE_LIST "dss")
 endif ()
 
-if (USE_OPENMP)
+if (USE_OPENMP_PARALLEL)
     include (FindOpenMP)
     if (OPENMP_FOUND)
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -641,7 +650,7 @@ if (USE_PYBIND_BINDINGS)
     endif ()
     include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${Python_LIBRARIES})
-    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${oofem_SOURCE_DIR}/src/oofemcfg.C ${PYBIND11_HEADERS})
+    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
     set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
@@ -680,6 +689,10 @@ configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
+configure_file (
+  "${oofem_SOURCE_DIR}/src/oofemenv.h.in"
+  "${oofem_BINARY_DIR}/oofemenv.h"
+)
 
 #######################################################################
 ######################## Targets ######################################
@@ -773,12 +786,12 @@ endif ()
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/main.C)
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
   add_dependencies(oofem version)
 
   target_link_libraries (oofem liboofem)
 else ()
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
   add_dependencies(oofem version)
 
   target_link_libraries (oofem ${EXT_LIBS})
@@ -794,10 +807,10 @@ endif ()
 if (USE_OOFEG)
     #  OOFEG target:
     if (USE_SHARED_LIB)
-        add_executable (oofeg ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/oofeg.C)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
         target_link_libraries (oofeg liboofem)
     else ()
-        add_executable (oofeg ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
         target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
@@ -805,24 +818,33 @@ if (USE_OOFEG)
 endif ()
 
 
-add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/src/main/benchmark.C)
-add_dependencies(liboofem_benchmark version)
-set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries (liboofem_benchmark liboofem benchmark)
+if (BUILD_EXTRA_BENCHMARKS)
+    find_package(benchmark REQUIRED)
+    add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
+    add_dependencies(liboofem_benchmark version)
+    set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_link_libraries (liboofem_benchmark liboofem benchmark)
+endif ()
 
-# Example of using liboofem with dynamic input record:
-add_executable(beam2d_1 ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
-add_dependencies(beam2d_1 version)
-set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries (beam2d_1 liboofem)
+if (BUILD_EXTRA_EXAMPLES)
+    # Example of using liboofem with dynamic input record:
+    add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+    add_dependencies(beam2d_1 version)
+    set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_link_libraries (beam2d_1 liboofem)
+endif ()
 
-add_executable(hexgrid ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
-set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries (hexgrid liboofem)
+if (BUILD_EXTRA_HEXGRID)
+    add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
+    set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_link_libraries (hexgrid liboofem)
+endif ()
 
-add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/src/oofemcfg.C ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
-set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries(dream3d_analysis liboofem)
+if (BUILD_EXTRA_DREAM3D)
+    add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
+    set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    target_link_libraries(dream3d_analysis liboofem)
+endif ()
 
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
@@ -894,7 +916,7 @@ include (CTest)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
 
-if (USE_PARALLEL)
+if (USE_MPI_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
     file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     foreach (case ${parallel_tests})
@@ -1027,7 +1049,7 @@ endif()
 if (N EQUAL 0)
   set (N 1)
 endif ()
-if (USE_OPENMP) # OPENMP will use all processors by default
+if (USE_OPENMP_PARALLEL) # OPENMP will use all processors by default
   set (N 1)
 endif ()
 

@@ -35,7 +35,7 @@
 #ifndef mesherinterface_h
 #define mesherinterface_h
 
-#include "oofemcfg.h"
+#include "oofemenv.h"
 #include "inputrecord.h"
 
 namespace oofem {
