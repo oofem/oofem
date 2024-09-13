@@ -167,20 +167,17 @@ ConnectivityTable::giveElementsWithNodes(IntArray &answer, const IntArray& nodes
     // loop over individual node's connectivity arrays and find intersection (common elements)
     answer.resize(0);
     if (nodes.giveSize()) {
-        const IntArray *candidates = this->giveDofManConnectivityArray(nodes.at(1));
-
-        for (int i=1; i<= candidates->giveSize(); i++) {
-            IntArray enodes = this->domain->giveElement(candidates->at(i))->giveDofManArray();
-            enodes.sort();
-            bool found = true;            
-            for (auto node : nodes) {
-                if (enodes.containsSorted(node) == false) {
-                    found = false;
-                    break;
+        for (int i=1; i<= nodes.giveSize(); i++) {
+            const IntArray *candidates = this->giveDofManConnectivityArray(nodes.at(i));
+            if (i == 1) {
+                answer = *candidates; // first node gives preliminary set of elements
+            } else { // other nodes refine the set
+                for (int j=1; j<=answer.giveSize(); j++) { // loop over candidates 
+                    if (candidates->contains(answer.at(j)) == false) {
+                        answer.erase(j);
+                        j--;
+                    }
                 }
-            }
-            if (found) {
-                answer.followedBy(candidates->at(i));
             }
         }
     }

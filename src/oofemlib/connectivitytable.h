@@ -36,7 +36,7 @@
 #define contable_h
 
 #include "oofemcfg.h"
-
+#include "intarray.h"
 #include <vector>
 
 #ifdef _OPENMP
@@ -44,7 +44,6 @@
 #endif
 
 namespace oofem {
-class IntArray;
 class Domain;
 
 /**
