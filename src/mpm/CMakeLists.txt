@@ -10,6 +10,7 @@ set (mpm_element
 
     set (mpm_problems
     mpmproblem.C
+    dg.C
     )
 
 set (mpm
