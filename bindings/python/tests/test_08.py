@@ -3,9 +3,9 @@ import util
 
 #Transient transport problem with one asisymmetric element loaded by heat flux from the right edge
 
-def test_7():
+def test_08():
     # engngModel
-    problem = oofempy.transientTransport(nSteps=10, deltat=3600.0, alpha=0.5, outFile='test_7.out')
+    problem = oofempy.transientTransport(nSteps=10, deltat=3600.0, alpha=0.5, outFile='test_08.out')
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._HeatTransferMode, tstep_all=True, dofman_all=True, element_all=True)
     problem.setDomain(1, domain, True)
    
@@ -67,6 +67,6 @@ def test_7():
     print("\nProblem solved")
 
 if __name__ == "__main__":
-    test_7()
+    test_08()
 
 

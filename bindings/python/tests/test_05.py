@@ -9,9 +9,9 @@ def evalField(coords, mode, tStep):
     return (val,) #Return list of len 1
 
 
-def test_5():
+def test_05():
     # engngModel
-    problem = oofempy.staticStructural(nSteps=3, outFile="test_5.out")
+    problem = oofempy.staticStructural(nSteps=3, outFile="test_05.out")
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._2dPlaneStressMode, tstep_all=True, dofman_all=True, element_all=True)
@@ -66,7 +66,7 @@ def test_5():
     
     #Create dummy temperature field, define from where to obtain the values
     f = oofempy.PythonField()
-    f.setModuleName('test_5')
+    f.setModuleName('test_05')
     f.setFunctionName('evalField')
     context = problem.giveContext()
     field_man = context.giveFieldManager()
@@ -106,4 +106,4 @@ def test_5():
 
 
 if __name__ == "__main__":
-    test_5()
+    test_05()

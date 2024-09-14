@@ -13,7 +13,7 @@ import pyvista as pv
  
 
 
-def test_8():
+def test_09():
     # Requires oofempy compiled with __MPM_MODULE ON
     import sys
     sys.path.extend(['/home/bp/devel/oofem.git/build', '/home/bp/devel/oofem.git/bindings/python'])
@@ -23,7 +23,7 @@ def test_8():
     
 
     # Create a new dummy problem (placeholder for our demo) with one domain.
-    problem = oofempy.dummyProblem(nSteps=1, outFile='test_7.out')
+    problem = oofempy.dummyProblem(nSteps=1, outFile='test_09.out')
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._HeatTransferMode, tstep_all=1, dofman_all=0, element_all=0)
     problem.setDomain(1, domain, True)
     
@@ -96,7 +96,7 @@ def test_8():
 
 if __name__ == "__main__":
     if oofempy.hasModule('mpm'):
-        test_8()
+        test_09()
     else:
         print("This example requires mpm module.")
         print("Please recompile oofem with mpm module enabled.")
