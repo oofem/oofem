@@ -99,10 +99,8 @@ def test_4():
     u2 = problem.giveUnknownComponent (oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(2).giveDofWithID(oofempy.DofIDItem.D_u))
     assert (round (u2-3.2, 8) == 0), "Node 2 dof 1 displacement check failed"
 
-
     problem.terminateAnalysis()
     print("\nProblem solved")
-
 
 
 if __name__ == "__main__":

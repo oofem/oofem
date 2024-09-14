@@ -2153,7 +2153,7 @@ StructuralMaterial::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 FloatArray
 StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
-    FloatArray et, eigenstrain;
+     FloatArray et, eigenstrain;
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
         return FloatArray();
@@ -2219,7 +2219,6 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
                 OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
-
             answer.add(eigenstrain);
         }
     } else {
@@ -2228,22 +2227,28 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
         }
     }
     
-    ///Add eigenstrain field if provided externally
-    if ( ( tf = fm->giveField(FT_EigenStrain)) ) {
+    //Add external eigenstrain if defined
+    if ( ( tf = fm->giveField(FT_EigenStrain)) && (tf->hasElementInSets(selem->giveNumber(), this->giveDomain() )) ) {
         FloatArray gcoords, eigStrain;
         int err;
         elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(eigStrain, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
-
         if ( answer.giveSize() ) {
-            answer.add(eigStrain);  
+            if ( eigStrain.giveSize() ) {
+                if ( answer.giveSize() != eigStrain.giveSize() ) {
+                    OOFEM_ERROR("Vector of eigen strain field has the size %d which is different with the size of eigStrain vector %d, element %d", answer.giveSize(), eigStrain.giveSize(), elem->giveNumber() );
+                }
+                answer.add(eigStrain);
+            }
         } else {
-            answer=eigStrain;
+            if ( eigStrain.giveSize() ) {
+                answer = eigStrain;
+            }
         }
     }
-    
+
     return answer;
 }
 
@@ -2305,6 +2310,20 @@ StructuralMaterial::computeStressIndependentStrainVector_3d(GaussPoint *gp, Time
     if ( eigenstrain.giveSize() ) {
         answer += FloatArrayF< 6 >(eigenstrain);
     }
+    
+    //Add external eigenstrain if defined
+    if ( ( tf = fm->giveField(FT_EigenStrain)) && (tf->hasElementInSets(selem->giveNumber(), this->giveDomain() )) ) {
+        FloatArray gcoords, eigStrain;
+        int err;
+        elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
+        if ( ( err = tf->evaluateAt(eigStrain, gcoords, mode, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+        }
+        if ( answer.giveSize() ) {
+            answer += FloatArrayF< 6 >(eigStrain);
+        }
+    }
+        
     return answer;
 }
 

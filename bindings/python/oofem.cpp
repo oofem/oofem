@@ -1374,6 +1374,7 @@ PYBIND11_MODULE(oofempy, m) {
         .value("FT_HumidityConcentration", oofem::FieldType::FT_HumidityConcentration)
         .value("FT_TransportProblemUnknowns", oofem::FieldType::FT_TransportProblemUnknowns)
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
+        .value("FT_EigenStrain", oofem::FieldType::FT_EigenStrain)
     ;
 
 
@@ -1733,6 +1734,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("tr1ht", &tr1ht, py::return_value_policy::move);
     m.def("quad1ht", &quad1ht, py::return_value_policy::move);
     m.def("qquad1ht", &qquad1ht, py::return_value_policy::move);
+    
 
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
@@ -1781,6 +1783,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("giveType", &oofem::Field::giveType)
         .def("setType", &oofem::Field::setType)
+        .def("setSetsNumbers", &oofem::Field::setSetsNumbers)
+        .def("hasElementInSets", &oofem::Field::hasElementInSets)
         ;
 
     py::class_<oofem::UniformGridField, oofem::Field, std::shared_ptr<oofem::UniformGridField>>(m, "UniformGridField")

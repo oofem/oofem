@@ -77,35 +77,43 @@ void UniformGridField::setGeometry(const FloatArray& lo_, const FloatArray& hi_,
     #if 0
         this->precomputeInternal();
     #endif
+    if (div_.giveSize()==2){
+        this->valueList.resize(div_.at(1)*div_.at(2));
+    } else {
+        this->valueList.resize(div_.at(1)*div_.at(2)*div_.at(3));
+    }
+    
 }
-void UniformGridField::setValues(const FloatArray& vv){
+
+void UniformGridField::setValues(const std::vector< FloatArray > &vv){
     int s=1;
-    for(int i=0; i<div.giveSize(); i++) s*=div[i]+1;
-    if(vv.giveSize()!=s) OOFEM_ERROR((std::string("Array size must be exactly prod(div[i]+1)=")+std::to_string(s)).c_str());
-    values=vv;
+    for(int i=0; i<div.giveSize(); i++){
+        s*=div[i]+1;
+    }
+//     if(vv.giveSize()!=s) OOFEM_ERROR((std::string("Array size must be exactly prod(div[i]+1)=")+std::to_string(s)).c_str());
+    valueList=vv;
 }
 
-double UniformGridField::nodeValue2d(int i, int j){
-    assert(div.giveSize()==2);
-    assert(values.giveSize()==(div[0]+1)*(div[1]+1));
-    return values[(div[1]+1)*i+j];
+const FloatArray UniformGridField::nodeValue2d(int i, int j){
+     assert(div.giveSize()==2);
+     assert(valueList.size()==(long unsigned int)(div[0]+1)*(div[1]+1));
+     return valueList[(div[1]+1)*i+j];
 }
 
-double UniformGridField::nodeValue3d(int i, int j, int k){
-    assert(div.giveSize()==3);
-    assert(values.giveSize()==(div[0]+1)*(div[1]+1)*(div[2]+1));
-    return values[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
+const FloatArray UniformGridField::nodeValue3d(int i, int j, int k){
+     assert(div.giveSize()==3);
+     assert(valueList.size()==(long unsigned int)(div[0]+1)*(div[1]+1)*(div[2]+1));
+     return valueList[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
 }
 
 // see https://github.com/woodem/woo/blob/master/pkg/dem/FlowAnalysis.cpp
 // and https://woodem.org/user/flow-analysis.html for explanation about the interpolation routine
 int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep){
-    // scalar value
-    answer.resize(1);
-    double& ret(answer[0]);
-    ret=0;
 
+    FloatArray ret(valueList[0]);
+    ret.zero();
+    
     // find cell containing coords, and coords within the cell
     IntArray ijk; FloatArray normXyz;
     this->xyz2ijk(coords,ijk,normXyz);
@@ -127,7 +135,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
         assert(fabs(weights[0]+weights[1]+weights[2]+weights[3]+weights[4]+weights[5]+weights[6]+weights[7]-1) < 1e-5);
         for(int p=0; p<8; p++){
             // std::cerr<<p<<": at "<<coords[0]<<","<<coords[1]<<","<<coords[2]<<", ijk "<<i<<","<<j<<","<<k<<" normXYZ "<<x<<","<<y<<","<<z<<std::endl;
-            ret+=weights[p]*this->nodeValue3d(pts[p][0],pts[p][1],pts[p][2]);
+             ret+=weights[p]*this->nodeValue3d(pts[p][0],pts[p][1],pts[p][2]);
         }
     }
     // 2D interpolation
@@ -148,10 +156,9 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
         return 1;
     }
 
+    answer = ret;
     return 0; // OK
 }
-
-
 
 int
 UniformGridField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)

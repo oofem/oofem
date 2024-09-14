@@ -496,7 +496,7 @@ CrossSection *Element :: giveCrossSection()
 {
 #ifdef DEBUG
     if ( !crossSection ) {
-        OOFEM_ERROR("crossSection not defined");
+        OOFEM_ERROR("crossSection not defined on element number (%d)", this->giveNumber());
     }
 #endif
     return domain->giveCrossSection(crossSection);

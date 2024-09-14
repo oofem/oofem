@@ -35,11 +35,14 @@
 #ifndef field_h
 #define field_h
 
+#include "domain.h"
 #include "oofemenv.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "enumitem.h"
+#include "intarray.h"
+
 #include <string>
 #include <memory>
 
@@ -82,12 +85,16 @@ class OOFEM_EXPORT Field
 {
 protected:
     FieldType type;
-
+    /** Array of set numbers used for imposing a field to a list of elements, e.g. assignment of 
+     * eigenstrain to selected elements. The set could refer to master of slave problem. Empty
+     * regionSets mean effect on all elements (default).
+     */
+    IntArray regionSets;
 public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldType b) : type(b) { }
+    Field(FieldType b);
     virtual ~Field() { }
     /**
      * Evaluates the field at given point.
@@ -116,13 +123,19 @@ public:
      */
     virtual int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep) = 0;
-
+                           
     /// Returns the type of receiver
     FieldType giveType() { return type; }
     
     /// Sets the type of receiver
     void setType(FieldType b) { type=b; }
 
+    /// Defines a list of sets used to impose a field on specific elements
+    void setSetsNumbers (const IntArray sets);
+    
+    /// Searches if element number exist in IntArray regionSets for given domain
+    virtual bool hasElementInSets(int nElem, Domain *d);
+    
     /**
      * Stores receiver state to output stream.
      * @param stream Output stream.
