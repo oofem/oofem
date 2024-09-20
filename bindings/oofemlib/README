@@ -6,9 +6,10 @@ prerequisite is existent library liboofem.so (in this case located under ../../d
 
 Compilation:
 g++ -c -I../../src/oofemlib -I../../src -I../../default beam2d_1.C -o beam2d_1.o
+g++ -c -I../../src/oofemlib -I../../src -I../../default ../../src/oofemcfg.C -o oofemcfg.o
 
 Linking:
-g++ beam2d_1.o -L../../default -loofem -o beam2d_1
+g++ oofemcfg.o beam2d_1.o -L../../default -loofem -o beam2d_1
 
 Running (you may need to create a symlink to liboofem.so to current directory):
 ./beam2d_1

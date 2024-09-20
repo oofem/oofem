@@ -196,7 +196,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         if ( i > 20 ) {
             msg << "...";
         }
-        OOFEM_WARNING("some values of some dofmanagers undetermined (in global numbers) \n[%s]", msg.str().c_str() );
+        OOFEM_WARNING("InternalStateType %s: some values of some dofmanagers undetermined (in global numbers) \n[%s] for ", __InternalStateTypeToString(type), msg.str().c_str());
     }
 
 

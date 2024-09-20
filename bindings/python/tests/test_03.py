@@ -51,9 +51,9 @@ class MyElement(oofempy.StructuralElement):
     def giveInputRecordName(self):
         return "MyElement"
 
-def test_3():
+def test_03():
     # engngModel
-    problem = oofempy.linearStatic(nSteps=1, outFile="test_3.out")
+    problem = oofempy.linearStatic(nSteps=1, outFile="test_03.out")
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._1dTrussMode, tstep_all=True, dofman_all=True, element_all=True)
@@ -109,4 +109,4 @@ def test_3():
 
 
 if __name__ == "__main__":
-    test_3()
+    test_03()

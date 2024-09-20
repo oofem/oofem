@@ -37,9 +37,9 @@ class MyMaterial(oofempy.StructuralMaterial):
             gp.setMaterialStatus(status)
         return gp.giveMaterialStatus() 
         
-def test_4():
+def test_04():
     # engngModel
-    problem = oofempy.linearStatic(nSteps=1, outFile="test_4.out")
+    problem = oofempy.linearStatic(nSteps=1, outFile="test_04.out")
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._1dTrussMode, tstep_all=True, dofman_all=True, element_all=True)
@@ -99,12 +99,10 @@ def test_4():
     u2 = problem.giveUnknownComponent (oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(2).giveDofWithID(oofempy.DofIDItem.D_u))
     assert (round (u2-3.2, 8) == 0), "Node 2 dof 1 displacement check failed"
 
-
     problem.terminateAnalysis()
     print("\nProblem solved")
 
 
-
 if __name__ == "__main__":
-    test_4()
+    test_04()
 

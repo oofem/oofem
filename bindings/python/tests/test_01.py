@@ -1,7 +1,7 @@
 import oofempy
 
 
-def test_1():
+def test_01():
     a = oofempy.FloatArray((1.0, 2.0, 3.0))
     b = oofempy.FloatArray((0.0, -1.0, 1.0))
     x = oofempy.FloatArray(3)
@@ -52,4 +52,4 @@ def test_1():
     print(y)
 
 if __name__ == "__main__":
-    test_1()
+    test_01()

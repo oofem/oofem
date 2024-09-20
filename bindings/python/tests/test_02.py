@@ -1,10 +1,10 @@
 import oofempy
 import util
 
-def test_2():
+def test_02():
 
     # engngModel
-    problem = oofempy.linearStatic(nSteps=3, outFile='test_2.out')
+    problem = oofempy.linearStatic(nSteps=3, outFile='test_02.out')
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._2dBeamMode, tstep_all=True, dofman_all=True, element_all=True)
@@ -68,4 +68,4 @@ def test_2():
     print("\nProblem solved")
 
 if __name__ == "__main__":
-    test_2()
+    test_02()

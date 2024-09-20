@@ -3,9 +3,9 @@ import oofempy
 import util
 
 
-def test_6():
+def test_07():
     # engngModel
-    problem = oofempy.staticStructural(nSteps=1, outFile="test_6.out")
+    problem = oofempy.staticStructural(nSteps=1, outFile="test_07.out")
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._3dMode, tstep_all=True, dofman_all=True, element_all=True)
@@ -70,4 +70,4 @@ def test_6():
 
 
 if __name__ == "__main__":
-    test_6()
+    test_07()
