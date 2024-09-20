@@ -483,12 +483,16 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bN
 
 Material *Element :: giveMaterial()
 {
-#ifdef DEBUG
-    if ( !material ) {
-        OOFEM_ERROR("material not defined");
+    if ( material ) { //materials defined directly on elements, obsolete but kept for compatibility reasons
+        return domain->giveMaterial(material);        
     }
-#endif
-    return domain->giveMaterial(material);
+
+    //use the first integration point
+    Material *mat = this->giveCrossSection()-> giveMaterial(integrationRulesArray[0]->getIntegrationPoint(0));
+    if ( mat == NULL) {
+        OOFEM_ERROR("material is not defined on a cross section %d", this->giveCrossSection()->giveNumber());
+    }
+    return mat;
 }
 
 

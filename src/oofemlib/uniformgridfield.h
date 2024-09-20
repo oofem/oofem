@@ -61,8 +61,6 @@ protected:
     #endif
 
     void xyz2ijk(const FloatArray& xyz, IntArray& ijk, FloatArray& normXyz) const;
-    const FloatArray nodeValue2d(int i, int j);
-    const FloatArray nodeValue3d(int i, int j, int k);
 public:
     /**
      * Constructor. Creates a field, with unspecified field values.
@@ -81,6 +79,9 @@ public:
     int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep) override;
 
+    const FloatArray nodeValue2d(int i, int j);
+    const FloatArray nodeValue3d(int i, int j, int k);
+                           
     void saveContext(DataStream &stream) override { }
     void restoreContext(DataStream &stream) override { }
 
