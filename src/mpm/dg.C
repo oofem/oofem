@@ -57,70 +57,54 @@
 namespace oofem {
 REGISTER_EngngModel(DGProblem);
 
-ScalarAdvectionLhsAssembler :: ScalarAdvectionLhsAssembler(double alpha, double deltaT) : 
+ScalarAdvectionLhsAssembler :: ScalarAdvectionLhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
     MatrixAssembler(), alpha(alpha), deltaT(deltaT)
-{}
+{
+    this->q = q;
+}
 
 
 void ScalarAdvectionLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
 {
     FloatMatrix contrib;
-    IntArray locu, locp;
+    IntArray loc;
     MPElement *e = dynamic_cast<MPElement*>(&el);
     int ndofs = e->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+    e->getLocalCodeNumbers (loc, q);
 
-    e->giveCharacteristicMatrix(contrib, MomentumBalance_StiffnessMatrix, tStep);
-    contrib.times(this->alpha);
-    answer.assemble(contrib, locu, locu);
-    e->giveCharacteristicMatrix(contrib, MomentumBalance_PressureCouplingMatrix, tStep);
-    contrib.times((-1.0)*this->alpha);
-    answer.assemble(contrib, locu, locp);
-
-    e->giveCharacteristicMatrix(contrib, MassBalance_PermeabilityMatrix, tStep);
-    contrib.times((-1.0)*this->alpha*this->alpha*this->deltaT);
-    answer.assemble(contrib, locp, locp);
-    e->giveCharacteristicMatrix(contrib, MassBalance_CompresibilityMatrix, tStep);
-    contrib.times((-1.0)*this->alpha);
-    answer.assemble(contrib, locp, locp);
-    e->giveCharacteristicMatrix(contrib, MassBalance_StressCouplingMatrix, tStep);
-    contrib.times((-1.0)*this->alpha);
-    answer.assemble(contrib, locp, locu);
+    e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
+    contrib.times(this->deltaT/2.0);
+    answer.assemble(contrib, loc, loc);
+    e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
+    answer.assemble(contrib, loc, loc);
 }
 
-void ScalarAdvectionResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+ScalarAdvectionRhsAssembler :: ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
+    MatrixAssembler(), alpha(alpha), deltaT(deltaT)
 {
-    FloatArray contrib;
-    IntArray locu, locp;
-    MPElement *e = dynamic_cast<MPElement*>(&element);
+    this->q = q;
+}
+
+
+void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    FloatMatrix contrib;
+    IntArray loc;
+    MPElement *e = dynamic_cast<MPElement*>(&el);
     int ndofs = e->giveNumberOfDofs();
-    vec.resize(ndofs);
-    vec.zero();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+    e->getLocalCodeNumbers (loc, q);
 
-    e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
-    vec.assemble(contrib, locu);
-    e->giveCharacteristicVector(contrib, MomentumBalance_PressureResidual, mode, tStep);
-    contrib.times((-1.0));
-    vec.assemble(contrib, locu);
-
-    e->giveCharacteristicVector(contrib, MassBalance_StressRateResidual, mode, tStep);
-    contrib.times(-1.0*alpha*deltaT);
-    vec.assemble(contrib, locp);
-    e->giveCharacteristicVector(contrib, MassBalance_PressureResidual, mode, tStep);
-    contrib.times(-1.0*alpha*deltaT);
-    vec.assemble(contrib, locp);
-    e->giveCharacteristicVector(contrib, MassBalance_PressureRateResidual, mode, tStep);
-    contrib.times(-1.0*alpha*deltaT);
-    vec.assemble(contrib, locp);
-
-    //vec.negated();
+    e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
+    contrib.times((-1.0)*this->deltaT/2.0);
+    answer.assemble(contrib, loc, loc);
+    e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
+    answer.assemble(contrib, loc, loc);
 }
 
 
@@ -132,11 +116,21 @@ DGProblem :: DGProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _ma
 NumericalMethod *DGProblem :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
+        if ( isParallel() ) {
+            if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+            }
+        } else {
+            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        }
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+        }
     }
+
+
     return nMethod.get();
 }
-
 
   
 void
@@ -163,9 +157,9 @@ DGProblem :: initializeFrom(InputRecord &ir)
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_DGProblem_alpha);
-    problemType = "ad"; // compatibility mode @TODO Remove default value
+    problemType = "sa"; // compatibility mode @TODO Remove default value
     IR_GIVE_OPTIONAL_FIELD(ir, problemType, _IFT_DGProblem_problemType);
-    if (!((problemType == "ad")||(problemType == "tm"))) {
+    if (!((problemType == "sa")||(problemType == "tm"))) {
       throw ValueInputException(ir, "none", "Problem type not recognized");
     }
     OOFEM_LOG_RELEVANT("DG: %s formulation\n", problemType.c_str());
@@ -330,74 +324,69 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    if (true) {
- 
-        this->constructBoundaryEntities();
-        // print boundary entities
-        int id = 1;
-        printf("Boundary entities: %ld\n---------------------------\n", this->boundaryEntities.size());
-        for ( auto &be: this->boundaryEntities ) {
-            if ( be->elements.giveSize() == 1 ) {
-            printf("%4d: %4d(%4d) %4s(%4s)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), "-", "-");
-            } else {
-                printf("%4d: %4d(%4d) %4d(%4d)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), be->elements.at(2), be->elementBoundaryIDs.at(2));
-            }
-        }
-        printf("---------------------------\n");
-        
-        printf("Element coloring\n---------------------------\n");
-        for (auto &e: this->giveDomain(1)->giveElements()) {
-            int c = this->giveDomain(1)->giveConnectivityTable()->getElementColor(e.get()->giveNumber());
-            printf("%4d: %2d\n", e->giveNumber(), c);
-        }
-        printf("---------------------------\n");
-        return;
-
-    }
-
     if ( tStep->isTheFirstStep() ) {
         this->constructBoundaryEntities();
+        if (true) {
+            // print boundary entities
+            int id = 1;
+            printf("Boundary entities: %ld\n---------------------------\n", this->boundaryEntities.size());
+            for ( auto &be: this->boundaryEntities ) {
+                if ( be->elements.giveSize() == 1 ) {
+                printf("%4d: %4d(%4d) %4s(%4s)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), "-", "-");
+                } else {
+                    printf("%4d: %4d(%4d) %4d(%4d)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), be->elements.at(2), be->elementBoundaryIDs.at(2));
+                }
+            }
+            printf("---------------------------\n");
+            
+            printf("Element coloring\n---------------------------\n");
+            for (auto &e: this->giveDomain(1)->giveElements()) {
+                int c = this->giveDomain(1)->giveConnectivityTable()->getElementColor(e.get()->giveNumber());
+                printf("%4d: %2d\n", e->giveNumber(), c);
+            }
+            printf("---------------------------\n");
+        }
         this->applyIC();
 
     }
 
-    field->advanceSolution(tStep);
-    field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+    // @BP: debug
+    return;
 
-    if ( !effectiveMatrix ) {
-        effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+    if ( tStep->isTheFirstStep() ) {
+        field->advanceSolution(tStep);
+        field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+
+        if ( !lhsMatrix ) {
+            lhsMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            lhsMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+        }
+        if ( !rhsMatrix ) {
+            rhsMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            rhsMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+        }
+
+        OOFEM_LOG_INFO("Assembling system matrices\n");
+        this->assemble( *lhsMatrix, tStep, ScalarAdvectionLhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
+        this->assemble( *rhsMatrix, tStep, ScalarAdvectionRhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
     }
+    OOFEM_LOG_INFO("Assembling boundary contributions\n");
+    // loop over boundary entities
+    // @BP instead using BoundaryEntity, we can set up MPMElement based boundary element representing the boundary entity, 
+    // this would allow to use the same assembly code as for the interior
+    // the term to evaluate over the boundary is \int (f(s+, s-)\cdot (nv)) ds, where f is numerical flux. So this term has to be parametrized by numerical flux...
 
-    OOFEM_LOG_INFO("Assembling external forces\n");
-    FloatArray externalForces(neq);
-    externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
-    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-
-    // set-up numerical method
+    // @BP start of editing
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    OOFEM_LOG_INFO("Solving for %d unknowns...\n", neq);
 
-    internalForces.resize(neq);
-
-    FloatArray incrementOfSolution;
-    double loadLevel;
-    int currentIterations = 0;
-    this->updateInternalRHS(this->internalForces, tStep, this->giveDomain(1), &this->eNorm); /// @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
-    ConvergedReason status = this->nMethod->solve(*this->effectiveMatrix,
-                                                  externalForces,
-                                                  nullptr, // ignore
-                                                  this->solution,
-                                                  incrementOfSolution,
-                                                  this->internalForces,
-                                                  this->eNorm,
-                                                  loadLevel, // ignore
-                                                  SparseNonLinearSystemNM :: rlm_total, // ignore
-                                                  currentIterations, // ignore
-                                                  tStep);
-    tStep->numberOfIterations = currentIterations;
+    FloatArray *pv = this->field->giveSolutionVector(tStep->givePreviousStep());
+    FloatArray *v = this->field->giveSolutionVector(tStep);
+    FloatArray rhs;
+    rhsMatrix->times(*pv, rhs);
+    ConvergedReason status = this->nMethod->solve(*lhsMatrix, rhs, *v);
     tStep->convergedReason = status;
+    this->updateSolution(*v, tStep, d); // ?
+    // @BP end of editing
 }
 
 
@@ -414,73 +403,18 @@ DGProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain 
 
 void
 DGProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
-{
-    // F_eff = F(T^(k)) + C * dT/dt^(k)
-    answer.zero();
-    if (this->problemType == "ad") {
-      this->assembleVector(answer, tStep, ScalarAdvectionResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
-    } else {
-      OOFEM_ERROR ("unsupported problemType");
-    }
-    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-}
+{}
 
 
 void
 DGProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
-{
-    // K_eff = (a*K + C/dt)
-    if ( !this->keepTangent || !this->hasTangent ) {
-        mat.zero();
-        if (this->problemType == "sa") {
-          ScalarAdvectionLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
-          //Assembling left hand side 
-          this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
-                          EModelDefaultEquationNumbering(), d );
-        } else {
-          OOFEM_ERROR ("unsupported problemType");
-        }
-        
-        this->hasTangent = true;
-    }
-}
+{}
 
 
 void
 DGProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    ///@todo NRSolver should report when the solution changes instead of doing it this way.
-    this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
-    /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
-    this->field->applyBoundaryCondition(tStep);
-
-    if ( cmpn == InternalRhs ) {
-        // F_eff = F(T^(k)) + C * dT/dt^(k)
-        this->internalForces.zero();
-        if (this->problemType == "ad") {
-          this->assembleVector(this->internalForces, tStep, ScalarAdvectionResidualAssembler(this->alpha, tStep->giveTimeIncrement()), VM_Total, EModelDefaultEquationNumbering(), d, &eNorm);
-        } else {
-          OOFEM_ERROR ("unsupported problemType");
-        }
-        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-    } else if ( cmpn == NonLinearLhs ) {
-        // K_eff = (a*K + C/dt)
-        if ( !this->keepTangent || !this->hasTangent ) {
-            this->effectiveMatrix->zero();
-            if (this->problemType == "ad") {
-              ScalarAdvectionLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
-              //Assembling left hand side 
-              this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
-                              EModelDefaultEquationNumbering(), d );
-            } else {
-              OOFEM_ERROR ("unsupported problemType");
-            }
-            this->hasTangent = true;
-        }
-    } else {
-        OOFEM_ERROR("Unknown component");
-    }
+    OOFEM_ERROR("Unknown component");
 }
 
 
@@ -528,7 +462,8 @@ DGProblem :: requiresEquationRenumbering(TimeStep *tStep)
 int
 DGProblem :: forceEquationNumbering()
 {
-    this->effectiveMatrix = nullptr;
+    this->lhsMatrix = nullptr;
+    this->rhsMatrix = nullptr;
     return EngngModel :: forceEquationNumbering();
 }
 

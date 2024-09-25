@@ -42,6 +42,7 @@
 #include "primaryfield.h"
 #include "function.h"
 #include "dofdistributedprimaryfield.h"
+#include "mpm.h"
 
 ///@name Input fields for DGproblem
 //@{
@@ -67,23 +68,42 @@ class ScalarAdvectionLhsAssembler : public MatrixAssembler
 protected:
     double alpha;
     double deltaT;
+    Variable::VariableQuantity q;
 
 public:
-    ScalarAdvectionLhsAssembler(double alpha, double deltaT);
+    ScalarAdvectionLhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) ;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+};
+
+/**
+ * Callback class for assembling mid point effective tangents. 
+ * @todo Need to parametrize individual contributing terms, ther locations and multilication factors.
+ */
+class ScalarAdvectionRhsAssembler : public MatrixAssembler
+{
+protected:
+    double alpha;
+    double deltaT;
+    Variable::VariableQuantity q;
+
+public:
+    ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) ;
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
 /**
  * Callback class for assembling residuals
  */
-class ScalarAdvectionResidualAssembler : public VectorAssembler
+class ScalarAdvectionResidualAssembler : public MatrixAssembler
 {
     protected:
     double alpha;
     double deltaT;
+    Variable::VariableQuantity q;
+
 public:
-    ScalarAdvectionResidualAssembler(double alpha, double deltaT) : VectorAssembler(), alpha(alpha), deltaT(deltaT) {}
-    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+    ScalarAdvectionResidualAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : MatrixAssembler(), alpha(alpha), deltaT(deltaT), q(q) {}
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
 
@@ -98,17 +118,22 @@ public:
 class DGProblem : public EngngModel
 {
 protected:
+
+    Variable::VariableQuantity unknownQuantity;
+    
+    LinSystSolverType solverType = ST_Direct;
     SparseMtrxType sparseMtrxType = SMT_Skyline;
     std :: unique_ptr< DofDistributedPrimaryField > field;
 
-    std :: unique_ptr< SparseMtrx > effectiveMatrix;
+    std :: unique_ptr< SparseMtrx > lhsMatrix;
+    std :: unique_ptr< SparseMtrx > rhsMatrix;
 
     FloatArray solution;
     FloatArray internalForces;
     FloatArray eNorm;
 
     /// Numerical method used to solve the problem
-    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     /// Initial time from which the computation runs. Default is zero.
     double initT = 0.;
