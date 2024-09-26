@@ -76,10 +76,19 @@ void ScalarAdvectionLhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
     e->getLocalCodeNumbers (loc, q);
 
     e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
-    contrib.times(this->deltaT/2.0);
-    answer.assemble(contrib, loc, loc);
+    if (contrib.isNotEmpty()) {
+        contrib.times(this->deltaT/2.0);
+        answer.assemble(contrib, loc, loc);
+    }
     e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
-    answer.assemble(contrib, loc, loc);
+    if (contrib.isNotEmpty()) {
+        answer.assemble(contrib, loc, loc);
+    }
+    // boundary terms
+    e->giveCharacteristicMatrix(contrib, InternalFluxVector, tStep);
+    if (contrib.isNotEmpty()) {
+        answer.assemble(contrib, loc, loc);
+    }
 }
 
 ScalarAdvectionRhsAssembler :: ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
@@ -101,10 +110,20 @@ void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
     e->getLocalCodeNumbers (loc, q);
 
     e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
-    contrib.times((-1.0)*this->deltaT/2.0);
-    answer.assemble(contrib, loc, loc);
+    if (contrib.isNotEmpty()) {
+        contrib.times((-1.0)*this->deltaT/2.0);
+        answer.assemble(contrib, loc, loc);
+    }
     e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
-    answer.assemble(contrib, loc, loc);
+    if (contrib.isNotEmpty()) {
+        answer.assemble(contrib, loc, loc);
+    }
+    // boundary terms
+    e->giveCharacteristicMatrix(contrib, InternalFluxVector, tStep);
+    if (contrib.isNotEmpty()) {
+        answer.assemble(contrib, loc, loc);
+    }
+
 }
 
 
@@ -324,7 +343,7 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    if ( tStep->isTheFirstStep() ) {
+    if ( false ) {
         this->constructBoundaryEntities();
         if (true) {
             // print boundary entities
@@ -346,14 +365,15 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
             }
             printf("---------------------------\n");
         }
-        this->applyIC();
+        
 
     }
 
     // @BP: debug
-    return;
-
+    
     if ( tStep->isTheFirstStep() ) {
+        this->applyIC();
+
         field->advanceSolution(tStep);
         field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
 

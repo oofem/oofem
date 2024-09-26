@@ -95,6 +95,8 @@ class SADGElement : public MPElement {
             answer.resize(sdofs,sdofs);
             answer.zero();
             this->integrateTerm_dw (answer, dnTaN (getScalarVariable(),getScalarVariable()), ir, tStep) ;
+        } else if (type == InternalFluxVector) {
+            answer.clear();
         } else {
 	        OOFEM_ERROR("Unknown characteristic matrix type");
 	    }
@@ -244,6 +246,8 @@ class SADGBoundaryElement : public SADGElement {
                     }
                 }
             }
+        } else if ((type == MassMatrix) || (type == StiffnessMatrix)) {
+            answer.clear(); //resize(this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers()); // scalar advection
         } else {
             OOFEM_ERROR("Unknown characteristic matrix type");
         }
@@ -293,7 +297,7 @@ class SADGBLine1 : public SADGBoundaryElement {
     }
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
-            int dofid = this->scalarVariable.getDofManDofIDs().at(0);
+            int dofid = this->scalarVariable.getDofManDofIDs().at(1);
             answer = {dofid};
     }
     int giveNumberOfDofs() override { return numberOfDofMans; }
@@ -356,6 +360,7 @@ class SADGTriangle1 : public SADGElement {
         numberOfDofMans  = 3;
         numberOfGaussPoints = 4;
         this->computeGaussPoints();
+        /*
         // set up internal dof managers
         // regular nodes just define element geometry
         // internal dof managers are used to store dofs (Discontinuous Galerkin)
@@ -364,9 +369,10 @@ class SADGTriangle1 : public SADGElement {
             edm->appendDof(new MasterDof(edm, (DofIDItem)scalarVariable.getDofManDofIDs().at(0)));
             internalDofManagers.push_back(edm);
         }
+        */
     }
 
-    int giveNumberOfInternalDofManagers() const override {return 3;}
+    //int giveNumberOfInternalDofManagers() const override {return 3;}
 
     void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
@@ -377,7 +383,7 @@ class SADGTriangle1 : public SADGElement {
     }
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
-            int dofid = this->scalarVariable.getDofManDofIDs().at(0);
+            int dofid = this->scalarVariable.getDofManDofIDs().at(1);
             answer = {dofid};
     }
     int giveNumberOfDofs() override { return 3; }
