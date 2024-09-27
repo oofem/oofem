@@ -493,6 +493,9 @@ VTKBaseExportModule::getNodalVariableFromPrimaryField(FloatArray &answer, DofMan
             answer.resize(3);
         }
         iState = IST_MacroSlipVector;
+     } else if ( type == Concentration) {
+        dofIDMask.followedBy(C_1);
+        answer.resize(1);
      } else {
         OOFEM_ERROR("unsupported unknownType %s", __UnknownTypeToString(type) );
     }

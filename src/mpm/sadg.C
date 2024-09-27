@@ -95,6 +95,7 @@ class SADGElement : public MPElement {
             answer.resize(sdofs,sdofs);
             answer.zero();
             this->integrateTerm_dw (answer, dnTaN (getScalarVariable(),getScalarVariable()), ir, tStep) ;
+            answer.times(-1.0);
         } else if (type == InternalFluxVector) {
             answer.clear();
         } else {
@@ -192,18 +193,20 @@ class SADGBoundaryElement : public SADGElement {
             IntArray rows, cols;
             // set up integration rule
             IntegrationRule* ir = this->giveDefaultIntegrationRulePtr();
-            for (int j=1;j<=ir->giveNumberOfIntegrationPoints();j++) {
+            for (int j=0;j<ir->giveNumberOfIntegrationPoints();j++) {
                 FloatArray lc = ir->getIntegrationPoint(j)->giveNaturalCoordinates();
                 FloatArray gc;
-                this->giveInterpolation()->local2global(lc, gc, FEIElementGeometryWrapper(this));
+                this->giveInterpolation()->local2global(gc, lc, FEIElementGeometryWrapper(this));
                 FloatArray normal, v, N;
                 this->giveInterpolation()->boundaryEvalNormal(normal, 1, lc, FEIElementGeometryWrapper(this));
                 this->giveInterpolation()->evalN(N, lc, FEIElementGeometryWrapper(this));
                 // get velocity vector first
-                this->domain->giveEngngModel()->giveField(FT_Velocity, tStep)->evaluateAt(gc, v, ValueModeType::VM_Total, tStep);
+                // @BP: todo -> connect external field 
+                //this->domain->giveEngngModel()->giveField(FT_Velocity, tStep)->evaluateAt(v, gc, ValueModeType::VM_Total, tStep);
+                v = {1.0, 0.0}; // dummy velocity
                 // evaluate N^T (a\cdot n) N
                 FloatMatrix contrib;
-                contrib.beTProductOf(N,N);
+                contrib.beDyadicProductOf(N,N);
                 contrib.times(normal.dotProduct(v));
                 contrib.times(ir->getIntegrationPoint(j)->giveWeight()*this->giveInterpolation()->giveTransformationJacobian(lc, FEIElementGeometryWrapper(this)));
                 int nnodes = N.giveSize(); // number of nodes on boundary
@@ -336,7 +339,7 @@ private:
 };
 
 const FEInterpolation & SADGBLine1::interpol = FEI2dLineLin(1,2);
-const Variable& SADGBLine1::scalarVariable = Variable(SADGBLine1::interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {100});
+const Variable& SADGBLine1::scalarVariable = Variable(SADGBLine1::interpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGBLine1_Name "sadgbline1"
 REGISTER_Element(SADGBLine1)
@@ -376,10 +379,10 @@ class SADGTriangle1 : public SADGElement {
 
     void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-          answer={};
+          answer={num};
     }
     void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        answer={1,2,3};
+        answer={};
     }
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
@@ -413,13 +416,13 @@ private:
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
                 integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
-                integrationRulesArray [ 0 ]->SetUpPointsOnCube(numberOfGaussPoints, _Unknown);
+                integrationRulesArray [ 0 ]->SetUpPointsOnTriangle(numberOfGaussPoints, _Unknown);
             }
         }
 };
 
 const FEInterpolation & SADGTriangle1::scalarInterpol = FEI2dTrLin(1,2);
-const Variable& SADGTriangle1::scalarVariable = Variable(SADGTriangle1::scalarInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {100});
+const Variable& SADGTriangle1::scalarVariable = Variable(SADGTriangle1::scalarInterpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGTriangle1_Name "sadgtria1"
 REGISTER_Element(SADGTriangle1)

@@ -77,16 +77,17 @@ void ScalarAdvectionLhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
 
     e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
     if (contrib.isNotEmpty()) {
-        contrib.times(this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
     e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
     if (contrib.isNotEmpty()) {
+        contrib.times(this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
     // boundary terms
     e->giveCharacteristicMatrix(contrib, InternalFluxVector, tStep);
     if (contrib.isNotEmpty()) {
+        contrib.times(this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
 }
@@ -111,16 +112,17 @@ void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
 
     e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
     if (contrib.isNotEmpty()) {
-        contrib.times((-1.0)*this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
     e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
     if (contrib.isNotEmpty()) {
+        contrib.times((-1.0)*this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
     // boundary terms
     e->giveCharacteristicMatrix(contrib, InternalFluxVector, tStep);
     if (contrib.isNotEmpty()) {
+        contrib.times((-1.0)*this->deltaT/2.0);
         answer.assemble(contrib, loc, loc);
     }
 
@@ -373,10 +375,7 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();
-
-        field->advanceSolution(tStep);
-        field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-
+        
         if ( !lhsMatrix ) {
             lhsMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             lhsMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
@@ -390,7 +389,6 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
         this->assemble( *lhsMatrix, tStep, ScalarAdvectionLhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
         this->assemble( *rhsMatrix, tStep, ScalarAdvectionRhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
     }
-    OOFEM_LOG_INFO("Assembling boundary contributions\n");
     // loop over boundary entities
     // @BP instead using BoundaryEntity, we can set up MPMElement based boundary element representing the boundary entity, 
     // this would allow to use the same assembly code as for the interior
@@ -399,13 +397,16 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     // @BP start of editing
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
-    FloatArray *pv = this->field->giveSolutionVector(tStep->givePreviousStep());
-    FloatArray *v = this->field->giveSolutionVector(tStep);
+    field->advanceSolution(tStep);
+    field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+
+    //FloatArray *pv = this->field->giveSolutionVector(tStep->givePreviousStep());
+    //FloatArray *v = this->field->giveSolutionVector(tStep);
     FloatArray rhs;
-    rhsMatrix->times(*pv, rhs);
-    ConvergedReason status = this->nMethod->solve(*lhsMatrix, rhs, *v);
+    rhsMatrix->times(solution, rhs);
+    ConvergedReason status = this->nMethod->solve(*lhsMatrix, rhs, solution);
     tStep->convergedReason = status;
-    this->updateSolution(*v, tStep, d); // ?
+    this->updateSolution(solution, tStep, d); // ?
     // @BP end of editing
 }
 

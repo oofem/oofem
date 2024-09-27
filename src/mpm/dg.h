@@ -119,7 +119,7 @@ class DGProblem : public EngngModel
 {
 protected:
 
-    Variable::VariableQuantity unknownQuantity;
+    Variable::VariableQuantity unknownQuantity = Variable::VariableQuantity::VolumeFraction;
     
     LinSystSolverType solverType = ST_Direct;
     SparseMtrxType sparseMtrxType = SMT_Skyline;
