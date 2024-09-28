@@ -203,7 +203,7 @@ class SADGBoundaryElement : public SADGElement {
                 // get velocity vector first
                 // @BP: todo -> connect external field 
                 //this->domain->giveEngngModel()->giveField(FT_Velocity, tStep)->evaluateAt(v, gc, ValueModeType::VM_Total, tStep);
-                v = {1.0, 0.0}; // dummy velocity
+                v = {sqrt(0.5), sqrt(0.5)}; // dummy velocity
                 // evaluate N^T (a\cdot n) N
                 FloatMatrix contrib;
                 contrib.beDyadicProductOf(N,N);

@@ -35,6 +35,7 @@
 #include "mpm.h"
 #include "termlibrary4.h"
 #include "element.h"
+#include "mathfem.h"
 
 namespace oofem {
 
@@ -70,7 +71,7 @@ void dnTaN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, Tim
     this->testField.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     this->field.interpolation.evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix nm(n, true), anm;
-    FloatMatrix a({1,0}, false); // assume 2D for now
+    FloatMatrix a({sqrt(0.5),sqrt(0.5)}, false); // assume 2D for now
     anm.beProductOf(a, nm);
     answer.beProductOf(dndx, anm);
 }
