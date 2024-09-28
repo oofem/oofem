@@ -931,7 +931,10 @@ Initial conditions
 These records specify description of initial conditions. The general
 format is following:
 
-``InitialCondition`` ``#(in)`` ``conditions #(dc)``
+``InitialCondition`` ``#(in)`` ``conditions #(dc)`` (deprecated)
+   
+``InitialCondition`` ``#(in)`` ``f #(expr)`` ``dfdt #(expr)`` ``d2fdt2 #(expr)`` ``set #(in)`` ``dofs #(ia)`` 
+
 The order of particular
 records is optional, load, boundary or initial condition number is
 determined by (``num``\ #)(in) parameter. The numbering should start
@@ -939,6 +942,11 @@ from one and should end at n, where n is the number of records. Initial
 parameters are listed in ``conditions`` dictionary using keys followed
 by their initial values. Now ’v’ key represents velocity and ’a’ key
 represents acceleration.
+
+The second alternative allows to specify initial conditions providing expressions for unknown value, velocity and acceleration using expressions (``f``, ``dfdt``, ``d2fdt2`` parameters). 
+The expressions can depend on position (’c1’, ’c2’, and ’c3’ variables corresponding to x,y, and z coordinates of given node (dof manager)). 
+The individual DOFs are determined using ``dofs`` array. 
+The ``set`` parameter determines the set of nodes, to which the initial condition is applied.
 
 .. _TimeFunctionsRecords:
 
