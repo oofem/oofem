@@ -39,6 +39,7 @@
 #include "dictionary.h"
 #include "bcvaltype.h"
 #include "valuemodetype.h"
+#include "scalarfunction.h"
 
 ///@name Input fields for initial condition
 //@{
@@ -47,6 +48,10 @@
 #define _IFT_InitialCondition_valType "valtype"
 #define _IFT_InitialCondition_set "set"
 #define _IFT_InitialCondition_dofs "dofs"
+
+#define _IFT_InitialCondition_f "f"
+#define _IFT_InitialCondition_dfdt "dfdt"
+#define _IFT_InitialCondition_d2fdt2 "d2fdt2"
 //@}
 
 namespace oofem {
@@ -78,8 +83,18 @@ class IntArray;
 class OOFEM_EXPORT InitialCondition : public FEMComponent
 {
 private:
-    /// Dictionary of initial values.
+    /// flag indicating compatibility (initialValueDictionary) mode
+    bool compatibilityMode = false;
+    /// Dictionary of initial (constant) values (deprecated)
     Dictionary initialValueDictionary;
+
+    // Expression for initial condition value
+    ScalarFunction valueExpr;
+    // Expression for initial condition velocity
+    ScalarFunction velocityExpr;
+    // Expression for initial condition acceleration
+    ScalarFunction accelerationExpr;
+
     /// Physical meaning of bc value.
     bcValType valType;
     /// Set number
@@ -103,7 +118,7 @@ public:
      * @param mode Characteristic mode of unknown, characteristic type depends on DOF (represent physical meaning).
      * @return Value of initial condition for given mode.
      */
-    double give(ValueModeType mode);
+    double give(ValueModeType mode, const FloatArray& coords);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).

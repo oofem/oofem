@@ -35,17 +35,35 @@
 #include "initialcondition.h"
 #include "inputrecord.h"
 #include "cltypes.h"
+#include "function.h"
 
 namespace oofem {
-double InitialCondition :: give(ValueModeType type)
+double InitialCondition :: give(ValueModeType type, const FloatArray& coords)
 // Returns the prescribed value of the kinematic unknown 'u'.
 {
-    char u;
-    u =  cltypesGiveUnknownTypeModeKey(type);
-    if ( this->hasConditionOn(u) ) {
-        return initialValueDictionary.at(u);
+    if (this->compatibilityMode) {
+        char u;
+        u =  cltypesGiveUnknownTypeModeKey(type);
+        if ( this->hasConditionOn(u) ) {
+            return initialValueDictionary.at(u);
+        } else {
+            return 0.;
+        }
     } else {
-        return 0.;
+        switch (type)
+        {
+        case VM_Total:
+            return this->valueExpr.eval( { { "c", coords } }, this->giveDomain() );
+            break;
+        case VM_Velocity:
+            return this->velocityExpr.eval( { { "c", coords } }, this->giveDomain() );
+            break;
+        case VM_Acceleration:
+            return this->accelerationExpr.eval( { { "c", coords } }, this->giveDomain() );
+            break;
+        default:
+            return 0.0;
+        }
     }
 }
 
@@ -54,7 +72,11 @@ int InitialCondition :: hasConditionOn(int u)
 // Returns True if the receiver submits the unknown 'u' to an initial
 // condition, else returns False.
 {
-    return  ( initialValueDictionary.includes(u) );
+    if (this->compatibilityMode) {
+        return  ( initialValueDictionary.includes(u) );
+    } else {
+        return true;
+    }
 }
 
 
@@ -62,8 +84,12 @@ int InitialCondition :: hasConditionOn(ValueModeType type)
 // Returns True if the receiver submits the unknown 'u' to an initial
 // condition, else returns False.
 {
-    char u = cltypesGiveUnknownTypeModeKey(type);
-    return  ( initialValueDictionary.includes(u) );
+    if (this->compatibilityMode) {
+        char u = cltypesGiveUnknownTypeModeKey(type);
+        return  ( initialValueDictionary.includes(u) );
+    } else {
+        return true;
+    }
 }
 
 void InitialCondition :: printYourself()
@@ -79,7 +105,26 @@ InitialCondition :: initializeFrom(InputRecord &ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
+    if ( ir.hasField(_IFT_InitialCondition_conditions) ) {
+        // compatibility with old input files
+        IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
+        this->compatibilityMode = true;
+    } else {
+        this->compatibilityMode = false;
+        // new input file format
+        valueExpr.setValue(0.0);
+        if ( ir.hasField(_IFT_InitialCondition_f) ) {
+            IR_GIVE_OPTIONAL_FIELD(ir, valueExpr, _IFT_InitialCondition_f);
+        }
+        velocityExpr.setValue(0.0);
+        if ( ir.hasField(_IFT_InitialCondition_dfdt) ) {
+            IR_GIVE_OPTIONAL_FIELD(ir, velocityExpr, _IFT_InitialCondition_dfdt);
+        }
+        accelerationExpr.setValue(0.0);
+        if ( ir.hasField(_IFT_InitialCondition_d2fdt2) ) {
+            IR_GIVE_OPTIONAL_FIELD(ir, accelerationExpr, _IFT_InitialCondition_d2fdt2);
+        }
+    }
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_InitialCondition_valType);
@@ -96,8 +141,13 @@ InitialCondition :: initializeFrom(InputRecord &ir)
 void
 InitialCondition :: scale(ValueModeType type, double s)
 {
-    if ( this->hasConditionOn(type) ) {
-        initialValueDictionary.at(type) *= s;
+    if (this->compatibilityMode) {
+        if ( this->hasConditionOn(type) ) {
+            initialValueDictionary.at(type) *= s;
+        }
+    } else {
+        OOFEM_ERROR ("Not supoorted");
     }
 }
+
 } // end namespace oofem

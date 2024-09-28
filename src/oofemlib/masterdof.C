@@ -154,7 +154,8 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
         // first try if IC apply
         if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
             if ( this->hasIcOn(mode) ) {
-                return this->giveIc()->give(mode);
+                FloatArray c = this->dofManager->giveCoordinates();
+                return this->giveIc()->give(mode, c);
             } else if ( this->hasBc(tStep) ) {
                 return this->giveBcValue(mode, tStep);
             } else {
@@ -199,7 +200,8 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
-            return this->giveIc()->give(mode);
+            FloatArray c = this->dofManager->giveCoordinates();
+            return this->giveIc()->give(mode, c);
         } else {
             return 0.;
         }

@@ -194,7 +194,8 @@ PrimaryField :: applyDefaultInitialCondition()
             if ( icid > 0 && dof->isPrimaryDof() ) {
                 InitialCondition *ic = d->giveIc(icid);
                 if ( ic->hasConditionOn(VM_Total) ) {
-                    double val = ic->give(VM_Total);
+                    FloatArray c = dman->giveCoordinates();
+                    double val = ic->give(VM_Total, c);
                     int eq = dof->giveEqn();
                     dof->updateUnknownsDictionary(tStep, VM_Total, val);
                     if ( eq > 0 ) {
@@ -233,14 +234,16 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
     // We have to set initial value, and velocity, for this particular primary field.
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
+        FloatArray c = dman->giveCoordinates();
         double tot0 = 0., tot1 = 0.;
         if ( ic.hasConditionOn(VM_Total) ) {
-            tot0 = ic.give(VM_Total);
+            tot0 = ic.give(VM_Total, c);
         }
         if ( ic.hasConditionOn(VM_Incremental) ) {
-            tot1 = tot0 - ic.give(VM_Incremental);
+            tot1 = tot0 - ic.give(VM_Incremental, c);
         } else if ( ic.hasConditionOn(VM_Velocity) ) {
-            tot1 = tot0 - ic.give(VM_Velocity) * tStep->giveTimeIncrement();
+
+            tot1 = tot0 - ic.give(VM_Velocity,c) * tStep->giveTimeIncrement();
         } else {
             tot1 = tot0;
         }
