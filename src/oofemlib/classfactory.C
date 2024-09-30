@@ -78,6 +78,8 @@
 #include "fracturemanager.h"
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
+#include "feinterpol.h"
+#include "mpm.h"
 
 
 namespace oofem {
@@ -513,5 +515,27 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
 {
     return cf_store(loadBalancerList, name, creator);
 }
+
+
+std::unique_ptr<FEInterpolation> ClassFactory :: createFEInterpolation(const char *name)
+{
+    return cf_create<FEInterpolation>(feInterpolationList, name);
+}
+
+bool ClassFactory :: registerFEInterpolation(const char *name, std::unique_ptr<FEInterpolation> ( *creator )() )
+{
+    return cf_store(feInterpolationList, name, creator);
+}
+
+std::unique_ptr<Term> ClassFactory :: createTerm(const char *name)
+{
+    return cf_create<Term>(termList, name);
+}
+
+bool ClassFactory :: registerTerm(const char *name, std::unique_ptr<Term> ( *creator )() )
+{
+    return cf_store(termList, name, creator);
+}
+
 
 } // End namespace oofem

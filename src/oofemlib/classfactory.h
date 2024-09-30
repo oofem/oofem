@@ -100,6 +100,9 @@ class FailureCriteria;
 class ContactManager;
 class ContactDefinition;
 
+class FEInterpolation;
+class Term;
+
 #ifdef _GNUC
 #define OOFEM_ATTR_UNUSED __attribute__((unused))
 #else
@@ -163,6 +166,10 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, CTOR< ContactManager, class, Domain* > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, CTOR< ContactDefinition, class, ContactManager* > );
+// mpm stuff
+#define REGISTER_FEInterpolation(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFEInterpolation(_IFT_ ## class ## _Name, CTOR< FEInterpolation, class > );
+#define REGISTER_Term(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTerm(_IFT_ ## class ## _Name, CTOR< Term, class > );
+
 ///@todo What is this? Doesn't seem needed / Mikael
 #define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
 //@}
@@ -252,6 +259,10 @@ private:
     /// Associative container containing ContactManager creators
     std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
     std :: map < std :: string, std::unique_ptr<ContactDefinition> ( * )(ContactManager *) > contactDefList;
+
+    /// MPM stuff
+    std :: map < std :: string, std::unique_ptr<FEInterpolation> ( * )() > feInterpolationList;
+    std :: map < std :: string, std::unique_ptr<Term> ( * )() > termList;
 
 public:
     /// Creates empty factory
@@ -527,6 +538,13 @@ public:
 
     std::unique_ptr<ContactDefinition> createContactDefinition(const char *name, ContactManager *cMan);
     bool registerContactDefinition( const char *name, std::unique_ptr<ContactDefinition> ( *creator )( ContactManager * ) );
+
+    // MPM stuff
+    std::unique_ptr<FEInterpolation> createFEInterpolation(const char *name);
+    bool registerFEInterpolation( const char *name, std::unique_ptr<FEInterpolation> ( *creator )( ) );
+
+    std::unique_ptr<Term> createTerm(const char *name);
+    bool registerTerm( const char *name, std::unique_ptr<Term> ( *creator )( ) );
 
     // Failure module (in development!)
     std::unique_ptr<FailureCriteria> createFailureCriteria(const char *name, int num, FractureManager *fracManager);

@@ -36,6 +36,8 @@
 #define fei1dlin_h
 
 #include "feinterpol1d.h"
+#include "classfactory.h"
+
 
 namespace oofem {
 /**
@@ -47,7 +49,7 @@ protected:
     int cindx = 0;
 
 public:
-    FEI1dLin(int coordIndx) : FEInterpolation1d(1), cindx(coordIndx) { }
+    FEI1dLin(int coordIndx=0) : FEInterpolation1d(1), cindx(coordIndx) { }
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Line; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
@@ -73,5 +75,9 @@ public:
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 };
+
+#define _IFT_FEI1dLin_Name "feidLin"
+REGISTER_FEInterpolation(FEI1dLin)
+
 } // end namespace oofem
 #endif // fei1dlin_h
