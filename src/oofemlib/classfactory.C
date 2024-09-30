@@ -79,7 +79,7 @@
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
 #include "feinterpol.h"
-#include "mpm.h"
+#include "../mpm/mpm.h"
 
 
 namespace oofem {
