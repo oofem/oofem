@@ -9,7 +9,7 @@ sys.path.extend(['/home/bp/devel/oofem.git/build', '/home/bp/devel/oofem.git/bin
 import oofempy
 import util
 import numpy as np
-import pyvista as pv
+#import pyvista as pv
  
 
 
