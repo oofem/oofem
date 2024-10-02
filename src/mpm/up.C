@@ -143,18 +143,18 @@ class UPElement : public MPElement {
         getSurfaceLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
 
         // integrate traction contribution (momentum balance)
-        int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
+        this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs, 's'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfSurfaceDOFs());
         answer.zero();
         answer.assemble(contrib, locu);
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        o = getP()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
+        this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP()->dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
 
@@ -171,18 +171,18 @@ class UPElement : public MPElement {
         getEdgeLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
 
         // integrate traction contribution (momentum balance)
-        int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
+        this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs,'e'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfEdgeDOFs());
         answer.zero();
         answer.assemble(contrib, locu);
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
-        o = getP().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+        o = getP()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
         std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-        this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
+        this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP()->dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
 
@@ -231,8 +231,8 @@ class UPElement : public MPElement {
     private:
         virtual int  giveNumberOfUDofs() const = 0;
         virtual int  giveNumberOfPDofs() const = 0;
-        virtual const Variable& getU() const = 0;
-        virtual const Variable& getP() const = 0;
+        virtual const Variable* getU() const = 0;
+        virtual const Variable* getP() const = 0;
 };
 
 /**
@@ -243,10 +243,10 @@ class UPTetra21 : public UPElement {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& p;
-        const static Variable& u;
+        const static FEI3dTetLin pInterpol;
+        const static FEI3dTetQuad uInterpol;
+        const static Variable p;
+        const static Variable u;
 
       
     public:
@@ -305,8 +305,8 @@ class UPTetra21 : public UPElement {
     private:
         virtual int  giveNumberOfUDofs() const override {return 30;} 
         virtual int  giveNumberOfPDofs() const override {return 4;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
+        virtual const Variable* getU() const override {return &u;}
+        virtual const Variable* getP() const override {return &p;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
@@ -316,10 +316,10 @@ class UPTetra21 : public UPElement {
         }
 };
 
-const FEInterpolation & UPTetra21::uInterpol = FEI3dTetQuad();
-const FEInterpolation & UPTetra21::pInterpol = FEI3dTetLin();
-const Variable& UPTetra21::p = Variable(UPTetra21::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPTetra21::u = Variable(UPTetra21::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const FEI3dTetQuad UPTetra21::uInterpol;
+const FEI3dTetLin  UPTetra21::pInterpol;
+const Variable UPTetra21::p(&UPTetra21::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPTetra21::u(&UPTetra21::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_UPTetra21_Name "uptetra21"
 REGISTER_Element(UPTetra21)
@@ -332,10 +332,10 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& p;
-        const static Variable& u;
+        const static FEI3dHexaLin  pInterpol;
+        const static FEI3dHexaLin  uInterpol;
+        const static Variable p;
+        const static Variable u;
       
     public:
     UPBrick11(int n, Domain* d): 
@@ -397,8 +397,8 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
 private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
         virtual int  giveNumberOfPDofs() const override {return 8;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
+        virtual const Variable* getU() const override {return &u;}
+        virtual const Variable* getP() const override {return &p;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
@@ -408,10 +408,10 @@ private:
         }
 };
 
-const FEInterpolation & UPBrick11::uInterpol = FEI3dHexaLin();
-const FEInterpolation & UPBrick11::pInterpol = FEI3dHexaLin();
-const Variable& UPBrick11::p = Variable(UPBrick11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPBrick11::u = Variable(UPBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const FEI3dHexaLin  UPBrick11::uInterpol;
+const FEI3dHexaLin  UPBrick11::pInterpol;
+const Variable UPBrick11::p(&UPBrick11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPBrick11::u(&UPBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_UPBrick11_Name "upbrick11"
 REGISTER_Element(UPBrick11)
@@ -424,10 +424,10 @@ class UPQuad11 : public UPElement {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & pInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& p;
-        const static Variable& u;
+        const static FEI2dQuadLin pInterpol;
+        const static FEI2dQuadLin uInterpol;
+        const static Variable p;
+        const static Variable u;
        
     public:
     UPQuad11(int n, Domain* d): 
@@ -483,8 +483,8 @@ class UPQuad11 : public UPElement {
 private:
         virtual int  giveNumberOfUDofs() const override {return 8;} 
         virtual int  giveNumberOfPDofs() const override {return 4;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getP() const override {return p;}
+        virtual const Variable* getU() const override {return &u;}
+        virtual const Variable* getP() const override {return &p;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
@@ -494,10 +494,10 @@ private:
         }
 };
 
-const FEInterpolation & UPQuad11::uInterpol = FEI2dQuadLin(1,2);
-const FEInterpolation & UPQuad11::pInterpol = FEI2dQuadLin(1,2);
-const Variable& UPQuad11::p = Variable(UPQuad11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable& UPQuad11::u = Variable(UPQuad11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
+const FEI2dQuadLin  UPQuad11::uInterpol(1,2);
+const FEI2dQuadLin  UPQuad11::pInterpol(1,2);
+const Variable UPQuad11::p(&UPQuad11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPQuad11::u(&UPQuad11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
 
 #define _IFT_UPQuad11_Name "upquad11"
 REGISTER_Element(UPQuad11)

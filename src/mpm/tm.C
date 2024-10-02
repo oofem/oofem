@@ -68,8 +68,8 @@ class TMElement : public MPElement {
     private:
         virtual int  giveNumberOfUDofs() const = 0;
         virtual int  giveNumberOfTDofs() const = 0;
-        virtual const Variable& getU() const = 0;
-        virtual const Variable& getT() const = 0;
+        virtual const Variable* getU() const = 0;
+        virtual const Variable* getT() const = 0;
 
     public:
     TMElement(int n, Domain* d): 
@@ -137,7 +137,7 @@ class TMElement : public MPElement {
             if (bbc) {
                 FloatMatrix contrib;
                 IntArray loc;
-                int iorder = getU().interpolation.giveInterpolationOrder()+bbc->giveApproxOrder();
+                int iorder = getU()->interpolation->giveInterpolationOrder()+bbc->giveApproxOrder();
                 std::unique_ptr<IntegrationRule> ir;
                 answer.clear();
                 if (bbc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
@@ -165,7 +165,7 @@ class TMElement : public MPElement {
             IntArray loct, tc;
             FloatArray contrib2;
             answer.clear();            
-            int o = getT().interpolation.giveInterpolationOrder()+bl->giveApproxOrder();
+            int o = getT()->interpolation->giveInterpolationOrder()+bl->giveApproxOrder();
             if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
                 std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundaryID, this->giveGeometryType());
                 this->integrateSurfaceTerm_c(answer, NTaTmTe(getT(), getT(), bl, boundaryID, 's'), ir2.get(), boundaryID, tStep);
@@ -196,15 +196,15 @@ class TMElement : public MPElement {
             getSurfaceLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
 
             // integrate traction contribution (momentum balance)
-            int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
             std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-            this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs, 's'), boundary), ir.get(), boundary, tStep);
+            this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs, 's'), boundary), ir.get(), boundary, tStep);
             answer.assemble(contrib, locu);
 
             // integrate mass (fluid) flux normal to the boundary (mass balance) 
-            o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            o = getT()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
             std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
-            this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
+            this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT()->dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
             contrib2.times(-1.0);
             answer.assemble(contrib2, loct);
 
@@ -231,15 +231,15 @@ class TMElement : public MPElement {
             getEdgeLocalCodeNumbers (loct, Variable::VariableQuantity::Pressure) ;
 
             // integrate traction contribution (momentum balance)
-            int o = getU().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
             std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-            this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU().dofIDs,'e'), boundary), ir.get(), boundary, tStep);
+            this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs,'e'), boundary), ir.get(), boundary, tStep);
             answer.assemble(contrib, locu);
 
             // integrate mass (fluid) flux normal to the boundary (mass balance) 
-            o = getT().interpolation.giveInterpolationOrder()+load->giveApproxOrder();
+            o = getT()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
             std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
-            this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT().dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
+            this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT()->dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
             contrib2.times(-1.0);
             answer.assemble(contrib2, loct);
         } else if (bct == ConvectionBC) {
@@ -258,8 +258,8 @@ class TMElement : public MPElement {
                 IntArray locu, loct;
                 getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
                 getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
-                this->integrateTerm_c(contribu, NTf_Body(getU(), BodyFluxFunctor(load, getU().dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
-                this->integrateTerm_c(contribt, NTf_Body(getT(), BodyFluxFunctor(load, getT().dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
+                this->integrateTerm_c(contribu, NTf_Body(getU(), BodyFluxFunctor(load, getU()->dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
+                this->integrateTerm_c(contribt, NTf_Body(getT(), BodyFluxFunctor(load, getT()->dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
                 answer.assemble(contribu, locu);
                 answer.assemble(contribt, loct);
             } else {
@@ -325,10 +325,10 @@ class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & tInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& t;
-        const static Variable& u;
+        const static FEI3dHexaLin  tInterpol;
+        const static FEI3dHexaLin  uInterpol;
+        const static Variable t;
+        const static Variable u;
       
     public:
     TMBrick11(int n, Domain* d): 
@@ -390,8 +390,8 @@ class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
 private:
         virtual int  giveNumberOfUDofs() const override {return 24;} 
         virtual int  giveNumberOfTDofs() const override {return 8;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getT() const override {return t;}
+        virtual const Variable* getU() const override {return &u;}
+        virtual const Variable* getT() const override {return &t;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
@@ -401,10 +401,10 @@ private:
         }
 };
 
-const FEInterpolation & TMBrick11::uInterpol = FEI3dHexaLin();
-const FEInterpolation & TMBrick11::tInterpol = FEI3dHexaLin();
-const Variable& TMBrick11::t = Variable(TMBrick11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
-const Variable& TMBrick11::u = Variable(TMBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const FEI3dHexaLin TMBrick11::uInterpol;
+const FEI3dHexaLin TMBrick11::tInterpol;
+const Variable TMBrick11::t(&TMBrick11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable TMBrick11::u(&TMBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_TMBrick11_Name "tmbrick11"
 REGISTER_Element(TMBrick11)
@@ -418,10 +418,10 @@ class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
     protected:
         //FEI3dTetLin pInterpol;
         //FEI3dTetQuad uInterpol;
-        const static FEInterpolation & tInterpol;
-        const static FEInterpolation & uInterpol;
-        const static Variable& t;
-        const static Variable& u;
+        const static FEI3dTetLin tInterpol;
+        const static FEI3dTetLin uInterpol;
+        const static Variable t;
+        const static Variable u;
       
     public:
     TMTetra11(int n, Domain* d): 
@@ -483,8 +483,8 @@ class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
 private:
         virtual int  giveNumberOfUDofs() const override {return 12;} 
         virtual int  giveNumberOfTDofs() const override {return 4;}
-        virtual const Variable& getU() const override {return u;}
-        virtual const Variable& getT() const override {return t;}
+        virtual const Variable* getU() const override {return &u;}
+        virtual const Variable* getT() const override {return &t;}
         void computeGaussPoints() override {
             if ( integrationRulesArray.size() == 0 ) {
                 integrationRulesArray.resize( 1 );
@@ -494,10 +494,10 @@ private:
         }
 };
 
-const FEInterpolation & TMTetra11::uInterpol = FEI3dTetLin();
-const FEInterpolation & TMTetra11::tInterpol = FEI3dTetLin();
-const Variable& TMTetra11::t = Variable(TMTetra11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
-const Variable& TMTetra11::u = Variable(TMTetra11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const FEI3dTetLin TMTetra11::uInterpol;
+const FEI3dTetLin TMTetra11::tInterpol;
+const Variable TMTetra11::t(&TMTetra11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable TMTetra11::u(&TMTetra11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_TMTetra11_Name "tmtetra11"
 REGISTER_Element(TMTetra11)

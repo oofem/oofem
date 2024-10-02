@@ -43,6 +43,8 @@ set (core_unsorted
     #
     vtkhdf5reader.C
     #
+    interpolationcatalogue.C
+    #
     oofemcfg.C
     )
 

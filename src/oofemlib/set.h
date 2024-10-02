@@ -188,6 +188,8 @@ protected:
      */
     void computeIntArray(IntArray &answer, const IntArray &specified, std :: list< Range >ranges);
 };
-}
 
+extern Set dummySet;
+
+} // end namespace oofem
 #endif // set_h

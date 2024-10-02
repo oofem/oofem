@@ -76,8 +76,5 @@ public:
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 };
 
-#define _IFT_FEI1dLin_Name "feidLin"
-REGISTER_FEInterpolation(FEI1dLin)
-
 } // end namespace oofem
 #endif // fei1dlin_h

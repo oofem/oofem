@@ -364,4 +364,8 @@ void Set :: restoreContext(DataStream &stream, ContextMode mode)
 
     this->totalNodes.clear();
 }
-}
+
+Set dummySet(0, nullptr);
+
+} // end namespace oofem
+

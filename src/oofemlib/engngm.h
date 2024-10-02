@@ -59,6 +59,7 @@
 #include "initmodulemanager.h"
 #include "monitormanager.h"
 #ifdef __MPM_MODULE
+#include "../mpm/mpm.h"
 #include "../mpm/integral.h"
 #endif
 
@@ -312,14 +313,21 @@ protected:
     /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
     ProblemCommunicator *nonlocCommunicator;
 #endif
-#ifdef __MPM_MODULE
-    /// experimental mpm 
-    std :: vector < std :: unique_ptr< Integral > > integralList;
-#endif
     /// Message tags
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
     /// List where parallel contexts are stored.
     std :: vector< ParallelContext > parallelContextList;
+
+
+#ifdef __MPM_MODULE
+    /// experimental mpm symbolic support
+    std :: map< std :: string, std::unique_ptr< Variable > >  variableMap;
+    std :: map< std :: string, std::unique_ptr< Term > >  termMap;
+    std :: vector < std :: unique_ptr< Integral > > integralList;
+#endif
+
+
+
 
     /// Flag for suppressing output to file.
     bool suppressOutput;
@@ -1018,6 +1026,14 @@ public:
         integralList.resize(size+1);
         integralList[size].reset(obj);
     }
+    const Variable* giveVariableByName (std::string name) {
+        // @BP: add better error handling than provided by at()
+        return variableMap.at(name).get();
+        
+    }
+    /// instanciates mpm stuff (variables, terms, and integrals)
+    /// returns nonzero if succesfull
+    int instanciateMPM (DataReader &dr, InputRecord &ir);
     // end mpm experimental
 #endif
 

@@ -517,16 +517,6 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
 }
 
 
-std::unique_ptr<FEInterpolation> ClassFactory :: createFEInterpolation(const char *name)
-{
-    return cf_create<FEInterpolation>(feInterpolationList, name);
-}
-
-bool ClassFactory :: registerFEInterpolation(const char *name, std::unique_ptr<FEInterpolation> ( *creator )() )
-{
-    return cf_store(feInterpolationList, name, creator);
-}
-
 std::unique_ptr<Term> ClassFactory :: createTerm(const char *name)
 {
     return cf_create<Term>(termList, name);

@@ -52,18 +52,18 @@ class PoissonTerm : public Term {
     protected:
         double c;
     public:
-    PoissonTerm (const Variable& unknownField, const Variable &testField, double c) : Term(unknownField, testField) {
+    PoissonTerm (const Variable* unknownField, const Variable *testField, double c) : Term(unknownField, testField) {
         this->c = c;
     }
 
-    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const {
-        interpol.evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
+    void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords) const {
+        interpol->evaldNdx(answer, coords, FEIElementGeometryWrapper(&cell));
     }
 
 
     void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep *tstep) const override {
-        const FEInterpolation & si = field.interpolation;
-        const FEInterpolation &ti = testField.interpolation;
+        const FEInterpolation * si = field->interpolation;
+        const FEInterpolation * ti = testField->interpolation;
         FloatMatrix bs, bt;
         this->grad(bs, this->field,si,e,gp->giveNaturalCoordinates());
         this->grad(bt, this->testField,ti,e,gp->giveNaturalCoordinates());
@@ -97,9 +97,9 @@ class PoissonElement : public MPElement {
     PoissonElement(int n, Domain* d): 
         MPElement(n,d), 
         interpol(1,2), 
-        t(interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3), 
-        dt(interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3, &t),
-        p(t,dt,1.0),
+        t(&interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3), 
+        dt(&interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3, &t),
+        p(&t,&dt,1.0),
         ir(1, this)
     {
         numberOfDofMans  = 3;

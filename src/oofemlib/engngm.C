@@ -78,6 +78,10 @@
  #include "loadbalancer.h"
 #endif
 
+#ifdef __MPM_MODULE
+ #include "mpm/mpm.h"
+#endif
+
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
@@ -223,6 +227,7 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         initModuleManager.initializeFrom(ir);
         monitorManager.initializeFrom(ir);
 
+
         if ( this->nMetaSteps == 0 ) {
             inputReaderFinish = false;
             this->instanciateDefaultMetaStep(ir);
@@ -236,6 +241,10 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         exportModuleManager.instanciateYourself(dr, ir);
         // instanciate monitor manager
         monitorManager.instanciateYourself(dr, ir);
+#ifdef __MPM_MODULE
+        // instanciate mpm stuff (variables, terms, and integrals)
+        this->instanciateMPM(dr,ir);
+#endif
         this->instanciateDomains(dr);
 
         exportModuleManager.initialize();
@@ -379,7 +388,42 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord &ir)
     return 1;
 }
 
+#ifdef __MPM_MODULE
+int 
+EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
+    int nvars=0, nterms=0, nintegrals=0;
+    // read number of variables, terms, and integrals
+    IR_GIVE_OPTIONAL_FIELD(ir, nvars, "nvariables");
+    IR_GIVE_OPTIONAL_FIELD(ir, nterms, "nterms");
+    IR_GIVE_OPTIONAL_FIELD(ir, nintegrals, "nintegrals");
+    // instanciate variables
+    std :: string name;
+    for ( int i = 0; i < nvars; i++ ) {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmVarRec, i + 1);
+        IR_GIVE_FIELD(mir, name, "name");
+        std::unique_ptr< Variable > var = std :: make_unique< Variable >();
+        var->initializeFrom(mir);
+        variableMap[name] = std::move(var);
+    }
+    // instanciate terms
+    for ( int i = 0; i < nterms; i++ ) {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmTermRec, i + 1);
+        IR_GIVE_FIELD(mir, name, "name");
+        std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());  
+        term->initializeFrom(mir, this);
+        termMap[name] = std::move(term);
+    }
+    // instanciate integrals
+    for ( int i = 0; i < nintegrals; i++ ) {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmIntegralRec, i + 1);
+        std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, dummySet, nullptr);
+        integral->initializeFrom(mir, this);
+        this->addIntegral(std::move(integral));
+    }
+    return 1;
+}   
 
+#endif
 int
 EngngModel :: giveNumberOfDomainEquations(int id, const UnknownNumberingScheme &num)
 {

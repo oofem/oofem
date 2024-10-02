@@ -48,9 +48,9 @@ namespace oofem {
  */
 class TMBTSigTerm : public BTSigTerm {
     protected:
-    const Variable& temperatureField;
+    const Variable* temperatureField;
     public:
-    TMBTSigTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) ;
+    TMBTSigTerm (const Variable *testField, const Variable* unknownField, const Variable* temperatureField) ;
     /**
      * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
      * 
@@ -68,7 +68,7 @@ class BDalphaPiTerm : public Term {
     protected:
     ValueModeType m;
     public:
-    BDalphaPiTerm (const Variable &testField, const Variable& unknownField, ValueModeType m) ;
+    BDalphaPiTerm (const Variable *testField, const Variable* unknownField, ValueModeType m) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -95,7 +95,7 @@ class BDalphaPiTerm : public Term {
 class TMgNTfTerm : public gNTfTerm {
     protected:
     public:
-    TMgNTfTerm (const Variable &testField, const Variable& unknownField, MatResponseMode lhsType, MatResponseMode rhsType) ;
+    TMgNTfTerm (const Variable *testField, const Variable* unknownField, MatResponseMode lhsType, MatResponseMode rhsType) ;
 
     
     /**
@@ -113,7 +113,7 @@ class TMgNTfTerm : public gNTfTerm {
 class BTdSigmadT : public Term {
     protected:
     public:
-    BTdSigmadT (const Variable &testField, const Variable& unknownField) ;
+    BTdSigmadT (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -143,7 +143,7 @@ class NTaTmTe : public Term {
         int boundaryID;
         char boundaryType;
     public:
-    NTaTmTe (const Variable &testField, const Variable& unknownField, BoundaryLoad* bl, int boundaryID, char boundaryType) ;
+    NTaTmTe (const Variable *testField, const Variable* unknownField, BoundaryLoad* bl, int boundaryID, char boundaryType) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -168,7 +168,7 @@ class NTaTmTe : public Term {
 class InternalTMFluxSourceTerm : public TMBTSigTerm {
     protected:
     public:
-    InternalTMFluxSourceTerm (const Variable &testField, const Variable& unknownField, const Variable& temperatureField) ;
+    InternalTMFluxSourceTerm (const Variable *testField, const Variable* unknownField, const Variable* temperatureField) ;
     /**
      * @brief Evaluates Internal forces vector, i.e. $b^T\sigma(u)$
      * 

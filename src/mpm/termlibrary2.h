@@ -50,7 +50,7 @@ namespace oofem {
  * @param cell 
  * @param coords 
  */
-void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) ;
+void deltaB(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) ;
 /**
  * @brief Evaluates $B$ = matrix; 
  * 
@@ -60,11 +60,11 @@ void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& inter
  * @param cell 
  * @param coords 
  */
-void evalB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) ;
+void evalB(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) ;
 
 /** evaluetes volume fraction by interpolating the values in gp
  **/
-  double evalVolumeFraction(const Variable&vf, MPElement& e, const FloatArray& coords, TimeStep* tstep);
+  double evalVolumeFraction(const Variable*vf, MPElement& e, const FloatArray& coords, TimeStep* tstep);
 
 
   
@@ -76,7 +76,7 @@ class NTBdivTerm : public Term {
     protected:
     ValueModeType m;
     public:
-    NTBdivTerm (const Variable &testField, const Variable& unknownField, ValueModeType m) ;
+    NTBdivTerm (const Variable *testField, const Variable* unknownField, ValueModeType m) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -104,9 +104,9 @@ class NTBdivTerm : public Term {
 /// @brief evaluates ∫_Ω▒〖P 〖δv〗_(i,i) ϕdΩ〗
 class deltaBTfiNpTerm : public Term {
     protected:
-        const Variable& volumeFraction;
+        const Variable* volumeFraction;
     public:
-    deltaBTfiNpTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) ;
+    deltaBTfiNpTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -132,13 +132,13 @@ class deltaBTfiNpTerm : public Term {
 /// @brief evalueates ∫_Ω▒〖N_d^T ∅_(,i) N_p  dΩ〖 r〗_p
 class NdTdvfNpTerm : public Term {
     protected:
-        const Variable& volumeFraction;
+        const Variable* volumeFraction;
     public:
     /// @brief Constructor
     /// @param unknownField 
     /// @param testField 
     /// @param volumeFraction 
-    NdTdvfNpTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) ;
+    NdTdvfNpTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -167,7 +167,7 @@ class BTmuBTerm : public Term {
     /// @brief Constructor
     /// @param unknownField 
     /// @param testField 
-    BTmuBTerm (const Variable &testField, const Variable& unknownField) ;
+    BTmuBTerm (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -192,13 +192,13 @@ class BTmuBTerm : public Term {
 /// @brief evalueates ∫_Ω▒〖μ∅(〗 u ̇_(i,j)+u ̇_(j,i))〖δv〗_(i,j) dΩ
 class BTmuVfBTerm : public Term {
     protected:
-        const Variable& volumeFraction; 
+        const Variable* volumeFraction; 
     public:
     /// @brief Constructor
     /// @param unknownField 
     /// @param testField 
     /// @param volumeFraction 
-    BTmuVfBTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) ;
+    BTmuVfBTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -223,13 +223,13 @@ class BTmuVfBTerm : public Term {
 /// @brief evalueates ∫_Ω▒〖〖δv〗_i∅μS_ij^(-1) v_j dΩ+  〗
 class NTmuVfSNTerm : public Term {
     protected:
-        const Variable& volumeFraction; 
+        const Variable* volumeFraction; 
     public:
     /// @brief Constructor
     /// @param unknownField 
     /// @param testField 
     /// @param volumeFraction 
-    NTmuVfSNTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) ;
+    NTmuVfSNTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -255,7 +255,7 @@ class NTmuVfSNTerm : public Term {
 class deltaBTNpTerm : public Term {
     protected:
     public:
-    deltaBTNpTerm (const Variable &testField, const Variable& unknownField) ;
+    deltaBTNpTerm (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$

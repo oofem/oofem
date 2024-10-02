@@ -46,7 +46,7 @@ namespace oofem {
 class BTSigTerm : public Term {
     protected:
     public:
-    BTSigTerm (const Variable &testField, const Variable& unknownField) ;
+    BTSigTerm (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -76,7 +76,7 @@ class BTSigTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const  ;
+    void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const  ;
     
 };
 
@@ -87,7 +87,7 @@ class gNTfTerm : public Term {
     protected:
     MatResponseMode lhsType, rhsType;
     public:
-    gNTfTerm (const Variable &testField, const Variable& unknownField, MatResponseMode lhsType, MatResponseMode rhsType) ;
+    gNTfTerm (const Variable *testField, const Variable* unknownField, MatResponseMode lhsType, MatResponseMode rhsType) ;
 
     /**
      * @brief Evaluates $\bf{H}$ matrix, the linearization of $w^T(\grad N)^T f(p)$, i.e. $(\grad N)^T \bf{k}/\mu \grad p = \bf{H}$
@@ -117,7 +117,7 @@ class gNTfTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords) const ;
+    void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords) const ;
     
 };
 
@@ -127,7 +127,7 @@ class gNTfTerm : public Term {
 class BTamNTerm : public Term {
     protected:
     public:
-    BTamNTerm (const Variable &testField, const Variable& unknownField) ;
+    BTamNTerm (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -157,7 +157,7 @@ class BTamNTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const ;
+    void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const ;
     
 };
 
@@ -167,7 +167,7 @@ class BTamNTerm : public Term {
 class NTamTBTerm : public Term {
     protected:
     public:
-    NTamTBTerm (const Variable &testField, const Variable& unknownField) ;
+    NTamTBTerm (const Variable *testField, const Variable* unknownField) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -197,7 +197,7 @@ class NTamTBTerm : public Term {
      * @param cell 
      * @param coords 
      */
-    void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const ;
+    void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const ;
     
 };
 
@@ -209,7 +209,7 @@ class NTcN : public Term {
     protected:
         MatResponseMode ctype;
     public:
-    NTcN (const Variable &testField, const Variable& unknownField, MatResponseMode ctype) ;
+    NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -237,7 +237,7 @@ class NTcN : public Term {
  */
 class NTfFunctor {
     public:
-  virtual void evaluate(FloatArray& answer, const FloatArray& coords, MPElement& cell, const Variable &testField, TimeStep* tStep) const = 0;
+  virtual void evaluate(FloatArray& answer, const FloatArray& coords, MPElement& cell, const Variable *testField, TimeStep* tStep) const = 0;
 };
 
 
@@ -250,14 +250,14 @@ class BoundaryFluxFunctor: public NTfFunctor {
     public:
     BoundaryFluxFunctor(BoundaryLoad *load, int surf, const IntArray& dofIDs, char btype) : load(load), dofIDs(dofIDs), isurf(surf), type(btype) {}
 
-    void evaluate(FloatArray& answer, const FloatArray& lcoords, MPElement& cell, const Variable &testField, TimeStep* tStep) const override {
+    void evaluate(FloatArray& answer, const FloatArray& lcoords, MPElement& cell, const Variable *testField, TimeStep* tStep) const override {
 
         ValueModeType mode = VM_Total;
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValues(answer, tStep, lcoords, dofIDs, mode);
         } else {
             FloatArray globalIPcoords;
-            testField.interpolation.local2global(globalIPcoords, lcoords, FEIElementGeometryWrapper(&cell) );
+            testField->interpolation->local2global(globalIPcoords, lcoords, FEIElementGeometryWrapper(&cell) );
             load->computeValues(answer, tStep, globalIPcoords, dofIDs, mode);
         }
 
@@ -269,7 +269,7 @@ class BoundaryFluxFunctor: public NTfFunctor {
         } else {
             FloatMatrix T;
             // then to global c.s
-            if ( cell.computeFluxLBToLRotationMatrix(T, isurf, lcoords, testField.q, type )) {
+            if ( cell.computeFluxLBToLRotationMatrix(T, isurf, lcoords, testField->q, type )) {
                 answer.rotatedWith(T, 'n');
             }
         }
@@ -283,14 +283,14 @@ class BodyFluxFunctor: public NTfFunctor {
     public:
     BodyFluxFunctor(BodyLoad *load, const IntArray& dofIDs) : load(load), dofIDs(dofIDs) {}
 
-    void evaluate(FloatArray& answer, const FloatArray& lcoords, MPElement& cell, const Variable &testField, TimeStep* tStep) const override {
+    void evaluate(FloatArray& answer, const FloatArray& lcoords, MPElement& cell, const Variable *testField, TimeStep* tStep) const override {
 
         ValueModeType mode = VM_Total;
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValues(answer, tStep, lcoords, dofIDs, mode);
         } else {
             FloatArray globalIPcoords;
-            testField.interpolation.local2global(globalIPcoords, lcoords, FEIElementGeometryWrapper(&cell) );
+            testField->interpolation->local2global(globalIPcoords, lcoords, FEIElementGeometryWrapper(&cell) );
             load->computeValues(answer, tStep, globalIPcoords, dofIDs, mode);
         }
 
@@ -314,7 +314,7 @@ class NTf_Surface : public Term {
         const NTfFunctor& f;
         int isurf;
     public:
-  NTf_Surface (const Variable &testField, const NTfFunctor& f, int surf) ;
+    NTf_Surface (const Variable *testField, const NTfFunctor& f, int surf) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -344,7 +344,7 @@ class NTf_Edge : public Term {
         const NTfFunctor& f;
         int isurf;
     public:
-  NTf_Edge (const Variable &testField, const NTfFunctor& f, int surf) ;
+   NTf_Edge (const Variable *testField, const NTfFunctor& f, int surf) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -373,7 +373,7 @@ class NTf_Body : public Term {
     protected:
         const NTfFunctor& f;
     public:
-  NTf_Body (const Variable &testField, const NTfFunctor& f) ;
+    NTf_Body (const Variable *testField, const NTfFunctor& f) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)

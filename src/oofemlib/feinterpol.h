@@ -511,5 +511,124 @@ public:
 
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
+
+
+class DummyFEInterpolation : public FEInterpolation
+{
+public:
+    DummyFEInterpolation() : FEInterpolation(0) { }
+    integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
+    const Element_Geometry_Type giveGeometryType() const override {return EGT_unknown;}
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+        return 0.;
+    }
+
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+        return 0;
+    }
+
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        return 0.;
+    }
+
+    void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    double boundaryEdgeEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+        return 0.;
+    }
+
+    double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        return 0.;
+    }
+
+    void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary, const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
+
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override {
+        return IntArray();
+    }
+
+
+    void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+        return 0.;
+    }
+
+    double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        return 0.;
+    }
+
+    void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary, const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
+
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override {
+        return IntArray();
+    }
+
+    void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+
+    void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+    }
+    double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        answer.clear();
+        return 0.;
+    }
+    double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        return 0.;
+    }
+
+    IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type) const override {
+        return IntArray();
+    }
+    integrationDomain giveBoundaryIntegrationDomain(int boundary, const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
+
+    double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo) const override {
+        return 0.;
+    }
+
+    int giveNsd(const Element_Geometry_Type) const override {
+        return 0;
+    }
+
+    int giveNumberOfEdges(const Element_Geometry_Type) const override {
+        return 0;
+    }
+
+    int giveNumberOfNodes(const Element_Geometry_Type) const override {
+        return 0;
+    }
+};
+
+
 } // end namespace oofem
 #endif // feinterpol_h

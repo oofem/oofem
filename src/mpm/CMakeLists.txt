@@ -1,3 +1,8 @@
+set (mpm_core
+    mpm.C
+    )
+
+
 set (mpm_element
     termlibrary.C
     termlibrary2.C
@@ -13,6 +18,7 @@ set (mpm_element
     )
 
 set (mpm
+    ${mpm_core}    
     ${mpm_element}
     ${mpm_problems}
     )

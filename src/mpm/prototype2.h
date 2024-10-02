@@ -165,13 +165,13 @@ namespace oofem {
 
     class MPMSymbolicTerm : public Term {
         public:
-        MPMSymbolicTerm (const Variable &testField, const Variable& unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
+        MPMSymbolicTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
         void initializeCell(Element& cell) const override {
             // allocate necessary DOFs
             IntArray enodes, einteranlnodes, dofIDs;
             // process term field
-            dofIDs = this->field.getDofManDofIDs();
-            this->field.interpolation.giveCellDofMans(enodes, einteranlnodes, &cell);
+            dofIDs = this->field->getDofManDofIDs();
+            this->field->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
             for (auto i: enodes) {
                 DofManager* dman =  cell.giveDofManager(i);
                 for (auto d: dofIDs) {
@@ -193,8 +193,8 @@ namespace oofem {
                 }
             }
             // process testField
-            dofIDs = this->testField.getDofManDofIDs();
-            this->testField.interpolation.giveCellDofMans(enodes, einteranlnodes, &cell);
+            dofIDs = this->testField->getDofManDofIDs();
+            this->testField->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
             for (auto i: enodes) {
                 DofManager* dman =  cell.giveDofManager(i);
                 for (auto d: dofIDs) {
@@ -217,7 +217,7 @@ namespace oofem {
             }
             // set up the integration rule on cell
             // get required number of IPs
-            int myorder = this->field.interpolation.giveInterpolationOrder() *  this->testField.interpolation.giveInterpolationOrder(); 
+            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
             GaussIntegrationRule ir(0, &cell);
             int nip = ir.getRequiredNumberOfIntegrationPoints(cell.giveIntegrationDomain(), myorder);
             // create nd insert it toelement if not exist yet.
@@ -239,7 +239,7 @@ namespace oofem {
             }
         }
         IntegrationRule* giveElementIntegrationRule(Element* e) const override {
-            int myorder = this->field.interpolation.giveInterpolationOrder() *  this->testField.interpolation.giveInterpolationOrder(); 
+            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
             GaussIntegrationRule ir(0, e);
             int nip = ir.getRequiredNumberOfIntegrationPoints(e->giveIntegrationDomain(), myorder);
             std::vector< std :: unique_ptr< IntegrationRule > > &irvec = e->giveIntegrationRulesArray();
@@ -256,7 +256,7 @@ namespace oofem {
     class BTSigmaTerm2 : public MPMSymbolicTerm {
         protected:
         public:
-        BTSigmaTerm2 (const Variable &testField, const Variable& unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
+        BTSigmaTerm2 (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
 
         /**
          * @brief Evaluates the linearization of $B^T\sigma(u)$, i.e. $B^TDBu$
@@ -268,7 +268,7 @@ namespace oofem {
         void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {
             FloatMatrix D, B, DB;
             e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, TangentStiffness, gp, tstep);
-            this->grad(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+            this->grad(B, this->field, this->field->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
             DB.beProductOf(D, B);
             //answer.plusProductSymmUpper(B, DB, 1.0);
             answer.beTProductOf(B,DB);
@@ -283,7 +283,7 @@ namespace oofem {
             FloatArray u, eps, sig;
             FloatMatrix B;
             cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
-            this->grad(B, this->field, this->field.interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+            this->grad(B, this->field, this->field->interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
             eps.beProductOf(B, u);
             cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, Stress, gp, tstep);
             answer.beTProductOf(B, sig);
@@ -300,12 +300,12 @@ namespace oofem {
          * @param cell 
          * @param coords 
          */
-        void grad(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const  {
+        void grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) const  {
             FloatMatrix dndx;
-            int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
-            int ndofs = v.size;
+            int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
+            int ndofs = v->size;
             // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-            interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+            interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
 
             if ((mmode == _3dUP) || (mmode == _3dUPV) || (mode==_3dMat)) {
                 // 3D mode only now
@@ -351,7 +351,7 @@ namespace oofem {
     class NTfTerm : public MPMSymbolicTerm {
         protected:
         public:
-        NTfTerm (const Variable &testField, const Variable& unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
+        NTfTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
 
         void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {}
 
@@ -367,8 +367,8 @@ namespace oofem {
             FloatArray nvec, flux={1.,0.};
             const FloatArray& lc = gp->giveNaturalCoordinates();
             
-            this->testField.interpolation.evalN(nvec, lc, FEIElementGeometryWrapper(&e));
-            N.beNMatrixOf(nvec, testField.size);
+            this->testField->interpolation->evalN(nvec, lc, FEIElementGeometryWrapper(&e));
+            N.beNMatrixOf(nvec, testField->size);
             answer.beTProductOf(N, flux);
         }
         
@@ -400,10 +400,10 @@ namespace oofem {
             Domain *domain = this->giveDomain(1);
             Set myset (1, domain);
             FEI2dQuadLin interpol(1,2);
-            Variable u = Variable(interpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
-	        BTSigmaTerm2 mt(u,u, _2dUP);
+            Variable u = Variable(&interpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
+	    BTSigmaTerm2 mt(&u,&u, _2dUP);
             myset.setElementList({1});
-            this->integralList.push_back(std::make_unique<Integral>(domain, myset, mt));
+            this->integralList.push_back(std::make_unique<Integral>(domain, myset, &mt));
             Integral *i = this->integralList[0].get();
             i->initialize();
            

@@ -41,6 +41,7 @@
 #include "sparsemtrx.h"
 
 namespace oofem {
+
     /**
     * @brief Class representing weak form integral
     * 
@@ -49,20 +50,23 @@ namespace oofem {
     public:
 
         Set &set;
-        const Term &term;
+        const Term *term;
         Domain *domain;
         /// @brief Constructor, creates an integral of given term over entities in given set 
         /// @param d
         /// @param s 
         /// @param t 
-        Integral (Domain* d, Set& s, const Term& t ) : set(s), term(t) {
+        Integral (Domain* d, Set& s, const Term* t ) : set(s), term(t) {
             this->domain = d;
         }   
-        /// @brief Initialize the integal domain 
+        void initializeFrom (InputRecord &ir, EngngModel *emodel) {
+            // @todo
+        }
+        /// @brief Initialize the integral domain 
         void initialize() {
             for (auto i: this->set.giveElementList()) { // loop over elements
                 // introduce necessary dofs and set-up integration rules
-                this->term.initializeCell(*(domain->giveElement(i)));
+                this->term->initializeCell(*(domain->giveElement(i)));
             }
         } 
         // evaluate term contribution to weak form on given cell at given point 
@@ -73,14 +77,14 @@ namespace oofem {
             for (auto i: this->set.giveElementList()) { // loop over elements
                 MPElement *e = dynamic_cast<MPElement*>(this->domain->giveElement(i));
                 if (e) {
-                    this->getElementTermCodeNumbers(locr, locc, e, this->term, s);
+                    this->getElementTermCodeNumbers(locr, locc, e, *this->term, s);
                     // determine integration rule (this has to be set up on element, as we need to track history there)
                     // the IR is created by term.initialize, we just need mechanism to get this IR
                     // specific terms can have specific integration requirements (reduced integration, etc)
                     // at the same time same rules should be shared between terms->
                     // ->need to querry/store/identify element IR based on NIP.
-                    IntegrationRule* ir =  this->term.giveElementIntegrationRule(e);
-                    e->integrateTerm_dw(contrib, this->term, ir, tStep); // @todo IR 
+                    IntegrationRule* ir =  this->term->giveElementIntegrationRule(e);
+                    e->integrateTerm_dw(contrib, *this->term, ir, tStep); // @todo IR 
                     // assemble
                     dest.assemble (locr, locc, contrib);
                 }
@@ -94,14 +98,14 @@ namespace oofem {
             for (auto i: this->set.giveElementList()) { // loop over elements
                 MPElement *e = dynamic_cast<MPElement*>(this->domain->giveElement(i));
                 if (e) {
-                    this->getElementTermCodeNumbers(locr, locc, e, this->term, s);
+                    this->getElementTermCodeNumbers(locr, locc, e, *this->term, s);
                     // determine integration rule (this has to be set up on element, as we need to track history there)
                     // the IR is created by term.initialize, we just need mechanism to get this IR
                     // specific terms can have specific integration requirements (reduced integration, etc)
                     // at the same time same rules should be shared between terms->
                     // ->need to querry/store/identify element IR based on NIP.
-                    IntegrationRule* ir =  this->term.giveElementIntegrationRule(e);
-                    e->integrateTerm_c(contrib, this->term, ir, tstep); // @todo IR 
+                    IntegrationRule* ir =  this->term->giveElementIntegrationRule(e);
+                    e->integrateTerm_c(contrib, *this->term, ir, tstep); // @todo IR 
                     // assemble
                     dest.assemble (contrib, locr);
                 }
@@ -115,31 +119,31 @@ namespace oofem {
             locc.resize(0);
             // term.field and its interpolation determines row code numbers
             // from interpolation get node and internalDofMan lists
-            t.field.interpolation.giveCellDofMans(nodes, internalDofMans, e);
+            t.field->interpolation->giveCellDofMans(nodes, internalDofMans, e);
             // loop over dof managers to get code numbers
             for (int i: nodes) {
                 // get mode dofID mask
-                e->giveDofManager(i)->giveLocationArray(t.field.getDofManDofIDs(), loc, s);
+                e->giveDofManager(i)->giveLocationArray(t.field->getDofManDofIDs(), loc, s);
                 locr.followedBy(loc);
             }
             for (int i: internalDofMans) {
-                e->giveInternalDofManager(i)->giveLocationArray(t.field.getDofManDofIDs(), loc, s);
+                e->giveInternalDofManager(i)->giveLocationArray(t.field->getDofManDofIDs(), loc, s);
                 locr.followedBy(loc);
             }
 
             // term.testField and its interpolation determines column code numbers
             // from interpolation get node and internalDofMan lists
-            t.testField.interpolation.giveCellDofMans(nodes, internalDofMans, e);
+            t.testField->interpolation->giveCellDofMans(nodes, internalDofMans, e);
             // loop over dof managers to get code numbers
             for (int i: nodes) {
                 // get mode dofID mask
-                e->giveDofManager(i)->giveLocationArray(t.field.getDofManDofIDs(), loc, s);
+                e->giveDofManager(i)->giveLocationArray(t.field->getDofManDofIDs(), loc, s);
                 locc.followedBy(loc);
             }
             for (int i: internalDofMans) {
 
 
-                e->giveInternalDofManager(i)->giveLocationArray(t.field.getDofManDofIDs(), loc, s);
+                e->giveInternalDofManager(i)->giveLocationArray(t.field->getDofManDofIDs(), loc, s);
                 locc.followedBy(loc);
             }
         }

@@ -55,6 +55,7 @@
 namespace oofem {
 
 class MPElement;
+class EngngModel;
 
 /* 
  * Note: someone should be able to return for given cell and variable vector of unknowns.
@@ -64,10 +65,10 @@ class MPElement;
  */
 
 /**
- * @brief Class representing unknown field (or test feld) in a weak psolution.
+ * @brief Class representing unknown field (or test field) in a weak solution.
  * The variable has its interpolation, type (scalar, vector), size.
  * When test (dual) field, it keeps reference to its primary (unknown) variable.
- * @todo The history parameter dermines how many time steps to remember. 
+ * @todo The history parameter determines how many time steps to remember. 
  */
 class Variable {
     public:
@@ -84,14 +85,15 @@ class Variable {
         VolumeFraction
     };
 
-    const FEInterpolation& interpolation;  
+    const FEInterpolation* interpolation;  
     Variable* dualVar; //? or just bool?
     VariableType type;
     VariableQuantity q;
     int size;
     IntArray dofIDs;
 
-    Variable (const FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}) : 
+    Variable () : interpolation(nullptr), dualVar(NULL), type(VariableType::scalar), q(VariableQuantity::Displacement), size(0) {}
+    Variable (const FEInterpolation* i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}) : 
         interpolation(i), 
         dualVar(dual), 
         q(q), 
@@ -99,7 +101,7 @@ class Variable {
         this->type = t;
         this->size = size;
     }
-    Variable (const FEInterpolation& i, Variable::VariableQuantity q, Variable::VariableType t, int size, IntArray& dofIDs, Variable* dual = NULL) : 
+    Variable (const FEInterpolation* i, Variable::VariableQuantity q, Variable::VariableType t, int size, IntArray& dofIDs, Variable* dual = NULL) : 
         interpolation(i), 
         dualVar(dual), 
         q(q), 
@@ -111,6 +113,8 @@ class Variable {
 
     /// Returns DodIF mask in node; need generalization (which dofMan)
     const IntArray& getDofManDofIDs () const {return this->dofIDs;}
+
+    void initializeFrom(InputRecord &ir); // enable instantiation from input record
 };
 
 
@@ -123,12 +127,12 @@ class Variable {
  */
 class Term {
     public:
-    const Variable& field;
-    const Variable& testField;
+    const Variable* field;
+    const Variable* testField;
     MaterialMode mode;
 
     public:
-    Term (const Variable &testField, const Variable& unknownField, MaterialMode m=MaterialMode::_Unknown) : field(unknownField), testField(testField) {mode=m;}
+    Term (const Variable* testField, const Variable* unknownField, MaterialMode m=MaterialMode::_Unknown) : field(unknownField), testField(testField) {mode=m;}
     
     // evaluate linearized term contribution to weak form on given cell at given point 
     virtual void evaluate_lin (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) const =0;
@@ -137,8 +141,10 @@ class Term {
     virtual void getDimensions(Element& cell) const =0;
     virtual void initializeCell(Element& cell) const =0;
     virtual IntegrationRule* giveElementIntegrationRule(Element* e) const {return NULL;};
-};
 
+    virtual void initializeFrom(InputRecord &ir, EngngModel* problem); // enable instantiation from input record
+
+};
 
 /**
 * Element code sample:
@@ -294,9 +300,9 @@ class MPElement : public Element {
      * @param ibc boundary entity ID
      * @param bt boundary type ('s' for surface, 'e' for edge)
     */
-    virtual void getBoundaryUnknownVector(FloatArray& answer, const Variable& field, ValueModeType mode, int ibc, char bt, TimeStep* tStep) {
+    virtual void getBoundaryUnknownVector(FloatArray& answer, const Variable* field, ValueModeType mode, int ibc, char bt, TimeStep* tStep) {
         FloatArray uloc;
-        IntArray bNodes, dofs=field.getDofManDofIDs();
+        IntArray bNodes, dofs=field->getDofManDofIDs();
         answer.clear();
         if (bt == 's') {
             bNodes = this->giveBoundarySurfaceNodes(ibc);
@@ -315,21 +321,21 @@ class MPElement : public Element {
     /// @param t 
     void assembleTermContribution (FloatMatrix& answer, FloatMatrix& contrib, const Term& t) {
         IntArray uloc, tloc;
-        this->getLocalCodeNumbers(uloc, t.field.q);
-        this->getLocalCodeNumbers(tloc, t.testField.q);
+        this->getLocalCodeNumbers(uloc, t.field->q);
+        this->getLocalCodeNumbers(tloc, t.testField->q);
         answer.assemble(contrib, tloc, uloc);
     }
 
     void assembleTermContributionT (FloatMatrix& answer, FloatMatrix& contrib, const Term& t) {
         IntArray uloc, tloc;
-        this->getLocalCodeNumbers(uloc, t.field.q);
-        this->getLocalCodeNumbers(tloc, t.testField.q);
+        this->getLocalCodeNumbers(uloc, t.field->q);
+        this->getLocalCodeNumbers(tloc, t.testField->q);
         answer.assembleT(contrib, tloc, uloc);
     }
     
     void assembleTermContribution (FloatArray& answer, FloatArray& contrib, const Term& t) {
         IntArray loc;
-        this->getLocalCodeNumbers(loc, t.testField.q);
+        this->getLocalCodeNumbers(loc, t.testField->q);
         answer.assemble(contrib, loc);
     }
 
@@ -340,17 +346,17 @@ class MPElement : public Element {
      * @param field 
      * @param tstep 
      */
-    virtual const void getUnknownVector(FloatArray& answer, const Variable& field, ValueModeType mode, TimeStep* tstep) {
+    virtual const void getUnknownVector(FloatArray& answer, const Variable* field, ValueModeType mode, TimeStep* tstep) {
         FloatArray uloc;
         IntArray nodes, internalNodes, dofs;
-        field.interpolation.giveCellDofMans(nodes, internalNodes, this);
+        field->interpolation->giveCellDofMans(nodes, internalNodes, this);
         for (int i : nodes) {
-            dofs=field.getDofManDofIDs();
+            dofs=field->getDofManDofIDs();
             this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
             answer.append(uloc);
         }
         for (int i : internalNodes) {
-            dofs=field.getDofManDofIDs();
+            dofs=field->getDofManDofIDs();
             this->giveInternalDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
             answer.append(uloc);
         }

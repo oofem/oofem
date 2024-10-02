@@ -41,12 +41,12 @@
 namespace oofem {
 
 
-void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
+void deltaB(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
-    int ndofs = v.size;
+    int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
+    int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
     answer.resize(1, nnodes*ndofs);
     answer.zero();
 
@@ -66,12 +66,12 @@ void deltaB(FloatMatrix& answer, const Variable &v, const FEInterpolation& inter
     }
 }
 
-void evalB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
+void evalB(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords, const MaterialMode mmode) {
     FloatMatrix dndx;
-    int nnodes = interpol.giveNumberOfNodes(cell.giveGeometryType());
-    int ndofs = v.size;
+    int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
+    int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol.evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
     answer.resize(6, nnodes*ndofs);
     answer.zero();
     if ((mmode == _3dUPV)||(mmode == _3dMat)) {
@@ -97,22 +97,22 @@ void evalB(FloatMatrix& answer, const Variable &v, const FEInterpolation& interp
     }
 }
 
-double evalVolumeFraction(const Variable&vf, MPElement& e, const FloatArray& coords, TimeStep* tstep)
+double evalVolumeFraction(const Variable* vf, MPElement& e, const FloatArray& coords, TimeStep* tstep)
 {
     FloatArray rvf, Nvf;
     e.getUnknownVector(rvf, vf, VM_TotalIntrinsic, tstep);
-    vf.interpolation.evalN(Nvf, coords, FEIElementGeometryWrapper(&e));
+    vf->interpolation->evalN(Nvf, coords, FEIElementGeometryWrapper(&e));
     return Nvf.dotProduct(rvf);
 }
 
-NTBdivTerm::NTBdivTerm (const Variable &testField, const Variable& unknownField, ValueModeType m) : Term(testField, unknownField), m(m) {}
+NTBdivTerm::NTBdivTerm (const Variable *testField, const Variable* unknownField, ValueModeType m) : Term(testField, unknownField), m(m) {}
 
 
 void NTBdivTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray Np;
-    this->testField.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    this->testField->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix Npm(Np), B;   
-    deltaB(B, this->field, this->field.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    deltaB(B, this->field, this->field->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     answer.beTProductOf(Npm,B);
 }
 
@@ -134,15 +134,15 @@ void NTBdivTerm::initializeCell(Element& cell) const  {}
 
 // deltaBTfiNpTerm 
 
-deltaBTfiNpTerm::deltaBTfiNpTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
+deltaBTfiNpTerm::deltaBTfiNpTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
 
 
 void deltaBTfiNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray Nvf, Np;
     FloatMatrix B;   
-    deltaB(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    deltaB(B, this->testField, this->testField->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
-    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix Npm(Np);
     answer.beTProductOf(B,Npm);
     answer.times(vf);
@@ -164,19 +164,19 @@ void deltaBTfiNpTerm::initializeCell(Element& cell) const  {}
 
 // NdTdvfNpTerm 
 
-NdTdvfNpTerm::NdTdvfNpTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
+NdTdvfNpTerm::NdTdvfNpTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
 
 
 void NdTdvfNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray nvec,dvf,rvf,Np;
     FloatMatrix N,dndx,help;
-    this->testField.interpolation.evalN(nvec, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    N.beNMatrixOf(nvec, testField.size);
+    this->testField->interpolation->evalN(nvec, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    N.beNMatrixOf(nvec, testField->size);
     // evaluate derivatives of volume fraction
-    this->volumeFraction.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    this->volumeFraction->interpolation->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     e.getUnknownVector(rvf, this->volumeFraction, VM_TotalIntrinsic, tstep);
     dvf.beTProductOf(dndx, rvf);
-    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix Npm(Np);
     help.beTProductOf(N,dvf); // Nv * dv
     answer.beProductOf(help, Npm);
@@ -197,14 +197,14 @@ void NdTdvfNpTerm::initializeCell(Element& cell) const  {}
 
 // BTmuBTerm 
 
-BTmuBTerm::BTmuBTerm (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+BTmuBTerm::BTmuBTerm (const Variable *testField, const Variable* unknownField) : Term(testField, unknownField) {}
 
 
 void BTmuBTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray nvec,dvf,rvf,Np;
     FloatMatrix B, M(6,6), MB;
 
-    evalB(B, this->field, this->field.interpolation, e,gp->giveNaturalCoordinates(),  gp->giveMaterialMode());
+    evalB(B, this->field, this->field->interpolation, e,gp->giveNaturalCoordinates(),  gp->giveMaterialMode());
     double m = e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(FluidViscosity, gp, tstep);
     M(0,0) = M(1,1) = M(2,2) = 2*m;
     M(3,3) = M(4,4) = M(5,5) = m;
@@ -227,13 +227,13 @@ void BTmuBTerm::initializeCell(Element& cell) const  {}
 
 // BTmuVfBTerm 
 
-BTmuVfBTerm::BTmuVfBTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
+BTmuVfBTerm::BTmuVfBTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
 
 
 void BTmuVfBTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatMatrix B, M(6,6), MB;
 
-    evalB(B, this->field, this->field.interpolation, e,gp->giveNaturalCoordinates(),  gp->giveMaterialMode());
+    evalB(B, this->field, this->field->interpolation, e,gp->giveNaturalCoordinates(),  gp->giveMaterialMode());
     double m = e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(FluidViscosity, gp, tstep);
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
 
@@ -258,7 +258,7 @@ void BTmuVfBTerm::initializeCell(Element& cell) const  {}
 
 // NTmuVfSNTerm 
 
-NTmuVfSNTerm::NTmuVfSNTerm (const Variable &testField, const Variable& unknownField, const Variable& volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
+NTmuVfSNTerm::NTmuVfSNTerm (const Variable *testField, const Variable* unknownField, const Variable* volumeFraction) : Term(testField, unknownField), volumeFraction(volumeFraction) {}
 
 
 void NTmuVfSNTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
@@ -266,8 +266,8 @@ void NTmuVfSNTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* 
   FloatMatrix S, SI, SIN, Nd;
     FloatArray N;
 
-    this->field.interpolation.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    Nd.beNMatrixOf (N, testField.size);
+    this->field->interpolation->evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    Nd.beNMatrixOf (N, testField->size);
     e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(S, Permeability,  gp, tstep);
     double m = e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(FluidViscosity, gp, tstep);
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
@@ -295,14 +295,14 @@ void NTmuVfSNTerm::initializeCell(Element& cell) const  {}
 
 // deltaBTNpTerm 
 
-deltaBTNpTerm::deltaBTNpTerm (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+deltaBTNpTerm::deltaBTNpTerm (const Variable *testField, const Variable* unknownField) : Term(testField, unknownField) {}
 
 
 void deltaBTNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray Nvf, Np;
     FloatMatrix B;   
-    deltaB(B, this->testField, this->testField.interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
-    this->field.interpolation.evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    deltaB(B, this->testField, this->testField->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
+    this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix Npm(Np);
     answer.beTProductOf(B,Npm);
 }
