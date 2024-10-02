@@ -462,16 +462,16 @@ py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
 {
     if (type == "BTSigmaTerm") {
         if (len(args)>2) {
-            oofem::Variable & f = args[0].cast<oofem::Variable &>();
-            oofem::Variable & tf = args[1].cast<oofem::Variable &>();
+            oofem::Variable * f = args[0].cast<oofem::Variable *>();
+            oofem::Variable * tf = args[1].cast<oofem::Variable *>();
             oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
             std::unique_ptr<Term> t = std::make_unique<BTSigmaTerm2>(f, tf, m);
             return py::cast(t.release());
         }
     } else if (type == "NTfTerm") {
         if (len(args)>2) {
-            oofem::Variable & f = args[0].cast<oofem::Variable &>();
-            oofem::Variable & tf = args[1].cast<oofem::Variable &>();
+            oofem::Variable * f = args[0].cast<oofem::Variable *>();
+            oofem::Variable * tf = args[1].cast<oofem::Variable *>();
             oofem::MaterialMode m = args[2].cast<oofem::MaterialMode &>() ;
             std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m);
             return py::cast(t.release());

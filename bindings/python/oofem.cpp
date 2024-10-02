@@ -1338,7 +1338,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::Variable>(m, "Variable")
-        .def(py::init<const oofem::FEInterpolation&, oofem::Variable::VariableQuantity, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
+        .def(py::init<const oofem::FEInterpolation*, oofem::Variable::VariableQuantity, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
         .def_readonly("dofIDs", &oofem::Variable::dofIDs)
         .def_readonly("type", &oofem::Variable::type)
         .def_readonly("q", &oofem::Variable::q)
@@ -1348,7 +1348,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::Integral>(m, "Integral")
-        .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term&>())
+        .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term*>())
         .def("initialize", &oofem::Integral::initialize)
         .def("assemble_lhs", &oofem::Integral::assemble_lhs)
         .def("assemble_rhs", &oofem::Integral::assemble_rhs)
