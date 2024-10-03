@@ -401,9 +401,9 @@ namespace oofem {
             Set myset (1, domain);
             FEI2dQuadLin interpol(1,2);
             Variable u = Variable(&interpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
-	    BTSigmaTerm2 mt(&u,&u, _2dUP);
+	        BTSigmaTerm2 mt(&u,&u, _2dUP);
             myset.setElementList({1});
-            this->integralList.push_back(std::make_unique<Integral>(domain, myset, &mt));
+            this->integralList.push_back(std::make_unique<Integral>(domain, &myset, &mt));
             Integral *i = this->integralList[0].get();
             i->initialize();
            

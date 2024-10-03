@@ -49,22 +49,24 @@ namespace oofem {
    class Integral {
     public:
 
-        Set &set;
+        Set* set;
+        int setIndex;
         const Term *term;
         Domain *domain;
         /// @brief Constructor, creates an integral of given term over entities in given set 
         /// @param d
         /// @param s 
         /// @param t 
-        Integral (Domain* d, Set& s, const Term* t ) : set(s), term(t) {
+        Integral (Domain* d, Set* set, const Term* t ) : set(set), term(t) {
             this->domain = d;
         }   
-        void initializeFrom (InputRecord &ir, EngngModel *emodel) {
-            // @todo
-        }
+        void initializeFrom (InputRecord &ir, EngngModel *emodel);
         /// @brief Initialize the integral domain 
         void initialize() {
-            for (auto i: this->set.giveElementList()) { // loop over elements
+            if (this->set == nullptr) {
+                 this->set = this->domain->giveSet(this->setIndex);
+            }
+            for (auto i: this->set->giveElementList()) { // loop over elements
                 // introduce necessary dofs and set-up integration rules
                 this->term->initializeCell(*(domain->giveElement(i)));
             }
@@ -74,7 +76,7 @@ namespace oofem {
             FloatMatrix contrib;
             IntArray locr, locc;
 
-            for (auto i: this->set.giveElementList()) { // loop over elements
+            for (auto i: this->set->giveElementList()) { // loop over elements
                 MPElement *e = dynamic_cast<MPElement*>(this->domain->giveElement(i));
                 if (e) {
                     this->getElementTermCodeNumbers(locr, locc, e, *this->term, s);
@@ -95,7 +97,7 @@ namespace oofem {
             FloatArray contrib;
             IntArray locr, locc;
 
-            for (auto i: this->set.giveElementList()) { // loop over elements
+            for (auto i: this->set->giveElementList()) { // loop over elements
                 MPElement *e = dynamic_cast<MPElement*>(this->domain->giveElement(i));
                 if (e) {
                     this->getElementTermCodeNumbers(locr, locc, e, *this->term, s);

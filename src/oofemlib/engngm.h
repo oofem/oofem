@@ -1031,6 +1031,10 @@ public:
         return variableMap.at(name).get();
         
     }
+    const Term* giveTermByName (std::string name) {
+        // @BP: add better error handling than provided by at()
+        return termMap.at(name).get();
+    }   
     /// instanciates mpm stuff (variables, terms, and integrals)
     /// returns nonzero if succesfull
     int instanciateMPM (DataReader &dr, InputRecord &ir);

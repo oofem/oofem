@@ -382,7 +382,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     // loop over integrals 
     for (auto &in: eModel->giveIntegralList()) {
         // loop over integral domain
-        for (auto &elem: in->set.giveElementList()) {
+        for (auto &elem: in->set->giveElementList()) {
             // get code numbers for integral.term on element
             in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
             maxle = INT_MAX;

@@ -1348,7 +1348,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::Integral>(m, "Integral")
-        .def(py::init<oofem::Domain*, oofem::Set&, oofem::Term*>())
+        .def(py::init<oofem::Domain*, oofem::Set*, oofem::Term*>())
         .def("initialize", &oofem::Integral::initialize)
         .def("assemble_lhs", &oofem::Integral::assemble_lhs)
         .def("assemble_rhs", &oofem::Integral::assemble_rhs)

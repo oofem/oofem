@@ -416,7 +416,7 @@ EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
     // instanciate integrals
     for ( int i = 0; i < nintegrals; i++ ) {
         auto &mir = dr.giveInputRecord(DataReader :: IR_mpmIntegralRec, i + 1);
-        std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, dummySet, nullptr);
+        std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, &dummySet, nullptr);
         integral->initializeFrom(mir, this);
         this->addIntegral(std::move(integral));
     }
