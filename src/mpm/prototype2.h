@@ -165,6 +165,7 @@ namespace oofem {
 
     class MPMSymbolicTerm : public Term {
         public:
+        MPMSymbolicTerm() : Term() {}
         MPMSymbolicTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
         void initializeCell(Element& cell) const override {
             // allocate necessary DOFs
@@ -256,6 +257,7 @@ namespace oofem {
     class BTSigmaTerm2 : public MPMSymbolicTerm {
         protected:
         public:
+        BTSigmaTerm2() : MPMSymbolicTerm() {}
         BTSigmaTerm2 (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
 
         /**
@@ -346,11 +348,12 @@ namespace oofem {
         }
         
     };
-
+    #define _IFT_BTSigmaTerm2_Name "BTSigmaTerm"
 
     class NTfTerm : public MPMSymbolicTerm {
         protected:
         public:
+        NTfTerm () : MPMSymbolicTerm() {}
         NTfTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
 
         void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {}
@@ -375,12 +378,13 @@ namespace oofem {
         void getDimensions(Element& cell) const override {}
     };
 
-
+    #define _IFT_NTfTerm_Name "NTfTerm"
 
     class TestProblem : public EngngModel
     {
     protected:
         SparseMtrxType sparseMtrxType = SMT_Skyline;
+        LinSystSolverType solverType = ST_Direct;
         std :: unique_ptr< DofDistributedPrimaryField > field;
 
         std :: unique_ptr< SparseMtrx > effectiveMatrix;
@@ -392,11 +396,22 @@ namespace oofem {
         /// Numerical method used to solve the problem
         std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
+        // list of integrals contributing to lhs and rhs
+        IntArray lhsIntegrals;
+        IntArray rhsIntegrals;
+
     public:
         TestProblem(int i, EngngModel * _master) : EngngModel(i, _master) { ndomains = 1;}
 
+        void initializeFrom(InputRecord &ir) override {
+            EngngModel::initializeFrom(ir);
+            IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
+            IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
+        }
 
         void solveYourselfAt(TimeStep *tStep) override {
+            FloatArray rhs;
+            /*
             Domain *domain = this->giveDomain(1);
             Set myset (1, domain);
             FEI2dQuadLin interpol(1,2);
@@ -406,16 +421,40 @@ namespace oofem {
             this->integralList.push_back(std::make_unique<Integral>(domain, &myset, &mt));
             Integral *i = this->integralList[0].get();
             i->initialize();
+            */
            
+           // initialize integrals
+           for (const auto& i: integralList) {
+                i->initialize();
+           }
+           this->giveDomain(1)->postInitialize();
+
             this->forceEquationNumbering();
-            OOFEM_LOG_DEBUG("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
+            OOFEM_LOG_INFO("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
 
             if ( !effectiveMatrix ) {
                 effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             }
-            i->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+            // loop over lhs integrals
+            for (auto i: lhsIntegrals) {
+                Integral* integral = this->integralList[i-1].get();
+                integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+            }
             effectiveMatrix->printYourself();
+            // assemble rhs
+            rhs.resize(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ));
+            // loop over rhs integrals
+            for (auto i: rhsIntegrals) {
+                Integral* integral = this->integralList[i-1].get();
+                integral->assemble_rhs (rhs, EModelDefaultEquationNumbering(), tStep); 
+            }
+            rhs.printYourself();
+
+            // solve the system
+            nMethod->solve(*effectiveMatrix, rhs, solution);
+            solution.printYourself();
+            
         }
 
         TimeStep *giveNextStep() override
@@ -430,7 +469,24 @@ namespace oofem {
 
             return currentStep.get();
         }
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override
+    {
+        if ( !nMethod ) {
+            if ( isParallel() ) {
+                if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+                }
+            } else {
+                nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+            }
+            if ( !nMethod ) {
+                OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+            }
+        }
 
+
+    return nMethod.get();
+}
         // identification
         const char *giveInputRecordName() const { return _IFT_TestProblem_Name; }
         const char *giveClassName() const override { return "TestProblem"; }
@@ -462,7 +518,6 @@ namespace oofem {
             void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
 
     };
-    const FEInterpolation & Q1Element::gInterpol = FEI2dQuadLin(1,2);
     #define _IFT_Q1Element_Name "q1"
 
     class L1Element : public MPElement  {
@@ -490,7 +545,6 @@ namespace oofem {
             void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
 
     };
-    const FEInterpolation & L1Element::gInterpol = FEI2dLineLin(1,2);
     #define _IFT_L1Element_Name "l1"
 
 } // end namespace oofem

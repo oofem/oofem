@@ -36,6 +36,9 @@
 #define interpolationcatalogue_h
 
 #include "fei1dlin.h"
+#ifdef __MPM_MODULE
+#include "prototype2.h"
+#endif
 
 namespace oofem {
 
@@ -49,7 +52,9 @@ public:
     static  FEI1dLin fei1dlin_x ;
     static  FEI1dLin fei1dlin_y ;
     static  FEI1dLin fei1dlin_z ;
-
+#ifdef __MPM_MODULE
+    static  LinearInterpolation feilin;
+#endif
     const FEInterpolation* getInterpolationByName (std::string name);
 
 };

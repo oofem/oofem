@@ -322,7 +322,7 @@ protected:
 #ifdef __MPM_MODULE
     /// experimental mpm symbolic support
     std :: map< std :: string, std::unique_ptr< Variable > >  variableMap;
-    std :: map< std :: string, std::unique_ptr< Term > >  termMap;
+    std :: vector < std :: unique_ptr< Term > > termList;
     std :: vector < std :: unique_ptr< Integral > > integralList;
 #endif
 
@@ -1031,9 +1031,9 @@ public:
         return variableMap.at(name).get();
         
     }
-    const Term* giveTermByName (std::string name) {
+    const Term* giveTerm (int indx) {
         // @BP: add better error handling than provided by at()
-        return termMap.at(name).get();
+        return termList.at(indx-1).get();
     }   
     /// instanciates mpm stuff (variables, terms, and integrals)
     /// returns nonzero if succesfull

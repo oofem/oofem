@@ -19,5 +19,9 @@ namespace oofem {
     REGISTER_EngngModel(TestProblem);    
     REGISTER_Element(Q1Element)
     REGISTER_Element(L1Element)
+    REGISTER_Term(BTSigmaTerm2)
+    REGISTER_Term(NTfTerm)
+    const FEInterpolation & Q1Element::gInterpol = FEI2dQuadLin(1,2);
+    const FEInterpolation & L1Element::gInterpol = FEI2dLineLin(1,2);
 
 } // end namespace oofem

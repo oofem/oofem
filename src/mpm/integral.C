@@ -49,9 +49,9 @@ Integral::initializeFrom (InputRecord &ir, EngngModel *emodel) {
     IR_GIVE_FIELD (ir, si, "set");
     this->setIndex  = si;
     this->set = nullptr; // be resolved in initialize
-    std :: string termName;
-    IR_GIVE_FIELD (ir, termName, "term");
-    this->term = emodel->giveTermByName(termName);
+    int ti;
+    IR_GIVE_FIELD (ir, ti, "term");
+    this->term = emodel->giveTerm(ti);
 }
         
 

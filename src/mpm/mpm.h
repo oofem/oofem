@@ -132,6 +132,7 @@ class Term {
     MaterialMode mode;
 
     public:
+    Term () : field(nullptr), testField(nullptr), mode(MaterialMode::_Unknown) {}
     Term (const Variable* testField, const Variable* unknownField, MaterialMode m=MaterialMode::_Unknown) : field(unknownField), testField(testField) {mode=m;}
     
     // evaluate linearized term contribution to weak form on given cell at given point 

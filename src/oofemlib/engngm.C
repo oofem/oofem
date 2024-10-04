@@ -407,11 +407,12 @@ EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
     }
     // instanciate terms
     for ( int i = 0; i < nterms; i++ ) {
+        int num;
         auto &mir = dr.giveInputRecord(DataReader :: IR_mpmTermRec, i + 1);
-        IR_GIVE_FIELD(mir, name, "name");
+        IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);
         std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());  
         term->initializeFrom(mir, this);
-        termMap[name] = std::move(term);
+        termList.push_back(std::move(term));
     }
     // instanciate integrals
     for ( int i = 0; i < nintegrals; i++ ) {

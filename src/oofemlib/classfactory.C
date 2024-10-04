@@ -520,6 +520,7 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
 std::unique_ptr<Term> ClassFactory :: createTerm(const char *name)
 {
     return cf_create<Term>(termList, name);
+    
 }
 
 bool ClassFactory :: registerTerm(const char *name, std::unique_ptr<Term> ( *creator )() )
