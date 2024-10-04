@@ -430,6 +430,7 @@ namespace oofem {
            this->giveDomain(1)->postInitialize();
 
             this->forceEquationNumbering();
+            OOFEM_LOG_INFO("MPM Symbolic solver\n");
             OOFEM_LOG_INFO("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
 
             if ( !effectiveMatrix ) {
@@ -469,24 +470,53 @@ namespace oofem {
 
             return currentStep.get();
         }
-    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override
-    {
-        if ( !nMethod ) {
-            if ( isParallel() ) {
-                if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+        NumericalMethod *giveNumericalMethod(MetaStep *mStep) override
+        {
+            if ( !nMethod ) {
+                if ( isParallel() ) {
+                    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+                    }
+                } else {
                     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
                 }
-            } else {
-                nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+                if ( !nMethod ) {
+                    OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+                }
             }
-            if ( !nMethod ) {
-                OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
-            }
+            return nMethod.get();
         }
 
+        double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override
+        // returns unknown quantity like displacement, velocity of equation eq
+        // This function translates this request to numerical method language
+        {
+            int eq = dof->__giveEquationNumber();
+        #ifdef DEBUG
+            if ( eq == 0 ) {
+                OOFEM_ERROR("invalid equation number");
+            }
+        #endif
 
-    return nMethod.get();
-}
+            if ( tStep != this->giveCurrentStep() ) {
+                OOFEM_ERROR("unknown time step encountered");
+            }
+
+            switch ( mode ) {
+            case VM_Total:
+            case VM_Incremental:
+                if ( solution.isNotEmpty() ) {
+                    return solution.at(eq);
+                } else {
+                    return 0.;
+                }
+
+            default:
+                OOFEM_ERROR("Unknown is of undefined type for this problem");
+            }
+
+            return 0.;
+        }
         // identification
         const char *giveInputRecordName() const { return _IFT_TestProblem_Name; }
         const char *giveClassName() const override { return "TestProblem"; }

@@ -254,9 +254,16 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         //gim -> getInput();
         // Milan ??????????????????
 
+        if ( this->nMetaSteps == 0 ) {
+            inputReaderFinish = false;
+            this->instanciateDefaultMetaStep(ir);
+        } 
+
         // check emodel input record if no default metastep, since all has been read
         if ( inputReaderFinish ) {
             ir.finish();
+        } else {
+            this->metaStepList.at(0).updateAttributesRecord(ir);
         }
     } catch ( InputException &e ) {
         OOFEM_ERROR("Error initializing from user input: %s\n", e.what());

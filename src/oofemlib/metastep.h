@@ -94,6 +94,7 @@ public:
     double giveTimeIncrement() { return this->deltaT; }
     /// Returns e-model attributes.
     InputRecord &giveAttributesRecord() { return *this->attributes; }
+    void updateAttributesRecord(InputRecord &ir) { this->attributes = ir.clone(); };
     /**
      * Instanciates the receiver from input record.
      */
