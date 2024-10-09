@@ -71,7 +71,9 @@ void dnTaN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, Tim
     this->testField.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     this->field.interpolation.evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix nm(n, true), anm;
-    FloatMatrix a({sqrt(0.5),sqrt(0.5)}, false); // assume 2D for now
+    FloatMatrix a(this->field.interpolation.giveNsd(e.giveGeometryType()),1);
+    //a.at(2,1)=1.0; // assume 2d flow for now
+    a.at(1,1)=sqrt(0.5); a.at(2,1)=sqrt(0.5);   
     anm.beProductOf(a, nm);
     answer.beProductOf(dndx, anm);
 }

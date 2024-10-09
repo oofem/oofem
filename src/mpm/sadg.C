@@ -48,6 +48,8 @@
 
 #include "fei2dlinelin.h"
 #include "fei2dtrlin.h"
+#include "fei3dhexalin.h"
+#include "fei3dquadlin.h"
 
 #include "mathfem.h"
 
@@ -79,6 +81,13 @@ class SADGElement : public MPElement {
     public:
     SADGElement(int n, Domain* d): MPElement(n,d) { }
 
+    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+          answer={num};
+    }
+
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+        answer={};
+    }
     // Note: performance can be probably improved once it will be possible 
     // to directly assemble multiple term contributions to the system matrix.
     // template metaprogramming?
@@ -143,6 +152,9 @@ class SADGBoundaryElement : public SADGElement {
          *  So for example for 2D triangle element:
          *  - the codeNumbers for shared edge represented by Boundary element the codeNumbers are {2,3}
          *  - and matching codeNumbers for the neighbor element are {5,4}
+         * The numbering should be such that the normal vector points from the first element to the second element
+         * so the normal vector should point outwards.
+         *
          * 
          *   3|\  \4``|6
          *    | \  \  |
@@ -203,7 +215,10 @@ class SADGBoundaryElement : public SADGElement {
                 // get velocity vector first
                 // @BP: todo -> connect external field 
                 //this->domain->giveEngngModel()->giveField(FT_Velocity, tStep)->evaluateAt(v, gc, ValueModeType::VM_Total, tStep);
-                v = {sqrt(0.5), sqrt(0.5)}; // dummy velocity
+                int nsd = this->giveInterpolation()->giveNsd(this->giveGeometryType());
+                v.resize(nsd);
+                //v.at(2) = 1.0;
+                v.at(1) = sqrt(0.5); v.at(2) = sqrt(0.5); // dummy velocity
                 // evaluate N^T (a\cdot n) N
                 FloatMatrix contrib;
                 contrib.beDyadicProductOf(N,N);
@@ -292,13 +307,6 @@ class SADGBLine1 : public SADGBoundaryElement {
     }
 
 
-    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-          answer={num};
-    }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        answer={};
-    }
-
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
             int dofid = this->scalarVariable.getDofManDofIDs().at(1);
             answer = {dofid};
@@ -377,13 +385,6 @@ class SADGTriangle1 : public SADGElement {
 
     //int giveNumberOfInternalDofManagers() const override {return 3;}
 
-    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-          answer={num};
-    }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
-        answer={};
-    }
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
             int dofid = this->scalarVariable.getDofManDofIDs().at(1);
@@ -426,6 +427,149 @@ const Variable& SADGTriangle1::scalarVariable = Variable(SADGTriangle1::scalarIn
 
 #define _IFT_SADGTriangle1_Name "sadgtria1"
 REGISTER_Element(SADGTriangle1)
+
+/**
+ * @brief 3D SADG linear brick Element
+ * 
+ */
+class SADGBrick1 : public SADGElement {
+    protected:
+        //FEI3dTetLin pInterpol;
+        //FEI3dTetQuad uInterpol;
+        const static FEInterpolation & scalarInterpol;
+        const static Variable& scalarVariable;
+      
+    public:
+    SADGBrick1(int n, Domain* d): 
+        SADGElement(n,d)
+    {
+        numberOfDofMans  = 8;
+        numberOfGaussPoints = 8;
+        this->computeGaussPoints();
+        /*
+        // set up internal dof managers
+        // regular nodes just define element geometry
+        // internal dof managers are used to store dofs (Discontinuous Galerkin)
+        for (int i=0; i<3; i++) {
+            ElementDofManager* edm = new ElementDofManager(i, d, this);
+            edm->appendDof(new MasterDof(edm, (DofIDItem)scalarVariable.getDofManDofIDs().at(0)));
+            internalDofManagers.push_back(edm);
+        }
+        */
+    }
+
+    //int giveNumberOfInternalDofManagers() const override {return 3;}
+
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
+            int dofid = this->scalarVariable.getDofManDofIDs().at(1);
+            answer = {dofid};
+    }
+    int giveNumberOfDofs() override { return 8; }
+    const char *giveInputRecordName() const override {return "sadgbrick1";}
+    const char *giveClassName() const override { return "SADGBrick1"; }
+
+    
+    const FEInterpolation& getGeometryInterpolation() const override {return this->scalarInterpol;}
+  
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_hexa_1;
+    }
+    int getNumberOfSurfaceDOFs() const override {return 4;}
+    int getNumberOfEdgeDOFs() const override {return 2;}
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+        answer={};
+    }
+    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    Interface *giveInterface(InterfaceType it) override {
+        return NULL;
+    }
+
+private:
+        virtual int  giveNumberOfSDofs() const override {return 8;} 
+        virtual const Variable& getScalarVariable() const override {return scalarVariable;}
+        void computeGaussPoints() override {
+            if ( integrationRulesArray.size() == 0 ) {
+                integrationRulesArray.resize( 1 );
+                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
+                integrationRulesArray [ 0 ]->SetUpPointsOnCube(numberOfGaussPoints, _Unknown);
+            }
+        }
+};
+
+const FEInterpolation & SADGBrick1::scalarInterpol = FEI3dHexaLin();
+const Variable& SADGBrick1::scalarVariable = Variable(SADGBrick1::scalarInterpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+
+#define _IFT_SADGBrick1_Name "sadgbrick1"
+REGISTER_Element(SADGBrick1)
+
+class SADGBQuad1 : public SADGBoundaryElement {
+    protected:
+        //FEI3dTetLin pInterpol;
+        //FEI3dTetQuad uInterpol;
+        const static FEInterpolation & interpol;
+        const static Variable& scalarVariable;
+
+      
+    public:
+    SADGBQuad1(int n, Domain* d): 
+        SADGBoundaryElement(n,d) { }
+    
+    void initializeFrom(InputRecord &ir) override {
+        SADGBoundaryElement::initializeFrom(ir);
+        this->numberOfDofMans = this->dofManArray.giveSize();
+        if (!((numberOfDofMans == 4) || (numberOfDofMans == 8))) {
+            OOFEM_ERROR("Invalid number of dofs");
+        }
+        this->numberOfGaussPoints = 8;
+        this->computeGaussPoints();
+    }
+
+
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override { 
+            int dofid = this->scalarVariable.getDofManDofIDs().at(1);
+            answer = {dofid};
+    }
+    int giveNumberOfDofs() override { return numberOfDofMans; }
+    const char *giveInputRecordName() const override {return "sadgbquad1";}
+    const char *giveClassName() const override { return "SADGBQuad1"; }
+
+    
+    const FEInterpolation& getGeometryInterpolation() const override {return this->interpol;}
+  
+    Element_Geometry_Type giveGeometryType() const override {
+        return EGT_quad_1;
+    }
+    int getNumberOfSurfaceDOFs() const override {return 0;}
+    int getNumberOfEdgeDOFs() const override {return 0;}
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+        answer={};
+    }
+    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    Interface *giveInterface(InterfaceType it) override {
+        return NULL;
+    }
+    int  giveNumberOfSDofs() const override {return 8;} 
+    int giveNumberOfSharedElements() const override {return this->numberOfDofMans/4;}   
+
+
+
+private:
+        virtual const Variable& getScalarVariable() const override {return scalarVariable;}
+        void computeGaussPoints() override {
+            if ( integrationRulesArray.size() == 0 ) {
+                integrationRulesArray.resize( 1 );
+                integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
+                integrationRulesArray [ 0 ]->SetUpPointsOnSquare(numberOfGaussPoints, _Unknown);
+            }
+        }
+};
+
+const FEInterpolation & SADGBQuad1::interpol = FEI3dQuadLin();
+const Variable& SADGBQuad1::scalarVariable = Variable(SADGBQuad1::interpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+
+#define _IFT_SADGBQuad1_Name "sadgbquad1"
+REGISTER_Element(SADGBQuad1)
+
 
 
 } // end namespace oofem
