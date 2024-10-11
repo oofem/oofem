@@ -50,16 +50,20 @@ double InitialCondition :: give(ValueModeType type, const FloatArray& coords)
             return 0.;
         }
     } else {
+        int size = coords.giveSize();
+        double x = (size > 0) ? coords.at(1) : 0.0;
+        double y = (size > 1) ? coords.at(2) : 0.0;
+        double z = (size > 2) ? coords.at(3) : 0.0;
         switch (type)
         {
         case VM_Total:
-            return this->valueExpr.eval( { { "c", coords } }, this->giveDomain() );
+            return this->valueExpr.eval( { { "x", x }, {"y", y}, {"z",z} }, this->giveDomain() );
             break;
         case VM_Velocity:
-            return this->velocityExpr.eval( { { "c", coords } }, this->giveDomain() );
+            return this->velocityExpr.eval( { { "x", x }, {"y", y}, {"z",z} }, this->giveDomain() );
             break;
         case VM_Acceleration:
-            return this->accelerationExpr.eval( { { "c", coords } }, this->giveDomain() );
+            return this->accelerationExpr.eval( { { "x", x }, {"y", y}, {"z",z} }, this->giveDomain() );
             break;
         default:
             return 0.0;
