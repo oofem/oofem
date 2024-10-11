@@ -30,7 +30,7 @@ set (core_unsorted
     dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
-    smoothednodalintvarfield.C dofmanvalfield.C
+    smoothednodalintvarfield.C dofmanvalfield.C expressionfield.C
     # Deprecated?
     rowcol.C skyline.C skylineu.C
     ldltfact.C
