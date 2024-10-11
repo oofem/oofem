@@ -514,4 +514,13 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
     return cf_store(loadBalancerList, name, creator);
 }
 
+std::unique_ptr<Field> ClassFactory :: createField(const char *name)
+{
+    return cf_create<Field>(fieldList, name);
+}
+
+bool ClassFactory :: registerField(const char *name, std::unique_ptr<Field> ( *creator )() )
+{
+    return cf_store(fieldList, name, creator);
+}
 } // End namespace oofem

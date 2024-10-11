@@ -68,6 +68,7 @@ class SparseNonLinearSystemNM;
 class InitModule;
 class TopologyDescription;
 class Monitor;
+class Field;
 
 class Dof;
 class SparseMtrx;
@@ -163,8 +164,10 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 
 #define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, CTOR< ContactManager, class, Domain* > );
 #define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, CTOR< ContactDefinition, class, ContactManager* > );
+#define REGISTER_Field(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerField(_IFT_ ## class ## _Name, CTOR< Field, class > );
 ///@todo What is this? Doesn't seem needed / Mikael
 #define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
+
 //@}
 
 /**
@@ -252,6 +255,8 @@ private:
     /// Associative container containing ContactManager creators
     std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
     std :: map < std :: string, std::unique_ptr<ContactDefinition> ( * )(ContactManager *) > contactDefList;
+    /// Associative container containing Field creators
+    std :: map < std :: string, std::unique_ptr<Field> ( * )() > fieldList; 
 
 public:
     /// Creates empty factory
@@ -551,6 +556,9 @@ public:
 
     std::unique_ptr<LoadBalancer> createLoadBalancer(const char *name, Domain *d);
     bool registerLoadBalancer( const char *name, std::unique_ptr<LoadBalancer> ( *creator )( Domain * ) );
+
+    std::unique_ptr<Field> createField(const char *name);
+    bool registerField( const char *name, std::unique_ptr<Field> ( *creator )() );
 };
 
 extern OOFEM_EXPORT ClassFactory &classFactory;
