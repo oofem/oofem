@@ -37,6 +37,7 @@
 #include "mpm.h"
 #include "boundaryload.h"
 #include "termlibrary.h"
+#include "field.h"
 
 // file containing various term definitions 
 
@@ -75,8 +76,9 @@ class NTN : public Term {
  */
 class dnTaN : public Term {
     protected:
+    FieldPtr velocity;
     public:
-    dnTaN (const Variable &testField, const Variable& unknownField) ;
+    dnTaN (const Variable &testField, const Variable& unknownField, FieldPtr velocity);
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)

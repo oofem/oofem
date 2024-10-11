@@ -103,7 +103,7 @@ class SADGElement : public MPElement {
             int sdofs = this->giveNumberOfSDofs();
             answer.resize(sdofs,sdofs);
             answer.zero();
-            this->integrateTerm_dw (answer, dnTaN (getScalarVariable(),getScalarVariable()), ir, tStep) ;
+            this->integrateTerm_dw (answer, dnTaN (getScalarVariable(),getScalarVariable(), this->giveDomain()->giveEngngModel()->giveField(FieldType::FT_Velocity, tStep)), ir, tStep) ;
             answer.times(-1.0);
         } else if (type == InternalFluxVector) {
             answer.clear();
@@ -218,7 +218,8 @@ class SADGBoundaryElement : public SADGElement {
                 int nsd = this->giveInterpolation()->giveNsd(this->giveGeometryType());
                 v.resize(nsd);
                 //v.at(2) = 1.0;
-                v.at(1) = sqrt(0.5); v.at(2) = sqrt(0.5); // dummy velocity
+                this->giveDomain()->giveEngngModel()->giveField(FT_Velocity, tStep)->evaluateAt(v, gc, ValueModeType::VM_Total, tStep);
+                // v.at(1) = sqrt(0.5); v.at(2) = sqrt(0.5); // dummy velocity
                 // evaluate N^T (a\cdot n) N
                 FloatMatrix contrib;
                 contrib.beDyadicProductOf(N,N);

@@ -559,8 +559,8 @@ FieldPtr DGProblem::giveField(FieldType key, TimeStep *tStep)
     if ( tStep != this->giveCurrentStep()) {
         OOFEM_ERROR("Unable to return field representation for non-current time step");
     }
-    if ( key == FT_Displacements ) {
-      return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{D_u, D_v, D_w} );
+    if ( key == FT_Velocity ) {
+      return this->giveContext()->giveFieldManager()->giveField(FT_Velocity);
     } else if ( key == FT_Pressure ) {
         return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{P_f} );
     } else if ( key == FT_Temperature ) {

@@ -36,6 +36,7 @@
 #include "termlibrary4.h"
 #include "element.h"
 #include "mathfem.h"
+#include "field.h"
 
 namespace oofem {
 
@@ -63,17 +64,24 @@ void NTN::getDimensions(Element& cell) const  {
 void NTN::initializeCell(Element& cell) const  {}
 
 
-dnTaN::dnTaN (const Variable &testField, const Variable& unknownField) : Term(testField, unknownField) {}
+dnTaN::dnTaN (const Variable &testField, const Variable& unknownField, FieldPtr velocity) : Term(testField, unknownField), velocity(velocity) {}
 
 void dnTaN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
-    FloatArray n;
+    FloatArray n, gc,lc,a;
     FloatMatrix dndx;
     this->testField.interpolation.evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     this->field.interpolation.evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix nm(n, true), anm;
-    FloatMatrix a(this->field.interpolation.giveNsd(e.giveGeometryType()),1);
+    int nsd = this->field.interpolation.giveNsd(e.giveGeometryType());
+    FloatMatrix am(nsd,1);
     //a.at(2,1)=1.0; // assume 2d flow for now
-    a.at(1,1)=sqrt(0.5); a.at(2,1)=sqrt(0.5);   
+    //a.at(1,1)=sqrt(0.5); a.at(2,1)=sqrt(0.5); 
+    lc = gp->giveNaturalCoordinates();
+    e.getGeometryInterpolation().local2global(gc, lc, FEIElementGeometryWrapper(&e));
+    this->velocity->evaluateAt(a, gc, VM_Total, tstep);
+    for (int i=1; i<=nsd; i++) {
+        am.at(i,1)=a.at(i);
+    }
     anm.beProductOf(a, nm);
     answer.beProductOf(dndx, anm);
 }
