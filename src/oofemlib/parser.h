@@ -36,6 +36,7 @@
 #define parser_h
 
 #include "oofemcfg.h"
+#include "floatarray.h"
 
 namespace oofem {
 #define Parser_CMD_LENGTH 1024
@@ -66,6 +67,9 @@ public:
     }
 
     double eval(const char *string, int &err);
+    void   eval(const char *string, FloatArray& answer, const char* name, int &err);
+    void setVariableValue(const char *name, int indx, double value);
+
     void   reset();
 
 private:
@@ -73,15 +77,19 @@ private:
         NAME, NUMBER, END,
         SQRT_FUNC, SIN_FUNC, COS_FUNC, TAN_FUNC, ATAN_FUNC, ASIN_FUNC, ACOS_FUNC, EXP_FUNC, INT_FUNC, HEAVISIDE_FUNC, HEAVISIDE_FUNC1,
         PLUS='+', MINUS='-', MUL='*', DIV='/', MOD='%', POW='^', BOOL_EQ, BOOL_LE, BOOL_LT, BOOL_GE, BOOL_GT,
-        PRINT=';', ASSIGN='=', LP='(', RP=')'
+        PRINT=';', ASSIGN='=', LP='(', RP=')', LB='[', RB=']'
     };
 
     int no_of_errors;
     Token_value curr_tok;
-    struct name {
+
+    struct name {   
         char *string;
         name *next;
-        double value;
+
+        int size = -1; // nonzero size indicates array context (and array size), zero scalar context, negative not yet defined
+        double doubleValue;
+        FloatArray arrayValue;
     };
     name *table [ Parser_TBLSZ ];
     double number_value;
@@ -96,6 +104,8 @@ private:
     double prim(bool get);
     double agr(bool get);
     Token_value get_token();
+
+    double getVariableValue(const char *name, int indx);
 };
 } // end namespace oofem
 #endif // parser_h

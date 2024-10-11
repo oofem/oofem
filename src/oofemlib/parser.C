@@ -130,13 +130,34 @@ double Parser :: prim(bool get) // handle primaries
         //   double &v = table[string_value];
         //   if (get_token() == ASSIGN) v = expr (true);
         //   return v;
-        if ( get_token() == ASSIGN ) {
-            name *n = insert(string_value);
-            n->value = expr(true);
-            return n->value;
+
+        Token_value next_tok = get_token();
+        char varname [32];
+        strncpy(varname, string_value, 31);
+        varname[31] = 0;
+        int indx = 0; // scalar context
+        if ( next_tok == LB ) {
+            // array access
+            double val = expr(true);
+            if ( curr_tok != RB ) {
+                OOFEM_ERROR("] expected");
+                return 1;
+            }
+
+            next_tok = get_token(); // eat ']'
+            indx = (int)val;
+        }
+        if ( next_tok == ASSIGN ) {
+            // name *n = insert(string_value);
+            // save string_value
+
+            setVariableValue(varname, indx, expr(true));
+            //n->value = expr(true);
+            return getVariableValue(varname, indx);
         }
 
-        return look(string_value)->value;
+        //return look(string_value)->value;
+        return getVariableValue(string_value, indx);
     }
     case MINUS:  // unary minus
         return -prim(true);
@@ -199,7 +220,7 @@ double Parser :: prim(bool get) // handle primaries
     }
     case HEAVISIDE_FUNC: //Heaviside function
     {
-        double time = look("t")->value;
+        double time = look("t")->doubleValue;
         double e = agr(true);
 
         return time < e ? 0 : 1;
@@ -271,6 +292,8 @@ Parser :: Token_value Parser :: get_token()
     case '(':
     case ')':
     case '%':
+    case '[':
+    case ']':
         return curr_tok = Token_value(ch);
 
     case '=':
@@ -391,7 +414,9 @@ Parser :: name *Parser :: look(const char *p, int ins)
     name *nn = new name;
     nn->string = new char [ strlen(p) + 1 ];
     strcpy(nn->string, p);
-    nn->value = 0.;
+    nn->doubleValue = 0.;
+    nn->arrayValue.clear();
+    nn->size = -1;
     nn->next = table [ ii ];
     table [ ii ] = nn;
     return nn;
@@ -411,6 +436,27 @@ double Parser :: eval(const char *string, int &err)
     return result;
 }
 
+
+void Parser :: eval(const char *string, FloatArray& answer, const char* resultName, int &err)
+{
+    parsedLine = string;
+    no_of_errors = 0;
+    do {
+        //double result = expr(true);
+        expr(true);
+    } while ( curr_tok != END );
+
+    err = no_of_errors;
+    name *n = look(resultName, false);
+
+    if ( n->size == 0 ) {
+        answer.resize(1);
+        answer.at(1) = n->doubleValue;
+    } else {
+        answer = n->arrayValue;
+    }
+}
+
 void Parser :: reset()
 {
     // empty Parser table
@@ -427,4 +473,42 @@ void Parser :: reset()
         }
     }
 }
+
+void Parser::setVariableValue(const char *vname, int indx, double value) {
+    name *n = look(vname, true);
+    if ( indx == 0 ) {
+        // check if variable context allowed
+        if ( n->size <= 0) {
+            n->doubleValue = value;
+            n->size = 0; // scalar context
+        } else {
+            OOFEM_ERROR("Variable %s: using scalar context of array variable", vname);
+        }
+    } else {
+        if ( n->size == 0 ) {
+            OOFEM_ERROR("Variable %s: using array context of scalar variable", vname);
+        } else {
+            if ( indx > n->size ) {
+                n->arrayValue.resize(indx);
+                n->size = indx;
+            }
+            n->arrayValue.at(indx) = value;
+        }
+    }
+}
+
+double 
+Parser::getVariableValue(const char *vname, int indx) {
+    name *n = look(vname, false);
+    
+    if ( indx == 0 && n->size == 0 ) {
+        return n->doubleValue;
+    } else if ( indx > 0 && n->size > 0 ) {
+        return n->arrayValue.at(indx);
+    } else {
+        OOFEM_ERROR("Variable %s access error", vname);
+    }
+}
+ 
+
 } // end namespace oofem
