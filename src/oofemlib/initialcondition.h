@@ -40,6 +40,7 @@
 #include "bcvaltype.h"
 #include "valuemodetype.h"
 #include "scalarfunction.h"
+#include "field.h"
 
 ///@name Input fields for initial condition
 //@{
@@ -52,6 +53,8 @@
 #define _IFT_InitialCondition_f "f"
 #define _IFT_InitialCondition_dfdt "dfdt"
 #define _IFT_InitialCondition_d2fdt2 "d2fdt2"
+
+#define _IFT_InitialCondition_field "field"
 //@}
 
 namespace oofem {
@@ -83,8 +86,8 @@ class IntArray;
 class OOFEM_EXPORT InitialCondition : public FEMComponent
 {
 private:
-    /// flag indicating compatibility (initialValueDictionary) mode
-    bool compatibilityMode = false;
+    /// flag indicating compatibility (initialValueDictionary) mode (0 uses initialValueDictionary, 1 uses expressions, 2 uses external field)
+    int mode = 0;
     /// Dictionary of initial (constant) values (deprecated)
     Dictionary initialValueDictionary;
 
@@ -94,6 +97,11 @@ private:
     ScalarFunction velocityExpr;
     // Expression for initial condition acceleration
     ScalarFunction accelerationExpr;
+
+    // external field for initial condition values (if mode == 2)
+    FieldPtr externalFField;
+    FieldType fFieldType=FieldType::FT_Unknown;
+
 
     /// Physical meaning of bc value.
     bcValType valType;

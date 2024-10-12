@@ -36,12 +36,14 @@
 #include "inputrecord.h"
 #include "cltypes.h"
 #include "function.h"
+#include "engngm.h"
+#include "timestep.h"
 
 namespace oofem {
 double InitialCondition :: give(ValueModeType type, const FloatArray& coords)
 // Returns the prescribed value of the kinematic unknown 'u'.
 {
-    if (this->compatibilityMode) {
+    if (this->mode == 0) {
         char u;
         u =  cltypesGiveUnknownTypeModeKey(type);
         if ( this->hasConditionOn(u) ) {
@@ -49,7 +51,7 @@ double InitialCondition :: give(ValueModeType type, const FloatArray& coords)
         } else {
             return 0.;
         }
-    } else {
+    } else if (this->mode == 1) {
         int size = coords.giveSize();
         double x = (size > 0) ? coords.at(1) : 0.0;
         double y = (size > 1) ? coords.at(2) : 0.0;
@@ -68,6 +70,16 @@ double InitialCondition :: give(ValueModeType type, const FloatArray& coords)
         default:
             return 0.0;
         }
+    } else if (this->mode == 2) {
+        if (!this->externalFField) {
+            this->externalFField = this->giveDomain()->giveEngngModel()->giveContext()->giveFieldManager()->giveField(this->fFieldType);
+        }
+        FloatArray answer;
+        this->externalFField->evaluateAt(answer, coords, type, this->domain->giveEngngModel()->giveSolutionStepWhenIcApply());
+        return answer.at(1);
+    } else {
+        OOFEM_ERROR("Invalid mode");
+        return 0.0;
     }
 }
 
@@ -76,7 +88,7 @@ int InitialCondition :: hasConditionOn(int u)
 // Returns True if the receiver submits the unknown 'u' to an initial
 // condition, else returns False.
 {
-    if (this->compatibilityMode) {
+    if (this->mode == 0) {
         return  ( initialValueDictionary.includes(u) );
     } else {
         return true;
@@ -88,7 +100,7 @@ int InitialCondition :: hasConditionOn(ValueModeType type)
 // Returns True if the receiver submits the unknown 'u' to an initial
 // condition, else returns False.
 {
-    if (this->compatibilityMode) {
+    if (this->mode == 0) {
         char u = cltypesGiveUnknownTypeModeKey(type);
         return  ( initialValueDictionary.includes(u) );
     } else {
@@ -112,14 +124,12 @@ InitialCondition :: initializeFrom(InputRecord &ir)
     if ( ir.hasField(_IFT_InitialCondition_conditions) ) {
         // compatibility with old input files
         IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
-        this->compatibilityMode = true;
-    } else {
-        this->compatibilityMode = false;
+        this->mode = 0;
+    } else if ( ir.hasField(_IFT_InitialCondition_f) ) {
+        this->mode = 1;
         // new input file format
         valueExpr.setValue(0.0);
-        if ( ir.hasField(_IFT_InitialCondition_f) ) {
-            IR_GIVE_OPTIONAL_FIELD(ir, valueExpr, _IFT_InitialCondition_f);
-        }
+        IR_GIVE_OPTIONAL_FIELD(ir, valueExpr, _IFT_InitialCondition_f);
         velocityExpr.setValue(0.0);
         if ( ir.hasField(_IFT_InitialCondition_dfdt) ) {
             IR_GIVE_OPTIONAL_FIELD(ir, velocityExpr, _IFT_InitialCondition_dfdt);
@@ -128,6 +138,13 @@ InitialCondition :: initializeFrom(InputRecord &ir)
         if ( ir.hasField(_IFT_InitialCondition_d2fdt2) ) {
             IR_GIVE_OPTIONAL_FIELD(ir, accelerationExpr, _IFT_InitialCondition_d2fdt2);
         }
+    } else if ( ir.hasField(_IFT_InitialCondition_field) ) {
+        this->mode = 2;
+        int val;
+        IR_GIVE_FIELD(ir, val, _IFT_InitialCondition_field);
+        this->fFieldType = static_cast<FieldType>(val);
+    } else {
+        OOFEM_ERROR("Invalid mode");
     }
 
     int val = 0;
@@ -145,12 +162,12 @@ InitialCondition :: initializeFrom(InputRecord &ir)
 void
 InitialCondition :: scale(ValueModeType type, double s)
 {
-    if (this->compatibilityMode) {
+    if (this->mode == 0) {
         if ( this->hasConditionOn(type) ) {
             initialValueDictionary.at(type) *= s;
         }
     } else {
-        OOFEM_ERROR ("Not supoorted");
+        OOFEM_ERROR ("Not suported");
     }
 }
 
