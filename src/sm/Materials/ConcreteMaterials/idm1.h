@@ -110,6 +110,12 @@
 #define _IFT_IsotropicDamageMaterial1_w_f "w_f"
 #define _IFT_IsotropicDamageMaterial1_f_k "f_k"
 #define _IFT_IsotropicDamageMaterial1_f_r "f_r"
+#define _IFT_IsotropicDamageMaterial1_ottoa "ottoa"
+#define _IFT_IsotropicDamageMaterial1_ottob "ottob"
+#define _IFT_IsotropicDamageMaterial1_otto_k1 "ottok1"
+#define _IFT_IsotropicDamageMaterial1_otto_k2 "ottok2"
+#define _IFT_IsotropicDamageMaterial1_m "m"
+#define _IFT_IsotropicDamageMaterial1_ecc "ecc"
 //@}
 
 namespace oofem {
@@ -174,6 +180,8 @@ protected:
     /// Parameters used in Trilinear_Cohesive_Crack softening law
     double w_k = 0., w_r = 0., w_f = 0., f_k = 0., f_r = 0.;
 
+    /// Parameters used Ottosen equivalent strain
+
     /** Type characterizing the algorithm used to compute equivalent strain measure.
      *  Note that the assigned numbers to enum values have to correspond to values
      *  used in initializeFrom to resolve EquivStrainType. If not, the consistency
@@ -188,6 +196,8 @@ protected:
         EST_ElasticEnergyPositiveStress=5,
         EST_ElasticEnergyPositiveStrain=6,
         EST_Griffith=7,
+        EST_Ottosen=8,
+        EST_Menetrey_Willam=9,
         EST_Unknown = 100
     };
     /// Parameter specifying the definition of equivalent strain.
@@ -195,6 +205,12 @@ protected:
 
     /// Parameter used in Mises definition of equivalent strain.
     double k = 0.;
+
+    /// Parameter used in Ottosen definition of equivalent strain.
+    double ottoa = 0., ottob = 0., otto_k1 = 0., otto_k2 = 0.;
+
+    /// Parameter used in Menetrey Willam definition of equivalent strain.
+    double m = 0., ecc = 0.;
 
     /// Parameter used in Griffith's criterion
     double griff_n = 8.;
@@ -264,9 +280,21 @@ public:
      * from the strain components stored in a vector.
      * @param strainVector Input strain components.
      * @param[out] I1e Output value of strain invariant I1.
-     * @param[out] J2e Output value of strain invariant J2.
+     * @param[out] J2e Output value of deviatoric strain invariant J2.
+     * @param[out] J3e Output value of deviatoric strain invariant J3.
      */
-    static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
+    static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e, double &J3e);
+
+    // /**
+    //  * Computes invariants I1, J2 and J3 of the strain tensor
+    //  * from the strain components stored in a vector.
+    //  * @param strainVector Input strain components.
+    //  * @param[out] I1e, I2e, I3e Output value of strain invariant I1, I2, and I3.
+    //  * @param[out] J1e, J2e, J3e Output value of strain invariant J2, J2, and J3.
+    //  */
+    // static void computeStrainInvariantPrincipal(const FloatArray &strainVector, 
+    // double &I1e, double &I2e, double &I3e, 
+    // double &J1e, double &J2e, double &J3e);
 
     bool isCrackBandApproachUsed() const { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->softType == ST_Trilinear_Cohesive_Crack || this->gf != 0. ); }
     double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;

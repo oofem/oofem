@@ -48,6 +48,7 @@
 #include "crosssection.h"
 #include "oofemtxtinputrecord.h"
 
+
 namespace oofem {
 REGISTER_Material(IsotropicDamageMaterial1);
 
@@ -114,6 +115,18 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord &ir)
     } else if ( equivStrainTypeRecord == 7 ) {
         this->equivStrainType = EST_Griffith;
         IR_GIVE_OPTIONAL_FIELD(ir, griff_n, _IFT_IsotropicDamageMaterial1_n);
+    } else if ( equivStrainTypeRecord == 8 ) {
+        this->equivStrainType = EST_Ottosen;
+        IR_GIVE_FIELD(ir, k, _IFT_IsotropicDamageMaterial1_k);
+        IR_GIVE_FIELD(ir, ottoa, _IFT_IsotropicDamageMaterial1_ottoa);
+        IR_GIVE_FIELD(ir, ottob, _IFT_IsotropicDamageMaterial1_ottob);
+        IR_GIVE_FIELD(ir, otto_k1, _IFT_IsotropicDamageMaterial1_otto_k1);
+        IR_GIVE_FIELD(ir, otto_k2, _IFT_IsotropicDamageMaterial1_otto_k2);
+    } else if ( equivStrainTypeRecord == 9 ) {
+        this->equivStrainType = EST_Menetrey_Willam;
+        IR_GIVE_FIELD(ir, k, _IFT_IsotropicDamageMaterial1_k);
+        IR_GIVE_FIELD(ir, m, _IFT_IsotropicDamageMaterial1_m);
+        IR_GIVE_FIELD(ir, ecc, _IFT_IsotropicDamageMaterial1_ecc);
     } else {
         throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_equivstraintype, "Unknown equivStrainType");
     }
@@ -520,18 +533,73 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(const FloatArray &strain, Ga
         }
 
         return sqrt( sum / lmat->give('E', gp) );
+
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
-        FloatArray principalStrains;
-
-        this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
-        double I1e, J2e;
-        this->computeStrainInvariants(principalStrains, I1e, J2e);
+        double I1e, J2e, J3e;
+        this->computeStrainInvariants(fullStrain, I1e, J2e, J3e);
         double a, b, c;
         a = ( k - 1 ) * I1e / ( 2 * k * ( 1 - 2 * nu ) );
         b = ( k - 1 ) * ( k - 1 ) * I1e * I1e / ( ( 1 - 2 * nu ) * ( 1 - 2 * nu ) );
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
         return a + 1 / ( 2 * k ) * sqrt(b + c);
+// Ottosen equivStrain
+    } else if ( this->equivStrainType == EST_Ottosen ) {
+        double nu   = lmat->give(NYxz, NULL);
+        double I1e, J2e, J3e;
+        // calculate strain invariants
+        this->computeStrainInvariants(fullStrain, I1e, J2e, J3e);
+
+        double epsilon = 1e-10;  // Small threshold to avoid precision issues
+
+        J2e = max(epsilon, fabs(J2e));
+
+        double cos3theta = 1.5 * sqrt(3.) * J3e / pow(J2e, 1.5);
+
+        double a, b, c, d, lambda;
+
+        if (cos3theta >= 0.) {
+            lambda = otto_k1 * cos( acos( min( max(otto_k2 * cos3theta,-1.), 1.) ) / 3. );
+        } else {
+            lambda = otto_k1 * cos(M_PI / 3. - acos( min( max( - otto_k2 * cos3theta,-1.), 1.) ) / 3. );
+        }
+
+        a = lambda * sqrt( J2e ) / ( 1 + nu);
+        b = ottob * I1e / ( 1 - 2 * nu);
+        c = lambda * sqrt( J2e ) / ( 1 + nu) + ottob * I1e / ( 1 - 2 * nu );
+        d = 4 * ottoa * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
+
+        return ( a + b * sqrt(c * c + d) ) / ( 2 * k );
+
+// Menetrey Willam equivStrain
+    } else if ( this->equivStrainType == EST_Menetrey_Willam ) {
+        double nu   = lmat->give(NYxz, NULL);
+        
+        double I1e, J2e, J3e;
+        // calculate strain invariants
+        this->computeStrainInvariants(fullStrain, I1e, J2e, J3e);
+
+        double epsilon = 1e-10;  // Small threshold to avoid precision issues
+
+        J2e = max(epsilon, fabs(J2e));
+
+        double theta = acos(max( min(1.,  1.5 * sqrt(3.) * J3e / pow(J2e, 1.5)), -1.) ) / 3.;
+
+        double costheta = cos(theta);
+        double a, b, c, rtheta;
+// calculate r
+        a = 4. * (1. - ecc * ecc ) * costheta * costheta + ( 2. * ecc - 1. ) * ( 2. * ecc - 1. );
+        b = 2. *( 1. - ecc * ecc ) * costheta;
+        c = 4. * (1. - ecc * ecc) * costheta * costheta + 5. * ecc * ecc - 4. * ecc;
+        rtheta = a / (b + (2. * ecc - 1.) * sqrt(c) );
+
+        double qe = sqrt(J2e * 3.);
+
+        double d = qe * rtheta / (3. + 3. * nu) + I1e / (3. - 6. * nu);
+        double f = pow(d, 2.) + 4. * qe * qe / (k * k * ( 1. + nu) * (1. + nu) );
+
+        return (d + sqrt(f)) / 2.;
+
     } else if ( this->equivStrainType == EST_Griffith ) {
         double kappa1 = 0.0, kappa2 = 0.0;
         FloatArray stress, fullStress, principalStress;
@@ -783,13 +851,26 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
 }
 
 void
-IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e)
+IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e, double &J3e)
 {
     I1e = strainVector.at(1) + strainVector.at(2) + strainVector.at(3);
-    double s1 = strainVector.at(1) * strainVector.at(1);
-    double s2 = strainVector.at(2) * strainVector.at(2);
-    double s3 = strainVector.at(3) * strainVector.at(3);
-    J2e = 1. / 2. * ( s1 + s2 + s3 ) - 1. / 6. * ( I1e * I1e );
+    // double s1 = strainVector.at(1) * strainVector.at(1);
+    // double s2 = strainVector.at(2) * strainVector.at(2);
+    // double s3 = strainVector.at(3) * strainVector.at(3);
+    // J2e = 1. / 2. * ( s1 + s2 + s3 ) - 1. / 6. * ( I1e * I1e );
+
+    J2e = (  strainVector.at(1) * strainVector.at(1) + strainVector.at(2) * strainVector.at(2) + strainVector.at(3) * strainVector.at(3) 
+      + 3 * (strainVector.at(4) * strainVector.at(4) + strainVector.at(5) * strainVector.at(5) + strainVector.at(6) * strainVector.at(6))
+           - strainVector.at(3) * strainVector.at(1) - strainVector.at(3) * strainVector.at(2) - strainVector.at(2) * strainVector.at(1)) / 3. ;
+
+    J3e = (1.0 / 27.0) * (2 * pow(strainVector.at(1), 3) + 9 * strainVector.at(1) * pow(strainVector.at(6), 2) - 3 * pow(strainVector.at(1), 2) * strainVector.at(2) 
+                + 9 * pow(strainVector.at(6), 2) * strainVector.at(2) - 3 * strainVector.at(1) * pow(strainVector.at(2), 2) + 2 * pow(strainVector.at(2), 3)
+                + 9 * strainVector.at(1) * pow(strainVector.at(5), 2) - 18 * pow(strainVector.at(5), 2) * strainVector.at(2) 
+                + 27 * strainVector.at(6) * strainVector.at(4) * strainVector.at(5) + 27 * strainVector.at(5) * strainVector.at(6) * strainVector.at(4) 
+                - 18 * strainVector.at(1) * pow(strainVector.at(4), 2) + 9 * strainVector.at(2) * pow(strainVector.at(4), 2)
+                - 3 * (pow(strainVector.at(1), 2) + 6 * pow(strainVector.at(6), 2) - 4 * strainVector.at(1) * strainVector.at(2) + pow(strainVector.at(2), 2) 
+                - 3 * pow(strainVector.at(5), 2) - 3 * pow(strainVector.at(4), 2)) * strainVector.at(3)
+                - 3 * (strainVector.at(1) + strainVector.at(2)) * pow(strainVector.at(3), 2) + 2 * pow(strainVector.at(3), 3));
 }
 
 double
@@ -812,7 +893,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
     const double gf = this->give(gf_ID, gp);
     double wf = this->give(wf_ID, gp);     // wf is the crack opening
     double omega = 0.0;
-
+// Ottosen    
     if ( kappa > e0 ) {
         if ( this->gf != 0. ) { //cohesive crack model
             if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
@@ -1177,7 +1258,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     const double e0 = this->give(e0_ID, gp);
     const double ef = this->give(ef_ID, gp);
     const double gf = this->give(gf_ID, gp);
-    double wf = this->give(wf_ID, gp);
+    double       wf = this->give(wf_ID, gp); // why not const?
 
     if ( softType == ST_Disable_Damage ) {
         return;
@@ -1338,6 +1419,14 @@ IsotropicDamageMaterial1 :: give(int aProperty, GaussPoint *gp) const
         return this->wf;
     } else if ( aProperty == gft_ID ) {
         return this->gft;
+    // } else if ( aProperty == ottoA_ID ) {
+    //     return this->ottoa;    
+    // } else if ( aProperty == ottoB_ID ) {
+    //     return this->ottob;    
+    // } else if ( aProperty == ottoK1_ID ) {
+    //     return this->otto_k2;    
+    // } else if ( aProperty == ottoK2_ID ) {
+    //     return this->otto_k2;    
     } else {
         return IsotropicDamageMaterial :: give(aProperty, gp);
     }
