@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "idm1.C": "cpp"
+        "idm1.C": "cpp",
+        "nlinearstatic.C": "cpp"
     }
 }
