@@ -55,6 +55,7 @@
 #define _IFT_DGProblem_keepTangent "keeptangent" ///< Fixes the tangent to be reused on each step.
 #define _IFT_DGProblem_exportFields "exportfields" ///< Fields to export for staggered problems.
 #define _IFT_DGProblem_problemType "ptype" 
+#define _IFT_DGProblem_preprocessFEM2DG "fem2dg" ///< Preprocess FEM problem input to DG problem.
 //@}
 
 namespace oofem {
@@ -107,6 +108,25 @@ public:
 };
 
 
+
+class ClonedDofManager : public DofManager
+{
+protected:
+    int master; // master DofManager
+
+public:
+    ClonedDofManager(int i, Domain * d, int master) : DofManager(i, d), master(master) { }
+    int giveMasterNumber() { return master; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "ClonedDofManager"; }
+    const char *giveInputRecordName() const override { return NULL; }
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
+
+
+
+};
+
+
 /**
  * This class represents generic Discontinuous Galerkin solver. The problem can be growing/decreasing, signalized by flag "changingproblemsize"
  * in the problem description. The solution is stored in UnknownsField, which can obtain/ project solution from/to DOFs (nodes). If the problem
@@ -148,6 +168,8 @@ protected:
     IntArray exportFields;
     /// identifies what problem to solve (UP, UPV, etc) 
     std::string problemType; 
+    /// @brief  flag indicating whether the FEM input should be preprocessed to DG problem input (boundary entity generation).
+    bool preprocessFEM2DG = false;
 
 
     // class representing boundary entity (edge, surface, etc.)
@@ -179,6 +201,7 @@ public:
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
+    void postInitialize() override;
 
     virtual void applyIC();
 
@@ -219,7 +242,8 @@ public:
       return deltaT * numberOfSteps;
     }
   }
-
+    protected:
+    std::unique_ptr< Element> CreateBoundaryElement( Element_Geometry_Type egt, int elemNum, Domain *domain, IntArray &bentityNodes) const;
 };
 
 } // end namespace oofem

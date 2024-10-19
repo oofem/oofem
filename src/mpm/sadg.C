@@ -295,7 +295,9 @@ class SADGBLine1 : public SADGBoundaryElement {
       
     public:
     SADGBLine1(int n, Domain* d): 
-        SADGBoundaryElement(n,d) { }
+        SADGBoundaryElement(n,d) { 
+            this->numberOfGaussPoints = 2;
+    }
     
     void initializeFrom(InputRecord &ir) override {
         SADGBoundaryElement::initializeFrom(ir);
@@ -303,7 +305,7 @@ class SADGBLine1 : public SADGBoundaryElement {
         if (!((numberOfDofMans == 2) || (numberOfDofMans == 4))) {
             OOFEM_ERROR("Invalid number of dofs");
         }
-        this->numberOfGaussPoints = 2;
+        
         this->computeGaussPoints();
     }
 
@@ -513,7 +515,9 @@ class SADGBQuad1 : public SADGBoundaryElement {
       
     public:
     SADGBQuad1(int n, Domain* d): 
-        SADGBoundaryElement(n,d) { }
+        SADGBoundaryElement(n,d) {
+            this->numberOfGaussPoints = 8;
+        }
     
     void initializeFrom(InputRecord &ir) override {
         SADGBoundaryElement::initializeFrom(ir);
@@ -521,7 +525,6 @@ class SADGBQuad1 : public SADGBoundaryElement {
         if (!((numberOfDofMans == 4) || (numberOfDofMans == 8))) {
             OOFEM_ERROR("Invalid number of dofs");
         }
-        this->numberOfGaussPoints = 8;
         this->computeGaussPoints();
     }
 

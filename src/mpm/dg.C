@@ -54,6 +54,7 @@
 #include "connectivitytable.h"
 #include "mpm.h"
 
+
 namespace oofem {
 REGISTER_EngngModel(DGProblem);
 
@@ -126,6 +127,16 @@ void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
         answer.assemble(contrib, loc, loc);
     }
 
+}
+
+void 
+ClonedDofManager::printOutputAt(FILE *file, TimeStep *tStep) {
+   EngngModel *emodel = this->giveDomain()->giveEngngModel();
+
+    fprintf( file, "%-8s%8d (%8d), Master:%d:\n", this->giveClassName(), this->giveLabel(), this->giveNumber(), master );
+    for ( Dof *dof: *this ) {
+        emodel->printDofOutputAt(file, dof, tStep);
+    } 
 }
 
 
@@ -203,6 +214,9 @@ DGProblem :: initializeFrom(InputRecord &ir)
             }
         }
     }
+    if ( ir.hasField(_IFT_DGProblem_preprocessFEM2DG) ) {
+        preprocessFEM2DG = true;
+    }
 }
 
 double DGProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
@@ -276,19 +290,48 @@ DGProblem :: constructBoundaryEntities () {
     // sets of processed boundary entities per element
     std::vector<std::set<int>> processedBoundaryEntities;
     processedBoundaryEntities.resize(this->giveDomain(1)->giveNumberOfElements());
+    Domain *domain = this->giveDomain(1);
+    int nnodes = domain->giveNumberOfDofManagers();
+    int nelems = domain->giveNumberOfElements();
+    int nodeNum = nnodes;
+    int elemNum = nelems;
 
-    for ( auto &elem: this->giveDomain(1)->giveElements() ) {
-        Element *e = elem.get();
+    Timer timer;
+    timer.startTimer();
+
+    std::vector<IntArray> clonedElementNodes(nelems);
+    //OOFEM_LOG_INFO ("fem2DG: Decoupling elements\n");
+    for ( int ielem = 1; ielem<=nelems; ielem++) {
+        // decouple original (FE) elements
+        Element *e = domain->giveElement(ielem);
+        int numNodes = e->giveNumberOfDofManagers();
+        IntArray clonedNodes(numNodes);
+        for (int i = 1; i <= numNodes; i++) {
+            auto cnode = std::make_unique<ClonedDofManager>(++nodeNum, domain, e->giveDofManagerNumber(i));
+            cnode->setCoordinates( domain->giveDofManager(e->giveDofManagerNumber(i))->giveCoordinates() );
+            domain->resizeDofManagers(nodeNum);
+            domain->setDofManager(nodeNum, std::move(cnode));
+            clonedNodes.at(i) = nodeNum;
+        }
+        // store new element connectivity
+        clonedElementNodes.at(ielem-1)=clonedNodes;// e->setDofManagers(clonedNodes);
+    }
+    //OOFEM_LOG_INFO ("fem2DG: Constructing boundary entities\n");
+    for ( int ielem = 1; ielem<=nelems; ielem++) {
+        Element *e = domain->giveElement(ielem);
         for ( int i = 1; i <= e->giveNumberOfBoundarySides(); i++ ) { // should rename as this is effectively number of boundary entities (edges or surfaces) depending on element dimension
             if ( processedBoundaryEntities[e->giveNumber()-1].find(i) != processedBoundaryEntities[e->giveNumber()-1].end() ) {
                 continue;  // edge already processed by neighbor element
             }
-            IntArray bnodes, neighbors;
+            IntArray bnodes, bnodesSorted, bclonednodes, neighbors;
             bnodes = e->giveBoundaryNodes(i);
+            bclonednodes.resize(bnodes.giveSize());
             for ( int j = 1; j <= bnodes.giveSize(); j++ ) {
+                bclonednodes.at(j) = clonedElementNodes.at(ielem-1).at(bnodes.at(j));
                 bnodes.at(j) = e->giveDofManager(bnodes.at(j))->giveNumber();
             }
-            bnodes.sort();
+            bnodesSorted = bnodes;
+            bnodesSorted.sort();
             // now search element neighbors to find one sharing the same boundary nodes
             ctable->giveElementsWithNodes(neighbors, bnodes);
             if ( neighbors.giveSize() > 2 ) {
@@ -297,21 +340,39 @@ DGProblem :: constructBoundaryEntities () {
                 std::unique_ptr<DGBoundaryEntity> be = std::make_unique<DGBoundaryEntity>();
                 be->addElement(e->giveNumber(), i);
                 processedBoundaryEntities[e->giveNumber()-1].insert(i);
+                IntArray bentityNodes(bclonednodes); // nodes of boundary entity, initially bnodes followed by cloned or neighbor nodes
+                int neighborboundary=0; // identified neighbor boundary id
 
-                if ( neighbors.giveSize() == 2 ) {
+                if ( neighbors.giveSize() == 1 ) {
+                    //boundary entity not shared => we are on domain boundary
+                    // create cloned nodes on boundary
+                    
+                    for (int j = 1; j <= bnodes.giveSize(); j++)
+                    {
+                        auto cnode = std::make_unique<ClonedDofManager>(++nodeNum, domain, bnodes.at(j));
+                        cnode->setCoordinates( domain->giveDofManager(bnodes.at(j))->giveCoordinates() );
+                        domain->resizeDofManagers(nodeNum);
+                        domain->setDofManager(nodeNum, std::move(cnode));
+                        bentityNodes.followedBy(nodeNum, bnodes.giveSize());
+                    }
+                } else if ( neighbors.giveSize() == 2 ) {
                     //boundary entity shared => we are on domain interior
                     int neighborelem = neighbors.at(1) == e->giveNumber() ? neighbors.at(2) : neighbors.at(1);
-                    // determine boundary entity number in neighbor element
-                    int neighborboundary = 0;
+                    // neighbor boundary nodes
+                    IntArray neighborBoundaryNodes;
+                    IntArray neighborClonedBoundaryNodes;
                     for ( int j = 1; j <= this->giveDomain(1)->giveElement(neighborelem)->giveNumberOfBoundarySides(); j++ ) {
                         bool equal = true;
-                        IntArray neighborBoundaryNodes = this->giveDomain(1)->giveElement(neighborelem)->giveBoundaryNodes(j);
-                        for ( int k = 1; k <= neighborBoundaryNodes.giveSize(); k++ ) {
+                        neighborBoundaryNodes = this->giveDomain(1)->giveElement(neighborelem)->giveBoundaryNodes(j);
+                        int size = neighborBoundaryNodes.giveSize();
+                        neighborClonedBoundaryNodes.resize(size);
+                        for ( int k = 1; k <= size; k++ ) {
+                            neighborClonedBoundaryNodes.at(k) = clonedElementNodes.at(neighborelem-1).at(neighborBoundaryNodes.at(k));
                             neighborBoundaryNodes.at(k) = this->giveDomain(1)->giveElement(neighborelem)->giveDofManager(neighborBoundaryNodes.at(k))->giveNumber();    
                         }
                         // compare bnodes (sorted) with neighborBoundaryNodes
                         for ( int k = 1; k <= neighborBoundaryNodes.giveSize(); k++ ) {
-                            if ( !bnodes.findSorted(neighborBoundaryNodes.at(k))) {
+                            if ( !bnodesSorted.findSorted(neighborBoundaryNodes.at(k))) {
                                 equal = false;
                                 break;
                             }
@@ -322,19 +383,104 @@ DGProblem :: constructBoundaryEntities () {
                         }
                     }
                     if (neighborboundary) {
-                        be->addElement(neighborelem, neighborboundary);
-                        processedBoundaryEntities[neighborelem-1].insert(neighborboundary);
+                        be->addElement(neighborelem, neighborboundary); // delete
+                        processedBoundaryEntities[neighborelem-1].insert(neighborboundary); 
+                        // add nodes of neighbor element
+                        for (int j = 1; j <= bnodes.giveSize(); j++)
+                        {
+                            bentityNodes.followedBy(neighborClonedBoundaryNodes.at(neighborBoundaryNodes.findFirstIndexOf(bnodes.at(j))), bnodes.giveSize());
+                        }
                     } else {
                         OOFEM_ERROR("Boundary entity not found in neighbor element");
                     }
                 }
-                this->boundaryEntities.push_back(std::move(be));    
+                this->boundaryEntities.push_back(std::move(be));   
+                // create boundary element
+                    Element_Geometry_Type egt = e->giveInterpolation()->giveBoundaryGeometryType(neighborboundary);
+                    std::unique_ptr<Element> belem (this->CreateBoundaryElement(egt, ++elemNum, domain, bentityNodes));
+                    domain->resizeElements(elemNum);
+                    domain->setElement(elemNum, std::move(belem));
+ 
             }
         }
     }
+    // finally make original elements decoupled
+    for ( int ielem = 1; ielem<=nelems; ielem++) {
+        Element *e = domain->giveElement(ielem);
+        e->setDofManagers(clonedElementNodes.at(ielem-1));
+    }
+    timer.stopTimer();
+    //OOFEM_LOG_INFO("fem2DG: generated %d interface elements, %d nodes cloned\n", elemNum-nelems, nodeNum-nnodes); 
+    OOFEM_LOG_INFO("fem2DG: FE (%d nodes, %d elements) -> DG (%d nodes, %d elements)\n", nnodes, nelems, nodeNum, elemNum);
+    OOFEM_LOG_INFO("fem2DG: done in %.2fs\n", timer.getUtime());
 }
 
 
+std::unique_ptr< Element> 
+DGProblem::CreateBoundaryElement( Element_Geometry_Type egt, int elemNum, Domain *domain, IntArray &bentityNodes) const 
+{
+    std::unique_ptr<Element> belem;
+    switch (egt) {
+        case EGT_line_1:
+            belem = classFactory.createElement("sadgbline1", elemNum, domain);
+            break;
+        case EGT_quad_1:
+            belem = classFactory.createElement("sadgbquad1", elemNum, domain);
+            break;
+        default:
+            OOFEM_ERROR("Unknown boundary element geometry type");
+    }
+    belem->setDofManagers(bentityNodes);
+    return belem;
+}
+
+void
+DGProblem :: postInitialize()
+{
+    // set meta step bounds
+    int istep = this->giveNumberOfFirstStep(true);
+    for ( auto &metaStep: metaStepList ) {
+        istep = metaStep.setStepBounds(istep);
+    }
+
+    // initialize boundary entities
+    if ( preprocessFEM2DG ) {
+        this->constructBoundaryEntities();
+    }
+
+    for ( auto &domain: domainList ) {
+        domain->postInitialize();
+    }
+    
+    if ( preprocessFEM2DG ) {
+        // print domain entities
+        for ( auto &dman: this->giveDomain(1)->dofManagerList ) {
+            ClonedDofManager *cdman = dynamic_cast<ClonedDofManager*>(dman.get());
+            Node *ndman = dynamic_cast<Node*>(dman.get());
+            std::string name;
+            int master=0;
+            if (ndman) {
+                name = "Node";
+            } else if (cdman) {
+                name = "ClonedNode";
+                master = cdman->giveMasterNumber();
+            }
+            printf("%10s %4d master %4d coords %6f %6f %6f dofs", name.c_str(), dman->giveNumber(), master, dman->giveCoordinate(1), dman->giveCoordinate(2), dman->giveCoordinate(3));
+            for ( Dof *dof: *dman ) {
+                printf(" %d", dof->giveDofID());
+            }
+            printf("\n");
+        }
+        for (auto &elem: this->giveDomain(1)->elementList) {
+            Element *e = elem.get();
+            printf("%8s %4d nodes", e->giveClassName(), e->giveNumber());
+            for ( int i = 1; i <= e->giveNumberOfDofManagers(); i++ ) {
+                printf(" %d", e->giveDofManager(i)->giveNumber());
+            }
+            printf("\n");
+        }
+    }
+}
 
 
 
@@ -343,35 +489,7 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO( "\nSolving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
     
     Domain *d = this->giveDomain(1);
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
-    if ( false ) {
-        this->constructBoundaryEntities();
-        if (true) {
-            // print boundary entities
-            int id = 1;
-            printf("Boundary entities: %ld\n---------------------------\n", this->boundaryEntities.size());
-            for ( auto &be: this->boundaryEntities ) {
-                if ( be->elements.giveSize() == 1 ) {
-                printf("%4d: %4d(%4d) %4s(%4s)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), "-", "-");
-                } else {
-                    printf("%4d: %4d(%4d) %4d(%4d)\n", id++, be->elements.at(1), be->elementBoundaryIDs.at(1), be->elements.at(2), be->elementBoundaryIDs.at(2));
-                }
-            }
-            printf("---------------------------\n");
-            
-            printf("Element coloring\n---------------------------\n");
-            for (auto &e: this->giveDomain(1)->giveElements()) {
-                int c = this->giveDomain(1)->giveConnectivityTable()->getElementColor(e.get()->giveNumber());
-                printf("%4d: %2d\n", e->giveNumber(), c);
-            }
-            printf("---------------------------\n");
-        }
-        
-
-    }
-
-    // @BP: debug
+    //int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();

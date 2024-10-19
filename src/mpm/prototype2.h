@@ -41,6 +41,9 @@ namespace oofem {
         virtual const Element_Geometry_Type giveGeometryType() const override {
             return EGT_unknown;
         }
+        virtual const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override {
+            return EGT_unknown;
+        }
         void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {
             return this->getCellInterpolation(elem->giveGeometryType())->giveCellDofMans(nodes,internalDofMans, elem );
         }
