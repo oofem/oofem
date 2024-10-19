@@ -550,6 +550,7 @@ void
 Element :: setDofManagers(const IntArray &_dmans)
 {
     this->dofManArray = _dmans;
+    this->numberOfDofMans = _dmans.giveSize();
 }
 
 void
