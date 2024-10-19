@@ -54,6 +54,11 @@ public:
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Wedge; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_2; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int ib) const override
+    {
+        if (ib <= 2) return EGT_triangle_2;
+        else return EGT_quad_2;
+    }
     integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override
     {
         if (ib <= 2) return _Triangle;

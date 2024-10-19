@@ -74,6 +74,8 @@ public:
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Cube; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_hexa_2; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_quad_2; } 
+
     integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Square; }
     integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _Square; }
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
