@@ -970,6 +970,13 @@ Domain :: postInitialize()
         }
     }
 
+    if (!spatialLocalizer) {
+        spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
+        spatialLocalizer->init();
+    }
+    if (!connectivityTable) {
+        connectivityTable = std::make_unique<ConnectivityTable>(this);
+    }
     
 
     if ( this->hasXfemManager() ) {
