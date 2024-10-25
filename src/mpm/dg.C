@@ -37,6 +37,8 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "dof.h"
+#include "crosssection.h"
+#include "material.h"
 #include "dictionary.h"
 #include "verbose.h"
 #include "classfactory.h"
@@ -217,6 +219,11 @@ DGProblem :: initializeFrom(InputRecord &ir)
     if ( ir.hasField(_IFT_DGProblem_preprocessFEM2DG) ) {
         preprocessFEM2DG = true;
     }
+    IR_GIVE_OPTIONAL_FIELD(ir, sets2preprocess, _IFT_DGProblem_sets2preprocess);
+    IR_GIVE_OPTIONAL_FIELD(ir, targetBoundaryNodeSets, _IFT_DGProblem_targetBoundaryNodeSets);
+    if ( sets2preprocess.giveSize() != targetBoundaryNodeSets.giveSize() ) {
+        OOFEM_ERROR("Size mismatch in %s and %s attributes", _IFT_DGProblem_sets2preprocess, _IFT_DGProblem_targetBoundaryNodeSets);
+    }
 }
 
 double DGProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
@@ -291,6 +298,11 @@ DGProblem :: constructBoundaryEntities () {
     std::vector<std::set<int>> processedBoundaryEntities;
     processedBoundaryEntities.resize(this->giveDomain(1)->giveNumberOfElements());
     Domain *domain = this->giveDomain(1);
+    // set maps to assist in generating boundary node sets
+    std::vector<std::unordered_multimap<int, int>> setsBoundaryEntities;
+    // boundary nodes sets to be generated
+    std::vector<std::set<int>> boundaryNodeSets;
+
     int nnodes = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
     int nodeNum = nnodes;
@@ -298,6 +310,16 @@ DGProblem :: constructBoundaryEntities () {
 
     Timer timer;
     timer.startTimer();
+
+    // initialize setBoundaryEntities
+    setsBoundaryEntities.resize(this->sets2preprocess.giveSize());
+    boundaryNodeSets.resize(this->sets2preprocess.giveSize());
+    for (int iset = 1; iset<=sets2preprocess.giveSize(); iset++) {
+        const IntArray& bentities = domain->giveSet(sets2preprocess.at(iset))->giveBoundaryList();
+        for (int i = 1; i <= bentities.giveSize()/2; i++) {
+            setsBoundaryEntities[iset-1].insert({bentities.at(2*i-1), bentities.at(2*i)});
+        }
+    }
 
     std::vector<IntArray> clonedElementNodes(nelems);
     //OOFEM_LOG_INFO ("fem2DG: Decoupling elements\n");
@@ -355,6 +377,21 @@ DGProblem :: constructBoundaryEntities () {
                         domain->setDofManager(nodeNum, std::move(cnode));
                         bentityNodes.followedBy(nodeNum, bnodes.giveSize());
                     }
+
+                    // update boundary sets
+                    for (int iset = 1; iset<=sets2preprocess.giveSize(); iset++) {
+                        auto range = setsBoundaryEntities[iset-1].equal_range(e->giveNumber());
+                        for (auto it = range.first; it != range.second; ++it) {
+                            if (it->second == i) {
+                                // add boundary nodes to target set
+                                for (int k = 1; k <= bnodes.giveSize(); k++) {
+                                    boundaryNodeSets.at(iset-1).insert(bentityNodes.at(bnodes.giveSize()+k));
+                                }
+                                break;  // only one boundary entity per element
+                            }
+                        }
+                    }
+
                 } else if ( neighbors.giveSize() == 2 ) {
                     //boundary entity shared => we are on domain interior
                     int neighborelem = neighbors.at(1) == e->giveNumber() ? neighbors.at(2) : neighbors.at(1);
@@ -399,6 +436,9 @@ DGProblem :: constructBoundaryEntities () {
                     Element_Geometry_Type egt = e->giveInterpolation()->giveBoundaryGeometryType(neighborboundary);
                     std::unique_ptr<Element> belem (this->CreateBoundaryElement(egt, ++elemNum, domain, bentityNodes));
                     domain->resizeElements(elemNum);
+                    // @BP TODO fragile, replace by user defined values 
+                    belem->setCrossSection(1);
+                    belem->setMaterial(1);
                     domain->setElement(elemNum, std::move(belem));
  
             }
@@ -408,6 +448,16 @@ DGProblem :: constructBoundaryEntities () {
     for ( int ielem = 1; ielem<=nelems; ielem++) {
         Element *e = domain->giveElement(ielem);
         e->setDofManagers(clonedElementNodes.at(ielem-1));
+    }
+    // update target boundary sets
+    for (int iset = 1; iset<=sets2preprocess.giveSize(); iset++) {
+        IntArray nodes(boundaryNodeSets.at(iset-1).size());
+        int counter = 1;
+        for (auto bnode: boundaryNodeSets.at(iset-1)) {
+            nodes.at(counter++)=bnode;
+        }
+        domain->giveSet(targetBoundaryNodeSets.at(iset))->clear();
+        domain->giveSet(targetBoundaryNodeSets.at(iset))->setNodeList(nodes);
     }
     timer.stopTimer();
     //OOFEM_LOG_INFO("fem2DG: generated %d interface elements, %d nodes cloned\n", elemNum-nelems, nodeNum-nnodes); 
@@ -476,6 +526,15 @@ DGProblem :: postInitialize()
             printf("%8s %4d nodes", e->giveClassName(), e->giveNumber());
             for ( int i = 1; i <= e->giveNumberOfDofManagers(); i++ ) {
                 printf(" %d", e->giveDofManager(i)->giveNumber());
+            }
+            printf("\n");
+        }
+
+        for (int iset =1; iset<= this->targetBoundaryNodeSets.giveSize(); iset++) {
+            Set *set = this->giveDomain(1)->giveSet(this->targetBoundaryNodeSets.at(iset));
+            printf("Set %d nodes", set->giveNumber());
+            for (int i = 1; i <= (set->giveNodeList()).giveSize(); i++) {
+                printf(" %d", (set->giveNodeList()).at(i));
             }
             printf("\n");
         }

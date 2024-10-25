@@ -56,6 +56,11 @@
 #define _IFT_DGProblem_exportFields "exportfields" ///< Fields to export for staggered problems.
 #define _IFT_DGProblem_problemType "ptype" 
 #define _IFT_DGProblem_preprocessFEM2DG "fem2dg" ///< Preprocess FEM problem input to DG problem.
+/// Sets to preprocess from FEM to DG problem. These should specify boundary using element boundaries, not nodes.
+/// this is needed to uniquely identify nodes on newly created boundary elements.
+#define _IFT_DGProblem_sets2preprocess "boundarysets" ///< Sets to preprocess from FEM to DG problem.
+#define _IFT_DGProblem_targetBoundaryNodeSets "targetnodesets" ///< Target sets to store the generated boundary node sets.
+
 //@}
 
 namespace oofem {
@@ -170,6 +175,10 @@ protected:
     std::string problemType; 
     /// @brief  flag indicating whether the FEM input should be preprocessed to DG problem input (boundary entity generation).
     bool preprocessFEM2DG = false;
+    /// array of sets to process to generate boundary node sets
+    IntArray sets2preprocess;
+    /// array of target sets (same size as sets2preprocess) to store the generated boundary node sets
+    IntArray targetBoundaryNodeSets;
 
 
     // class representing boundary entity (edge, surface, etc.)
@@ -185,6 +194,7 @@ protected:
 
     // list of boundary entities
     std :: vector< std::unique_ptr<DGBoundaryEntity>> boundaryEntities;
+
 
 
 public:
