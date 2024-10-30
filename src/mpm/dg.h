@@ -100,22 +100,6 @@ public:
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
-/**
- * Callback class for assembling residuals
- */
-class ScalarAdvectionResidualAssembler : public MatrixAssembler
-{
-    protected:
-    double alpha;
-    double deltaT;
-    Variable::VariableQuantity q;
-
-public:
-    ScalarAdvectionResidualAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : MatrixAssembler(), alpha(alpha), deltaT(deltaT), q(q) {}
-    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
-};
-
-
 
 class ClonedDofManager : public DofManager
 {
@@ -259,6 +243,8 @@ public:
   }
     protected:
     std::unique_ptr< Element> CreateBoundaryElement( Element_Geometry_Type egt, int elemNum, Domain *domain, IntArray &bentityNodes) const;
+    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
+                                        const UnknownNumberingScheme &ns, Domain *d) const;
 };
 
 } // end namespace oofem

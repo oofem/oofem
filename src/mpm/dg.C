@@ -131,6 +131,7 @@ void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
 
 }
 
+
 void 
 ClonedDofManager::printOutputAt(FILE *file, TimeStep *tStep) {
    EngngModel *emodel = this->giveDomain()->giveEngngModel();
@@ -603,6 +604,8 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     //FloatArray *v = this->field->giveSolutionVector(tStep);
     FloatArray rhs;
     rhsMatrix->times(solution, rhs);
+    // add dirichlet boundary conditions
+    this->assembleDirichletBcRhsVector(rhs, tStep, VM_Total, EModelDefaultEquationNumbering(), d);
     ConvergedReason status = this->nMethod->solve(*lhsMatrix, rhs, solution);
     tStep->convergedReason = status;
     this->updateSolution(solution, tStep, d); // ?
@@ -769,6 +772,63 @@ FieldPtr DGProblem::giveField(FieldType key, TimeStep *tStep)
     }
 }
 
+
+/**
+ * @BP: This method is used to assemble the Dirichlet boundary conditions into the RHS vector.
+ * Note that it assembles the contributions from Lhs and Rhs! 
+ * This is needed, as the Rhs is at present evaluated as Matrix * PreviousSolutionVector, and the Dirichlet BCs are not included in previous solution vector!
+ */
+void
+DGProblem::assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
+                                        const UnknownNumberingScheme &ns, Domain *d) const
+{
+    IntArray loc, dofids;
+    FloatArray rp1, rp, charVec, c1;
+    FloatMatrix ke,me,kte,m1;
+    FloatMatrix capacity;
+
+    int nelem = d->giveNumberOfElements();
+
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        Element *element = d->giveElement(ielem);
+
+        element->giveElementDofIDMask(dofids);
+        element->computeVectorOfPrescribed(dofids, VM_Total, tStep, rp1);
+        element->computeVectorOfPrescribed(dofids, VM_Total, tStep->givePreviousStep(), rp);
+
+        if ( !rp.containsOnlyZeroes() || !rp1.containsOnlyZeroes() ) {
+            element->giveCharacteristicMatrix(ke, StiffnessMatrix, tStep);
+            element->giveCharacteristicMatrix(me, MassMatrix, tStep);
+            // internal flux (boundary elements)
+            element->giveCharacteristicMatrix(kte, InternalFluxVector, tStep);
+            if (ke.isNotEmpty() && kte.isNotEmpty()) {
+                ke.add(kte);
+            } else if (kte.isNotEmpty()) {
+                ke = kte;
+            } 
+            element->giveLocationArray(loc, ns);
+
+ 
+            if ( !rp1.containsOnlyZeroes() ) {
+                m1 = ke;
+                m1.times(this->deltaT/2.0);
+                m1.add(me);
+                c1.beProductOf(m1, rp1);
+                c1.negated();
+                answer.assemble(c1, loc);
+            }
+
+            if ( !rp.containsOnlyZeroes() ) {
+                m1=ke;
+                m1.times((-1.0)*this->deltaT/2.0);
+                m1.add(me);
+                c1.beProductOf(m1, rp);
+                answer.assemble(c1, loc);
+            }
+        }
+    } // end element loop
+
+}
 
 
 } // end namespace oofem
