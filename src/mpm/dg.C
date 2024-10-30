@@ -524,7 +524,8 @@ DGProblem :: postInitialize()
     for ( auto &domain: domainList ) {
         domain->postInitialize();
     }
-    
+
+#if 0
     if ( preprocessFEM2DG ) {
         // print domain entities
         for ( auto &dman: this->giveDomain(1)->dofManagerList ) {
@@ -562,6 +563,7 @@ DGProblem :: postInitialize()
             printf("\n");
         }
     }
+#endif
 }
 
 
