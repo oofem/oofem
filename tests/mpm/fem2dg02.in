@@ -1,0 +1,124 @@
+fem2dg02.out
+Sample 2D scalar advection problem
+DGproblem nsteps 40 nmodules 1 deltat 1.e-2 alpha 1.0 smtype 1 fem2dg  nfields 2 boundarysets 4 3 4 5 6 targetboundarynodesets 4 7 8 9 10 targetallnodeset 11 targetallelementset 12
+#vtkxml 1 tstep_all primvars 1 19
+errorcheck
+exprfield f "f[1]=1.0;f[2]=0.0" type 1
+exprfield f "f=(x<0.40)*(sin(x*pi/0.4))" type 7
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 42 nelem 40 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 1 nset 12
+Node 1 coords 3     0.000000e+00     0.000000e+00     0.000000e+00
+Node 2 coords 3     5.000000e-02     0.000000e+00     0.000000e+00
+Node 3 coords 3     1.000000e-01     0.000000e+00     0.000000e+00
+Node 4 coords 3     1.500000e-01     0.000000e+00     0.000000e+00
+Node 5 coords 3     2.000000e-01     0.000000e+00     0.000000e+00
+Node 6 coords 3     2.500000e-01     0.000000e+00     0.000000e+00
+Node 7 coords 3     3.000000e-01     0.000000e+00     0.000000e+00
+Node 8 coords 3     3.500000e-01     0.000000e+00     0.000000e+00
+Node 9 coords 3     4.000000e-01     0.000000e+00     0.000000e+00
+Node 10 coords 3     4.500000e-01     0.000000e+00     0.000000e+00
+Node 11 coords 3     5.000000e-01     0.000000e+00     0.000000e+00
+Node 12 coords 3     5.500000e-01     0.000000e+00     0.000000e+00
+Node 13 coords 3     6.000000e-01     0.000000e+00     0.000000e+00
+Node 14 coords 3     6.500000e-01     0.000000e+00     0.000000e+00
+Node 15 coords 3     7.000000e-01     0.000000e+00     0.000000e+00
+Node 16 coords 3     7.500000e-01     0.000000e+00     0.000000e+00
+Node 17 coords 3     8.000000e-01     0.000000e+00     0.000000e+00
+Node 18 coords 3     8.500000e-01     0.000000e+00     0.000000e+00
+Node 19 coords 3     9.000000e-01     0.000000e+00     0.000000e+00
+Node 20 coords 3     9.500000e-01     0.000000e+00     0.000000e+00
+Node 21 coords 3     1.000000e+00     0.000000e+00     0.000000e+00
+Node 22 coords 3     0.000000e+00     5.000000e-02     0.000000e+00
+Node 23 coords 3     5.000000e-02     5.000000e-02     0.000000e+00
+Node 24 coords 3     1.000000e-01     5.000000e-02     0.000000e+00
+Node 25 coords 3     1.500000e-01     5.000000e-02     0.000000e+00
+Node 26 coords 3     2.000000e-01     5.000000e-02     0.000000e+00
+Node 27 coords 3     2.500000e-01     5.000000e-02     0.000000e+00
+Node 28 coords 3     3.000000e-01     5.000000e-02     0.000000e+00
+Node 29 coords 3     3.500000e-01     5.000000e-02     0.000000e+00
+Node 30 coords 3     4.000000e-01     5.000000e-02     0.000000e+00
+Node 31 coords 3     4.500000e-01     5.000000e-02     0.000000e+00
+Node 32 coords 3     5.000000e-01     5.000000e-02     0.000000e+00
+Node 33 coords 3     5.500000e-01     5.000000e-02     0.000000e+00
+Node 34 coords 3     6.000000e-01     5.000000e-02     0.000000e+00
+Node 35 coords 3     6.500000e-01     5.000000e-02     0.000000e+00
+Node 36 coords 3     7.000000e-01     5.000000e-02     0.000000e+00
+Node 37 coords 3     7.500000e-01     5.000000e-02     0.000000e+00
+Node 38 coords 3     8.000000e-01     5.000000e-02     0.000000e+00
+Node 39 coords 3     8.500000e-01     5.000000e-02     0.000000e+00
+Node 40 coords 3     9.000000e-01     5.000000e-02     0.000000e+00
+Node 41 coords 3     9.500000e-01     5.000000e-02     0.000000e+00
+Node 42 coords 3     1.000000e+00     5.000000e-02     0.000000e+00
+sadgtria1 1 nodes 3 1 23 22
+sadgtria1 2 nodes 3 1 2 23
+sadgtria1 3 nodes 3 2 24 23
+sadgtria1 4 nodes 3 2 3 24
+sadgtria1 5 nodes 3 3 25 24
+sadgtria1 6 nodes 3 3 4 25
+sadgtria1 7 nodes 3 4 26 25
+sadgtria1 8 nodes 3 4 5 26
+sadgtria1 9 nodes 3 5 27 26
+sadgtria1 10 nodes 3 5 6 27
+sadgtria1 11 nodes 3 6 28 27
+sadgtria1 12 nodes 3 6 7 28
+sadgtria1 13 nodes 3 7 29 28
+sadgtria1 14 nodes 3 7 8 29
+sadgtria1 15 nodes 3 8 30 29
+sadgtria1 16 nodes 3 8 9 30
+sadgtria1 17 nodes 3 9 31 30
+sadgtria1 18 nodes 3 9 10 31
+sadgtria1 19 nodes 3 10 32 31
+sadgtria1 20 nodes 3 10 11 32
+sadgtria1 21 nodes 3 11 33 32
+sadgtria1 22 nodes 3 11 12 33
+sadgtria1 23 nodes 3 12 34 33
+sadgtria1 24 nodes 3 12 13 34
+sadgtria1 25 nodes 3 13 35 34
+sadgtria1 26 nodes 3 13 14 35
+sadgtria1 27 nodes 3 14 36 35
+sadgtria1 28 nodes 3 14 15 36
+sadgtria1 29 nodes 3 15 37 36
+sadgtria1 30 nodes 3 15 16 37
+sadgtria1 31 nodes 3 16 38 37
+sadgtria1 32 nodes 3 16 17 38
+sadgtria1 33 nodes 3 17 39 38
+sadgtria1 34 nodes 3 17 18 39
+sadgtria1 35 nodes 3 18 40 39
+sadgtria1 36 nodes 3 18 19 40
+sadgtria1 37 nodes 3 19 41 40
+sadgtria1 38 nodes 3 19 20 41
+sadgtria1 39 nodes 3 20 42 41
+sadgtria1 40 nodes 3 20 21 42
+#
+dummycs 1 mat 1 set 2
+dummymat 1 
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 14 values 1 0 set 7
+BoundaryCondition  2 loadTimeFunction 1 dofs 1 14 values 1 0 set 8
+BoundaryCondition  3 loadTimeFunction 1 dofs 1 14 values 1 0 set 9
+BoundaryCondition  4 loadTimeFunction 1 dofs 1 14 values 1 0 set 10
+InitialCondition 1 dofs 1 14 set 11 field 7
+ConstantFunction 1 f(t) 1.0
+#
+set 1 noderanges {(1 42)}
+set 2 elementranges {(1 40)}
+set 3 elementboundaries 2  1 3  
+set 4 elementboundaries 2  40 2  
+set 5 elementboundaries 40  2 1   4 1   6 1   8 1   10 1   12 1   14 1   16 1   18 1   20 1   22 1   24 1   26 1   28 1   30 1   32 1   34 1   36 1   38 1   40 1  
+set 6 elementboundaries 40  1 2   3 2   5 2   7 2   9 2   11 2   13 2   15 2   17 2   19 2   21 2   23 2   25 2   27 2   29 2   31 2   33 2   35 2   37 2   39 2  
+# target sets 
+set 7
+set 8
+set 9
+set 10
+set 11
+set 12
+#
+#%BEGIN_CHECK% tolerance 0.08
+## check nodes (against exact solution - sine function)
+#NODE tStep 40 number 43 dof 14 unknown d value 0.0
+#NODE tStep 40 number 65 dof 14 unknown d value 0.0
+#NODE tStep 40 number 89 dof 14 unknown d value 0.0 
+#NODE tStep 40 number 113 dof 14 unknown d value 1.0
+#NODE tStep 40 number 137 dof 14 unknown d value 0.0 
+#%END_CHECK%
