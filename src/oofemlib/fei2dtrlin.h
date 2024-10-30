@@ -52,6 +52,8 @@ public:
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
 
     const Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_line_1; } 
+
 
     // Bulk
     static FloatArrayF<3> evalN(const FloatArrayF<2> &lcoords) ;

@@ -40,9 +40,9 @@
 
 namespace oofem {
 
-  ConnectivityTable::ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0)
+ConnectivityTable::ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0), elementColoring(), elementColoringFlag(false)  
 {
-  #ifdef _OPENMP
+#ifdef _OPENMP
     omp_init_lock(&initLock);
 #endif
 }
@@ -51,6 +51,7 @@ void
 ConnectivityTable :: reset()
 {
     nodalConnectivityFlag = 0;
+    elementColoringFlag = false;
 }
 
 void
@@ -121,7 +122,7 @@ ConnectivityTable :: giveDofManConnectivityArray(int dofman)
 
 
 void
-ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemList)
+ConnectivityTable :: giveElementNeighbourList(IntArray &answer, const IntArray &elemList)
 {
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
@@ -159,4 +160,64 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
         }
     }
 }
+
+void 
+ConnectivityTable::giveElementsWithNodes(IntArray &answer, const IntArray& nodes)
+{
+    // loop over individual node's connectivity arrays and find intersection (common elements)
+    answer.resize(0);
+    if (nodes.giveSize()) {
+        for (int i=1; i<= nodes.giveSize(); i++) {
+            const IntArray *candidates = this->giveDofManConnectivityArray(nodes.at(i));
+            if (i == 1) {
+                answer = *candidates; // first node gives preliminary set of elements
+            } else { // other nodes refine the set
+                for (int j=1; j<=answer.giveSize(); j++) { // loop over candidates 
+                    if (candidates->contains(answer.at(j)) == false) {
+                        answer.erase(j);
+                        j--;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void 
+ConnectivityTable::buildElementColoring() {
+    // greedy coloring algorithm
+    // loop over elements
+    if (elementColoringFlag) {
+        return;
+    } else {
+        int nelems = domain->giveNumberOfElements();
+        elementColoring.resize(nelems);
+        elementColoring.zero();
+        for (auto &elem : domain->elementList) {
+            IntArray neighbors;
+            giveElementNeighbourList(neighbors, IntArray({elem->giveNumber()}));
+            IntArray neighborsColors;
+            for (auto val : neighbors) {
+                neighborsColors.insertSortedOnce(elementColoring.at(val));
+            }
+            // find first unused color code in neighborsColor array
+            for (int c=1; true; c++) {
+                if (!neighborsColors.containsSorted(c)) {
+                    elementColoring.at(elem->giveNumber()) = c;
+                    break;
+                }
+            }
+        }
+        elementColoringFlag = true;
+    }
+}
+
+int 
+ConnectivityTable::getElementColor(int e) {
+    if (!elementColoringFlag) {
+        buildElementColoring();
+    }
+    return elementColoring.at(e);
+}
+
 } // end namespace oofem

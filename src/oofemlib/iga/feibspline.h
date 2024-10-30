@@ -96,6 +96,8 @@ public:
         }
     }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_unknown; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_unknown; } 
+
 
     integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override {
         if ( nsd == 3 ) {

@@ -49,6 +49,8 @@ public:
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Square; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_quad_1_interface; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_line_1; } 
+
     integrationDomain giveBoundaryIntegrationDomain(int ib, const Element_Geometry_Type) const override { return _Line; }
     integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf, const Element_Geometry_Type) const override { return _Square; }
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge, const Element_Geometry_Type) const override { return _Line; }
@@ -60,6 +62,7 @@ public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
     // Edge
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

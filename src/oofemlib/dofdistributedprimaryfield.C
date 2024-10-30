@@ -174,7 +174,8 @@ DofDistributedPrimaryField :: applyDefaultInitialCondition()
             if ( icid > 0 && dof->isPrimaryDof() ) {
                 InitialCondition *ic = d->giveIc(icid);
                 if ( ic->hasConditionOn(VM_Total) ) {
-                    double val = ic->give(VM_Total);
+                    FloatArray c = dman->giveCoordinates();
+                    double val = ic->give(VM_Total, c);
                     dof->updateUnknownsDictionary(tStep, VM_Total, val);
                 }
             }
@@ -225,7 +226,8 @@ DofDistributedPrimaryField :: applyInitialCondition(InitialCondition &ic)
         if ( dman->isNull() ) continue;
         double tot0 = 0;
         if ( ic.hasConditionOn(VM_Total) ) {
-            tot0 = ic.give(VM_Total);
+            FloatArray c = dman->giveCoordinates();
+            tot0 = ic.give(VM_Total, c);
         }
 #if 0
         Not relevant for this time discretization

@@ -55,6 +55,7 @@ public:
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const  override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_point; } 
 
     /**@name Surface interpolation services */
     //@{

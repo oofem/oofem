@@ -528,5 +528,13 @@ bool ClassFactory :: registerTerm(const char *name, std::unique_ptr<Term> ( *cre
     return cf_store(termList, name, creator);
 }
 
+std::unique_ptr<Field> ClassFactory :: createField(const char *name)
+{
+    return cf_create<Field>(fieldList, name);
+}
 
+bool ClassFactory :: registerField(const char *name, std::unique_ptr<Field> ( *creator )() )
+{
+    return cf_store(fieldList, name, creator);
+}
 } // End namespace oofem

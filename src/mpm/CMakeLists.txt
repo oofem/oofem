@@ -12,10 +12,13 @@ set (mpm_element
     prototype2.C
     up.C
     tm.C
+    sadg.C
+    termlibrary4.C
     )
 
     set (mpm_problems
     mpmproblem.C
+    dg.C
     )
 
 set (mpm

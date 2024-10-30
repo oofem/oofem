@@ -32,41 +32,54 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef unknowntype_h
-#define unknowntype_h
-//#include "internalstatetype.h"
-#include "enumitem.h"
+
+#include "field.h"
+#include "expressionfield.h"
+#include "floatarray.h"
+#include "timestep.h"
+#include "parser.h"
 
 namespace oofem {
-#define UnknownType_DEF \
-    ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
-    ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
-    ENUM_ITEM_WITH_VALUE(FluxVector, 3)                    \
-    ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                \
-    ENUM_ITEM_WITH_VALUE(PressureVector, 5)                \
-    ENUM_ITEM_WITH_VALUE(Temperature, 6)                   \
-    ENUM_ITEM_WITH_VALUE(Humidity, 7)                      \
-    ENUM_ITEM_WITH_VALUE(EigenVector, 8)                   \
-    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */ \
-    ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)          \
-    ENUM_ITEM_WITH_VALUE(MacroSlipVector, 17) \
-    ENUM_ITEM_WITH_VALUE(ResidualForce, 18) \
-    ENUM_ITEM_WITH_VALUE(Concentration, 19) 
-
-/**
- * Type representing particular unknown (its physical meaning).
- */
-enum UnknownType {
-    UnknownType_DEF
-};
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
+REGISTER_Field(ExpressionField);
 
 
+/// Constructor.
+ExpressionField :: ExpressionField(void) : Field(FieldType::FT_Unknown)
+{
+}
+
+void ExpressionField :: initializeFrom(InputRecord &ir)
+{
+    IR_GIVE_FIELD(ir, this->expression, "f");
+    int val;
+    IR_GIVE_FIELD(ir, val, "type");
+    this->type = static_cast<FieldType>(val);
+}
 
 
-const char *__UnknownTypeToString(UnknownType _value);
+int ExpressionField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
+{
+    if (mode == VM_Total) {
+        Parser p;
+        int err;
+        p.setVariableValue("x", 0, coords.at(1));
+        p.setVariableValue("y", 0, (coords.giveSize()>1)?coords.at(2):0);
+        p.setVariableValue("z", 0, (coords.giveSize()>2)?coords.at(3):0);
+        p.setVariableValue("t", 0, tStep->giveIntrinsicTime());
+        p.eval(this->expression.c_str(), answer, "f", err); // evaluate the expression; return value of "f" array
+        return (err==0);
+    } else {
+        OOFEM_ERROR("Unsupported mode");
+        return 1;
+    }
+}
+
+int ExpressionField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not implemented");
+    return 1;
+}
+
+
+
 } // end namespace oofem
-#endif // unknowntype_h

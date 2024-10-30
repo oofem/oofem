@@ -563,6 +563,13 @@ public:
      */
     virtual IntArray giveBoundarySurfaceNodes(int boundary) const;
     /**
+     * Returns list of receiver boundary nodes for given boundary entity.
+     * Boundary entities are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param bNodes list of boundary surface nodes 
+     * @param boundary surface id
+     */
+    virtual IntArray giveBoundaryNodes(int boundary) const;
+    /**
      * Returns boundary edge integration rule
      * @param order approximation order to integrate 
      * @param boundary boundary edge id

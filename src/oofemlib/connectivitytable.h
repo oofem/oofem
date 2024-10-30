@@ -36,7 +36,7 @@
 #define contable_h
 
 #include "oofemenv.h"
-
+#include "intarray.h"
 #include <vector>
 
 #ifdef _OPENMP
@@ -44,7 +44,6 @@
 #endif
 
 namespace oofem {
-class IntArray;
 class Domain;
 
 /**
@@ -66,6 +65,11 @@ private:
     std::vector< IntArray > nodalConnectivity;
     /// Flag indicating assembled connectivity table for domain.
     int nodalConnectivityFlag;
+
+    /// Element colors
+    IntArray elementColoring;
+    /// flag indicating assembled element coloring
+    bool elementColoringFlag;   
 #ifdef _OPENMP
     omp_lock_t initLock;
 #endif
@@ -97,13 +101,24 @@ public:
      * @param answer List of neighbors + given elements, every element contained only once.
      * @param elemList List of elements, which neighborhood is searched.
      */
-    void giveElementNeighbourList(IntArray &answer, IntArray &elemList);
+    void giveElementNeighbourList(IntArray &answer, const IntArray &elemList);
     /**
-     * Returns list of elements sharing given nodes.
+     * Returns list of elements sharing any given nodes.
      * @param answer List of elements, every element contained only once.
      * @param nodeList List of nodes, which neighborhood is searched.
      */
     void giveNodeNeighbourList(IntArray &answer, IntArray &nodeList);
+    /** 
+     * Return list of elements sharing all given nodes
+     * @param answer List of elements that have all given nodes
+     * @param nodeList List of nodes
+    */
+    void giveElementsWithNodes(IntArray &answer, const IntArray& nodes);
+    /** Builds element coloring, assigning to element color, such that no neighboring elements have the same color
+     */
+    void buildElementColoring();
+    /** Returns element color as determined by coloring algorithm*/
+    int getElementColor(int e);
 };
 } // end namespace oofem
 #endif // conTable_h

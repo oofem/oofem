@@ -33,6 +33,9 @@
  */
 
 #include "fieldmanager.h"
+#include "datareader.h"
+#include "inputrecord.h"
+#include "classfactory.h"
 
 namespace oofem {
 FieldManager :: ~FieldManager()
@@ -88,6 +91,30 @@ FieldManager :: giveRegisteredKeys()
     std::vector<FieldType> ret;
     for(const auto& keyField: this->externalFields) ret.push_back(keyField.first);
     return ret;
+}
+
+
+
+int FieldManager::instanciateYourself(DataReader &dr, InputRecord &ir)
+{
+  int externalFieldsCount = 0;
+  std :: string fname;
+
+  IR_GIVE_OPTIONAL_FIELD (ir, externalFieldsCount, "nfields");
+  // instantiate and initialize external fields
+  for (int i = 1; i <= externalFieldsCount; i++) {
+    InputRecord &fieldRecord = dr.giveInputRecord(DataReader::IR_fieldRec, i);
+    fieldRecord.giveRecordKeywordField(fname);
+
+    std :: shared_ptr< Field > fieldPtr = classFactory.createField(fname.c_str());
+    if ( !fieldPtr ) {
+        OOFEM_ERROR("unknown field name (%s)", fname.c_str());
+    }
+
+    fieldPtr->initializeFrom(fieldRecord);
+    registerField(fieldPtr, fieldPtr->giveType());
+  }
+  return 1;
 }
 
 } // end namespace oofem

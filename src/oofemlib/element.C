@@ -550,6 +550,7 @@ void
 Element :: setDofManagers(const IntArray &_dmans)
 {
     this->dofManArray = _dmans;
+    this->numberOfDofMans = _dmans.giveSize();
 }
 
 void
@@ -849,6 +850,13 @@ Element::giveBoundarySurfaceNodes(int boundary) const
 {
     return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
 }
+
+IntArray
+Element::giveBoundaryNodes(int boundary) const
+{
+    return this->giveInterpolation()->boundaryGiveNodes(boundary, this->giveGeometryType());
+}
+
 
 std::unique_ptr<IntegrationRule>
 Element::giveBoundaryEdgeIntegrationRule(int order, int boundary)

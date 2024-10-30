@@ -37,6 +37,8 @@
 
 #include "oofemenv.h"
 #include "field.h"
+#include "datareader.h"
+#include "inputrecord.h"
 
 #include <map>
 #include <vector>
@@ -82,7 +84,10 @@ public:
      * Returns list of registered field keys, which can be obtained by calling giveField.
      */
     std::vector<FieldType> giveRegisteredKeys();
-
+    /**
+     * Initialize receiver from input record.
+     */
+    int instanciateYourself(DataReader &dr, InputRecord &ir);
 };
 } // end namespace oofem
 #endif // fieldmanager_h

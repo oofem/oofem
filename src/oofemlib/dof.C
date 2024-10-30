@@ -122,7 +122,8 @@ Dof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
     if ( this->hasBc(tStep) ) {
         double rel = 0.0;
         if ( mode == VM_Incremental && tStep->isTheFirstStep() && hasIcOn(VM_Total) ) {
-            rel = giveIc()->give(VM_Total);
+            FloatArray c = this->giveDofManager()->giveCoordinates();
+            rel = giveIc()->give(VM_Total, c);
             return this->giveBc()->give(this, VM_Total, tStep) - rel;
         } else {
             return this->giveBc()->give(this, mode, tStep) - rel;

@@ -48,6 +48,7 @@ public:
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Triangle; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override { return EGT_line_1; } 
 
     // Bulk
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

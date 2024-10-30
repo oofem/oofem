@@ -203,10 +203,10 @@ attribute values are following:
 
    ::
 
-      string1 ``string example''
+      string1 "string example"
 
 -  **expr** - function expression. The expression have to be enclosed in
-   quotes (""). The expression is evaluated by internal parser and
+   quotes (""). The expression can be a value, simple expression (enclosed by $ characters) or reference to function record (starting with @ character followed by function record id). The simple expression is evaluated by internal parser and
    represent mathematical expressions as a function of certain
    variables. The variable names and meaning are described in specific
    sections. The usual arithmetic operators like -,+,*,/ are supported
@@ -218,7 +218,9 @@ attribute values are following:
 
    ::
 
-      expr1 ``2.0*sin(t)/3.0''
+      expr1 "2.0"
+      expr2 "$2.0*sin(t)/3.0$"
+      expr3 "@2"
 
 | The general format of record is
 | [``attribute1_keyword #(type)``] ``...``

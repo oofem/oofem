@@ -82,6 +82,12 @@ FEI3dQuadLin :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 
 }
 
+double
+FEI3dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+    FloatArray normal;
+    return this->surfaceEvalNormal(normal, 1, lcoords, cellgeo);
+}
 
 void
 FEI3dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
@@ -232,8 +238,8 @@ FEI3dQuadLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const F
     G1.resize(0);
     G2.resize(0);
     for ( int i = 0; i < 4; ++i ) {
-        G1.add( dNdxi(i, 1), cellgeo.giveVertexCoordinates(i) );
-        G2.add( dNdxi(i, 2), cellgeo.giveVertexCoordinates(i) );
+        G1.add( dNdxi(i, 0), cellgeo.giveVertexCoordinates(i+1) );
+        G2.add( dNdxi(i, 1), cellgeo.giveVertexCoordinates(i+1) );
     }
 }
 

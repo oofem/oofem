@@ -14,7 +14,8 @@ Welcome to OOFEM Theory manual!
    general
    problems
    elements
-   materials  
+   materials 
+   terms 
 
 * :download:`How to contribute <docs/Introduction/Adding_documentation/Readme.pdf>`
   

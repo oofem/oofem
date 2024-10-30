@@ -68,6 +68,7 @@ class TimeStep;
 class FloatArray;
 class DofManager;
 class DataStream;
+class InputRecord;
 
 class Field;
 typedef std::shared_ptr<Field> FieldPtr;
@@ -86,7 +87,7 @@ public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldType b) : type(b) { }
+    Field(FieldType b = FieldType::FT_Unknown) : type(b) { }
     virtual ~Field() { }
     /**
      * Evaluates the field at given point.
@@ -141,6 +142,9 @@ public:
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;
+
+    // for Field classes supporting instantiation from input record
+    virtual void initializeFrom(InputRecord &ir) { };
 };
 } // end namespace oofem
 #endif // field_h

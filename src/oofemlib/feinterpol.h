@@ -455,6 +455,10 @@ public:
      * @param boundary Boundary number.
      */
     virtual std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, const Element_Geometry_Type) const;
+    /**
+     * Returns boundary geometry type
+     */
+    virtual const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const = 0;
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */

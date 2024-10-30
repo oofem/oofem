@@ -943,6 +943,11 @@ Domain :: instanciateYourself(DataReader &dr)
 
     BuildMaterialToElementMap();
 
+    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+    spatialLocalizer->init();
+    connectivityTable = std::make_unique<ConnectivityTable>(this);
+    OOFEM_LOG_INFO("Spatial localizer init done\n");
+
     return 1;
 }
 
@@ -963,12 +968,14 @@ Domain :: postInitialize()
         }
     }
 
-    {
-        spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+    if (!spatialLocalizer) {
+        spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
         spatialLocalizer->init();
-        connectivityTable = std::make_unique<ConnectivityTable>(this);
-        OOFEM_LOG_INFO("Spatial localizer init done\n");
     }
+    if (!connectivityTable) {
+        connectivityTable = std::make_unique<ConnectivityTable>(this);
+    }
+    
 
     if ( this->hasXfemManager() ) {
         this->giveXfemManager()->postInitialize();

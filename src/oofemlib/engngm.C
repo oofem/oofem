@@ -241,6 +241,7 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         exportModuleManager.instanciateYourself(dr, ir);
         // instanciate monitor manager
         monitorManager.instanciateYourself(dr, ir);
+        this->giveContext()->giveFieldManager()->instanciateYourself(dr, ir);
 #ifdef __MPM_MODULE
         // instanciate mpm stuff (variables, terms, and integrals)
         this->instanciateMPM(dr,ir);
