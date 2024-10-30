@@ -218,12 +218,16 @@ DGProblem :: initializeFrom(InputRecord &ir)
     }
     if ( ir.hasField(_IFT_DGProblem_preprocessFEM2DG) ) {
         preprocessFEM2DG = true;
+    
+        IR_GIVE_OPTIONAL_FIELD(ir, sets2preprocess, _IFT_DGProblem_sets2preprocess);
+        IR_GIVE_OPTIONAL_FIELD(ir, targetBoundaryNodeSets, _IFT_DGProblem_targetBoundaryNodeSets);
+        if ( sets2preprocess.giveSize() != targetBoundaryNodeSets.giveSize() ) {
+            OOFEM_ERROR("Size mismatch in %s and %s attributes", _IFT_DGProblem_sets2preprocess, _IFT_DGProblem_targetBoundaryNodeSets);
+        }
+        IR_GIVE_FIELD(ir, targetAllNodeSet, _IFT_DGProblem_targetAllNodeSet);
+        IR_GIVE_FIELD(ir, targetAllElementSet, _IFT_DGProblem_targetAllElementSet);
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, sets2preprocess, _IFT_DGProblem_sets2preprocess);
-    IR_GIVE_OPTIONAL_FIELD(ir, targetBoundaryNodeSets, _IFT_DGProblem_targetBoundaryNodeSets);
-    if ( sets2preprocess.giveSize() != targetBoundaryNodeSets.giveSize() ) {
-        OOFEM_ERROR("Size mismatch in %s and %s attributes", _IFT_DGProblem_sets2preprocess, _IFT_DGProblem_targetBoundaryNodeSets);
-    }
+
 }
 
 double DGProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
@@ -459,6 +463,24 @@ DGProblem :: constructBoundaryEntities () {
         domain->giveSet(targetBoundaryNodeSets.at(iset))->clear();
         domain->giveSet(targetBoundaryNodeSets.at(iset))->setNodeList(nodes);
     }
+    // define target all node set
+    if ( targetAllNodeSet ) {
+        IntArray nodes(nodeNum);
+        for (int i = 1; i <= nodeNum; i++) {
+            nodes.at(i) = i;
+        }
+        domain->giveSet(targetAllNodeSet)->clear();
+        domain->giveSet(targetAllNodeSet)->setNodeList(nodes);
+    }
+    // define target all element set
+    if ( targetAllElementSet ) {
+        IntArray elements(elemNum);
+        for (int i = 1; i <= elemNum; i++) {
+            elements.at(i) = i;
+        }
+        domain->giveSet(targetAllElementSet)->clear();
+        domain->giveSet(targetAllElementSet)->setElementList(elements);
+    } 
     timer.stopTimer();
     //OOFEM_LOG_INFO("fem2DG: generated %d interface elements, %d nodes cloned\n", elemNum-nelems, nodeNum-nnodes); 
     OOFEM_LOG_INFO("fem2DG: FE (%d nodes, %d elements) -> DG (%d nodes, %d elements)\n", nnodes, nelems, nodeNum, elemNum);

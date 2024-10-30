@@ -59,7 +59,10 @@
 /// Sets to preprocess from FEM to DG problem. These should specify boundary using element boundaries, not nodes.
 /// this is needed to uniquely identify nodes on newly created boundary elements.
 #define _IFT_DGProblem_sets2preprocess "boundarysets" ///< Sets to preprocess from FEM to DG problem.
-#define _IFT_DGProblem_targetBoundaryNodeSets "targetnodesets" ///< Target sets to store the generated boundary node sets.
+#define _IFT_DGProblem_targetBoundaryNodeSets "targetboundarynodesets" ///< Target sets to store the generated boundary node sets.
+/// target sets to map allnodes and allelements
+#define _IFT_DGProblem_targetAllNodeSet "targetallnodeset" ///< Target sets to store all nodes
+#define _IFT_DGProblem_targetAllElementSet "targetallelementset" ///< Target sets to store all elements
 
 //@}
 
@@ -179,6 +182,8 @@ protected:
     IntArray sets2preprocess;
     /// array of target sets (same size as sets2preprocess) to store the generated boundary node sets
     IntArray targetBoundaryNodeSets;
+    /// int target sets for all nodes and all elements
+    int targetAllNodeSet = 0, targetAllElementSet = 0;
 
 
     // class representing boundary entity (edge, surface, etc.)
