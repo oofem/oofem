@@ -17,11 +17,11 @@ The general format of this record can be specified using
    | ``nsteps #(in)`` [``renumber #(in)``]
      [``profileopt #(in)``] ``attributes #(string)``
      [``ninitmodules #(in)``] [``nmodules #(in)``]
-     [``nxfemman #(in)``]
+     [``nxfemman #(in)``] [``nvariables #(in)``] [``nterms #(in)``] [``nintegrals #(in)``]
 
 -  | “meta step-syntax”
    | ``nmsteps #(in)`` [``ninitmodules #(in)``]
-     [``nmodules #(in)``] [``nxfemman #(in)``]
+     [``nmodules #(in)``] [``nxfemman #(in)``] [``nvariables #(in)``] [``nterms #(in)``] [``nintegrals #(in)``]
    | immediately followed by ``nmsteps`` meta step records with the
      following syntax:
    | ``nsteps #(in)`` ``attributes #(string)``
@@ -62,6 +62,10 @@ The general format of this record can be specified using
       Export modules allow to export computed data into external
       software for postprocessing. The available export modules are
       described in section :ref:`ExportModulesSec`.
+   
+   -  To support symbolic computations provided by mpm module, the number of Variables, Terms and Integrals appearing in
+      weak form are specified by ``nvariables``, ``nterms`` and ``nintegrals`` respectively. The Varialble, Terms and Integral records are specified 
+      following export module records.
 
    -  ``nxfemman`` - 1 implies that an XFEM manager is created, 0
       implies that no XFEM manager is created. The XFEM manager stores a
@@ -73,6 +77,8 @@ The general format of this record can be specified using
       Used for adaptive analysis, but can also be used to compute and
       write error estimates to the output files. See adaptive
       engineering models for details.
+
+
 
 Not all of analysis types support the metastep syntax, and if not
 mentioned, the standard-syntax is expected. Currently, supported

@@ -721,3 +721,59 @@ Currently, the supported export modules are following
    The module can also be used to extract user-selected quantities rather than testing them against expected values. This can be done by adding ``extract`` keyword to the input record of the module.
    The ``filename`` parameter allows to specify filename (with path) in which the rules are defined, insted of input file itself (the default).
 
+.. _VariablesSec:
+
+Variables (symbolic mpm module)
+-------------------------------
+The symbolic mpm module allows to define problem(s) by defining problem weak form using variables, terms and integrals. 
+In this section we describe how to define variable or field apperaing in weak form. The general syntax is following:
+
+``Variable`` ``name #(s)`` ``interpolation #(s)`` ``type #(in)`` ``quantity #(in)`` ``size #(in)`` ``dofs #(ia)``
+
+where the parameters have following meaning:
+- ``name`` is the string containing the name of the variable
+- ``interpolation`` string, defining the interpolation of the varaible. The supported values are:
+   - ``feilin`` - linear interpolation
+- ``type`` defines the rank of the variable. The supported values are:
+   - 0 - for scalar variable
+   - 1 - for vector variable
+- ``quantity`` attribute defines the physical meaning of variable. Supported values include
+   - 0 - for displacement field
+   - 1 - for velocity field
+   - 2 - for temperature field
+   - 3 - for pressure field
+- ``size`` attribute determines the size (dimension) of variable.
+- ``dofs`` array of integers, defining the physical meaning of variable DOFs. The size of the array should be equal to the size of the variable. 
+   The supported values are defined in src/oofemlib/dofiditem.h file.
+
+.. _TermsSec:
+
+Terms (symbolic mpm module)
+---------------------------
+The integrals in the weak form integrate terms. The individual term record have the following generic syntax:
+
+``TermType``  ``variable #(s)``  ``testvariable #(s)`` ``mmode #(in)``
+
+The Supported DofManagerType keywords are documented in dedicated document (Theory Manual).
+The parameters have following meaning:
+  - ``variable`` is the name of the unknown variable (field) of the term
+  - ``testvariable`` is the name of the test variable (field) of the term
+   - ``mmode`` allows to define material mode used to evaluate the term
+Note that sopecific terms can introduce additional parameters to define the term.
+
+
+.. _IntergarlsSec:
+
+Integrals (symbolic mpm module)
+--------------------------------
+The Integrals in the weak form integrate individual terms. The individual integral record have the following generic syntax:
+
+``Integral #(in)``  ``domain #(in)`` ``set #(in)`` ``term #(in)``
+
+The parameters have following meaning:
+  - The record keyword is always ``Integral``, followed by its number,
+  - ``domain`` determines the domain in which integral is defined (by providing domain number),
+  - ``set`` is the set number, which defines integral domain using set of elements over which the integration is performed. Note that boundary integrals require the presence of boundary elements. 
+  - ``term`` defines term to integrate by providing its number.
+
+

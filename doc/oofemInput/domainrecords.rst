@@ -89,7 +89,7 @@ Components size record
   format is:
 | ``ndofman #(in)`` ``nelem #(in)``
   ``ncrosssect #(in)`` ``nmat #(in)`` ``nbc #(in)``
-  ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``]
+  ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``] 
    where
   ``ndofman`` represents number of dof managers (e.g. nodes) and their
   associated records, ``nelem`` represents number of elements and their
@@ -101,7 +101,7 @@ Components size record
   and their associated records. The optional parameter ``nbarrier``
   represents the number of nonlocal barriers and their records. If not
   specified, no barriers are assumed.
-
+  
 .. _NodeElementSideRecords:
 
 Dof manager records
