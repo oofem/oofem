@@ -88,7 +88,7 @@ public:
  * Callback class for assembling mid point effective tangents. 
  * @todo Need to parametrize individual contributing terms, ther locations and multilication factors.
  */
-class ScalarAdvectionRhsAssembler : public MatrixAssembler
+class ScalarAdvectionRhsAssembler : public VectorAssembler
 {
 protected:
     double alpha;
@@ -97,7 +97,7 @@ protected:
 
 public:
     ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) ;
-    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+    void vectorFromElement(FloatArray &mat, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 

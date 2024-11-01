@@ -96,39 +96,46 @@ void ScalarAdvectionLhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
 }
 
 ScalarAdvectionRhsAssembler :: ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
-    MatrixAssembler(), alpha(alpha), deltaT(deltaT)
+    VectorAssembler(), alpha(alpha), deltaT(deltaT)
 {
     this->q = q;
 }
 
 
-void ScalarAdvectionRhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+void ScalarAdvectionRhsAssembler :: vectorFromElement(FloatArray &answer, Element &el, TimeStep *tStep, ValueModeType mode) const
 {
-    FloatMatrix contrib;
-    IntArray loc;
+    FloatMatrix contrib, rhsMatrix;
+    IntArray loc, dofids;
     MPElement *e = dynamic_cast<MPElement*>(&el);
     int ndofs = e->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
+    answer.resize(ndofs);
     answer.zero();
+
+    rhsMatrix.resize(ndofs, ndofs);
+    rhsMatrix.zero();
 
     e->getLocalCodeNumbers (loc, q);
 
     e->giveCharacteristicMatrix(contrib, MassMatrix, tStep);
     if (contrib.isNotEmpty()) {
-        answer.assemble(contrib, loc, loc);
+        rhsMatrix.add(contrib);
     }
     e->giveCharacteristicMatrix(contrib, StiffnessMatrix, tStep);
     if (contrib.isNotEmpty()) {
         contrib.times((-1.0)*this->deltaT/2.0);
-        answer.assemble(contrib, loc, loc);
+        rhsMatrix.add(contrib);
     }
     // boundary terms
     e->giveCharacteristicMatrix(contrib, InternalFluxVector, tStep);
     if (contrib.isNotEmpty()) {
         contrib.times((-1.0)*this->deltaT/2.0);
-        answer.assemble(contrib, loc, loc);
+        rhsMatrix.add(contrib);
     }
+    FloatArray help, rp;
+    e->computeVectorOf(VM_Total, tStep->givePreviousStep(), rp);  
 
+    help.beProductOf(rhsMatrix, rp);
+    answer.assemble(help, loc);
 }
 
 
@@ -573,7 +580,7 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO( "\nSolving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
     
     Domain *d = this->giveDomain(1);
-    //int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();
@@ -582,15 +589,11 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
             lhsMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             lhsMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         }
-        if ( !rhsMatrix ) {
-            rhsMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            rhsMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
-        }
-
-        OOFEM_LOG_INFO("Assembling system matrices\n");
-        this->assemble( *lhsMatrix, tStep, ScalarAdvectionLhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
-        this->assemble( *rhsMatrix, tStep, ScalarAdvectionRhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
     }
+    OOFEM_LOG_INFO("Assembling system matrices\n");
+    lhsMatrix->zero();
+    this->assemble( *lhsMatrix, tStep, ScalarAdvectionLhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), EModelDefaultEquationNumbering(), d );
+
     // loop over boundary entities
     // @BP instead using BoundaryEntity, we can set up MPMElement based boundary element representing the boundary entity, 
     // this would allow to use the same assembly code as for the interior
@@ -604,8 +607,8 @@ void DGProblem :: solveYourselfAt(TimeStep *tStep)
 
     //FloatArray *pv = this->field->giveSolutionVector(tStep->givePreviousStep());
     //FloatArray *v = this->field->giveSolutionVector(tStep);
-    FloatArray rhs;
-    rhsMatrix->times(solution, rhs);
+    FloatArray rhs(neq);  
+    this->assembleVector( rhs, tStep, ScalarAdvectionRhsAssembler(this->alpha, tStep->giveTimeIncrement(), unknownQuantity), VM_Total, EModelDefaultEquationNumbering(), d );
     // add dirichlet boundary conditions
     this->assembleDirichletBcRhsVector(rhs, tStep, VM_Total, EModelDefaultEquationNumbering(), d);
     ConvergedReason status = this->nMethod->solve(*lhsMatrix, rhs, solution);
@@ -810,7 +813,6 @@ DGProblem::assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, Val
             } 
             element->giveLocationArray(loc, ns);
 
- 
             if ( !rp1.containsOnlyZeroes() ) {
                 m1 = ke;
                 m1.times(this->deltaT/2.0);
@@ -819,7 +821,7 @@ DGProblem::assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, Val
                 c1.negated();
                 answer.assemble(c1, loc);
             }
-
+/*
             if ( !rp.containsOnlyZeroes() ) {
                 m1=ke;
                 m1.times((-1.0)*this->deltaT/2.0);
@@ -827,6 +829,7 @@ DGProblem::assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, Val
                 c1.beProductOf(m1, rp);
                 answer.assemble(c1, loc);
             }
+*/
         }
     } // end element loop
 
