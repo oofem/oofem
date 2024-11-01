@@ -227,7 +227,7 @@ attribute values are following:
   [``attributeXX_keyword #(type)``] <``ver. 1.6``>
 
 The keywords and their values are separated by one or more spaces.
-Please note, that a single record cooresponds to one input line in input
+Please note, that a single record corresponds to one input line in input
 file.
 
 When some attribute is enclosed in brackets [ ], then it’s use is
