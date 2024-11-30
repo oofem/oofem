@@ -92,10 +92,10 @@ void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 J2plasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new PlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return std::make_unique<PlasticMaterialStatus>(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 

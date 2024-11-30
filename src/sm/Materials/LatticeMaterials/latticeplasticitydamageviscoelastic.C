@@ -74,10 +74,10 @@ LatticePlasticityDamageViscoelastic::initializeFrom(InputRecord &ir)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LatticePlasticityDamageViscoelastic::CreateStatus(GaussPoint *gp) const
 {
-    return new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic::domain, gp);
+    return std::make_unique<LatticePlasticityDamageViscoelasticStatus>(1, LatticePlasticityDamageViscoelastic::domain, gp);
 }
 
 

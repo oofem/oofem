@@ -297,13 +297,13 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-MaterialStatus *FE2FluidMaterial :: CreateStatus(GaussPoint *gp) const
+std::unique_ptr<MaterialStatus> FE2FluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
     int rank = -1;
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         rank = this->domain->giveEngngModel()->giveRank();
     }
-    return new FE2FluidMaterialStatus(n++, rank, gp, this->inputfile);
+    return std::make_unique<FE2FluidMaterialStatus>(n++, rank, gp, this->inputfile);
 }
 
 int FE2FluidMaterial :: checkConsistency()

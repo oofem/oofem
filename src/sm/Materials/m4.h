@@ -128,7 +128,7 @@ public:
     const char *giveClassName() const override { return "M4Material"; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M4MaterialStatus(gp, numberOfMicroplanes); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<M4MaterialStatus>(gp, numberOfMicroplanes); }
 };
 } // end namespace oofem
 #endif // m4_h

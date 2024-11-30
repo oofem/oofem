@@ -258,10 +258,10 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp) cons
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeTransportMaterialStatus(gp);
+    return std::make_unique<LatticeTransportMaterialStatus>(gp);
 }
 
 

@@ -99,10 +99,10 @@ MisesMat::initializeFrom(InputRecord &ir)
 }
 
 // creates a new material status  corresponding to this class
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MisesMat::CreateStatus(GaussPoint *gp) const
 {
-    return new MisesMatStatus(gp);
+    return std::make_unique<MisesMatStatus>(gp);
 }
 
 FloatArrayF< 1 >

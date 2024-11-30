@@ -151,10 +151,10 @@ OgdenCompressibleMaterial::giveDeviatoricSecondPKStressVector_3d(const Tensor2_3
 
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 OgdenCompressibleMaterial::CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 
 

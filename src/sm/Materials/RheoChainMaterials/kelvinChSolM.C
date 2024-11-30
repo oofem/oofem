@@ -217,13 +217,13 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 KelvinChainSolidMaterial :: CreateStatus(GaussPoint *gp) const
 /*
  * creates a new material status corresponding to this class
  */
 {
-    return new KelvinChainSolidMaterialStatus(gp, nUnits);
+    return std::make_unique<KelvinChainSolidMaterialStatus>(gp, nUnits);
 }
 
 void

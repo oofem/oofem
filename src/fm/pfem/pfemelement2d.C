@@ -44,7 +44,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
+#include "../Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
@@ -112,7 +112,7 @@ PFEMElement2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mod
     answer.clear();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ].get();
     for ( auto &gp : *iRule ) {
-        mat->giveDeviatoricStiffnessMatrix(D, mode, gp, atTime);
+        D=mat->computeTangent2D(mode, gp, atTime);
         this->computeBMatrix(B, gp);
         DB.beProductOf(D, B);
         double dV = this->computeVolumeAround(gp);

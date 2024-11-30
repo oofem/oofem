@@ -125,7 +125,7 @@ public:
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp,
                                             TimeStep * tStep) const override;
     virtual FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new StructuralMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<StructuralMaterialStatus>(gp); }
 
 };
 } // end namespace oofem

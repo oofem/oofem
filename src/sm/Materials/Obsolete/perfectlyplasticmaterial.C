@@ -653,13 +653,13 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 PerfectlyPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 /*
  * creates new  material status  corresponding to this class
  */
 {
-    return new PerfectlyPlasticMaterialStatus(gp);
+    return std::make_unique<PerfectlyPlasticMaterialStatus>(gp);
 }
 
 

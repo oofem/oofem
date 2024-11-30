@@ -110,7 +110,7 @@ public:
 
     virtual void giveRandomParameters(FloatArray &param);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 

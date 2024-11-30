@@ -95,7 +95,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_HeMoBazNajMaterial_Name; }
     const char *giveClassName() const override { return "HeMoBazNajMaterial"; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<HeMoTransportMaterialStatus>(gp); }
 
 protected:
     double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;

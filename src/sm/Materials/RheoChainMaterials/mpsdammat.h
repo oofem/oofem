@@ -273,7 +273,7 @@ public:
      */
     double computeDamageForCohesiveCrack(double kappa, GaussPoint *gp) const;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 
     virtual double computeTensileStrength(double equivalentTime) const;

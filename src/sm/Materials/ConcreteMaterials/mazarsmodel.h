@@ -116,7 +116,7 @@ public:
     double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
     double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<MazarsMaterialStatus>(gp); }
 
 protected:
     /**

@@ -144,10 +144,10 @@ BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 BinghamFluidMaterial2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new BinghamFluidMaterial2Status(gp);
+    return std::make_unique<BinghamFluidMaterial2Status>(gp);
 }
 
 

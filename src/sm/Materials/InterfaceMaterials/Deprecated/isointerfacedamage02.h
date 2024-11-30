@@ -175,7 +175,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsoInterfaceDamageMaterialStatus_2(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<IsoInterfaceDamageMaterialStatus_2>(gp); }
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

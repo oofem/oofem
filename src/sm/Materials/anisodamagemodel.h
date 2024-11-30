@@ -281,7 +281,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp, const FloatArray &totalStrain, double equivStrain, TimeStep *atTime);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new AnisotropicDamageMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<AnisotropicDamageMaterialStatus>(gp); }
 
 protected:
 

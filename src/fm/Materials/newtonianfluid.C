@@ -80,10 +80,10 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 NewtonianFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new FluidDynamicMaterialStatus(gp);
+    return std::make_unique<FluidDynamicMaterialStatus>(gp);
 }
 
 

@@ -87,10 +87,10 @@ NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new NonlinearFluidMaterialStatus(gp);
+    return std::make_unique<NonlinearFluidMaterialStatus>(gp);
 }
 
 

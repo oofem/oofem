@@ -71,10 +71,10 @@ MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return std::make_unique<MPlasticMaterialStatus>(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 

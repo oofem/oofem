@@ -1784,10 +1784,10 @@ ConcreteDPM::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
     return StructuralMaterial::giveIPValue(answer, gp, type, tStep);
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 ConcreteDPM::CreateStatus(GaussPoint *gp) const
 {
-    return new ConcreteDPMStatus(gp);
+    return std::make_unique<ConcreteDPMStatus>(gp);
 }
 
 void

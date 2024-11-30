@@ -306,7 +306,7 @@ public:
      */
     virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const { }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     double giveAlphaOne() const { return this->alphaOne; }
     double giveAlphaTwo() const { return this->alphaTwo; }

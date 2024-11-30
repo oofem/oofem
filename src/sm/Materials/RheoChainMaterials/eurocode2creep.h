@@ -181,7 +181,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
     void initializeFrom(InputRecord &ir) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     /// evaluates concrete strength at given age 
     virtual double computeConcreteStrengthAtAge(double age) const;

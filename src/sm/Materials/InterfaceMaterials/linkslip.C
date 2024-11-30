@@ -104,10 +104,10 @@ LinkSlip :: initializeFrom(InputRecord &ir)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LinkSlip :: CreateStatus(GaussPoint *gp) const
 {
-    return new LinkSlipStatus(gp);
+    return std::make_unique<LinkSlipStatus>(gp);
 }
   
 double

@@ -303,8 +303,8 @@ public:
      * @see Dof::hasBc
      * @todo Remove all usage of this. Just ask for the unknown vector instead, they are the same.
      */
-    void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                     ValueModeType mode, TimeStep *tStep);
+    virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                                            ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name Transformation functions

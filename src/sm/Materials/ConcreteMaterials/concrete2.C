@@ -1231,10 +1231,10 @@ Concrete2 :: givePlateLayerStiffMtrx(MatResponseMode rMode,
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 Concrete2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new Concrete2MaterialStatus(gp);
+    return std::make_unique<Concrete2MaterialStatus>(gp);
 }
 
 

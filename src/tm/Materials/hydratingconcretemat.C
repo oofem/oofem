@@ -266,10 +266,10 @@ HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydratingConcreteMatStatus(gp);
+    return std::make_unique<HydratingConcreteMatStatus>(gp);
 }
 
 

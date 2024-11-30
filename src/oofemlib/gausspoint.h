@@ -47,6 +47,7 @@
 #include "element.h"
 #include "floatarray.h"
 #include "materialmode.h"
+#include <map>
 
 namespace oofem {
 class Material;
@@ -113,7 +114,7 @@ protected:
     /// List of slave integration points.
     std::vector< GaussPoint * > gaussPoints;
     /// Status of e.g. material in point
-    std::unique_ptr<IntegrationPointStatus> materialStatus;
+    std::map<int, std::unique_ptr<IntegrationPointStatus>> materialStatuses;
 
 public:
     /**
@@ -200,21 +201,22 @@ public:
     /**
      * Returns reference to associated material status (NULL if not defined).
      */
-    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus.get(); }
-    const IntegrationPointStatus *giveMaterialStatus() const { return this->materialStatus.get(); }
+    IntegrationPointStatus *giveMaterialStatus(IntegrationPointStatusIDType key=IPSID_Default) { return this->materialStatuses.at(key).get(); }
+    const IntegrationPointStatus *giveMaterialStatus(IntegrationPointStatusIDType key=IPSID_Default) const { return this->materialStatuses.at(key).get(); }
+    bool hasMaterialStatus(IntegrationPointStatusIDType key=IPSID_Default) const { return this->materialStatuses.find(key) != this->materialStatuses.end(); }
     
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
      * @return Pointer to new status.
      */
-    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
+    IntegrationPointStatus *setMaterialStatus(std::unique_ptr<IntegrationPointStatus> ptr, IntegrationPointStatusIDType key=IPSID_Default)
     {
-        if ( this->materialStatus ) {
+        if ( this->materialStatuses.find(key) != this->materialStatuses.end() ) {
             OOFEM_ERROR("status already exist");
         }
-        this->materialStatus.reset(ptr);
-        return ptr;
+        this->materialStatuses[key]=std::move(ptr);
+        return this->materialStatuses[key].get();
     }
     /**
      * Returns index-th slave gauss point of receiver.

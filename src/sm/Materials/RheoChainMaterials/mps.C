@@ -557,13 +557,13 @@ MPSMaterial::giveShrinkageStrainVector(FloatArray &answer,
     return;
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MPSMaterial::CreateStatus(GaussPoint *gp) const
 /*
  * creates a new material status corresponding to this class
  */
 {
-    return new MPSMaterialStatus(gp, nUnits);
+    return std::make_unique<MPSMaterialStatus>(gp, nUnits);
 }
 
 

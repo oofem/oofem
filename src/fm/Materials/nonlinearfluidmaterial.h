@@ -118,7 +118,7 @@ public:
 
     int checkConsistency() override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // nonlinearfluidmaterial_h

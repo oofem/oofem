@@ -86,7 +86,7 @@ public:
     void giveEigenStrainVector(FloatArray &answer,
                                GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return false; }

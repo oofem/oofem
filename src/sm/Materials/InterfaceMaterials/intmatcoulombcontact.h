@@ -114,7 +114,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatCoulombContactStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<IntMatCoulombContactStatus>(gp); }
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

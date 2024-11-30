@@ -499,10 +499,10 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
 
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 IsotropicGradientDamageMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new IsotropicGradientDamageMaterialStatus(gp);
+    return std::make_unique<IsotropicGradientDamageMaterialStatus>(gp);
 }
 
 

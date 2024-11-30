@@ -125,7 +125,7 @@ class PFEM : public EngngModel
 {
 protected:
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
     /// Used solver type for linear system of equations
     LinSystSolverType solverType;
     /// Used type of sparse matrix
@@ -221,7 +221,7 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
     TimeStep *giveNextStep() override;
-    TimeStep *giveSolutionStepWhenIcApply() override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
     NumericalMethod *giveNumericalMethod(MetaStep *) override;
 
     /** Removes all elements and call DelaunayTriangulator to build up new mesh with new recognized boundary.

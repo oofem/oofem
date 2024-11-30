@@ -218,14 +218,14 @@ RVEStokesFlow :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
     int rank = -1;
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         rank = this->domain->giveEngngModel()->giveRank();
     }
-    return new RVEStokesFlowMaterialStatus(n++, rank, gp, this->rveFilename);
+    return std::make_unique<RVEStokesFlowMaterialStatus>(n++, rank, gp, this->rveFilename);
 }
 
 }

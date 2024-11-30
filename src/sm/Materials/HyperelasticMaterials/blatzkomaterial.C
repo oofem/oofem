@@ -86,9 +86,9 @@ BlatzKoMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, GaussPoi
     return vP;
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 BlatzKoMaterial::CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 };

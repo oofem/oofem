@@ -3066,9 +3066,9 @@ ConcreteDPM2::giveIPValue(FloatArray &answer,
     }
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 ConcreteDPM2::CreateStatus(GaussPoint *gp) const
 {
-    return new  ConcreteDPM2Status(gp);
+    return std::make_unique<ConcreteDPM2Status>(gp);
 }
 } //end of namespace

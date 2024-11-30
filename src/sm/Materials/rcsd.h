@@ -132,7 +132,7 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<RCSDMaterialStatus>(gp); }
 
 protected:
     double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);

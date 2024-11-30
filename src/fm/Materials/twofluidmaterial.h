@@ -80,7 +80,7 @@ public:
     const char *giveClassName() const override { return "TwoFluidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_TwoFluidMaterial_Name; }
     int checkConsistency() override;
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     FluidDynamicMaterial *giveMaterial(int i) const;

@@ -273,13 +273,15 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
  * Creates the hydration model status if necessary.
  */
 {
-    HydrationModelStatusInterface *hmi = static_cast< HydrationModelStatusInterface * >( this->giveStatus(gp)->giveInterface(HydrationModelStatusInterfaceType) );
+   
+    HydrationModelStatusInterface *hmi = static_cast< HydrationModelStatusInterface * >( gp->giveMaterialStatus()->giveInterface(HydrationModelStatusInterfaceType) );
     HydrationModelStatus *status = nullptr;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();
         if ( !status ) {
-            status = static_cast< HydrationModelStatus * >( this->CreateStatus(gp) );
-            hmi->setHydrationModelStatus(status);
+            status = hmi->setHydrationModelStatus(this->CreateStatus(gp));
+            //status = static_cast< HydrationModelStatus * >( this->CreateStatus(gp) );
+            //hmi->setHydrationModelStatus(status);
         }
     } else {
         OOFEM_ERROR("Master status undefined.");
@@ -539,10 +541,10 @@ HydrationModel :: mixedfindroot() const
     return x0;
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 HydrationModel :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydrationModelStatus(gp);
+    return std::make_unique<HydrationModelStatus>(gp);
 }
 
 // ======= HydrationModelStatusInterface implementation =======

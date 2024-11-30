@@ -643,10 +643,10 @@ Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 Eurocode2CreepMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new Eurocode2CreepMaterialStatus(gp, nUnits);
+    return std::make_unique<Eurocode2CreepMaterialStatus>(gp, nUnits);
 }
 
 

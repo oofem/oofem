@@ -694,7 +694,7 @@ class TMSimpleMaterial : public Material {
     };
     //   void giveInputRecord(DynamicInputRecord &input) override {};
     void giveInputRecord(DynamicInputRecord &input) override {};
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TMMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<TMMaterialStatus>(gp); }
 
     const char *giveClassName() const override {return "TMSimpleMaterial";}
     const char *giveInputRecordName() const override {return _IFT_TMSimpleMaterial_Name;}

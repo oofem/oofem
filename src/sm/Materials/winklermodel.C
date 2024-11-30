@@ -126,10 +126,10 @@ WinklerMaterial::give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *g
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 WinklerMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 
 

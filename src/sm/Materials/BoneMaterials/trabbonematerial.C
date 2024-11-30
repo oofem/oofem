@@ -294,8 +294,8 @@ TrabBoneMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 }
 
 
-MaterialStatus *TrabBoneMaterial :: CreateStatus(GaussPoint *gp) const
+std::unique_ptr<MaterialStatus> TrabBoneMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new TrabBoneMaterialStatus(gp);
+    return std::make_unique<TrabBoneMaterialStatus>(gp);
 }
 } // end namespace oofem

@@ -80,10 +80,10 @@ MooneyRivlinCompressibleMaterial::give3dMaterialStiffnessMatrix_dPdF(MatResponse
 
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MooneyRivlinCompressibleMaterial::CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 
 

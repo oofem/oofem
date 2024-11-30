@@ -102,7 +102,7 @@ public:
     const char *giveClassName() const override { return "ConcreteFCMViscoElastic"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteFCMViscoElastic_Name; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMViscoElasticStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<ConcreteFCMViscoElasticStatus>(gp); }
 
     double give(int aProperty, GaussPoint *gp) const override;
 
@@ -114,7 +114,7 @@ public:
     
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     
-    MaterialStatus *giveStatus(GaussPoint *gp) const override;
+    MaterialStatus* giveStatus(GaussPoint *gp) const override;
 
 protected:
     /// number of the viscoelastic material

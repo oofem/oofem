@@ -68,7 +68,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_J2MPlasticMaterial_Name; }
     const char *giveClassName() const override { return "J2MPlasticMaterial"; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     void computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,

@@ -69,7 +69,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_J2plasticMaterial_Name; }
     const char *giveClassName() const override { return "J2plasticMaterial"; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
 

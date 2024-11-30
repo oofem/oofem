@@ -162,16 +162,13 @@ void PFEMPressureLaplacianAssembler :: locationFromElement(IntArray &loc, Elemen
 
 NumericalMethod *PFEM :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        if ( !nMethod) {
+            OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
+        }
     }
-
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 
@@ -288,13 +285,16 @@ PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
 
 
 TimeStep *
-PFEM :: giveSolutionStepWhenIcApply()
+PFEM :: giveSolutionStepWhenIcApply(bool force)
 {
-    if ( !stepWhenIcApply ) {
-        stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
+        }
+        return stepWhenIcApply.get();
     }
-
-    return stepWhenIcApply.get();
 }
 
 void
@@ -407,7 +407,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
     this->assembleVector( avLhs, tStep, LumpedMassVectorAssembler(), VM_Total, avns, this->giveDomain(1) );
 
-    pLhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    pLhs = classFactory.createSparseMtrx(sparseMtrxType);
     if ( !pLhs ) {
         OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
     }
@@ -707,8 +707,8 @@ void
 PFEM :: saveContext(DataStream &stream, ContextMode mode)
 {
     EngngModel :: saveContext(stream, mode);
-    PressureField.saveContext(stream, mode);
-    VelocityField.saveContext(stream, mode);
+    PressureField.saveContext(stream);
+    VelocityField.saveContext(stream);
 }
 
 
@@ -717,8 +717,8 @@ void
 PFEM :: restoreContext(DataStream &stream, ContextMode mode)
 {
     EngngModel :: restoreContext(stream, mode);
-    PressureField.restoreContext(stream, mode);
-    VelocityField.restoreContext(stream, mode);
+    PressureField.restoreContext(stream);
+    VelocityField.restoreContext(stream);
 }
 
 
@@ -891,9 +891,9 @@ PFEM :: deactivateTooCloseParticles()
             PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
             PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
 
-            double l12 = distance( *particle1->giveCoordinates(), *particle2->giveCoordinates() );
-            double l23 = distance( *particle2->giveCoordinates(), *particle3->giveCoordinates() );
-            double l31 = distance( *particle3->giveCoordinates(), *particle1->giveCoordinates() );
+            double l12 = distance( particle1->giveCoordinates(), particle2->giveCoordinates() );
+            double l23 = distance( particle2->giveCoordinates(), particle3->giveCoordinates() );
+            double l31 = distance( particle3->giveCoordinates(), particle1->giveCoordinates() );
 
             double maxLength = max( l12, max(l23, l31) );
             double minLength = min( l12, min(l23, l31) );

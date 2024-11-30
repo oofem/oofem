@@ -72,7 +72,7 @@ public:
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const override;
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) const override { return 2; }

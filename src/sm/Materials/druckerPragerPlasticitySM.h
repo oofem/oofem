@@ -326,7 +326,7 @@ public:
         return LEMaterial.giveThermalDilatationVector(gp, tStep);
     }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     double predictRelativeComputationalCost(GaussPoint *gp) override;
     double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }

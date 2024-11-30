@@ -159,7 +159,7 @@ NLStructuralElement::giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     answer.clear();
 
     for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
-        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( this->giveCrossSection()->giveMaterial(gp)->giveStatus(gp) );
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {

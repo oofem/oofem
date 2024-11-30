@@ -329,8 +329,8 @@ public:
      * @param gp Integration point where newly created status will be stored.
      * @return Reference to new status.
      */
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const
-    { return nullptr; }
+    virtual std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const
+    { return std::unique_ptr<MaterialStatus>() ; }
 
     /**
      * Initializes temporary variables stored in integration point status

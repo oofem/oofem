@@ -142,10 +142,10 @@ RankineMat :: initializeFrom(InputRecord &ir)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 RankineMat :: CreateStatus(GaussPoint *gp) const
 {
-    return new RankineMatStatus(gp);
+    return std::make_unique<RankineMatStatus>(gp);
 }
 
 

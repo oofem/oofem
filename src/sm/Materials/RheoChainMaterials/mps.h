@@ -322,7 +322,7 @@ public:
 
     double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     void predictParametersFrom(double, double, double, double);

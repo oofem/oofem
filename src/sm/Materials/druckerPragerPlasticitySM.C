@@ -705,10 +705,10 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
     }
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 {
-    return new DruckerPragerPlasticitySMStatus(gp);
+    return std::make_unique<DruckerPragerPlasticitySMStatus>(gp);
 }
 
 

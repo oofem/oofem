@@ -45,7 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "pfem.h"
-#include "fluiddynamicmaterial.h"
+#include "../Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
 #include "bodyload.h"
@@ -242,7 +242,8 @@ void
 TR1_2D_PFEM :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one should call material driver instead */
-    FloatArray u(6), eps(3);
+    FloatArray u(6);
+    FloatArrayF<3> eps(3);
     answer.resize(3);
 
 
@@ -252,7 +253,7 @@ TR1_2D_PFEM :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    mat->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    answer=mat->computeDeviatoricStress2D(eps, gp, tStep);
 }
 
 void

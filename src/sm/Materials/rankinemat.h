@@ -162,7 +162,7 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return ( a == 0. ); }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducesStrain, GaussPoint *gp, TimeStep *tStep) const override;
     FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const override;

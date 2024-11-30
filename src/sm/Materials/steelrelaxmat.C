@@ -109,10 +109,10 @@ SteelRelaxMat::initializeFrom(InputRecord &ir)
 }
 
 // creates a new material status  corresponding to this class
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 SteelRelaxMat::CreateStatus(GaussPoint *gp) const
 {
-    return new SteelRelaxMatStatus(gp);
+    return std::make_unique<SteelRelaxMatStatus>(gp);
 }
 
 void

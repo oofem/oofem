@@ -187,10 +187,10 @@ LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LatticeDamage :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeDamageStatus(gp);
+    return std::make_unique<LatticeDamageStatus>(gp);
 }
 
 

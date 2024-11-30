@@ -173,8 +173,8 @@ FloatArrayF<6> SimpleVitrificationMaterial :: giveThermalDilatationVector(GaussP
 }
 
 
-MaterialStatus *SimpleVitrificationMaterial :: CreateStatus(GaussPoint *gp) const
+std::unique_ptr<MaterialStatus> SimpleVitrificationMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 } // end namespace oofem

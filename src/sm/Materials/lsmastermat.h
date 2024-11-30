@@ -83,7 +83,7 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode,
                                             GaussPoint * gp,

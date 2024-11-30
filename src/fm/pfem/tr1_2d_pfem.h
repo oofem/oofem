@@ -157,7 +157,7 @@ protected:
     void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep) override;
 
     void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode) override;
-    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep) override;
+    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep) ;
 };
 } // end namespace oofem
 #endif // tr1_2d_pfem_h

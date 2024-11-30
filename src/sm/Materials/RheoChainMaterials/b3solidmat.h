@@ -129,7 +129,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_B3SolidMaterial_Name; }
     void initializeFrom(InputRecord &ir) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
     double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;

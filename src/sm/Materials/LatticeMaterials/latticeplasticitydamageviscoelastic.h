@@ -124,7 +124,7 @@ public:
                                         GaussPoint *gp,
                                         TimeStep *tStep) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
 

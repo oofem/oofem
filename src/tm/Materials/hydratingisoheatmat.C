@@ -225,10 +225,10 @@ HydratingIsoHeatMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
     }
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus>
 HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydratingTransportMaterialStatus(gp);
+    return std::make_unique<HydratingTransportMaterialStatus>(gp);
 }
 
 

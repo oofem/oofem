@@ -184,10 +184,10 @@ LatticePlasticityDamage::computeDamageParam(double kappaDOne, double kappaDTwo, 
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LatticePlasticityDamage::CreateStatus(GaussPoint *gp) const
 {
-    return new LatticePlasticityDamageStatus(1, LatticePlasticityDamage::domain, gp);
+    return std::make_unique<LatticePlasticityDamageStatus>(1, LatticePlasticityDamage::domain, gp);
 }
 
 

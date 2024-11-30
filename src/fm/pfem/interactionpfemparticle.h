@@ -82,8 +82,6 @@ public:
 
     void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
 
-    void printOutputAt(FILE *stream, TimeStep *stepN) const override;
-
     const char *giveClassName() const override { return "InteractionPFEMParticle"; }
     const char *giveInputRecordName() const override { return _IFT_InteractionPFEMParticle_Name; }
 

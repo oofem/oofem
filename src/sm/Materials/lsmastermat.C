@@ -61,10 +61,10 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LargeStrainMasterMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new LargeStrainMasterMaterialStatus(gp, domain, slaveMat);
+    return std::make_unique<LargeStrainMasterMaterialStatus>(gp, domain, slaveMat);
 }
 
 

@@ -127,9 +127,9 @@ RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, Ga
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 RankinePlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return std::make_unique<MPlasticMaterialStatus>(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 } // end namespace oofem

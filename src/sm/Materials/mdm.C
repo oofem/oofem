@@ -70,10 +70,10 @@ MMALeastSquareProjection MDM :: mapperLST;
 
 MMAClosestIPTransfer MDM :: mapper2;
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    return new MDMStatus(gp, this->nsd, this->numberOfMicroplanes);
+    return std::make_unique<MDMStatus>(gp, this->nsd, this->numberOfMicroplanes);
 }
 
 

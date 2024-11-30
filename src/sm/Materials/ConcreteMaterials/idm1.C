@@ -1382,27 +1382,20 @@ IsotropicDamageMaterial1::restoreContext(DataStream &stream, ContextMode mode)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 IsotropicDamageMaterial1 :: CreateStatus(GaussPoint *gp) const
 {
-    return new IsotropicDamageMaterial1Status(gp);
+    return std::make_unique<IsotropicDamageMaterial1Status>(gp);
 }
 
-MaterialStatus *
+MaterialStatus*
 IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == nullptr ) {
-        // create a new one
-        status = this->CreateStatus(gp);
-
-        if ( status ) {
-            gp->setMaterialStatus(status);
+    if ( !gp->hasMaterialStatus()) {
+            gp->setMaterialStatus(this->CreateStatus(gp));
             this->_generateStatusVariables(gp);
-        }
     }
-
-    return status;
+    return static_cast<MaterialStatus*>(gp->giveMaterialStatus());
 }
 
 

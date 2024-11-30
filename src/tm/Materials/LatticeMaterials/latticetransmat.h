@@ -184,7 +184,7 @@ public:
 
     double give(int, GaussPoint *gp) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif

@@ -118,7 +118,7 @@ public:
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLEmbedStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<TrabBoneNLEmbedStatus>(gp); }
 };
 } // end namespace oofem
 #endif

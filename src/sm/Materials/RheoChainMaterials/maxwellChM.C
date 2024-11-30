@@ -261,10 +261,10 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MaxwellChainMaterialStatus(gp, nUnits);
+    return std::make_unique<MaxwellChainMaterialStatus>(gp, nUnits);
 }
 
 

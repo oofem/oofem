@@ -80,11 +80,6 @@ PFEMParticle :: updateYourself(TimeStep *tStep)
     Node :: updateYourself(tStep);
 }
 
-void
-PFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN)
-{
-    DofManager :: printOutputAt(stream, stepN);
-}
 
 #ifdef __OOFEG
 void PFEMParticle :: drawScalar(oofegGraphicContext &gc)

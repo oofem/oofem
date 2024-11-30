@@ -734,13 +734,13 @@ MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, Gaus
 
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus>
 MPSDamMaterial :: CreateStatus(GaussPoint *gp) const
 /*
  * creates a new material status corresponding to this class
  */
 {
-    return new MPSDamMaterialStatus(gp, nUnits);
+    return std::make_unique<MPSDamMaterialStatus>(gp, nUnits);
 }
 
 

@@ -246,11 +246,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     gp->setWeight(gw);
 
                                     // Fetch material status and set normal
-                                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
+                                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                     if ( ms ) {
                                         ms->letNormalBe(crackNormal);
                                     } else {
-                                        StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
+                                        StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
                                         if ( fe2ms ) {
                                             fe2ms->letNormalBe(crackNormal);
@@ -532,14 +532,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
                     // Fetch new material status. Create it if it does not exist.
-                    MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-                    if ( !ms_new ) {
+                    if (gp_new->hasMaterialStatus() == false) {
                         StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
                         StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
                         cs->createMaterialStatus(*gp_new);
-                        ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
                     }
-
+                    MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( element->giveCrossSection()->giveMaterial(gp_new)->giveStatus(gp_new) );
+                   
                     // Find closest old GP.
                     double closest_dist = 0.0;
                     MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());

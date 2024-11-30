@@ -1256,8 +1256,8 @@ void LayeredCrossSection::createMaterialStatus(GaussPoint &iGP)
         for ( int k = 0; k < layerIntegrationPoints.at(i); k++ ) {
             GaussPoint *layerGp = giveSlaveGaussPoint(& iGP, i - 1, k);
             StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial(this->giveLayerMaterial(i) ) );
-            MaterialStatus *matStat = mat->CreateStatus(layerGp);
-            layerGp->setMaterialStatus(matStat);
+            //MaterialStatus *matStat = mat->CreateStatus(layerGp);
+            layerGp->setMaterialStatus(mat->CreateStatus(layerGp));
         }
     }
 }

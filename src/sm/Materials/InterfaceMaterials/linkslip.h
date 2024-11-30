@@ -147,7 +147,7 @@ public:
     Interface *giveInterface(InterfaceType) override;
                                   
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,

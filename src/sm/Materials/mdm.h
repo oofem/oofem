@@ -294,7 +294,7 @@ public:
     double predictRelativeComputationalCost(GaussPoint *gp) override;
     double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     void computeDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,

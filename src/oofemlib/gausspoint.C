@@ -71,9 +71,9 @@ GaussPoint::~GaussPoint()
 
     fprintf(file, "%s  GP %2d.%-2d :", indent, iruleNumber, number);
 
-    IntegrationPointStatus *status = this->giveMaterialStatus();
-    if ( status ) {
-        status->printOutputAt(file, tStep);
+    for (auto const& [key, val] : materialStatuses)
+    {
+        val->printOutputAt(file, tStep);
     }
 
     if ( gaussPoints.size() != 0 ) { // layered material
@@ -125,9 +125,10 @@ size_t GaussPoint :: findFirstIndexOfSlaveGaussPoint(GaussPoint *gp)
 
 void GaussPoint :: updateYourself(TimeStep *tStep)
 {
-    IntegrationPointStatus *status = this->giveMaterialStatus();
-    if ( status ) {
-        status->updateYourself(tStep);
+
+    for (auto const& [key, val] : materialStatuses)
+    {
+        val->updateYourself(tStep);
     }
 
     for ( auto &gp: gaussPoints ) {

@@ -95,10 +95,10 @@ WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(MatResponseMode mode, Ga
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 WinklerPasternakMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 
 

@@ -201,7 +201,7 @@ public:
     bool evaluate(int &nodeNr) override
     {
         if ( initFlag ) {
-            double dist = distance(startingPosition, *this->domain->giveNode(nodeNr)->giveCoordinates());
+            double dist = distance(startingPosition, this->domain->giveNode(nodeNr)->giveCoordinates());
 
             if ( ( dist - distanceToClosestNode ) <= dist * 0.001 ) {
                 if ( ( dist - distanceToClosestNode ) >= -0.001 * dist ) {
@@ -214,7 +214,7 @@ public:
             }
         } else {
             closestNodeIndices.push_back(nodeNr);
-            distanceToClosestNode = distance(startingPosition, *this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates());
+            distanceToClosestNode = distance(startingPosition, this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates());
             initFlag = true;
         }
 

@@ -84,7 +84,7 @@ public:
 
     void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the creep compliance function - function useless here
     double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep) const override;

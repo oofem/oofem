@@ -733,7 +733,7 @@ LIBeam3dNL::computeTempCurv(FloatArray &answer, TimeStep *tStep)
     answer.times(1 / this->l0);
 
     // ask for previous kappa
-    StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+    StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( this->giveCrossSection()->giveMaterial(gp)->giveStatus(gp) );
     if ( matStat ) {
         PrevEpsilon = matStat->giveStrainVector();
     }

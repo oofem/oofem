@@ -92,7 +92,7 @@ public:
     FloatArrayF< 9 >giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, GaussPoint *gp, TimeStep *tStep) const override;
 
     virtual void initializeFrom(InputRecord &ir) override;
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
     virtual const char *giveInputRecordName() const override { return _IFT_OgdenCompressibleMaterial_Name; }
     virtual const char *giveClassName() const override { return "OgdenCompressibleMaterial"; }
 

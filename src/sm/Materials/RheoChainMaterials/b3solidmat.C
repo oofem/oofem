@@ -750,13 +750,13 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) const 
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 /*
  * creates a new material status corresponding to this class
  */
 {
-    return new B3SolidMaterialStatus(gp, nUnits);
+    return std::make_unique<B3SolidMaterialStatus>(gp, nUnits);
 }
 
 

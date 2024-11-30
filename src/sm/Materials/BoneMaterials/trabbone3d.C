@@ -1118,8 +1118,8 @@ TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode)
 }
 
 
-MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
+std::unique_ptr<MaterialStatus> TrabBone3D :: CreateStatus(GaussPoint *gp) const
 {
-    return new TrabBone3DStatus(gp);
+    return std::make_unique<TrabBone3DStatus>(gp);
 }
 } //end namespace oofem

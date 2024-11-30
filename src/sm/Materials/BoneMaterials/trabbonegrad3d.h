@@ -120,7 +120,7 @@ public:
 
 protected:
     // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<TrabBoneGrad3DStatus>(gp); }
 };
 } // end namespace oofem
 

@@ -514,8 +514,8 @@ void FiberedCrossSection::createMaterialStatus(GaussPoint &iGP)
     for ( int i = 1; i <= fiberMaterials.giveSize(); i++ ) {
         GaussPoint *fiberGp = this->giveSlaveGaussPoint(& iGP, i - 1);
         Material *mat = domain->giveMaterial(fiberMaterials.at(i) );
-        MaterialStatus *matStat = mat->CreateStatus(fiberGp);
-        iGP.setMaterialStatus(matStat);
+        //MaterialStatus *matStat = mat->CreateStatus(fiberGp);
+        iGP.setMaterialStatus(mat->CreateStatus(fiberGp));
     }
 }
 

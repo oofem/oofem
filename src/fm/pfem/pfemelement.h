@@ -94,7 +94,7 @@ public:
     /// Returns the interpolation for the pressure
     virtual FEInterpolation *givePressureInterpolation() = 0;
 
-    computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
     
     // definition
     const char *giveClassName() const override { return "PFEMElement"; }

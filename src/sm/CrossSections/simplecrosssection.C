@@ -651,8 +651,7 @@ void
 SimpleCrossSection::createMaterialStatus(GaussPoint &iGP)
 {
     Material *mat = domain->giveMaterial(materialNumber);
-    MaterialStatus *matStat = mat->CreateStatus(& iGP);
-    iGP.setMaterialStatus(matStat);
+    iGP.setMaterialStatus(mat->CreateStatus(& iGP));
 }
 
 

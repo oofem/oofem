@@ -171,10 +171,10 @@ FloatArrayF<6> MicroMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &to
     //     status->letTempStressVectorBe(answer);
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 MicroMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MicroMaterialStatus(gp);
+    return std::make_unique<MicroMaterialStatus>(gp);
 }
 
 

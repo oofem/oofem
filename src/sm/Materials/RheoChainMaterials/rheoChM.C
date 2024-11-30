@@ -554,10 +554,10 @@ RheoChainMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
     }
 }
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new RheoChainMaterialStatus(gp, nUnits);
+    return std::make_unique<RheoChainMaterialStatus>(gp, nUnits);
 }
 
 

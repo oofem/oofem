@@ -169,7 +169,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
     const char *giveClassName() const override { return "SteelRelaxMat"; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };

@@ -88,7 +88,7 @@ StructuralFE2Material :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 StructuralFE2Material :: CreateStatus(GaussPoint *gp) const
 {
     int rank = -1;
@@ -96,7 +96,7 @@ StructuralFE2Material :: CreateStatus(GaussPoint *gp) const
     if ( emodel->isParallel() && emodel->giveNumberOfProcesses() > 1 ) {
         rank = emodel->giveRank();
     }
-    return new StructuralFE2MaterialStatus(rank, gp, this->inputfile);
+    return std::make_unique<StructuralFE2MaterialStatus>(rank, gp, this->inputfile);
 }
 
 

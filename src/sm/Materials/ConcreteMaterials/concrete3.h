@@ -71,7 +71,7 @@ public:
      const char *giveClassName() const override { return "Concrete3"; }
      const char *giveInputRecordName() const override { return _IFT_Concrete3_Name; }
 
-     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
 protected:
     double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,

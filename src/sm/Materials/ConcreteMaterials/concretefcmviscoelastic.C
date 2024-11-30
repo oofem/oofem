@@ -203,21 +203,16 @@ ConcreteFCMViscoElastic::giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
 
 
 
-MaterialStatus *
+MaterialStatus* 
 ConcreteFCMViscoElastic::giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == NULL ) {
-        // create a new one
-        status = this->CreateStatus(gp);
-
-        if ( status != NULL ) {
-            gp->setMaterialStatus(status);
-            this->_generateStatusVariables(gp);
-        }
+    if (gp->hasMaterialStatus()) {
+        return static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+    } else {
+        MaterialStatus *status = static_cast<MaterialStatus*> (gp->setMaterialStatus (this->CreateStatus(gp)));
+        this->_generateStatusVariables(gp);
+        return status;
     }
-
-    return status;
 }
 
 

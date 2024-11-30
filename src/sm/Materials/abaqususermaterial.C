@@ -139,9 +139,9 @@ void AbaqusUserMaterial::giveInputRecord(DynamicInputRecord &input)
     input.setField(std::string(this->cmname), _IFT_AbaqusUserMaterial_name);
 }
 
-MaterialStatus *AbaqusUserMaterial::CreateStatus(GaussPoint *gp) const
+std::unique_ptr<MaterialStatus> AbaqusUserMaterial::CreateStatus(GaussPoint *gp) const
 {
-    return new AbaqusUserMaterialStatus(gp, this->numState);
+    return std::make_unique<AbaqusUserMaterialStatus>(gp, this->numState);
 }
 
 

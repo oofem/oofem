@@ -87,7 +87,7 @@ public:
                                  
     FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
     const char *giveClassName() const override { return "SimpleVitrificationMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_SimpleVitrificationMaterial_Name; }

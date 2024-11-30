@@ -133,7 +133,6 @@ VTKPFEMXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     DofManager *node;
-    FloatArray *coords;
     this->fileStream << "<Piece NumberOfPoints=\"" << nActiveNode << "\" NumberOfCells=\"" << nActiveNode << "\">\n";
     this->fileStream << "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ";
 
@@ -142,13 +141,13 @@ VTKPFEMXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
         PFEMParticle *particle = dynamic_cast< PFEMParticle * >( node );
         if ( particle ) {
             if ( particle->isActive() ) {
-                coords = node->giveCoordinates();
+                const FloatArray &coords = node->giveCoordinates();
                 ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
-                for ( int i = 1; i <= coords->giveSize(); i++ ) {
-                    this->fileStream << scientific << coords->at(i) << " ";
+                for ( int i = 1; i <= coords.giveSize(); i++ ) {
+                    this->fileStream << scientific << coords.at(i) << " ";
                 }
 
-                for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
+                for ( int i = coords.giveSize() + 1; i <= 3; i++ ) {
                     this->fileStream << scientific << 0.0 << " ";
                 }
             }

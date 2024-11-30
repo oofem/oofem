@@ -267,7 +267,7 @@ public:
     /// computes total shear slip on a given crack plane (i = 1, 2, 3); the slip is computed from the temporary cracking strain
     virtual double computeShearSlipOnCrack(GaussPoint *gp, TimeStep *tStep, int i);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FCMMaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<FCMMaterialStatus>(gp); }
 
 protected:
 

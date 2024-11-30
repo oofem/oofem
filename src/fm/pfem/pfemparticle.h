@@ -95,8 +95,6 @@ public:
     /// Sets the activeFlag to false
     virtual void deactivate() { activeFlag = false; }
 
-    void printOutputAt(FILE *stream, TimeStep *stepN) override;
-
     const char *giveClassName() const override { return "PFEMParticle"; }
     const char *giveInputRecordName() const override { return _IFT_PFEMParticle_Name; }
 

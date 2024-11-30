@@ -69,10 +69,10 @@ public:
     /// Destructor
     virtual ~InteractionBoundaryCondition() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "IntertactionBoundaryCondition"; }
-    virtual const char *giveInputRecordName() const { return _IFT_InteractionBoundaryCondition_Name; }
+    virtual const char *giveClassName() const override { return "IntertactionBoundaryCondition"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_InteractionBoundaryCondition_Name; }
 };
 } // end namespace oofem
 #endif //inteactionboundarycondition_h

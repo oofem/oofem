@@ -46,7 +46,7 @@ Concrete3 :: Concrete3(int n, Domain *d) : RCM2Material(n, d)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 Concrete3 :: CreateStatus(GaussPoint *gp) const
 /*
  * creates new  material status  corresponding to this class

@@ -125,12 +125,6 @@ InteractionPFEMParticle::giveCoupledVelocities(FloatArray &answer, TimeStep *ste
     }
 }
 
-void
-InteractionPFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN) const
-{
-    PFEMParticle :: printOutputAt(stream, stepN);
-}
-
 #ifdef __OOFEG
 void InteractionPFEMParticle :: drawScalar(oofegGraphicContext &gc)
 {

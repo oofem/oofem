@@ -266,7 +266,7 @@ public:
     const char *giveClassName() const override { return "HydrationModel"; }
 
     /// Creates and returns new HydrationModelStatus instance
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 };
 
 // =========== Interfaces for materials using the hydration model ============
@@ -274,16 +274,16 @@ class HydrationModelStatusInterface : public Interface
 {
 protected:
     /// Reference to associated hydration model status
-    std :: unique_ptr< HydrationModelStatus > hydrationModelStatus;
+    std :: unique_ptr< MaterialStatus > hydrationModelStatus;
 
 public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
     HydrationModelStatusInterface() {}
 
     /// Returns the associated hydration model status.
-    HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus.get(); }
+    HydrationModelStatus *giveHydrationModelStatus() { return static_cast<HydrationModelStatus*> (hydrationModelStatus.get()); }
     /// Sets the associated hydration model status. Analogue to gp->setMaterialStatus.
-    void setHydrationModelStatus(HydrationModelStatus *s) { hydrationModelStatus.reset(s); }
+    HydrationModelStatus* setHydrationModelStatus(std::unique_ptr<MaterialStatus> s) { hydrationModelStatus = std::move(s); return static_cast<HydrationModelStatus*> (hydrationModelStatus.get()); }
 
     /// Updates the equilibrium variables to temporary values.
     void updateYourself(TimeStep *tStep);

@@ -416,9 +416,9 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(gp);
+    return std::make_unique<StructuralMaterialStatus>(gp);
 }
 } // end namespace oofem

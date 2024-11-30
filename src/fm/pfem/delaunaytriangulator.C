@@ -397,7 +397,7 @@ void
 DelaunayTriangulator :: findNonDelaunayTriangles(int insertedNode, InsertTriangleBasedOnCircumcircle &tInsert, std :: list< Edge2D > &polygon)
 {
     DofManager *node = domain->giveNode(insertedNode);
-    const auto &nodeCoords = *node->giveCoordinates();
+    const auto &nodeCoords = node->giveCoordinates();
 
     ElementCircumCirclesContainingNode findElements(nodeCoords, domain);
     std :: list< DelaunayTriangle * > nonDelaunayTriangles;
@@ -533,16 +533,16 @@ DelaunayTriangulator:: computeBBXBasedOnNodeData(BoundingBox &BBX)
         const auto &coords = node->giveCoordinates();
         if ( init ) {
             init = 0;
-            for ( int j = 1; j <= coords->giveSize(); j++ ) {
-                minc.at(j) = maxc.at(j) = coords->at(j);
+            for ( int j = 1; j <= coords.giveSize(); j++ ) {
+                minc.at(j) = maxc.at(j) = coords.at(j);
             }
         } else {
-            for ( int j = 1; j <= coords->giveSize(); j++ ) {
-                if ( coords->at(j) < minc.at(j) ) {
-                    minc.at(j) = coords->at(j);
+            for ( int j = 1; j <= coords.giveSize(); j++ ) {
+                if ( coords.at(j) < minc.at(j) ) {
+                    minc.at(j) = coords.at(j);
                 }
-                if ( coords->at(j) > maxc.at(j) ) {
-                    maxc.at(j) = coords->at(j);
+                if ( coords.at(j) > maxc.at(j) ) {
+                    maxc.at(j) = coords.at(j);
                 }
             }
         }

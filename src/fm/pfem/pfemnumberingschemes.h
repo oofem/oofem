@@ -70,9 +70,9 @@ public:
      * Initializes the receiver
      */
     virtual void init(Domain *domain, TimeStep *tStep);
-    virtual bool isDefault() const { return false; }
-    virtual int giveDofEquationNumber(Dof *dof) const;
-    virtual int giveRequiredNumberOfDomainEquation() const;
+    virtual bool isDefault() const override { return false; }
+    virtual int giveDofEquationNumber(Dof *dof) const override;
+    virtual int giveRequiredNumberOfDomainEquation() const override;
 
     /// Returns total number of equations
     virtual int giveTotalNumberOfEquations() const;
@@ -105,9 +105,9 @@ public:
 
     /// Resets the numbering in order to start numbering again from 1
     void reset() { numEqs = 0; }
-    virtual bool isDefault() const { return !prescribed; }
-    virtual int giveDofEquationNumber(Dof *dof) const;
-    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+    virtual bool isDefault() const override { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const override;
+    virtual int giveRequiredNumberOfDomainEquation() const override { return numEqs; }
 
     /// Asks new equation number
     int askNewEquationNumber() { return ++numEqs; }
@@ -143,8 +143,8 @@ public:
     /// Initializes the numbering scheme
     virtual void init(Domain *domain);
 
-    virtual int giveDofEquationNumber(Dof *dof) const;
-    virtual int giveRequiredNumberOfDomainEquation() const;
+    virtual int giveDofEquationNumber(Dof *dof) const override;
+    virtual int giveRequiredNumberOfDomainEquation() const override;
 };
 } // end namespace oofem
 #endif // pfemnumberingschemes_h

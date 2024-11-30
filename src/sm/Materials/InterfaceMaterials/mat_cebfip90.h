@@ -135,7 +135,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CebFipSlip90MaterialStatus(gp); }
+    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<CebFipSlip90MaterialStatus>(gp); }
 };
 } // end namespace oofem
 #endif // mat_cebfip90_h

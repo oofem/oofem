@@ -45,6 +45,14 @@ class GaussPoint;
 class TimeStep;
 class DataStream;
 
+/** Enumeration defining allowed IntegrationPointStatuses Keys.
+  *  The point is that there is a need to store multiple statuses in integration points.
+  *  Each status is identified by its key. The key is used to access the status. 
+  */
+ enum IntegrationPointStatusIDType {
+    IPSID_Default = 0,
+ };
+
 /**
  * Abstract base class representing  a integration status.
  *

@@ -40,6 +40,7 @@
 #include "dynamicinputrecord.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include <stdexcept>
 
 namespace oofem {
 Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
@@ -207,20 +208,12 @@ Material :: giveStatus(GaussPoint *gp) const
  * returns material status in gp corresponding to specific material class
  */
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == nullptr ) {
-        // create a new one
-        status = this->CreateStatus(gp);
-
-        // if newly created status is null
-        // dont include it. specific instance
-        // does not have status.
-        if ( status ) {
-            gp->setMaterialStatus( status );
-        }
+    if (gp->hasMaterialStatus()) {
+        return static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+    } else {
+        MaterialStatus *status = static_cast<MaterialStatus*>(gp->setMaterialStatus (this->CreateStatus(gp)));
+        return status;
     }
-
-    return status;
 }
 
 

@@ -80,10 +80,10 @@ LatticeSlip :: initializeFrom(InputRecord &ir)
 }
 
 
-MaterialStatus *
+std::unique_ptr<MaterialStatus> 
 LatticeSlip :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeSlipStatus(gp);
+    return std::make_unique<LatticeSlipStatus>(gp);
 }
 
 
