@@ -830,7 +830,7 @@ Currently, EntType keyword can be one from
      nodes have to interconnect opposing boundary nodes of a unit cell.
 
 - Boundary loads
-  -  Constant edge fluxes (load)
+   -  Constant edge fluxes (load)
 
      ``ConstantEdgeLoad`` ``loadType #(in)`` ``components #(ra)``
      [``dofexcludemask #(ia)``] [``csType #(in)``]
@@ -893,7 +893,7 @@ Currently, EntType keyword can be one from
      default) or in entity - specific local coordinate system (``csType``
      = 1).
 
-  -  Linear edge flux (load)
+   -  Linear edge flux (load)
 
      ``LinearEdgeLoad`` ``loadType #(in)`` ``components #(ra)``
      [``dofexcludemask #(ia)``] [``csType #(in)``]
@@ -906,7 +906,19 @@ Currently, EntType keyword can be one from
      (``csType`` = 0, default) or in entity - specific local coordinate
      system (``csType`` = 1).
 
-  -  InteractionLoad
+   -  User Defined Boundary Flux (load) 
+      ``UserDefinedBoundaryLoad`` ``loadTimeFunction #(in)`` ``dofs #(ia)`` ``set #(in)`` ``intensityfunction #(in)`` ``geomtype #(in)`` ``approxorder #(in)`` ``components 0``
+
+      Represents user defined boundary flux, where the flux is specified using configured function (see :ref:`TimeFunctionsRecords`). Note that PythonExpression provides complete configurability. 
+      The flux intensity is defined by the ``intensityfunction``, which is a reference to specific function. 
+      The function is defined in the global coordinate system as a function of position (x array variable) and time (t variable). 
+      The ``geomtype`` parameter determines the type of geometry, where the flux is applied (4 for surface flux (defaut), 3 for edge flux). 
+      The ``approxorder`` parameter determines the (approximate) order of intensity function. This is used to set up integration rule on the boundary.
+      The ``dofs`` array determines the DOFs, to which the flux is applied. 
+      The ``set`` parameter determines the set of element boundary entities, to which the flux is applied. 
+      The ``loadTimeFunction`` and ``components`` parameters have no effect, but needs to be provided.
+
+   -  InteractionLoad
 
      ``InteractionLoad`` ``ndofs #(in)`` ``loadType #(in)``
      ``Components #(ra)`` [``csType #(in)``]
@@ -950,8 +962,8 @@ The ``set`` parameter determines the set of nodes, to which the initial conditio
 
 .. _TimeFunctionsRecords:
 
-Time functions records
-----------------------
+(Time) Functions records
+----------------------------
 
 These records specify description of time functions, which generally
 describe time variation of components during solution. The general
@@ -1022,7 +1034,16 @@ Currently, TimeFunctType keyword can be one from
    using ``dfdt(t)`` and ``d2fdt2(t)`` parameters. The first and second
    derivatives may be required, this depend on type of analysis.
 
-   Very general, but relatively slow.
+-  User defined Python expression <requires to compile with  USE_PYTHON_EXTENSION = ON >
+
+   ``PythonExpression`` ``f #(s)`` [``dfdt #(s)``] [``d2fdt2 #(s)``]
+
+
+   Represents user defined function defined by Python script. The expressions can depend on
+   “t” parameter, for which actual time will be substituted and ``x`` array containing the position.
+   The parameter ``f`` is aq string containing Python expression.
+   Optional parameters ``dfdt`` and ``d2fdt2`` allow to prowide expressions for derivative and second derivative of a function, that may be required, depending on the context of use.
+
 
 .. _XFEMManagerRecords:
 
