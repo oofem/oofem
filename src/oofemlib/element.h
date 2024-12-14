@@ -314,7 +314,7 @@ public:
      * @param rmode Mode of the contribution.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the tangent contribution of the given load at the given boundary.
      * @note Elements which do not have an contribution should resize the vector to be empty.
@@ -324,7 +324,7 @@ public:
      * @param rmode Mode of the contribution.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary edge. 
      * In general, the answer should include only relevant DOFs at the edge.

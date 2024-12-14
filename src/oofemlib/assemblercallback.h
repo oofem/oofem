@@ -66,8 +66,8 @@ class OOFEM_EXPORT VectorAssembler
 public:
     virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const;
-    virtual void vectorFromSurfaceLoad(FloatArray &vec, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
-    virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, EdgeLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromSurfaceLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const;
+    virtual void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const;
     virtual void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const;
     virtual void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock=nullptr) const;
 
@@ -86,8 +86,8 @@ class OOFEM_EXPORT MatrixAssembler
 public:
     virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
     virtual void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const;
-    virtual void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep) const;
-    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, EdgeLoad *load, int edge, TimeStep *tStep) const;
+    virtual void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const;
+    virtual void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const;
     virtual void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void* lock=nullptr) const;
 
     virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
@@ -104,8 +104,8 @@ class OOFEM_EXPORT InternalForceAssembler : public VectorAssembler
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromEdgeLoad(FloatArray &vec, Element &element, EdgeLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
     void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock=nullptr) const override;
 };
 
@@ -118,8 +118,8 @@ class OOFEM_EXPORT ExternalForceAssembler : public VectorAssembler
 public:
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override; ///@todo Temporary: Remove when switch to sets is complete
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromEdgeLoad(FloatArray &vec, Element &element, EdgeLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
     void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const override;
     void assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void*lock=nullptr) const override;
 };
@@ -132,8 +132,8 @@ class OOFEM_EXPORT ReferenceForceAssembler : public VectorAssembler
 {
 public:
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromEdgeLoad(FloatArray &vec, Element &element, EdgeLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
     void vectorFromNodeLoad(FloatArray &vec, DofManager &dman, NodalLoad *load, TimeStep *tStep, ValueModeType mode) const override;
 };
 
@@ -173,8 +173,8 @@ public:
 
     void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
     void vectorFromLoad(FloatArray &vec, Element &element, BodyLoad *load, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
-    void vectorFromEdgeLoad(FloatArray &vec, Element &element, EdgeLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromSurfaceLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep, ValueModeType mode) const override;
+    void vectorFromEdgeLoad(FloatArray &vec, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 
@@ -193,8 +193,8 @@ public:
 
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
     void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const override;
-    void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep) const override;
-    void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, EdgeLoad *load, int edge, TimeStep *tStep) const override;
+    void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const override;
+    void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const override;
     void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void*lock=nullptr) const override;
 };
 
@@ -225,8 +225,8 @@ public:
     EffectiveTangentAssembler(MatResponseMode mode, bool lumped, double k, double m);
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
     void matrixFromLoad(FloatMatrix &mat, Element &element, BodyLoad *load, TimeStep *tStep) const override;
-    void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, SurfaceLoad *load, int boundary, TimeStep *tStep) const override;
-    void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, EdgeLoad *load, int edge, TimeStep *tStep) const override;
+    void matrixFromSurfaceLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int boundary, TimeStep *tStep) const override;
+    void matrixFromEdgeLoad(FloatMatrix &mat, Element &element, BoundaryLoad *load, int edge, TimeStep *tStep) const override;
     void assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void *lock=nullptr) const override;
 };
 

@@ -674,7 +674,7 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
 
 //Contribution to conductivity matrix from convection and radiation
 void
-TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 
@@ -725,7 +725,7 @@ TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLo
 
 
 void
-TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
+TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, BoundaryLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep)
 {
     answer.clear();
 

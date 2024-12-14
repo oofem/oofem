@@ -1200,8 +1200,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
             FloatArray charVec;
             FloatMatrix R;
             BodyLoad *bodyLoad;
-            SurfaceLoad *sLoad;
-            EdgeLoad *eLoad;
+            BoundaryLoad *bLoad;
             //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
@@ -1233,7 +1232,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                         }
                     }
                 }
-            } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) { // Surface load:
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) && (load->giveBCGeoType()==SurfaceLoadBGT)) { // Surface load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
@@ -1241,7 +1240,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 
                         int boundary = boundaries.at(ibnd * 2);
                         charVec.clear();
-                        va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
+                        va.vectorFromSurfaceLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
                         if ( charVec.isNotEmpty() ) {
                             //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -1265,14 +1264,14 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                         }
                     }
                 }
-            } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) { // Edge load:
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) && (load->giveBCGeoType()==EdgeLoadBGT) ) { // Edge load:
                 const IntArray &edgeBoundaries = set->giveEdgeList();
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
                     if ( element->isActivated(tStep) && this->isElementActivated(element) ) {
                         int boundary = edgeBoundaries.at(ibnd * 2);
                         charVec.clear();
-                        va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
+                        va.vectorFromEdgeLoad(charVec, *element, bLoad, boundary, tStep, mode);
 
                         if ( charVec.isNotEmpty() ) {
                             //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
