@@ -61,23 +61,25 @@ private:
     /// Expression for the function value.
     std :: string fExpression;
     /// Expression for first time derivative.
-    std :: string dfdtExpression;
+    std :: string dfdtExpression = "0";
     /// Expression for second time derivative.
-    std :: string d2fdt2Expression;
+    std :: string d2fdt2Expression = "0";
 
     PyObject *f;
     PyObject *dfdt;
     PyObject *d2fdt2;
 
-    PyObject *main_dict;
+    PyObject *main_dict = nullptr;
 
     /// Helper function to convert the std::map to a Python dictionary.
     PyObject *getDict(const std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given value dictionary.
-    void getArray(FloatArray &answer, PyObject *func, const std :: map< std :: string, FunctionArgument > &valDict);
+    void getArray(FloatArray &answer, PyObject **func, const std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given time
     double getScalar(PyObject *func, double time);
-
+    // helper method to convert a PyObject to a double
+    double pyObj2double(PyObject *obj) ;
+   
 public:
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
