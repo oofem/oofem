@@ -1,0 +1,40 @@
+usrdefboundaryload01.out
+boundary load applied on element surface
+StaticStructural nsteps 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 3
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 3. 0. 0.
+node 3 coords 3 3. 3. 0.
+node 4 coords 3 0. 3. 0.
+#
+node 5 coords 3 0. 0. 6.
+node 6 coords 3 3. 0. 6.
+node 7 coords 3 3. 3. 6.
+node 8 coords 3 0. 3. 6.
+#
+LSpace  1 nodes 8 1 2 3 4 5 6 7 8
+SimpleCS 1 material 1 set 1
+IsoLE 1 d 0.0 E 15.0 n 0.25 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 3
+usrdefboundaryload 2 loadTimeFunction 1 dofs 3 1 2 3 set 2 intensityfunction 2 geomtype 4 approxorder 1 components 0
+ConstantFunction 1 f(t) 1.0
+pythonexpression 2 f "ret=[0,0.,x[0]]"
+Set 1 allelements
+Set 2 elementboundaries 2 1 2
+Set 3 nodes 4 1 2 3 4
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+##
+## Note: this is the exact solution
+##
+## check reactions 
+#REACTION tStep 1 number 2 dof 3 value -4.5
+#REACTION tStep 1 number 3 dof 3 value -4.5
+#REACTION tStep 1 number 1 dof 3 value -2.25
+#REACTION tStep 1 number 1 dof 3 value -2.25
+#%END_CHECK%

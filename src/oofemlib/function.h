@@ -61,6 +61,7 @@ class OOFEM_EXPORT FunctionArgument
 {
 public:
     enum FunctionArgumentType {
+        FAT_null,
         FAT_double,
         FAT_FloatArray,
         FAT_int,
@@ -75,6 +76,7 @@ public:
     int val2;
     IntArray val3;
 
+    FunctionArgument() : type(FAT_null), val0(0), val1(), val2(0), val3() { }
     FunctionArgument(double val) : type(FAT_double), val0(val), val1(), val2(0), val3() { }
     FunctionArgument(FloatArray val) : type(FAT_FloatArray),  val0(0), val1(std::move(val)), val2(0), val3() { }
     FunctionArgument(int val) : type(FAT_int),  val0(0), val1(), val2(val), val3() { }
