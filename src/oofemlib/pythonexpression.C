@@ -40,6 +40,8 @@
 #include "error.h"
 
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 // Defines the name for the return variable;
 #define RETURN_VARIABLE "ret"
@@ -60,17 +62,39 @@ PythonExpression :: initializeFrom(InputRecord &ir)
 {
     Function :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->dfdtExpression, _IFT_PythonExpression_dfdt);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->d2fdt2Expression, _IFT_PythonExpression_d2fdt2);
-
+    // Check if the f expression is given
+    if (ir.hasField(_IFT_PythonExpression_f)) {
+        IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
+    } else {
+        std::string path;
+        IR_GIVE_FIELD(ir, path, _IFT_PythonExpression_ffile);
+        this->readFile2String(path, this->fExpression);
+    }
     this->f = Py_CompileString(fExpression.c_str(), "<internal_f>", Py_file_input);
     if ( this->f == nullptr) {
        PyErr_Print();
     }
+
+    // Check if the dfdt expression is given
+    if (ir.hasField(_IFT_PythonExpression_dfdt)) {
+        IR_GIVE_FIELD(ir, this->dfdtExpression, _IFT_PythonExpression_dfdt);
+    } else if (ir.hasField(_IFT_PythonExpression_dfdtfile)) {
+        std::string path;
+        IR_GIVE_OPTIONAL_FIELD(ir, path, _IFT_PythonExpression_dfdtfile);
+        this->readFile2String(path, this->dfdtExpression);
+    }
     this->dfdt = Py_CompileString(dfdtExpression.c_str(), "<internal_dfdt>", Py_file_input);
     if ( this->dfdt == nullptr) {
        PyErr_Print();
+    }
+
+    // Check if the d2fdt2 expression is given
+    if (ir.hasField(_IFT_PythonExpression_d2fdt2)) {
+        IR_GIVE_FIELD(ir, this->d2fdt2Expression, _IFT_PythonExpression_d2fdt2);
+    } else if (ir.hasField(_IFT_PythonExpression_d2fdt2file)) {
+        std::string path;
+        IR_GIVE_OPTIONAL_FIELD(ir, path, _IFT_PythonExpression_d2fdt2file);
+        this->readFile2String(path, this->d2fdt2Expression);
     }
     this->d2fdt2 = Py_CompileString(d2fdt2Expression.c_str(), "<internal_d2fdt2>", Py_file_input);
     if ( this->d2fdt2 == nullptr) {
@@ -236,4 +260,18 @@ double PythonExpression::pyObj2double(PyObject *obj) {
     // Handle error: object is not a number or conversion failed
     return -1.0;  // Or some other error indicator
 }
+
+
+void PythonExpression::readFile2String(const std::string &path, std::string &content) {
+    std::ifstream file(path);
+    if (file.is_open()) {
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        content = buffer.str();
+        file.close();
+    } else {
+        OOFEM_ERROR("Could not open file %s", path);
+    }
+}
+
 } // end namespace oofem

@@ -48,6 +48,9 @@ typedef _object PyObject;
 #define _IFT_PythonExpression_f "f" ///< Expression with return variable named "ret"
 #define _IFT_PythonExpression_dfdt "dfdt" ///< Velocity with return variable named "ret"
 #define _IFT_PythonExpression_d2fdt2 "d2fdt2" ///< Acceleration with return variable named "ret"
+#define _IFT_PythonExpression_ffile "fpath" ///< Expression with return variable named "ret"
+#define _IFT_PythonExpression_dfdtfile "dfdtpath" ///< Velocity with return variable named "ret"
+#define _IFT_PythonExpression_d2fdt2file "d2fdt2path" ///< Acceleration with return variable named "ret"
 //@}
 
 
@@ -58,12 +61,13 @@ namespace oofem {
 class OOFEM_EXPORT PythonExpression : public Function
 {
 private:
-    /// Expression for the function value.
+    /// Expression for the function value or path to python script   
     std :: string fExpression;
-    /// Expression for first time derivative.
+    /// Expression for first time derivative or path to python script   
     std :: string dfdtExpression = "0";
-    /// Expression for second time derivative.
+    /// Expression for second time derivative or path to python script   
     std :: string d2fdt2Expression = "0";
+    
 
     PyObject *f;
     PyObject *dfdt;
@@ -109,6 +113,8 @@ public:
 
     const char *giveClassName() const override { return "PythonExpression"; }
     const char *giveInputRecordName() const override { return _IFT_PythonExpression_Name; }
+private:
+    void readFile2String(const std :: string &path, std :: string &content);
 };
 } // end namespace oofem
 #endif // pythonexpression_h
