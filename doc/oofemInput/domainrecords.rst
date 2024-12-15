@@ -87,11 +87,12 @@ Components size record
 | This record describes the number of components in related domain. The
   particular records will follow immediately in input file. The general
   format is:
+
 | ``ndofman #(in)`` ``nelem #(in)``
   ``ncrosssect #(in)`` ``nmat #(in)`` ``nbc #(in)``
   ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``] 
-   where
-  ``ndofman`` represents number of dof managers (e.g. nodes) and their
+  
+| where ``ndofman`` represents number of dof managers (e.g. nodes) and their
   associated records, ``nelem`` represents number of elements and their
   associated records, ``ncrosssect`` is number of cross sections and
   their records, ``nmatdnMat`` is number of material models and their
@@ -1036,13 +1037,16 @@ Currently, TimeFunctType keyword can be one from
 
 -  User defined Python expression <requires to compile with  USE_PYTHON_EXTENSION = ON >
 
-   ``PythonExpression`` ``f #(s)`` [``dfdt #(s)``] [``d2fdt2 #(s)``]
+   ``PythonExpression`` (``f #(s)`` | ``fpath #(s)``) [``dfdt #(s)`` | ``dfdtpath #(s)``] [``d2fdt2 #(s)`` | ``d2fdt2path #(s)``]
 
 
    Represents user defined function defined by Python script. The expressions can depend on
-   “t” parameter, for which actual time will be substituted and ``x`` array containing the position.
-   The parameter ``f`` is aq string containing Python expression.
-   Optional parameters ``dfdt`` and ``d2fdt2`` allow to prowide expressions for derivative and second derivative of a function, that may be required, depending on the context of use.
+   ``t`` parameter, for which actual time will be substituted and ``x`` array containing the position.
+   The python expression or script should define ``ret`` variable, which will be returned as the value of the function.
+
+   The parameter ``f`` is an string containing Python expression, alternativaly, the parameter ``fpath`` is a string containing the path to the Python script file defining the python code for the function. 
+   Optional parameters ``dfdt``, ``dfdtpath``, ``d2fdt2``, and ``d2fdt2path`` allow to prowide expressions or path to python scripts for evaluating derivative and second derivative of a function, 
+   that may be required, depending on the context of use.
 
 
 .. _XFEMManagerRecords:
