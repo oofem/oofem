@@ -997,6 +997,13 @@ if (USE_SM AND USE_MFRONT)
     endforeach (case)
 endif()
 
+if (USE_SM AND USE_PYTHON_EXTENSION)
+    file (GLOB smpython_tests RELATIVE "${oofem_TEST_DIR}/sm/python" "${oofem_TEST_DIR}/sm/python/*.in")
+    foreach (case ${smpython_tests})
+        add_test (NAME "test_sm_python_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm/python COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif()
+
 if (USE_MPM)
     file (GLOB mpm_tests RELATIVE "${oofem_TEST_DIR}/mpm" "${oofem_TEST_DIR}/mpm/*.in")
     foreach (case ${mpm_tests})
