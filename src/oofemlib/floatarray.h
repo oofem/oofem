@@ -103,7 +103,7 @@ public:
     /// Copy constructor. Creates the array from another array.
     FloatArray(const FloatArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
-    FloatArray(FloatArray &&src) : values(std::move(src.values)) { }
+    FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline FloatArray(std :: initializer_list< double >list) : values(list) { }
     /// Wrapper to direct assignment from iterator pairs
@@ -118,7 +118,7 @@ public:
     /// Assignment operator
     FloatArray &operator = (const FloatArray &src) { values = src.values; return *this; }
     /// Move operator
-    FloatArray &operator = (FloatArray &&src) { values = std::move(src.values); return *this; }
+    FloatArray &operator = (FloatArray &&src) noexcept { values = std::move(src.values); return *this; }
     /// Assignment operator.
     inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
     /// Assign from fixed size array

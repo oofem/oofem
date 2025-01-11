@@ -93,8 +93,8 @@ private:
     };
     name *table [ Parser_TBLSZ ];
     double number_value =0.0;
-    char string_value [ Parser_CMD_LENGTH ];
-    const char *parsedLine;
+    char string_value [ Parser_CMD_LENGTH ]="";
+    const char *parsedLine= nullptr;
 
     name *look(const char *p, int ins = 0);
     inline name *insert(const char *s) { return look(s, 1); }

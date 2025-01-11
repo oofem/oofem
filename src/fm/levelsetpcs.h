@@ -120,23 +120,23 @@ protected:
     Polygon initialRefMatVol;
     bool initialRefMatFlag;
     /// Indexes of nodal coordinates used to init levelset using initialRefMatVol.
-    int ci1, ci2;
+    int ci1=1, ci2=2;
 
     /// Type of reinitialization algorithm to use.
-    int reinit_alg;
+    int reinit_alg=1;
     /// Time step used in reinitialization of LS (if apply).
-    double reinit_dt;
+    double reinit_dt=0.0;
     bool reinit_dt_flag;
     /// Reinitialization error limit.
-    double reinit_err;
+    double reinit_err=1.e-6;
     /// number of spatial dimensions.
-    int nsd;
+    int nsd=2;
     /// Level set values version.
     long int levelSetVersion;
 
 #ifdef LevelSetPCS_CACHE_ELEMENT_VOF
     std :: vector< FloatArray >elemVof;
-    long int elemVofLevelSetVersion;
+    long int elemVofLevelSetVersion=0;
 #endif
 
 public:

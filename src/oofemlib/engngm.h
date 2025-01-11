@@ -395,11 +395,11 @@ public:
     /**
      * Returns domain context output mode.
      */
-    ContextOutputMode giveContextOutputMode() { return contextOutputMode; }
+    ContextOutputMode giveContextOutputMode() const { return contextOutputMode; }
     /**
      * Returns domain context output step.
      */
-    int giveContextOutputStep() { return contextOutputStep; }
+    int giveContextOutputStep() const { return contextOutputStep; }
     /**
      * Sets context output mode of receiver.
      * @param contextMode domain context mode.
@@ -427,14 +427,14 @@ public:
      */
     void setParallelMode(bool newParallelFlag);
     /// Returns domain mode.
-    problemMode giveProblemMode() { return pMode; }
+    problemMode giveProblemMode() const { return pMode; }
     /**
      * Sets scale in multiscale simulation.
      * @param pscale Problem scale.
      */
     void setProblemScale(problemScale pscale) { pScale = pscale; }
     /// Returns scale in multiscale simulation
-    problemScale giveProblemScale() { return pScale; }
+    problemScale giveProblemScale() const { return pScale; }
     /// Sets the renumber flag to true.
     virtual void setRenumberFlag() { this->renumberFlag = true; }
     /// Sets the renumber flag to false.
@@ -1022,7 +1022,7 @@ public:
     }
     // Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
     void py_addIntegral(Integral *obj) {
-        int size = integralList.size();
+        std::size_t size = integralList.size();
         integralList.resize(size+1);
         integralList[size].reset(obj);
     }

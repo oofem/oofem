@@ -107,8 +107,8 @@ protected:
     /// Numerical method used to solve the problem
     std :: unique_ptr< SparseLinearSystemNM >nMethod;
 
-    LinSystSolverType solverType;
-    SparseMtrxType sparseMtrxType;
+    LinSystSolverType solverType=LinSystSolverType::ST_Direct;
+    SparseMtrxType sparseMtrxType=SparseMtrxType::SMT_Skyline;
 
     std :: unique_ptr< SparseMtrx > lhs;
     std :: unique_ptr< PrimaryField > VelocityPressureField;

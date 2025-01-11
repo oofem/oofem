@@ -127,7 +127,7 @@ public:
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
     /// Copy constructor.
-    FloatMatrix(FloatMatrix && mat) : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
+    FloatMatrix(FloatMatrix && mat) noexcept : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Initializer list constructor.
@@ -144,7 +144,7 @@ public:
         values = mat.values;
         return * this;
     }
-    FloatMatrix &operator=(FloatMatrix && mat) {
+    FloatMatrix &operator=(FloatMatrix && mat) noexcept {
         nRows = std :: move(mat.nRows);
         nColumns = std :: move(mat.nColumns);
         values = std :: move(mat.values);

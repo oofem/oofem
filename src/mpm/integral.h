@@ -50,7 +50,7 @@ namespace oofem {
     public:
 
         Set* set;
-        int setIndex;
+        int setIndex=0;
         const Term *term;
         Domain *domain;
         /// @brief Constructor, creates an integral of given term over entities in given set 

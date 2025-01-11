@@ -628,9 +628,9 @@ class UPSimpleMaterial : public Material {
             status->letTempStressVectorBe(answer);
 
         }else if (type == FluidMassBalancePressureContribution) {
-            FloatMatrix k;
-            this->giveCharacteristicMatrix(k, Permeability, gp, tStep);
-            answer.beProductOf(k, flux);
+            FloatMatrix _k;
+            this->giveCharacteristicMatrix(_k, Permeability, gp, tStep);
+            answer.beProductOf(_k, flux);
         }
     }
 

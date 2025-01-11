@@ -79,7 +79,7 @@ public:
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
-    IntArray(IntArray &&src) : values(std::move(src.values)) { }
+    IntArray(IntArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline IntArray(std :: initializer_list< int >list) : values(list) { }
     /// Destructor.
@@ -88,7 +88,7 @@ public:
     /// Assignment operator
     IntArray &operator = (const IntArray &src) { values = src.values; return *this; }
     /// Move operator
-    IntArray &operator = (IntArray &&src) { values = std::move(src.values); return *this; }
+    IntArray &operator = (IntArray &&src) noexcept { values = std::move(src.values); return *this; }
     /// Assignment operator.
     inline IntArray &operator = (std :: initializer_list< int >list) { values = list; return *this; }
 

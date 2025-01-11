@@ -34,6 +34,7 @@
 
 #include "fei2dtrconst.h"
 #include "mathfem.h"
+#include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 

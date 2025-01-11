@@ -931,7 +931,7 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 void
-SUPG :: applyIC(TimeStep *stepWhenIcApply)
+SUPG :: applyIC(TimeStep *_stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
@@ -946,8 +946,8 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     accelerationVector.zero();
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField->advanceSolution(stepWhenIcApply);
-        vp_vector = VelocityPressureField->giveSolutionVector(stepWhenIcApply);
+        VelocityPressureField->advanceSolution(_stepWhenIcApply);
+        vp_vector = VelocityPressureField->giveSolutionVector(_stepWhenIcApply);
         vp_vector->resize(neq);
         vp_vector->zero();
 
@@ -965,9 +965,9 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
                 DofIDItem type = dof->giveDofID();
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, _stepWhenIcApply);
                     } else {
-                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, _stepWhenIcApply);
                     }
                 }
             }
@@ -981,13 +981,13 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
 
     //this->initElementsForNewStep (stepWhenIcApply);
     if ( materialInterface ) {
-        this->updateElementsForNewInterfacePosition(stepWhenIcApply);
+        this->updateElementsForNewInterfacePosition(_stepWhenIcApply);
     }
 
     for ( auto &elem : domain->giveElements() ) {
         SUPGElement *element = static_cast< SUPGElement * >( elem.get() );
-        element->updateInternalState(stepWhenIcApply);
-        element->updateYourself(stepWhenIcApply);
+        element->updateInternalState(_stepWhenIcApply);
+        element->updateYourself(_stepWhenIcApply);
     }
 }
 
@@ -1134,7 +1134,7 @@ SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 }
 
 void
-SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep)
+SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &_accelerationVector, TimeStep *tStep)
 {
     double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
@@ -1150,7 +1150,7 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt)*a
-                    solutionVector.at(jj) += dt * accelerationVector.at(jj);
+                    solutionVector.at(jj) += dt * _accelerationVector.at(jj);
                 }
             }
         }
@@ -1170,7 +1170,7 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (dt*alpha)*da
-                        solutionVector.at(jj) += dt * accelerationVector.at(jj);
+                        solutionVector.at(jj) += dt * _accelerationVector.at(jj);
                     }
                 }
             }
@@ -1180,12 +1180,12 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 
 
 void
-SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep)
+SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &_accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep)
 {
     double dt = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
 
-    accelerationVector.add(incrementalSolutionVector);
+    _accelerationVector.add(incrementalSolutionVector);
 
     for ( auto &node : domain->giveDofManagers() ) {
 

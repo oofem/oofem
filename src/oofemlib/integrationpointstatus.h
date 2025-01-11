@@ -51,6 +51,7 @@ class DataStream;
   */
  enum IntegrationPointStatusIDType {
     IPSID_Default = 0,
+    PIDControllerStatusID = 1,
  };
 
 /**

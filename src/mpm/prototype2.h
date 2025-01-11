@@ -65,8 +65,8 @@ namespace oofem {
         void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo );
         }
-        std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, Element_Geometry_Type egt) const override {
-            return this->getCellInterpolation(egt)->giveIntegrationRule(order, egt);
+        std::unique_ptr<IntegrationRule> giveIntegrationRule(int _order, Element_Geometry_Type egt) const override {
+            return this->getCellInterpolation(egt)->giveIntegrationRule(_order, egt);
         }
         virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->boundaryEdgeEvalN (answer, boundary, lcoords, cellgeo);
@@ -83,8 +83,8 @@ namespace oofem {
         integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary, Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveBoundaryEdgeIntegrationDomain(boundary, egt);
         }
-        std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const override {
-            return this->getCellInterpolation(egt)->giveBoundaryEdgeIntegrationRule(order, boundary, egt);
+        std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int _order, int boundary, Element_Geometry_Type egt) const override {
+            return this->getCellInterpolation(egt)->giveBoundaryEdgeIntegrationRule(_order, boundary, egt);
         }
         IntArray boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type gt) const override {
             return this->getCellInterpolation(gt)->boundaryEdgeGiveNodes(boundary, gt);
@@ -109,8 +109,8 @@ namespace oofem {
         integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary, const Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveBoundarySurfaceIntegrationDomain(boundary, egt);
         }
-        std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary, const Element_Geometry_Type egt) const override {
-            return this->getCellInterpolation(egt)->giveBoundarySurfaceIntegrationRule(order, boundary, egt) ;
+        std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int _order, int boundary, const Element_Geometry_Type egt) const override {
+            return this->getCellInterpolation(egt)->giveBoundarySurfaceIntegrationRule(_order, boundary, egt) ;
         }
         IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type gt) const override {
             return this->getCellInterpolation(gt)->boundarySurfaceGiveNodes(boundary, gt);
@@ -134,8 +134,8 @@ namespace oofem {
         integrationDomain giveBoundaryIntegrationDomain(int boundary, Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveBoundaryIntegrationDomain(boundary,egt);
         }
-        std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const override {
-            return this->getCellInterpolation(egt)->giveBoundaryIntegrationRule(order, boundary, egt);
+        std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int _order, int boundary, Element_Geometry_Type egt) const override {
+            return this->getCellInterpolation(egt)->giveBoundaryIntegrationRule(_order, boundary, egt);
         }
         int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) const override{ return 0; }
         int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) const override { return 0; }
@@ -227,8 +227,8 @@ namespace oofem {
             // create nd insert it toelement if not exist yet.
             std::vector< std :: unique_ptr< IntegrationRule > > &irvec = cell.giveIntegrationRulesArray();
             bool found = false;
-            int size = irvec.size();
-            for (int i = 0; i< size; i++) {
+            std::size_t size = irvec.size();
+            for (std::size_t i = 0; i< size; i++) {
                 if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
                     found = true;
                     break;
@@ -247,8 +247,8 @@ namespace oofem {
             GaussIntegrationRule ir(0, e);
             int nip = ir.getRequiredNumberOfIntegrationPoints(e->giveIntegrationDomain(), myorder);
             std::vector< std :: unique_ptr< IntegrationRule > > &irvec = e->giveIntegrationRulesArray();
-            int size = irvec.size();
-            for (int i = 0; i< size; i++) {
+            std::size_t size = irvec.size();
+            for (std::size_t i = 0; i< size; i++) {
                 if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
                     return irvec[i].get();
                 }

@@ -75,11 +75,11 @@ class OOFEM_EXPORT SparseNonLinearSystemNM : public NumericalMethod
 {
 protected:
     /// Load level
-    double deltaL;
+    double deltaL=0.0;
 
     /// Amplitude of a random perturbation applied on the solution before the iteration process
-    double randPertAmplitude;
-    int randSeed;
+    double randPertAmplitude=0.0;
+    int randSeed=0;
     bool pert_init_needed;
     IntArray igp_PertDmanDofSrcArray;
     FloatArray igp_PertWeightArray;
