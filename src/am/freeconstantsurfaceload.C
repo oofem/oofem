@@ -113,7 +113,7 @@ bool FreeConstantSurfaceLoad :: isImposed(TimeStep *tStep)
     IntArray surfNodes = el->giveBoundarySurfaceNodes(boundaries.at(2));
     int nSurfNodes = surfNodes.giveSize();
 
-    int nElements = domain->giveNumberOfElements();
+    //int nElements = domain->giveNumberOfElements();
     
     // map of node occurance
     std::map<int, int> connmap;

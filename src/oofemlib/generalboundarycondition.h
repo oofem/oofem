@@ -108,7 +108,7 @@ public:
     /**
      * Gives the set number which boundary condition is applied to.
      */
-    int giveSetNumber() { return set; }
+    int giveSetNumber() const { return set; }
 
     /// Gives the number of internal dof managers.
     virtual int giveNumberOfInternalDofManagers() { return 0; }
@@ -124,7 +124,7 @@ public:
     /**
      * Gets the activity time function number.
      */
-    int getIsImposedTimeFunctionNumber(){ return this->isImposedTimeFunction; }
+    int getIsImposedTimeFunctionNumber() const { return this->isImposedTimeFunction; }
 
 
     /**
@@ -181,7 +181,6 @@ public:
      */
     virtual double giveProperty(int aProperty, TimeStep *tStep) const {
         OOFEM_ERROR("Not supported for this boundary condition.");
-        return 0;
     }
 
     // Overloaded methods:
