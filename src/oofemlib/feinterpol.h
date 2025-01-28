@@ -51,6 +51,7 @@ class FloatArray;
 class FloatMatrix;
 class IntArray;
 class IntegrationRule;
+class DummyFEInterpolation;
 
 template <std::size_t N> class FloatArrayF;
 template <std::size_t N, std::size_t M> class FloatMatrixF;
@@ -65,11 +66,12 @@ template <std::size_t N, std::size_t M> class FloatMatrixF;
 class OOFEM_EXPORT FEICellGeometry
 {
 public:
-    FEICellGeometry() { }
+    FEICellGeometry() {}
     virtual ~FEICellGeometry() { }
     virtual int giveNumberOfVertices() const = 0;
     virtual const FloatArray &giveVertexCoordinates(int i) const = 0;
     virtual const Element_Geometry_Type giveGeometryType() const = 0;
+    virtual const FEInterpolation* getGeometryInterpolation() const {return nullptr;};
 };
 
 
@@ -98,6 +100,7 @@ public:
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 
+
 /**
  * Wrapper around element definition to provide FEICellGeometry interface.
  */
@@ -117,6 +120,7 @@ public:
     const Element_Geometry_Type giveGeometryType() const override {
         return elem->giveGeometryType();
     }
+    const FEInterpolation* getGeometryInterpolation() const override {return elem->getGeometryInterpolation();}
 };
 
 
@@ -513,6 +517,9 @@ public:
     { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); }
     //@}
 
+    /** MPM support for cell initialization. Standard FE interpolation classes do not require element initialization, as elements are tailored to specific interpolation*/
+    virtual void initializeCell(Element* e) const {}
+    
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 
@@ -631,6 +638,7 @@ public:
     int giveNumberOfNodes(const Element_Geometry_Type) const override {
         return 0;
     }
+    const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override {return EGT_unknown;}
 };
 
 

@@ -46,6 +46,7 @@ FEI1dLin InterpolationCatalogueType::fei1dlin_y = FEI1dLin(2);
 FEI1dLin InterpolationCatalogueType::fei1dlin_z = FEI1dLin(3);
 #ifdef __MPM_MODULE
 LinearInterpolation InterpolationCatalogueType::feilin = LinearInterpolation();
+QuadraticInterpolation InterpolationCatalogueType::feiquad = QuadraticInterpolation();
 #endif
 
 const FEInterpolation* InterpolationCatalogueType :: getInterpolationByName (std::string name) {
@@ -58,6 +59,8 @@ const FEInterpolation* InterpolationCatalogueType :: getInterpolationByName (std
 #ifdef __MPM_MODULE
     } else if (name == "feilin") {
         return &feilin;
+    } else if (name == "feiquad") {
+        return &feiquad;
 #endif
     } else {
         OOFEM_ERROR("Interpolation %s not found in catalogue", name.c_str());

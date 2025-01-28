@@ -210,7 +210,8 @@ VTKBaseExportModule::giveElementCell(IntArray &answer, Element *elem)
          ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
          ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
          ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2 ) ||
-         ( elemGT == EGT_wedge_1 ) ) {} else if ( elemGT == EGT_hexa_27 ) {
+         ( elemGT == EGT_wedge_1 ) ) 
+    {} else if ( elemGT == EGT_hexa_27 ) {
         nodeMapping = {
             5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
         };
@@ -234,7 +235,7 @@ VTKBaseExportModule::giveElementCell(IntArray &answer, Element *elem)
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
 
-    int nelemNodes = elem->giveNumberOfNodes();
+    int nelemNodes = giveNumberOfNodesPerCell(this->giveCellType(elem)); // elem->giveNumberOfNodes();
     answer.resize(nelemNodes);
     if ( nodeMapping.giveSize() > 0 ) {
         for ( int i = 1; i <= nelemNodes; i++ ) {

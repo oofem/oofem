@@ -280,7 +280,7 @@ class MPElement : public Element {
    * @param isurf
    */ 
   virtual void getSurfaceElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
-    IntArray dl, sn = this->getGeometryInterpolation().boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
+    IntArray dl, sn = this->getGeometryInterpolation()->boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
       this->getDofManLocalCodeNumbers(dl, q, i);
@@ -288,7 +288,7 @@ class MPElement : public Element {
     }
   }
   virtual void getEdgeElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
-    IntArray dl, sn = this->getGeometryInterpolation().boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
+    IntArray dl, sn = this->getGeometryInterpolation()->boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
       this->getDofManLocalCodeNumbers(dl, q, i);
@@ -364,14 +364,14 @@ class MPElement : public Element {
     }
 
   virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf) 
-  {return igp->giveWeight()*this->getGeometryInterpolation().boundarySurfaceGiveTransformationJacobian(iSurf, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->boundarySurfaceGiveTransformationJacobian(iSurf, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   virtual double computeEdgeVolumeAround(GaussPoint* igp, int iEdge) 
-  {return igp->giveWeight()*this->getGeometryInterpolation().boundaryEdgeGiveTransformationJacobian(iEdge, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->boundaryEdgeGiveTransformationJacobian(iEdge, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   virtual double computeVolumeAround(GaussPoint* igp) override
-  {return igp->giveWeight()*this->getGeometryInterpolation().giveTransformationJacobian(igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->giveTransformationJacobian(igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   
-  virtual const FEInterpolation& getGeometryInterpolation () const = 0;
-  FEInterpolation *giveInterpolation() const override { return const_cast<FEInterpolation*>(&this->getGeometryInterpolation()); }
+   //const FEInterpolation& getGeometryInterpolation () const override = 0;
+   FEInterpolation *giveInterpolation() const override { return const_cast<FEInterpolation*>( this->getGeometryInterpolation()); }
 
     /**
      * Returns transformation matrix from local boundary (edge/surface) c.s  to element local coordinate system
@@ -390,10 +390,10 @@ class MPElement : public Element {
         return 0;
     }
     IntArray giveBoundarySurfaceNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
+        return this->getGeometryInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
     }
     IntArray giveBoundaryEdgeNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
+        return this->getGeometryInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
     }
     virtual void giveCharacteristicMatrixFromBC(FloatMatrix &answer, CharType type, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) {
         answer.clear();

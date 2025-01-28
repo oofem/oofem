@@ -139,7 +139,7 @@ class PoissonElement : public MPElement {
     
     const char *giveInputRecordName() const override {return "pe";}
     
-    const FEInterpolation& getGeometryInterpolation() const override {return  this->interpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return  &this->interpol;}
     Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
 
 };

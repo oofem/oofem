@@ -74,6 +74,8 @@ public:
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 8; } 
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3,4,5,6,7,8};internalDofMans={};}
+
 
     double giveCharacteristicLength(const FEICellGeometry &cellgeo) const override;
 

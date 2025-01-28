@@ -196,6 +196,18 @@ protected:
      */
     IntArray partitions;
 
+    /**
+     * List of global element edge IDs. Global edge representations are established by connectivityTable when needed.
+     * Each edge keeps list of shared elements, can have DofManagers, etc.
+     */
+    IntArray globalEdgeIDs;
+     /**
+     * List of global element surface IDs. Surfaces representations are established by connectivityTable when needed.
+     * Each surface keeps list of shared elements, can have DofManagers, etc.
+     */
+    IntArray globalSurfaceIDs;
+
+
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
@@ -638,6 +650,12 @@ public:
      * @return Appropriate interpolation, or NULL if none exists.
      */
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
+    /**
+     * Returns the geometry interpolation for the receiver.
+     * @return Appropriate interpolation, or NULL if none exists.
+     */
+    virtual const FEInterpolation *getGeometryInterpolation() const { return giveInterpolation(); }
+
     /// @return Reference to the associated material of element.
     virtual Material *giveMaterial();
     /// @return Material number.
@@ -685,6 +703,12 @@ public:
      * @param dmans Array with dof manager indices.
      */
     void setDofManagers(const IntArray &dmans);
+    /**
+     * Sets receiver specific dofManager.
+     * @param id dofmanager local id
+     * @param dm ofmanager id to set
+     */
+    void setDofManager(int id, int dm);
 
     /**
      * Sets receiver bodyLoadArray.
@@ -816,15 +840,35 @@ public:
      */
     virtual Element_Geometry_Type giveGeometryType() const = 0;
     /**
+     * @brief Returns the receiver edge geometry type
+     * @param edge id
+     */
+    virtual Element_Geometry_Type giveEdgeGeometryType(int id) const;
+    /**
+     * @brief Returns the receiver surface geometry type
+     * @param surface id
+     */
+    virtual Element_Geometry_Type giveSurfaceGeometryType(int id) const;
+    /**
      * Returns the element spatial dimension (1, 2, or 3).
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.
      * @return Number of spatial dimensions of element.
      */
     virtual int giveSpatialDimension();
     /**
+     * @brief Returns number of boundaries (entities of element_dimension-1: points, edges, surfaces)
      * @return Number of boundaries of element.
      */
     virtual int giveNumberOfBoundarySides();
+    /**
+     * @return Number of element edges
+     */
+    virtual int giveNumberOfEdges() const;
+    /**
+     * @return Number of elementsurfaces.
+     */
+    virtual int giveNumberOfSurfaces() const;
+
     /**
      * Returns id of default integration rule. Various element types can use
      * different integration rules for implementation of selective or reduced
@@ -1175,6 +1219,26 @@ public:
 
     virtual const IntArray giveLocation() {IntArray answer(0); return answer;}
     virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}
+
+
+    // global edge/surface management
+    /**
+     * Set global edge ID corresponding to given local edge id.
+     */
+    void setSharedEdgeID(int iedge, int globalID) {
+        if (this->globalEdgeIDs.isEmpty()) {
+            this->globalEdgeIDs.resize(this->giveNumberOfEdges());
+        }
+        this->globalEdgeIDs.at(iedge)=globalID;
+    }
+    void setSharedSurfaceID(int isurf, int globalID) {
+        if (this->globalSurfaceIDs.isEmpty()) {
+            this->globalSurfaceIDs.resize(this->giveNumberOfSurfaces());
+        }
+        this->globalSurfaceIDs.at(isurf)=globalID;
+    }
+    const IntArray* giveSharedEdgeIDs() const {return &(this->globalEdgeIDs);} 
+    const IntArray* giveSharedSurfaceIDs() const {return &(this->globalSurfaceIDs);} 
 
  protected:
     /**
