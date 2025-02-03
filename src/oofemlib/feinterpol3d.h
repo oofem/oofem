@@ -54,7 +54,7 @@ public:
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -195,7 +195,7 @@ public:
     {
         OOFEM_ERROR("Not overloaded"); 
     };
-    IntArray boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type) const override;
+    IntArray boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type, bool includeHierarchical=false) const override;
 };
 } // end namespace oofem
 #endif // feinterpol3d_h

@@ -74,7 +74,7 @@ public:
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
     IntArray computeLocalEdgeMapping(int iedge) const override;
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

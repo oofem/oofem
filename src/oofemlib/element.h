@@ -566,14 +566,16 @@ public:
      * Returns list of receiver boundary nodes for given edge
      * @param bNodes list of boundary edge nodes 
      * @param boundary edge id
+     * @param includeHierarchical Include hierarchical nodes
      */
-    virtual IntArray giveBoundaryEdgeNodes(int boundary) const;
+    virtual IntArray giveBoundaryEdgeNodes(int boundary, bool includeHierarchical=false) const;
     /**
      * Returns list of receiver boundary nodes for given surface
      * @param bNodes list of boundary surface nodes 
      * @param boundary surface id
+     * @param includeHierarchical Include hierarchical nodes
      */
-    virtual IntArray giveBoundarySurfaceNodes(int boundary) const;
+    virtual IntArray giveBoundarySurfaceNodes(int boundary, bool includeHierarchical=false) const;
     /**
      * Returns list of receiver boundary nodes for given boundary entity.
      * Boundary entities are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.

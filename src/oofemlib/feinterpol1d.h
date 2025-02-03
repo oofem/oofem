@@ -69,7 +69,7 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override
     { throw std::runtime_error("Functions not supported for this interpolator."); }
     //@}
 

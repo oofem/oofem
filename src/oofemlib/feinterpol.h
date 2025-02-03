@@ -321,8 +321,9 @@ public:
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
+     * @param includeHierarchical If true, include hierarchical nodes, introduced by interpolations on universal cells (mpm) 
      */
-    virtual IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const = 0;
+    virtual IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const = 0;
     //@}
 
     /**@name Surface interpolation services 
@@ -386,8 +387,9 @@ public:
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
+     * @param includeHierarchical If true, include hierarchical nodes, introduced by interpolations on universal cells (mpm)
      */
-    virtual IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const = 0;
+    virtual IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const = 0;
     //@}
 
     /** @name General boundary interpolation functions.
@@ -571,7 +573,7 @@ public:
 
     integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary, const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
 
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override {
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override {
         return IntArray();
     }
 
@@ -599,7 +601,7 @@ public:
 
     integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary, const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
 
-    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override {
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override {
         return IntArray();
     }
 

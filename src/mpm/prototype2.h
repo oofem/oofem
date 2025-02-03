@@ -82,8 +82,8 @@ namespace oofem {
         std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary, Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveBoundaryEdgeIntegrationRule(order, boundary, egt);
         }
-        IntArray boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type gt) const override {
-            return this->getCellInterpolation(gt)->boundaryEdgeGiveNodes(boundary, gt);
+        IntArray boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type gt, bool includeHierarchical=false) const override {
+            return this->getCellInterpolation(gt)->boundaryEdgeGiveNodes(boundary, gt, includeHierarchical);
         }
         
         void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
@@ -108,8 +108,8 @@ namespace oofem {
         std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary, const Element_Geometry_Type egt) const override {
             return this->getCellInterpolation(egt)->giveBoundarySurfaceIntegrationRule(order, boundary, egt) ;
         }
-        IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type gt) const override {
-            return this->getCellInterpolation(gt)->boundarySurfaceGiveNodes(boundary, gt);
+        IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type gt, bool includeHierarchical=false) const override {
+            return this->getCellInterpolation(gt)->boundarySurfaceGiveNodes(boundary, gt, includeHierarchical);
         }
         
         IntArray boundaryGiveNodes(int boundary, const Element_Geometry_Type gt) const override {
@@ -318,107 +318,6 @@ namespace oofem {
     };
 
 
-    /**
-     * MPMSymbolic terms extend standard Terms to allow for cell initialization.
-     * The symbolic terms are assumed to be evaluated on generic cells (and not on problem-specific elements).
-     * Therefore the need to ensure that proper DOFs and integration rules are set-up.
-     */
-    class MPMSymbolicTerm : public Term {
-        public:
-        MPMSymbolicTerm() : Term() {}
-        MPMSymbolicTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
-        void initializeCell(Element& cell) const override {
-            // initialize cell for interpolation use
-            // @TODO: prevent multiple initialization for same interpolation
-            this->field->interpolation->initializeCell(&cell);
-            this->testField->interpolation->initializeCell(&cell);
-
-            // allocate necessary DOFs
-            IntArray enodes, einteranlnodes, dofIDs;
-            // process term field
-            dofIDs = this->field->getDofManDofIDs();
-            this->field->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
-            for (auto i: enodes) {
-                DofManager* dman =  cell.giveDofManager(i);
-                for (auto d: dofIDs) {
-                    if (!dman->hasDofID((DofIDItem) d)) {
-                        // create a DOF
-                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
-                        dman->appendDof(dof);
-                    }
-                }
-            }
-            for (auto i: einteranlnodes) {
-                DofManager* dman =  cell.giveInternalDofManager(i);
-                for (auto d: dofIDs) {
-                    if (!dman->hasDofID((DofIDItem) d)) {
-                        // create a DOF
-                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
-                        dman->appendDof(dof);
-                    }
-                }
-            }
-            // process testField
-            dofIDs = this->testField->getDofManDofIDs();
-            this->testField->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
-            for (auto i: enodes) {
-                DofManager* dman =  cell.giveDofManager(i);
-                for (auto d: dofIDs) {
-                    if (!dman->hasDofID((DofIDItem)d)) {
-                        // create a DOF
-                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
-                        dman->appendDof(dof);
-                    }
-                }
-            }
-            for (auto i: einteranlnodes) {
-                DofManager* dman =  cell.giveInternalDofManager(i);
-                for (auto d: dofIDs) {
-                    if (!dman->hasDofID((DofIDItem)d)) {
-                        // create a DOF
-                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
-                        dman->appendDof(dof);
-                    }
-                }
-            }
-            // set up the integration rule on cell
-            // get required number of IPs
-            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
-            GaussIntegrationRule ir(0, &cell);
-            int nip = ir.getRequiredNumberOfIntegrationPoints(cell.giveIntegrationDomain(), myorder);
-            // create nd insert it toelement if not exist yet.
-            std::vector< std :: unique_ptr< IntegrationRule > > &irvec = cell.giveIntegrationRulesArray();
-            bool found = false;
-            int size = irvec.size();
-            for (int i = 0; i< size; i++) {
-                if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                // need to insert right one
-                irvec.resize( size +1);
-                irvec [ size] = std::make_unique<GaussIntegrationRule>(size, &cell);
-                //irvec [ size ]->SetUpPointsOnSquare(nip, this->mode);
-                irvec[size]->setUpIntegrationPoints(cell.giveIntegrationDomain(), nip, this->mode);
-            }
-        }
-        IntegrationRule* giveElementIntegrationRule(Element* e) const override {
-            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
-            GaussIntegrationRule ir(0, e);
-            int nip = ir.getRequiredNumberOfIntegrationPoints(e->giveIntegrationDomain(), myorder);
-            std::vector< std :: unique_ptr< IntegrationRule > > &irvec = e->giveIntegrationRulesArray();
-            int size = irvec.size();
-            for (int i = 0; i< size; i++) {
-                if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
-                    return irvec[i].get();
-                }
-            }
-            return NULL;
-        }
-    };
-
     class BTSigmaTerm2 : public MPMSymbolicTerm {
         protected:
         public:
@@ -518,6 +417,17 @@ namespace oofem {
                     answer(2, i*ndofs+0) = dndx(i, 1);
                     answer(2, i*ndofs+1) = dndx(i, 0);
                 }
+            } else if (mmode == _PlaneStrain) {
+                answer.resize(4, nnodes*ndofs);
+                for (int i = 0; i< nnodes; i++) {
+                    answer(0, i*ndofs+0) = dndx(i, 0);
+                    answer(1, i*ndofs+1) = dndx(i, 1);
+
+                    answer(3, i*ndofs+0) = dndx(i, 1);
+                    answer(3, i*ndofs+1) = dndx(i, 0);
+                }
+            } else {
+                OOFEM_ERROR("Unsupported material mode %d", mmode);
             }
         }
         
@@ -589,14 +499,14 @@ namespace oofem {
         }
 
         void postInitialize() override {
-            EngngModel::postInitialize();
+            
             this->giveDomain(1)->giveConnectivityTable()->buildSharedBoundaryEntities(this->giveDomain(1));
-
-            // initialize integrals
             for (const auto& i: integralList) {
                 i->initialize();
             } 
-            this->giveDomain(1)->postInitialize();
+            EngngModel::postInitialize();
+            // initialize integrals
+            //this->giveDomain(1)->postInitialize();
         }
 
         void solveYourselfAt(TimeStep *tStep) override {
@@ -654,7 +564,7 @@ namespace oofem {
 
             // solve the system
             nMethod->solve(*effectiveMatrix, rhs, solution);
-            solution.printYourself();
+            //solution.printYourself();
             
         }
 
@@ -746,7 +656,24 @@ namespace oofem {
             int getNumberOfEdgeDOFs() const override {return 0;}
             void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
             void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
-
+            IntArray giveBoundaryEdgeNodes(int boundary, bool includeHierarchical=false) const override {
+                IntArray answer = MPElement::giveBoundaryEdgeNodes(boundary, false);
+                int nnodes = this->dofManArray.giveSize();
+                if (includeHierarchical && nnodes > 4) {  
+                    if (nnodes <= 8) { // qudratic
+                        int nbaseenodes = answer.giveSize();
+                        int offset = 3+boundary;
+                        int nhiernodes = 1;
+                        answer.resizeWithValues(nbaseenodes+nhiernodes);
+                        for (int i=1; i<=nhiernodes; i++) {
+                            answer.at(nbaseenodes+i) = i+offset;
+                        } 
+                    } else {
+                        OOFEM_ERROR("Unsupported hierarchical node scheme (nnodes=%d)", nnodes);
+                    }
+                }
+                return answer;
+            }
     };
     #define _IFT_Q1Element_Name "q1"
 

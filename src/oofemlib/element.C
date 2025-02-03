@@ -853,15 +853,15 @@ Element :: initForNewStep()
 
 
 IntArray
-Element::giveBoundaryEdgeNodes(int boundary) const
+Element::giveBoundaryEdgeNodes(int boundary, bool includeHierarchical) const
 {
-    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
 }
 
 IntArray
-Element::giveBoundarySurfaceNodes(int boundary) const
+Element::giveBoundarySurfaceNodes(int boundary, bool includeHierarchical) const
 {
-    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
 }
 
 IntArray

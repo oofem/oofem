@@ -130,7 +130,7 @@ double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, con
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) / 2.0;
 }
 
-IntArray FEI2dLineLin :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
+IntArray FEI2dLineLin :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt, bool includeHierarchical) const
 {
     return {1, 2};
 }
