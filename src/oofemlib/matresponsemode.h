@@ -39,33 +39,36 @@
 
 namespace oofem {
 #define MatResponseMode_DEF \
-    ENUM_ITEM(TangentStiffness) \
-    ENUM_ITEM(SecantStiffness) \
-    ENUM_ITEM(ElasticStiffness) \
-    ENUM_ITEM(Stress) \
-    ENUM_ITEM(Conductivity)  /* element level conductivity matrix */ \
-    ENUM_ITEM(Conductivity_ww) /* material level conductivity submatrix */ \
-    ENUM_ITEM(Conductivity_hh) /* material level conductivity submatrix */ \
-    ENUM_ITEM(Conductivity_hw) /* material level conductivity submatrix */ \
-    ENUM_ITEM(Conductivity_wh) /* material level conductivity submatrix */ \
-    ENUM_ITEM(Capacity)                                                   \
-    ENUM_ITEM(Capacity_ww) /* material level capacity submatrix */ \
-    ENUM_ITEM(Capacity_hh) /* material level capacity submatrix */ \
-    ENUM_ITEM(Capacity_hw) /* material level capacity submatrix */ \
-    ENUM_ITEM(Capacity_wh) /* material level capacity submatrix */ \
-    ENUM_ITEM(IntSource)                                                  \
-    ENUM_ITEM(IntSource_ww) /* material level internal source submatrix - water source */ \
-    ENUM_ITEM(IntSource_hh) /*  - heat source */ \
-    ENUM_ITEM(IntSource_hw) /*  - heat source dependency on water content change */ \
-    ENUM_ITEM(IntSource_wh) /*  - water source dependency on temperature change */ \
-    ENUM_ITEM(Permeability) \
-    ENUM_ITEM(FluidMassBalancePressureContribution) \
-    ENUM_ITEM(BiotConstant) \
-    ENUM_ITEM(CompressibilityCoefficient) \
-    ENUM_ITEM(FluidViscosity) \
-    ENUM_ITEM(Flux) \
-    ENUM_ITEM(DSigmaDT)
-
+    ENUM_ITEM_WITH_VALUE(TangentStiffness, 0) \
+    ENUM_ITEM_WITH_VALUE(SecantStiffness, 1) \
+    ENUM_ITEM_WITH_VALUE(ElasticStiffness, 2) \
+    ENUM_ITEM_WITH_VALUE(Stress, 3) \
+    ENUM_ITEM_WITH_VALUE(Conductivity, 4)  /* element level conductivity matrix */ \
+    ENUM_ITEM_WITH_VALUE(Conductivity_ww, 5) /* material level conductivity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Conductivity_hh, 6) /* material level conductivity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Conductivity_hw, 7) /* material level conductivity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Conductivity_wh, 8) /* material level conductivity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Capacity, 9)                                                   \
+    ENUM_ITEM_WITH_VALUE(Capacity_ww, 10) /* material level capacity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Capacity_hh, 11) /* material level capacity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Capacity_hw, 12) /* material level capacity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(Capacity_wh, 13) /* material level capacity submatrix */ \
+    ENUM_ITEM_WITH_VALUE(IntSource, 14)                                                  \
+    ENUM_ITEM_WITH_VALUE(IntSource_ww, 15) /* material level internal source submatrix - water source */ \
+    ENUM_ITEM_WITH_VALUE(IntSource_hh, 16) /*  - heat source */ \
+    ENUM_ITEM_WITH_VALUE(IntSource_hw, 17) /*  - heat source dependency on water content change */ \
+    ENUM_ITEM_WITH_VALUE(IntSource_wh, 18) /*  - water source dependency on temperature change */ \
+    ENUM_ITEM_WITH_VALUE(Permeability, 19) \
+    ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 20) \
+    ENUM_ITEM_WITH_VALUE(BiotConstant, 21) \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 22) \
+    ENUM_ITEM_WITH_VALUE(FluidViscosity, 23) \
+    ENUM_ITEM_WITH_VALUE(Flux, 24) \
+    ENUM_ITEM_WITH_VALUE(DSigmaDT, 25) \
+    ENUM_ITEM_WITH_VALUE(ElasticBulkModulus, 26) \
+    ENUM_ITEM_WITH_VALUE(ElasticBulkModulusInverse, 27) \
+    ENUM_ITEM_WITH_VALUE(MRM_ScalarOne, 28) \
+    ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29)
 /**
  * Describes the character of characteristic material matrix.
  */
