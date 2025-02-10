@@ -11,6 +11,8 @@
 #include "dofdistributedprimaryfield.h"
 #include "unknownnumberingscheme.h"
 #include "integral.h"
+#include "fei2dquadconst.h"
+#include "fei2dlineconst.h"
 #include "fei2dquadlin.h"
 #include "fei2dlinelin.h"
 #include "fei2dquadquad.h"
@@ -22,6 +24,7 @@
 #include "gaussintegrationrule.h"
 #include "dofmanager.h"
 #include "connectivitytable.h"
+#include "matresponsemode.h"
 
 ///@name Input fields for testproblem
 //@{
@@ -184,6 +187,53 @@ namespace oofem {
 
     };
 
+    class ConstantInterpolation : public CellTypeUnifiedInterpolation {
+    private:
+        FEI2dQuadConst  fei2dQuadConst;
+        FEI2dLineConst  fei2dLineConst;   
+    public:
+        ConstantInterpolation () : CellTypeUnifiedInterpolation(0), fei2dQuadConst(1,2), fei2dLineConst(1,2) {}
+
+        virtual integrationDomain giveIntegrationDomain(const Element_Geometry_Type egt) const override {
+            if (egt == EGT_quad_1) return _Square;
+            else if (egt == EGT_line_1) return _Line;
+            else return _UnknownIntegrationDomain;
+        }
+        virtual const Element_Geometry_Type giveGeometryType() const override {
+            return EGT_unknown;
+        }
+        virtual const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const override {
+            return EGT_unknown;
+        }
+        
+        int giveNsd(const Element_Geometry_Type egt) const override {
+            if (egt == EGT_quad_1) return 2;
+            else if (egt == EGT_line_1) return 1;
+            else return 0;
+        }
+        
+        const FEInterpolation* getCellInterpolation (Element_Geometry_Type egt) const override {
+            if (egt==EGT_quad_1) return &fei2dQuadConst;
+            else if (egt == EGT_line_1) return &fei2dLineConst;
+            else return NULL;
+        }
+        void initializeCell(Element* e) const override {
+            // initialize cell to be compatible with interpolation
+            // typically 1) new nodes are allocated on shared edges and surfaces with neighboring elements 
+            // and (2)new internal dofmans are allocated
+            Domain *d = e->giveDomain();
+            Element_Geometry_Type egt=e->giveGeometryType();
+            if ((egt == EGT_quad_2) || (egt == EGT_quad_1)) { 
+                if (e->giveNumberOfInternalDofManagers() < 1) {
+                    std::unique_ptr<DofManager> dm = std::make_unique<DofManager>(1, d);
+                    e->setInternalDofManager(1, std::move(dm));
+                }
+            } else {
+                OOFEM_ERROR ("Unsupported element geometry type (%d)", egt);
+            }
+        }
+    };
+
     class LinearInterpolation : public CellTypeUnifiedInterpolation {
     private:
         FEI2dQuadLin  fei2dQuadLin;
@@ -320,6 +370,9 @@ namespace oofem {
 
     class BTSigmaTerm2 : public MPMSymbolicTerm {
         protected:
+            MatResponseMode lhsmatmode = MatResponseMode::TangentStiffness;
+            MatResponseMode rhsmatmode = MatResponseMode::Stress;
+
         public:
         BTSigmaTerm2() : MPMSymbolicTerm() {}
         BTSigmaTerm2 (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
@@ -333,7 +386,7 @@ namespace oofem {
          */
         void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {
             FloatMatrix D, B, DB;
-            e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, TangentStiffness, gp, tstep);
+            e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, this->lhsmatmode, gp, tstep);
             this->grad(B, this->field, this->field->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
             DB.beProductOf(D, B);
             //answer.plusProductSymmUpper(B, DB, 1.0);
@@ -351,10 +404,22 @@ namespace oofem {
             cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
             this->grad(B, this->field, this->field->interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
             eps.beProductOf(B, u);
-            cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, Stress, gp, tstep);
+            cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, this->rhsmatmode, gp, tstep);
             answer.beTProductOf(B, sig);
         }
         void getDimensions(Element& cell) const override {}
+        void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+            MPMSymbolicTerm::initializeFrom(ir, problem);
+            int value;
+            if (ir.hasField("lhsmatmode")) {
+                IR_GIVE_FIELD(ir, value, "lhsmatmode");
+                lhsmatmode = (MatResponseMode) value;
+            }
+            if (ir.hasField("rhsmatmode")) {
+                IR_GIVE_FIELD(ir, value, "rhsmatmode");
+                rhsmatmode = (MatResponseMode) value;
+            }
+        }
 
         protected:
         /**
@@ -561,7 +626,7 @@ namespace oofem {
                 integral->assemble_rhs (rhs, EModelDefaultEquationNumbering(), tStep); 
             }
             //rhs.printYourself();
-
+            solution.resize(rhs.giveSize());
             // solve the system
             nMethod->solve(*effectiveMatrix, rhs, solution);
             //solution.printYourself();
@@ -638,8 +703,9 @@ namespace oofem {
     class Q1Element : public MPElement  {
         protected:
             const static FEInterpolation & gInterpol;
+            std::vector<std::shared_ptr<DofManager>> internalDofManagers; // stored in the domain not internally
         public:
-            Q1Element (int n, Domain* d): MPElement(n,d) {
+            Q1Element (int n, Domain* d): MPElement(n,d), internalDofManagers() {
                 numberOfDofMans  = 4; 
             }
             const char *giveInputRecordName() const override {return "Q1";}
@@ -656,6 +722,17 @@ namespace oofem {
             int getNumberOfEdgeDOFs() const override {return 0;}
             void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
             void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+            DofManager *giveInternalDofManager(int i) const override {
+                    return this->internalDofManagers.at(i-1).get();
+            }
+            void setInternalDofManager(int num, std::unique_ptr<DofManager> dm) override{
+                if (num > (int)this->internalDofManagers.size()) {
+                    this->internalDofManagers.resize(num);
+                }
+                this->internalDofManagers[num-1] = std::move(dm);
+            }
+            int giveNumberOfInternalDofManagers() const override  { return this->internalDofManagers.size(); }
+
             IntArray giveBoundaryEdgeNodes(int boundary, bool includeHierarchical=false) const override {
                 IntArray answer = MPElement::giveBoundaryEdgeNodes(boundary, false);
                 int nnodes = this->dofManArray.giveSize();

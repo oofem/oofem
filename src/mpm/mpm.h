@@ -157,9 +157,15 @@ class Term {
      * Therefore the need to ensure that proper DOFs and integration rules are set-up.
      */
     class MPMSymbolicTerm : public Term {
+        protected:
+        int nip=0; // assumed order of interpolation for the term
         public:
         MPMSymbolicTerm() : Term() {}
         MPMSymbolicTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
+        void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+            Term::initializeFrom(ir, problem);
+            IR_GIVE_OPTIONAL_FIELD(ir, nip, "nip");
+        }
         void initializeCell(Element& cell) const override {
             // initialize cell for interpolation use
             // @TODO: prevent multiple initialization for same interpolation
@@ -219,6 +225,9 @@ class Term {
             int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
             GaussIntegrationRule ir(0, &cell);
             int nip = ir.getRequiredNumberOfIntegrationPoints(cell.giveIntegrationDomain(), myorder);
+            if (this->nip>0) {
+                nip = this->nip;
+            }
             // create nd insert it toelement if not exist yet.
             std::vector< std :: unique_ptr< IntegrationRule > > &irvec = cell.giveIntegrationRulesArray();
             bool found = false;
@@ -235,12 +244,16 @@ class Term {
                 irvec [ size] = std::make_unique<GaussIntegrationRule>(size, &cell);
                 //irvec [ size ]->SetUpPointsOnSquare(nip, this->mode);
                 irvec[size]->setUpIntegrationPoints(cell.giveIntegrationDomain(), nip, this->mode);
+                OOFEM_LOG_INFO("Integration rule with %d nip created for cell %d\n",nip,cell.giveNumber());
             }
         }
         IntegrationRule* giveElementIntegrationRule(Element* e) const override {
             int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
             GaussIntegrationRule ir(0, e);
             int nip = ir.getRequiredNumberOfIntegrationPoints(e->giveIntegrationDomain(), myorder);
+            if (this->nip>0) {
+                nip = this->nip;
+            }
             std::vector< std :: unique_ptr< IntegrationRule > > &irvec = e->giveIntegrationRulesArray();
             int size = irvec.size();
             for (int i = 0; i< size; i++) {

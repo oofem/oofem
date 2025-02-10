@@ -45,6 +45,7 @@ FEI1dLin InterpolationCatalogueType::fei1dlin_x = FEI1dLin(1);
 FEI1dLin InterpolationCatalogueType::fei1dlin_y = FEI1dLin(2);
 FEI1dLin InterpolationCatalogueType::fei1dlin_z = FEI1dLin(3);
 #ifdef __MPM_MODULE
+ConstantInterpolation InterpolationCatalogueType::feiconst = ConstantInterpolation();
 LinearInterpolation InterpolationCatalogueType::feilin = LinearInterpolation();
 QuadraticInterpolation InterpolationCatalogueType::feiquad = QuadraticInterpolation();
 #endif
@@ -57,6 +58,8 @@ const FEInterpolation* InterpolationCatalogueType :: getInterpolationByName (std
     } else if (name == "fei1dlin_z") {
         return &fei1dlin_z;
 #ifdef __MPM_MODULE
+    } else if (name == "feiconst") {
+        return &feiconst;
     } else if (name == "feilin") {
         return &feilin;
     } else if (name == "feiquad") {
