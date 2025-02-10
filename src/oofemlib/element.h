@@ -250,6 +250,8 @@ public:
     virtual DofManager *giveInternalDofManager(int i) const {
         OOFEM_ERROR("No such DOF available on Element %d", number);
     }
+    virtual void setInternalDofManager(int num, std::unique_ptr<DofManager> dm) {}
+
     //@}
     /**
      * @name General methods for obtaining element contributions
