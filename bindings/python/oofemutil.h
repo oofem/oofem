@@ -245,16 +245,59 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
 }
 
 // specific elements
-py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
 py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
-py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
+py::object truss2d(py::args args, py::kwargs &kw) { return createElementOfType("truss2d",args,kw); }
+py::object truss3d(py::args args, py::kwargs &kw) { return createElementOfType("truss3d",args,kw); }
+py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
+py::object beam3d(py::args args, py::kwargs &kw) { return createElementOfType("beam3d",args,kw); }
+py::object lattice2d(py::args args, py::kwargs &kw) { return createElementOfType("lattice2d",args,kw); }
+py::object lattice2dboundary(py::args args, py::kwargs &kw) { return createElementOfType("lattice2dboundary",args,kw); }
+py::object lattice3d(py::args args, py::kwargs &kw) { return createElementOfType("lattice3d",args,kw); }
+py::object lattice3dboundary(py::args args, py::kwargs &kw) { return createElementOfType("lattice3dboundary",args,kw); }
+py::object latticelink3d(py::args args, py::kwargs &kw) { return createElementOfType("latticelink3d",args,kw); }
+py::object latticelink3dboundary(py::args args, py::kwargs &kw) { return createElementOfType("latticelink3dboundary",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
-py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
-py::object quadAxiSym1ht(py::args args, py::kwargs &kw) { return createElementOfType("quadaxisym1ht",args,kw); }
+py::object linquad3dplanestress(py::args args, py::kwargs &kw) { return createElementOfType("linquad3dplanestress",args,kw); }
+py::object qPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("qplanestress2d",args,kw); }
+py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
+py::object qTrPlStr(py::args args, py::kwargs &kw) { return createElementOfType("qtrplstr",args,kw); }
+py::object trPlaneStrRot(py::args args, py::kwargs &kw) { return createElementOfType("trplanestrrot",args,kw); }
+py::object trPlaneStressRotAllman(py::args args, py::kwargs &kw) { return createElementOfType("trplanestressrotallman",args,kw); }
+py::object trPlanestressrotallman3d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestressrotallman3d",args,kw); }
+py::object quad1PlaneStrain(py::args args, py::kwargs &kw) { return createElementOfType("quad1planestrain",args,kw); }
+py::object trPlaneStrain(py::args args, py::kwargs &kw) { return createElementOfType("trplanestrain",args,kw); }
+py::object axisymm3d(py::args args, py::kwargs &kw) { return createElementOfType("axisymm3d",args,kw); }
+py::object q4axisymm(py::args args, py::kwargs &kw) { return createElementOfType("q4axisymm",args,kw); } 
+py::object l4axisymm(py::args args, py::kwargs &kw) { return createElementOfType("l4axisymm",args,kw); }
 py::object lspace(py::args args, py::kwargs &kw) { return createElementOfType("lspace",args,kw); }
+py::object lspaceBB(py::args args, py::kwargs &kw) { return createElementOfType("lspacebb",args,kw); }
+py::object qspace(py::args args, py::kwargs &kw) { return createElementOfType("qspace",args,kw); }
+py::object ltrpace(py::args args, py::kwargs &kw) { return createElementOfType("ltrspace",args,kw); }
+py::object qTRSpace(py::args args, py::kwargs &kw) { return createElementOfType("qtrspace",args,kw); } 
+py::object lWedge(py::args args, py::kwargs &kw) { return createElementOfType("lwedge",args,kw); }
+py::object qWedge(py::args args, py::kwargs &kw) { return createElementOfType("qwedge",args,kw); } 
+//transport elements
+py::object line1ht(py::args args, py::kwargs &kw) { return createElementOfType("line1ht",args,kw); }
+py::object line1mt(py::args args, py::kwargs &kw) { return createElementOfType("line1mt",args,kw); }
+py::object line1hmt(py::args args, py::kwargs &kw) { return createElementOfType("line1hmt",args,kw); }
 py::object tr1ht(py::args args, py::kwargs &kw) { return createElementOfType("tr1ht",args,kw); }
+py::object tr1mt(py::args args, py::kwargs &kw) { return createElementOfType("tr1mt",args,kw); }
+py::object tr1hmt(py::args args, py::kwargs &kw) { return createElementOfType("tr1hmt",args,kw); }
 py::object quad1ht(py::args args, py::kwargs &kw) { return createElementOfType("quad1ht",args,kw); }
+py::object quad1mt(py::args args, py::kwargs &kw) { return createElementOfType("quad1mt",args,kw); }
+py::object quad1hmt(py::args args, py::kwargs &kw) { return createElementOfType("quad1hmt",args,kw); }
 py::object qquad1ht(py::args args, py::kwargs &kw) { return createElementOfType("qquad1ht",args,kw); }
+py::object qquad1mt(py::args args, py::kwargs &kw) { return createElementOfType("qquad1mt",args,kw); }
+py::object qquad1hmt(py::args args, py::kwargs &kw) { return createElementOfType("qquad1hmt",args,kw); }
+py::object quadAxiSym1ht(py::args args, py::kwargs &kw) { return createElementOfType("quadaxisym1ht",args,kw); }
+py::object traxisym1ht(py::args args, py::kwargs &kw) { return createElementOfType("traxisym1ht",args,kw); }
+py::object tetrah1ht(py::args args, py::kwargs &kw) { return createElementOfType("tetrah1ht",args,kw); }
+py::object brick1ht(py::args args, py::kwargs &kw) { return createElementOfType("brick1ht",args,kw); }
+py::object brick1hmt(py::args args, py::kwargs &kw) { return createElementOfType("brick1hmt",args,kw); }
+py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
+py::object qBrick1mt(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1mt",args,kw); }
+py::object qBrick1hmt(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1mt",args,kw); }
+
 // mpm experimental
 py::object q1(py::args args, py::kwargs &kw) { return createElementOfType("q1",args,kw); }
 py::object l1(py::args args, py::kwargs &kw) { return createElementOfType("l1",args,kw); }
