@@ -331,6 +331,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
                 alphaTrialOld = alphaTrialNew;
             }
             ms->degreeOfHydration = alphaTrialNew;
+            ms->equivalentTime = ms->lastEquivalentTime + ( evalTime - ms->lastEvalTime ) * scaleTemperature(gp);
         }
     
     } else if ( this->hydrationModelType == 3 ) { //Rahimi-Aghdam's model, still unfinished  
