@@ -1253,7 +1253,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint, py::return_value_policy::reference)
     ;
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
-      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)() const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)
+      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatusIDType ) const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
