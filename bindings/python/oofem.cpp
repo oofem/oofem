@@ -1746,20 +1746,65 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);
+    m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("dummyProblem", &dummyProblem, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
+    //structural elements
     m.def("truss1d", &truss1d, py::return_value_policy::move);
+    m.def("truss2d", &truss2d, py::return_value_policy::move);
+    m.def("truss3d", &truss3d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
-    m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
-    m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
-    m.def("transientTransport", &transientTransport, py::return_value_policy::move);
-    m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
-    m.def("quadAxiSym1ht", &quadAxiSym1ht, py::return_value_policy::move);
+    m.def("beam3d", &beam3d, py::return_value_policy::move);
+    m.def("lattice2d", &lattice2d, py::return_value_policy::move);
+    m.def("lattice2dboundary", &lattice2dboundary, py::return_value_policy::move);
+    m.def("lattice3d", &lattice3d, py::return_value_policy::move);
+    m.def("lattice3dboundary", &lattice3dboundary, py::return_value_policy::move);
+    m.def("latticelink3d", &latticelink3d, py::return_value_policy::move);
+    m.def("latticelink3dboundary", &latticelink3dboundary, py::return_value_policy::move);
+    m.def("planestress2d", &planeStress2d, py::return_value_policy::move);
+    m.def("linquad3dplanestress", &linquad3dplanestress, py::return_value_policy::move);
+    m.def("qplanestress2d", &qPlaneStress2d, py::return_value_policy::move);
+    m.def("trplanestress2d", &trPlaneStress2d, py::return_value_policy::move);
+    m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);//backward compatibility
+    m.def("qtrplstr", &qTrPlStr, py::return_value_policy::move);
+    m.def("trplanestrrot", &trPlaneStrRot, py::return_value_policy::move);
+    m.def("trplanestressrotallman", &trPlaneStressRotAllman, py::return_value_policy::move);
+    m.def("trplanestressrotallman3d", &trPlanestressrotallman3d, py::return_value_policy::move);
+    m.def("quad1planestrain", &quad1PlaneStrain, py::return_value_policy::move);
+    m.def("trplanestrain", &trPlaneStrain, py::return_value_policy::move);
+    m.def("axisymm3d", &axisymm3d, py::return_value_policy::move);
+    m.def("q4axisymm", &q4axisymm, py::return_value_policy::move);
+    m.def("l4axisymm", &l4axisymm, py::return_value_policy::move);
     m.def("lspace", &lspace, py::return_value_policy::move);
+    m.def("lspacebb", &lspaceBB, py::return_value_policy::move);
+    m.def("qspace", &qspace, py::return_value_policy::move);
+    m.def("ltrpace", &ltrpace, py::return_value_policy::move);
+    m.def("qtrspace", &qTRSpace, py::return_value_policy::move);
+    m.def("lwedge", &lWedge, py::return_value_policy::move);
+    m.def("qwedge", &qWedge, py::return_value_policy::move);
+    //transport elements
+    m.def("line1ht", &line1ht, py::return_value_policy::move);
+    m.def("line1mt", &line1mt, py::return_value_policy::move);
+    m.def("line1hmt", &line1hmt, py::return_value_policy::move);
     m.def("tr1ht", &tr1ht, py::return_value_policy::move);
+    m.def("tr1mt", &tr1mt, py::return_value_policy::move);
+    m.def("tr1ht", &tr1ht, py::return_value_policy::move);
+    m.def("tr1hmt", &tr1hmt, py::return_value_policy::move);
     m.def("quad1ht", &quad1ht, py::return_value_policy::move);
+    m.def("quad1mt", &quad1mt, py::return_value_policy::move);
+    m.def("quad1hmt", &quad1hmt, py::return_value_policy::move);
     m.def("qquad1ht", &qquad1ht, py::return_value_policy::move);
-    
+    m.def("qquad1mt", &qquad1mt, py::return_value_policy::move);
+    m.def("qquad1hmt", &qquad1hmt, py::return_value_policy::move);
+    m.def("quadaxisym1ht", &quadAxiSym1ht, py::return_value_policy::move);
+    m.def("quadAxiSym1ht", &quadAxiSym1ht, py::return_value_policy::move);//backward compatibility
+    m.def("traxisym1ht", &traxisym1ht, py::return_value_policy::move);
+    m.def("tetrah1ht", &tetrah1ht, py::return_value_policy::move);
+    m.def("brick1ht", &brick1ht, py::return_value_policy::move);
+    m.def("brick1hmt", &brick1hmt, py::return_value_policy::move);
+    m.def("qbrick1ht", &qBrick1ht, py::return_value_policy::move);
+    m.def("qbrick1mt", &qBrick1mt, py::return_value_policy::move);
+    m.def("qbrick1hmt", &qBrick1hmt, py::return_value_policy::move);
 
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
