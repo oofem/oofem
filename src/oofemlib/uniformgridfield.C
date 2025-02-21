@@ -77,24 +77,33 @@ void UniformGridField::setGeometry(const FloatArray& lo_, const FloatArray& hi_,
     #if 0
         this->precomputeInternal();
     #endif
+    if (div_.giveSize()==2){
+        this->valueList.resize(div_.at(1)*div_.at(2));
+    } else {
+        this->valueList.resize(div_.at(1)*div_.at(2)*div_.at(3));
+    }
 }
-void UniformGridField::setValues(const FloatArray& vv){
+void UniformGridField::setValues(const std::vector< FloatArray > &vv){
     int s=1;
-    for(int i=0; i<div.giveSize(); i++) s*=div[i]+1;
-    if(vv.giveSize()!=s) OOFEM_ERROR((std::string("Array size must be exactly prod(div[i]+1)=")+std::to_string(s)).c_str());
-    values=vv;
+    for(int i=0; i<div.giveSize(); i++){
+        s*=div[i]+1;
+    }
+//  if(vv.giveSize()!=s) OOFEM_ERROR((std::string("Array size must be exactly prod(div[i]+1)=")+std::to_string(s)).c_str());
+    valueList=vv;
+    
+    
 }
 
-double UniformGridField::nodeValue2d(int i, int j){
-    assert(div.giveSize()==2);
-    assert(values.giveSize()==(div[0]+1)*(div[1]+1));
-    return values[(div[1]+1)*i+j];
+const FloatArray UniformGridField::nodeValue2d(int i, int j){
+     assert(div.giveSize()==2);
+     assert(valueList.size()==(long unsigned int)(div[0]+1)*(div[1]+1));
+     return valueList[(div[1]+1)*i+j];
 }
 
-double UniformGridField::nodeValue3d(int i, int j, int k){
-    assert(div.giveSize()==3);
-    assert(values.giveSize()==(div[0]+1)*(div[1]+1)*(div[2]+1));
-    return values[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
+const FloatArray UniformGridField::nodeValue3d(int i, int j, int k){
+     assert(div.giveSize()==3);
+     assert(valueList.size()==(long unsigned int)(div[0]+1)*(div[1]+1)*(div[2]+1));
+     return valueList[(div[2]+1)*(div[1]+1)*i+(div[2]+1)*j+k];
 }
 
 // see https://github.com/woodem/woo/blob/master/pkg/dem/FlowAnalysis.cpp
@@ -102,9 +111,8 @@ double UniformGridField::nodeValue3d(int i, int j, int k){
 int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep){
     // scalar value
-    answer.resize(1);
-    double& ret(answer[0]);
-    ret=0;
+    FloatArray ret(valueList[0]);
+    ret.zero();
 
     // find cell containing coords, and coords within the cell
     IntArray ijk; FloatArray normXyz;
@@ -147,7 +155,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
         OOFEM_ERROR((std::string("UniformGridField::evaluateAt: erroneous dimension of input coordinates (")+std::to_string(coords.giveSize())+", must be 2 or 3).").c_str());
         return 1;
     }
-
+    answer = ret;
     return 0; // OK
 }
 

@@ -31,7 +31,7 @@ class MyMaterial(oofempy.StructuralMaterial):
         return answer;
     def giveStatus (self, gp):
         print ("getStatus")
-        if (gp.giveMaterialStatus() is None):
+        if (gp.giveMaterialStatus(oofempy.IntegrationPointStatusIDType.IPSID_Default) is None):
             print ("getStatus creating")
             status = oofempy.StructuralMaterialStatus (gp)
             gp.setMaterialStatus(status)

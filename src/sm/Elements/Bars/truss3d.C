@@ -263,8 +263,6 @@ Truss3d::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type,
 }
 
 
-
-
 void
 Truss3d::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {

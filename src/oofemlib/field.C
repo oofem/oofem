@@ -33,13 +33,40 @@
  */
 
 #include "field.h"
+#include "set.h"
 
 #include <cstdarg>
 
 namespace oofem {
+void
+Field :: setSetsNumbers (const IntArray sets)
+{
+   regionSets = sets;
+}
+
+
+bool
+Field :: hasElementInSets(int nElem, Domain *d)
+{
+    if (regionSets.giveSize() == 0) {
+        return true;
+    }
+
+    for (int i = 1; i <= regionSets.giveSize(); i++){
+        Set *set = d->giveSet( regionSets.at(i) );
+        if (set->hasElement(nElem)){
+            return true;    
+        }
+    }
+
+    return false;
+}
+
+    
 std :: string Field :: errorInfo(const char *func) const
 {
     return std :: string(this->giveClassName()) + "::" + func;
 }
+
 
 } // end namespace oofem

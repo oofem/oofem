@@ -2228,19 +2228,25 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
         }
     }
     
-    ///Add eigenstrain field if provided externally
-    if ( ( tf = fm->giveField(FT_EigenStrain)) ) {
+        //Add external eigenstrain if defined
+    if ( ( tf = fm->giveField(FT_EigenStrain)) && (tf->hasElementInSets(selem->giveNumber(), this->giveDomain() )) ) {
         FloatArray gcoords, eigStrain;
         int err;
         elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(eigStrain, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
-
         if ( answer.giveSize() ) {
-            answer.add(eigStrain);  
+            if ( eigStrain.giveSize() ) {
+                if ( answer.giveSize() != eigStrain.giveSize() ) {
+                    OOFEM_ERROR("Vector of eigen strain field has the size %d which is different with the size of eigStrain vector %d, element %d", answer.giveSize(), eigStrain.giveSize(), elem->giveNumber() );
+                }
+                answer.add(eigStrain);
+            }
         } else {
-            answer=eigStrain;
+            if ( eigStrain.giveSize() ) {
+                answer = eigStrain;
+            }
         }
     }
     
@@ -2304,6 +2310,19 @@ StructuralMaterial::computeStressIndependentStrainVector_3d(GaussPoint *gp, Time
     }
     if ( eigenstrain.giveSize() ) {
         answer += FloatArrayF< 6 >(eigenstrain);
+    }
+    
+    //Add external eigenstrain if defined
+    if ( ( tf = fm->giveField(FT_EigenStrain)) && (tf->hasElementInSets(selem->giveNumber(), this->giveDomain() )) ) {
+        FloatArray gcoords, eigStrain;
+        int err;
+        elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
+        if ( ( err = tf->evaluateAt(eigStrain, gcoords, mode, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+        }
+        if ( answer.giveSize() ) {
+            answer += FloatArrayF< 6 >(eigStrain);
+        }
     }
     return answer;
 }
