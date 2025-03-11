@@ -1780,7 +1780,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("lspace", &lspace, py::return_value_policy::move);
     m.def("lspacebb", &lspaceBB, py::return_value_policy::move);
     m.def("qspace", &qspace, py::return_value_policy::move);
-    m.def("ltrpace", &ltrpace, py::return_value_policy::move);
+    m.def("ltrspace", &ltrspace, py::return_value_policy::move);
     m.def("qtrspace", &qTRSpace, py::return_value_policy::move);
     m.def("lwedge", &lWedge, py::return_value_policy::move);
     m.def("qwedge", &qWedge, py::return_value_policy::move);

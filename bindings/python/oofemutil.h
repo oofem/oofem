@@ -272,7 +272,7 @@ py::object l4axisymm(py::args args, py::kwargs &kw) { return createElementOfType
 py::object lspace(py::args args, py::kwargs &kw) { return createElementOfType("lspace",args,kw); }
 py::object lspaceBB(py::args args, py::kwargs &kw) { return createElementOfType("lspacebb",args,kw); }
 py::object qspace(py::args args, py::kwargs &kw) { return createElementOfType("qspace",args,kw); }
-py::object ltrpace(py::args args, py::kwargs &kw) { return createElementOfType("ltrspace",args,kw); }
+py::object ltrspace(py::args args, py::kwargs &kw) { return createElementOfType("ltrspace",args,kw); }
 py::object qTRSpace(py::args args, py::kwargs &kw) { return createElementOfType("qtrspace",args,kw); } 
 py::object lWedge(py::args args, py::kwargs &kw) { return createElementOfType("lwedge",args,kw); }
 py::object qWedge(py::args args, py::kwargs &kw) { return createElementOfType("qwedge",args,kw); } 
