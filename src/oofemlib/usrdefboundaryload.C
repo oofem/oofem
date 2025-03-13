@@ -69,14 +69,14 @@ UsrDefBoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const 
         f->evaluate(answer, args);
         return;
     } else if (mode == VM_TotalIntrinsic) {
-        args.at("t") = tStep->giveIntrinsicTime();
+        args["t"] = FunctionArgument(tStep->giveIntrinsicTime());
         f->evaluate(answer, args);
         return;
     } else if (mode == VM_Incremental) {
         FloatArray answerPrev;
-        args.at("t") = tStep->giveTargetTime();
+        args["t"] = FunctionArgument(tStep->giveTargetTime());
         f->evaluate(answer, args);
-        args.at("t") = tStep->giveTargetTime()-tStep->giveTimeIncrement();
+        args["t"] = FunctionArgument(tStep->giveTargetTime()-tStep->giveTimeIncrement());
         f->evaluate(answerPrev, args);
         answer.subtract(answerPrev);  
         return;

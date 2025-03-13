@@ -55,6 +55,11 @@ BCTracker :: BCTracker(Domain* d) {
 
 void
 BCTracker::initialize() {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+  
+  {
   this->elemList.clear();
   this->elemList.resize(domain->giveNumberOfElements());
 
@@ -106,6 +111,7 @@ BCTracker::initialize() {
 #endif
     }
   }// end loop over BCs
+  }
 }
   
 const BCTracker::entryListType&
