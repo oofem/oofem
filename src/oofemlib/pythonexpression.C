@@ -160,6 +160,10 @@ PythonExpression :: getDict(const std :: map< std :: string, FunctionArgument > 
 void
 PythonExpression :: getArray(FloatArray &answer, PyObject **func, const std :: map< std :: string, FunctionArgument > &valDict)
 {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+{
     PyObject *local_dict = getDict(valDict);
     PyObject *dummy = PyEval_EvalCode( *func, main_dict, local_dict );
 
@@ -180,6 +184,7 @@ PythonExpression :: getArray(FloatArray &answer, PyObject **func, const std :: m
     Py_DECREF(local_dict);
     Py_DECREF(dummy);
     Py_DECREF(ret);
+}
 }
 
 
