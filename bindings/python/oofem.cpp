@@ -1268,7 +1268,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
     
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
-      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatusIDType) const) &oofem::GaussPoint::giveMaterialStatus, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default, py::return_value_policy::reference)
+      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatusIDType) const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default)
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
       .def ("giveElement", &oofem::GaussPoint::giveElement, py::return_value_policy::reference)
       .def ("giveMaterial", &oofem::GaussPoint::giveMaterial, py::return_value_policy::reference)

@@ -97,7 +97,6 @@ protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
     int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
     
 };
 
