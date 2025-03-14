@@ -1732,6 +1732,8 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("dummyProblem", &dummyProblem, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
     m.def("truss1d", &truss1d, py::return_value_policy::move);
+    m.def("truss2d", &truss2d, py::return_value_policy::move);
+    m.def("truss3d", &truss3d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
     m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
     m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);

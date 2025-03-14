@@ -247,6 +247,8 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
 // specific elements
 py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
 py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
+py::object truss2d(py::args args, py::kwargs &kw) { return createElementOfType("truss2d",args,kw); }
+py::object truss3d(py::args args, py::kwargs &kw) { return createElementOfType("truss3d",args,kw); }
 py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
