@@ -256,6 +256,7 @@ py::object lattice3d(py::args args, py::kwargs &kw) { return createElementOfType
 py::object lattice3dboundary(py::args args, py::kwargs &kw) { return createElementOfType("lattice3dboundary",args,kw); }
 py::object latticelink3d(py::args args, py::kwargs &kw) { return createElementOfType("latticelink3d",args,kw); }
 py::object latticelink3dboundary(py::args args, py::kwargs &kw) { return createElementOfType("latticelink3dboundary",args,kw); }
+py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object linquad3dplanestress(py::args args, py::kwargs &kw) { return createElementOfType("linquad3dplanestress",args,kw); }
 py::object qPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("qplanestress2d",args,kw); }
@@ -324,6 +325,7 @@ py::object createDofManagerOfType(const char*type, py::args args, py::kwargs &kw
 
 
 py::object node(py::args args, py::kwargs kw) { return createDofManagerOfType("node",args,kw); }
+py::object hangingnode(py::args args, py::kwargs kw) { return createDofManagerOfType("hangingnode",args,kw); }
 
 
 /*****************************************************

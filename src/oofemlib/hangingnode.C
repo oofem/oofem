@@ -54,20 +54,21 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 void HangingNode :: initializeFrom(InputRecord &ir)
 {
     Node :: initializeFrom(ir);
-    this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_HangingNode_masterElement);
-    this->masterRegion = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_HangingNode_masterRegion);
 }
 
 int HangingNode :: checkConsistency()
 {
-    if (this->masterElement !=-1){
-        return true;
-    }
-        
-    Element *e = this->domain->giveGlobalElement(this->masterElement);
     int result = Node :: checkConsistency();
+
+    if (this->masterElement == 0){
+        OOFEM_ERROR("Master element not specified or determined for hanging node %d.\nHas postInitialize() method been called before? ", this->giveNumber());
+        result = 0;
+    }
+    return result;    
+    
+    
 
 #if 0
     // Check if master is in same mode
@@ -81,6 +82,7 @@ int HangingNode :: checkConsistency()
     }
 #endif
 
+    Element *e = this->domain->giveGlobalElement(this->masterElement);
     // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
         if ( !this->hasSameLCS( e->giveNode(i) ) ) {
@@ -107,7 +109,7 @@ void HangingNode :: postInitialize()
 #endif
 
     // First check element and interpolation
-    if ( masterElement == -1 ) { // Then we find it by taking the closest (probably containing element)
+    if ( masterElement == 0 ) { // Then we find it by taking the closest (probably containing element)
         FloatArray closest;
         SpatialLocalizer *sp = this->domain->giveSpatialLocalizer();
         sp->init();

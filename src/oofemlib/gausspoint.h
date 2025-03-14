@@ -251,6 +251,20 @@ public:
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "GaussPoint"; }
 
+    /**
+     * Sets Material status managed by receiver, this method is intended only for PyBind11 interface.
+     * @param ptr Pointer to new status of receiver. Object will take ownership of the pointer.
+     * @return Pointer to new status.
+     */
+    IntegrationPointStatus *__setMaterialStatus(IntegrationPointStatus* ptr, IntegrationPointStatusIDType key=IPSID_Default)
+    {
+        if ( this->materialStatuses.find(key) != this->materialStatuses.end() ) {
+            OOFEM_ERROR("status already exist");
+        }
+        this->materialStatuses[key]=std::unique_ptr<IntegrationPointStatus>(ptr);
+        return this->materialStatuses[key].get();
+    }
+
     friend class LayeredCrossSection;
     friend class FiberedCrossSection;
 };
