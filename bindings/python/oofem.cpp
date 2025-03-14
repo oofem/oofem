@@ -38,6 +38,7 @@
 namespace py = pybind11;
 
 #include <string>
+#include <memory>
 
 #include "oofemenv.h"
 #include "oofemcfg.h"
@@ -1203,6 +1204,12 @@ PYBIND11_MODULE(oofempy, m) {
       .def(py::init<oofem::GaussPoint*>())
         .def("giveClassName", &oofem::IntegrationPointStatus::giveClassName)
     ;
+
+
+    py::enum_<oofem::IntegrationPointStatusIDType>(m, "IntegrationPointStatusIDType")
+        .value("IPSID_Default", oofem::IntegrationPointStatusIDType::IPSID_Default)
+    ;
+
     py::class_<oofem::MaterialStatus, oofem::IntegrationPointStatus, PyMaterialStatus<>>(m, "MaterialStatus")
         .def(py::init<oofem::GaussPoint *>())
     ;
@@ -1253,8 +1260,10 @@ PYBIND11_MODULE(oofempy, m) {
         .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint, py::return_value_policy::reference)
     ;
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
-      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)() const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)
-      .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
+      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatusIDType) const) &oofem::GaussPoint::giveMaterialStatus, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default, py::return_value_policy::reference)
+      .def ("hasMaterialStatus", &oofem::GaussPoint::hasMaterialStatus, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default)
+      //IntegrationPointStatus *setMaterialStatus(std::unique_ptr<IntegrationPointStatus> ptr, IntegrationPointStatusIDType key=IPSID_Default)
+      .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*, oofem::IntegrationPointStatusIDType)) &oofem::GaussPoint::__setMaterialStatus, py::keep_alive<1,2>())
     ;
 
     py::class_<oofem::ExportModule>(m, "ExportModule")
@@ -1735,6 +1744,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("qquad1ht", &qquad1ht, py::return_value_policy::move);
 
     m.def("node", &node, py::return_value_policy::move);
+    m.def("hangingnode", &hangingnode, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
     m.def("initialCondition", &initialCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);

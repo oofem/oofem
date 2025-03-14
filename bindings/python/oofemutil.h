@@ -281,6 +281,7 @@ py::object createDofManagerOfType(const char*type, py::args args, py::kwargs &kw
 
 
 py::object node(py::args args, py::kwargs kw) { return createDofManagerOfType("node",args,kw); }
+py::object hangingnode(py::args args, py::kwargs kw) { return createDofManagerOfType("hangingnode",args,kw); }
 
 
 /*****************************************************
