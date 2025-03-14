@@ -65,9 +65,9 @@ class OOFEM_EXPORT HangingNode : public Node
 {
 protected:
     /// Number of the master element.
-    int masterElement;
+    int masterElement=0;
     /// Region of the master element (used for automatic detection).
-    int masterRegion;
+    int masterRegion=0;
 #ifdef __OOFEG
     /// Flag whether node is fully initialized already.
     bool initialized;
