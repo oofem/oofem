@@ -254,7 +254,7 @@ Truss3d::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type,
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
         area = this->giveCrossSection()->give(CS_Area, gp);
-        answer.resize(1);
+        answer.resize(6);
         answer.at(1) = stress.at(1)*area;
         return 1;
     } else {
