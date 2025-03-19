@@ -56,7 +56,6 @@ namespace py = pybind11;
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
-#include "Elements/structuralelement.h"
 #include "datastream.h"
 #include "timediscretizationtype.h"
 #include "statecountertype.h"
@@ -68,9 +67,6 @@ namespace py = pybind11;
 #include "material.h"
 #include "integrationpointstatus.h"
 #include "matstatus.h"
-#include "Materials/structuralmaterial.h"
-#include "Materials/structuralms.h"
-
 #include "crosssection.h"
 #include "sparsemtrx.h"
 
@@ -109,6 +105,13 @@ namespace py = pybind11;
 #include "pythonfield.h"
 #include <iostream>
 #include "oofemutil.h"
+
+
+#ifdef __SM_MODULE
+    #include "Elements/structuralelement.h"
+    #include "Materials/structuralmaterial.h"
+    #include "Materials/structuralms.h"
+#endif
 
 #ifdef __MPM_MODULE
     // mpm experimental
@@ -202,6 +205,7 @@ public:
         }
     };
 
+#ifdef __SM_MODULE
     template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
         // inherit the constructor
     public:
@@ -232,7 +236,7 @@ public:
             PYBIND11_OVERLOAD (void, StructuralElementBase, giveInternalForcesVector, std::ref(answer), tStep, useUpdatedGpRecord);
         }
     };
-
+#endif
 
     template <class EngngModelBase = oofem::EngngModel> class PyEngngModel : public EngngModelBase {
             // inherit the constructor
@@ -393,11 +397,12 @@ public:
 
     };
 
+#ifdef __SM_MODULE
     template <class StructuralMaterialStatusBase = oofem::StructuralMaterialStatus> class PyStructuralMaterialStatus : public PyMaterialStatus<StructuralMaterialStatusBase> {
         // inherit the constructor
         using PyMaterialStatus<StructuralMaterialStatusBase>::PyMaterialStatus;
     };
-
+#endif
 
     template <class MaterialBase = oofem::Material> class PyMaterial : public MaterialBase {
         // inherit the constructor
@@ -492,7 +497,7 @@ public:
         
     };
     
-    
+#ifdef __SM_MODULE
     template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
         // inherit the constructor
         using PyMaterial<StructuralMaterial>::PyMaterial;
@@ -662,6 +667,7 @@ public:
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give3dBeamSubSoilStiffMtrx, mmode, gp, tStep);
         }
      };
+#endif
 
     /**
      * @brief Initializes some global oofem options (typically controlled from command-line)
@@ -1100,11 +1106,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setActivityTimeFunctionNumber", &oofem::Element::setActivityTimeFunctionNumber)
     ;
 
+#ifdef __SM_MODULE
     py::class_<oofem::StructuralElement, oofem::Element, PyStructuralElement<>>(m, "StructuralElement")
         .def(py::init<int, oofem::Domain*>())
         .def("giveDofManDofIDMask", &oofem::StructuralElement::giveDofManDofIDMask)
     ;
-
+#endif
 
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
         .def("getIsImposedTimeFunctionNumber", &oofem::GeneralBoundaryCondition::getIsImposedTimeFunctionNumber)
@@ -1214,6 +1221,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<oofem::GaussPoint *>())
     ;
 
+#ifdef __SM_MODULE
     py::class_<oofem::StructuralMaterialStatus, oofem::MaterialStatus, PyStructuralMaterialStatus<>>(m, "StructuralMaterialStatus")
         .def(py::init<oofem::GaussPoint *>())
         .def("giveStrainVector", &oofem::StructuralMaterialStatus::giveStrainVector)
@@ -1221,6 +1229,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("letTempStressVectorBe", &oofem::StructuralMaterialStatus::letTempStressVectorBe)
         .def("letTempStrainVectorBe", &oofem::StructuralMaterialStatus::letTempStrainVectorBe)
     ;
+#endif
 
     py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
         .def("giveStatus", &oofem::Material::giveStatus, py::return_value_policy::reference)
@@ -1228,11 +1237,13 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveIPValue", &oofem::Material::giveIPValue)
     ;
 
+#ifdef __SM_MODULE
     py::class_<oofem::StructuralMaterial, oofem::Material, PyStructuralMaterial<>>(m, "StructuralMaterial")
         .def(py::init<int, oofem::Domain*>())
         .def("giveStatus", &oofem::StructuralMaterial::giveStatus, py::return_value_policy::reference)
         .def("CreateStatus", &oofem::StructuralMaterial::CreateStatus, py::return_value_policy::reference)
     ;
+#endif
 
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
     ;
@@ -1726,6 +1737,7 @@ PYBIND11_MODULE(oofempy, m) {
         .value("CR_DIVERGED_TOL", oofem::ConvergedReason::CR_DIVERGED_TOL)
         .value("CR_FAILED", oofem::ConvergedReason::CR_FAILED)
     ;
+
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);

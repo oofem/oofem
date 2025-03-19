@@ -212,9 +212,9 @@ LatticeDirichletCouplingNode :: computeUnknownCouplingContribution(TimeStep *ste
 
             result = nominator / denominator;
         }
-
+    }
 #endif
-}
+
 
 return result;
 }

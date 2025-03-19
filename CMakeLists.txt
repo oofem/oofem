@@ -180,6 +180,17 @@ include_directories ("${oofem_BINARY_DIR}")
 # Is there really any reason not to compile all of them? Some has cross dependencies.
 list (APPEND LIBS $<TARGET_OBJECTS:core>)
 
+if (USE_AM)
+    include_directories ("${oofem_SOURCE_DIR}/src/am")
+    add_definitions (-D__AM_MODULE)
+    list (APPEND LIBS $<TARGET_OBJECTS:am>)
+    list (APPEND MODULE_LIST "am")
+    # AM depends on TM and SM modules
+    set(USE_TM ON)
+    set(USE_SM ON)
+endif ()
+
+
 if (USE_FM)
     include_directories ("${oofem_SOURCE_DIR}/src/fm")
     add_definitions (-D__FM_MODULE)

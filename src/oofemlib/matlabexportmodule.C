@@ -491,6 +491,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             fprintf(FID, "];\n");
             mcount++;
         }
+#ifdef __SM_MODULE
         PrescribedDispSlipBCDirichletRC *pdsd = dynamic_cast<PrescribedDispSlipBCDirichletRC *>( gbc.get() );
         if (pdsd) {
             FloatArray stress, bStress, rStress;
@@ -571,6 +572,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             fprintf(FID, "];\n");
             trccount++;
         }
+#endif
     }
 }
 

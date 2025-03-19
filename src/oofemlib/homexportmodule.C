@@ -145,6 +145,7 @@ HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, bool str
                 volTot += dV;
                 
                 if(strainEn){
+#ifdef __SM_MODULE
                     FloatArray stress, lastStressIP, strain, strainRed, tmp, strainStressDep, lastStrainStressDepIP, avSig, dEpsStressDep;
                     elem->giveGlobalIPValue(stress, gp, IST_StressTensor, tStep); //returns in giveFullSymVectorForm
                     elem->giveGlobalIPValue(strain, gp, IST_StrainTensor, tStep);
@@ -179,6 +180,9 @@ HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, bool str
                         lastStrainStressDep[num] = strainStressDep;    
                     }
                     num++;
+#else
+                    OOFEM_ERROR("Strain energy calculation requires SM module");
+#endif
                 } else {
                     elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
                     answer.add(dV, ipState);

@@ -251,11 +251,20 @@ VTKXMLLatticeExportModule::setupVTKPieceCross(ExportRegion &vtkPieceCross, TimeS
     crossSectionTable.resize(numberOfElements);
     int numberOfNodes = 0;
     for ( int ie = 1; ie <= numberOfElements; ie++ ) {
+    #ifdef __SM_MODULE
         if (  dynamic_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
-        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
+        } else 
+    #endif
+    #ifdef __TM_MODULE    
+        if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
+        } else
+    #endif
+        {
+            OOFEM_ERROR("Unknown element type\n");
         }
+
         crossSectionTable.at(ie) = numberOfCrossSectionNodes;
         numberOfNodes += numberOfCrossSectionNodes;
     }
@@ -269,12 +278,20 @@ VTKXMLLatticeExportModule::setupVTKPieceCross(ExportRegion &vtkPieceCross, TimeS
     //Store node coordinates in table
     int nodeCounter = 0;
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
+    #ifdef __SM_MODULE
         if (  dynamic_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes =  ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
             ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveCrossSectionCoordinates(crossSectionCoordinates);
-        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
+        } else 
+    #endif
+    #ifdef __TM_MODULE
+        if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
             ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveCrossSectionCoordinates(crossSectionCoordinates);
+        } else
+    #endif
+        {
+            OOFEM_ERROR("Unknown element type\n");
         }
 
         for ( int is = 0; is < numberOfCrossSectionNodes; is++ ) {
