@@ -166,7 +166,6 @@ Structural2DElement::giveCharacteristicLength(const FloatArray &normalToCrackPla
 
 
 
-
 // Edge support
 
 void
@@ -223,9 +222,6 @@ Structural2DElement::computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEd
 
     return 1;
 }
-
-
-
 
 
 // Plane stress
@@ -343,9 +339,6 @@ PlaneStressElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatRe
         answer.rotatedWith(Q, 't');
     }
 }
-
-
-
 
 
 // Plane strain
@@ -471,8 +464,6 @@ PlaneStrainElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatRe
         answer.rotatedWith(Q, 't');
     }
 }
-
-
 
 
 // Axisymmetry

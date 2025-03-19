@@ -53,15 +53,13 @@ protected:
     IntArray div;
     // values in all grid points, as linear array; its size must be prod(div)
     // the array is c-ordered, the last index varying the fastest (FIXME: check)
-    FloatArray values;
+    std::vector< FloatArray > valueList;
     #if 0
         // precompute useful interally used values (such as cell size)
         void precomputeInternal(); 
     #endif
 
     void xyz2ijk(const FloatArray& xyz, IntArray& ijk, FloatArray& normXyz) const;
-    double nodeValue2d(int i, int j);
-    double nodeValue3d(int i, int j, int k);
 public:
     /**
      * Constructor. Creates a field, with unspecified field values.
@@ -72,7 +70,7 @@ public:
     /** Shorthand for defining geometry, with consistency checks. Used primarily from python */
     void setGeometry(const FloatArray& lo_, const FloatArray& hi_, const IntArray& div_);
     /** Accessor for setting nodal values; checks size of the array for correctness. */
-    void setValues(const FloatArray& vv);
+    void setValues(const std::vector< FloatArray > &vv);
 
     int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep) override;
@@ -80,6 +78,9 @@ public:
     int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep) override;
 
+    const FloatArray nodeValue2d(int i, int j);
+    const FloatArray nodeValue3d(int i, int j, int k);
+                           
     void saveContext(DataStream &stream) override { }
     void restoreContext(DataStream &stream) override { }
 

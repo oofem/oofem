@@ -60,6 +60,8 @@ namespace py = pybind11;
 #include "timediscretizationtype.h"
 #include "statecountertype.h"
 
+#include "spatiallocalizer.h"
+#include "octreelocalizer.h"
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
 #include "initialcondition.h"
@@ -85,6 +87,7 @@ namespace py = pybind11;
 #include "elementgeometrytype.h"
 #include "internalstatetype.h"
 #include "materialmode.h"
+#include "materialmappingalgorithmtype.h"
 
 #include "integrationrule.h"
 #include "gausspoint.h"
@@ -100,6 +103,7 @@ namespace py = pybind11;
 
 #include "uniformgridfield.h"
 #include "unstructuredgridfield.h"
+#include "intvarfield.h"
 #include "vtkhdf5reader.h"
 #include "dofmanvalfield.h"
 #include "pythonfield.h"
@@ -492,9 +496,6 @@ public:
         void restoreContext(DataStream &stream) override {
             PYBIND11_OVERLOAD_PURE(void, oofem::Field, restoreContext, stream);
         }
-        
-        
-        
     };
     
 #ifdef __SM_MODULE
@@ -1040,6 +1041,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("resizeSets", &oofem::Domain::resizeSets)
         .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
         .def("giveSet", &oofem::Domain::giveSet, py::return_value_policy::reference)
+        .def("giveSpatialLocalizer", &oofem::Domain::giveSpatialLocalizer, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -1085,6 +1087,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveMaterial", &oofem::Element::giveMaterial, py::return_value_policy::reference)
         .def("giveCrossSection", &oofem::Element::giveCrossSection, py::return_value_policy::reference)
         .def("giveMaterialNumber", &oofem::Element::giveMaterialNumber)
+        .def("giveNumber", &oofem::Element::giveNumber)
         .def("giveNumberOfDofManagers", &oofem::Element::giveNumberOfDofManagers)
         .def("giveNumberOfNodes", &oofem::Element::giveNumberOfNodes)
         .def("giveRegionNumber", &oofem::Element::giveRegionNumber)
@@ -1146,7 +1149,12 @@ PYBIND11_MODULE(oofempy, m) {
         .export_values()
     ;
 
-
+    py::class_<oofem::SpatialLocalizer>(m, "SpatialLocalizer")
+        //.def("giveDomain", &oofem::SpatialLocalizer::giveDomain, py::return_value_policy::reference)        
+        .def("giveClosestIP", (oofem::GaussPoint * (oofem::SpatialLocalizer::*)(const FloatArray &, Set &, bool)) &oofem::SpatialLocalizer::giveClosestIP)
+    ;
+    
+    
     /*
         Function class
     */
@@ -1246,6 +1254,7 @@ PYBIND11_MODULE(oofempy, m) {
 #endif
 
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
+        .def("giveMaterial", &oofem::CrossSection::giveMaterial, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
@@ -1270,11 +1279,20 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfIntegrationPoints", &oofem::IntegrationRule::giveNumberOfIntegrationPoints)
         .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint, py::return_value_policy::reference)
     ;
+    
+    py::enum_<oofem::IntegrationPointStatusIDType>(m, "IntegrationPointStatusIDType")
+        .value("IPSID_Default", oofem::IntegrationPointStatusIDType::IPSID_Default)
+        .value("PIDControllerStatusID", oofem::IntegrationPointStatusIDType::PIDControllerStatusID)
+    ;
+    
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
       .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatusIDType) const) &oofem::GaussPoint::giveMaterialStatus, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default, py::return_value_policy::reference)
       .def ("hasMaterialStatus", &oofem::GaussPoint::hasMaterialStatus, py::arg("key") = oofem::IntegrationPointStatusIDType::IPSID_Default)
       //IntegrationPointStatus *setMaterialStatus(std::unique_ptr<IntegrationPointStatus> ptr, IntegrationPointStatusIDType key=IPSID_Default)
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*, oofem::IntegrationPointStatusIDType)) &oofem::GaussPoint::__setMaterialStatus, py::keep_alive<1,2>())
+      .def ("giveElement", &oofem::GaussPoint::giveElement, py::return_value_policy::reference)
+      .def ("giveMaterial", &oofem::GaussPoint::giveMaterial, py::return_value_policy::reference)
+      .def ("giveGlobalCoordinates", &oofem::GaussPoint::giveGlobalCoordinates, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::ExportModule>(m, "ExportModule")
@@ -1394,6 +1412,7 @@ PYBIND11_MODULE(oofempy, m) {
         .value("FT_HumidityConcentration", oofem::FieldType::FT_HumidityConcentration)
         .value("FT_TransportProblemUnknowns", oofem::FieldType::FT_TransportProblemUnknowns)
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
+        .value("FT_EigenStrain", oofem::FieldType::FT_EigenStrain)
     ;
 
 
@@ -1720,6 +1739,15 @@ PYBIND11_MODULE(oofempy, m) {
         .value("_3dUPV", oofem::MaterialMode::_3dUPV)
     ;
 
+ 
+    
+    
+    py::enum_<oofem::MaterialMappingAlgorithmType>(m, "MaterialMappingAlgorithmType")
+        .value("MMA_ClosestPoint", oofem::MaterialMappingAlgorithmType::MMA_ClosestPoint)
+        .value("MMA_LeastSquareProjection", oofem::MaterialMappingAlgorithmType::MMA_LeastSquareProjection)
+        .value("MMA_ShapeFunctionProjection", oofem::MaterialMappingAlgorithmType::MMA_ShapeFunctionProjection)
+    ;
+    
 
     py::enum_<oofem::TimeDiscretizationType>(m,"TimeDiscretizationType")
         .value("TD_Unspecified", oofem::TimeDiscretizationType::TD_Unspecified)
@@ -1741,22 +1769,66 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);
+    m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("dummyProblem", &dummyProblem, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
+    //structural elements
     m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("truss2d", &truss2d, py::return_value_policy::move);
     m.def("truss3d", &truss3d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
-    m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
-    m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
-    m.def("transientTransport", &transientTransport, py::return_value_policy::move);
-    m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
-    m.def("quadAxiSym1ht", &quadAxiSym1ht, py::return_value_policy::move);
+    m.def("beam3d", &beam3d, py::return_value_policy::move);
+    m.def("lattice2d", &lattice2d, py::return_value_policy::move);
+    m.def("lattice2dboundary", &lattice2dboundary, py::return_value_policy::move);
+    m.def("lattice3d", &lattice3d, py::return_value_policy::move);
+    m.def("lattice3dboundary", &lattice3dboundary, py::return_value_policy::move);
+    m.def("latticelink3d", &latticelink3d, py::return_value_policy::move);
+    m.def("latticelink3dboundary", &latticelink3dboundary, py::return_value_policy::move);
+    m.def("planestress2d", &planeStress2d, py::return_value_policy::move);
+    m.def("linquad3dplanestress", &linquad3dplanestress, py::return_value_policy::move);
+    m.def("qplanestress2d", &qPlaneStress2d, py::return_value_policy::move);
+    m.def("trplanestress2d", &trPlaneStress2d, py::return_value_policy::move);
+    m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);//backward compatibility
+    m.def("qtrplstr", &qTrPlStr, py::return_value_policy::move);
+    m.def("trplanestrrot", &trPlaneStrRot, py::return_value_policy::move);
+    m.def("trplanestressrotallman", &trPlaneStressRotAllman, py::return_value_policy::move);
+    m.def("trplanestressrotallman3d", &trPlanestressrotallman3d, py::return_value_policy::move);
+    m.def("quad1planestrain", &quad1PlaneStrain, py::return_value_policy::move);
+    m.def("trplanestrain", &trPlaneStrain, py::return_value_policy::move);
+    m.def("axisymm3d", &axisymm3d, py::return_value_policy::move);
+    m.def("q4axisymm", &q4axisymm, py::return_value_policy::move);
+    m.def("l4axisymm", &l4axisymm, py::return_value_policy::move);
     m.def("lspace", &lspace, py::return_value_policy::move);
+    m.def("lspacebb", &lspaceBB, py::return_value_policy::move);
+    m.def("qspace", &qspace, py::return_value_policy::move);
+    m.def("ltrspace", &ltrspace, py::return_value_policy::move);
+    m.def("qtrspace", &qTRSpace, py::return_value_policy::move);
+    m.def("lwedge", &lWedge, py::return_value_policy::move);
+    m.def("qwedge", &qWedge, py::return_value_policy::move);
+    //transport elements
+    m.def("line1ht", &line1ht, py::return_value_policy::move);
+    m.def("line1mt", &line1mt, py::return_value_policy::move);
+    m.def("line1hmt", &line1hmt, py::return_value_policy::move);
     m.def("tr1ht", &tr1ht, py::return_value_policy::move);
+    m.def("tr1mt", &tr1mt, py::return_value_policy::move);
+    m.def("tr1ht", &tr1ht, py::return_value_policy::move);
+    m.def("tr1hmt", &tr1hmt, py::return_value_policy::move);
     m.def("quad1ht", &quad1ht, py::return_value_policy::move);
+    m.def("quad1mt", &quad1mt, py::return_value_policy::move);
+    m.def("quad1hmt", &quad1hmt, py::return_value_policy::move);
     m.def("qquad1ht", &qquad1ht, py::return_value_policy::move);
-
+    m.def("qquad1mt", &qquad1mt, py::return_value_policy::move);
+    m.def("qquad1hmt", &qquad1hmt, py::return_value_policy::move);
+    m.def("quadaxisym1ht", &quadAxiSym1ht, py::return_value_policy::move);
+    m.def("quadAxiSym1ht", &quadAxiSym1ht, py::return_value_policy::move);//backward compatibility
+    m.def("traxisym1ht", &traxisym1ht, py::return_value_policy::move);
+    m.def("tetrah1ht", &tetrah1ht, py::return_value_policy::move);
+    m.def("brick1ht", &brick1ht, py::return_value_policy::move);
+    m.def("brick1hmt", &brick1hmt, py::return_value_policy::move);
+    m.def("qbrick1ht", &qBrick1ht, py::return_value_policy::move);
+    m.def("qbrick1mt", &qBrick1mt, py::return_value_policy::move);
+    m.def("qbrick1hmt", &qBrick1hmt, py::return_value_policy::move);
+    
     m.def("node", &node, py::return_value_policy::move);
     m.def("hangingnode", &hangingnode, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
@@ -1805,12 +1877,16 @@ PYBIND11_MODULE(oofempy, m) {
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("giveType", &oofem::Field::giveType)
         .def("setType", &oofem::Field::setType)
-        ;
+        .def("setSetsNumbers", &oofem::Field::setSetsNumbers)
+        .def("hasElementInSets", &oofem::Field::hasElementInSets)
+    ;
 
     py::class_<oofem::UniformGridField, oofem::Field, std::shared_ptr<oofem::UniformGridField>>(m, "UniformGridField")
         .def(py::init<>())
         .def("setGeometry", &oofem::UniformGridField::setGeometry)
         .def("setValues", &oofem::UniformGridField::setValues)
+        .def("nodeValue2d", &oofem::UniformGridField::nodeValue2d)
+        .def("nodeValue3d", &oofem::UniformGridField::nodeValue3d)
         ;
 
     py::class_<oofem::UnstructuredGridField, oofem::Field, std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
@@ -1827,7 +1903,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setDofManValue", &oofem::DofManValueField::setDofManValue )
         .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
         ;
-    
+
+    py::class_<oofem::InternalVariableField, oofem::Field, std::shared_ptr<oofem::InternalVariableField>>(m, "InternalVariableField")
+        .def(py::init<oofem::InternalStateType, oofem::FieldType, oofem::MaterialMappingAlgorithmType, oofem::Domain*>())
+        ;
+        
+        
     py::class_<oofem::VTKHDF5Reader>(m, "VTKHDF5Reader")
         .def(py::init<>())
         .def("initialize", &oofem::VTKHDF5Reader::initialize)

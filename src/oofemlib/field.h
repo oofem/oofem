@@ -35,11 +35,13 @@
 #ifndef field_h
 #define field_h
 
+#include "domain.h"
 #include "oofemenv.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "enumitem.h"
+#include "intarray.h"
 #include <string>
 #include <memory>
 
@@ -54,7 +56,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FT_Temperature, 5) \
     ENUM_ITEM_WITH_VALUE(FT_HumidityConcentration, 6) \
     ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7) \
-    ENUM_ITEM_WITH_VALUE(FT_TemperatureAmbient, 8)
+    ENUM_ITEM_WITH_VALUE(FT_TemperatureAmbient, 8) \
+    ENUM_ITEM_WITH_VALUE(FT_EigenStrain, 9)
 
 /// Physical type of field.
 enum FieldType {
@@ -82,12 +85,13 @@ class OOFEM_EXPORT Field
 {
 protected:
     FieldType type;
+    IntArray regionSets;
 
 public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldType b = FieldType::FT_Unknown) : type(b) { }
+    Field(FieldType b = FieldType::FT_Unknown) : type(b) { regionSets.resize(0); }
     virtual ~Field() { }
     /**
      * Evaluates the field at given point.
@@ -123,6 +127,11 @@ public:
     /// Sets the type of receiver
     void setType(FieldType b) { type=b; }
 
+    /// Defines a list of sets used to impose a field on specific elements
+    void setSetsNumbers (const IntArray sets);
+
+    /// Searches if element number exist in IntArray regionSets for given domain
+    virtual bool hasElementInSets(int nElem, Domain *d);
     /**
      * Stores receiver state to output stream.
      * @param stream Output stream.

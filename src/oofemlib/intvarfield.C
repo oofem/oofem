@@ -48,7 +48,7 @@ InternalVariableField :: InternalVariableField(InternalStateType ist, FieldType 
 int
 InternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
-    IntArray types;
+    IntArray types(1);
     types.at(1) = this->type;
     /// Use MaterialMappingAlgorithm classes to do the job
     Set eset(0, domain);
