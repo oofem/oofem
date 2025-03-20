@@ -37,6 +37,9 @@
 
 #include <list>
 #include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace oofem {
 class Domain;
@@ -68,6 +71,10 @@ class BCTracker {
   std::vector<entryListType> elemList;
   /// Domain link
   Domain *domain;
+  bool initialized=false;
+  #ifdef _OPENMP
+    omp_lock_t initLock;
+#endif
   
  public:
   BCTracker (Domain *d);
