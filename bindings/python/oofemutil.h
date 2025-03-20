@@ -260,7 +260,6 @@ py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElement
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object linquad3dplanestress(py::args args, py::kwargs &kw) { return createElementOfType("linquad3dplanestress",args,kw); }
 py::object qPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("qplanestress2d",args,kw); }
-py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object qTrPlStr(py::args args, py::kwargs &kw) { return createElementOfType("qtrplstr",args,kw); }
 py::object trPlaneStrRot(py::args args, py::kwargs &kw) { return createElementOfType("trplanestrrot",args,kw); }
 py::object trPlaneStressRotAllman(py::args args, py::kwargs &kw) { return createElementOfType("trplanestressrotallman",args,kw); }
