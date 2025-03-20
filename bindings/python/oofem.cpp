@@ -1220,11 +1220,6 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveClassName", &oofem::IntegrationPointStatus::giveClassName)
     ;
 
-
-    py::enum_<oofem::IntegrationPointStatusIDType>(m, "IntegrationPointStatusIDType")
-        .value("IPSID_Default", oofem::IntegrationPointStatusIDType::IPSID_Default)
-    ;
-
     py::class_<oofem::MaterialStatus, oofem::IntegrationPointStatus, PyMaterialStatus<>>(m, "MaterialStatus")
         .def(py::init<oofem::GaussPoint *>())
     ;
