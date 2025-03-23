@@ -60,16 +60,18 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
     if ( ! Material :: isActivated( tStep ) ) {
         OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
     }
-
-    if ( this->EparVal.isEmpty() ) {
-        this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
-    }
-
     double sum = 0.0;
-    for ( int mu = 1; mu <= nUnits; mu++ ) {
-        double lambdaMu = this->computeLambdaMu(gp, tStep, mu);
-        double Emu = this->giveEparModulus(mu);
-        sum += ( 1 - lambdaMu ) / Emu;
+#pragma omp critical (KelvinChainSolidMaterial_EModulus)
+    {
+        if ( this->EparVal.isEmpty() ) {
+            this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
+        }
+
+        for ( int mu = 1; mu <= nUnits; mu++ ) {
+            double lambdaMu = this->computeLambdaMu(gp, tStep, mu);
+            double Emu = this->giveEparModulus(mu);
+            sum += ( 1 - lambdaMu ) / Emu;
+        }
     }
 
     double v = this->computeSolidifiedVolume(gp, tStep);
