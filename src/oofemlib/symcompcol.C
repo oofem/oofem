@@ -71,6 +71,9 @@
 #include "sparsemtrxtype.h"
 #include "activebc.h"
 #include "classfactory.h"
+#ifdef __MPM_MODULE
+#include "../mpm/integral.h"
+#endif
 
 #include <set>
 
@@ -140,6 +143,28 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
             }
         }
     }
+
+#ifdef __MPM_MODULE
+    IntArray locr, locc;
+    // loop over integrals 
+    for (auto &in: eModel->giveIntegralList()) {
+        // loop over integral domain
+        for (auto &elem: in->set->giveElementList()) {
+            // get code numbers for integral.term on element
+            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
+            for ( int ii : locr ) {
+                if ( ii > 0 ) {
+                    for ( int jj : locc ) {
+                        if ( jj > 0 && ii >= jj ) {
+                            columns [ jj - 1 ].insert(ii - 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
+
 
     for ( auto &val : columns ) {
         this->nz += val.size();

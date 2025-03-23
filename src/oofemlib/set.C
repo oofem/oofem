@@ -191,25 +191,23 @@ const IntArray &Set :: giveNodeList()
         }
     }
 
-    for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
-        auto e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
-        auto edge = this->elementEdges.at(iedge * 2);
-        auto fei = e->giveInterpolation();
-        auto eNodes = fei->boundaryEdgeGiveNodes(edge, e->giveGeometryType());
-        for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
-            afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
+        for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
+            auto e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
+            auto edge = this->elementEdges.at(iedge * 2);
+            auto eNodes = e->giveBoundaryEdgeNodes(edge, true); // true for including hierarchical nodes
+            for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
+                afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
+            }
         }
-    }
 
-    for ( int isurf = 1; isurf <= this->elementSurfaces.giveSize() / 2; ++isurf ) {
-        auto e = this->domain->giveElement( this->elementSurfaces.at(isurf * 2 - 1) );
-        auto surf = this->elementSurfaces.at(isurf * 2);
-        auto fei = e->giveInterpolation();
-        auto eNodes = fei->boundarySurfaceGiveNodes(surf, e->giveGeometryType());
-        for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
-            afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
+        for ( int isurf = 1; isurf <= this->elementSurfaces.giveSize() / 2; ++isurf ) {
+            auto e = this->domain->giveElement( this->elementSurfaces.at(isurf * 2 - 1) );
+            auto surf = this->elementSurfaces.at(isurf * 2);
+            auto eNodes = e->giveBoundarySurfaceNodes(surf, true); // true for including hierarchical nodes
+            for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
+                afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
+            }
         }
-    }
 
     for ( int inode = 1; inode <= this->nodes.giveSize(); ++inode ) {
         afflictedNodes.at( this->nodes.at(inode) ) = 1;

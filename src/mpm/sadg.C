@@ -319,7 +319,7 @@ class SADGBLine1 : public SADGBoundaryElement {
     const char *giveClassName() const override { return "SADGBLine1"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->interpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->interpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_line_1;
@@ -398,7 +398,7 @@ class SADGTriangle1 : public SADGElement {
     const char *giveClassName() const override { return "SADGTriangle1"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->scalarInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->scalarInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_triangle_1;
@@ -472,7 +472,7 @@ class SADGBrick1 : public SADGElement {
     const char *giveClassName() const override { return "SADGBrick1"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->scalarInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->scalarInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_hexa_1;
@@ -538,7 +538,7 @@ class SADGBQuad1 : public SADGBoundaryElement {
     const char *giveClassName() const override { return "SADGBQuad1"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->interpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->interpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_quad_1;

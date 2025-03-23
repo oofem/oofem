@@ -73,19 +73,19 @@ public:
     virtual void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
     { OOFEM_ERROR("not implemented "); }
 
 
     virtual void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix &answer,
                                                     MatResponseMode, GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
     { OOFEM_ERROR("not implemented "); }
 
 
     virtual void giveDeviatoricConstitutiveMatrix(FloatMatrix & answer,
                                                   MatResponseMode, GaussPoint * gp,
-                                                  TimeStep * tStep);
+                                                  TimeStep * tStep) const;
 
 
     virtual void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;

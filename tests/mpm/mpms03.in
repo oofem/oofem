@@ -1,0 +1,61 @@
+mpms03.out
+Demo of symbolic mpm problem; bending of clamped cantilever (l=3, h=0.3) loaded at the free end
+# 
+test nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 rhsterms 1 2 nmodules 1
+errorcheck
+Variable name "u" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # displacement 
+Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # test function
+BTSigmaTerm 1 variable "u"  testvariable "w" mmode 6
+NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 0. 1.
+Integral 1 domain 1 set 1 term 1
+Integral 2 domain 1 set 2 term 2
+#
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 10 nelem 5 nbc 2 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
+#
+#   6    7     8      9     10
+#
+#   1    2     3      4     5
+#
+node 1  coords 3 0.            0.           0.
+node 2  coords 3 0.75          0.           0.
+node 3  coords 3 1.5           0.           0.
+node 4  coords 3 2.25          0.           0.
+node 5  coords 3 3.0           0.           0.
+node 6  coords 3 0.            0.3          0.
+node 7  coords 3 0.75          0.3          0.
+node 8  coords 3 1.5           0.3          0.
+node 9  coords 3 2.25          0.3          0.
+node 10 coords 3 3.0           0.3          0.
+#
+q1 1 nodes 4 1 2 7 6  mat 1 crosssect 1
+q1 2 nodes 4 2 3 8 7  mat 1 crosssect 1
+q1 3 nodes 4 3 4 9 8  mat 1 crosssect 1
+q1 4 nodes 4 4 5 10 9 mat 1 crosssect 1
+l1 5 nodes 2 5 10     mat 1 crosssect 1
+#
+simplecs 1 thick 1.0
+isole 1 d 1 e 1 n 0.3 talpha 1.
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 3 values 1 0   dofs 1 1 
+# y-displacement
+boundarycondition 2 loadtimefunction 1 set 4 values 1 0   dofs 1 2 
+#
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 1. 5. f(t) 4 0. 0. 1.0 1.0 
+set 1 elements 4 1 2 3 4
+# 
+set 2 elements 1 5
+# x-bc
+set 3 nodes 2 1 6
+# y-bc
+set 4 nodes 2 1 6
+#%BEGIN_CHECK% 
+## check nodes 
+#NODE tStep 1 number 5 dof 1 unknown d value 2.56941176e+01
+#NODE tStep 1 number 5 dof 2 unknown d value 3.45035294e+02
+#NODE tStep 1 number 10 dof 1 unknown d value -2.56941176e+01
+#NODE tStep 1 number 10 dof 2 unknown d value 3.45035294e+02
+#%END_CHECK%

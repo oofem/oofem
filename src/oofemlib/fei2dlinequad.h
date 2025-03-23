@@ -79,6 +79,8 @@ public:
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const override;
 
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 3; }
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2,3};internalDofMans={};}
+
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
 

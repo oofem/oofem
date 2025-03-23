@@ -45,6 +45,10 @@
 #include "sparsemtrxtype.h"
 #include "activebc.h"
 #include "classfactory.h"
+#ifdef __MPM_MODULE
+#include "../mpm/integral.h"
+#endif
+
 
 #ifdef TIME_REPORT
  #include "timer.h"
@@ -287,6 +291,30 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
         }
     }
 
+#ifdef __MPM_MODULE
+    IntArray locr, locc;
+    // loop over integrals 
+    for (auto &in: eModel->giveIntegralList()) {
+        // loop over integral domain
+        for (auto &elem: in->set->giveElementList()) {
+            // get code numbers for integral.term on element
+            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
+            first = neq;
+            for ( int k = 1; k <= locc.giveSize(); k++ ) {
+                int kk = locc.at(k);
+                if ( kk ) {
+                    first = min(first, kk);
+                }
+            }
+            for ( int k = 1; k <= locr.giveSize(); k++ ) {
+                int kk = locr.at(k);
+                if ( kk && ( first < firstIndex.at(kk) ) ) {
+                    firstIndex.at(kk) = first;
+                }
+            }
+        }
+    }
+#endif
 
     for ( int i = 1; i <= neq; i++ ) {
         this->rowColumns[i-1].growTo( firstIndex.at(i) );

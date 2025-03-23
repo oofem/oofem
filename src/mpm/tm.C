@@ -141,11 +141,11 @@ class TMElement : public MPElement {
                 std::unique_ptr<IntegrationRule> ir;
                 answer.clear();
                 if (bbc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
-                        ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(iorder, 1, this->giveGeometryType());
+                        ir = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(iorder, 1, this->giveGeometryType());
                         //this->integrateSurfaceTerm_dw(contrib, NTf_Surface(getT(), BoundaryFluxFunctor(bbc, boundaryID, getT().dofIDs,'s'), boundaryID), ir.get(), boundaryID, tStep);
                         this->integrateSurfaceTerm_dw(answer, NTaTmTe(getT(), getT(), bbc, boundaryID, 's'), ir.get(), boundaryID, tStep);
                 } else if (bbc->giveBCGeoType() == bcGeomType::EdgeLoadBGT) {
-                        ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(iorder, 1, this->giveGeometryType());
+                        ir = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(iorder, 1, this->giveGeometryType());
                         //this->integrateSurfaceTerm_dw(contrib, NTf_Surface(getT(), BoundaryFluxFunctor(bbc, boundaryID, getT().dofIDs,'e'), boundaryID), ir.get(), boundaryID, tStep);
                         this->integrateSurfaceTerm_dw(answer, NTaTmTe(getT(), getT(), bbc, boundaryID, 'e'), ir.get(), boundaryID, tStep);
                 } else {
@@ -167,10 +167,10 @@ class TMElement : public MPElement {
             answer.clear();            
             int o = getT()->interpolation->giveInterpolationOrder()+bl->giveApproxOrder();
             if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
-                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundaryID, this->giveGeometryType());
+                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(o, boundaryID, this->giveGeometryType());
                 this->integrateSurfaceTerm_c(answer, NTaTmTe(getT(), getT(), bl, boundaryID, 's'), ir2.get(), boundaryID, tStep);
             } else {
-                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundaryID, this->giveGeometryType());
+                std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(o, boundaryID, this->giveGeometryType());
                 this->integrateEdgeTerm_c(answer, NTaTmTe(getT(), getT(), bl, boundaryID, 'e'), ir2.get(), boundaryID, tStep);
             }
         } else {
@@ -197,13 +197,13 @@ class TMElement : public MPElement {
 
             // integrate traction contribution (momentum balance)
             int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
             this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs, 's'), boundary), ir.get(), boundary, tStep);
             answer.assemble(contrib, locu);
 
             // integrate mass (fluid) flux normal to the boundary (mass balance) 
             o = getT()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
             this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getT(), BoundaryFluxFunctor(load, boundary, getT()->dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
             contrib2.times(-1.0);
             answer.assemble(contrib2, loct);
@@ -232,13 +232,13 @@ class TMElement : public MPElement {
 
             // integrate traction contribution (momentum balance)
             int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+            std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
             this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs,'e'), boundary), ir.get(), boundary, tStep);
             answer.assemble(contrib, locu);
 
             // integrate mass (fluid) flux normal to the boundary (mass balance) 
             o = getT()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+            std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
             this->integrateEdgeTerm_c(contrib2, NTf_Edge(getT(), BoundaryFluxFunctor(load, boundary, getT()->dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
             contrib2.times(-1.0);
             answer.assemble(contrib2, loct);
@@ -277,7 +277,7 @@ class TMElement : public MPElement {
             FloatArray nn, h1(3), h2(3);
             answer.resize(3,3);
             if (btype == 's') {
-                this->getGeometryInterpolation().boundarySurfaceEvalNormal(nn, iSurf, lc, FEIElementGeometryWrapper(this));
+                this->getGeometryInterpolation()->boundarySurfaceEvalNormal(nn, iSurf, lc, FEIElementGeometryWrapper(this));
             } else {
                 OOFEM_ERROR ("Unsupported boundary entity");
             }
@@ -362,7 +362,7 @@ class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
     const char *giveClassName() const override { return "TMBrick11"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->tInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->tInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_hexa_1;
@@ -455,7 +455,7 @@ class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
     const char *giveClassName() const override { return "TMTetra11"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->tInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->tInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_tetra_1;

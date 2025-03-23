@@ -240,6 +240,7 @@ set (core_fei
     fei2dtrlin.C
     fei2dtrquad.C
     fei2dlinehermite.C
+    fei2dlineconst.C
     fei2dlinelin.C
     fei2dlinequad.C
     fei2dquadconst.C

@@ -1,10 +1,10 @@
-mpms01.out
+mpms02.out
 Demo of symbolic mpm problem 
 # 
 test nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 rhsterms 1 2 nmodules 1
 errorcheck
-Variable name "u" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # displacement 
-Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # test function
+Variable name "u" interpolation "feiquad" type 1 quantity 0 size 2 dofs 2 1 2 # displacement 
+Variable name "w" interpolation "feiquad" type 1 quantity 0 size 2 dofs 2 1 2 # test function
 BTSigmaTerm 1 variable "u"  testvariable "w" mmode 6
 NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 1. 0.
 Integral 1 domain 1 set 1 term 1
@@ -12,13 +12,14 @@ Integral 2 domain 1 set 2 term 2
 #
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
-ndofman 4 nelem 2 nbc 2 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
+ndofman 5 nelem 2 nbc 2 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
 node 1 coords 3 0.            0.           0.
 node 2 coords 3 1.0           0.           0.
 node 3 coords 3 1.0           1.0          0.
 node 4 coords 3 0.0           1.0          0.
+node 5 coords 3 0.0           0.5          0.
 #
-q1 1 nodes 4 1 2 3 4 mat 1 crosssect 1
+q1 1 nodes 8 1 2 3 4 0 0 0 5 mat 1 crosssect 1
 l1 2 nodes 2 2 3     mat 1 crosssect 1
 #
 simplecs 1 thick 1.0
@@ -35,7 +36,7 @@ set 1 elements 1 1
 # 
 set 2 elements 1 2 
 # x-bc
-set 3 nodes 2 1 4
+set 3 nodes 3 1 4 5
 # y-bc
 set 4 nodes 1 1
 #%BEGIN_CHECK% 

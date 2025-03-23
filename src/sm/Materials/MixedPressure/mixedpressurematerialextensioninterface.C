@@ -71,7 +71,7 @@ MixedPressureMaterialExtensionInterface :: giveRealStressVector(FloatArray &answ
 
 
 void
-MixedPressureMaterialExtensionInterface ::  giveDeviatoricConstitutiveMatrix(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+MixedPressureMaterialExtensionInterface ::  giveDeviatoricConstitutiveMatrix(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();

@@ -36,7 +36,10 @@
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "feinterpol.h"
 #include "intarray.h"
+#include <set>
+
 
 namespace oofem {
 
@@ -219,5 +222,114 @@ ConnectivityTable::getElementColor(int e) {
     }
     return elementColoring.at(e);
 }
+
+
+void 
+ConnectivityTable::buildSharedBoundaryEntities(Domain *d) {
+    // sets of processed boundary entities per element
+    std::vector<std::set<int>> processedBoundaryEdges;
+    std::vector<std::set<int>> processedBoundarySurfaces;
+
+    // local vars
+    IntArray bnodes, bnodesSorted, neighbors;
+
+    processedBoundaryEdges.resize(domain->giveNumberOfElements());
+    processedBoundarySurfaces.resize(domain->giveNumberOfElements());
+
+    // start with a loop over all elements
+    for (auto &elem : domain->elementList) {
+        // loop over all edges of the element
+        // int nsd = elem->giveSpatialDimension();
+        // process edges
+        int nedges = elem->giveNumberOfEdges();
+        for (int i = 1; i <= nedges; i++) {
+            if (processedBoundaryEdges[elem->giveNumber()-1].find(i) != processedBoundaryEdges[elem->giveNumber()-1].end()) {
+                continue; // edge already processed by neighbor element
+            }
+            // get element edge
+            bnodes = elem->giveBoundaryEdgeNodes(i);
+            for ( int j = 1; j <= bnodes.giveSize(); j++ ) {
+                bnodes.at(j) = elem->giveDofManager(bnodes.at(j))->giveNumber();
+            }
+            bnodesSorted = bnodes;
+            bnodesSorted.sort();
+
+            // create a boundary entity
+            std::unique_ptr<SharedBoundaryEntity> sbe = std::make_unique<SharedBoundaryEntity>();
+            sbe->nodes = bnodes;
+            SharedBoundaryEntity::elementRec er={elem->giveNumber(), i};
+            sbe->elements.push_back(er);
+            sbe->geomType = elem->giveEdgeGeometryType(i);
+            sbe->spatialDimension = 1;
+            std::size_t sbeIndex = sharedBoundaryEntities.size()+1; 
+            // store the boundary entity ID on the element
+            elem->setSharedEdgeID(i, sbeIndex);
+
+            // now search element neighbors to find one sharing the same boundary nodes
+            this->giveElementsWithNodes(neighbors, bnodes);
+            // loop over elements sharing the boundary entity
+            for (auto neighborelem : neighbors) {
+                if (neighborelem == elem->giveNumber()) {
+                    continue;
+                }
+                int neighborboundary = 0;
+                IntArray neighborBoundaryNodes;
+                for ( int j = 1; j <= domain->giveElement(neighborelem)->giveNumberOfEdges(); j++ ) {
+                    bool equal = true;
+                    neighborBoundaryNodes = domain->giveElement(neighborelem)->giveBoundaryEdgeNodes(j);// edge or surface?
+                    for ( int k = 1; k <= neighborBoundaryNodes.giveSize(); k++ ) {
+                        neighborBoundaryNodes.at(k) = domain->giveElement(neighborelem)->giveDofManager(neighborBoundaryNodes.at(k))->giveNumber();
+                    }
+                    
+                    // compare bnodes (sorted) with neighborBoundaryNodes
+                    for ( int k = 1; k <= neighborBoundaryNodes.giveSize(); k++ ) {
+                        if ( !bnodesSorted.findSorted(neighborBoundaryNodes.at(k))) {
+                            equal = false;
+                            break;
+                        }
+                    }
+                    if ( equal) {   
+                        neighborboundary = j;
+                        break;
+                    }
+                }
+                if (neighborboundary) {
+                    // store the boundary entity id on the neighbor element
+                    domain->giveElement(neighborelem)->setSharedEdgeID(neighborboundary, sbeIndex);
+                    SharedBoundaryEntity::elementRec er={neighborelem, neighborboundary};
+                    sbe->elements.push_back(er);
+                    processedBoundaryEdges[neighborelem-1].insert(neighborboundary);                    
+                } else {
+                    OOFEM_ERROR("Boundary entity not found in neighbor element");
+                }
+            } // end loop over neighbors
+            sharedBoundaryEntities.emplace_back(std::move(sbe));
+        } // end loop over element edges
+    } // end loop over elements
+
+    // @TODO now process surfaces
+
+    //@DEBUG print BEs
+#if 0
+    for (auto& be: this->sharedBoundaryEntities) {
+        printf("BE nodes ");
+        for (auto n: be->nodes) {
+            printf("%4d ", n);
+        }
+        printf("elements/sides ");
+        for (auto& p: be->elements) {
+            printf("%4d(%2d) ", p.elementID, p.boundaryID);
+        }
+        printf("\n");
+    }
+#endif
+}
+
+SharedBoundaryEntity* 
+ConnectivityTable::giveBoundaryEntity(int id) {
+    SharedBoundaryEntity *be = reinterpret_cast< SharedBoundaryEntity * >( sharedBoundaryEntities[id-1].get() );
+    return be;
+}
+
 
 } // end namespace oofem

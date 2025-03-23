@@ -213,7 +213,7 @@ void
 IsotropicLinearElasticMaterial :: giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                           MatResponseMode mode,
                                                                           GaussPoint *gp,
-                                                                          TimeStep *tStep)
+                                                                          TimeStep *tStep) const
 //
 // forceElasticResponse ignored - always elastic
 //
@@ -239,7 +239,7 @@ void
 IsotropicLinearElasticMaterial :: giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix &answer,
                                                                      MatResponseMode mode,
                                                                      GaussPoint *gp,
-                                                                     TimeStep *tStep)
+                                                                     TimeStep *tStep) const
 {
     answer.resize(4, 4);
 
@@ -300,4 +300,28 @@ IsotropicLinearElasticMaterial :: giveRealStressVectorUP_PlaneStrain(FloatArray 
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(answer);
 }
+
+double 
+IsotropicLinearElasticMaterial::giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    switch (type) {
+        case ElasticBulkModulus:
+            return giveBulkModulus(); 
+        case ElasticBulkModulusInverse:
+            return 1./giveBulkModulus();
+        case MRM_ScalarOne:
+            return 1.0;
+        default:
+            return this->Material::giveCharacteristicValue(type, gp, tStep);
+    }
+}
+
+void 
+IsotropicLinearElasticMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    if (type == DeviatoricStiffness) {
+        return this->giveDeviatoricConstitutiveMatrix(answer, type, gp, tStep);
+    } else {
+        return this->LinearElasticMaterial::giveCharacteristicMatrix(answer, type, gp, tStep);
+    }
+}
+
 } // end namespace oofem
