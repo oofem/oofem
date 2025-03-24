@@ -154,7 +154,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
-
+    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
 
     /**
      * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
@@ -184,7 +184,7 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
     virtual FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_3d

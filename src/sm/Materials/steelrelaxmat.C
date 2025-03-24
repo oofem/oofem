@@ -119,7 +119,7 @@ void
 SteelRelaxMat::giveRealStressVector(FloatArray &answer,
                                     GaussPoint *gp,
                                     const FloatArray &totalStrain,
-                                    TimeStep *tStep)
+                                    TimeStep *tStep) const
 {
     FloatArray reducedStrain, strainIncrement, stressVector;
     double stressIncrement;
@@ -225,7 +225,7 @@ SteelRelaxMat::give1dStressStiffMtrx(MatResponseMode mode,
 
 
 void
-SteelRelaxMat::giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode)
+SteelRelaxMat::giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode) const
 {
     FloatArray temperatureFreeStrain;
     FloatArray relaxationStrain;
@@ -242,7 +242,7 @@ SteelRelaxMat::giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPo
 
 
 void
-SteelRelaxMat::evalStressRelaxationAtConstStrain(double &answer, GaussPoint *gp, double dt)
+SteelRelaxMat::evalStressRelaxationAtConstStrain(double &answer, GaussPoint *gp, double dt) const
 {
     double rho;
     double k;
@@ -269,7 +269,7 @@ SteelRelaxMat::evalStressRelaxationAtConstStrain(double &answer, GaussPoint *gp,
 
 // this method is active only in the case of EC2 approach
 void
-SteelRelaxMat::computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress)
+SteelRelaxMat::computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress) const
 {
     double rho;
     double k;
@@ -310,7 +310,7 @@ SteelRelaxMat::computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint 
 
 
 void
-SteelRelaxMat::computeStressRelaxationStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode)
+SteelRelaxMat::computeStressRelaxationStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode) const
 {
     SteelRelaxMatStatus *status = static_cast< SteelRelaxMatStatus * >( this->giveStatus(gp) );
     double averageStress = 0.;

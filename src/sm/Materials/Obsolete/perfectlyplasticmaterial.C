@@ -63,7 +63,7 @@ void
 PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                                  GaussPoint *gp,
                                                  const FloatArray &totalStrain,
-                                                 TimeStep *tStep)
+                                                 TimeStep *tStep) const 
 //
 // returns  stress vector (in full or reduced form )  of receiver according to
 // previous level of stress and current
@@ -266,7 +266,7 @@ void
 PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                  MatResponseMode mode,
                                                                  GaussPoint *gp,
-                                                                 TimeStep *tStep)
+                                                                 TimeStep *tStep) const
 //
 //
 // for case of perfectly plastic material
@@ -296,7 +296,7 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
 void
 PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
                                                         GaussPoint *gp,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 //
 //
 //
@@ -500,7 +500,7 @@ PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
 void
 PerfectlyPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                         const FloatArray &strainIncrement,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 //
 // computest the elastic stress increment
 // from stressIncrement in full stress strain space
@@ -525,7 +525,7 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
                                                       FloatArray *currentPlasticStrainVector,
                                                       FloatArray *strainIncrement3d,
                                                       TimeStep *tStep,
-                                                      double &lambda)
+                                                      double &lambda) const
 //
 // Computes full form of  Plastic stiffness Matrix at given state.
 // gp is used only and only for setting proper MaterialMode ()
@@ -592,7 +592,7 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
 FloatArray *
 PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *gp,
                                                                    FloatArray *stressVector3d,
-                                                                   FloatArray *plasticVector3d)
+                                                                   FloatArray *plasticVector3d) const
 //
 // returns the stress correction -> correction is in the direction of
 // the normal to the yield surface

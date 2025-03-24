@@ -172,7 +172,7 @@ public:
 
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &, TimeStep *tStep) override;
+                              const FloatArray &, TimeStep *tStep) const override;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -211,18 +211,18 @@ protected:
     void closestPointReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
                             GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
-                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
+                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep) const;
 
     void cuttingPlaneReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
                             GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
-                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
+                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep) const;
 
     void computeGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &fullStressVector,
                                const FloatArray &fullStressSpaceHardeningVars) const;
     void computeResidualVector(FloatArray &answer, GaussPoint *gp, const FloatArray &gamma,
                                const IntArray &activeConditionMap, const FloatArray &plasticStrainVectorR,
-                               const FloatArray &strainSpaceHardeningVariables, std :: vector< FloatArray > &gradVec);
+                               const FloatArray &strainSpaceHardeningVariables, std :: vector< FloatArray > &gradVec) const;
     virtual FloatMatrix giveConsistentStiffnessMatrix(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,

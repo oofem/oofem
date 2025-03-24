@@ -192,7 +192,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
 
 
 void
-MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
@@ -202,7 +202,7 @@ MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
+MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * Updates hidden variables used to effectively trace the load history

@@ -73,7 +73,7 @@ FRCFCMNL :: initializeFrom(InputRecord &ir)
 void
 FRCFCMNL :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &totalStrain,
-                                 TimeStep *tStep)
+                                 TimeStep *tStep) const
 {
     // first try conventional way as if no sourrounding cracks existed
     FCMMaterial :: giveRealStressVector(answer, gp, totalStrain, tStep);
@@ -113,7 +113,7 @@ FRCFCMNL :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
             if ( crackStrain > 0. ) {
                 // get local fiber stress
-	      sigma_f_local = this->computeStressInFibersInCracked(gp, tStep, crackStrain, iCrack);
+	            sigma_f_local = this->computeStressInFibersInCracked(gp, tStep, crackStrain, iCrack);
                 // set local fiber stress to status
                 status->setTempFiberStressLoc(iCrack, sigma_f_local);
             } else {
@@ -159,7 +159,7 @@ FRCFCMNL :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 /// computes debonded length of the fibers from the crack opening. Delta is here one half of the crack opening.
 double
-FRCFCMNL :: computeDebondedLength(double delta) {
+FRCFCMNL :: computeDebondedLength(double delta) const {
     double a = 0.;
 
     if ( this->fiberType == FT_CAF ) { // continuous aligned fibers
@@ -183,7 +183,7 @@ FRCFCMNL :: computeDebondedLength(double delta) {
 
 
 double
-FRCFCMNL :: computeDecreaseInFibreStress(double distance, double delta, double targetDebondedLength) {
+FRCFCMNL :: computeDecreaseInFibreStress(double distance, double delta, double targetDebondedLength) const {
     // compute decrease in fiber stress due to stress transfer to matrix
     // delta_sigma_f = 4 * tau_eff * Vf * Xca'/ ( Df * ( 1 - Vf))
     // Xca' = ( 4 * x^2 - 4 * x * Lf ) / ( -2 * pi * Lf * lambda )
@@ -222,7 +222,7 @@ FRCFCMNL :: computeDecreaseInFibreStress(double distance, double delta, double t
 
 
 void
-FRCFCMNL :: computeElementCentroid(FloatArray &answer, GaussPoint *gp) {
+FRCFCMNL :: computeElementCentroid(FloatArray &answer, GaussPoint *gp) const {
     double A, cx, cy, x_i, x_ii, y_i, y_ii;
     Element *elem;
     elem = gp->giveElement();
@@ -269,7 +269,7 @@ FRCFCMNL :: computeElementCentroid(FloatArray &answer, GaussPoint *gp) {
 
 
 bool
-FRCFCMNL :: isInElementProjection(GaussPoint *homeGp, GaussPoint *nearGp, int iNlCrack)
+FRCFCMNL :: isInElementProjection(GaussPoint *homeGp, GaussPoint *nearGp, int iNlCrack) const
 {
     FRCFCMNLStatus *nonlocStatus;
     nonlocStatus = static_cast< FRCFCMNLStatus * >( nearGp->giveMaterialStatus() );
@@ -345,7 +345,7 @@ FRCFCMNL :: isInElementProjection(GaussPoint *homeGp, GaussPoint *nearGp, int iN
 
 
 double
-FRCFCMNL :: computeNonlocalStressInFibers(const FloatArray &crackVectorHome, GaussPoint *gp, TimeStep *tStep) {
+FRCFCMNL :: computeNonlocalStressInFibers(const FloatArray &crackVectorHome, GaussPoint *gp, TimeStep *tStep) const {
     // using "non-local" approach
 
     // computes stress in fibers in the direction of "crackVectorHome"
@@ -514,7 +514,7 @@ FRCFCMNL :: computeNonlocalStressInFibers(const FloatArray &crackVectorHome, Gau
 
 
 double
-FRCFCMNL :: computeNonlocalStressInFibersInUncracked(GaussPoint *gp, TimeStep *tStep)
+FRCFCMNL :: computeNonlocalStressInFibersInUncracked(GaussPoint *gp, TimeStep *tStep) const
 {
     // using "non-local" approach
 
@@ -611,7 +611,7 @@ FRCFCMNL :: computeNonlocalStressInFibersInUncracked(GaussPoint *gp, TimeStep *t
 
 
 bool
-FRCFCMNL :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) {
+FRCFCMNL :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) const {
     // evaluates cheaper function than is the nonlocal approach
     if ( !FRCFCM :: isStrengthExceeded(base, gp, tStep, iCrack, trialStress) ) {
         return false;
@@ -655,7 +655,7 @@ void
 FRCFCMNL :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 //
 // returns effective material stiffness matrix in full form
 // for gp stress strain mode
@@ -691,7 +691,7 @@ FRCFCMNL :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 double
-FRCFCMNL :: computeAngleBetweenVectors(const FloatArray &vec1, const FloatArray &vec2)
+FRCFCMNL :: computeAngleBetweenVectors(const FloatArray &vec1, const FloatArray &vec2) const
 {
     // compute angle between two vectors
 

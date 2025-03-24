@@ -152,7 +152,7 @@ KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int
 
 
 void
-KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
@@ -162,7 +162,7 @@ KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint 
 
 
 void
-KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
+KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * Updates hidden variables used to effectively trace the load history

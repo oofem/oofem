@@ -198,7 +198,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
@@ -206,7 +206,7 @@ KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
 }
 
 void
-KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
+KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * Updates hidden variables used to effectively trace the load history

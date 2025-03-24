@@ -58,24 +58,24 @@ public:
     void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_Steel1_Name; }
     const char *giveClassName() const override { return "Steel1MaterialClass"; }
-    void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) override { }
+    void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) const override { }
     bool hasCastingTimeSupport() const override { return true; }
 
 protected:
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
-    double      computeYCValueAt(GaussPoint *, FloatArray *, FloatArray *) override;
-    FloatArray *GiveYCStressGradient(GaussPoint *, FloatArray *, FloatArray *) override;
-    FloatArray *GiveLCStressGradient(GaussPoint *, FloatArray *, FloatArray *) override;
-    FloatArray *GiveYCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) override;
-    FloatArray *GiveLCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) override;
-    void        updateTempYC(GaussPoint *, FloatArray *, FloatArray *) override { }
-    void        updateTempLC(GaussPoint *, FloatArray *, FloatArray *) override { }
+    double      computeYCValueAt(GaussPoint *, FloatArray *, FloatArray *) const override;
+    FloatArray *GiveYCStressGradient(GaussPoint *, FloatArray *, FloatArray *) const override;
+    FloatArray *GiveLCStressGradient(GaussPoint *, FloatArray *, FloatArray *) const override;
+    FloatArray *GiveYCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) const override;
+    FloatArray *GiveLCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) const override;
+    void        updateTempYC(GaussPoint *, FloatArray *, FloatArray *) const override { }
+    void        updateTempLC(GaussPoint *, FloatArray *, FloatArray *) const override { }
     // update during computation
 
     // auxiliary function
-    double computeJ2InvariantAt(FloatArray *);
+    double computeJ2InvariantAt(FloatArray *) const;
 };
 } // end namespace oofem
 #endif // steel1_h

@@ -518,7 +518,7 @@ public:
         void giveStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveStiffnessMatrix, std::ref(answer), mode, gp, tStep);
         }
-        void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) override {
+        void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector, std::ref(answer), gp, reducedStrain, tStep);
         }
         oofem::FloatArrayF<6> giveRealStressVector_3d(const oofem::FloatArrayF<6> &E, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {

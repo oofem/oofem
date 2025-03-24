@@ -95,7 +95,7 @@ void
 MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
                                           GaussPoint *gp,
                                           const FloatArray &totalStrain,
-                                          TimeStep *tStep)
+                                          TimeStep *tStep) const
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -175,7 +175,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
 }
 
 double
-MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *tStep) {
+MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *tStep) const {
     return 0.;
 }
 

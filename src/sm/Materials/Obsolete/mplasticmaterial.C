@@ -82,7 +82,7 @@ void
 MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                          GaussPoint *gp,
                                          const FloatArray &totalStrain,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -166,7 +166,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                                        const FloatArray &totalStrain,
                                        FloatArray &plasticStrainVectorR,
                                        FloatArray &strainSpaceHardeningVariables,
-                                       TimeStep *tStep)
+                                       TimeStep *tStep) const
 {
     FloatArray fullStressVector;
     FloatArray elasticStrainVectorR;
@@ -408,7 +408,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
                                        const FloatArray &totalStrain,
                                        FloatArray &plasticStrainVectorR,
                                        FloatArray &strainSpaceHardeningVariables,
-                                       TimeStep *tStep)
+                                       TimeStep *tStep) const
 {
     FloatArray elasticStrainVectorR;
     FloatArray fullStressVector, fullStressSpaceHardeningVars;
@@ -697,7 +697,7 @@ void
 MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, const FloatArray &gamma,
                                           const IntArray &activeConditionMap, const FloatArray &plasticStrainVectorR,
                                           const FloatArray &strainSpaceHardeningVariables,
-                                          std :: vector< FloatArray > &gradientVectorR)
+                                          std :: vector< FloatArray > &gradientVectorR) const
 {
     /* Computes Residual vector for closest point projection algorithm */
 

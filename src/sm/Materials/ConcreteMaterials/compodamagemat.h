@@ -151,7 +151,7 @@ public:
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &, TimeStep *tStep) override;
+                              const FloatArray &, TimeStep *tStep) const override;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -194,9 +194,9 @@ protected:
     int giveMatStiffRotationMatrix(FloatMatrixF<6,6> &answer, GaussPoint *gp) const;
 
     /// Six stress components of tension components read from the input file.
-    FloatArray inputTension;
+    mutable FloatArray inputTension;
     /// Six stress components of compression components read from the input file.
-    FloatArray inputCompression;
+    mutable FloatArray inputCompression;
 
     /// Stress components which are allowed for snap back [6 tension, 6 compression].
     IntArray allowSnapBack;
@@ -208,19 +208,19 @@ protected:
      * @param gp Integration point.
      * @param elementCs Material orientation matrix.
      */
-    void giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs);
+    void giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs) const;
     /**
      * Computes characteristic length for fixed planes of material orientation.
      * @param charLenModes Returns six lengths.
      * @param gp Integration point.
      */
-    void giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp);
+    void giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp) const;
     /**
      * Check that element is small enough or Gf is large enough to prevent the snap-back.
      * @param gp Integration point.
      * @param mMode Type of material (_1dMat, _3dMat supported).
      */
-    void checkSnapBack(GaussPoint *gp, MaterialMode mMode);
+    void checkSnapBack(GaussPoint *gp, MaterialMode mMode) const;
 };
 } // end namespace oofem
 #endif // compodamagemat_h

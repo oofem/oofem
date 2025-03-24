@@ -55,7 +55,7 @@ MixedPressureMaterialExtensionInterface :: MixedPressureMaterialExtensionInterfa
 
 
 void
-MixedPressureMaterialExtensionInterface :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+MixedPressureMaterialExtensionInterface :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) const
 {
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();
@@ -88,7 +88,7 @@ MixedPressureMaterialExtensionInterface ::  giveDeviatoricConstitutiveMatrix(Flo
 
 
 void
-MixedPressureMaterialExtensionInterface :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+MixedPressureMaterialExtensionInterface :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) const
 {
     FloatArray vE, vS;
     StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);

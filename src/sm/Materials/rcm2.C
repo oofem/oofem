@@ -83,7 +83,7 @@ void
 RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -103,7 +103,7 @@ RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain,
-                                     TimeStep *tStep)
+                                     TimeStep *tStep) const
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -150,7 +150,7 @@ void
 RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
                                                 FloatArray &principalStrain,
                                                 FloatMatrix &tempCrackDirs,
-                                                TimeStep *tStep)
+                                                TimeStep *tStep) const
 //
 // returns real principal stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -333,7 +333,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
                                         const FloatArray &crackStrain,
                                         const FloatArray &princStressVector,
                                         FloatArray &crackStressVector,
-                                        const FloatArray &princStrainVector)
+                                        const FloatArray &princStrainVector) const
 //
 // returns int_array flag showing if some crack
 // is newly activated or
@@ -403,7 +403,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 
 
 void
-RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
+RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le) const
 //
 // updates gp status when new crack-plane i is formed with charLength Le
 // updates Le and computes and sets minEffStrainForFullyOpenCrack
@@ -420,13 +420,13 @@ RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
 }
 
 double 
-RCM2Material :: giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal) 
+RCM2Material :: giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal) const
 { 
   return gp->giveElement()->giveCharacteristicLength(crackPlaneNormal); 
 }
 
 void
-RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
+RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain) const
 //
 // updates gp records and MatStatus due to cracking.
 //
@@ -498,7 +498,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
 
 void
 RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVector,
-                                    IntArray &crackMap)
+                                    IntArray &crackMap) const
 //
 // Check if crack closing occurs
 // if yes updates crackStrainVector and gp-status accordingly
@@ -532,7 +532,7 @@ void
 RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                                  bool reduce, MatResponseMode rMode,
                                                  GaussPoint *gp, TimeStep *tStep,
-                                                 const FloatMatrix &dir)
+                                                 const FloatMatrix &dir) const
 //
 // return Elastic Stiffness matrix for normal Stresses
 // taking into account the directions of normal stresses
@@ -593,7 +593,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 void
 RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                      MatResponseMode rMode, GaussPoint *gp,
-                                                     TimeStep *tStep)
+                                                     TimeStep *tStep) const
 //
 // returns effective material stiffness matrix in full form
 // for gp stress strain mode
@@ -706,7 +706,7 @@ void
 RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 //
 //
 // Returns material incremental stiffness matrix for cracked concrete.
@@ -750,7 +750,7 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks)
+RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks) const
 //
 //
 // updates mapping matrix of active cracks

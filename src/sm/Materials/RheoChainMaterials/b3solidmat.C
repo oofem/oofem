@@ -761,7 +761,7 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     KelvinChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 

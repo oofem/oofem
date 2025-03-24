@@ -126,7 +126,7 @@ public:
     }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep) override;
+                              const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -168,12 +168,12 @@ public:
     // can be moved to parent classes
     virtual void updateIfFailure(GaussPoint *gp,
                                  FloatArray *stressVector3d,
-                                 FloatArray *PlasticStrainVector3d) { }
+                                 FloatArray *PlasticStrainVector3d) const { }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PerfectlyPlasticMaterial"; }
     void initializeFrom(InputRecord &ir) override;
-    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
+    LinearElasticMaterial *giveLinearElasticMaterial() const { return linearElasticMaterial; }
 
     double give(int aProperty, GaussPoint *gp) const override;
 
@@ -189,10 +189,10 @@ protected:
 
     virtual void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode mode, GaussPoint *gp,
-                                             TimeStep *tStep);
+                                             TimeStep *tStep) const;
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode mode, GaussPoint *gp,
-                                                      TimeStep *tStep);
+                                                      TimeStep *tStep) const ;
 
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
@@ -201,30 +201,30 @@ protected:
     FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &strainIncrement, TimeStep *tStep);
+                                     const FloatArray &strainIncrement, TimeStep *tStep) const;
     void computePlasticStiffnessAt(FloatMatrix &answer,
                                    GaussPoint *gp,
                                    FloatArray *currentStressVector,
                                    FloatArray *currentPlasticStrainVector,
                                    FloatArray *strainIncrement3d,
                                    TimeStep *tStep,
-                                   double &lambda);
+                                   double &lambda) const;
 
     FloatArray *GiveStressCorrectionBackToYieldSurface(GaussPoint *gp,
                                                        FloatArray *stressVector3d,
-                                                       FloatArray *plasticVector3d);
+                                                       FloatArray *plasticVector3d) const;
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
-    virtual double computeYCValueAt(GaussPoint *gp, FloatArray *, FloatArray *) { return -1.0; }
-    virtual FloatArray *GiveYCStressGradient(GaussPoint *gp, FloatArray *, FloatArray *) { return NULL; }
-    virtual FloatArray *GiveLCStressGradient(GaussPoint *gp, FloatArray *, FloatArray *) { return NULL; }
-    virtual FloatArray *GiveYCPlasticStrainGradient(GaussPoint *gp, FloatArray *, FloatArray *) { return NULL; }
-    virtual FloatArray *GiveLCPlasticStrainGradient(GaussPoint *gp, FloatArray *, FloatArray *) { return NULL; }
+    virtual double computeYCValueAt(GaussPoint *gp, FloatArray *, FloatArray *) const { return -1.0; }
+    virtual FloatArray *GiveYCStressGradient(GaussPoint *gp, FloatArray *, FloatArray *) const { return NULL; }
+    virtual FloatArray *GiveLCStressGradient(GaussPoint *gp, FloatArray *, FloatArray *) const { return NULL; }
+    virtual FloatArray *GiveYCPlasticStrainGradient(GaussPoint *gp, FloatArray *, FloatArray *) const { return NULL; }
+    virtual FloatArray *GiveLCPlasticStrainGradient(GaussPoint *gp, FloatArray *, FloatArray *) const { return NULL; }
     //virtual FloatArray* GiveHardeningGradient (GaussPoint *gp,FloatArray *,FloatArray *) {return NULL;}
-    virtual void updateTempYC(GaussPoint *gp, FloatArray *, FloatArray *) { }
-    virtual void updateTempLC(GaussPoint *gp, FloatArray *, FloatArray *) { }
+    virtual void updateTempYC(GaussPoint *gp, FloatArray *, FloatArray *) const { }
+    virtual void updateTempLC(GaussPoint *gp, FloatArray *, FloatArray *) const { }
     //virtual int updateYieldStatus(GaussPoint* gp, FloatArray* strainIncrementIn3d);
 };
 } // end namespace oofem

@@ -72,7 +72,7 @@ void
 RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
                                           GaussPoint *gp,
                                           const FloatArray &totalStrain,
-                                          TimeStep *tStep)
+                                          TimeStep *tStep) const
 //
 // returns the total stress vector (in full or reduced form - form parameter)
 // of the receiver according to

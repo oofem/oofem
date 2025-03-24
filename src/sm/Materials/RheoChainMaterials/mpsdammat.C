@@ -274,7 +274,7 @@ MPSDamMaterial :: initializeFrom(InputRecord &ir)
 
 
 void
-MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const
 {
     if ( this->E < 0. ) {   // initialize dummy elastic modulus E
         this->E = 1. / MPSMaterial :: computeCreepFunction(28.01*this->lambda0, 28.*this->lambda0, gp, tStep);
@@ -463,7 +463,7 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
 
 
 void
-MPSDamMaterial :: initDamagedFib(GaussPoint *gp, TimeStep *tStep)
+MPSDamMaterial :: initDamagedFib(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
@@ -695,7 +695,7 @@ MPSDamMaterial :: computeDamageForCohesiveCrack(double kappa, GaussPoint *gp) co
 }
 
 void
-MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, GaussPoint *gp, TimeStep *tStep)
+MPSDamMaterial :: initDamaged(double kappa, FloatArray &principalDirection, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 

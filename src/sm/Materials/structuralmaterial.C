@@ -79,14 +79,23 @@ void
 StructuralMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
 {
     if (type == TangentStiffness) {
-        return this->giveStiffnessMatrix(answer, MatResponseMode::TangentStiffness, gp, tStep);
+        this->giveStiffnessMatrix(answer, MatResponseMode::TangentStiffness, gp, tStep);
     } else {
         OOFEM_ERROR("Not implemented");
     }
 }
 
+void 
+StructuralMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    if (type == Stress) {
+        return this->giveRealStressVector(answer, gp, flux, tStep);
+    } else {
+        OOFEM_ERROR("Not implemented");
+    } 
+}
+
 void
-StructuralMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+StructuralMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();

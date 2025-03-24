@@ -128,29 +128,29 @@ public:
 
     double give(int aProperty, GaussPoint *gp) const override;
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *) override;
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *) const override;
 
     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<RCSDEMaterialStatus>(gp); }
 
 protected:
-    double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *tStep);
+    double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *tStep) const;
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
     // we try to find equlibrium state.
 
     void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode,
-                                              GaussPoint *gp, TimeStep *tStep) override;
+                                              GaussPoint *gp, TimeStep *tStep) const override;
 
-    double computeDamageCoeff(double, double, double);
+    double computeDamageCoeff(double, double, double) const;
     double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                               double crackStrain, int i) override;
+                               double crackStrain, int i) const override;
     //double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i) override;
-    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
-    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) override;
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) const override;
+    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) const override;
     //void updateStatusForNewCrack(GaussPoint *gp, int, double) override;
-    double computeStrength(GaussPoint *gp, double) override;
-    int checkSizeLimit(GaussPoint *gp, double) override;
+    double computeStrength(GaussPoint *gp, double) const override;
+    int checkSizeLimit(GaussPoint *gp, double) const override;
 };
 } // end namespace oofem
 #endif // rcsde_h

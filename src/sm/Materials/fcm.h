@@ -216,9 +216,9 @@ public:
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep) override;
+                              const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
-    virtual void initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &base, int nCrack);
+    virtual void initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &base, int nCrack) const;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -260,12 +260,12 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /// uses temporary cracking strain and characteristic length to obtain the crack opening
-    virtual double computeNormalCrackOpening(GaussPoint *gp, int i);
+    virtual double computeNormalCrackOpening(GaussPoint *gp, int i) const;
     /// uses maximum equilibrated cracking strain and characteristic length to obtain the maximum reached crack opening
-    virtual double computeMaxNormalCrackOpening(GaussPoint *gp, TimeStep *tStep, int i);
+    virtual double computeMaxNormalCrackOpening(GaussPoint *gp, TimeStep *tStep, int i) const;
 
     /// computes total shear slip on a given crack plane (i = 1, 2, 3); the slip is computed from the temporary cracking strain
-    virtual double computeShearSlipOnCrack(GaussPoint *gp, TimeStep *tStep, int i);
+    virtual double computeShearSlipOnCrack(GaussPoint *gp, TimeStep *tStep, int i) const;
 
     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override { return std::make_unique<FCMMaterialStatus>(gp); }
 
@@ -281,61 +281,61 @@ protected:
     bool multipleCrackShear;
 
     /// comutes tensile strength
-    virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /// checks possible snap-back
-    virtual void checkSnapBack(GaussPoint *gp, TimeStep *tStep, int crack) = 0;
+    virtual void checkSnapBack(GaussPoint *gp, TimeStep *tStep, int crack) const = 0;
 
     /// updates crack statuses
-    virtual void updateCrackStatus(GaussPoint *gp);
+    virtual void updateCrackStatus(GaussPoint *gp) const;
 
     /// computes normal stress associated with i-th crack direction
-    virtual double giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) = 0;
+    virtual double giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) const = 0;
 
     /// returns characteristic element length in given direction
-    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal);
+    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal) const;
 
     /// returns stiffness in the normal direction of the i-th crack
-    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) = 0;
+    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) const = 0;
 
     /// returns stiffness in the normal direction of the i-th crack
-    virtual double giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) = 0;
+    virtual double giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) const = 0;
     
     /// returns Geff which is necessary in the global stiffness matrix
-    virtual double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) = 0;
+    virtual double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) const = 0;
 
     /// shear modulus for a given shear direction (4, 5, 6)
-    virtual double computeTotalD2Modulus(GaussPoint *gp, TimeStep *tStep, int i);
+    virtual double computeTotalD2Modulus(GaussPoint *gp, TimeStep *tStep, int i) const;
 
     /// shear modulus in a STIFFNESS MATRIX for a given shear direction (4, 5, 6)
-    virtual double computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int i);
+    virtual double computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int i) const;
 
     /// shear modulus for a given crack plane (1, 2, 3)
-    virtual double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) = 0;
+    virtual double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const = 0;
 
     /// shear modulus for numerical purpose (stiffness matrix) for a given crack plane (1, 2, 3)
-    virtual double computeNumerD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) = 0;
+    virtual double computeNumerD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const = 0;
     
     /// computes the maximum value of the shear stress; if the shear stress exceeds this value, it is cropped
-    virtual double maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) = 0;
+    virtual double maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) const = 0;
 
     /// returns true for closed or no cracks associated to given shear direction (i = 4, 5, 6)
-    virtual bool isIntactForShear(GaussPoint *gp, int i);
+    virtual bool isIntactForShear(GaussPoint *gp, int i) const;
 
     /// returns true for closed or no crack (i = 1, 2, 3)
-    virtual bool isIntact(GaussPoint *gp, int icrack);
+    virtual bool isIntact(GaussPoint *gp, int icrack) const;
 
     /// returns true if current component is associated with shear
-    virtual bool isThisShearComponent(GaussPoint *gp, int component);
+    virtual bool isThisShearComponent(GaussPoint *gp, int component) const;
 
     /// checks if the globalStress does not exceed strength in the direction of newBase for n-th crack
-    virtual bool checkStrengthCriterion(FloatMatrix &newBase, const FloatArray &globalStress, GaussPoint *gp, TimeStep *tStep, int nCrack);
+    virtual bool checkStrengthCriterion(FloatMatrix &newBase, const FloatArray &globalStress, GaussPoint *gp, TimeStep *tStep, int nCrack) const;
 
     /// compares trial stress with strength. Returns true if the strength is exceeded. Function oveloaded in the nonlocal approach for the fiber reinforced composites
-    virtual bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress);
+    virtual bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) const;
 
     /// function calculating ratio used to split shear slips on two crack planes
-    virtual double computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection);
+    virtual double computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection) const;
 
     /// value of crack spacing (allows to "have" more parallel cracks in one direction if the element size exceeds user-defined or computed crack spacing).
     double crackSpacing;
@@ -348,37 +348,37 @@ protected:
     
 
     /// returns either user-provided value of crack spacing or a value computed from composition
-    virtual double giveCrackSpacing(void);
+    virtual double giveCrackSpacing(void) const;
 
     /// returns number of fictiotious parallel cracks in the direction of i-th crack
-    virtual double giveNumberOfCracksInDirection(GaussPoint *gp, int iCrack);
+    virtual double giveNumberOfCracksInDirection(GaussPoint *gp, int iCrack) const;
 
     /// returns number of cracks for given shear direction (i = 4, 5, 6) which is treated as the maximum of the two associated normal directions
-    virtual double giveNumberOfCracksForShearDirection(GaussPoint *gp, int i);
+    virtual double giveNumberOfCracksForShearDirection(GaussPoint *gp, int i) const;
 
 
     virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
                                              GaussPoint * gp,
-                                             TimeStep * tStep);
+                                             TimeStep * tStep) const;
 
     /// returns local stiffness matrix in the cracks' direction (total according to the material mode)
     virtual void giveTotalLocalCrackedStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *tStep);
+                                                 GaussPoint *gp, TimeStep *tStep) const;
 
     /// returns local stiffness matrix in the cracks' direction (only normal components)
     virtual void giveNormalLocalCrackedStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *tStep);
+                                                 GaussPoint *gp, TimeStep *tStep) const;
 
     /// returns overall Young's modulus
-    virtual double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) { return linearElasticMaterial.giveYoungsModulus(); }
+    virtual double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) const { return linearElasticMaterial.giveYoungsModulus(); }
 
     /// returns overall shear modulus
-    virtual double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) { return linearElasticMaterial.giveShearModulus(); }
+    virtual double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) const { return linearElasticMaterial.giveShearModulus(); }
 
     /// returns Poisson's ratio
-    virtual double givePoissonsRatio() { return linearElasticMaterial.givePoissonsRatio(); }
+    virtual double givePoissonsRatio() const { return linearElasticMaterial.givePoissonsRatio(); }
 
 
     
