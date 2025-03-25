@@ -315,6 +315,20 @@ IsotropicLinearElasticMaterial::giveCharacteristicValue(MatResponseMode type, Ga
     }
 }
 
+void
+IsotropicLinearElasticMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    if (type == Stress) {
+        return LinearElasticMaterial::giveRealStressVector(answer, gp, flux, tStep);
+    } else if (type == DeviatoricStress) {
+        FloatMatrix d;
+        this->giveDeviatoricConstitutiveMatrix(d, TangentStiffness, gp, tStep);
+        answer.beProductOf(d, flux);
+        return; 
+    } else {
+        OOFEM_ERROR("Not implemented");
+    } 
+}
+
 void 
 IsotropicLinearElasticMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
     if (type == DeviatoricStiffness) {

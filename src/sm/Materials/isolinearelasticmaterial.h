@@ -182,6 +182,8 @@ public:
     **
     */
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+
 
 
     void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
