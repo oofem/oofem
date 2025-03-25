@@ -76,7 +76,7 @@ namespace oofem {
         IntArray rhsIntegrals;
 
     public:
-        StationaryMPMSProblem(int i, EngngModel * _master) : EngngModel(i, _master) { ndomains = 1;}
+        StationaryMPMSProblem(int i, EngngModel * _master) : EngngModel(i, _master), nMethod(nullptr) { ndomains = 1;}
 
         void initializeFrom(InputRecord &ir) override {
             EngngModel::initializeFrom(ir);
@@ -126,7 +126,6 @@ namespace oofem {
                     }
                 }
             }
-            effectiveMatrix->printYourself();
             // assemble rhs
             FloatArray rhs(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ));
             // loop over rhs integrals
@@ -136,7 +135,6 @@ namespace oofem {
             }
             this->updateSharedDofManagers(rhs, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
-            rhs.printYourself();
             residualVector.resize(neq);
 
             // set-up numerical method
@@ -155,19 +153,19 @@ namespace oofem {
                                 SparseNonLinearSystemNM :: rlm_total,
                                 currentIterations,
                                 tStep);
-
-
-            unknownsField->giveSolutionVector(tStep)->printYourself();      
         }
 
         void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override
         {
             if ( cmpn == InternalRhs ) {
                 this->residualVector.zero();
+                int maxdofids = d->giveMaxDofID();
+                eNorm.resize(maxdofids);
+                eNorm.zero();
                 for (auto i: lhsIntegrals) {
-                        Integral* integral = this->integralList[i-1].get();
-                        integral->assemble_rhs (residualVector, EModelDefaultEquationNumbering(), tStep); 
-                    }
+                    Integral* integral = this->integralList[i-1].get();
+                    integral->assemble_rhs (residualVector, EModelDefaultEquationNumbering(), tStep, &eNorm); 
+                }
                 this->updateSharedDofManagers(this->residualVector, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
                 return;
             } else if ( cmpn == NonLinearLhs ) {

@@ -95,14 +95,14 @@ namespace oofem {
             }
         }
         // evaluate contribution (all vars known) on given cell
-        void assemble_rhs (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep) {
-            IntArray locr, locc;
+        void assemble_rhs (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep, FloatArray* eNorms=NULL ) const {
+            IntArray locr, locc, dofIDs;
 
             for (auto i: this->set->giveElementList()) { // loop over elements
                 MPElement *e = dynamic_cast<MPElement*>(this->domain->giveElement(i));
                 if (e) {
                     FloatArray contrib;
-                    this->getElementTermCodeNumbers(locr, locc, e, *this->term, s);
+                    this->getElementTermCodeNumbers(locr, locc, e, *this->term, s, &dofIDs);
                     // determine integration rule (this has to be set up on element, as we need to track history there)
                     // the IR is created by term.initialize, we just need mechanism to get this IR
                     // specific terms can have specific integration requirements (reduced integration, etc)
@@ -113,13 +113,16 @@ namespace oofem {
                     contrib.times(this->factor); 
                     // assemble
                     dest.assemble (contrib, locr);
+                    if ( eNorms ) {
+                        eNorms->assembleSquared(contrib, dofIDs);
+                    }
                 }
             }
            
 
         }
-        void getElementTermCodeNumbers (IntArray &locr, IntArray &locc, Element* e, const Term& t, const UnknownNumberingScheme &s) const {
-            IntArray nodes, internalDofMans, loc;
+        void getElementTermCodeNumbers (IntArray &locr, IntArray &locc, Element* e, const Term& t, const UnknownNumberingScheme &s, IntArray* rowDofIDs=NULL) const {
+            IntArray nodes, internalDofMans, loc, masterDofIDs;
             locr.resize(0);
             locc.resize(0);
             // term.field and its interpolation determines column code numbers
@@ -136,6 +139,9 @@ namespace oofem {
                 locc.followedBy(loc);
             }
 
+            if ( rowDofIDs ) {
+                rowDofIDs->clear();
+            }
             // term.testField and its interpolation determines row code numbers
             // from interpolation get node and internalDofMan lists
             t.testField->interpolation->giveCellDofMans(nodes, internalDofMans, e);
@@ -144,12 +150,18 @@ namespace oofem {
                 // get mode dofID mask
                 e->giveDofManager(i)->giveLocationArray(t.testField->getDofManDofIDs(), loc, s);
                 locr.followedBy(loc);
+                if ( rowDofIDs ) {
+                    e->giveDofManager(i)->giveMasterDofIDArray(t.testField->getDofManDofIDs(), masterDofIDs);
+                    rowDofIDs->followedBy(masterDofIDs);
+                }
             }
             for (int i: internalDofMans) {
-
-
                 e->giveInternalDofManager(i)->giveLocationArray(t.testField->getDofManDofIDs(), loc, s);
                 locr.followedBy(loc);
+                if ( rowDofIDs ) {
+                    e->giveInternalDofManager(i)->giveMasterDofIDArray(t.testField->getDofManDofIDs(), masterDofIDs);
+                    rowDofIDs->followedBy(masterDofIDs);
+                }
             }
         }
    };
