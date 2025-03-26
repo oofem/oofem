@@ -52,6 +52,8 @@ Integral::initializeFrom (InputRecord &ir, EngngModel *emodel) {
     int ti;
     IR_GIVE_FIELD (ir, ti, "term");
     this->term = emodel->giveTerm(ti);
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, factor, "factor");
 }
         
 

@@ -210,6 +210,9 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
     this->evaldNdxi(dn, lcoords, cellgeo);
+#if 1
+    cellgeo.getGeometryInterpolation()->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
+#else
     for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         double x = cellgeo.giveVertexCoordinates(i).at(xind);
         double y = cellgeo.giveVertexCoordinates(i).at(yind);
@@ -219,9 +222,10 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
         jacobianMatrix.at(2, 1) += dn.at(i, 2) * x;
         jacobianMatrix.at(2, 2) += dn.at(i, 2) * y;
     }
+#endif
     inv.beInverseOf(jacobianMatrix);
 
-    answer.beProductTOf(dn, inv);
+    answer.beProductOf(dn, inv);
     return jacobianMatrix.giveDeterminant();
 #endif
 }

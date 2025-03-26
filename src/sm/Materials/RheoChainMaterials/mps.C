@@ -736,13 +736,16 @@ MPSMaterial::giveEModulus(GaussPoint *gp, TimeStep *tStep) const
     if ( status->giveStoredEmodulusFlag() ) {
         Emodulus = status->giveStoredEmodulus();
     } else {
-        if ( EparVal.giveSize() == 0 ) {
-            this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
-        }
+#pragma omp critical (MPS_Emodulus)
+        { // critical section as EparVal is a class variable; if the receiver is slave model (e.g. ConcreteFCMViscoElastic) 
+          // it can be shared by several master models with different parameters
+            if ( EparVal.giveSize() == 0 ) {
+                this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
+            }
 
-        // contribution of the solidifying Kelving chain
-        sum = KelvinChainSolidMaterial::giveEModulus(gp, tStep);
-
+            // contribution of the solidifying Kelving chain
+            sum = KelvinChainSolidMaterial::giveEModulus(gp, tStep);
+        }      
         v = computeSolidifiedVolume(gp, tStep);
 
         dt = tStep->giveTimeIncrement();

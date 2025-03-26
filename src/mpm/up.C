@@ -144,7 +144,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib, NTf_Surface(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs, 's'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfSurfaceDOFs());
@@ -153,7 +153,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundarySurfaceIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateSurfaceTerm_c(contrib2, NTf_Surface(getP(), BoundaryFluxFunctor(load, boundary, getP()->dofIDs,'s'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
@@ -172,7 +172,7 @@ class UPElement : public MPElement {
 
         // integrate traction contribution (momentum balance)
         int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+        std::unique_ptr<IntegrationRule> ir = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib, NTf_Edge(getU(), BoundaryFluxFunctor(load, boundary, getU()->dofIDs,'e'), boundary), ir.get(), boundary, tStep);
 
         answer.resize(this->getNumberOfEdgeDOFs());
@@ -181,7 +181,7 @@ class UPElement : public MPElement {
 
         // integrate mass (fluid) flux normal to the boundary (mass balance) 
         o = getP()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
-        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation().giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
+        std::unique_ptr<IntegrationRule> ir2 = this->getGeometryInterpolation()->giveBoundaryEdgeIntegrationRule(o, boundary, this->giveGeometryType());
         this->integrateEdgeTerm_c(contrib2, NTf_Edge(getP(), BoundaryFluxFunctor(load, boundary, getP()->dofIDs,'e'), boundary), ir2.get(), boundary, tStep);
         answer.assemble(contrib2, locp);
     }
@@ -193,7 +193,7 @@ class UPElement : public MPElement {
             FloatArray nn, h1(3), h2(3);
             answer.resize(3,3);
             if (btype == 's') {
-                this->getGeometryInterpolation().boundarySurfaceEvalNormal(nn, iSurf, lc, FEIElementGeometryWrapper(this));
+                this->getGeometryInterpolation()->boundarySurfaceEvalNormal(nn, iSurf, lc, FEIElementGeometryWrapper(this));
             } else {
                 OOFEM_ERROR ("Unsupported boundary entity");
             }
@@ -286,7 +286,7 @@ class UPTetra21 : public UPElement {
     }
     int giveNumberOfDofs() override { return 34; }
     const char *giveInputRecordName() const override {return "uptetra21";}
-    const FEInterpolation& getGeometryInterpolation() const override {return this->uInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->uInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_tetra_2;
@@ -369,7 +369,7 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
     const char *giveClassName() const override { return "UPBrick11"; }
 
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->pInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->pInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_hexa_1;
@@ -459,7 +459,7 @@ class UPQuad11 : public UPElement {
     int giveNumberOfDofs() override { return 12; }
     const char *giveInputRecordName() const override {return "upquad11";}
     
-    const FEInterpolation& getGeometryInterpolation() const override {return this->pInterpol;}
+    const FEInterpolation* getGeometryInterpolation() const override {return &this->pInterpol;}
   
     Element_Geometry_Type giveGeometryType() const override {
         return EGT_quad_1;

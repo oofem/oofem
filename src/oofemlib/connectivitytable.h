@@ -35,9 +35,16 @@
 #ifndef contable_h
 #define contable_h
 
+#include <vector>
+#include <list>
+#include <memory>
+
 #include "oofemenv.h"
 #include "intarray.h"
-#include <vector>
+#include "domain.h"
+#include "dofmanager.h"
+#include "elementgeometrytype.h"
+
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -45,6 +52,33 @@
 
 namespace oofem {
 class Domain;
+
+/**
+ * @NOTE Consider just keeping the connectivity information
+ *  (list of shared elements)
+ *  and allocate dofmanages in Domain and keep nodes on element standard DofManList.  
+ *  
+ */
+class SharedBoundaryEntity {
+public:
+    struct elementRec {
+        int elementID;
+        int boundaryID;
+    };
+    // boundary entity internal; DOfManagers (ordering is interpolation dependent) 
+    // number of dofmans determines the interpolation order on the entity, however, 
+    // std::list<std::unique_ptr<DofManager>> dofMans; 
+    // we also store the interpolation order explicitly
+    int interpolationOrder;
+    // elements sharing the boundary entity (OPTIONAL, required by DG)
+    // @TODO: We also need mapping from elements to boundary entities
+    std::list<elementRec> elements; 
+    // @NOTE this may be redundant, 
+    IntArray nodes;  // nodes defining the boundary entity and its orientation
+    Element_Geometry_Type geomType; // geometry type of the boundary entity
+    int spatialDimension; // entity spatial dimension (1 for edge, 2 for surface)
+};
+
 
 /**
  * Class representing connectivity table. Usually attribute of domain. Provides
@@ -70,6 +104,10 @@ private:
     IntArray elementColoring;
     /// flag indicating assembled element coloring
     bool elementColoringFlag;   
+
+    // shared element boundary entities (edges & surfaces)
+    std::vector<std::unique_ptr<SharedBoundaryEntity>> sharedBoundaryEntities;
+
 #ifdef _OPENMP
     omp_lock_t initLock;
 #endif
@@ -114,11 +152,19 @@ public:
      * @param nodeList List of nodes
     */
     void giveElementsWithNodes(IntArray &answer, const IntArray& nodes);
+    
+    
     /** Builds element coloring, assigning to element color, such that no neighboring elements have the same color
      */
     void buildElementColoring();
     /** Returns element color as determined by coloring algorithm*/
     int getElementColor(int e);
+
+
+    /** Build list of shared element edges and surfaces */
+    void buildSharedBoundaryEntities(Domain *d); 
+    /** Access SharedBoundaryEntities */
+    SharedBoundaryEntity* giveBoundaryEntity(int id);
 };
 } // end namespace oofem
 #endif // conTable_h

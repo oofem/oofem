@@ -496,7 +496,7 @@ Optional parameter ``timeScale`` scales time in output. In transport problem, ba
 
 Currently, the supported export modules are following
 
--  VTK export, **DEPRECATED - Use VTKXML or vtkhdf5 **
+-  VTK export, **DEPRECATED - Use VTKXML or vtkhdf5**
 
    ``vtk`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
    [``stype #(in)``] [``regionstoskip #(ia)``]
@@ -731,20 +731,26 @@ In this section we describe how to define variable or field apperaing in weak fo
 ``Variable`` ``name #(s)`` ``interpolation #(s)`` ``type #(in)`` ``quantity #(in)`` ``size #(in)`` ``dofs #(ia)``
 
 where the parameters have following meaning:
+
 - ``name`` is the string containing the name of the variable
 - ``interpolation`` string, defining the interpolation of the varaible. The supported values are:
-   - ``feilin`` - linear interpolation
+    
+  - ``feiconst`` - constant interpolation
+  - ``feilin`` - linear interpolation
+  - ``feiquad`` - quadratic interpolation
 - ``type`` defines the rank of the variable. The supported values are:
-   - 0 - for scalar variable
-   - 1 - for vector variable
+  
+  - 0 - for scalar variable
+  - 1 - for vector variable
 - ``quantity`` attribute defines the physical meaning of variable. Supported values include
+  
    - 0 - for displacement field
    - 1 - for velocity field
    - 2 - for temperature field
    - 3 - for pressure field
 - ``size`` attribute determines the size (dimension) of variable.
 - ``dofs`` array of integers, defining the physical meaning of variable DOFs. The size of the array should be equal to the size of the variable. 
-   The supported values are defined in src/oofemlib/dofiditem.h file.
+    The supported values are defined in src/oofemlib/dofiditem.h file.
 
 .. _TermsSec:
 
@@ -754,12 +760,49 @@ The integrals in the weak form integrate terms. The individual term record have 
 
 ``TermType``  ``variable #(s)``  ``testvariable #(s)`` ``mmode #(in)``
 
-The Supported DofManagerType keywords are documented in dedicated document (Theory Manual).
+The Supported TermType keywords are documented below.
 The parameters have following meaning:
+
   - ``variable`` is the name of the unknown variable (field) of the term
   - ``testvariable`` is the name of the test variable (field) of the term
-   - ``mmode`` allows to define material mode used to evaluate the term
+  - ``mmode`` allows to define material mode used to evaluate the term
+
 Note that sopecific terms can introduce additional parameters to define the term.
+
+Supported TermTypes
+^^^^^^^^^^^^^^^^^^^^
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Keyword      | Description & parameters                                                                                                    |
++==============+=============================================================================================================================+
+|| BTSigmaTerm || :math:`\int_\Omega \nabla^s \mathbf{w}\ \mathbf{\sigma}(\nabla^s \mathbf{u})`,                                             |
+||             || where :math:`\mathbf{\sigma}` is (nonlinar) operator evaluated by constitutive model.                                      |
+||             || Supported material modes (``mmode``): _3dMat, _3dUP, _2dUP, _PlaneStress                                                   |
+||             || Optional parameters                                                                                                        |
+||             || * ``lhsmatmode #(in)``                                                                                                     |
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+|| BTamNTerm   || :math:`\int_\Omega \nabla^s \mathbf{w}\ a\mathbf{m}\ p`,                                                                   |
+||             || where ``a`` is material parameter, defined by contitutive model with meaning defined by ``atype`` parameter                |
+||             || and :math:`\mathbf{m}^T=[1,1,1,0,0,0]^T`. Note that :math:`\mathbf{\sigma}_{D}=\mathbf{\sigma}-\mathbf{m}p`                |
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+| NTamTBTerm   | This is transposed version of BTamNTerm :math:`=\int_\Omega w\ \alpha\mathbf{m}\ \nabla^s \mathbf{u}`                       |
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+| NTcN         | :math:`\int_\Omega q c p`, where ``c`` is constant defined by material model with meaning determined by `ctype` parameter.  |
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+| NTfTerm      | :math:`\int_\Omega \mathbf{w}\cdot\bar{\mathbf{t}}`, where ``t`` is given flux vector, defined by ``flux #(ra)`` parameter. |
++--------------+-----------------------------------------------------------------------------------------------------------------------------+
+
+Notation
+^^^^^^^^
++----------------------+-------------------------+
+| Symbol               | Description             |
++======================+=========================+
+| q,p                  | scalar valued functions |
++----------------------+-------------------------+
+| :math:`\mathbf{w,u}` | vector valued functions |
++----------------------+-------------------------+
+
+
+
 
 
 .. _IntergarlsSec:

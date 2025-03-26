@@ -81,7 +81,7 @@ public:
        than the interpolation represents
     */
     //@{
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
@@ -102,7 +102,7 @@ public:
     double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override;
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
     //@}
 
     /**@name Edge interpolation services. */

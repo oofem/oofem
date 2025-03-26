@@ -49,6 +49,9 @@
 #include "gausspoint.h"
 #include "feinterpol.h"
 #include "intarray.h"
+#include "masterdof.h"
+#include "integrationrule.h"
+#include "gaussintegrationrule.h"
 #include "classfactory.h"
 
 
@@ -146,6 +149,121 @@ class Term {
     virtual void initializeFrom(InputRecord &ir, EngngModel* problem); // enable instantiation from input record
 
 };
+
+
+    /**
+     * MPMSymbolic terms extend standard Terms to allow for cell initialization.
+     * The symbolic terms are assumed to be evaluated on generic cells (and not on problem-specific elements).
+     * Therefore the need to ensure that proper DOFs and integration rules are set-up.
+     */
+    class MPMSymbolicTerm : public Term {
+        protected:
+        int nip=0; // assumed order of interpolation for the term
+        public:
+        MPMSymbolicTerm() : Term() {}
+        MPMSymbolicTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : Term(testField, unknownField, m) {};
+        void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+            Term::initializeFrom(ir, problem);
+            IR_GIVE_OPTIONAL_FIELD(ir, nip, "nip");
+        }
+        void initializeCell(Element& cell) const override {
+            // initialize cell for interpolation use
+            // @TODO: prevent multiple initialization for same interpolation
+            this->field->interpolation->initializeCell(&cell);
+            this->testField->interpolation->initializeCell(&cell);
+
+            // allocate necessary DOFs
+            IntArray enodes, einteranlnodes, dofIDs;
+            // process term field
+            dofIDs = this->field->getDofManDofIDs();
+            this->field->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
+            for (auto i: enodes) {
+                DofManager* dman =  cell.giveDofManager(i);
+                for (auto d: dofIDs) {
+                    if (!dman->hasDofID((DofIDItem) d)) {
+                        // create a DOF
+                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
+                        dman->appendDof(dof);
+                    }
+                }
+            }
+            for (auto i: einteranlnodes) {
+                DofManager* dman =  cell.giveInternalDofManager(i);
+                for (auto d: dofIDs) {
+                    if (!dman->hasDofID((DofIDItem) d)) {
+                        // create a DOF
+                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
+                        dman->appendDof(dof);
+                    }
+                }
+            }
+            // process testField
+            dofIDs = this->testField->getDofManDofIDs();
+            this->testField->interpolation->giveCellDofMans(enodes, einteranlnodes, &cell);
+            for (auto i: enodes) {
+                DofManager* dman =  cell.giveDofManager(i);
+                for (auto d: dofIDs) {
+                    if (!dman->hasDofID((DofIDItem)d)) {
+                        // create a DOF
+                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
+                        dman->appendDof(dof);
+                    }
+                }
+            }
+            for (auto i: einteranlnodes) {
+                DofManager* dman =  cell.giveInternalDofManager(i);
+                for (auto d: dofIDs) {
+                    if (!dman->hasDofID((DofIDItem)d)) {
+                        // create a DOF
+                        MasterDof* dof = new MasterDof(dman, (DofIDItem)d);
+                        dman->appendDof(dof);
+                    }
+                }
+            }
+            // set up the integration rule on cell
+            // get required number of IPs
+            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
+            GaussIntegrationRule ir(0, &cell);
+            int nip = ir.getRequiredNumberOfIntegrationPoints(cell.giveIntegrationDomain(), myorder);
+            if (this->nip>0) {
+                nip = this->nip;
+            }
+            // create nd insert it toelement if not exist yet.
+            std::vector< std :: unique_ptr< IntegrationRule > > &irvec = cell.giveIntegrationRulesArray();
+            bool found = false;
+            int size = irvec.size();
+            for (int i = 0; i< size; i++) {
+                if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // need to insert right one
+                irvec.resize( size +1);
+                irvec [ size] = std::make_unique<GaussIntegrationRule>(size, &cell);
+                //irvec [ size ]->SetUpPointsOnSquare(nip, this->mode);
+                irvec[size]->setUpIntegrationPoints(cell.giveIntegrationDomain(), nip, this->mode);
+                OOFEM_LOG_INFO("Integration rule with %d nip created for cell %d\n",nip,cell.giveNumber());
+            }
+        }
+        IntegrationRule* giveElementIntegrationRule(Element* e) const override {
+            int myorder = this->field->interpolation->giveInterpolationOrder() *  this->testField->interpolation->giveInterpolationOrder(); 
+            GaussIntegrationRule ir(0, e);
+            int nip = ir.getRequiredNumberOfIntegrationPoints(e->giveIntegrationDomain(), myorder);
+            if (this->nip>0) {
+                nip = this->nip;
+            }
+            std::vector< std :: unique_ptr< IntegrationRule > > &irvec = e->giveIntegrationRulesArray();
+            int size = irvec.size();
+            for (int i = 0; i< size; i++) {
+                if (irvec[i].get()->giveNumberOfIntegrationPoints() == nip) {
+                    return irvec[i].get();
+                }
+            }
+            return NULL;
+        }
+    };
 
 /**
 * Element code sample:
@@ -280,7 +398,7 @@ class MPElement : public Element {
    * @param isurf
    */ 
   virtual void getSurfaceElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
-    IntArray dl, sn = this->getGeometryInterpolation().boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
+    IntArray dl, sn = this->getGeometryInterpolation()->boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
       this->getDofManLocalCodeNumbers(dl, q, i);
@@ -288,7 +406,7 @@ class MPElement : public Element {
     }
   }
   virtual void getEdgeElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
-    IntArray dl, sn = this->getGeometryInterpolation().boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
+    IntArray dl, sn = this->getGeometryInterpolation()->boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
       this->getDofManLocalCodeNumbers(dl, q, i);
@@ -364,14 +482,14 @@ class MPElement : public Element {
     }
 
   virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf) 
-  {return igp->giveWeight()*this->getGeometryInterpolation().boundarySurfaceGiveTransformationJacobian(iSurf, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->boundarySurfaceGiveTransformationJacobian(iSurf, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   virtual double computeEdgeVolumeAround(GaussPoint* igp, int iEdge) 
-  {return igp->giveWeight()*this->getGeometryInterpolation().boundaryEdgeGiveTransformationJacobian(iEdge, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->boundaryEdgeGiveTransformationJacobian(iEdge, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   virtual double computeVolumeAround(GaussPoint* igp) override
-  {return igp->giveWeight()*this->getGeometryInterpolation().giveTransformationJacobian(igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
+  {return igp->giveWeight()*this->getGeometryInterpolation()->giveTransformationJacobian(igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   
-  virtual const FEInterpolation& getGeometryInterpolation () const = 0;
-  FEInterpolation *giveInterpolation() const override { return const_cast<FEInterpolation*>(&this->getGeometryInterpolation()); }
+   //const FEInterpolation& getGeometryInterpolation () const override = 0;
+   FEInterpolation *giveInterpolation() const override { return const_cast<FEInterpolation*>( this->getGeometryInterpolation()); }
 
     /**
      * Returns transformation matrix from local boundary (edge/surface) c.s  to element local coordinate system
@@ -389,11 +507,11 @@ class MPElement : public Element {
         answer.clear(); 
         return 0;
     }
-    IntArray giveBoundarySurfaceNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
+    IntArray giveBoundarySurfaceNodes(int boundary, bool includeHierarchical=false) const override {
+        return this->getGeometryInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
     }
-    IntArray giveBoundaryEdgeNodes(int boundary) const override {
-        return this->getGeometryInterpolation().boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
+    IntArray giveBoundaryEdgeNodes(int boundary, bool includeHierarchical=false) const override {
+        return this->getGeometryInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
     }
     virtual void giveCharacteristicMatrixFromBC(FloatMatrix &answer, CharType type, TimeStep *tStep, GeneralBoundaryCondition *bc, int boundaryID) {
         answer.clear();

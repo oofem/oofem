@@ -37,7 +37,7 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
+IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt, bool includeHierarchical) const
 {
     return this->computeLocalEdgeMapping(boundary);
 }
@@ -212,7 +212,7 @@ double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, c
   return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
-IntArray FEInterpolation2d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt) const
+IntArray FEInterpolation2d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt, bool includeHierarchical) const
 {
     int nnode = this->giveNumberOfNodes(egt);
     IntArray answer(nnode);

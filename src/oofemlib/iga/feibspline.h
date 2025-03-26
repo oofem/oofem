@@ -130,7 +130,7 @@ public:
     int giveNsd(const Element_Geometry_Type)  const override { return nsd; }
     void initializeFrom(InputRecord &ir) override;
 
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override
     { OOFEM_ERROR("Functions not supported for this interpolator.");}
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
@@ -154,7 +154,7 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type) const override
+    IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override
     { OOFEM_ERROR("Functions not supported for this interpolator.");}
     //@}
 

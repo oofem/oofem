@@ -69,7 +69,9 @@
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), crossSection(0), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
+    FEMComponent(n, aDomain), dofManArray(), crossSection(0), 
+    bodyLoadArray(), boundaryLoadArray(), integrationRulesArray(),
+    globalEdgeIDs(), globalSurfaceIDs()
 {
     material           = 0;
     numberOfDofMans    = 0;
@@ -554,6 +556,17 @@ Element :: setDofManagers(const IntArray &_dmans)
 }
 
 void
+Element :: setDofManager(int id, int dm)
+{
+    if (this->dofManArray.giveSize() >= id) {
+        this->dofManArray.at(id)=dm;
+    } else {
+        OOFEM_ERROR("DofMAnager index out of bounds (index=%d, size=%d)", id, this->dofManArray.giveSize());
+    }
+}
+
+
+void
 Element :: setBodyLoads(const IntArray &_bodyLoads)
 {
     this->bodyLoadArray = _bodyLoads;
@@ -840,15 +853,15 @@ Element :: initForNewStep()
 
 
 IntArray
-Element::giveBoundaryEdgeNodes(int boundary) const
+Element::giveBoundaryEdgeNodes(int boundary, bool includeHierarchical) const
 {
-    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType());
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
 }
 
 IntArray
-Element::giveBoundarySurfaceNodes(int boundary) const
+Element::giveBoundarySurfaceNodes(int boundary, bool includeHierarchical) const
 {
-    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType());
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary, this->giveGeometryType(), includeHierarchical);
 }
 
 IntArray
@@ -1424,6 +1437,134 @@ Element :: giveNumberOfBoundarySides()
 
 
 int
+Element :: giveNumberOfEdges() const
+{
+    switch ( this->giveGeometryType() ) {
+    case EGT_point:
+        return 0;
+    case EGT_line_1:
+    case EGT_line_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
+        return 1;
+
+    case EGT_triangle_1:
+    case EGT_triangle_2:
+        return 3;
+
+    case EGT_quad_1:
+    case EGT_quad_2:
+    case EGT_quad9_2:
+        return 4;
+
+    case EGT_tetra_1:
+    case EGT_tetra_2:
+        return 6;
+
+    case EGT_wedge_1:
+    case EGT_wedge_2:
+        return 9;
+
+    case EGT_hexa_1:
+    case EGT_hexa_2:
+    case EGT_hexa_27:
+        return 12;
+
+    case EGT_Composite:
+    case EGT_unknown:
+        break;
+    }
+
+    OOFEM_ERROR("failure, unsupported geometry type (%s)",
+            __Element_Geometry_TypeToString( this->giveGeometryType() ));
+}
+
+int
+Element :: giveNumberOfSurfaces() const
+{
+    switch ( this->giveGeometryType() ) {
+    case EGT_point:
+    case EGT_line_1:
+    case EGT_line_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
+    case EGT_triangle_1:
+    case EGT_triangle_2:
+    case EGT_quad_1:
+    case EGT_quad_2:
+    case EGT_quad9_2:
+        return 0;
+
+    case EGT_tetra_1:
+    case EGT_tetra_2:
+        return 4;
+
+    case EGT_wedge_1:
+    case EGT_wedge_2:
+        return 5;
+
+    case EGT_hexa_1:
+    case EGT_hexa_2:
+    case EGT_hexa_27:
+        return 6;
+
+    case EGT_Composite:
+    case EGT_unknown:
+        break;
+    }
+
+    OOFEM_ERROR("failure, unsupported geometry type (%s)",
+            __Element_Geometry_TypeToString( this->giveGeometryType() ));
+}
+
+Element_Geometry_Type 
+Element::giveEdgeGeometryType(int id) const {
+    switch ( this->giveGeometryType() ) {
+        case EGT_line_1:
+        case EGT_triangle_1:
+        case EGT_quad_1:
+        case EGT_tetra_1:
+        case EGT_wedge_1:
+        case EGT_hexa_1:
+            return EGT_line_1;
+
+        case EGT_line_2:
+        case EGT_triangle_2:
+        case EGT_quad_2:
+        case EGT_quad9_2:
+        case EGT_tetra_2:
+        case EGT_wedge_2:
+        case EGT_hexa_2:
+        case EGT_hexa_27:
+            return EGT_line_2;
+        default:
+            OOFEM_ERROR("failure, unsupported geometry type (%s)",
+                        __Element_Geometry_TypeToString( this->giveGeometryType() ));
+    }
+}
+
+Element_Geometry_Type 
+Element::giveSurfaceGeometryType(int id) const {
+    switch ( this->giveGeometryType() ) {
+
+        case EGT_tetra_1:
+            return EGT_triangle_1;
+        case EGT_tetra_2:
+            return EGT_triangle_2;
+        case EGT_hexa_1:
+            return EGT_quad_1;
+        case EGT_hexa_2:
+            return EGT_quad_2;
+        case EGT_wedge_1:
+            if (id<3) return EGT_triangle_1;
+            else return EGT_quad_1;
+        default:
+            OOFEM_ERROR("failure, unsupported geometry type (%s)",
+                __Element_Geometry_TypeToString( this->giveGeometryType() ));
+    }
+}
+
+int
 Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 {
     int result = 1;
@@ -1504,7 +1645,9 @@ void
 Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     for ( auto &dnum : dofManArray ) {
-        dnum = f(dnum, ERS_DofManager);
+        if (dnum) {
+            dnum = f(dnum, ERS_DofManager);
+        }
     }
     
 }

@@ -50,18 +50,30 @@ namespace oofem {
 
 BCTracker :: BCTracker(Domain* d) {
   this->domain = d;
+  #ifdef _OPENMP
+    omp_init_lock(&initLock);
+  #endif
 }
 
 
 void
 BCTracker::initialize() {
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-  
-  {
+  if ( initialized ) {
+          return;                     // already initialized
+  }
+  #ifdef _OPENMP
+      omp_set_lock(&initLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+      if ( this->initialized ) {
+          omp_unset_lock(&initLock); 
+          return;
+      }
+  #endif 
+
   this->elemList.clear();
   this->elemList.resize(domain->giveNumberOfElements());
+  for (int ie=0; ie<domain->giveNumberOfElements(); ie++) {
+    this->elemList[ie].clear();
+  }
 
   int nbc = domain->giveNumberOfBoundaryConditions();
   for ( int ibc = 1; ibc <= nbc; ++ibc ) {
@@ -111,7 +123,10 @@ BCTracker::initialize() {
 #endif
     }
   }// end loop over BCs
-  }
+  this->initialized = true;
+  #ifdef _OPENMP
+  omp_unset_lock(&initLock);
+  #endif
 }
   
 const BCTracker::entryListType&

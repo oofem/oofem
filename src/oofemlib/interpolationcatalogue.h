@@ -53,7 +53,9 @@ public:
     static  FEI1dLin fei1dlin_y ;
     static  FEI1dLin fei1dlin_z ;
 #ifdef __MPM_MODULE
+    static  ConstantInterpolation feiconst;
     static  LinearInterpolation feilin;
+    static  QuadraticInterpolation feiquad;
 #endif
     const FEInterpolation* getInterpolationByName (std::string name);
 

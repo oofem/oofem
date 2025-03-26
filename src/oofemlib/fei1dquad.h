@@ -68,7 +68,7 @@ public:
 
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 3; }
 
-    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type) const override;
+    IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

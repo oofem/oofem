@@ -48,6 +48,13 @@
 #include <list>
 
 namespace oofem {
+
+Set::Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) {
+    #ifdef _OPENMP
+    omp_init_lock(&initLock);
+#endif
+ }
+
 void Set :: initializeFrom(InputRecord &ir)
 {
     FEMComponent :: initializeFrom(ir);
@@ -155,32 +162,39 @@ const IntArray &Set :: giveInternalElementDofManagerList() { return this->elemen
 const IntArray &Set :: giveNodeList()
 {
     // Lazy evaluation, we compute the unique set of nodes if needed (and store it).
-    if ( this->totalNodes.giveSize() == 0 ) {
-        IntArray afflictedNodes( this->domain->giveNumberOfDofManagers() );
-        afflictedNodes.zero();
-        for ( int ielem = 1; ielem <= this->elements.giveSize(); ++ielem ) {
-            auto e = this->domain->giveElement( this->elements.at(ielem) );
-            for ( int inode = 1; inode <= e->giveNumberOfNodes(); ++inode ) {
-                afflictedNodes.at( e->giveNode(inode)->giveNumber() ) = 1;
-            }
+    if ( nodalListInitialized) return this->totalNodes;
+
+#ifdef _OPENMP
+    omp_set_lock(&initLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+    if ( this->nodalListInitialized ) {
+        omp_unset_lock(&initLock); 
+        return this->totalNodes;
+    }
+#endif  
+    IntArray afflictedNodes( this->domain->giveNumberOfDofManagers() );
+    afflictedNodes.zero();
+    for ( int ielem = 1; ielem <= this->elements.giveSize(); ++ielem ) {
+        auto e = this->domain->giveElement( this->elements.at(ielem) );
+        for ( int inode = 1; inode <= e->giveNumberOfNodes(); ++inode ) {
+            afflictedNodes.at( e->giveNode(inode)->giveNumber() ) = 1;
         }
-        
-        /* boundary entities are obsolete, use edges and/or surfaces instead */
-        for ( int ibnd = 1; ibnd <= this->elementBoundaries.giveSize() / 2; ++ibnd ) {
-            auto e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
-            auto boundary = this->elementBoundaries.at(ibnd * 2);
-            auto fei = e->giveInterpolation();
-            auto bNodes = fei->boundaryGiveNodes(boundary, e->giveGeometryType());
-            for ( int inode = 1; inode <= bNodes.giveSize(); ++inode ) {
-                afflictedNodes.at( e->giveNode( bNodes.at(inode) )->giveNumber() ) = 1;
-            }
+    }
+    
+    /* boundary entities are obsolete, use edges and/or surfaces instead */
+    for ( int ibnd = 1; ibnd <= this->elementBoundaries.giveSize() / 2; ++ibnd ) {
+        auto e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
+        auto boundary = this->elementBoundaries.at(ibnd * 2);
+        auto fei = e->giveInterpolation();
+        auto bNodes = fei->boundaryGiveNodes(boundary, e->giveGeometryType());
+        for ( int inode = 1; inode <= bNodes.giveSize(); ++inode ) {
+            afflictedNodes.at( e->giveNode( bNodes.at(inode) )->giveNumber() ) = 1;
         }
+    }
 
         for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
             auto e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
             auto edge = this->elementEdges.at(iedge * 2);
-            auto fei = e->giveInterpolation();
-            auto eNodes = fei->boundaryEdgeGiveNodes(edge, e->giveGeometryType());
+            auto eNodes = e->giveBoundaryEdgeNodes(edge, true); // true for including hierarchical nodes
             for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }
@@ -189,18 +203,20 @@ const IntArray &Set :: giveNodeList()
         for ( int isurf = 1; isurf <= this->elementSurfaces.giveSize() / 2; ++isurf ) {
             auto e = this->domain->giveElement( this->elementSurfaces.at(isurf * 2 - 1) );
             auto surf = this->elementSurfaces.at(isurf * 2);
-            auto fei = e->giveInterpolation();
-            auto eNodes = fei->boundarySurfaceGiveNodes(surf, e->giveGeometryType());
+            auto eNodes = e->giveBoundarySurfaceNodes(surf, true); // true for including hierarchical nodes
             for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
                 afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }
         }
 
-        for ( int inode = 1; inode <= this->nodes.giveSize(); ++inode ) {
-            afflictedNodes.at( this->nodes.at(inode) ) = 1;
-        }
-        totalNodes.findNonzeros(afflictedNodes);
+    for ( int inode = 1; inode <= this->nodes.giveSize(); ++inode ) {
+        afflictedNodes.at( this->nodes.at(inode) ) = 1;
     }
+    totalNodes.findNonzeros(afflictedNodes);
+    nodalListInitialized = true;
+#ifdef _OPENMP
+    omp_unset_lock(&initLock);
+#endif
     return this->totalNodes;
 }
 

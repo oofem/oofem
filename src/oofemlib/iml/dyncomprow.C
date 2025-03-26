@@ -42,6 +42,9 @@
 #include "sparsemtrxtype.h"
 #include "activebc.h"
 #include "classfactory.h"
+#ifdef __MPM_MODULE
+#include "../mpm/integral.h"
+#endif
 
 #ifdef TIME_REPORT
  #include "timer.h"
@@ -169,6 +172,31 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
             }
         }
     }
+
+
+#ifdef __MPM_MODULE
+    IntArray locr, locc;
+    // loop over integrals 
+    for (auto &in: eModel->giveIntegralList()) {
+        // loop over integral domain
+        for (auto &elem: in->set->giveElementList()) {
+            // get code numbers for integral.term on element
+            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
+            for ( int i = 1; i <= locr.giveSize(); i++ ) {
+                int ii;
+                if ( ( ii = locr.at(i) ) ) {
+                    for ( int j = 1; j <= locc.giveSize(); j++ ) {
+                        int jj;
+                        if ( ( jj = locc.at(j) ) ) {
+                            this->insertColInRow(ii - 1, jj - 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
+
 
     int nz_ = 0;
     for ( auto &col : this->colind ) {

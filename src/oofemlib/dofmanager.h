@@ -551,6 +551,10 @@ public:
     bool isShared() { return parallel_mode == DofManager_shared; }
     /// Returns true if receiver is shared.
     bool isNull() { return parallel_mode == DofManager_null; }
+
+    const char *giveClassName() const override {return "DofManager";}
+    /// @return Input record name of the receiver.
+    const char *giveInputRecordName() const override {return "dofmanager";}
 };
 } // end namespace oofem
 #endif // dofmanager_h

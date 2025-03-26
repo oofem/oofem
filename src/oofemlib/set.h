@@ -39,6 +39,10 @@
 #include "intarray.h"
 
 #include <list>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 namespace oofem {
 ///@name Input fields for Set
@@ -88,13 +92,17 @@ protected:
     /// receiver original input record
     std::unique_ptr<InputRecord> inputRec;
 #endif
+    bool nodalListInitialized = false;
+#ifdef _OPENMP
+    omp_lock_t initLock;
+#endif
 public:
     /**
      * Creates a empty set with given number and belonging to given domain.
      * @param n Set number.
      * @param d Domain to which component belongs to.
      */
-    Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) { }
+    Set(int n, Domain * d) ;
     virtual ~Set() { }
 
     void initializeFrom(InputRecord &ir) override;

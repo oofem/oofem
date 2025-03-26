@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef fei2dlinelin_h
-#define fei2dlinelin_h
+#ifndef fei2dlineconst_h
+#define fei2dlineconst_h
 
 #include "feinterpol2d.h"
 
@@ -43,10 +43,10 @@ namespace oofem {
  * @todo{Some more routines to be implemented here}
  * @author Mikael Öhman
  */
-class OOFEM_EXPORT FEI2dLineLin : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dLineConst : public FEInterpolation2d
 {
 public:
-    FEI2dLineLin(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) { }
+    FEI2dLineConst(int ind1, int ind2) : FEInterpolation2d(0, ind1, ind2) { }
 
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override { return _Line; }
     const Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
@@ -62,15 +62,12 @@ public:
     int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const override;
 
     int giveNumberOfEdges(const Element_Geometry_Type) const override { return 1; }
-    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={1,2};internalDofMans={};}
+    void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {nodes={};internalDofMans={1};}
 
 
     // "Bulk"
-    static FloatArrayF<2> evalN(double xi);
-
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
@@ -90,4 +87,4 @@ protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 } // end namespace oofem
-#endif // fei2dlinelin_h
+#endif // fei2dlineconst_h

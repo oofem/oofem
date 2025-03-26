@@ -42,7 +42,7 @@ double FEInterpolation3d::giveVolume(const FEICellGeometry& cellgeo) const
     OOFEM_ERROR("Not implemented in subclass.");
 }
 
-IntArray FEInterpolation3d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt) const
+IntArray FEInterpolation3d :: boundaryEdgeGiveNodes(int boundary, Element_Geometry_Type egt, bool includeHierarchical) const
 {
     return this->computeLocalEdgeMapping(boundary);
 }
@@ -137,7 +137,7 @@ double FEInterpolation3d :: edgeEvalNormal(FloatArray &answer, int isurf, const 
     OOFEM_ERROR("Not implemented");
 }
 
-IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt) const
+IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary, Element_Geometry_Type egt, bool includeHierarchical) const
 {
     return this->computeLocalSurfaceMapping(boundary);
 }

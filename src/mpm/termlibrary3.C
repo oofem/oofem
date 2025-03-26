@@ -186,7 +186,7 @@ void NTaTmTe::evaluate (FloatArray& answer, MPElement& e, GaussPoint* gp, TimeSt
         coords = gp->giveNaturalCoordinates();
     } else {
         //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
-        e.getGeometryInterpolation().boundarySurfaceLocal2global(coords, this->boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+        e.getGeometryInterpolation()->boundarySurfaceLocal2global(coords, this->boundaryID, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     }
     this->bl->computeValues(Te, tstep, coords, this->field->dofIDs, VM_TotalIntrinsic);
     answer *= this->bl->giveProperty('a', tstep)*(t-Te.at(1));

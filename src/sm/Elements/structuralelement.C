@@ -499,9 +499,9 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     // new approach using sets
     // add exact end forces due to nonnodal loading applied indirectly (via sets)
     BCTracker *bct = this->domain->giveBCTracker();
-    BCTracker::entryListType bcList = bct->getElementRecords(this->number);
+    const BCTracker::entryListType& bcList = bct->getElementRecords(this->number);
     
-    for (BCTracker::entryListType::iterator it = bcList.begin(); it != bcList.end(); ++it) {
+    for (BCTracker::entryListType::const_iterator it = bcList.begin(); it != bcList.end(); ++it) {
       GeneralBoundaryCondition *bc = this->domain->giveBc((*it).bcNumber);
             if ( ( load = dynamic_cast< StructuralTemperatureLoad * >( bc ) ) ) {
             if  ( bc->giveSetNumber() && bc->isImposed(tStep) ) {

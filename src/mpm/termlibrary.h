@@ -39,6 +39,12 @@
 #include "bodyload.h"
 
 namespace oofem {
+
+#define _IFT_BTamNTerm_Name "BTamNTerm"
+#define _IFT_NTamTBTerm_Name "NTamTBTerm"
+#define _IFT_NTcN_Name "NTcN"
+
+
 /**
  * @brief A Linear momentum balance equation term ($B^T\sigma(u)$)
  * 
@@ -124,10 +130,12 @@ class gNTfTerm : public Term {
 /**
  * @brief A continuity equation term $Qp=(B)^T \alpha\bf{m}N_p$. 
  */
-class BTamNTerm : public Term {
+class BTamNTerm : public MPMSymbolicTerm {
     protected:
+        MatResponseMode aType = BiotConstant;
     public:
-    BTamNTerm (const Variable *testField, const Variable* unknownField) ;
+    BTamNTerm() : MPMSymbolicTerm() {}
+    BTamNTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at = BiotConstant) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -145,7 +153,13 @@ class BTamNTerm : public Term {
      */
     void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
     void getDimensions(Element& cell) const override;
-    void initializeCell(Element& cell) const override;
+    void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+        MPMSymbolicTerm::initializeFrom(ir, problem);
+        int value = 0;
+        IR_GIVE_FIELD(ir, value, "atype");
+        aType = static_cast<MatResponseMode>(value);
+    }
+
 
     protected:
     /**
@@ -164,10 +178,12 @@ class BTamNTerm : public Term {
 /**
  * @brief A continuity equation term $Q^T(du\over dt)=(N)^T \alpha\bf{m}^TB du\over dt$. 
  */
-class NTamTBTerm : public Term {
+class NTamTBTerm : public MPMSymbolicTerm {
     protected:
+        MatResponseMode aType = BiotConstant;
     public:
-    NTamTBTerm (const Variable *testField, const Variable* unknownField) ;
+    NTamTBTerm () : MPMSymbolicTerm() {}
+    NTamTBTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at = BiotConstant) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -185,8 +201,12 @@ class NTamTBTerm : public Term {
      */
     void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
     void getDimensions(Element& cell) const override;
-    void initializeCell(Element& cell) const override;
-
+    void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+        MPMSymbolicTerm::initializeFrom(ir, problem);
+        int value = 0;
+        IR_GIVE_FIELD(ir, value, "atype");
+        aType = static_cast<MatResponseMode>(value);
+    }
     protected:
     /**
      * @brief Evaluates B matrix; i.e. $\grad N$ where $N$ is interpolation matrix of unknown (p)
@@ -205,10 +225,11 @@ class NTamTBTerm : public Term {
 /**
  * @brief A continuity equation compressibility matrix $S=(N_p)^T c\ N_p$, where $c=({\alpha-n}\over{K_s}+{n}\over{K_w})$. 
  */
-class NTcN : public Term {
+class NTcN : public MPMSymbolicTerm {
     protected:
         MatResponseMode ctype;
     public:
+    NTcN () : MPMSymbolicTerm() {}
     NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype) ;
 
     /**
@@ -227,7 +248,12 @@ class NTcN : public Term {
      */
     void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;
     void getDimensions(Element& cell) const override;
-    void initializeCell(Element& cell) const override;
+    void initializeFrom(InputRecord &ir, EngngModel* problem) override {
+        MPMSymbolicTerm::initializeFrom(ir, problem);
+        int value = 0;
+        IR_GIVE_FIELD(ir, value, "ctype");
+        ctype = static_cast<MatResponseMode>(value);
+    }
     
 };
 
