@@ -654,10 +654,12 @@ if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
     find_package(Python COMPONENTS Interpreter Development)
     #find_package(pybind11 CONFIG)
-    add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
+        add_git_submodule(${PYBIND_DIR})
+    else ()
+        add_git_submodule(extern/pybind11)
     endif ()
     include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${Python_LIBRARIES})

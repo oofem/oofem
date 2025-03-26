@@ -259,6 +259,7 @@ py::object latticelink3dboundary(py::args args, py::kwargs &kw) { return createE
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 py::object linquad3dplanestress(py::args args, py::kwargs &kw) { return createElementOfType("linquad3dplanestress",args,kw); }
 py::object qPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("qplanestress2d",args,kw); }
+py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object qTrPlStr(py::args args, py::kwargs &kw) { return createElementOfType("qtrplstr",args,kw); }
 py::object trPlaneStrRot(py::args args, py::kwargs &kw) { return createElementOfType("trplanestrrot",args,kw); }
 py::object trPlaneStressRotAllman(py::args args, py::kwargs &kw) { return createElementOfType("trplanestressrotallman",args,kw); }
@@ -386,7 +387,11 @@ py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm
 py::object isoHeat(py::args args, py::kwargs kw) { return createMaterialOfType("isoheat",args,kw); }
 py::object j2mat(py::args args, py::kwargs kw) { return createMaterialOfType("j2mat",args,kw); }
 py::object steel1(py::args args, py::kwargs kw) { return createMaterialOfType("steel1",args,kw); }
+py::object concreteFcmViscoelastic(py::args args, py::kwargs kw) { return createMaterialOfType("concretefcmviscoelastic",args,kw); }
+py::object mps(py::args args, py::kwargs kw) { return createMaterialOfType("mps",args,kw); }
+
 py::object upm(py::args args, py::kwargs kw) { return createMaterialOfType("upm",args,kw); }
+
 
 
 /*****************************************************
