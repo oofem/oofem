@@ -635,9 +635,13 @@ if (USE_PYBIND_BINDINGS)
     include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${Python_LIBRARIES})
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
-    target_link_libraries(oofempy PRIVATE liboofem)
+    # without --whole-archive, static variables will be eliminated at link-time; those take care of registering classes
+    target_link_libraries(oofempy PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,liboofem>")
     set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
-
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
+        install(TARGETS oofempy DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+        set_target_properties(oofempy PROPERTIES INSTALL_RPATH "$ORIGIN") # look for liboofem.so (if shared) where the module is installed
+    endif()
     # Make sure pytest is found or produce a fatal error
     if(NOT PYTEST_FOUND)
         execute_process(COMMAND ${Python_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
@@ -709,14 +713,28 @@ set (oofempy)
 
 # Main targets
 if (USE_SHARED_LIB)
+    # when building pybind11 module via py-build-cmake, build as static library (so that the python module is self-contained)
+    # it is possible to use SHARED linkage as well;
+    #   then the module's RPATH will be used to look up liboofem.so in the same directory as the module (see below)
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
+        set(LIBOOFEM_LIBRARY_TYPE STATIC)
+    else()
+        set(LIBOOFEM_LIBRARY_TYPE SHARED)
+    endif()
     add_library (liboofem
-        SHARED
+        ${LIBOOFEM_LIBRARY_TYPE}
         ${oofempy}
         ${LIBS} 
         )
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     add_dependencies(liboofem version)
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
+        # if built as STATIC library
+        set_target_properties(liboofem PROPERTIES POSITION_INDEPENDENT_CODE ON) 
+        # if shared, install liboofem.so alongside with the python module
+        # install(TARGETS liboofem DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+    endif()
 
     if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
         set_target_properties (liboofem PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
