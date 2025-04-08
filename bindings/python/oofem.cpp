@@ -127,6 +127,12 @@ namespace py = pybind11;
 #include <omp.h>
 #endif
 
+
+// this is needed for emscripten, where FILE* in pybind11 trampolines fails at compile time
+#ifdef __EMSCRIPTEN__
+    #define _HIDE_FILE_METHODS
+#endif
+
 //test
 void test (oofem::Element& e) {
     oofem::IntArray a = {1,2,3};
@@ -189,9 +195,11 @@ public:
         oofem::FEInterpolation *giveInterpolation() const override {
             PYBIND11_OVERLOAD (oofem::FEInterpolation*, ElementBase, giveInterpolation,);
         }
-        void printOutputAt(FILE *file, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD (void, ElementBase, printOutputAt, file, tStep);
-        }
+        #ifndef _HIDE_FILE_METHODS
+            void printOutputAt(FILE *file, oofem::TimeStep *tStep) override {
+                PYBIND11_OVERLOAD (void, ElementBase, printOutputAt, file, tStep);
+            }
+        #endif
         void postInitialize() override {
             PYBIND11_OVERLOAD (void, ElementBase, postInitialize,);
         }
@@ -350,12 +358,14 @@ public:
             void postInitialize() override  {
                 PYBIND11_OVERLOAD (void, EngngModelBase, postInitialize, );
             }
-            void printOutputAt(FILE *file, TimeStep *tStep) override  {
-                PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep);
-            }
-            void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets) override  {
-                PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep, nodeSets, elementSets);
-            }
+            #ifndef _HIDE_FILE_METHODS
+               void printOutputAt(FILE *file, TimeStep *tStep) override  {
+                   PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep);
+               }
+               void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets) override  {
+                   PYBIND11_OVERLOAD (void, EngngModelBase, printOutputAt, file, tStep, nodeSets, elementSets);
+               }
+            #endif
             const char *giveClassName() const override  {
                 PYBIND11_OVERLOAD_PURE (const char*, EngngModelBase, giveClassName, );
             }
@@ -383,9 +393,11 @@ public:
     public:
         using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
         // trampoline (need one for each virtual method)
-        void printOutputAt(FILE *file, TimeStep *tStep) const override {
-            PYBIND11_OVERLOAD (void, MaterialStatusBase, printOutputAt, file, tStep);
-        }
+        #ifndef _HIDE_FILE_METHODS
+            void printOutputAt(FILE *file, TimeStep *tStep) const override {
+                PYBIND11_OVERLOAD (void, MaterialStatusBase, printOutputAt, file, tStep);
+            }
+        #endif
         void initTempStatus() override {
             PYBIND11_OVERLOAD (void, MaterialStatusBase, initTempStatus, );
         }
