@@ -147,7 +147,6 @@ option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 option (USE_AM "Enable additive manufacturing module" OFF)
 option (USE_T3D "Enable T3D support" OFF)
-option (USE_BOOSTPYTHON_BINDINGS "Rather obsolete, use USE_PYBIND_BINDINGS. Enable Python bidings using boost (OOFEM callable from Python)." OFF)
 option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable from Python and vice versa)." OFF)
 option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
@@ -616,32 +615,6 @@ if (USE_SPOOLES)
     list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-if (USE_PYTHON_EXTENSION OR USE_BOOSTPYTHON_BINDINGS)
-    # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
-    #Print if set up manually
-    message(STATUS "PYTHON_LIBRARY = ${Python3_LIBRARIES}")
-    message(STATUS "PYTHON_EXECUTABLE = ${Python3_EXECUTABLE}")
-    message(STATUS "PYTHON_INCLUDE_DIR = ${Python3_INCLUDE_DIRS}")
-    find_package (Python3 COMPONENTS Interpreter Development)
-#     find_package(PythonInterp "3" REQUIRED)
-#    find_package(PythonLibs "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}" REQUIRED)
-    include_directories (${Python3_INCLUDE_DIRS})
-    list (APPEND EXT_LIBS ${Python3_LIBRARIES})
-    list (APPEND MODULE_LIST "Python")
-    if(USE_PYTHON_EXTENSION)
-        add_definitions(-D_PYTHON_EXTENSION)    
-    endif ()
-    
-    if(USE_BOOSTPYTHON_BINDINGS)
-        # require boost_python also for python stuff by itself
-        find_package(Boost COMPONENTS "python-py${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}" REQUIRED)
-        include_directories (${Boost_INCLUDE_DIRS})
-        list (APPEND EXT_LIBS ${Boost_LIBRARIES})
-        add_definitions(-D_BOOSTPYTHON_BINDINGS)
-     endif ()   
-endif ()
-
 
 if(WIN32)
     set(PYTHON_MODULE_EXTENSION ".pyd")
@@ -732,9 +705,6 @@ if (USE_MPM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/mpm")
 endif ()
 set (oofempy)
-if (USE_BOOSTPYTHON_BINDINGS)
-    set (oofempy ${oofem_SOURCE_DIR}/bindings/Deprecated/python/oofemlib.cpp)
-endif ()
 
 
 # Main targets
