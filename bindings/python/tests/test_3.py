@@ -2,8 +2,13 @@
 # this example illustrates the user defined function in python injected into oofem
 #
 #
-import oofempy
-import util
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
+
 
 class MyFunc(oofempy.Function):
     def __init__(self, num, domain):

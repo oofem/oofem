@@ -2,8 +2,13 @@
 # this example illustrates the user defined material model in python injected into oofem
 #
 #
-import oofempy
-import util
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
+
 
 class MyMaterial(oofempy.StructuralMaterial):
     def __init__(self, num, domain):

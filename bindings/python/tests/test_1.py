@@ -1,4 +1,9 @@
-import oofempy
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
 
 
 def test_1():

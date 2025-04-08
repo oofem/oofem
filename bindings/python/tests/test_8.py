@@ -4,23 +4,21 @@
 #
 #
 
-import sys
-sys.path.extend(['/home/bp/devel/oofem.git/build', '/home/bp/devel/oofem.git/bindings/python'])
-import oofempy
-import util
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
+
+
 import numpy as np
 #import pyvista as pv
- 
+
 
 
 def test_8():
     # Requires oofempy compiled with __MPM_MODULE ON
-    import sys
-    sys.path.extend(['/home/bp/devel/oofem.git/build', '/home/bp/devel/oofem.git/bindings/python'])
-    import oofempy
-    import util
-
-    
 
     # Create a new dummy problem (placeholder for our demo) with one domain.
     problem = oofempy.dummyProblem(nSteps=1, outFile='test_7.out')
@@ -98,5 +96,4 @@ if __name__ == "__main__":
     if oofempy.hasModule('mpm'):
         test_8()
     else:
-        print("This example requires mpm module.")
-        print("Please recompile oofem with mpm module enabled.")
+        raise RuntimeError("This example requires mpm module. Please recompile oofem with mpm module enabled.")

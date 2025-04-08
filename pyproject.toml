@@ -24,7 +24,7 @@ install_components=['python_module']
 generator ='Ninja'
 
 [tool.py-build-cmake.module]
-name='oofempy'
+name='oofem'
 # generated='module' # module
 directory = 'bindings/python'
 
@@ -45,7 +45,7 @@ build_hook = true
 #ignore_missing_imports = true
 
 
-#[tool.pytest.ini_options]
+[tool.pytest.ini_options]
 #minversion = "6.0"
 #addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 #xfail_strict = true
@@ -53,7 +53,7 @@ build_hook = true
 #    "error",
 #    "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",
 #]
-#testpaths = ["tests"]
+testpaths = ["bindings/python/tests"]
 
 [tool.cibuildwheel]
 # test-command = "pytest {project}/tests"
