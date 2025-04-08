@@ -136,6 +136,9 @@ oofem::OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(py::kwargs k
 }
 
 
+#define OOFEM_RAISE(msg) { oofem::OOFEM_LOG_ERROR(msg); throw std::runtime_error(msg); }
+
+
 /*****************************************************
 * EngngModel
 *****************************************************/
@@ -146,7 +149,7 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     int number = len(args)>0? PyLong_AsUnsignedLong(args[0].ptr()) : 0;
     oofem::EngngModel* master = len(args)>1? args[1].cast<oofem::EngngModel *>() : nullptr;
     std::unique_ptr<EngngModel> engngm = classFactory.createEngngModel(type,number,master);
-    if ( !engngm ) { oofem::OOFEM_LOG_ERROR("engngModel: wrong input data"); }
+    if ( !engngm ) { OOFEM_RAISE("engngModel: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // instanciateYourself
     ///@todo Output filename isn't stored like this (and has never been!)!?
@@ -162,7 +165,7 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     engngm->initializeFrom(ir);
 
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
-        oofem::OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
+        OOFEM_RAISE("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
         engngm->instanciateDefaultMetaStep(ir);
         //engngm->giveTimeStepController()->instanciateDefaultMetaStep(ir);
@@ -233,7 +236,7 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
     // create Element (convert aClass to char* - expected by classFactory.createElement)
     auto elem = oofem::classFactory.createElement(type,number,domain);
     // if elem==nullptr, something was wrong
-    if (!elem) { oofem::OOFEM_LOG_ERROR("element: wrong input data"); }
+    if (!elem) { OOFEM_RAISE("element: wrong input data"); }
     // sets globalNumber == number befor initializeFrom
     elem->setGlobalNumber(number);
     // construct OOFEMTXTInputRecord from bp::dict **kw
@@ -315,7 +318,7 @@ py::object createDofManagerOfType(const char*type, py::args args, py::kwargs &kw
     unsigned long number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto dofMan = oofem::classFactory.createDofManager(type,number,domain);
-    if (!dofMan) { oofem::OOFEM_LOG_ERROR("dofManager: wrong input data"); }
+    if (!dofMan) { OOFEM_RAISE("dofManager: wrong input data"); }
     dofMan->setGlobalNumber(number);
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     dofMan->initializeFrom(ir);
@@ -336,7 +339,7 @@ py::object createGeneralBoundaryConditionOfType(const char* type, py::args args,
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto bc = oofem::classFactory.createBoundaryCondition(type,number,domain);
-    if (!bc) { oofem::OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
+    if (!bc) { OOFEM_RAISE("generalBoundaryCondition: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     bc->initializeFrom(ir);
     return py::cast(bc.release());
@@ -359,7 +362,7 @@ py::object createInitialConditionOfType(const char* type, py::args args, py::kwa
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto ic = oofem::classFactory.createInitialCondition(type,number,domain);
-    if (!ic) { oofem::OOFEM_LOG_ERROR("initialCondition: wrong input data"); }
+    if (!ic) { OOFEM_RAISE("initialCondition: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ic->initializeFrom(ir);
     return py::cast(ic.release());
@@ -376,7 +379,7 @@ py::object createMaterialOfType(const char* type, py::args args, py::kwargs kw)
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto mat = oofem::classFactory.createMaterial(type,number,domain);
-    if (!mat) { oofem::OOFEM_LOG_ERROR("material: wrong input data"); }
+    if (!mat) { OOFEM_RAISE("material: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     mat->initializeFrom(ir);
     return py::cast(mat.release());
@@ -398,7 +401,7 @@ py::object createCrossSectionOfType(const char* type, py::args args, py::kwargs 
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto cs = oofem::classFactory.createCrossSection(type,number,domain);
-    if (!cs) { oofem::OOFEM_LOG_ERROR("crossSection: wrong input data"); }
+    if (!cs) { OOFEM_RAISE("crossSection: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     cs->initializeFrom(ir);
     return py::cast(cs.release());
@@ -417,7 +420,7 @@ py::object createLoadTimeFunctionOfType(const char* type, py::args args, py::kwa
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     auto ltf = oofem::classFactory.createFunction(type,number,domain);
-    if (!ltf) { oofem::OOFEM_LOG_ERROR("function: wrong input data"); }
+    if (!ltf) { OOFEM_RAISE("function: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ltf->initializeFrom(ir);
     return py::cast(ltf.release());
@@ -438,7 +441,7 @@ py::object createExportModuleOfType(const char* type, py::args args, py::kwargs 
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::EngngModel *engngModel = len(args)>1? args[1].cast<oofem::EngngModel *>() : nullptr;
     auto module = oofem::classFactory.createExportModule(type,number,engngModel);
-    if (!module) { oofem::OOFEM_LOG_ERROR("exportModule: wrong input data"); }
+    if (!module) { OOFEM_RAISE("exportModule: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(ir);
     module->initialize();
@@ -458,7 +461,7 @@ py::object createSetOfType(const char* type, py::args args, py::kwargs kw)
     int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
     oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
     std::unique_ptr<Set> setP = std::make_unique<Set>(number, domain);
-    if ( !setP ) { oofem::OOFEM_LOG_ERROR("Couldn't create set: %d", number); }
+    if ( !setP ) { OOFEM_RAISE(("Couldn't create set: "+std::to_string(number)).c_str()); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     setP->initializeFrom(ir);
     return py::cast(setP.release());
