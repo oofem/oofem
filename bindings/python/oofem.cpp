@@ -1392,6 +1392,7 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
+        .def("getRegisteredNames", &oofem::ClassFactory::getRegisteredNames)
     ;
 
     m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);

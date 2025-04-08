@@ -270,6 +270,8 @@ public:
     /// Creates empty factory
     ClassFactory();
 
+    std::map<std::string,std::list<std::string>> getRegisteredNames();
+
     /**
      * Creates new instance of element corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
