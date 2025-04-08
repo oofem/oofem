@@ -39,6 +39,7 @@
 #include "error.h"
 #include "chartype.h"
 #include "domain.h"
+#include "dofmanager.h"
 #include "floatmatrix.h"
 #include "integrationdomain.h"
 #include "materialmode.h"

@@ -3996,7 +3996,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 void
 Subdivision :: bisectMesh()
 {
-    int ie, nelems = mesh->giveNumberOfElements(), nelems_old = 0, terminal_local_elems = nelems;
+    [[maybe_unused]] int ie, nelems = mesh->giveNumberOfElements(), nelems_old = 0, terminal_local_elems = nelems;
     int nnodes = mesh->giveNumberOfNodes(), nnodes_old;
     double iedensity, rdensity;
     int repeat = 1, loop = 0, max_loop = 0;     // max_loop != 0 use only for debugging
@@ -4746,7 +4746,7 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 
 #else // local case
 
-    int numberOfLocalElementsToNumber = 0;
+    [[maybe_unused]] int numberOfLocalElementsToNumber = 0;
     int localMaxGlobnum = 0;
 
     // idea: first determine the number of local elements waiting for new global id
