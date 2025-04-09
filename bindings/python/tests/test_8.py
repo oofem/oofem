@@ -17,7 +17,7 @@ import pytest
 #import pyvista as pv
 
 
-@pytest.mark.xfail(reason='Error calling assemble_rhs(): incompatible function arguments.')
+@pytest.mark.skip(reason='Error calling assemble_rhs(): incompatible function arguments. Hard failure with emscripten.')
 def test_8():
     # Requires oofempy compiled with __MPM_MODULE ON
 
