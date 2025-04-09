@@ -4,7 +4,8 @@ requires-python = '>=3.11'
 readme='README.md'
 license={'file'='COPYING.LGPLv2.1'}
 # dynamic=['version','description']
-version='2.5.0-dev1'
+dependencies = [ 'pytest' ]
+version='2.6.0-dev1'
 description='oofem etc' 
 
 [build-system]
@@ -18,7 +19,7 @@ exclude = ['**/_build']
 [tool.py-build-cmake.cmake]
 minimum_version="3.17"
 build_type="Release"
-build_args=['-j64']
+# build_args=['-j64'] # Ninja parallelizes automatically
 options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
 install_components=['python_module']
 generator ='Ninja'
@@ -56,7 +57,7 @@ build_hook = true
 testpaths = ["bindings/python/tests"]
 
 [tool.cibuildwheel]
-# test-command = "pytest {project}/tests"
+test-command = "pytest {project}/bindings/python/tests"
 # test-extras = ["test"]
 # test-skip = ["*universal2:arm64"]
 # Setuptools bug causes collision between pypy and cpython artifacts
