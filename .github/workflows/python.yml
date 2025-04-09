@@ -11,14 +11,14 @@ jobs:
       run: |
           # skip this step if already installed (such as locally re-using container with naktos/act)
           [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
-          sudo rm /usr/lib/python3.12/EXTERNALLY-MANAGED
-          pip install uv
-          uv pip install --system pyodide-build py-build-cmake pytest
+          # sudo rm /usr/lib/python3.12/EXTERNALLY-MANAGED
+          #sudo chmod -R $(USER): /usr/local
+          pip install pyodide-build py-build-cmake pytest
     - name: Wheel build
       run: python3 -m build .
     - name: Wheel test
       run: |
-          uv pip install --system dist/oofem-*-linux_x86_64.whl
+          pip install dist/oofem-*-linux_x86_64.whl
           python3 -m pytest bindings/python/tests
     - name: Pyodide build
       run: |
