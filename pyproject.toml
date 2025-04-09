@@ -19,7 +19,7 @@ exclude = ['**/_build']
 minimum_version="3.17"
 build_type="Release"
 build_args=['-j64']
-options = {'USE_PYBIND_BINDINGS'='1','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1'}
+options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
 install_components=['python_module']
 generator ='Ninja'
 
