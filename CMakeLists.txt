@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 include (CheckSymbolExists)
@@ -633,17 +633,21 @@ if (USE_PYBIND_BINDINGS)
     add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
-        include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
+        include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
     endif ()
     include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
     if(NOT EMSCRIPTEN)
+        # fails with emscripten
         list (APPEND EXT_LIBS ${Python_LIBRARIES})
     endif()
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
     if(USE_SHARED_LIB)
+        if(EMSCRIPTEN)
+            MESSAGE(FATAL_ERROR "USE_SHARED_LIB=1 is incompatible with Emscripten (some unresolved symbols at runtime).")
+        endif()
         target_link_libraries(oofempy PRIVATE liboofem)
         set_target_properties(oofempy PROPERTIES INSTALL_RPATH "$ORIGIN") # look for liboofem.so (if shared) where the module is installed
-        set_target_properties(oofempy PROPERTIES BUILD_RPATH ".") # look for liboofem.so in the build directory (before installation)
+        set_target_properties(oofempy PROPERTIES BUILD_RPATH ".") # look for liboofem.so in the build directory (before installation, for tests)
     else()
         target_sources(oofempy PRIVATE ${LIBS} ${EXT_LIBS})
     endif()
