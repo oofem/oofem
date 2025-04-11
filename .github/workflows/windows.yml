@@ -21,7 +21,7 @@ jobs:
           cmake --build ./build --parallel
     - name: CTest
       shell: bash
-      run: ctest --test-dir ./build --parallel --rerun-failed --output-on-failure
+      run: ctest --test-dir ./build --parallel --rerun-failed --output-on-failure -C Release
     - name: CPack
       shell: bash
       working-directory: ./build
