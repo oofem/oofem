@@ -18,7 +18,7 @@ jobs:
       shell: bash
       run: |
           cmake -B ./build -S. -DCMAKE_BUILD_TYPE=Release
-          cmake --build --parallel ./build
+          cmake --build ./build --parallel
     - name: CTest
       shell: bash
       run: ctest --test-dir=./build --rerun-failed --output-on-failure
