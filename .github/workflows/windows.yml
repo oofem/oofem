@@ -21,15 +21,19 @@ jobs:
           cmake --build ./build --parallel
     - name: CTest
       shell: bash
-      run: ctest --test-dir=./build --rerun-failed --output-on-failure
+      run: ctest --test-dir ./build --parallel --rerun-failed --output-on-failure
     - name: CPack
       shell: bash
       working-directory: ./build
       run: cpack -G "ZIP;NSIS"
     - uses: actions/upload-artifact@v4
       with:
-        name: binaries
+        name: oofem-windows-zip
         path: |
           build/oofem_*.zip
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-windows-installer
+        path: |
           build/oofem_*.exe
 

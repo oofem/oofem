@@ -55,7 +55,11 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: my-artifact
+        name: oofem-linux-deb
         path: |
           build/oofem_*.deb
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-linux-tgz
+        path: |
           build/oofem_*.tgz
