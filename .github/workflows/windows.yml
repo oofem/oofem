@@ -17,11 +17,12 @@ jobs:
     - name: CMake
       shell: bash
       run: |
-          cmake -B ./build -S. -DCMAKE_BUILD_TYPE=Release
-          cmake --build ./build --parallel
+          # -DCMAKE_BUILD_TYPE=Release would be ignored with multi-configuration generator (MSVC is one of those)
+          cmake -B ./build -S.
+          cmake --build ./build --config Release --parallel
     - name: CTest
       shell: bash
-      run: ctest --test-dir ./build --parallel --rerun-failed --output-on-failure -C Release
+      run: ctest --test-dir ./build --parallel --rerun-failed --output-on-failure --build-config Release
     - name: CPack
       shell: bash
       working-directory: ./build

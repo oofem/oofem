@@ -62,4 +62,4 @@ jobs:
       with:
         name: oofem-linux-tgz
         path: |
-          build/oofem_*.tgz
+          build/oofem_*.tar.gz
