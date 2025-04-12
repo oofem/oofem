@@ -502,7 +502,7 @@ Currently, the supported export modules are following
    [``stype #(in)``] [``regionstoskip #(ia)``]
 
    ``vtkxml`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
-   [``ipvars #(ia)``] [``stype #(in)``] 
+   [``ipvars #(ia)``] [``stype #(in)``] [``setmembership``]
 
    | <``ver 1.6``> 
    | ``vtkhdf5`` [``vars #(ia)``] [``primvars #(ia)``] [``cellvars #(ia)``]
@@ -551,6 +551,11 @@ Currently, the supported export modules are following
       triangular and tetrahedral elements), :math:`1` for Zienkiewicz
       Zhu recovery (default), and :math:`2` for Superconvergent Patch
       Recovery (SPR, based on least square fitting).
+   -  The paramneter ``setmembership`` will trigger export of set
+      membership information. The set membership information (at present for DofManagers and cells) is
+      exported as a point/cell variable. As vtk format does not support sparse sets, 
+      the set membership is encoded into datasets containing byte values (UINT8, named VertexSetMembership and CellSetMembership), 
+      where i-th bit is set to 1 if the given component is member of set, zero otherwise. 
 
    
 -  VTK pfem (particle FEM) export. Exports particle positions to vtk as a point dataset.
