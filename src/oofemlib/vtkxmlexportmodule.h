@@ -77,6 +77,8 @@ namespace py = pybind11;
 #define _IFT_VTKXMLExportModule_externalForces "externalforces"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
+#define _IFT_VTKXMLExportModule_exportSetMembershipFlag "setmembership"
+
 //@}
 
 using namespace std;
@@ -103,6 +105,8 @@ protected:
     IntArray cellVarsToExport;
     /// List of internal variables to export directly in Integration Points (no smoothing to nodes)
     IntArray ipInternalVarsToExport;
+    /// Flag whether to export setMembership (byte encoded array)
+    bool exportSetMembershipFlag=0;
 
     
 
@@ -171,6 +175,8 @@ protected:
     void writePrimaryVars(ExportRegion &vtkPiece);
     void writeCellVars(ExportRegion &vtkPiece);
     void writeExternalForces(ExportRegion &vtkPiece);
+    void writeVertexSetMembership(ExportRegion &vtkPiece);
+    void writeCellSetMembership(ExportRegion &vtkPiece);
     /**
      * Writes Piece header+geometry
      * @return true if piece is not empty and thus written
