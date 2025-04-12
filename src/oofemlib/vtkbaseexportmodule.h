@@ -125,7 +125,10 @@ protected:
      * Export external forces.
      */
     void exportExternalForces(ExportRegion &piece, Set& region, IntArray& externalForcesToExport, TimeStep *tStep);
-
+    /*
+    * Export set membership 
+    */
+    void exportSetMembership(ExportRegion &piece, Set& region, TimeStep *tStep);
 
     //  Tries to find the value of a primary field on the given DofManager.
     //  Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).

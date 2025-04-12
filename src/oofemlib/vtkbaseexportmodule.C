@@ -941,6 +941,45 @@ VTKBaseExportModule::exportExternalForces(ExportRegion &vtkPiece, Set& region, I
     }
 }
 
+void
+VTKBaseExportModule::exportSetMembership(ExportRegion &vtkPiece, Set& region, TimeStep *tStep)
+{
+    Domain *d = emodel->giveDomain(1);
+    FloatArray valueArray;
+    int nsets = d->giveNumberOfSets();
+    const IntArray &elems = region.giveElementList();
+    const IntArray &nodes = region.giveNodeList();
+    IntArray &regionG2LNodalNumbers = vtkPiece.getMapG2L();
+    vtkPiece.setNumberOfSetMembershipsToExport(nsets, nodes.giveSize(), elems.giveSize() );
+    const IntArray& regionElements = region.giveElementList();
+
+    for ( int iset = 1; iset <= nsets; iset++ ) {
+        Set *set = d->giveSet(iset);
+
+        const IntArray &setNodes = set->giveSpecifiedNodeList();
+        //const IntArray &setElems = set->giveElementList();
+
+        for (int node : setNodes) {
+            int regionNode = regionG2LNodalNumbers.at(node);
+            if (regionNode == 0) {
+                continue; // node not in region
+            }
+            vtkPiece.setVertexSetMembership(iset, regionNode);
+        }
+
+        for (int ic=1; ic<=regionElements.giveSize(); ic++) {
+            int regionCell = regionElements.at(ic);
+            // now test if region cell is in the set
+            if (set->hasElement(regionCell) ) {
+                vtkPiece.setCellSetMembership(iset, ic);
+            }
+        }
+    }
+}
+
+
+
+
 // End of VTKBaseExportModule implementation
 
 
