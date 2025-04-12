@@ -60,10 +60,13 @@ namespace oofem {
 class OOFEM_EXPORT ExportRegion
 {
 public:
+    typedef  uint8_t setMembershipGroupType;
+
     ExportRegion()
     {
         numCells = 0;
         numNodes = 0;
+        numSetGroups = 0;
     }
 
     void clear();
@@ -73,6 +76,8 @@ public:
 
     void setNumberOfCells(int numCells);
     int giveNumberOfCells() { return this->numCells; }
+
+    int giveNumberOfSetGroups() { return this->numSetGroups; }
 
     void setConnectivity(int cellNum, IntArray &nodes);
     IntArray &giveCellConnectivity(int cellNum) { return this->connectivity [ cellNum - 1 ]; }
@@ -91,6 +96,17 @@ public:
     void setNumberOfInternalVarsToExport(const IntArray& ists, int numNodes);
     void setNumberOfInternalXFEMVarsToExport(int numVars, int numEnrichmentItems, int numNodes);
     void setNumberOfCellVarsToExport(const IntArray& cellVars, int numCells);
+    void setNumberOfSetMembershipsToExport(int numSets, int numNodes, int numCells) {
+        this->numSetGroups = 1+numSets/8;
+        this->vertexSetMembership.resize(numNodes);
+        for ( int i = 0; i < numNodes; i++ ) {
+            this->vertexSetMembership [ i ].resize(numSetGroups, 0);
+        }
+        this->cellSetMembership.resize(numCells);
+        for ( int i = 0; i < numCells; i++ ) {
+            this->cellSetMembership [ i ].resize(numSetGroups, 0);
+        }
+    }
 
     void setPrimaryVarInNode(UnknownType  type, int nodeNum, FloatArray valueArray);
     FloatArray &givePrimaryVarInNode(UnknownType type, int nodeNum) { return this->nodeVars [ type ] [ nodeNum - 1 ]; }
@@ -107,6 +123,15 @@ public:
     void setCellVar(InternalStateType type, int cellNum, FloatArray valueArray);
     FloatArray &giveCellVar(InternalStateType type, int cellNum) { return this->cellVars [ type ] [ cellNum - 1 ]; }
 
+
+    const std::vector<setMembershipGroupType>& getVertexSetMembershipGroup(int inode) { return this->vertexSetMembership [ inode-1 ]; }
+    const std::vector<setMembershipGroupType>& getCellSetMembershipGroup(int icell) { return this->cellSetMembership [ icell-1 ]; }
+    void setVertexSetMembership(int set, int nodeNum) {
+         this->vertexSetMembership [ nodeNum - 1 ][ (set-1) / 8 ]  |= 1 << ((set-1) % 8);   
+    }
+    void setCellSetMembership(int set, int cellNum) {
+         this->cellSetMembership [ cellNum - 1 ][ (set-1) / 8 ]  |= 1 << ((set-1) % 8);   
+    }
     IntArray& getMapG2L () {return this->mapG2L;}
     IntArray& getMapL2G () {return this->mapL2G;}
     //void setRegionCells(IntArray& cells) {this->regionElInd = cells;}
@@ -125,6 +150,7 @@ public:
 private:
     int numCells;
     int numNodes;
+    int numSetGroups;
     IntArray elCellTypes;
     IntArray elOffsets;
     // dofman local->global and global->local region map 
@@ -140,6 +166,10 @@ private:
     std::map< InternalStateType, std::vector< FloatArray > >nodeVarsFromIS;     // [field][node][valArray]
     std::vector< std::vector< std::vector< FloatArray > > >nodeVarsFromXFEMIS;       // [field][ei][node][valArray]
     std::map< InternalStateType, std::vector< FloatArray > >cellVars;     // [el][field][valArray]
+    // set membership (set membership for each vertex encoded into 8bit uint -? setGroups)
+    std::vector< std::vector<setMembershipGroupType> > vertexSetMembership; // [setGroup][vertex][membership]
+    std::vector< std::vector<setMembershipGroupType> > cellSetMembership; // [setGroup][cell][membership]
+
 };
 
 } // end namespace oofem
