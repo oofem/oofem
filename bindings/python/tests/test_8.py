@@ -9,6 +9,7 @@ sys.path.extend(['/home/bp/devel/oofem.git/build', '/home/bp/devel/oofem.git/bin
 import oofempy
 import util
 import numpy as np
+import pytest
 #import pyvista as pv
  
 
@@ -20,7 +21,8 @@ def test_8():
     import oofempy
     import util
 
-    
+    if (oofempy.hasModule('mpm')==0):
+       pytest.skip()
 
     # Create a new dummy problem (placeholder for our demo) with one domain.
     problem = oofempy.dummyProblem(nSteps=1, outFile='test_7.out')
@@ -33,7 +35,7 @@ def test_8():
     n3 = oofempy.node(3, domain, coords=(1., 1., 0. ))
     n4 = oofempy.node(4, domain, coords=(0, 1, 0. ))
     
-    # Defdine elements, note that q1 defines just element geometry.
+    # Define elements, note that q1 defines just element geometry.
     q1 = oofempy.q1(1, domain, nodes=(1,2,3,4), mat=1, crossSect=1) # quad element #1
     l1 = oofempy.l1(2, domain, nodes=(2,3), mat=1, crossSect=1)     # boundary element #2
 
@@ -98,5 +100,4 @@ if __name__ == "__main__":
     if oofempy.hasModule('mpm'):
         test_8()
     else:
-        print("This example requires mpm module.")
-        print("Please recompile oofem with mpm module enabled.")
+        print("Module mpm not found, please recompile oofem with mpm module enabled.")
