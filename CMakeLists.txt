@@ -22,6 +22,7 @@ endif()
 cmake_policy(SET CMP0074 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
+
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 6)
@@ -630,21 +631,19 @@ endif()
 
 
 if (USE_PYBIND_BINDINGS)
-    #build pybind11 bindings
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
+
     find_package(Python COMPONENTS Interpreter Development)
-    #find_package(pybind11 CONFIG)
     add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
     endif ()
-    include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-    if(NOT EMSCRIPTEN)
-        # fails with emscripten
-        list (APPEND EXT_LIBS ${Python_LIBRARIES})
-    endif()
+
+    # use python include paths and libs for all future targets (liboofem and oofem binary)
+    link_libraries(pybind11::embed)
+
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
     if(USE_SHARED_LIB)
         if(EMSCRIPTEN)
@@ -732,10 +731,10 @@ endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem SHARED)
     target_sources(liboofem PRIVATE ${LIBS})
-    target_link_libraries (liboofem ${EXT_LIBS})
+    target_link_libraries (liboofem PUBLIC ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     add_dependencies(liboofem version)
-    if(USE_PYBIND_BINDINGS AND NOT USE_PYBIND_STATIC AND PY_BUILD_CMAKE_IMPORT_NAME)
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
         # if shared, install liboofem.so alongside with the python module
         install(TARGETS liboofem DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
     endif()
@@ -790,15 +789,13 @@ endif (USE_SHARED_LIB)
 # OOFEM target
 if (USE_OOFEM_EXE)
     if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-    add_dependencies(oofem version)
-
-    target_link_libraries (oofem liboofem)
+        add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+        add_dependencies(oofem version)
+        target_link_libraries (oofem PUBLIC liboofem)
     else ()
-    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
-    add_dependencies(oofem version)
-
-    target_link_libraries (oofem ${EXT_LIBS})
+        add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+        add_dependencies(oofem version)
+        target_link_libraries (oofem PUBLIC ${EXT_LIBS})
     endif ()
     install (TARGETS oofem DESTINATION bin)
 

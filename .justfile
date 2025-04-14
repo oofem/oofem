@@ -18,7 +18,7 @@ pyodide:
 	pyodide build
 	[ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
 	source build/venv-pyodide/bin/activate
-	pip install --force-reinstall dist/oofem-2.5.0.dev1-cp312-cp312-pyodide_2024_0_wasm32.whl
+	pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
 	pip install pytest numpy
 	cd bindings/python/tests; python -m pytest
 shared:
@@ -31,12 +31,15 @@ notshared:
 	cmake -Bbuild -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build/
 	ctest --test-dir build/ --parallel=16
-act:
+act-install:
 	#!/bin/bash
 	[ -f nektos-act ] || wget https://github.com/nektos/act/releases/download/v0.2.76/act_Linux_x86_64.tar.gz && tar xvfz act_Linux_x86_64.tar.gz act && mv ./act nektos-act && chmod a+x nektos-act
-	./nektos-act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/build.yml
+act-linux:
+	./nektos-act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/linux.yml
 act-python:
 	./nektos-act --reuse -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/python.yml
+act-cibuildhwheel:
+	./nektos-act --reuse -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/cibuildhweel.yml
 msvc:
 	#!/bin/bash
 	[ -d /opt/msvc ] || ( git clone https://github.com/mstorsjo/msvc-wine.git && cd msvc-wine && ./vsdownload.py --accept-license --dest /opt/msvc && ./install.sh )

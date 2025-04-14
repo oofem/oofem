@@ -4,7 +4,7 @@ requires-python = '>=3.11'
 readme='README.md'
 license={'file'='COPYING.LGPLv2.1'}
 # dynamic=['version','description']
-dependencies = [ 'pytest' ]
+dependencies = [ 'pytest', 'numpy' ]
 version='2.6.0-dev1'
 description='oofem etc' 
 
