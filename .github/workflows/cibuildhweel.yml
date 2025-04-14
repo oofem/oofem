@@ -3,6 +3,10 @@ name: CI Build Wheel
 
 on: [push, pull_request]
 
+env:
+  # skipy pypy builds: embedding interpreter not supported (pythonfield.C)
+  CIBW_SKIP: pp*
+
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
