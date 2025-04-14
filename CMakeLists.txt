@@ -17,6 +17,11 @@ if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
+
+# cmake>=3.12: honor *_ROOT variables (needed for cibuildwheel python envs)
+cmake_policy(SET CMP0074 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
+
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 6)
