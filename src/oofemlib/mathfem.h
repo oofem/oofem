@@ -69,7 +69,7 @@ inline unsigned long min(unsigned long i, unsigned long j)
     return (i <= j ? i : j);
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 /// Returns smaller value from two given decimals
 inline std::size_t min(std::size_t i, std::size_t j)
 { return ( i <= j ? i : j ); }
