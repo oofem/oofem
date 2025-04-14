@@ -6,7 +6,8 @@ on: [push, pull_request]
 env:
   # (a) skip all 32-bit builds (source issue: datastream.h assumes size_t != unsigned long, which break on 32bit)
   # (b) skipy pypy builds: embedding interpreter not supported (pythonfield.C)
-  CIBW_SKIP: "*-win32 *-manylinux_i686 pp*"
+  # (c) skip all musllinux builds (compiles but segfaults at import time)
+  CIBW_SKIP: "*-win32 *-manylinux_i686 pp* *musllinux*"
   # https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions
   MACOSX_DEPLOYMENT_TARGET: 10.14
   # on Linux, also build pyodide (wasm), but not i686
