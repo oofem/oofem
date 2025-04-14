@@ -22,7 +22,8 @@ build_type="Release"
 # build_args=['-j64'] # Ninja parallelizes automatically
 options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
 install_components=['python_module']
-generator ='Ninja'
+# https://github.com/pypa/cibuildwheel/issues/643
+# generator ='Ninja'
 
 [tool.py-build-cmake.module]
 name='oofem'
