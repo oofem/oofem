@@ -651,7 +651,7 @@ Eurocode2CreepMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-Eurocode2CreepMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+Eurocode2CreepMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     KelvinChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 

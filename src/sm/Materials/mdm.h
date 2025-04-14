@@ -237,7 +237,7 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep) override;
+                              const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -309,7 +309,7 @@ protected:
     void applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals) const;
     void transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp) const;
     void computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC,
-                                GaussPoint *gp, TimeStep *tStep) ;
+                                GaussPoint *gp, TimeStep *tStep) const;
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode, GaussPoint *gp,
                                      TimeStep *tStep) const;

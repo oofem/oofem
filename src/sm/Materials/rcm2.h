@@ -190,12 +190,12 @@ public:
 
     double give(int aProperty, GaussPoint *gp) const override;
 
-    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
+    LinearElasticMaterial *giveLinearElasticMaterial() const { return linearElasticMaterial; }
 
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep) override;
+                              const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
@@ -244,42 +244,42 @@ public:
 protected:
 
     virtual void checkForNewActiveCracks(IntArray &answer, GaussPoint *gp, const FloatArray &,
-                                         const FloatArray &, FloatArray &, const FloatArray &);
-    virtual void updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain);
+                                         const FloatArray &, FloatArray &, const FloatArray &) const;
+    virtual void updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain) const;
 
-    virtual void checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVector, IntArray &);
-    virtual int checkSizeLimit(GaussPoint *gp, double) { return 0; }
-    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) = 0;
-    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) = 0;
-    virtual double computeStrength(GaussPoint *gp, double) = 0;
-    virtual void updateStatusForNewCrack(GaussPoint *, int, double);
-    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal);
+    virtual void checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVector, IntArray &) const;
+    virtual int checkSizeLimit(GaussPoint *gp, double) const { return 0; }
+    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) const = 0;
+    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) const = 0;
+    virtual double computeStrength(GaussPoint *gp, double) const = 0;
+    virtual void updateStatusForNewCrack(GaussPoint *, int, double) const;
+    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal) const;
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                                       double effStrain, int i) { return 1.e20; }
+                                       double effStrain, int i) const { return 1.e20; }
 
     virtual void giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode,
                                              GaussPoint *gp,
-                                             TimeStep *tStep);
+                                             TimeStep *tStep) const;
 
     void giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                     MatResponseMode rMode,
                                     GaussPoint *gp,
-                                    TimeStep *tStep);
+                                    TimeStep *tStep) const;
     /*
      * void  computeTrialStressIncrement (FloatArray& answer, GaussPoint *gp,
      * const FloatArray& strainIncrement, TimeStep* tStep);
      */
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
-                                                      GaussPoint *gp, TimeStep *tStep);
+                                                      GaussPoint *gp, TimeStep *tStep) const;
 
     void giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *,
-                                         FloatArray &, FloatMatrix &, TimeStep *);
+                                         FloatArray &, FloatMatrix &, TimeStep *) const;
     void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                           bool reduce, MatResponseMode,
                                           GaussPoint *, TimeStep *tStep,
-                                          const FloatMatrix &);
-    void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL);
+                                          const FloatMatrix &) const;
+    void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL) const;
     // Give3dMaterialStiffnessMatrix should return 3d material stiffness matrix
     // taking into account possible failure or fracture of material
     double giveResidualStrength() { return 0.01 * this->Ft; }

@@ -62,7 +62,7 @@ RCSDMaterial :: ~RCSDMaterial()
 void
 RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain,
-                                     TimeStep *tStep)
+                                     TimeStep *tStep) const
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -175,7 +175,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 void
 RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                      MatResponseMode rMode, GaussPoint *gp,
-                                                     TimeStep *tStep)
+                                                     TimeStep *tStep) const
 //
 // returns effective material stiffness matrix in full form
 // for gp stress strain mode
@@ -215,7 +215,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 double
-RCSDMaterial :: computeDamageCoeff(double equivStrain, double dStiffCoeff, double ep, double ef)
+RCSDMaterial :: computeDamageCoeff(double equivStrain, double dStiffCoeff, double ep, double ef) const
 {
     double damage = 1. - dStiffCoeff * ( 1. - ef / equivStrain ) / ( 1. - ef / ep );
     if ( damage > 1.0 ) {
@@ -227,7 +227,7 @@ RCSDMaterial :: computeDamageCoeff(double equivStrain, double dStiffCoeff, doubl
 
 
 double
-RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reducedTotalStrainVector, double e, TimeStep *tStep)
+RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reducedTotalStrainVector, double e, TimeStep *tStep) const
 {
     FloatArray effStress, princEffStress, fullEffStress;
     FloatMatrix De;
@@ -268,7 +268,7 @@ RCSDMaterial :: give(int aProperty, GaussPoint *gp) const
 
 
 int
-RCSDMaterial :: checkSizeLimit(GaussPoint *gp, double charLength)
+RCSDMaterial :: checkSizeLimit(GaussPoint *gp, double charLength) const
 //
 // checks if element size (charLength) is too big
 // so that tension strength must be reduced followed
@@ -287,7 +287,7 @@ RCSDMaterial :: checkSizeLimit(GaussPoint *gp, double charLength)
 
 
 double
-RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
+RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength) const
 //
 // computes strength for given gp,
 // which may be reduced according to length of "fracture process zone"
@@ -313,7 +313,7 @@ RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
 
 
 double
-RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
+RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) const
 //
 // computes MinCrackStrainsForFullyOpenCrack for given gp and i-th crack
 //
@@ -354,7 +354,7 @@ RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 
 double
 RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                                    double crackStrain, int i)
+                                    double crackStrain, int i) const
 //
 // returns current cracking modulus according to crackStrain for i-th
 // crackplane
@@ -420,7 +420,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
 
 
 double
-RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
+RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i) const
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //

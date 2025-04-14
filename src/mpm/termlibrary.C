@@ -218,7 +218,7 @@ void BTamNTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolati
 
 // NTamTBTerm Term (Q^T du/dt)
 
-NTamTBTerm::NTamTBTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at) : MPMSymbolicTerm(testField, unknownField, _Unknown), aType(at) {}
+NTamTBTerm::NTamTBTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at, ValueModeType ufieldVM) : MPMSymbolicTerm(testField, unknownField, _Unknown), aType(at), unknownFieldVMT(ufieldVM) {}
 
 void NTamTBTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
     FloatMatrix B, mb;
@@ -235,7 +235,7 @@ void NTamTBTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp
 void NTamTBTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
     FloatArray ut;
     FloatMatrix Q;
-    cell.getUnknownVector(ut, this->field, VM_Velocity ,tstep);
+    cell.getUnknownVector(ut, this->field, unknownFieldVMT ,tstep);
     this->evaluate_lin (Q, cell,gp, tstep);
     answer.beProductOf(Q,ut);
 }
@@ -285,7 +285,7 @@ void NTamTBTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolat
 
 // NTcN Term (S(dp/dt))
 
-NTcN::NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype) : MPMSymbolicTerm(testField, unknownField, _Unknown), ctype(ctype) {}
+NTcN::NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype, ValueModeType uFieldVMT) : MPMSymbolicTerm(testField, unknownField, _Unknown), ctype(ctype), unknownFieldVMT(uFieldVMT) {}
 
 void NTcN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const  {
     FloatArray Np;
@@ -297,7 +297,7 @@ void NTcN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, Time
 void NTcN::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
     FloatArray p;
     FloatMatrix S;
-    cell.getUnknownVector(p, this->field, VM_Velocity, tstep);
+    cell.getUnknownVector(p, this->field, unknownFieldVMT, tstep);
     this->evaluate_lin (S, cell,gp, tstep);
     answer.beProductOf(S,p);
 }

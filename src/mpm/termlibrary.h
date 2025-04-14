@@ -181,9 +181,10 @@ class BTamNTerm : public MPMSymbolicTerm {
 class NTamTBTerm : public MPMSymbolicTerm {
     protected:
         MatResponseMode aType = BiotConstant;
+        ValueModeType unknownFieldVMT = VM_Velocity;
     public:
     NTamTBTerm () : MPMSymbolicTerm() {}
-    NTamTBTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at = BiotConstant) ;
+    NTamTBTerm (const Variable *testField, const Variable* unknownField, MatResponseMode at = BiotConstant, ValueModeType unknownFieldVMT = VM_Velocity) ;
 
     /**
      * @brief Evaluates the linearization of receiver, i.e. the LHS term
@@ -206,6 +207,10 @@ class NTamTBTerm : public MPMSymbolicTerm {
         int value = 0;
         IR_GIVE_FIELD(ir, value, "atype");
         aType = static_cast<MatResponseMode>(value);
+
+        value = unknownFieldVMT; // VM_Velocity
+        IR_GIVE_OPTIONAL_FIELD(ir, value, "uvmt" );
+        unknownFieldVMT = static_cast<ValueModeType>(value);
     }
     protected:
     /**
@@ -228,9 +233,10 @@ class NTamTBTerm : public MPMSymbolicTerm {
 class NTcN : public MPMSymbolicTerm {
     protected:
         MatResponseMode ctype;
+        ValueModeType unknownFieldVMT = VM_Velocity;
     public:
     NTcN () : MPMSymbolicTerm() {}
-    NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype) ;
+    NTcN (const Variable *testField, const Variable* unknownField, MatResponseMode ctype, ValueModeType uFieldVMT = VM_Velocity) ;
 
     /**
      * @brief Evaluates the linearization of term (the lhs contribution)
@@ -253,6 +259,10 @@ class NTcN : public MPMSymbolicTerm {
         int value = 0;
         IR_GIVE_FIELD(ir, value, "ctype");
         ctype = static_cast<MatResponseMode>(value);
+
+        value = unknownFieldVMT; // VM_Velocity
+        IR_GIVE_OPTIONAL_FIELD(ir, value, "uvmt" );
+        unknownFieldVMT = static_cast<ValueModeType>(value);
     }
     
 };

@@ -487,7 +487,7 @@ AnisotropicDamageMaterial :: computeInplaneStress(FloatArray &inplaneStress, con
 void
 AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                   const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
+                                                  TimeStep *atTime) const
 //
 // returns real stress vector in 3d stress space of receiver
 // computed from the state at the beginning of the step and strain at the end of the step
@@ -502,7 +502,7 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
 
     // evaluate stress under general triaxial stress conditions
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    IsotropicLinearElasticMaterial &lmat = linearElasticMaterial;
+    const IsotropicLinearElasticMaterial &lmat = linearElasticMaterial;
     FloatMatrix de, tempDamage;
     double equivStrain, kappa = 0.0, tempKappa = 0.0, traceTempD;
     FloatArray eVals, effectiveStressVector, fullEffectiveStressVector, stressVector;
@@ -791,7 +791,7 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
 
 // Computes Kappa according to the first damage law proposed in reference paper.
 double
-AnisotropicDamageMaterial :: computeKappa(FloatMatrix damageTensor)
+AnisotropicDamageMaterial :: computeKappa(FloatMatrix damageTensor) const
 {
     double trace = damageTensor.giveTrace();
     double answer = ( this->kappaf - this->kappa0 ) * trace + this->kappa0;
@@ -1418,7 +1418,7 @@ AnisotropicDamageMaterial :: computePlaneStressSigmaZ(double &answer, FloatMatri
 void
 AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
                                                  const FloatArray &reducedTotalStrainVector, double equivStrain,
-                                                 TimeStep *atTime)
+                                                 TimeStep *atTime) const
 //
 {
     //

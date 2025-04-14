@@ -464,7 +464,7 @@ MPSMaterial::initializeFrom(InputRecord &ir)
 
 
 void
-MPSMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+MPSMaterial::giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
 {
     KelvinChainSolidMaterial::giveRealStressVector(answer, gp, reducedStrain, tStep);
 

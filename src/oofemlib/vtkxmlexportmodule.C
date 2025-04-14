@@ -96,6 +96,9 @@ VTKXMLExportModule::initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
     IR_GIVE_OPTIONAL_FIELD(ir, externalForcesToExport, _IFT_VTKXMLExportModule_externalForces); // Macro - see unknowntype.h
     IR_GIVE_OPTIONAL_FIELD(ir, ipInternalVarsToExport, _IFT_VTKXMLExportModule_ipvars); // Macro - see internalstatetype.h
+    if ( ir.hasField(_IFT_VTKXMLExportModule_exportSetMembershipFlag) ) {
+        exportSetMembershipFlag = true;
+    }
 
     val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
@@ -193,6 +196,9 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
         this->exportIntVars(this->defaultVTKPiece, *region, internalVarsToExport, *smoother, tStep);
         this->exportExternalForces(this->defaultVTKPiece, *region, externalForcesToExport, tStep);
         this->exportCellVars(this->defaultVTKPiece, *region, cellVarsToExport, tStep);
+        if (exportSetMembershipFlag) {
+            this->exportSetMembership(this->defaultVTKPiece, *region, tStep);
+        }
 
         // Write the VTK piece to file.
         anyPieceNonEmpty += this->writeVTKPieceVariables(this->defaultVTKPiece, tStep);
@@ -470,6 +476,9 @@ VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tSt
     this->writePrimaryVars(vtkPiece);       // Primary field
     this->writeIntVars(vtkPiece);           // Internal State Type variables smoothed to the nodes
     this->writeExternalForces(vtkPiece);           // External forces
+    if (this->exportSetMembershipFlag) {
+        this->writeVertexSetMembership(vtkPiece);     // Set membership (region number) of the nodes
+    }
 
     //if ( emodel->giveDomain(1)->hasXfemManager() ) {
     //    this->writeXFEMVars(vtkPiece);      // XFEM State Type variables associated with XFEM structure
@@ -480,7 +489,9 @@ VTKXMLExportModule::writeVTKPieceVariables(ExportRegion &vtkPiece, TimeStep *tSt
     this->fileStream << cellHeader.c_str();
 #endif
     this->writeCellVars(vtkPiece);          // Single cell variables ( if given in the integration points then an average will be exported)
-
+    if (this->exportSetMembershipFlag) {
+        this->writeCellSetMembership(vtkPiece);     // Set membership (region number) of the nodes
+    }
 #ifndef __VTK_MODULE
     this->fileStream << "</CellData>\n";
 #endif
@@ -537,6 +548,9 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
         }
     }
 
+    if (this->exportSetMembershipFlag) {
+        scalars.append("VertexSetMembership ");
+    }
     // print header
     pointHeader = "<PointData Scalars=\"" + scalars + "\" "
                   +  "Vectors=\"" + vectors + "\" "
@@ -563,6 +577,9 @@ VTKXMLExportModule::giveDataHeaders(std::string &pointHeader, std::string &cellH
         } else {
             OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
+    }
+    if (this->exportSetMembershipFlag) {
+        vectors.append("CellSetMembership ");
     }
 
     // print header
@@ -773,6 +790,40 @@ VTKXMLExportModule::writeExternalForces(ExportRegion &vtkPiece)
 #endif
     }
 }
+
+void
+VTKXMLExportModule::writeVertexSetMembership(ExportRegion &vtkPiece)
+{
+    // Write the set membership to file
+    int numSetGroups = vtkPiece.giveNumberOfSetGroups();
+    this->fileStream << "<DataArray type=\"UInt8\" Name=\"" << "VertexSetMembership" << "\" NumberOfComponents=\"" << numSetGroups << "\" format=\"ascii\"> ";
+    for (int inode = 1; inode <= vtkPiece.giveNumberOfNodes(); inode++ ) {
+        const std::vector<uint8_t>& setMembership = vtkPiece.getVertexSetMembershipGroup(inode);
+        for ( auto val : setMembership ) {
+            this->fileStream << static_cast<int>(val) << " ";
+        }
+    }
+    this->fileStream << "</DataArray>\n";
+}
+
+
+void
+VTKXMLExportModule::writeCellSetMembership(ExportRegion &vtkPiece)
+{
+    // Write the set membership to file
+    int numSetGroups = vtkPiece.giveNumberOfSetGroups();
+    
+    this->fileStream << "<DataArray type=\"UInt8\" Name=\"" << "CellSetMembership" << "\" NumberOfComponents=\"" << numSetGroups << "\" format=\"ascii\"> ";
+    for (int icell = 1; icell <= vtkPiece.giveNumberOfCells(); icell++ ) {
+        const std::vector<uint8_t>& setMembership = vtkPiece.getCellSetMembershipGroup(icell);
+        for ( auto val : setMembership ) {
+            this->fileStream << static_cast<int>(val) << " ";
+        }
+    }
+    this->fileStream << "</DataArray>\n";
+}
+
+
 
 void
 VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)

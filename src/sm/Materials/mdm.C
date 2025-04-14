@@ -85,7 +85,7 @@ MDM :: hasMaterialModeCapability(MaterialMode mode) const
 
 void
 MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                            const FloatArray &totalStrain, TimeStep *tStep)
+                            const FloatArray &totalStrain, TimeStep *tStep) const
 {
     FloatArray reducedStrain, strainPDC, stressPDC, stress;
     FloatArray tempDamageTensorEigenVals;
@@ -449,7 +449,7 @@ MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDam
 
 
 void
-MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep)
+MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep) const
 {
     //FloatMatrixF<6,6> de;
     FloatMatrix de;

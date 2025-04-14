@@ -82,7 +82,7 @@ void
 PlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                         GaussPoint *gp,
                                         const FloatArray &totalStrain,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current

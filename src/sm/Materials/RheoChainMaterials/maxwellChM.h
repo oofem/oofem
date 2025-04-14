@@ -70,8 +70,8 @@ public:
     MaxwellChainMaterial(int n, Domain *d);
 
     // overload thesse function such that computation of hidden vars can be done after the computation of stress
-    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
-    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const override;
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep) const;
 
     // identification and auxiliary functions
     const char *giveClassName() const override { return "MaxwellChainMaterial"; }

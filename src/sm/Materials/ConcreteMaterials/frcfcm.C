@@ -255,7 +255,7 @@ FRCFCM :: initializeFrom(InputRecord &ir)
 
 
 double
-FRCFCM :: computeCrackFibreAngle(GaussPoint *gp, int index)
+FRCFCM :: computeCrackFibreAngle(GaussPoint *gp, int index) const
 {
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
 
@@ -287,7 +287,7 @@ FRCFCM :: computeCrackFibreAngle(GaussPoint *gp, int index)
 
 
 double
-FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i)
+FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) const
 //
 // returns current cracking modulus according to crackStrain for i-th
 // crackplane
@@ -560,7 +560,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *t
 
 
 double
-FRCFCM :: computeFiberBond(double w)
+FRCFCM :: computeFiberBond(double w) const
 {
     double tau_s = 0.;
     double dw, tau_tilde = 0.;
@@ -599,7 +599,7 @@ FRCFCM :: computeFiberBond(double w)
 
 
 double
-FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double ec, int i)
+FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double ec, int i) const 
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
@@ -617,7 +617,7 @@ FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double ec, i
 
 
 double
-FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double ec, int i)
+FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double ec, int i) const
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
@@ -814,7 +814,7 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double
 
 
 double
-FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shearDirection)
+FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shearDirection) const 
 {
     double G, Geff;
     double beta_mf;
@@ -871,7 +871,7 @@ FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shea
 
 
 double
-FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
+FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const 
 {
   double cos_theta;
     double E = linearElasticMaterial.giveYoungsModulus();
@@ -912,7 +912,7 @@ FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
 
 // the same function as "computeD2ModulusForCrack", only without current value of fiber damage.
 double
-FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
+FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const
 {
     double cos_theta; 
     double E = linearElasticMaterial.giveYoungsModulus();
@@ -952,7 +952,7 @@ FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
 
 
 double
-FRCFCM :: computeTempDamage(GaussPoint *gp, TimeStep *tStep) {
+FRCFCM :: computeTempDamage(GaussPoint *gp, TimeStep *tStep) const {
     // we assume that fibre damage is the same for all crack planes
     FRCFCMStatus *status = static_cast< FRCFCMStatus * >( this->giveStatus(gp) );
 
@@ -1001,7 +1001,7 @@ FRCFCM :: computeTempDamage(GaussPoint *gp, TimeStep *tStep) {
 
 
 double
-FRCFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int shearDirection)
+FRCFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int shearDirection) const
 {
     double maxTau_m;
     double minTau_f;
@@ -1114,7 +1114,7 @@ FRCFCM :: computeCrackSpacing() {
 
 
 bool
-FRCFCM :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress)
+FRCFCM :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) const
 {
     double Em, sigma_m;
 
@@ -1141,7 +1141,7 @@ FRCFCM :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *
 
 
 double
-FRCFCM :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection)
+FRCFCM :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection) const
 {
     double factor_ij, D2_i, D2_j;
 
@@ -1180,7 +1180,7 @@ FRCFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 
 // computes overall stiffness of the composite material: the main purpose of this method is to adjust the stiffness given by the linear elastic material which corresponds to the matrix. The same method is used by all fiber types.
 double
-FRCFCM :: computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) {
+FRCFCM :: computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) const {
     double stiffness = 0.;
 
     double Em = linearElasticMaterial.giveYoungsModulus();

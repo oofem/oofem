@@ -107,7 +107,7 @@ public:
     double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep) override;
+                                      const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
     FloatArray computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
@@ -131,18 +131,18 @@ protected:
     double stiffnessFactor = 0.;    
 
 
-    double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override;
-    double giveFractureEnergy(GaussPoint *gp, TimeStep *tStep) override;    
+    double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveFractureEnergy(GaussPoint *gp, TimeStep *tStep) const override;    
 
    
-    double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) override;
-    double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) const override;
+    double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) const override;
     
 
     int checkConsistency(void) override; 
    
     /// returns equivalent time (used to compute time-dependent ft and gf)
-    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const;
 
 };
 } // end namespace oofem

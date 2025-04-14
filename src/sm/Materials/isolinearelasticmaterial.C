@@ -259,7 +259,7 @@ IsotropicLinearElasticMaterial :: giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix
 
 
 void
-IsotropicLinearElasticMaterial :: giveRealStressVectorUP_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+IsotropicLinearElasticMaterial :: giveRealStressVectorUP_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) const
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -281,7 +281,7 @@ IsotropicLinearElasticMaterial :: giveRealStressVectorUP_3d(FloatArray &answer, 
 
 
 void
-IsotropicLinearElasticMaterial :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+IsotropicLinearElasticMaterial :: giveRealStressVectorUP_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) const
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -313,6 +313,20 @@ IsotropicLinearElasticMaterial::giveCharacteristicValue(MatResponseMode type, Ga
         default:
             return this->Material::giveCharacteristicValue(type, gp, tStep);
     }
+}
+
+void
+IsotropicLinearElasticMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    if (type == Stress) {
+        return LinearElasticMaterial::giveRealStressVector(answer, gp, flux, tStep);
+    } else if (type == DeviatoricStress) {
+        FloatMatrix d;
+        this->giveDeviatoricConstitutiveMatrix(d, TangentStiffness, gp, tStep);
+        answer.beProductOf(d, flux);
+        return; 
+    } else {
+        OOFEM_ERROR("Not implemented");
+    } 
 }
 
 void 

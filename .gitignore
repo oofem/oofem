@@ -10,8 +10,8 @@ release/
 debug/
 
 # ignore any files under build directories
-build/
-_build/
+build*/
+_build*/
 
 # test results
 *.out

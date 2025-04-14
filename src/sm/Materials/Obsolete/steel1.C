@@ -50,7 +50,7 @@ Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)
 double
 Steel1 :: computeYCValueAt(GaussPoint *gp,
                            FloatArray *currentStress,
-                           FloatArray *currentPlasticStrain)
+                           FloatArray *currentPlasticStrain) const
 
 //
 // computes the value of receiver.
@@ -68,7 +68,7 @@ Steel1 :: computeYCValueAt(GaussPoint *gp,
 
 
 double
-Steel1 :: computeJ2InvariantAt(FloatArray *currentStress)
+Steel1 :: computeJ2InvariantAt(FloatArray *currentStress) const
 //
 // computes the J2 value of receiver.
 //
@@ -96,7 +96,7 @@ Steel1 :: computeJ2InvariantAt(FloatArray *currentStress)
 FloatArray *
 Steel1 :: GiveYCStressGradient(GaussPoint *gp,
                                FloatArray *currentStress,
-                               FloatArray *currentPlasticStrain)
+                               FloatArray *currentPlasticStrain) const
 
 //
 // - returning vector of derivatives of yield surface with respect to stresses.
@@ -133,7 +133,7 @@ Steel1 :: GiveYCStressGradient(GaussPoint *gp,
 FloatArray *
 Steel1 :: GiveLCStressGradient(GaussPoint *gp,
                                FloatArray *currentStress,
-                               FloatArray *currentPlasticStrain)
+                               FloatArray *currentPlasticStrain) const 
 
 //
 // - returning vector of derivatives of loading surface with respect to stresses.
@@ -147,7 +147,7 @@ Steel1 :: GiveLCStressGradient(GaussPoint *gp,
 FloatArray *
 Steel1 :: GiveYCPlasticStrainGradient(GaussPoint *gp,
                                       FloatArray *currentStress,
-                                      FloatArray *currentPlasticStrain)
+                                      FloatArray *currentPlasticStrain) const 
 
 //
 //returning vector of derivatives of yield surface with respects to plastic strains
@@ -161,7 +161,7 @@ Steel1 :: GiveYCPlasticStrainGradient(GaussPoint *gp,
 FloatArray *
 Steel1 :: GiveLCPlasticStrainGradient(GaussPoint *gp,
                                       FloatArray *currentStress,
-                                      FloatArray *currentPlasticStrain)
+                                      FloatArray *currentPlasticStrain) const
 
 //
 //returning vector of derivatives of loading  surface with respects to plastic strains

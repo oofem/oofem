@@ -130,7 +130,7 @@ CompoDamageMat :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint
 }
 
 //called in each iteration, support for 3D and 1D material mode
-void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const
 {
     int i_max, s;
     double delta, sigma, charLen, tmp = 0., Gf_tmp;
@@ -437,7 +437,7 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrixF<6,6> &answer, Gaus
 // Since the orientation of cracks is aligned with the orientation of material, determination is based only on the geometry (not on the direction of principal stress etc.).
 // Assumption that fracture localizes into all integration points on element.
 // Material orientation in global c.s. is passed. Called in the first run
-void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs)
+void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs) const
 {
     FloatArray crackPlaneNormal(3);
 
@@ -456,7 +456,7 @@ void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *
 
 //determine characteristic length for six stresses/strains in their modes
 void
-CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp)
+CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp) const
 {
     CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
 
@@ -470,7 +470,7 @@ CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *g
 }
 
 //check that elemnt is small enough to prevent snap-back
-void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
+void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) const
 {
     CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
     FloatArray charLenModes(6);

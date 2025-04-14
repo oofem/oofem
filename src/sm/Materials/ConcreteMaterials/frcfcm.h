@@ -207,28 +207,28 @@ protected:
     enum FiberType { FT_CAF, FT_SAF, FT_SRF, FT_SRF2D, FT_Unknown };
     FiberType fiberType = FT_Unknown;
 
-    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) override;
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) const override;
     /// evaluates the fiber bond if w > w*
-    virtual double computeFiberBond(double w);
-    double giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) override;
+    virtual double computeFiberBond(double w) const;
+    double giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) const override;
     /// compute the nominal stress in fibers in the i-th crack
-    virtual double computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i);
-    double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) override;
-    double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) override;
+    virtual double computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) const;
+    double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) const override;
+    double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const override;
     /// estimate shear modulus for a given crack plane (1, 2, 3). Uses equilibrated value of damage.
-    virtual double estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack);
-    double maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) override;
+    virtual double estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) const;
+    double maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) const override;
     /// evaluates temporary value of damage caused by fibre shearing
-    virtual double computeTempDamage(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeTempDamage(GaussPoint *gp, TimeStep *tStep) const;
     /// computes crack spacing based on composition of the fibre composite
     virtual double computeCrackSpacing();
     /// compute the angle between the fibre and i-th crack normal
-    virtual double computeCrackFibreAngle(GaussPoint *gp, int i);
-    void checkSnapBack(GaussPoint *gp, TimeStep *tStep, int crack) override { }
-    bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) override;
-    double computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection) override;
-    double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) override;
-    double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) override { return this->computeOverallElasticStiffness(gp, tStep) / ( 2. * ( 1. + linearElasticMaterial.givePoissonsRatio() ) ); }
+    virtual double computeCrackFibreAngle(GaussPoint *gp, int i) const;
+    void checkSnapBack(GaussPoint *gp, TimeStep *tStep, int crack) const override { }
+    bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) const override;
+    double computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection) const override;
+    double computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) const override;
+    double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) const override { return this->computeOverallElasticStiffness(gp, tStep) / ( 2. * ( 1. + linearElasticMaterial.givePoissonsRatio() ) ); }
 };
 } // end namespace oofem
 #endif // frcfcm_h

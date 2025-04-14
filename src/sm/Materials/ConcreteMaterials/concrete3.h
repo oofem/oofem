@@ -75,13 +75,13 @@ public:
 
 protected:
     double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                               double crackStrain, int i) override;
+                               double crackStrain, int i) const override;
     //double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i) override;
-    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
-    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) override;
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) const override;
+    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) const override;
     //void updateStatusForNewCrack( GaussPoint*, int, double) override;
-    double computeStrength(GaussPoint *, double) override;
-    int checkSizeLimit(GaussPoint *gp, double) override;
+    double computeStrength(GaussPoint *, double) const override;
+    int checkSizeLimit(GaussPoint *gp, double) const override;
 };
 } // end namespace oofem
 #endif // concrete3_h

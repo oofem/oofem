@@ -83,9 +83,9 @@ public:
 
     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const override;
 
-    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep) const;
 
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return false; }

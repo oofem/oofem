@@ -68,7 +68,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(ElasticBulkModulus, 26) \
     ENUM_ITEM_WITH_VALUE(ElasticBulkModulusInverse, 27) \
     ENUM_ITEM_WITH_VALUE(MRM_ScalarOne, 28) \
-    ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29)
+    ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29) \
+    ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) 
+
 /**
  * Describes the character of characteristic material matrix.
  */

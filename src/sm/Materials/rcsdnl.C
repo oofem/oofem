@@ -81,7 +81,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
 void
 RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain,
-                                       TimeStep *tStep)
+                                       TimeStep *tStep) const 
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -373,7 +373,7 @@ RCSDNLMaterial :: initializeFrom(InputRecord &ir)
 
 
 double
-RCSDNLMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
+RCSDNLMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) const
 {
     return 1.e6; //this->ef;
 }
