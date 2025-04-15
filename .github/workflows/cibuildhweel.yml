@@ -35,7 +35,7 @@ jobs:
         os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
-
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.2
       - uses: actions/upload-artifact@v4
