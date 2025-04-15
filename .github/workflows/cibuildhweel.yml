@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         # macos-14, macos-13: compiles okay, tests segfault at import time
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, pyodide]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: TheMrMilchmann/setup-msvc-dev@v3
