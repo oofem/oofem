@@ -45,5 +45,5 @@ msvc:
 	[ -d /opt/msvc ] || ( git clone https://github.com/mstorsjo/msvc-wine.git && cd msvc-wine && ./vsdownload.py --accept-license --dest /opt/msvc && ./install.sh )
 	export PATH=/opt/msvc/bin/x64:$PATH
 	rm -rf build-msvc
-	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_CXX_FLAGS="/wd4275 /wd4267 /wd4458 /wd4456 /wd5205 /wd4244 /wd4101 /EHsc"
+	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 	cmake --build ./build-msvc --parallel
