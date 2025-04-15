@@ -23,7 +23,11 @@ build_type="Release"
 options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
 install_components=['python_module']
 # https://github.com/pypa/cibuildwheel/issues/643
-# generator ='Ninja'
+generator ='Ninja'
+
+[tool.py-build-cmake.windows.cmake]
+# extra options, but pass them as args so that options don't have to be repeated
+args = ['-DCMAKE_C_COMPILER=cl','-DCMAKE_CXX_COMPILER=cl']
 
 [tool.py-build-cmake.module]
 name='oofem'
