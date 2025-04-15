@@ -13,13 +13,9 @@ env:
   # on Linux, also build pyodide (wasm), but not i686
   CIBW_BUILD_LINUX: "x86_64 wasm"
 
-
-  # TEMP: Windows wheel 3.11 fails at import time; do-nothing test so that the wheel can be inspected after the build
-  # wine trace reveals it libgcc_s_dw2-1.dll is not found
-  CIBW_TEST_COMMAND_WINDOWS: "echo Wheel installed, no testing done (TEMPORARY)."
   # Use delvewheel on windows: https://github.com/pypa/cibuildwheel/discussions/1798
-  CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
-  CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
+  #CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+  #CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
 
 jobs:
   build_wheels:
