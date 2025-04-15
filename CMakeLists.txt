@@ -645,6 +645,7 @@ if (USE_PYBIND_BINDINGS)
     link_libraries(pybind11::embed)
 
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
+    add_dependencies(oofem version)
     if(USE_SHARED_LIB)
         if(EMSCRIPTEN)
             MESSAGE(FATAL_ERROR "USE_SHARED_LIB=1 is incompatible with Emscripten (some unresolved symbols at runtime).")
