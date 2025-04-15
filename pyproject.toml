@@ -19,10 +19,10 @@ exclude = ['**/_build']
 [tool.py-build-cmake.cmake]
 minimum_version="3.17"
 build_type="Release"
-# build_args=['-j64'] # Ninja parallelizes automatically
 options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
 install_components=['python_module']
 # https://github.com/pypa/cibuildwheel/issues/643
+# use Ninja everywhere (including windows), where it needs compiler paths to be set up (done via setup-msvc-dev in cibuildwheel.yml)
 generator ='Ninja'
 
 [tool.py-build-cmake.windows.cmake]
@@ -31,7 +31,6 @@ args = ['-DCMAKE_C_COMPILER=cl','-DCMAKE_CXX_COMPILER=cl']
 
 [tool.py-build-cmake.module]
 name='oofem'
-# generated='module' # module
 directory = 'bindings/python'
 
 [tool.py-build-cmake.editable]
