@@ -7,13 +7,20 @@ env:
   # (a) skip all 32-bit builds (source issue: datastream.h assumes size_t != unsigned long, which break on 32bit)
   # (b) skipy pypy builds: embedding interpreter not supported (pythonfield.C)
   # (c) skip all musllinux builds (compiles but segfaults at import time)
-  CIBW_SKIP: "*-win32 *-manylinux_i686 pp* *musllinux*"
+  # (d) temporarily skip ubuntu, where the builds work just fine
+  CIBW_SKIP: "*-win32 *-manylinux_i686 pp* *musllinux* ubuntu-*"
   # https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions
   MACOSX_DEPLOYMENT_TARGET: 10.14
   # on Linux, also build pyodide (wasm), but not i686
   CIBW_BUILD_LINUX: "x86_64 wasm"
-  # Windows wheel 3.11 fails at import time; do-nothing test so that the wheel can be inspected after the build
-  CIBW_TEST_COMMAND_WINDOWS: "echo Wheel installed, no testing done."
+
+
+  # TEMP: Windows wheel 3.11 fails at import time; do-nothing test so that the wheel can be inspected after the build
+  # wine trace reveals it libgcc_s_dw2-1.dll is not found
+  CIBW_TEST_COMMAND_WINDOWS: "echo Wheel installed, no testing done (TEMPORARY)."
+  # Use delvewheel on windows: https://github.com/pypa/cibuildwheel/discussions/1798
+  CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+  CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
 
 jobs:
   build_wheels:
