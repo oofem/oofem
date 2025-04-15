@@ -39,7 +39,12 @@ jobs:
           python -m pytest bindings/python/tests
     - uses: actions/upload-artifact@v4
       with:
-        name: my-artifact
+        name: oofem-linux-wheel
+        path: |
+          dist/oofem-*-linux_x86_64.whl
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-wasm-wheel
         path: |
           dist/oofem-*_wasm32.whl
-          dist/oofem-*-linux_x86_64.whl
+
