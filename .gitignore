@@ -35,6 +35,14 @@ perf.data*
 *.bcf
 *-blx.bib
 *.blg
+*.auxlock
+elementlibmanual-figure*.dpth
+elementlibmanual-figure*.pdf
+elementlibmanual-figure*.md5
+
+# documentation artifacts
+doc/elementlibmanual/elementlibmanual.pdf
+doc/theorymanual/theorymanual.pdf
 
 
 *.idea
