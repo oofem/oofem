@@ -754,7 +754,10 @@ PYBIND11_MODULE(oofempy, m) {
         .def("product", &oofem::FloatArray::product)
         .def("zero", &oofem::FloatArray::zero)
         .def("beProductOf", &oofem::FloatArray::beProductOf)
-
+        // enable conversion to numpy representation
+        .def("asNumpyArray", [](const oofem::FloatArray &s) {
+            return py::array_t<double> (s.giveSize(), s.givePointer());
+        })
         // expose FloatArray operators
         .def(py::self + py::self)
         .def(py::self - py::self)
@@ -825,6 +828,10 @@ PYBIND11_MODULE(oofempy, m) {
         .def("plusDyadSymmUpper", &oofem::FloatMatrix::plusDyadSymmUpper)
         .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
         .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
+        // enable conversion to numpy representation
+        .def("asNumpyArray", [](const oofem::FloatMatrix &s) {
+            return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer());
+        })
         // expose FloatArray operators
         .def(py::self + py::self)
         .def(py::self - py::self)
