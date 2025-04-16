@@ -640,10 +640,12 @@ if (USE_PYBIND_BINDINGS)
     set(PYBIND11_FINDPYTHON ON)
 
     find_package(Python COMPONENTS Interpreter Development)
-    add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
         include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
+        add_git_submodule(${PYBIND_DIR})
+    else()
+        add_git_submodule(extern/pybind11)
     endif ()
 
     # use python include paths and libs for all future targets (liboofem and oofem binary)

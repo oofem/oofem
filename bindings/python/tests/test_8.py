@@ -16,10 +16,19 @@ import numpy as np
 import pytest
 #import pyvista as pv
 
+#       I2.assemble_rhs(rhs, oofempy.EModelDefaultEquationNumbering(), tstep)
+#       TypeError: assemble_rhs(): incompatible function arguments. The following argument types are supported:
+#           1. (self: oofem.oofempy.Integral, arg0: oofem.oofempy.FloatArray, arg1: oofem.oofempy.UnknownNumberingScheme, arg2: oofem.oofempy.TimeStep, arg3: oofem.oofempy.FloatArray) -> None
+#
+#       Invoked with: <oofem.oofempy.Integral object at 0x7bedd55d1f70>, <oofempy.FloatArray: {0, 0, 0, 0, 0, }>, <oofem.oofempy.EModelDefaultEquationNumbering object at 0x7bedd68813f0>, <oofem.oofempy.TimeStep object at 0x7bedd55d3130>
 
-@pytest.mark.skip(reason='Error calling assemble_rhs(): incompatible function arguments. Hard failure with emscripten.')
+
+
+@pytest.mark.skip(reason='Error calling assemble_rhs(): incompatible function arguments (exception on usual platforms, crash with emscripten).')
 def test_8():
     # Requires oofempy compiled with __MPM_MODULE ON
+    if (oofempy.hasModule('mpm')==0):
+       pytest.skip()
 
     # Create a new dummy problem (placeholder for our demo) with one domain.
     problem = oofempy.dummyProblem(nSteps=1, outFile='test_7.out')
@@ -32,7 +41,7 @@ def test_8():
     n3 = oofempy.node(3, domain, coords=(1., 1., 0. ))
     n4 = oofempy.node(4, domain, coords=(0, 1, 0. ))
     
-    # Defdine elements, note that q1 defines just element geometry.
+    # Define elements, note that q1 defines just element geometry.
     q1 = oofempy.q1(1, domain, nodes=(1,2,3,4), mat=1, crossSect=1) # quad element #1
     l1 = oofempy.l1(2, domain, nodes=(2,3), mat=1, crossSect=1)     # boundary element #2
 

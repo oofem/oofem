@@ -1232,7 +1232,6 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveClassName", &oofem::IntegrationPointStatus::giveClassName)
     ;
 
-
     py::class_<oofem::MaterialStatus, oofem::IntegrationPointStatus, PyMaterialStatus<>>(m, "MaterialStatus")
         .def(py::init<oofem::GaussPoint *>())
     ;
@@ -1853,6 +1852,8 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoHeat", &isoHeat, py::return_value_policy::move);
     m.def("j2mat", &j2mat, py::return_value_policy::move);
     m.def("steel1", &steel1, py::return_value_policy::move);
+    m.def("concreteFcmViscoelastic", &concreteFcmViscoelastic, py::return_value_policy::move);
+    m.def("mps", &mps, py::return_value_policy::move);
 
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("simpleTransportCS", &simpleTransportCS, py::return_value_policy::move);
