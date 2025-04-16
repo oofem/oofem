@@ -49,7 +49,9 @@
 #define _IFT_MPSMaterial_fc "fc"
 #define _IFT_MPSMaterial_cc "cc"
 #define _IFT_MPSMaterial_wc "w/c"
+#define _IFT_MPSMaterial_wcr "wc" //for Python bindings
 #define _IFT_MPSMaterial_ac "a/c"
+#define _IFT_MPSMaterial_acr "ac" //for Python bindings
 #define _IFT_MPSMaterial_q1 "q1"
 #define _IFT_MPSMaterial_q2 "q2"
 #define _IFT_MPSMaterial_q3 "q3"

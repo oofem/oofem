@@ -1,0 +1,50 @@
+name: Python
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: recursive
+    - name: Python
+      run: |
+          # skip this step if already installed (such as locally re-using container with naktos/act)
+          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
+          # sudo rm /usr/lib/python3.12/EXTERNALLY-MANAGED
+          #sudo chmod -R $(USER): /usr/local
+          pip install pyodide-build py-build-cmake pytest numpy
+    - name: Wheel build
+      run: python3 -m build .
+    - name: Wheel test
+      run: |
+          pip install dist/oofem-*-linux_x86_64.whl
+          python3 -m pytest bindings/python/tests
+    - name: Pyodide build
+      run: |
+          [ -d emsdk ] || git clone https://github.com/emscripten-core/emsdk.git emsdk
+          pushd emsdk
+            export PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+            ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+            ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+            source emsdk_env.sh
+          popd
+          pyodide build --build-dependencies
+    - name: Pyodide test
+      run: |
+          pyodide venv build/venv-pyodide
+          source build/venv-pyodide/bin/activate
+          pip install dist/oofem-*_wasm32.whl
+          pip install pytest numpy
+          python -m pytest bindings/python/tests
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-linux-wheel
+        path: |
+          dist/oofem-*-linux_x86_64.whl
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-wasm-wheel
+        path: |
+          dist/oofem-*_wasm32.whl
+

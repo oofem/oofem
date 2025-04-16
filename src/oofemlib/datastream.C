@@ -95,7 +95,7 @@ int FileDataStream :: read(long *data, std::size_t count)
     return ( fread(data, sizeof( long ), count, stream) == count );
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 int FileDataStream::read(std::size_t* data, std::size_t count)
 {
     return (fread(data, sizeof(std::size_t), count, stream) == count);
@@ -127,7 +127,7 @@ int FileDataStream :: write(const unsigned long *data, std::size_t count)
     return ( fwrite(data, sizeof( unsigned long ), count, stream) == count );
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 int FileDataStream::write(const std::size_t* data, std::size_t count)
 {
     return (fwrite(data, sizeof(std::size_t), count, stream) == count);

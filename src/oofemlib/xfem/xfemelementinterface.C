@@ -278,7 +278,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
     double enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
 
-    int counter = iLocNodeInd.size() * dim;
+    [[maybe_unused]] int counter = iLocNodeInd.size() * dim;
 
     std :: vector< std :: vector< double > >Nd( iLocNodeInd.size() );
     for ( int j = 1; j <= int( iLocNodeInd.size() ); j++ ) {
@@ -1018,7 +1018,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
     double enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
 
 
-    int counter = nDofMan * dim;
+    [[maybe_unused]] int counter = nDofMan * dim;
 
     std :: vector< std :: vector< double > >Nd(nDofMan);
 

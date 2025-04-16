@@ -231,9 +231,21 @@ MPSMaterial::initializeFrom(InputRecord &ir)
     if ( mode == 0 ) { // default - estimate model parameters q1,..,q4 from composition
         IR_GIVE_FIELD(ir, fc, _IFT_MPSMaterial_fc); // 28-day standard cylinder compression strength [MPa]
         IR_GIVE_FIELD(ir,  c, _IFT_MPSMaterial_cc); // cement content of concrete [kg/m^3]
-        IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, _IFT_MPSMaterial_ac); // ratio (by weight) of aggregate to cement
+        if ( ir.hasField(_IFT_MPSMaterial_wc) ) { // ratio (by weight) of water to cementitious material
+            IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc);
+        } else if (ir.hasField(_IFT_MPSMaterial_wcr)) {
+            IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wcr);
+        } else {
+            throw ValueInputException(ir, "none", "w/c not defined");
+        }
 
+        if ( ir.hasField(_IFT_MPSMaterial_ac)){  // ratio (by weight) of aggregate to cement
+            IR_GIVE_FIELD(ir, ac, _IFT_MPSMaterial_ac);
+        } else if ( ir.hasField(_IFT_MPSMaterial_acr)){
+            IR_GIVE_FIELD(ir, ac, _IFT_MPSMaterial_acr);
+        } else {
+            throw ValueInputException(ir, "none", "a/c not defined");
+        }
         this->predictParametersFrom(fc, c, wc, ac);
     } else { // read model parameters for creep
         IR_GIVE_FIELD(ir, q1, _IFT_MPSMaterial_q1);

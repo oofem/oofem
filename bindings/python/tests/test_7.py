@@ -1,5 +1,10 @@
-import oofempy
-import util
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
+
 
 #Transient transport problem with one asisymmetric element loaded by heat flux from the right edge
 

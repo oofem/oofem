@@ -1,0 +1,70 @@
+[project]
+name = 'oofem'
+requires-python = '>=3.11'
+readme='README.md'
+license={'file'='COPYING.LGPLv2.1'}
+# dynamic=['version','description']
+dependencies = [ 'pytest', 'numpy' ]
+version='2.6.0-dev1'
+description='oofem etc' 
+
+[build-system]
+requires = ['py-build-cmake~=0.4.2','pytest']
+build-backend = "py_build_cmake.build"
+
+[tool.py-build-cmake.sdist]
+include = ['CMakeLists.txt','bindings/python','cmake','src','extern','doc','README']
+exclude = ['**/_build']
+
+[tool.py-build-cmake.cmake]
+minimum_version="3.17"
+build_type="Release"
+options = {'USE_PYBIND_BINDINGS'='1','USE_SHARED_LIB'='0','USE_SM'='1','USE_FM'='1','USE_TM'='1','USE_MPM'='1','USE_OOFEM_EXE'='0'}
+install_components=['python_module']
+# https://github.com/pypa/cibuildwheel/issues/643
+# use Ninja everywhere (including windows), where it needs compiler paths to be set up (done via setup-msvc-dev in cibuildwheel.yml)
+generator ='Ninja'
+
+[tool.py-build-cmake.windows.cmake]
+# extra options, but pass them as args so that options don't have to be repeated
+args = ['-DCMAKE_C_COMPILER=cl','-DCMAKE_CXX_COMPILER=cl']
+
+[tool.py-build-cmake.module]
+name='oofem'
+directory = 'bindings/python'
+
+[tool.py-build-cmake.editable]
+mode='symlink'
+build_hook = true
+
+#[tool.mypy]
+#files = "setup.py"
+#python_version = "3.7"
+#strict = true
+#show_error_codes = true
+#enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+#warn_unreachable = true
+
+#[[tool.mypy.overrides]]
+#module = ["ninja"]
+#ignore_missing_imports = true
+
+
+[tool.pytest.ini_options]
+#minversion = "6.0"
+#addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+#xfail_strict = true
+#filterwarnings = [
+#    "error",
+#    "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",
+#]
+testpaths = ["bindings/python/tests"]
+
+[tool.cibuildwheel]
+test-command = "pytest {project}/bindings/python/tests"
+# test-extras = ["test"]
+# test-skip = ["*universal2:arm64"]
+# Setuptools bug causes collision between pypy and cpython artifacts
+before-build = "rm -rf {project}/build"
+build-verbosity = 1
+environment = { PY_BUILD_CMAKE_VERBOSE="1" }

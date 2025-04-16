@@ -1094,7 +1094,7 @@ void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
 
 void FloatArray :: beRowOf(const FloatMatrix &mat, std::size_t row)
 {
-    std::size_t nRows = mat.giveRowSize();
+    [[maybe_unused]] std::size_t nRows = mat.giveRowSize();
     std::size_t nColumns = mat.giveColSize();
 
 #  ifndef NDEBUG

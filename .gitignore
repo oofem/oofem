@@ -63,3 +63,7 @@ tests/sm/crack0Step0.vtk
 tests/sm/crack1Step0.vtk
 tests/sm/crack2Step0.vtk
 tests/sm/t3d.bmf
+
+dist/
+.py-build-cmake_cache/
+

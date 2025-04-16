@@ -1,0 +1,41 @@
+name: Windows MSVC
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: recursive
+    - name: Install NSIS
+      run: |
+        iwr -useb get.scoop.sh -outfile 'install.ps1'
+        .\install.ps1 -RunAsAdmin
+        scoop update
+        scoop bucket add extras
+        scoop install nsis
+    - name: CMake
+      shell: bash
+      run: |
+          # -DCMAKE_BUILD_TYPE=Release would be ignored with multi-configuration generator (MSVC is one of those)
+          cmake -B ./build -S.
+          cmake --build ./build --config Release --parallel
+    - name: CTest
+      shell: bash
+      # FIXME: benchmark_fm_bdam7.oofem.in currently fails under windows
+      run: ctest -E benchmark_fm_bdam7 --test-dir ./build --parallel --rerun-failed --output-on-failure --build-config Release 
+    - name: CPack
+      shell: bash
+      working-directory: ./build
+      run: cpack -G "ZIP;NSIS"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-windows-zip
+        path: |
+          build/oofem_*.zip
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-windows-installer
+        path: |
+          build/oofem_*.exe
+

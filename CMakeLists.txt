@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.5)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 include (CheckSymbolExists)
@@ -16,6 +16,12 @@ find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
+
+
+# cmake>=3.12: honor *_ROOT variables (needed for cibuildwheel python envs)
+cmake_policy(SET CMP0074 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
+
 
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
@@ -56,11 +62,16 @@ endfunction(add_git_submodule)
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
+    # needed for py-build-cmake (cibuildwheel adds this flag automatically)
+    #   enable c++ stack unwinding; for translating c++ exceptions back to python via pybind11
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -EHsc")
     # I'm not sure we should block these warnings or not:
     # C4800 Conversion from int to bool performance warning (we should probably be using bool in most of these places though).
     # C4127 Conditional expression is constant: Most of these uses are intentional (debugging code etc.)
     # C4267 size_t to int conversion. Most of these are indices, but many places can be replaced by a for-each loop as well.
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
+    # make MSVC a bit more silent (though most of this should be fixed really)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
@@ -147,11 +158,11 @@ option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 option (USE_AM "Enable additive manufacturing module" OFF)
 option (USE_T3D "Enable T3D support" OFF)
-option (USE_BOOSTPYTHON_BINDINGS "Rather obsolete, use USE_PYBIND_BINDINGS. Enable Python bidings using boost (OOFEM callable from Python)." OFF)
 option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable from Python and vice versa)." OFF)
 option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
+option (USE_OOFEM_EXE "Build oofem executable" ON)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -227,7 +238,7 @@ if (USE_SM)
     list (APPEND LIBS $<TARGET_OBJECTS:sm> $<TARGET_OBJECTS:sm_elements> $<TARGET_OBJECTS:sm_materials>)
     list (APPEND MODULE_LIST "sm" "sm_elements" "sm_materials")
 
-    if (NOT MSVC AND NOT MINGW)
+    if (NOT MSVC AND NOT MINGW AND NOT EMSCRIPTEN)
         find_library (DL_LIB dl) 
         list (APPEND EXT_LIBS ${DL_LIB})
     endif ()
@@ -302,10 +313,10 @@ endif ()
 #    find_package (BOOST REQUIRED)
 #    list (APPEND EXT_LIBS ${BOOST_LIBRARIES})
 #    if (BOOST_DIR)
-#    	include_directories ("${BOOST_DIR}")
-#    	list (APPEND MODULE_LIST "BOOST")
+#        include_directories ("${BOOST_DIR}")
+#        list (APPEND MODULE_LIST "BOOST")
 #     endif ()
-# 
+#
 #    add_definitions (-D__BOOST_MODULE)
 #endif ()
 
@@ -616,32 +627,6 @@ if (USE_SPOOLES)
     list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-if (USE_PYTHON_EXTENSION OR USE_BOOSTPYTHON_BINDINGS)
-    # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
-    #Print if set up manually
-    message(STATUS "PYTHON_LIBRARY = ${Python3_LIBRARIES}")
-    message(STATUS "PYTHON_EXECUTABLE = ${Python3_EXECUTABLE}")
-    message(STATUS "PYTHON_INCLUDE_DIR = ${Python3_INCLUDE_DIRS}")
-    find_package (Python3 COMPONENTS Interpreter Development)
-#     find_package(PythonInterp "3" REQUIRED)
-#    find_package(PythonLibs "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}" REQUIRED)
-    include_directories (${Python3_INCLUDE_DIRS})
-    list (APPEND EXT_LIBS ${Python3_LIBRARIES})
-    list (APPEND MODULE_LIST "Python")
-    if(USE_PYTHON_EXTENSION)
-        add_definitions(-D_PYTHON_EXTENSION)    
-    endif ()
-    
-    if(USE_BOOSTPYTHON_BINDINGS)
-        # require boost_python also for python stuff by itself
-        find_package(Boost COMPONENTS "python-py${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}" REQUIRED)
-        include_directories (${Boost_INCLUDE_DIRS})
-        list (APPEND EXT_LIBS ${Boost_LIBRARIES})
-        add_definitions(-D_BOOSTPYTHON_BINDINGS)
-     endif ()   
-endif ()
-
 
 if(WIN32)
     set(PYTHON_MODULE_EXTENSION ".pyd")
@@ -651,20 +636,37 @@ endif()
 
 
 if (USE_PYBIND_BINDINGS)
-    #build pybind11 bindings
+    # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
+    set(PYBIND11_FINDPYTHON ON)
+
     find_package(Python COMPONENTS Interpreter Development)
-    #find_package(pybind11 CONFIG)
-    add_git_submodule(extern/pybind11)
     if (PYBIND_DIR)
         message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
-        include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
+        include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
+        add_git_submodule(${PYBIND_DIR})
+    else()
+        add_git_submodule(extern/pybind11)
     endif ()
-    include_directories (${pybind11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-    list (APPEND EXT_LIBS ${Python_LIBRARIES})
-    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
-    target_link_libraries(oofempy PRIVATE liboofem)
-    set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
+    # use python include paths and libs for all future targets (liboofem and oofem binary)
+    link_libraries(pybind11::embed)
+
+    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
+    if(USE_SHARED_LIB)
+        if(EMSCRIPTEN)
+            MESSAGE(FATAL_ERROR "USE_SHARED_LIB=1 is incompatible with Emscripten (some unresolved symbols at runtime).")
+        endif()
+        target_link_libraries(oofempy PRIVATE liboofem)
+        set_target_properties(oofempy PROPERTIES INSTALL_RPATH "$ORIGIN") # look for liboofem.so (if shared) where the module is installed
+        set_target_properties(oofempy PROPERTIES BUILD_RPATH ".") # look for liboofem.so in the build directory (before installation, for tests)
+    else()
+        target_sources(oofempy PRIVATE ${LIBS} ${EXT_LIBS})
+        add_dependencies(oofempy version)
+    endif()
+    # set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
+        install(TARGETS oofempy DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+    endif()
     # Make sure pytest is found or produce a fatal error
     if(NOT PYTEST_FOUND)
         execute_process(COMMAND ${Python_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
@@ -674,9 +676,8 @@ if (USE_PYBIND_BINDINGS)
                     " (try: ${Python_EXECUTABLE} -m pip install pytest)")
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
-    add_definitions(-D_PYBIND_BINDINGS)
     endif()
-    set (USE_SHARED_LIB ON)
+    add_definitions(-D_PYBIND_BINDINGS)
 endif()
 
 #######################################################################
@@ -689,6 +690,7 @@ set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
 check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
+
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
     # For consistant library on linux and windows platforms.
@@ -731,22 +733,19 @@ endif ()
 if (USE_MPM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/mpm")
 endif ()
-set (oofempy)
-if (USE_BOOSTPYTHON_BINDINGS)
-    set (oofempy ${oofem_SOURCE_DIR}/bindings/Deprecated/python/oofemlib.cpp)
-endif ()
 
 
 # Main targets
 if (USE_SHARED_LIB)
-    add_library (liboofem
-        SHARED
-        ${oofempy}
-        ${LIBS} 
-        )
-    target_link_libraries (liboofem ${EXT_LIBS})
+    add_library (liboofem SHARED)
+    target_sources(liboofem PRIVATE ${LIBS})
+    target_link_libraries (liboofem PUBLIC ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     add_dependencies(liboofem version)
+    if(PY_BUILD_CMAKE_IMPORT_NAME)
+        # if shared, install liboofem.so alongside with the python module
+        install(TARGETS liboofem DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+    endif()
 
     if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
         set_target_properties (liboofem PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
@@ -788,32 +787,31 @@ if (USE_SHARED_LIB)
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
             set_target_properties (mpm PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
         endif ()
-endif()
+    endif()
 
     generate_export_header (liboofem
         BASE_NAME OOFEM
-        )
-endif ()
+    )
+endif (USE_SHARED_LIB)
 
 # OOFEM target
-if (USE_SHARED_LIB) # Prefer dynamic lib if available.
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-  add_dependencies(oofem version)
+if (USE_OOFEM_EXE)
+    if (USE_SHARED_LIB) # Prefer dynamic lib if available.
+        add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+        add_dependencies(oofem version)
+        target_link_libraries (oofem PUBLIC liboofem)
+    else ()
+        add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+        add_dependencies(oofem version)
+        target_link_libraries (oofem PUBLIC ${EXT_LIBS})
+    endif ()
+    install (TARGETS oofem DESTINATION bin)
 
-  target_link_libraries (oofem liboofem)
-else ()
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
-  add_dependencies(oofem version)
-
-  target_link_libraries (oofem ${EXT_LIBS})
-endif ()
-
-install (TARGETS oofem DESTINATION bin)
-
-if (USE_MFRONT)
-    find_package (MFrontGenericInterface REQUIRED)
-    target_link_libraries(oofem mgis::MFrontGenericInterface)
-endif ()
+    if (USE_MFRONT)
+        find_package (MFrontGenericInterface REQUIRED)
+        target_link_libraries(oofem mgis::MFrontGenericInterface)
+    endif ()
+endif()
 
 if (USE_OOFEG)
     #  OOFEG target:
@@ -920,10 +918,12 @@ add_custom_target (
 #######################################################################
 ######################## Tests ########################################
 #######################################################################
+include (CTest)
+
+if(USE_OOFEM_EXE)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
 set (oofem_cmd  $<TARGET_FILE:oofem>)
 file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
-include (CTest)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
 
@@ -1080,11 +1080,12 @@ else ()
     add_custom_target (partests   COMMAND ${CMAKE_CTEST_COMMAND} "-R" "^partest")
     add_custom_target (benchmarks COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^benchmark")
 endif ()
+endif(USE_OOFEM_EXE)
 
 ######################## Tests of Python bindings ########################################
 if (USE_PYBIND_BINDINGS)
-    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python COMMAND ${Python_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python)
-    set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}")
+    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python/tests COMMAND ${Python_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python/tests)
+    set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_BINARY_DIR}:${oofem_SOURCE_DIR}/bindings/python/oofem)
 endif()
 
 
@@ -1105,7 +1106,7 @@ set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Object Oriented Finite Element")
 set (CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
 set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.LGPLv2.1")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
-set (CPACK_PACKAGE_EXECUTABLES "oofem")
+set (CPACK_PACKAGE_EXECUTABLES "oofem;OOFEM")
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR})
 
 ### default generators
