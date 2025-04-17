@@ -714,6 +714,14 @@ PYBIND11_MODULE(oofempy, m) {
             return ans;
         }
         ))
+        .def(py::init([](py::array_t<double> s){
+            oofem::FloatArray* ans = new oofem::FloatArray((int) s.size());
+            for (unsigned int i=0; i<s.size(); i++) {
+                (*ans)[i]=s.data()[i];
+            }
+            return ans;
+        }
+        ))
         .def("printYourself", (void (oofem::FloatArray::*)() const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("printYourself", (void (oofem::FloatArray::*)(const std::string &) const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("pY", &oofem::FloatArray::pY)
@@ -772,6 +780,16 @@ PYBIND11_MODULE(oofempy, m) {
      py::class_<oofem::FloatMatrix>(m, "FloatMatrix")
         .def(py::init<>())
         .def(py::init<int,int>())
+        .def(py::init([](py::array_t<double> s){
+            oofem::FloatMatrix* ans = new oofem::FloatMatrix((int) s.shape(0), (int) s.shape(1));
+            for (unsigned int i=0; i<s.shape(0); i++) {
+                for (unsigned int j=0; j<s.shape(1); j++) {
+                    (*ans)(i,j)=s.data()[i*s.shape(1)+j];
+                }
+            }
+            return ans;
+        }
+        ))
         .def("printYourself", (void (oofem::FloatMatrix::*)() const) &oofem::FloatMatrix::printYourself, "Prints receiver")
         .def("printYourself", (void (oofem::FloatMatrix::*)(const std::string &) const) &oofem::FloatMatrix::printYourself, "Prints receiver")
         .def("pY", &oofem::FloatMatrix::pY)
@@ -1964,3 +1982,4 @@ PYBIND11_MODULE(oofempy, m) {
     });
     m.def("test", &test);
  }
+
