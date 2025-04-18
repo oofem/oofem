@@ -163,7 +163,7 @@ public:
      * @param aProperty id of property requested
      * @return property value
      */
-    virtual double giveProperty(int aProperty, TimeStep *tStep) {
+    virtual double giveProperty(int aProperty, TimeStep *tStep) const override {
         OOFEM_ERROR("Not supported for this boundary condition.");
     }
 

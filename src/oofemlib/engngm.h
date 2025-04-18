@@ -47,6 +47,7 @@
 #include "varscaletype.h"
 #include "numericalcmpn.h"
 #include "valuemodetype.h"
+#include "internalstatetype.h"
 #include "problemmode.h"
 #include "fmode.h"
 #include "dofiditem.h"
@@ -116,7 +117,6 @@ class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
-enum InternalStateType;
 
 
 /**
