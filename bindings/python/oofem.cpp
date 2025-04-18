@@ -764,7 +764,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("beProductOf", &oofem::FloatArray::beProductOf)
         // enable conversion to numpy representation
         .def("asNumpyArray", [](const oofem::FloatArray &s) {
-            return py::array_t<double> (s.giveSize(), s.givePointer());
+            // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
+            return py::array_t<double> (s.giveSize(), s.givePointer(), py::cast(s));
         })
         // expose FloatArray operators
         .def(py::self + py::self)
@@ -848,7 +849,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
         // enable conversion to numpy representation
         .def("asNumpyArray", [](const oofem::FloatMatrix &s) {
-            return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer());
+            // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
+            return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer(), py::cast(s));
         })
         // expose FloatArray operators
         .def(py::self + py::self)
