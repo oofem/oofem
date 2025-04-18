@@ -70,6 +70,8 @@
 #include "parallelcontext.h"
 #include "unknownnumberingscheme.h"
 #include "contact/contactmanager.h"
+#include "smoothednodalintvarfield.h"
+#include "nodalrecoverymodel.h"
 
 
 #ifdef __MPI_PARALLEL_MODE
@@ -2089,6 +2091,12 @@ EngngModel :: initParallel()
  #endif
 }
 
+
+FieldPtr EngngModel::giveField (InternalStateType key, TimeStep *) 
+{
+    FieldPtr _ptr ( new SmoothedNodalInternalVariableField ( key, FT_Unknown, NodalRecoveryModel::NodalRecoveryModelType::NRM_ZienkiewiczZhu, this->giveDomain(1)));
+    return _ptr;
+}
 
 #ifdef __OOFEG
 void EngngModel :: drawYourself(oofegGraphicContext &gc)

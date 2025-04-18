@@ -529,6 +529,7 @@ public:
      *
      */
     virtual FieldPtr giveField (FieldType key, TimeStep *) { return FieldPtr();}
+    virtual FieldPtr giveField (InternalStateType key, TimeStep *) ;
 
 
     ///Returns the master engnmodel
