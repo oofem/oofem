@@ -76,3 +76,5 @@ def plot2D(d, field=None, fieldValueIndex=0, tstep=None):
         plt.colorbar(orientation='horizontal')
     else:
         plt.triplot(triangulation, linewidth=0.2, color='black', alpha=1.0)
+    
+    return plt
