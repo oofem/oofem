@@ -56,5 +56,12 @@ def test_1():
     assert (round(y[2]-3.0, 6) == 0)
     print(y)
 
+    # test that asNumpyArray return view to the original data
+    a0=oofempy.FloatMatrix(3,3)
+    a1=a0.asNumpyArray()
+    a1[0,2]=99
+    assert a1[0,2]==a0[0,2]
+    assert a0[0,2]==99
+
 if __name__ == "__main__":
     test_1()
