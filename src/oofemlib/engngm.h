@@ -116,6 +116,7 @@ class ProcessCommunicatorBuff;
 class CommunicatorBuff;
 class ProcessCommunicator;
 class UnknownNumberingScheme;
+enum InternalStateType;
 
 
 /**
