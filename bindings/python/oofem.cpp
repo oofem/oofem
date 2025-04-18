@@ -375,6 +375,12 @@ public:
             bool isElementActivated( Element *e )  override { 
                 PYBIND11_OVERLOAD (bool, EngngModelBase, isElementActivated, e);
             }
+            FieldPtr giveField (FieldType key, TimeStep *s) override  {
+                PYBIND11_OVERLOAD (FieldPtr, EngngModelBase, giveField, key, s);
+            }
+            FieldPtr giveField (InternalStateType key, TimeStep *s) override {
+                PYBIND11_OVERLOAD (FieldPtr, EngngModelBase, giveField, key, s);
+            }
     };
 
 
@@ -1004,7 +1010,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("solveYourself", &oofem::EngngModel::solveYourself)
         .def("solveYourselfAt", &oofem::EngngModel::solveYourselfAt)
         .def("terminate",&oofem::EngngModel::terminate)
-        .def("giveField", &oofem::EngngModel::giveField)
+        .def("giveField", (FieldPtr (oofem::EngngModel::*)(oofem::FieldType, oofem::TimeStep*)) &oofem::EngngModel::giveField)
+        .def("giveField", (FieldPtr (oofem::EngngModel::*)(oofem::InternalStateType, oofem::TimeStep*)) &oofem::EngngModel::giveField)
         .def("giveLoadLevel", &oofem::EngngModel::giveLoadLevel)
         //.def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference)
         .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference, py::arg("force") = false)
