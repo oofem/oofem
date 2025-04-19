@@ -355,7 +355,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
 {
     if ( dman->giveDomain() == this->emodel->giveDomain(domainIndx) ) {
         if ( dofId ) {
-            dman->giveUnknownVector(answer, * dofId, * this, mode, tStep);
+            dman->giveUnknownVector(answer, * dofId, * this, mode, tStep, true);
             return 0; // ok
         } else { // all dofs requested
             dman->giveCompleteUnknownVector(answer, mode, tStep);
