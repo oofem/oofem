@@ -90,14 +90,10 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
 
     if (evals):
         # Normalize values for color mapping
-        print (evals)
         mmin = min(evals)
         mmax = max(evals)
-        print(mmin, mmax)
         norm = plt.Normalize(mmin, mmax)
-        print(norm)
         colors = plt.cm.viridis(norm(evals))        
-        print(colors)
 
     for i in range(1, d.giveNumberOfElements()+1):
         e=d.giveElement(i)
