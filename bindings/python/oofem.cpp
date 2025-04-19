@@ -1917,6 +1917,7 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
         .def(py::init<oofem::FieldType>())  
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
+        .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, DofManager *dman, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("giveType", &oofem::Field::giveType)
         .def("setType", &oofem::Field::setType)
         .def("setSetsNumbers", &oofem::Field::setSetsNumbers)
