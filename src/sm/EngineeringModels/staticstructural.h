@@ -128,6 +128,9 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
+
+    FieldPtr giveField (FieldType key, TimeStep *) override; 
+
 };
 } // end namespace oofem
 #endif // staticstructural_h
