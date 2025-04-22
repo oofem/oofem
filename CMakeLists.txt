@@ -656,6 +656,7 @@ if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
 endif()
 
 if (USE_PYBIND_BINDINGS)
+    add_definitions(-D_PYBIND_BINDINGS)
     if(USE_NANOBIND)
         add_subdirectory(extern/nanobind)
         find_package(Python COMPONENTS Interpreter Development)
@@ -704,8 +705,12 @@ if (USE_PYBIND_BINDINGS)
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
     endif()
-    add_definitions(-D_PYBIND_BINDINGS)
 endif()
+
+
+if(USE_PYTHON_EXTENSION)
+    add_definitions(-D_PYTHON_EXTENSION)
+endif ()
 
 #######################################################################
 ######################## Configuration ################################

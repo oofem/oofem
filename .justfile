@@ -57,3 +57,6 @@ msvc:
 pytest:
 	#!/bin/bash
 	PYTHONPATH=build:bindings/python python -m pytest bindings/python/tests
+test-ext:
+	# ctest --test-dir build/ -VV --output-on-failure -R test_sm_python_usrdefboundaryload01.in
+	gdb -ex=run -args build/oofem -f tests/sm/python/usrdefboundaryload01.in
