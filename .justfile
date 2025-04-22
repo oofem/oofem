@@ -23,7 +23,7 @@ pyodide:
 	cd bindings/python/tests; python -m pytest
 shared:
 	mkdir -p build
-	cmake -Bbuild -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	cmake -Bbuild -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build/
 	ctest --test-dir build/ --parallel=16 --output-on-failure
 notshared:
@@ -47,3 +47,6 @@ msvc:
 	rm -rf build-msvc
 	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 	cmake --build ./build-msvc --parallel
+test-ext:
+	# ctest --test-dir build/ -VV --output-on-failure -R test_sm_python_usrdefboundaryload01.in
+	gdb -ex=run -args build/oofem -f tests/sm/python/usrdefboundaryload01.in

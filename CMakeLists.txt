@@ -635,7 +635,8 @@ else()
 endif()
 
 
-if (USE_PYBIND_BINDINGS)
+
+if (USE_PYBIND_BINDINGS OR USE_PYTHON_EXTENSION)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
 
@@ -650,7 +651,13 @@ if (USE_PYBIND_BINDINGS)
 
     # use python include paths and libs for all future targets (liboofem and oofem binary)
     link_libraries(pybind11::embed)
+endif()
 
+if(USE_PYTHON_EXTENSION)
+    add_definitions(-D_PYTHON_EXTENSION)
+endif ()
+
+if(USE_PYBIND_BINDINGS)
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
     if(USE_SHARED_LIB)
         if(EMSCRIPTEN)
