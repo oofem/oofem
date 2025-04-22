@@ -32,15 +32,20 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//#include <Python.h>
-#include <pybind11/embed.h>
+#ifdef _USE_NANOBIND
+    #include<nanobind/nanobind.h>
+#else
+    #include <pybind11/embed.h>
+    namespace py = pybind11;
+#endif
+
 
 #include "field.h"
 #include "pythonfield.h"
 #include "floatarray.h"
 #include "timestep.h"
 
-namespace py = pybind11;
+
 
 namespace oofem {
 // REGISTER_Material(PythonField);
@@ -71,10 +76,17 @@ int PythonField :: evaluateAt(FloatArray &answer, const FloatArray &coords, Valu
     // py::scoped_interpreter guard{}; // start the interpreter and keep it alive
     
 //     py::initialize_interpreter();
-    
-    py::module calc = py::module::import(moduleName.c_str());
-    py::object result = calc.attr(functionName.c_str())(coords, mode, tStep);
-    answer = result.cast<FloatArray>();
+    #ifdef _USE_NANOBIND
+        nanobind::module_ calc = nanobind::module_::import_(moduleName.c_str());
+        nanobind::object result = calc.attr(functionName.c_str())(coords, mode, tStep);
+        answer = nanobind::cast<FloatArray>(result);
+    #else
+        py::module calc = py::module::import(moduleName.c_str());
+        py::object result = calc.attr(functionName.c_str())(coords, mode, tStep);
+        answer = result.cast<FloatArray>();
+    #endif
+
+
 //     py::finalize_interpreter();
     
     return 0;

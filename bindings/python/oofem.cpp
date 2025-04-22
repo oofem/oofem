@@ -32,10 +32,44 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h> //Conversion for lists
-#include <pybind11/operators.h>
-namespace py = pybind11;
+
+#ifdef _USE_NANOBIND
+	#include <nanobind/nanobind.h>
+	#include <nanobind/operators.h>
+    #include <nanobind/trampoline.h>
+    #include <nanobind/ndarray.h>
+    #include <nanobind/stl/map.h>
+    #include <nanobind/stl/vector.h>
+    #include <nanobind/stl/list.h>
+    #include <nanobind/stl/set.h>
+    #include <nanobind/stl/string.h>
+	namespace py=nanobind;
+    // compatibility with pybind11
+	#define PYBIND11_MODULE(...) NB_MODULE(__VA_ARGS__)
+	#define PYBIND11_OVERRIDE(RET_TYPE,PARENT_CLASS,METHOD_NAME,...) NB_OVERRIDE(METHOD_NAME,__VA_ARGS__)
+    #define PYBIND11_OVERRIDE_PURE(RET_TYPE,PARENT_CLASS,METHOD_NAME,...) NB_OVERRIDE_PURE(METHOD_NAME,__VA_ARGS__)
+    #define PYBIND11_OVERLOAD PYBIND11_OVERRIDE
+    #define PYBIND11_OVERLOAD_PURE PYBIND11_OVERRIDE_PURE
+	#define def_readwrite def_rw
+	#define def_readonly def_ro
+	#define def_property def_prop_rw
+	#define def_property_readonly def_prop_ro
+	#define register_exception exception
+    #define return_value_policy rv_policy
+    #define SHARED_PTR_HOLDER(T)
+    #define PY_USING(a)
+#else
+	#include <pybind11/pybind11.h>
+	#include <pybind11/stl.h> //Conversion for lists
+	#include <pybind11/operators.h>
+    #include <pybind11/numpy.h>
+	namespace py = pybind11;
+	// no-op for pybind11
+	#define NB_TRAMPOLINE(base,num)
+	#define SHARED_PTR_HOLDER(T) , std::shared_ptr<T>
+    #define PY_USING(a) using a
+#endif
+
 
 #include <string>
 #include <memory>
@@ -142,20 +176,37 @@ void test (oofem::Element& e) {
     a.printYourself();
 }
 
+
+#ifdef _USE_NANOBIND
+    #include"oofemarray.h"
+    #if 0
+        // use nanobind::none as owner so that data are taken over (https://github.com/wjakob/nanobind/discussions/583)
+        nanobind::ndarray<int,nanobind::shape<-1>> floatarray2numpy(const FloatArray&& a){ size_t shape[1]={(size_t)a.giveSize()}; return nanobind::ndarray<int,nanobind::shape<-1>>(a.givePointer(),/*ndim*/1,/*shape*/shape,/*owner*/nanobind::none()); }
+        nanobind::ndarray<double,nanobind::shape<-1>> intarray2numpy(IntArray&& a){ size_t shape[1]={(size_t)a.giveSize()}; return nanobind::ndarray<double,nanobind::shape<-1>>(a.givePointer(),/*ndim*/1,/*shape*/shape,/*owner*/nanobind::none()); }
+        nanobind::ndarray<double,nanobind::shape<-1,-1>> floatmatrix2numpy(FloatMatrix&& m){ size_t shape[2]={sizeof(double), sizeof(double)*s.giveNumberOfRows()}; return nanobind::ndarray<double,nanobind::shape<-1,-1>>(a.givePointer(),/*ndim*/2,/*shape*/shape,/*owner*/nanobind::none()); }
+    #endif
+    #define floatarray2numpy(a) a
+    #define intarray2numpy(a) a
+    #define floatmatrix2numpy(a) a
+#else
+    // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
+    py::array_t<double> floatarray2numpy(const FloatArray& s){ return py::array_t<double> (s.giveSize(), s.givePointer(), py::cast(s)); }
+    py::array_t<int> intarray2numpy(const IntArray& s){ return py::array_t<int> (s.giveSize(), s.givePointer(), py::cast(s)); }
+    py::array_t<double> floatmatrix2numpy(const FloatMatrix& s){ return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer(), py::cast(s));}
+#endif
+
 /*
     Trampoline classes
 */
-template <class FemComponentBase = oofem::FEMComponent> class PyFemComponent : public FemComponentBase {
-public:
+template <class FemComponentBase = oofem::FEMComponent> struct PyFemComponent : public FemComponentBase {
     using FemComponentBase::FemComponentBase;
 };
 
 
-template <class ElementBase = oofem::Element> class PyElement : public PyFemComponent<ElementBase> {
+template <class ElementBase = oofem::Element> struct PyElement : public PyFemComponent<ElementBase> {
 //template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
-        // inherit the constructor
-public:
-        using PyFemComponent<ElementBase>::PyFemComponent;
+        NB_TRAMPOLINE(PyFemComponent<ElementBase>,30);
+        PY_USING(PyFemComponent<ElementBase>::PyFemComponent);
         // trampoline (need one for each virtual method)
         int giveNumberOfDofs() override {
             PYBIND11_OVERLOAD (int, ElementBase, giveNumberOfDofs,);
@@ -218,10 +269,9 @@ public:
     };
 
 #ifdef __SM_MODULE
-    template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
-        // inherit the constructor
-    public:
-        using PyElement<StructuralElementBase>::PyElement;
+    template <class StructuralElementBase = oofem::StructuralElement> struct PyStructuralElement : public PyElement<StructuralElementBase> {
+        NB_TRAMPOLINE(PyElement<StructuralElementBase>,30);
+        PY_USING(PyElement<StructuralElementBase>::PyElement);
         // trampoline (need one for each virtual method)
         void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override {
             PYBIND11_OVERLOAD (void, StructuralElementBase, computeMassMatrix, std::ref(answer), tStep);
@@ -250,10 +300,9 @@ public:
     };
 #endif
 
-    template <class EngngModelBase = oofem::EngngModel> class PyEngngModel : public EngngModelBase {
-            // inherit the constructor
-        public:
-            using EngngModelBase::EngngModelBase;
+    template <class EngngModelBase = oofem::EngngModel> struct PyEngngModel : public EngngModelBase {
+            NB_TRAMPOLINE(EngngModelBase,50);
+            PY_USING(EngngModelBase::EngngModelBase);
             // trampoline (need one for each virtual method)
             void solveYourself()  override {
                 PYBIND11_OVERLOAD_PURE( void, EngngModelBase, solveYourself,);
@@ -384,20 +433,18 @@ public:
     };
 
 
-    template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
-        // inherit the constructor
-    public:
-        using IntegrationPointStatusBase::IntegrationPointStatusBase;
+    template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> struct PyIntegrationPointStatus : public IntegrationPointStatusBase {
+        NB_TRAMPOLINE(IntegrationPointStatusBase,10);
+        PY_USING(IntegrationPointStatusBase::IntegrationPointStatusBase);
         // trampoline (need one for each virtual method)
         const char *giveClassName() const override {
             PYBIND11_OVERLOAD_PURE (const char*, IntegrationPointStatusBase, giveClassName,);
         }
     };
 
-    template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
-        // inherit the constructor
-    public:
-        using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
+    template <class MaterialStatusBase = oofem::MaterialStatus> struct PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
+        NB_TRAMPOLINE(PyIntegrationPointStatus<MaterialStatusBase>,10);
+        PY_USING(PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus);
         // trampoline (need one for each virtual method)
         #ifndef _HIDE_FILE_METHODS
             void printOutputAt(FILE *file, TimeStep *tStep) const override {
@@ -421,14 +468,14 @@ public:
 
 #ifdef __SM_MODULE
     template <class StructuralMaterialStatusBase = oofem::StructuralMaterialStatus> class PyStructuralMaterialStatus : public PyMaterialStatus<StructuralMaterialStatusBase> {
-        // inherit the constructor
-        using PyMaterialStatus<StructuralMaterialStatusBase>::PyMaterialStatus;
+        NB_TRAMPOLINE(PyMaterialStatus<StructuralMaterialStatusBase>,10);
+        PY_USING(PyMaterialStatus<StructuralMaterialStatusBase>::PyMaterialStatus);
     };
 #endif
 
-    template <class MaterialBase = oofem::Material> class PyMaterial : public MaterialBase {
-        // inherit the constructor
-        using MaterialBase::MaterialBase;
+    template <class MaterialBase = oofem::Material> struct PyMaterial : public MaterialBase {
+        NB_TRAMPOLINE(MaterialBase,30);
+        PY_USING(MaterialBase::MaterialBase);
         // trampoline (need one for each virtual method)
         bool isCharacteristicMtrxSymmetric(oofem::MatResponseMode rMode) const override {
             PYBIND11_OVERLOAD(bool, MaterialBase, isCharacteristicMtrxSymmetric, rMode);
@@ -468,17 +515,17 @@ public:
         int initMaterial(oofem::Element *element) override {
             PYBIND11_OVERLOAD(int, MaterialBase, initMaterial, element);
         }
-      /*
+        /*
         /// Exposing the following won't work (opeened issue https://github.com/pybind/pybind11/issues/1962)
         /// However, giveStatus can be overriden and can create and set status properly. See test4.py.
         std::unique_ptr<oofem::IntegrationPointStatus> CreateStatus(oofem::GaussPoint *gp) const override {
         PYBIND11_OVERLOAD(std::unique_ptr<oofem::IntegrationPointStatus>, MaterialBase, CreateStatus, gp);
         }
-      */
+        */
 
-      oofem::MaterialStatus* giveStatus (oofem::GaussPoint* gp) const override {
-        PYBIND11_OVERLOAD(oofem::MaterialStatus*, MaterialBase, giveStatus, gp);
-      }
+        oofem::MaterialStatus* giveStatus (oofem::GaussPoint* gp) const override {
+            PYBIND11_OVERLOAD(oofem::MaterialStatus*, MaterialBase, giveStatus, gp);
+        }
         void initTempStatus(oofem::GaussPoint *gp) const override {
             PYBIND11_OVERLOAD(void, MaterialBase, initTempStatus, gp);
         }
@@ -493,9 +540,9 @@ public:
     };
 
 
-    class PyField : public oofem::Field {
-        // inherit the constructor
-        using oofem::Field::Field;
+    struct PyField : public oofem::Field {
+        NB_TRAMPOLINE(oofem::Field,20);
+        PY_USING(oofem::Field::Field);
         // trampoline (need one for each virtual method
         int evaluateAt(oofem::FloatArray &answer, const oofem::FloatArray &coords,
         oofem::ValueModeType mode, oofem::TimeStep *tStep) override  {
@@ -517,9 +564,9 @@ public:
     };
     
 #ifdef __SM_MODULE
-    template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
-        // inherit the constructor
-        using PyMaterial<StructuralMaterial>::PyMaterial;
+    template <class StructuralMaterialBase = oofem::StructuralMaterial> struct PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
+        NB_TRAMPOLINE(PyMaterial<StructuralMaterialBase>,50);
+        PY_USING(PyMaterial<StructuralMaterial>::PyMaterial);
         // trampoline (need one for each virtual method)
         bool hasMaterialModeCapability(oofem::MaterialMode mode) const override {
             PYBIND11_OVERLOAD(bool, StructuralMaterialBase, hasMaterialModeCapability, mode);
@@ -710,18 +757,27 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("init", &init, py::arg("logLevel")=2, py::arg("numberOfThreads")=0, "Initializes some global oofem options (typically controlled from command-line)");
 
+#ifndef _USE_NANOBIND
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
+        #ifdef _USE_NANOBIND
+        .def("__init__", ([](oofem::FloatArray* ans, py::sequence s){ new (ans) oofem::FloatArray((int) py::len(s));
+        #else
         .def(py::init([](py::sequence s){
             oofem::FloatArray* ans = new oofem::FloatArray((int) py::len(s));
+        #endif
             for (unsigned int i=0; i<py::len(s); i++) {
-                (*ans)[i]=s[i].cast<double>();
+                (*ans)[i]=PY_CAST(double,s[i]);
             }
             return ans;
         }
         ))
+        #ifdef _USE_NANOBIND
+        .def("__init__", ([](oofem::FloatArray* ans, py::array_t<double> s){ new (ans) oofem::FloatArray((int) s.size());
+        #else
         .def(py::init([](py::array_t<double> s){
             oofem::FloatArray* ans = new oofem::FloatArray((int) s.size());
+        #endif
             for (unsigned int i=0; i<s.size(); i++) {
                 (*ans)[i]=s.data()[i];
             }
@@ -769,10 +825,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("zero", &oofem::FloatArray::zero)
         .def("beProductOf", &oofem::FloatArray::beProductOf)
         // enable conversion to numpy representation
-        .def("asNumpyArray", [](const oofem::FloatArray &s) {
-            // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
-            return py::array_t<double> (s.giveSize(), s.givePointer(), py::cast(s));
-        })
+        .def("asNumpyArray", [](const oofem::FloatArray &s) { return floatarray2numpy(s); })
         // expose FloatArray operators
         .def(py::self + py::self)
         .def(py::self - py::self)
@@ -787,8 +840,12 @@ PYBIND11_MODULE(oofempy, m) {
      py::class_<oofem::FloatMatrix>(m, "FloatMatrix")
         .def(py::init<>())
         .def(py::init<int,int>())
+        #ifdef _USE_NANOBIND
+        .def("__init__", ([](oofem::FloatArray* ans, py::array_t<double> s){ new (ans) oofem::FloatMatrix((int) s.shape(0), (int) s.shape(1));
+        #else
         .def(py::init([](py::array_t<double> s){
             oofem::FloatMatrix* ans = new oofem::FloatMatrix((int) s.shape(0), (int) s.shape(1));
+        #endif
             for (unsigned int i=0; i<s.shape(0); i++) {
                 for (unsigned int j=0; j<s.shape(1); j++) {
                     (*ans)(i,j)=s.data()[i*s.shape(1)+j];
@@ -801,12 +858,14 @@ PYBIND11_MODULE(oofempy, m) {
         .def("printYourself", (void (oofem::FloatMatrix::*)(const std::string &) const) &oofem::FloatMatrix::printYourself, "Prints receiver")
         .def("pY", &oofem::FloatMatrix::pY)
         .def("__setitem__", [](oofem::FloatMatrix &s, py::tuple indx, double v) {
-            s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>()) = v;
+            s(PY_CAST(int,py::handle(indx[0])),PY_CAST(int,py::handle(indx[1]))) = v;
         })
         .def("__getitem__", [](const oofem::FloatMatrix &s, py::tuple indx) {
-            if (((py::handle)(indx[0])).cast<int>() >= s.giveNumberOfRows()) throw py::index_error();
-            if (((py::handle)(indx[1])).cast<int>() >= s.giveNumberOfColumns()) throw py::index_error();
-            return s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>());
+            int r=PY_CAST(int,py::handle(indx[0]));
+            int c=PY_CAST(int,py::handle(indx[1]));
+            if (r >= s.giveNumberOfRows()) throw py::index_error();
+            if (c >= s.giveNumberOfColumns()) throw py::index_error();
+            return s(r,c);
         })
         .def("__repr__",
             [](const oofem::FloatMatrix &s) {
@@ -854,10 +913,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
         .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
         // enable conversion to numpy representation
-        .def("asNumpyArray", [](const oofem::FloatMatrix &s) {
-            // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
-            return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer(), py::cast(s));
-        })
+        .def("asNumpyArray", [](oofem::FloatMatrix &s) { return floatmatrix2numpy(s); })
         // expose FloatArray operators
         .def(py::self + py::self)
         .def(py::self - py::self)
@@ -871,10 +927,14 @@ PYBIND11_MODULE(oofempy, m) {
 
         .def(py::init<int>(), py::arg("n")=0)
         .def(py::init<const oofem::IntArray&>())
+        #ifdef _USE_NANOBIND
+        .def("__init__", ([](oofem::FloatArray* ans /*, py::array_t<double> s*/){ /*FIXME: new (ans) oofem::IntArray((int) py::len(s)); */
+        #else
         .def(py::init([](py::sequence s){
             oofem::IntArray* ans = new oofem::IntArray((int) py::len(s));
+        #endif
             for (unsigned int i=0; i<py::len(s); i++) {
-                (*ans)[i]=s[i].cast<int>();
+                (*ans)[i]=PY_CAST(int,s[i]);
             }
             return ans;
         }
@@ -920,6 +980,7 @@ PYBIND11_MODULE(oofempy, m) {
     ;
     py::implicitly_convertible<py::sequence, oofem::IntArray>();
 
+#endif
 
     py::class_<oofem::DataReader>(m, "DataReader")
     ;
@@ -1206,9 +1267,9 @@ PYBIND11_MODULE(oofempy, m) {
     */
 
     /* Trampoline classes allowing to define custom derived types from within Python */
-    class PyFunction : public oofem::Function {
-        // inherit the constructor
-        using oofem::Function::Function;
+    struct PyFunction : public oofem::Function {
+        NB_TRAMPOLINE(oofem::Function,10);
+        PY_USING(oofem::Function::Function);
         // trampoline (need one for each virtual method)
         double evaluateAtTime(double t) override {
             PYBIND11_OVERLOAD (
@@ -1224,7 +1285,7 @@ PYBIND11_MODULE(oofempy, m) {
                 oofem::Function,
                 evaluateVelocityAtTime,
                 t
-            )
+            );
         }
         double evaluateAccelerationAtTime(double t) override {
             PYBIND11_OVERLOAD_PURE(
@@ -1232,21 +1293,21 @@ PYBIND11_MODULE(oofempy, m) {
                 oofem::Function,
                 evaluateAccelerationAtTime,
                 t
-            )
+            );
         }
         const char* giveClassName() const override {
            PYBIND11_OVERLOAD_PURE(
                 const char*,
                 oofem::Function,
                 giveClassName,
-            )
+            );
         }
         const char* giveInputRecordName() const override {
            PYBIND11_OVERLOAD_PURE(
                 const char*,
                 oofem::Function,
                 giveInputRecordName,
-            )
+            );
         }
 
 
@@ -1356,12 +1417,12 @@ PYBIND11_MODULE(oofempy, m) {
       .def("giveInternalVarInNode", &oofem::ExportRegion::giveInternalVarInNode)
       .def("giveCellVar", &oofem::ExportRegion::giveCellVar)
 
-      .def("getVertices", &oofem::ExportRegion::getVertices, py::return_value_policy::move)
-      .def("getCellConnectivity", &oofem::ExportRegion::getCellConnectivity, py::return_value_policy::move)
-      .def("getCellTypes", &oofem::ExportRegion::getCellTypes, py::return_value_policy::move)
-      .def("getPrimaryVertexValues", &oofem::ExportRegion::getPrimaryVertexValues, py::return_value_policy::move)
-      .def("getInternalVertexValues", &oofem::ExportRegion::getInternalVertexValues, py::return_value_policy::move)
-      .def("getCellValues", &oofem::ExportRegion::getCellValues, py::return_value_policy::move)
+      .def("getVertices", [](oofem::ExportRegion& self){ return floatmatrix2numpy(self.getVertices()); })
+      .def("getCellConnectivity", [](oofem::ExportRegion& self){ return intarray2numpy(self.getCellConnectivity()); })
+      .def("getCellTypes", [](oofem::ExportRegion& self){ return intarray2numpy(self.getCellTypes()); })
+      .def("getPrimaryVertexValues", [](oofem::ExportRegion& self, UnknownType u){ return floatmatrix2numpy(self.getPrimaryVertexValues(u)); })
+      .def("getInternalVertexValues", [](oofem::ExportRegion& self, InternalStateType u){ return floatmatrix2numpy(self.getInternalVertexValues(u)); })
+      .def("getCellValues", [](oofem::ExportRegion& self, InternalStateType u){ return floatmatrix2numpy(self.getCellValues(u)); } )
       ;
 
     py::class_<oofem::VTKBaseExportModule, oofem::ExportModule>(m, "VTKBaseExportModule")
@@ -1916,7 +1977,7 @@ PYBIND11_MODULE(oofempy, m) {
 #endif
 
 //std::shared_ptr<oofem::Field>
-    py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
+    py::class_<oofem::Field, PyField SHARED_PTR_HOLDER(oofem::Field)>(m, "Field")
         .def(py::init<oofem::FieldType>())  
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, DofManager *dman, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
@@ -1926,7 +1987,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("hasElementInSets", &oofem::Field::hasElementInSets)
     ;
 
-    py::class_<oofem::UniformGridField, oofem::Field, std::shared_ptr<oofem::UniformGridField>>(m, "UniformGridField")
+    py::class_<oofem::UniformGridField, oofem::Field SHARED_PTR_HOLDER(oofem::UniformGridField)>(m, "UniformGridField")
         .def(py::init<>())
         .def("setGeometry", &oofem::UniformGridField::setGeometry)
         .def("setValues", &oofem::UniformGridField::setValues)
@@ -1934,13 +1995,13 @@ PYBIND11_MODULE(oofempy, m) {
         .def("nodeValue3d", &oofem::UniformGridField::nodeValue3d)
         ;
 
-    py::class_<oofem::UnstructuredGridField, oofem::Field, std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
+    py::class_<oofem::UnstructuredGridField, oofem::Field SHARED_PTR_HOLDER(oofem::UnstructuredGridField)>(m, "UnstructuredGridField")
         .def(py::init<int, int, double>(), py::arg().noconvert(), py::arg().noconvert(), py::arg("octreeOriginShift") = 0.0)
         .def("addVertex", &oofem::UnstructuredGridField::addVertex)
         .def("setVertexValue", &oofem::UnstructuredGridField::setVertexValue)
         ;
     
-    py::class_<oofem::DofManValueField, oofem::Field,  std::shared_ptr<oofem::DofManValueField>>(m, "DofManValueField")
+    py::class_<oofem::DofManValueField, oofem::Field SHARED_PTR_HOLDER(oofem::DofManValueField)>(m, "DofManValueField")
         .def(py::init<oofem::FieldType,oofem::Domain*>())
         .def(py::init<oofem::FieldType,int,int, const std::string, const std::string>(), py::arg().noconvert(), py::arg().noconvert(), py::arg().noconvert(), py::arg("engngModel")="transienttransport", py::arg("domainDofsDefaults")="heattransfer")
         .def("addNode", &oofem::DofManValueField::addNode )
@@ -1949,7 +2010,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
         ;
 
-    py::class_<oofem::InternalVariableField, oofem::Field, std::shared_ptr<oofem::InternalVariableField>>(m, "InternalVariableField")
+    py::class_<oofem::InternalVariableField, oofem::Field SHARED_PTR_HOLDER(oofem::InternalVariableField)>(m, "InternalVariableField")
         .def(py::init<oofem::InternalStateType, oofem::FieldType, oofem::MaterialMappingAlgorithmType, oofem::Domain*>())
         ;
         
@@ -1963,12 +2024,12 @@ PYBIND11_MODULE(oofempy, m) {
         ;
         
 //depends on Python.h
-#ifdef _PYBIND_BINDINGS       
-    py::class_<oofem::PythonField, oofem::Field, std::shared_ptr<oofem::PythonField>>(m, "PythonField")
+#if defined(_PYBIND_BINDINGS) && !defined(_USE_NANOBIND)
+    py::class_<oofem::PythonField, oofem::Field SHARED_PTR_HOLDER(oofem::PythonField)>(m, "PythonField")
         .def(py::init<>())
         .def("setModuleName", &oofem::PythonField::setModuleName)
         .def("setFunctionName", &oofem::PythonField::setFunctionName)
-        ;   
+        ;
 #endif
 
 // Utility function to test presence of compiled oofem modules
