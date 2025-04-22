@@ -47,3 +47,6 @@ msvc:
 	rm -rf build-msvc
 	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 	cmake --build ./build-msvc --parallel
+pytest:
+	#!/bin/bash
+	PYTHONPATH=build:bindings/python python -m pytest bindings/python/tests
