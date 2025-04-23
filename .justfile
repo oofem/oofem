@@ -47,6 +47,6 @@ msvc:
 	rm -rf build-msvc
 	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 	cmake --build ./build-msvc --parallel
-test-ext:
-	# ctest --test-dir build/ -VV --output-on-failure -R test_sm_python_usrdefboundaryload01.in
-	gdb -ex=run -args build/oofem -f tests/sm/python/usrdefboundaryload01.in
+pytest:
+	#!/bin/bash
+	PYTHONPATH=build:bindings/python python -m pytest bindings/python/tests

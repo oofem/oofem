@@ -4,7 +4,7 @@ requires-python = '>=3.11'
 readme='README.md'
 license={'file'='COPYING.LGPLv2.1'}
 # dynamic=['version','description']
-dependencies = [ 'pytest', 'numpy' ]
+dependencies = [ 'pytest', 'numpy', 'matplotlib' ]
 version='2.6.0-dev1'
 description='oofem etc' 
 
@@ -51,14 +51,8 @@ build_hook = true
 
 
 [tool.pytest.ini_options]
-#minversion = "6.0"
-#addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
-#xfail_strict = true
-#filterwarnings = [
-#    "error",
-#    "ignore:(ast.Str|Attribute s|ast.NameConstant|ast.Num) is deprecated:DeprecationWarning:_pytest",
-#]
 testpaths = ["bindings/python/tests"]
+pythonpath=["bindings/python/oofem","build"]
 
 [tool.cibuildwheel]
 test-command = "pytest {project}/bindings/python/tests"
@@ -67,4 +61,19 @@ test-command = "pytest {project}/bindings/python/tests"
 # Setuptools bug causes collision between pypy and cpython artifacts
 before-build = "rm -rf {project}/build"
 build-verbosity = 1
-environment = { PY_BUILD_CMAKE_VERBOSE="1" }
+# see https://cibuildwheel.pypa.io/en/stable/cpp_standards/#macos-and-deployment-target-versions for MACOSX_DEPLOYMENT_TARGET
+environment = { PY_BUILD_CMAKE_VERBOSE="1", MACOSX_DEPLOYMENT_TARGET="10.14" }
+# same as CIBW_SKIP environment in the workflow file (cibuildhweel.yml)
+# (a) skip all 32-bit builds (source issue: datastream.h assumes size_t != unsigned long, which breaks on 32bit)
+# (b) skipy pypy builds: embedding interpreter not supported (pythonfield.C)
+# (c) skip all musllinux builds (compiles but segfaults at import time)
+skip = "*-win32 *-manylinux_i686 pp* *musllinux*"
+
+[tool.cibuildwheel.linux]
+# skip i686 on linux
+archs = ["x86_64"]
+
+#[[tool.cibuildwheel.windows]]
+## seems not necessary with MSVC builds, and might become the default in cibuildwheel itself later
+#before-build = "pip install delvewheel"
+#repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
