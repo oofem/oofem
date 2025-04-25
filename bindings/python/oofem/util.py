@@ -81,7 +81,7 @@ def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0):
     return plt
 
 
-def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1.0, label=""):
+def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1.0, label="", nodeLabels=False, elementLabels=False):
     x=[];
     y=[];
     
@@ -95,6 +95,9 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
         mmax = max(evals)
         norm = plt.Normalize(mmin, mmax)
         colors = plt.cm.viridis(norm(evals))        
+
+    ElemBbox = dict(boxstyle='round', fc='lavender', ec='blue', alpha=0.5)
+    NodeBbox = dict(boxstyle='round', fc='mistyrose', ec='red', alpha=0.5)
 
     for i in range(1, d.giveNumberOfElements()+1):
         e=d.giveElement(i)
@@ -119,11 +122,24 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
                 y  = (c1[yind], c2[yind])
 
             if (evals):
-                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=2, markersize=8, mfc='red')
+                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=2, markersize=4, mfc='red')
             else:
-                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=2, markersize=8, mfc='red')
+                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=2, markersize=4, mfc='red')
+            if (elementLabels):
+                plt.text((x[0]+x[1])/2, (y[0]+y[1])/2, str(e.giveNumber()), fontsize=8, ha='center', va='center', bbox=ElemBbox)
+
+    if (nodeLabels):
+        for i in range(1, d.giveNumberOfDofManagers()+1):
+            dm = d.giveDofManager(i)
+            coords = dm.giveCoordinates()
+            if (warpField):
+                val = oofempy.FloatArray()
+                warpField.evaluateAt(val, dm, oofempy.ValueModeType.VM_Total, tstep) 
+                coords[xind] += val[xind]*warpScale
+                coords[yind] += val[yind]*warpScale
+            plt.text(coords[xind], coords[yind], str(dm.giveNumber()), fontsize=8, ha='center', va='center', bbox=NodeBbox)
 
     sm = plt.cm.ScalarMappable(cmap=plt.cm.viridis, norm=norm)
     sm.set_array([])
-    plt.colorbar(sm, label=label, ax=ax)   
+    plt.colorbar(sm, label=label, ax=ax, orientation='horizontal')   
     return plt
