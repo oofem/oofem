@@ -53,6 +53,16 @@
 
 namespace oofem {
 
+
+#define PM_UPDATE_PARAMETER(_pm, _ir, _num, _type, _kwd, _prio) \
+    { \
+        if (_ir.hasField(_kwd)) { \
+            _type value; \
+            _ir.giveField(value, _kwd); \
+            _pm.setParam(_num, _kwd, value, _prio); \
+        } \
+    }
+
  // ParameterManager class using std::variant with custom types
  /**
   * ParameterManager class manages the parameters for set of components, each with unique index (number).
@@ -87,6 +97,12 @@ namespace oofem {
          }
          return {};
      }
+
+     
+     bool hasParam(size_t componentIndex, const std::string& paramName) {
+        return componentIndex < params.size() && params[componentIndex].find(paramName) != params[componentIndex].end();
+    }
+    
  
  private:
      std::vector<std::unordered_map<std::string, std::tuple<ParamValue, int>>> params;
