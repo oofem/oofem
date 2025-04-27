@@ -91,6 +91,7 @@ class SurfaceLoad;
 class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
+class ParameterManager;
 
 /**
  * In parallel mode, this type indicates the mode of element.
@@ -207,6 +208,10 @@ protected:
      * Each surface keeps list of shared elements, can have DofManagers, etc.
      */
     IntArray globalSurfaceIDs;
+    /**
+     * Parameter manager for the elements. It is used to store and manage setting of parameters
+     */
+    static ParameterManager parameterManager;
 
 
 public:
@@ -755,9 +760,6 @@ public:
     /// @return Corresponding element region. Currently corresponds to cross section model number.
     int giveRegionNumber();
 
-    /// Performs post initialization steps.
-    virtual void postInitialize();
-
     /**
      * Updates element state after equilibrium in time step has been reached.
      * Default implementation updates all integration rules defined by
@@ -1215,6 +1217,8 @@ public:
 
     // Overloaded methods:
     void initializeFrom(InputRecord &ir) override;
+    /// Performs post initialization steps.
+    void postInitialize() override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

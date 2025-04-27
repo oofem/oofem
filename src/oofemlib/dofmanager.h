@@ -465,7 +465,7 @@ public:
     /**
      * Performs post-initialization such like checking if there are any slave dofs etc.
      */
-    virtual void postInitialize();
+    void postInitialize() override;
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain

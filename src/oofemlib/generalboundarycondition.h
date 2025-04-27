@@ -170,9 +170,6 @@ public:
      */
     virtual void scale(double s) { }
 
-    /// Performs post initialization steps.
-    virtual void postInitialize() { }
-
     /**
      * Returns the value of a property 'aProperty'. Property must be identified
      * by unique integer id.

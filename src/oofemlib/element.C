@@ -59,6 +59,7 @@
 #include "unknownnumberingscheme.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
+#include "parametermanager.h"
 #include "cltypes.h"
 
 #ifdef __OOFEG
@@ -68,6 +69,9 @@
 #include <cstdio>
 
 namespace oofem {
+    
+ParameterManager Element::parameterManager;
+
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), dofManArray(), crossSection(0), 
     bodyLoadArray(), boundaryLoadArray(), integrationRulesArray(),

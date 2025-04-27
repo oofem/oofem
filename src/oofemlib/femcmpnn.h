@@ -128,6 +128,9 @@ public:
      * @param ir Input record to initialize from.
      */
     virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir, int priority) { initializeFrom(ir); }
+    /// Performs post initialization steps. Called after all components are created and initialized.
+    virtual void postInitialize() {}
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.
