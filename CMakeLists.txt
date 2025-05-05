@@ -656,20 +656,24 @@ if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
 endif()
 
 if (USE_PYBIND_BINDINGS)
-    add_definitions(-D_PYBIND_BINDINGS)
+    # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
+    set(PYBIND11_FINDPYTHON ON)
+    find_package(Python COMPONENTS Interpreter Development)
     if(USE_NANOBIND)
         add_subdirectory(extern/nanobind)
-        find_package(Python COMPONENTS Interpreter Development)
+        #include(FetchContent)
+        #FetchContent_Declare(
+        #    nanobind
+        #    GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+        #    GIT_TAG v2.7.0
+        #)
+        #FetchContent_MakeAvailable(nanobind)
         nanobind_add_module(oofempy NB_STATIC STABLE_ABI LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
         nanobind_build_library(nanobind-static)
         link_libraries(nanobind-static)
         add_definitions(-D_USE_NANOBIND)
         include_directories(${oofem_SOURCE_DIR}/extern/nanobind/include)
     else()
-        # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
-        set(PYBIND11_FINDPYTHON ON)
-
-        find_package(Python COMPONENTS Interpreter Development)
         if (PYBIND_DIR)
             message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
             include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
@@ -707,10 +711,11 @@ if (USE_PYBIND_BINDINGS)
     endif()
 endif()
 
-
 if(USE_PYTHON_EXTENSION)
+    find_package(Python COMPONENTS Interpreter Development)
     add_definitions(-D_PYTHON_EXTENSION)
-endif ()
+    link_libraries(Python::Python)
+endif()
 
 #######################################################################
 ######################## Configuration ################################
