@@ -3,18 +3,31 @@ name = 'oofem'
 requires-python = '>=3.11'
 readme='README.md'
 license={'file'='COPYING.LGPLv2.1'}
-# dynamic=['version','description']
+dynamic=['version']
 dependencies = [ 'pytest', 'numpy', 'matplotlib' ]
-version='2.6.0-dev1'
 description='oofem etc' 
 
 [build-system]
-requires = ['py-build-cmake~=0.4.2','pytest']
-build-backend = "py_build_cmake.build"
+#requires = ['py-build-cmake~=0.4.2','pytest']
+#build-backend = "py_build_cmake.build"
+requires=['scikit-build-core','pybind11','pytest']
+build-backend = 'scikit_build_core.build'
+
+[tool.scikit-build]
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+build.verbose = true
+logging.level = 'INFO'
+install.components=['python_module']
+sdist.cmake = false
+sdist.exclude = ['.cache','.wenv']
+wheel.packages = ['bindings/python/oofem']
+#sdist.include = ['CMakeLists.txt','bindings/python','cmake','src','extern','doc','README','README.md','pyproject.toml','COPYING.LGPLv2.1']
+
+[tool.setuptools_scm]
 
 [tool.py-build-cmake.sdist]
 include = ['CMakeLists.txt','bindings/python','cmake','src','extern','doc','README']
-exclude = ['**/_build']
+exclude = ['**/_build','.*']
 
 [tool.py-build-cmake.cmake]
 minimum_version="3.17"
@@ -24,6 +37,23 @@ install_components=['python_module']
 # https://github.com/pypa/cibuildwheel/issues/643
 # use Ninja everywhere (including windows), where it needs compiler paths to be set up (done via setup-msvc-dev in cibuildwheel.yml)
 generator ='Ninja'
+
+[tool.scikit-build.cmake]
+build-type="Release"
+args=['-GNinja']
+
+[tool.scikit-build.cmake.define]
+USE_PYBIND_BINDINGS=1
+USE_SHARED_LIB=0
+USE_SM=1
+USE_FM=1
+USE_TM=1
+USE_MPM=1
+USE_OOFEM_EXE=0
+
+[[tool.scikit-build.overrides]]
+if.platform-system='win32'
+cmake.args=['-GNinja','-DCMAKE_C_COMPILER=cl','-DCMAKE_CXX_COMPILER=cl']
 
 [tool.py-build-cmake.windows.cmake]
 # extra options, but pass them as args so that options don't have to be repeated

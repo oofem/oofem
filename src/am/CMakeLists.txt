@@ -12,4 +12,3 @@ add_library (am
     ${tm}
     )
 
-add_dependencies(am version)

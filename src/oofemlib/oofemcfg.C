@@ -1,5 +1,5 @@
-#include "oofem_version.h"
-#include "oofemcfg.h"
+#include"oofemcfg.h"
+// macro values are defiend in CMakeLists.txt
 
 OOFEM_EXPORT const char* PRG_VERSION =  "OOFEM version " __OOFEM_MAJOR_VERSION "." __OOFEM_MINOR_VERSION;
 OOFEM_EXPORT const char* OOFEM_VERSION = __OOFEM_VERSION;
