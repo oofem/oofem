@@ -85,4 +85,3 @@ add_library (fm
     ${LIB_TYPE}
     ${fm}
     )
-add_dependencies(fm version)

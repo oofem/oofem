@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = OOFEM
-PROJECT_NUMBER         = @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@
+PROJECT_NUMBER         = @OOFEM_VERSION_MAJOR@.@OOFEM_VERSION_MINOR@
 PROJECT_BRIEF          =
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT@
