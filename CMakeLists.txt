@@ -868,7 +868,8 @@ endif ()
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
-add_custom_command(TARGET cppcheck 
+add_custom_command(TARGET cppcheck
+    PRE_BUILD
     COMMAND cppcheck "--xml" "--template=gcc" "--enable=all" 
     "-I${oofem_BINARY_DIR}/"
     "-I${oofem_SOURCE_DIR}/src/oofemlib/"
