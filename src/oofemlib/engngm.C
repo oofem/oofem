@@ -198,6 +198,10 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
+
+    Timer timer;
+    timer.startTimer();
+
     referenceFileName = dr.giveReferenceName();
 
     bool inputReaderFinish = true;
@@ -272,6 +276,8 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         OOFEM_ERROR("Error initializing from user input: %s\n", e.what());
     }
 
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "Problem instantiation done in %.2fs\n", timer.getUtime() );
     return 1;
 }
 
