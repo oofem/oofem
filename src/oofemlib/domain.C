@@ -969,8 +969,14 @@ Domain :: postInitialize()
             Set *set = this->giveSet(setNum);
             for ( int ielem: set->giveElementList() ) {
                 Element *element = this->giveElement( ielem );
-                //@TODO has lower priority than component record !
-                element->setCrossSection(i);
+                // hack to set the cross section from the cross section model to the element
+                // this is obsolete feature, but supported here for backwards compatibility
+                // the supported way is to set cross section using set element properties
+                size_t indx = this->elementPPM.registerParam(_IFT_Element_crosssect);
+                if (this->elementPPM.getPriority(ielem-1, indx) < 1) {
+                    this->elementPPM.setPriority(ielem-1, indx, 1);
+                    element->setCrossSection(i);
+                }  
             }
         }
     }
