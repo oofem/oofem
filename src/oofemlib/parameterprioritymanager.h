@@ -79,12 +79,20 @@ namespace oofem {
         } \
     }
 
-#define PM_ERROR_IFNOTSET(_pm, _componentnum, _kwd) \
+#define PM_ELEMENT_ERROR_IFNOTSET(_pm, _componentnum, _kwd) \
     { \
         if (!_pm.checkIfSet(_componentnum-1, _kwd)) { \
-            OOFEM_ERROR("Parameter %s not set", _kwd);\
+            OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _kwd);\
         }\
     }    
+
+#define PM_DOFMAN_ERROR_IFNOTSET(_pm, _componentnum, _kwd) \
+    { \
+        if (!_pm.checkIfSet(_componentnum-1, _kwd)) { \
+            OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _kwd);\
+        }\
+    }    
+
 
  // ParameterPriorityManager 
  /**

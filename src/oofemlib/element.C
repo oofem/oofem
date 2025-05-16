@@ -820,8 +820,8 @@ Element :: postInitialize()
     ParameterPriorityManager &ppm =  this->giveDomain()->elementPPM;
 
     //PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_mat) ;
-    PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_crosssect) ;
-    PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_nodes) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_crosssect) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_nodes) ;
     
     this->computeGaussPoints();
 }

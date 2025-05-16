@@ -207,7 +207,7 @@ Node :: postInitialize()
 {
     ParameterPriorityManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Node_coords) ;
+    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, _IFT_Node_coords) ;
     
 }
 
