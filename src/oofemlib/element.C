@@ -59,7 +59,7 @@
 #include "unknownnumberingscheme.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
-#include "parametermanager.h"
+#include "parameterprioritymanager.h"
 #include "cltypes.h"
 
 #ifdef __OOFEG
@@ -70,8 +70,6 @@
 
 namespace oofem {
     
-ParameterManager Element::parameterManager;
-
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), dofManArray(), crossSection(0), 
     bodyLoadArray(), boundaryLoadArray(), integrationRulesArray(),
@@ -714,6 +712,61 @@ Element :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 }
 
+void
+Element :: initializeFrom(InputRecord &ir, int priority)
+{
+#  ifdef VERBOSE
+    // VERBOSE_PRINT1("Instanciating element ",number);
+#  endif
+    ParameterPriorityManager &ppm =  this->giveDomain()->elementPPM;
+    //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    PM_UPDATE_PARAMETER(material, ppm, ir, this->number, _IFT_Element_mat, priority) ;
+    PM_UPDATE_PARAMETER(crossSection, ppm, ir, this->number, _IFT_Element_crosssect, priority) ;
+    PM_UPDATE_PARAMETER(dofManArray, ppm, ir, this->number, _IFT_Element_nodes, priority) ;
+    PM_UPDATE_PARAMETER(bodyLoadArray, ppm, ir, this->number, _IFT_Element_bodyload, priority) ;
+    PM_UPDATE_PARAMETER(boundaryLoadArray, ppm, ir, this->number, _IFT_Element_boundaryload, priority) ;
+    bool tripletsflag = false;
+    FloatArray triplets;
+    PM_UPDATE_PARAMETER_AND_REPORT(triplets, ppm, ir, this->number, _IFT_Element_lcs, priority, tripletsflag) ;
+    PM_UPDATE_PARAMETER(partitions, ppm, ir, this->number, _IFT_Element_partitions, priority) ;
+    PM_UPDATE_PARAMETER(activityTimeFunction, ppm, ir, this->number, _IFT_Element_activityTimeFunction, priority) ;
+    PM_UPDATE_PARAMETER(numberOfGaussPoints, ppm, ir, this->number, _IFT_Element_nip, priority) ;
+    
+    if (tripletsflag ) { //local coordinate system
+        double n1 = 0.0, n2 = 0.0;
+        FloatArray triplets;
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
+        elemLocalCS.resize(3, 3);
+        for ( int j = 1; j <= 3; j++ ) {
+            elemLocalCS.at(j, 1) = triplets.at(j);
+            n1 += triplets.at(j) * triplets.at(j);
+            elemLocalCS.at(j, 2) = triplets.at(j + 3);
+            n2 += triplets.at(j + 3) * triplets.at(j + 3);
+        }
+
+        n1 = sqrt(n1);
+        n2 = sqrt(n2);
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
+            elemLocalCS.at(j, 1) /= n1;
+            elemLocalCS.at(j, 2) /= n2;
+        }
+
+        // vector e3' computed from vector product of e1', e2'
+        elemLocalCS.at(1, 3) = ( elemLocalCS.at(2, 1) * elemLocalCS.at(3, 2) - elemLocalCS.at(3, 1) * elemLocalCS.at(2, 2) );
+        elemLocalCS.at(2, 3) = ( elemLocalCS.at(3, 1) * elemLocalCS.at(1, 2) - elemLocalCS.at(1, 1) * elemLocalCS.at(3, 2) );
+        elemLocalCS.at(3, 3) = ( elemLocalCS.at(1, 1) * elemLocalCS.at(2, 2) - elemLocalCS.at(2, 1) * elemLocalCS.at(1, 2) );
+    }
+
+    bool flag = false;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, _IFT_Element_remote, priority, flag) ;
+    if (flag) {
+        parallel_mode = Element_remote;
+    } else {
+        parallel_mode = Element_local;
+    }
+    
+}
+
 
 void
 Element :: giveInputRecord(DynamicInputRecord &input)
@@ -764,6 +817,12 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 void
 Element :: postInitialize()
 {
+    ParameterPriorityManager &ppm =  this->giveDomain()->elementPPM;
+
+    //PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_mat) ;
+    PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_crosssect) ;
+    PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_nodes) ;
+    
     this->computeGaussPoints();
 }
 

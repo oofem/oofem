@@ -91,7 +91,6 @@ class SurfaceLoad;
 class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
-class ParameterManager;
 
 /**
  * In parallel mode, this type indicates the mode of element.
@@ -208,11 +207,6 @@ protected:
      * Each surface keeps list of shared elements, can have DofManagers, etc.
      */
     IntArray globalSurfaceIDs;
-    /**
-     * Parameter manager for the elements. It is used to store and manage setting of parameters
-     */
-    static ParameterManager parameterManager;
-
 
 public:
     /**
@@ -1217,6 +1211,7 @@ public:
 
     // Overloaded methods:
     void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     /// Performs post initialization steps.
     void postInitialize() override;
     void giveInputRecord(DynamicInputRecord &input) override;

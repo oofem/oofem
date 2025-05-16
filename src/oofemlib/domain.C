@@ -76,6 +76,8 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
+#include "parameterprioritymanager.h"
+
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
@@ -90,8 +92,11 @@
 #include <set>
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
-                                                     bcTracker(this)
+Domain :: Domain(int n, int serNum, EngngModel *e) : elementPPM(),
+                                                    dofmanPPM(),
+                                                    defaultNodeDofIDArry(),
+                                                    bcTracker(this)
+                                                     
     // Constructor. Creates a new domain.
 {
     if ( !e->giveSuppressOutput() ) {
@@ -480,6 +485,7 @@ Domain :: instanciateYourself(DataReader &dr)
     bool nxfemman = false;
     bool ncontactman = false;
     bool nfracman = false;
+    int componentRecPriority = 2;
 
     // read type of Domain to be solved
     {
@@ -559,7 +565,7 @@ Domain :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR("Couldn't create node of type: %s\n", name.c_str());
         }
 
-        dman->initializeFrom(ir);
+        dman->initializeFrom(ir, componentRecPriority);
         dman->setGlobalNumber(num);    // set label
         dofManagerList[i - 1] = std :: move(dman);
 
@@ -585,7 +591,7 @@ Domain :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
 
-        elem->initializeFrom(ir);
+        elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
         elementList[i - 1] = std :: move(elem);
 
@@ -963,10 +969,32 @@ Domain :: postInitialize()
             Set *set = this->giveSet(setNum);
             for ( int ielem: set->giveElementList() ) {
                 Element *element = this->giveElement( ielem );
+                //@TODO has lower priority than component record !
                 element->setCrossSection(i);
             }
         }
     }
+
+    // process sets and apply element and dofman properties
+    for ( int i = 1; i <= this->giveNumberOfSets(); i++ ) {
+        Set *set = this->giveSet(i);
+        std::string elemProps = set->giveElementProperties();
+        if (!elemProps.empty()) {
+            OOFEMTXTInputRecord ir (-1, elemProps);
+            for ( int ielem: set->giveElementList() ) {
+                Element *element = this->giveElement( ielem );
+                element->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)
+            }
+        }
+        std::string dofmanProps = set->giveDofManProperties();
+        if (!dofmanProps.empty()) {
+            OOFEMTXTInputRecord ir (-1, dofmanProps);
+            for ( int idofman: set->giveNodeList() ) {
+                DofManager *dofman = this->giveDofManager( idofman );
+                dofman->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)
+            }
+        }
+    } 
 
     if (!spatialLocalizer) {
         spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
@@ -992,11 +1020,14 @@ Domain :: postInitialize()
     for ( auto &el: elementList ) {
         el->postInitialize();
     }
+    //@TODO clear parameterPriorityManager
 
     for ( auto &bc: bcList ) {
         bc->postInitialize();
     }
 
+    this->elementPPM.clear();
+    this->dofmanPPM.clear();
 
 }
 

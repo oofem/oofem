@@ -163,6 +163,9 @@ public:
     const char *giveClassName() const override { return "Node"; }
     const char *giveInputRecordName() const override { return _IFT_Node_Name; }
     void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+     /// Performs post initialization steps.
+     void postInitialize() override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     int checkConsistency() override;
