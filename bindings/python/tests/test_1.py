@@ -5,8 +5,10 @@ except: # in-tree
     import oofempy
     import util
 
+import pytest
 
-def test_1():
+@pytest.mark.skipif(oofempy.hasModule('nanobind'),reason='Skipping with nanobind')
+def test_arrays():
     a = oofempy.FloatArray((1.0, 2.0, 3.0))
     b = oofempy.FloatArray((0.0, -1.0, 1.0))
     x = oofempy.FloatArray(3)
@@ -64,4 +66,4 @@ def test_1():
     assert a0[0,2]==99
 
 if __name__ == "__main__":
-    test_1()
+    test_arrays()

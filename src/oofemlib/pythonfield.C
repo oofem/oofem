@@ -34,6 +34,9 @@
 
 #ifdef _USE_NANOBIND
     #include<nanobind/nanobind.h>
+    // must include converters here so that compiler can pickup template specialization for arrays
+    #include"../../bindings/python/oofemarray-nanobind.h"
+    namespace nb = nanobind;
 #else
     #include <pybind11/embed.h>
     namespace py = pybind11;
@@ -67,7 +70,6 @@ void PythonField :: setModuleName(std::string moduleName){
     //this->moduleName.resize(this->moduleName.size()); //remove trailing quotes
 }
 
-
 int PythonField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     // Do not use the raw CPython API functions Py_Initialize and Py_Finalize as these do not properly handle the lifetime of pybind11’s internal data.
@@ -77,9 +79,9 @@ int PythonField :: evaluateAt(FloatArray &answer, const FloatArray &coords, Valu
     
 //     py::initialize_interpreter();
     #ifdef _USE_NANOBIND
-        nanobind::module_ calc = nanobind::module_::import_(moduleName.c_str());
-        nanobind::object result = calc.attr(functionName.c_str())(coords, mode, tStep);
-        answer = nanobind::cast<FloatArray>(result);
+        nb::module_ calc = nb::module_::import_(moduleName.c_str());
+        nb::object result = calc.attr(functionName.c_str())(nb::cast(coords), nb::cast(mode), nb::cast(tStep));
+        answer = nb::cast<FloatArray>(result);
     #else
         py::module calc = py::module::import(moduleName.c_str());
         py::object result = calc.attr(functionName.c_str())(coords, mode, tStep);

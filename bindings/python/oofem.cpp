@@ -34,8 +34,8 @@
 
 
 #ifdef _USE_NANOBIND
-	#include <nanobind/nanobind.h>
-	#include <nanobind/operators.h>
+    #include <nanobind/nanobind.h>
+    #include <nanobind/operators.h>
     #include <nanobind/trampoline.h>
     #include <nanobind/ndarray.h>
     #include <nanobind/stl/map.h>
@@ -43,31 +43,34 @@
     #include <nanobind/stl/list.h>
     #include <nanobind/stl/set.h>
     #include <nanobind/stl/string.h>
-	namespace py=nanobind;
+    #include <nanobind/stl/shared_ptr.h>
+    namespace py=nanobind;
     // compatibility with pybind11
-	#define PYBIND11_MODULE(...) NB_MODULE(__VA_ARGS__)
-	#define PYBIND11_OVERRIDE(RET_TYPE,PARENT_CLASS,METHOD_NAME,...) NB_OVERRIDE(METHOD_NAME,__VA_ARGS__)
+    #define PYBIND11_MODULE(...) NB_MODULE(__VA_ARGS__)
+    #define PYBIND11_OVERRIDE(RET_TYPE,PARENT_CLASS,METHOD_NAME,...) NB_OVERRIDE(METHOD_NAME,__VA_ARGS__)
     #define PYBIND11_OVERRIDE_PURE(RET_TYPE,PARENT_CLASS,METHOD_NAME,...) NB_OVERRIDE_PURE(METHOD_NAME,__VA_ARGS__)
     #define PYBIND11_OVERLOAD PYBIND11_OVERRIDE
     #define PYBIND11_OVERLOAD_PURE PYBIND11_OVERRIDE_PURE
-	#define def_readwrite def_rw
-	#define def_readonly def_ro
-	#define def_property def_prop_rw
-	#define def_property_readonly def_prop_ro
-	#define register_exception exception
+    #define def_readwrite def_rw
+    #define def_readonly def_ro
+    #define def_property def_prop_rw
+    #define def_property_readonly def_prop_ro
+    #define register_exception exception
     #define return_value_policy rv_policy
     #define SHARED_PTR_HOLDER(T)
     #define PY_USING(a)
+    #include "oofemarray-nanobind.h"
 #else
-	#include <pybind11/pybind11.h>
-	#include <pybind11/stl.h> //Conversion for lists
-	#include <pybind11/operators.h>
+    #include <pybind11/pybind11.h>
+    #include <pybind11/stl.h> //Conversion for lists
+    #include <pybind11/operators.h>
     #include <pybind11/numpy.h>
-	namespace py = pybind11;
-	// no-op for pybind11
-	#define NB_TRAMPOLINE(base,num)
-	#define SHARED_PTR_HOLDER(T) , std::shared_ptr<T>
+    namespace py = pybind11;
+    // no-op for pybind11
+    #define NB_TRAMPOLINE(base,num)
+    #define SHARED_PTR_HOLDER(T) , std::shared_ptr<T>
     #define PY_USING(a) using a
+    // #include "oofemarray-pybind11.h" // TODO
 #endif
 
 
@@ -178,7 +181,6 @@ void test (oofem::Element& e) {
 
 
 #ifdef _USE_NANOBIND
-    #include"oofemarray.h"
     #if 0
         // use nanobind::none as owner so that data are taken over (https://github.com/wjakob/nanobind/discussions/583)
         nanobind::ndarray<int,nanobind::shape<-1>> floatarray2numpy(const FloatArray&& a){ size_t shape[1]={(size_t)a.giveSize()}; return nanobind::ndarray<int,nanobind::shape<-1>>(a.givePointer(),/*ndim*/1,/*shape*/shape,/*owner*/nanobind::none()); }
@@ -189,10 +191,24 @@ void test (oofem::Element& e) {
     #define intarray2numpy(a) a
     #define floatmatrix2numpy(a) a
 #else
-    // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
-    py::array_t<double> floatarray2numpy(const FloatArray& s){ return py::array_t<double> (s.giveSize(), s.givePointer(), py::cast(s)); }
-    py::array_t<int> intarray2numpy(const IntArray& s){ return py::array_t<int> (s.giveSize(), s.givePointer(), py::cast(s)); }
-    py::array_t<double> floatmatrix2numpy(const FloatMatrix& s){ return py::array_t<double> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer(), py::cast(s));}
+    #if 1
+      // the py::cast(s) uses the parent object for determining array lifetime: https://github.com/pybind/pybind11/issues/2271#issuecomment-650565098
+      py::array_t<double> floatarray2numpy(const FloatArray& s){ return py::array_t<double> (s.giveSize(), s.givePointer(), py::cast(s)); }
+      py::array_t<int> intarray2numpy(const IntArray& s){ return py::array_t<int> (s.giveSize(), s.givePointer(), py::cast(s)); }
+      /* say reference=true to create view on existing data inside the object (bound lifetime); copy data by default. */
+      py::array_t<double,py::array::f_style> floatmatrix2numpy(const FloatMatrix& s, bool reference=false){
+        // for(int i=0; i<s.giveNumberOfRows()*s.giveNumberOfColumns(); i++) std::cerr<<"["<<i<<"] → "<<*(double*)(((char*)s.givePointer())+i*sizeof(double))<<std::endl;
+        std::cerr<<std::endl;
+        auto ret=py::array_t<double,py::array::f_style> ({s.giveNumberOfRows(), s.giveNumberOfColumns()}, {sizeof(double), sizeof(double)*s.giveNumberOfRows()}, s.givePointer(), /* base */ reference ? py::cast(s) : py::handle());
+        // for(int r=0; r<s.giveNumberOfRows(); r++) for(int c=0; c<s.giveNumberOfColumns(); c++) std::cerr<<"["<<r<<","<<c<<"]="<<ret.at(r,c)<<std::endl;
+        // std::cerr<<std::endl;
+        return ret;
+      }
+    #else
+      #define floatarray2numpy(a) a
+      #define intarray2numpy(a) a
+      #define floatmatrix2numpy(a) a
+    #endif
 #endif
 
 /*
@@ -753,11 +769,14 @@ template <class ElementBase = oofem::Element> struct PyElement : public PyFemCom
 
 
 PYBIND11_MODULE(oofempy, m) {
+    #ifdef _USE_NANOBIND
+     // py::set_leak_warnings(false);
+    #endif
     m.doc() = "oofem python bindings module"; // optional module docstring
 
     m.def("init", &init, py::arg("logLevel")=2, py::arg("numberOfThreads")=0, "Initializes some global oofem options (typically controlled from command-line)");
 
-#ifndef _USE_NANOBIND
+    #ifndef _USE_NANOBIND
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
         #ifdef _USE_NANOBIND
@@ -913,7 +932,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
         .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
         // enable conversion to numpy representation
-        .def("asNumpyArray", [](oofem::FloatMatrix &s) { return floatmatrix2numpy(s); })
+        .def("asNumpyArray", [](oofem::FloatMatrix &s) { return floatmatrix2numpy(s,/*reference*/true); })
         // expose FloatArray operators
         .def(py::self + py::self)
         .def(py::self - py::self)
@@ -979,8 +998,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     ;
     py::implicitly_convertible<py::sequence, oofem::IntArray>();
-
-#endif
+    #endif
 
     py::class_<oofem::DataReader>(m, "DataReader")
     ;
@@ -1163,6 +1181,8 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::DofManager, oofem::FEMComponent>(m, "DofManager")
         .def("giveDofWithID", &oofem::DofManager::giveDofWithID, py::return_value_policy::reference)
+        // nanobind needs this extra wrapper since it won't convert the enuym to int automatically
+        .def("giveDofWithID", [](const oofem::DofManager& self, const DofIDItem& id){ return self.giveDofWithID(id); }, py::return_value_policy::reference)
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
@@ -1976,7 +1996,6 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("upm", &upm, py::return_value_policy::move);
 #endif
 
-//std::shared_ptr<oofem::Field>
     py::class_<oofem::Field, PyField SHARED_PTR_HOLDER(oofem::Field)>(m, "Field")
         .def(py::init<oofem::FieldType>())  
         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)      
@@ -2023,8 +2042,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("readField", &oofem::VTKHDF5Reader::readField)
         ;
         
-//depends on Python.h
-#if defined(_PYBIND_BINDINGS) && !defined(_USE_NANOBIND)
+   //depends on Python.h
+#if defined(_PYBIND_BINDINGS)
     py::class_<oofem::PythonField, oofem::Field SHARED_PTR_HOLDER(oofem::PythonField)>(m, "PythonField")
         .def(py::init<>())
         .def("setModuleName", &oofem::PythonField::setModuleName)
@@ -2048,6 +2067,10 @@ PYBIND11_MODULE(oofempy, m) {
 #endif
 #ifdef __MPM_MODULE
         if (name == "mpm") return true;
+#endif
+
+#ifdef _USE_NANOBIND
+       if (name == "nanobind") return true;
 #endif
         return false;
     });
