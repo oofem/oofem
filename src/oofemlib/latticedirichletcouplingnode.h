@@ -53,6 +53,7 @@ class NodalLoad;
 class TimeStep;
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /**
  * Class implementing lattice coupling node
@@ -68,6 +69,8 @@ protected:
     int couplingType;
     double activedirichletbc;
 
+
+    static ParamKey IPK_LatticeDirichletCouplingNode_couplingelements;
 public:
 
     LatticeDirichletCouplingNode(int n, Domain *aDomain);                       // constructor
@@ -75,7 +78,8 @@ public:
     ~LatticeDirichletCouplingNode();                                            // destructor
 
     const char *giveClassName() const override { return "LatticeDirichletCouplingNode"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     IntArray *giveCouplingNodes();
 

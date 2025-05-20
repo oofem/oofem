@@ -42,9 +42,14 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "node.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(MacroLSpace);
+ParamKey MacroLSpace::IPK_MacroLSpace_microMasterNodes("micromasternodes");
+ParamKey MacroLSpace::IPK_MacroLSpace_microBoundaryNodes("microboundarynodes");
+ParamKey MacroLSpace::IPK_MacroLSpace_stiffMatrixFileName("stiffmatrixfilename");
 
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
@@ -60,21 +65,15 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 MacroLSpace :: ~MacroLSpace() { }
 
 
-void MacroLSpace :: initializeFrom(InputRecord &ir)
+void MacroLSpace :: initializeFrom(InputRecord &ir, int priority)
 {
-    LSpace :: initializeFrom(ir);;
+    LSpace :: initializeFrom(ir, priority);
+    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(microMasterNodes, ppm, ir, this->number, IPK_MacroLSpace_microMasterNodes, priority) ;
+    PM_UPDATE_PARAMETER(microBoundaryNodes, ppm, ir, this->number, IPK_MacroLSpace_microBoundaryNodes, priority) ;
 
-    IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
-    if ( this->microMasterNodes.giveSize() != 8 ) {
-        throw ValueInputException(ir, _IFT_MacroLspace_microMasterNodes, "Need 8 master nodes from the microproblem defined on macroLspace element");
-    }
-
-    IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
-
-    microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
-
-#if 0
+#if 0 // obsolete
     if ( ir.hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName);
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
@@ -90,6 +89,17 @@ void MacroLSpace :: initializeFrom(InputRecord &ir)
 #endif
 }
 
+void MacroLSpace :: postInitialize()
+{
+    LSpace :: postInitialize();
+    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_MacroLSpace_microMasterNodes) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_MacroLSpace_microBoundaryNodes) ;
+    if ( this->microMasterNodes.giveSize() != 8 ) {
+        throw ValueInputException(ir, IPK_MacroLSpace_microMasterNodes.getName(), "Need 8 master nodes from the microproblem defined on macroLspace element");
+    }
+    microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
+}
 
 
 /*Stiffness matrix is taken from the microproblem. No GPs are presented here on macroscale.

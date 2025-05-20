@@ -47,14 +47,11 @@
 ///@name Input fields for TR12DSUPG
 //@{
 #define _IFT_TR1_2D_SUPG_Name "tr1supg"
-#define _IFT_Tr1SUPG_pvof "pvof"
-#define _IFT_Tr1SUPG_vof "vof"
-#define _IFT_Tr1SUPG2_mat0 "mat0"
-#define _IFT_Tr1SUPG2_mat1 "mat1"
 //@}
 
 namespace oofem {
 class FEI2dTrLin;
+class ParamKey;
 
 /**
  * Class representing 2d linear triangular element
@@ -77,6 +74,11 @@ protected:
     double b [ 3 ];
     double c [ 3 ];
     double area = 0.;
+
+    static ParamKey IPK_TR1_2D_SUPG_vof;
+    static ParamKey IPK_TR1_2D_SUPG_pvof;
+    static ParamKey IPK_TR1_2D_SUPG_mat0;
+    static ParamKey IPK_TR1_2D_SUPG_mat1;
 
 public:
     TR1_2D_SUPG(int n, Domain * d);
@@ -126,7 +128,7 @@ public:
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c).

@@ -55,6 +55,8 @@ FEI3dWedgeQuad QWedge_ht :: interpolation;
 QWedge_ht :: QWedge_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
 {
     numberOfDofMans = 15;
+    numberOfGaussPoints = 6;
+
 }
 
 QWedge_hmt :: QWedge_hmt(int n, Domain *aDomain) : QWedge_ht(n, aDomain)
@@ -69,10 +71,9 @@ QWedge_mt :: QWedge_mt(int n, Domain *aDomain) : QWedge_ht(n, aDomain)
 
 
 void
-QWedge_ht :: initializeFrom(InputRecord &ir)
+QWedge_ht :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 6;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 
 }
 

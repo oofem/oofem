@@ -48,22 +48,6 @@
 #include "unknowntype.h"
 #include "chartype.h"
 
-///@name Input fields for DofManager
-//@{
-#define _IFT_DofManager_dofidmask "dofidmask"
-#define _IFT_DofManager_load "load"
-#define _IFT_DofManager_bc "bc"
-#define _IFT_DofManager_ic "ic"
-#define _IFT_DofManager_mastermask "mastermask"
-#define _IFT_DofManager_doftypemask "doftype"
-#define _IFT_DofManager_boundaryflag "boundary"
-#define _IFT_DofManager_globnum "globnum"
-#define _IFT_DofManager_partitions "partitions"
-#define _IFT_DofManager_sharedflag "shared"
-#define _IFT_DofManager_remoteflag "remote"
-#define _IFT_DofManager_nullflag "null"
-//@}
-
 namespace oofem {
 class DataStream;
 class Dof;
@@ -76,6 +60,7 @@ class Load;
 class TimeStep;
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /// In parallel mode, this type indicates the mode of DofManager.
 enum dofManagerParallelMode {
@@ -144,18 +129,32 @@ protected:
     IntArray partitions;
 
     /// List of additional dof ids to include.
-    IntArray *dofidmask;
+    IntArray dofidmask;
     /// Map from DofIDItem to dofType.
-    std :: map< int, int > *dofTypemap;
+    std :: map< int, int > dofTypemap;
     /// Map from DofIDItem to master node.
-    std :: map< int, int > *dofMastermap;
+    std :: map< int, int > dofMastermap;
     /// Map from DofIDItem to bc (to be removed).
-    std :: map< int, int > *dofBCmap;
+    std :: map< int, int > dofBCmap;
     /// Map from DofIDItem to ic (to be removed).
-    std :: map< int, int > *dofICmap;
+    std :: map< int, int > dofICmap;
 
     // List of BCs (to enable writing to DynamicInputRecord)
     IntArray mBC;
+
+    static ParamKey IPK_DofManager_dofidmask;
+    static ParamKey IPK_DofManager_load;
+    static ParamKey IPK_DofManager_bc;
+    static ParamKey IPK_DofManager_ic;
+    static ParamKey IPK_DofManager_mastermask;
+    static ParamKey IPK_DofManager_doftypemask;
+    static ParamKey IPK_DofManager_boundaryflag;
+    static ParamKey IPK_DofManager_globnum;
+    static ParamKey IPK_DofManager_partitions;
+    static ParamKey IPK_DofManager_sharedflag;
+    static ParamKey IPK_DofManager_remoteflag;
+    static ParamKey IPK_DofManager_nullflag;
+
 
 public:
     std::vector< Dof* > :: iterator begin() { return dofArray.begin(); }
@@ -401,30 +400,30 @@ public:
      * Returns list of specific dofs that should be included in node.
      * @return NULL if no additional dofs are necessary, otherwise a list of DofIDItem's.
      */
-    const IntArray *giveForcedDofIDs() { return dofidmask; }
+    const IntArray *giveForcedDofIDs() { return &dofidmask; }
     /**
      * Returns map from DofIDItem to dofType.
      * @return NULL if no specific dofTypes are required, otherwise a map.
      */
-    std :: map< int, int > *giveDofTypeMap()  { return dofTypemap; }
+    std :: map< int, int > *giveDofTypeMap()  { return &dofTypemap; }
     /**
      * Returns map from DofIDItem to dofType.
      * @return NULL if no specific BCs are required, otherwise a map.
      * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
      */
-    std :: map< int, int > *giveMasterMap()  { return dofMastermap; }
+    std :: map< int, int > *giveMasterMap()  { return (dofMastermap.empty()?NULL: &dofMastermap);}
     /**
      * Returns map from DofIDItem to dofType.
      * @return NULL if no specific BCs are required, otherwise a map.
      * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
      */
-    std :: map< int, int > *giveBcMap()  { return dofBCmap; }
+    std :: map< int, int > *giveBcMap()  { return (dofBCmap.empty()? NULL:&dofBCmap); }
     /**
      * Returns map from DofIDItem to initial condition.
      * @return NULL if no specific ICs are required, otherwise a map.
      * @deprecated This method of applying i.c.s is soon to be deprecated.
      */
-    std :: map< int, int > *giveIcMap() { return dofICmap; }
+    std :: map< int, int > *giveIcMap() { return (dofICmap.empty()? NULL: &dofICmap); }
     //@}
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -453,8 +452,8 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    void initializeFrom(InputRecord &ir) override;
-    void initializeFrom(InputRecord &ir, int priority) override { initializeFrom(ir); }
+    void initializeFrom(InputRecord &ir) override { initializeFrom(ir, 1); };
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     void giveInputRecord(DynamicInputRecord &input) override;
 

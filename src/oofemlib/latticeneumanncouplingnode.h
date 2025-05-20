@@ -54,7 +54,7 @@ class NodalLoad;
 class TimeStep;
 class FloatArray;
 class IntArray;
-
+class ParamKey;
 /**
  * Class implementing lattice coupling node
  * This DOF manager is based on the standard node but allows to read
@@ -68,6 +68,9 @@ protected:
     FloatArray directionVector;
     IntArray couplingNodes;
 
+    static ParamKey IPK_LatticeNeumannCouplingNode_direction;
+    static ParamKey IPK_LatticeNeumannCouplingNode_couplingnodes;
+
 public:
 
     LatticeNeumannCouplingNode(int n, Domain *aDomain);                       // constructor
@@ -77,7 +80,8 @@ public:
     virtual void  computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
 
     const char *giveClassName() const override { return "LatticeNeumannCouplingNode"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     IntArray *giveCouplingNodes();
 

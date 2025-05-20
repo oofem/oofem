@@ -39,10 +39,8 @@
 
 #define _IFT_Truss3dnl_Name "truss3dnl"
 
-
-#define _IFT_Truss3dnl_initialStretch "initstretch"
-
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a nonlinear two-node truss bar element for three-dimensional
  * analysis.
@@ -51,6 +49,7 @@ class Truss3dnl : public Truss3d
 {
 protected:
     double initialStretch;
+    static ParamKey IPK_Truss3dnl_initialStretch; ///< [optional] Initial stretch of the truss element.
 
 public:
     Truss3dnl(int n, Domain * d);
@@ -60,7 +59,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_Truss3dnl_Name; }
     const char *giveClassName() const override { return "Truss3dnl"; }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 

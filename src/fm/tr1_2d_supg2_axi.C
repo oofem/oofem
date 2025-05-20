@@ -76,25 +76,31 @@ TR1_2D_SUPG2_AXI :: TR1_2D_SUPG2_AXI(int n, Domain *aDomain) :
 
 
 void
-TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord &ir)
+TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord &ir, int priority)
 {
-    SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir, priority);
 
-    this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
-    if ( vof > 0.0 ) {
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    bool flag;
+
+    PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_pvof, priority, flag) ;
+    if (flag && (vof > 0.0)) {
         setPermanentVolumeFraction(vof);
-        this->temp_vof = this->vof;
+        this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_vof);
-        this->temp_vof = this->vof;
+        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, tripletsflag) ;
+        if (flag) {
+            this->temp_vof = this->vof;
+        }
     }
 
     this->mat [ 0 ] = this->mat [ 1 ] = this->material;
-    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 0 ], _IFT_Tr1SUPG2_mat0);
-    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
-    this->material = this->mat [ 0 ];
+    PM_UPDATE_PARAMETER_AND_REPORT(mat [ 0 ], ppm, ir, this->number, IPK_TR1_2D_SUPG_mat0, priority, tripletsflag) ;
+    if (flag) {
+        this->material = this->mat [ 0 ];
+    }
+    PM_UPDATE_PARAMETER(mat [ 1 ], ppm, ir, this->number, IPK_TR1_2D_SUPG_mat1, priority) ;
 
     this->initGeometry();
 }
@@ -105,13 +111,13 @@ TR1_2D_SUPG2_AXI :: giveInputRecord(DynamicInputRecord &input)
 {
     SUPGElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, _IFT_Tr1SUPG_pvof);
+        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getName());
     } else {
-        input.setField(this->vof, _IFT_Tr1SUPG_vof);
+        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getName());
     }
 
-    input.setField(this->mat [ 0 ], _IFT_Tr1SUPG2_mat0);
-    input.setField(this->mat [ 1 ], _IFT_Tr1SUPG2_mat1);
+    input.setField(this->mat [ 0 ], IPK_TR1_2D_SUPG_mat0.getName());
+    input.setField(this->mat [ 1 ], IPK_TR1_2D_SUPG_mat1.getName());
 }
 
 void

@@ -38,12 +38,6 @@
 #include "fmelement.h"
 #include "matresponsemode.h"
 
-///@name Input fields for SUPG elements
-//@{
-#define _IFT_SUPGElement_bsides "bsides"
-#define _IFT_SUPGElement_bcodes "bcodes"
-//@}
-
 namespace oofem {
 class TimeStep;
 class GaussPoint;
@@ -51,6 +45,7 @@ class FloatMatrix;
 class FloatArray;
 class IntArray;
 class Load;
+class ParamKey;
 
 /**
  * General stabilized SUPG/PSPG element for CFD analysis.
@@ -69,10 +64,13 @@ protected:
      */
     double t_supg = 0., t_pspg = 0., t_lsic = 0.;
 
+    static ParamKey IPK_SUPGElement_bsides;
+    static ParamKey IPK_SUPGElement_bcodes;
+
 public:
     SUPGElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;

@@ -95,7 +95,7 @@ public:
     const char *giveClassName() const override { return "Quad1PlaneStrain"; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1;}
 
-    void initializeFrom(InputRecord &ir) override;
+    void postInitialize() override;
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;

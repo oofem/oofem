@@ -38,7 +38,7 @@
 #include "oofemenv.h"
 #include "domaintype.h"
 #include "statecountertype.h"
-#include "parameterprioritymanager.h"
+#include "parametermanager.h"
 #include "intarray.h"
 #include "error.h"
 #include "bctracker.h"
@@ -128,8 +128,8 @@ class OOFEM_EXPORT Domain
      * Parameter priority manager for the elements. It is used to store and manage priorities of parameters.
      * This supports setting the parameter (attribute) from different sources (e.g. from component record or trough set).
      */
-    ParameterPriorityManager elementPPM;
-    ParameterPriorityManager dofmanPPM;
+    ParameterManager elementPPM;
+    ParameterManager dofmanPPM;
 
 private:
     /// Material list.

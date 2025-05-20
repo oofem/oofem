@@ -233,9 +233,9 @@ Truss3d::giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-Truss3d::initializeFrom(InputRecord &ir)
+Truss3d::initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement::initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir, priority);
 }
 
 

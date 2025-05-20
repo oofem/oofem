@@ -89,10 +89,9 @@ Brick1_ht :: computeGaussPoints()
 
 
 void
-Brick1_ht :: initializeFrom(InputRecord &ir)
+Brick1_ht :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 8;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 }
 
 

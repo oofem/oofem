@@ -46,6 +46,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.
@@ -69,6 +70,7 @@ private:
     /// Reference node.
     int referenceNode;
 
+    static ParamKey IPK_LIBeam3dNL_refnode;
 public:
     LIBeam3dNL(int n, Domain *d);
     virtual ~LIBeam3dNL() { }
@@ -93,7 +95,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam3dNL_Name; }
     const char *giveClassName() const override { return "LIBeam3dNL"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;

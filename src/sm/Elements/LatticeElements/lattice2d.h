@@ -48,6 +48,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 2-dimensional lattice element
  */
@@ -60,6 +61,12 @@ protected:
     FloatArray gpCoords;
     int couplingFlag;
     IntArray couplingNumbers;
+
+    static ParamKey IPK_Lattice2d_thick;
+    static ParamKey IPK_Lattice2d_width;
+    static ParamKey IPK_Lattice2d_gpcoords;
+    static ParamKey IPK_Lattice2d_couplingflag;
+    static ParamKey IPK_Lattice2d_couplingnumber;
 
 public:
     Lattice2d(int n, Domain *d);
@@ -102,7 +109,8 @@ public:
     //
     const char *giveInputRecordName() const override { return _IFT_Lattice2d_Name; }
     const char *giveClassName() const override { return "Lattice2d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG

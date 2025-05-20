@@ -296,10 +296,10 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 void
-PlaneStress2dXfem :: initializeFrom(InputRecord &ir)
+PlaneStress2dXfem :: initializeFrom(InputRecord &ir, int priority)
 {
-    PlaneStress2d :: initializeFrom(ir);
-    XfemStructuralElementInterface :: initializeCZFrom(ir);
+    PlaneStress2d :: initializeFrom(ir, priority);
+    XfemStructuralElementInterface :: initializeCZFrom(ir, priority);
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()

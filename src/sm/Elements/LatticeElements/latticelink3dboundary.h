@@ -44,6 +44,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional lattice link element for the boundaries of a periodic cell.
  * The first two nodes have each 6 degrees of freedom (3 translation and 3 rotations).
@@ -57,7 +58,7 @@ class LatticeLink3dBoundary : public LatticeLink3d
 {
 protected:
     IntArray location;
-
+    static ParamKey IPK_LatticeLink3dBoundary_location;
 public:
     LatticeLink3dBoundary(int n, Domain *);
     virtual ~LatticeLink3dBoundary();
@@ -74,7 +75,8 @@ public:
     void giveGPCoordinates(FloatArray &coords) override { coords = this->globalCentroid; }
     const char *giveInputRecordName() const override { return _IFT_LatticeLink3dBoundary_Name; }
     const char *giveClassName() const override { return "LatticeLink3dBoundary"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;

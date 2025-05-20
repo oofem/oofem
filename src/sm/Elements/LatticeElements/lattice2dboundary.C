@@ -49,6 +49,8 @@
 #include "classfactory.h"
 #include "dof.h"
 #include "../sm/Materials/structuralmaterial.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -56,6 +58,7 @@
 
 namespace oofem {
 REGISTER_Element(Lattice2dBoundary);
+ParamKey Lattice2dBoundary::IPK_Lattice2dBoundary_location("location");
 
 Lattice2dBoundary :: Lattice2dBoundary(int n, Domain *aDomain) : Lattice2d(n, aDomain)
     // Constructor.
@@ -434,15 +437,23 @@ double Lattice2dBoundary :: givePitch()
 
 
 void
-Lattice2dBoundary :: initializeFrom(InputRecord &ir)
+Lattice2dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
     // first call parent
-    Lattice2d :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, location, _IFT_Lattice2dBoundary_location); // Macro
-
-    this->computeGaussPoints();
+    Lattice2d :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_Lattice2dBoundary_location, priority);
 }
 
+void
+Lattice2dBoundary :: postInitialize()
+{
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    // first call parent
+    Lattice2d :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Lattice2dBoundary_location);
+    this->computeGaussPoints();
+}
 
 
 

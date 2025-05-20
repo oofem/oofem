@@ -42,10 +42,13 @@
 #include "domain.h"
 #include "dof.h"
 #include "mathfem.h"
+#include "paramkey.h"
 
 
 namespace oofem {
 REGISTER_DofManager(InteractionPFEMParticle);
+
+ParamKey InteractionPFEMParticle::IPK_InteractionPFEMParticle_coupledNode("couplednode");
 /**
  * Constructor. Creates a particle with number n, belonging to aDomain.
  */
@@ -57,11 +60,11 @@ InteractionPFEMParticle :: InteractionPFEMParticle(int n, Domain *aDomain) : PFE
  * Gets from the source line from the data file all the data of the receiver.
  */
 void
-InteractionPFEMParticle :: initializeFrom(InputRecord &ir)
+InteractionPFEMParticle :: initializeFrom(InputRecord &ir, int priority)
 {
-    PFEMParticle :: initializeFrom(ir);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, coupledNode, _IFT_InteractionPFEMParticle_CoupledNode);
+    PFEMParticle :: initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+    PM_UPDATE_PARAMETER(coupledNode, ppm, ir, this->number, IPK_InteractionPFEMParticle_CoupledNode, priority) ;
 }
 
 /**

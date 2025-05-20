@@ -45,6 +45,8 @@
 #include "mathfem.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -346,34 +348,30 @@ LIBeam3dNL::computeGaussPoints()
 
 
 void
-LIBeam3dNL::initializeFrom(InputRecord &ir)
+LIBeam3dNL::initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    NLStructuralElement::initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir, priority);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3dNL_refnode, priority);
+}
 
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL_refnode);
+void
+LIBeam3dNL::postInitialize()
+{
+    NLStructuralElement::postInitialize();
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3dNL_refnode);
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified");
     }
-
-    /*
-     * if (this->hasString (initString, "dofstocondense")) {
-     *  dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
-     *  if (dofsToCondense->giveSize() >= 12)
-     *    OOFEM_ERROR("wrong input data for condensed dofs");
-     * } else {
-     *  dofsToCondense = NULL;
-     * }
-     */
-
-    ///@todo Move this to postInitialize?
     // compute initial triad at centre - requires nodal coordinates
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
     this->nlGeometry = 0; // element always nonlinear, this is to force ouput in strains and stresses in GP (see structuralms.C)
-}
 
+}
 
 double
 LIBeam3dNL::computeLength()

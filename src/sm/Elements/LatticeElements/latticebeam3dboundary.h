@@ -44,6 +44,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional lattice element for the boundaries of a periodic cell.
  */
@@ -52,7 +53,7 @@ class LatticeBeam3dBoundary : public LatticeBeam3d
 {
 protected:
     IntArray location;
-
+    static ParamKey IPK_LatticeBeam3dBoundary_location;
 public:
     LatticeBeam3dBoundary(int n, Domain *);
     virtual ~LatticeBeam3dBoundary();
@@ -73,7 +74,9 @@ public:
 
     virtual const char *giveInputRecordName() const override { return _IFT_LatticeBeam3dBoundary_Name; }
     virtual const char *giveClassName() const override { return "LatticeBeam3dBoundary"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
+    
     virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;

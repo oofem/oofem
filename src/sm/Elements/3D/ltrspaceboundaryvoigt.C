@@ -55,12 +55,6 @@ LTRSpaceBoundaryVoigt :: LTRSpaceBoundaryVoigt(int n, Domain *aDomain) :
 {}
 
 void
-LTRSpaceBoundaryVoigt :: initializeFrom(InputRecord &ir)
-{
-    LTRSpaceBoundary :: initializeFrom(ir);
-}
-
-void
 LTRSpaceBoundaryVoigt :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 5 ) {

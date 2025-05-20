@@ -47,9 +47,12 @@
 #include "load.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "paramkey.h"
+#include "parametermanager.h"
 
 namespace oofem {
 REGISTER_Element(TrPlaneStrRot);
+ParamKey TrPlaneStrRot::IPK_TrPlaneStrRot_niprot("niprot");
 
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     TrPlaneStress2d(n, aDomain)
@@ -558,13 +561,17 @@ TrPlaneStrRot :: GiveDerivativeVY(const FloatArray &lCoords)
 
 
 void
-TrPlaneStrRot :: initializeFrom(InputRecord &ir)
+TrPlaneStrRot :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 4;
-    TrPlaneStress2d :: initializeFrom(ir);
+    ParameterManager &pm = this->giveDomain()->elementPPM;
+    TrPlaneStress2d :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(numberOfRotGaussPoints, pm, ir, this->number, IPK_TrPlaneStrRot_niprot, priority);
+}
 
-    numberOfRotGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);
+void
+TrPlaneStrRot :: postInitialize()
+{
+    TrPlaneStress2d :: postInitialize();
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -578,7 +585,6 @@ TrPlaneStrRot :: initializeFrom(InputRecord &ir)
         OOFEM_ERROR("numberOfRotGaussPoints size mismatch - must be equal to one");
     }
 }
-
 
 void
 TrPlaneStrRot :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)

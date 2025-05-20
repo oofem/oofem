@@ -57,13 +57,6 @@ QPlaneStress2dSlip :: QPlaneStress2dSlip(int n, Domain *aDomain) : QPlaneStress2
 {
 }
 
-
-void QPlaneStress2dSlip::initializeFrom( InputRecord &ir )
-{
-    QPlaneStress2d::initializeFrom(ir);
-}
-
-
 void QPlaneStress2dSlip :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {

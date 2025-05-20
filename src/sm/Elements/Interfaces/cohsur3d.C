@@ -46,6 +46,8 @@
 #include "mathfem.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -55,6 +57,11 @@
 
 namespace oofem {
 REGISTER_Element(CohesiveSurface3d);
+ParamKey CohesiveSurface3d::IPK_CohesiveSurface3d_kx("kx");
+ParamKey CohesiveSurface3d::IPK_CohesiveSurface3d_ky("ky");
+ParamKey CohesiveSurface3d::IPK_CohesiveSurface3d_kz("kz");
+ParamKey CohesiveSurface3d::IPK_CohesiveSurface3d_area("area");
+
 
 CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
@@ -364,22 +371,28 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
 
 
 void
-CohesiveSurface3d :: initializeFrom(InputRecord &ir)
+CohesiveSurface3d :: initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(area, ppm, ir, this->number, IPK_CohesiveSurface3d_area, priority);
+    PM_UPDATE_PARAMETER(kx, ppm, ir, this->number, IPK_CohesiveSurface3d_kx, priority);
+    PM_UPDATE_PARAMETER(ky, ppm, ir, this->number, IPK_CohesiveSurface3d_ky, priority);
+    PM_UPDATE_PARAMETER(kz, ppm, ir, this->number, IPK_CohesiveSurface3d_kz, priority);
+}
 
-    // read the area from the input file
-    IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
+void
+CohesiveSurface3d :: postInitialize()
+{
+    // first call parent
+    StructuralElement :: postInitialize();
+    ParameterManager &ppm = giveDomain()->elementPPM;
+
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_CohesiveSurface3d_area);
     if ( area < 0. ) {
         throw ValueInputException(ir, _IFT_CohSur3d_area, "negative area specified");
     }
-
-    // read shift constants of second (periodic) particle form the input file (if defined)
-    ///@todo Why not a vector input instead?
-    IR_GIVE_OPTIONAL_FIELD(ir, kx, _IFT_CohSur3d_kx);
-    IR_GIVE_OPTIONAL_FIELD(ir, ky, _IFT_CohSur3d_ky);
-    IR_GIVE_OPTIONAL_FIELD(ir, kz, _IFT_CohSur3d_kz);
 
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
@@ -412,7 +425,6 @@ CohesiveSurface3d :: initializeFrom(InputRecord &ir)
     // evaluate the local coordinate system
     evaluateLocalCoordinateSystem();
 }
-
 
 int
 CohesiveSurface3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

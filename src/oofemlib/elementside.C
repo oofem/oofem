@@ -50,18 +50,6 @@ ElementSide :: ElementSide(int n, Domain *aDomain) :
 ElementSide :: ~ElementSide()
 { }
 
-
-void ElementSide :: initializeFrom(InputRecord &ir)
-// Gets from the source line from the data file all the data of the receiver.
-{
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1("Instanciating node ",number)
-#  endif
-
-    DofManager :: initializeFrom(ir);
-}
-
-
 void ElementSide :: printYourself()
 // Prints the receiver on screen.
 {

@@ -98,15 +98,6 @@ Quad2PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
     }
 }
 
-
-void
-Quad2PlateSubSoil :: initializeFrom(InputRecord &ir)
-{
-    this->numberOfGaussPoints = 4;
-    StructuralElement :: initializeFrom(ir);
-}
-
-
 void
 Quad2PlateSubSoil :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

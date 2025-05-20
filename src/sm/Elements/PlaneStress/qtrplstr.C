@@ -87,14 +87,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 }
 
 
-void
-QTrPlaneStress2d :: initializeFrom(InputRecord &ir)
-{
-    numberOfGaussPoints = 4;
-    PlaneStressElement :: initializeFrom(ir);
-}
-
-
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 

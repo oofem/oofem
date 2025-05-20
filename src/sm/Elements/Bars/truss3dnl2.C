@@ -55,16 +55,15 @@ Truss3dnl2 :: Truss3dnl2(int n, Domain *aDomain) : Truss3d(n, aDomain)
   cellGeometryWrapper = NULL;
 }
 
-
 void
-Truss3dnl2 :: initializeFrom(InputRecord &ir)
+Truss3dnl2 :: postInitialize()
 {
-  Truss3d :: initializeFrom(ir);
+  Truss3d :: postInitialize();
+  // Initialize the length of the truss
   X = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
   X.append(this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 ));
   L = this->computeLength();
 }
-
   
 void
 Truss3dnl2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)

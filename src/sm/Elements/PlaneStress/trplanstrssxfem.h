@@ -46,6 +46,7 @@
 #define _IFT_TrPlaneStress2dXFEM_RegCoeffTol "reg_coeff_tol"
 
 namespace oofem {
+class ParamKey;
 /**
  * 3-node triangle with XFEM kinematics
  * @author Erik Svenning
@@ -57,6 +58,9 @@ protected:
     void postInitialize() override;
 
     double mRegCoeff, mRegCoeffTol;
+
+    static ParamKey IPK_TrPlaneStress2dXFEM_RegCoeff;
+    static ParamKey IPK_TrPlaneStress2dXFEM_RegCoeffTol;
 
 public:
     TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 3; mRegCoeff = 1.0e-6; mRegCoeffTol = 1.0e-6;}
@@ -98,7 +102,7 @@ public:
     //void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override;
     void giveInputRecord(DynamicInputRecord &input) override;
 

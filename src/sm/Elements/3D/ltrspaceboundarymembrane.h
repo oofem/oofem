@@ -38,7 +38,6 @@
 #include "sm/Elements/3D/ltrspaceboundary.h"
 
 #define _IFT_LTRSpaceBoundaryMembrane_Name "ltrspaceboundarymembrane"
-#define _IFT_LTRSpaceBoundaryMembrane_Location "location"
 
 namespace oofem {
 class FEI3dTetLin;
@@ -65,7 +64,6 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     // definition & identification
-    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundaryMembrane_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundaryMembrane"; }
 };

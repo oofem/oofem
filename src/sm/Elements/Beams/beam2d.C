@@ -51,6 +51,8 @@
 #include "classfactory.h"
 #include "elementinternaldofman.h"
 #include "masterdof.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,6 +60,7 @@
 
 namespace oofem {
 REGISTER_Element(Beam2d);
+ParamKey Beam2d::IPK_Beam2d_dofsToCondense("dofstocondense");
 
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
@@ -378,16 +381,25 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-Beam2d :: initializeFrom(InputRecord &ir)
+Beam2d :: initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    BeamBaseElement :: initializeFrom(ir);
+    BeamBaseElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ic, ppm, ir, this->number, IPK_Beam2d_dofstocondense, priority) ;
+}
 
-    if ( ir.hasField(_IFT_Beam2d_dofstocondense) ) {
-        IntArray val;
-        IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
+void
+Beam2d :: postInitialize()
+{
+    BeamBaseElement :: postInitialize();
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    if (ppm.checkIfSet(this->number, IPK_Beam2d_dofsToCondense)) {
+        auto _val = ppm.getTempParameter(this->number, IPK_Beam2d_dofstocondense);
+        IntArray val (std::get<IntArray>(*_val)); 
+        
         if ( val.giveSize() >= 6 ) {
-            throw ValueInputException(ir, _IFT_Beam2d_dofstocondense, "wrong input data for condensed dofs");
+            throw ValueInputException(ir, IPK_Beam2d_dofstocondense.getName(), "wrong input data for condensed dofs");
         }
 
         DofIDItem mask[] = {
@@ -409,8 +421,6 @@ Beam2d :: initializeFrom(InputRecord &ir)
         }
     }
 }
-
-
 
 void
 Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)

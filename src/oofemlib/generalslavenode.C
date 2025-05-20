@@ -38,18 +38,42 @@
 #include "intarray.h"
 #include "entityrenumberingscheme.h"
 #include "classfactory.h"
+#include "domain.h"
+#include "paramkey.h"
+#include "parametermanager.h"
 
 namespace oofem {
 REGISTER_DofManager(GeneralSlaveNode);
 
-void GeneralSlaveNode::initializeFrom(InputRecord &ir)
+ParamKey GeneralSlaveNode::IPK_GeneralSlaveNode_masterSizes("mastersizes");
+ParamKey GeneralSlaveNode::IPK_GeneralSlaveNode_masterList("masterlist");
+ParamKey GeneralSlaveNode::IPK_GeneralSlaveNode_masterWeights("masterweights");
+
+void GeneralSlaveNode::initializeFrom(InputRecord &ir, int priority)
 {
-    IntArray dofTypeMask;
-    dofTypeMask.clear();
-    IR_GIVE_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
+    ParameterManager &ppm =  domain->dofmanPPM;
+
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_doftypemask, priority) ;
+    PM_UPDATE_PARAMETER(masterSizes, ppm, ir, this->number, IPK_GeneralSlaveNode_masterSizes, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_GeneralSlaveNode_masterWeights, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_GeneralSlaveNode_masterList, priority) ;
+
     //
-    Node::initializeFrom(ir);
-    //
+    Node::initializeFrom(ir, priority);
+}
+
+
+void
+GeneralSlaveNode::postInitialize()
+{
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+
+    Node::postInitialize();
+
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_DofManager_doftypemask) ;
+    auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
+    IntArray dofTypeMask (std::get<IntArray>(*val)); 
+
     int size = 0;
     for ( int i = 1; i <= dofTypeMask.giveSize(); i++ ) {
         if ( dofTypeMask.at(i) != 0 ) {
@@ -61,14 +85,16 @@ void GeneralSlaveNode::initializeFrom(InputRecord &ir)
     FloatArray masterWeights;
     masterSizes = 0;
     if ( size > 0 ) {
-        IR_GIVE_FIELD(ir, masterSizes, _IFT_GeneralSlaveNode_masterSizes);
         if ( masterSizes.giveSize() != size ) {
             OOFEM_ERROR("OOFEM ERROR: masterSizes size does not correspond to doftype size");
         }
-
-        IR_GIVE_FIELD(ir, masterList, _IFT_GeneralSlaveNode_masterList);
-        IR_GIVE_FIELD(ir, masterWeights, _IFT_GeneralSlaveNode_masterWeights);
     }
+
+    auto val = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterList.getIndex());
+    IntArray masterList (std::get<IntArray>(*val)); 
+    auto val = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterWeights.getIndex());
+    FloatArray masterWeights (std::get<FloatArray>(*val)); 
+
 
     int index = 0;
     for ( int j = 1; j <= masterSizes.giveSize(); j++ ) {
@@ -86,13 +112,6 @@ void GeneralSlaveNode::initializeFrom(InputRecord &ir)
         dofs_dofsList.push_back(dof_dofsList);
         dofs_weightsList.push_back(dof_weightsList);
     }
-}
-
-
-void
-GeneralSlaveNode::postInitialize()
-{
-    Node::postInitialize();
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     int i = 0;

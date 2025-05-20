@@ -50,14 +50,6 @@ REGISTER_DofManager(PFEMParticle);
   PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), freeFlag(true), alphaShapeFlag(false), activeFlag(true)
 { }
 
-/**
- * Gets from the source line from the data file all the data of the receiver.
- */
-void
-PFEMParticle :: initializeFrom(InputRecord &ir)
-{
-    Node :: initializeFrom(ir);
-}
 
 /**
  * Checks internal data consistency in node.

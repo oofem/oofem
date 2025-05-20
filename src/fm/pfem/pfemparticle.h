@@ -75,7 +75,7 @@ public:
      */
     virtual ~PFEMParticle(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    //void initializeFrom(InputRecord &ir, int priority) override;
     int checkConsistency() override;
 
     void updateYourself(TimeStep *tStep) override;

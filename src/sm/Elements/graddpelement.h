@@ -56,8 +56,6 @@ public:
     GradDpElement();
     virtual ~GradDpElement() { }
 
-    virtual void initializeFrom(InputRecord &ir);
-
 protected:
     virtual StructuralElement *giveStructuralElement() = 0;
     virtual NLStructuralElement *giveNLStructuralElement() = 0;

@@ -55,6 +55,7 @@
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -65,6 +66,9 @@ namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
 REGISTER_Element(TR1_2D_CBS);
+
+ParamKey TR1_2D_CBS::IPK_TR1_2D_CBS_vof("vof");
+ParamKey TR1_2D_CBS::IPK_TR1_2D_CBS_pvof("pvof");
 
 FEI2dTrLin TR1_2D_CBS :: interp(1, 2);
 
@@ -97,23 +101,23 @@ TR1_2D_CBS :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-TR1_2D_CBS :: initializeFrom(InputRecord &ir)
+TR1_2D_CBS :: initializeFrom(InputRecord &ir, int priority)
 {
-    CBSElement :: initializeFrom(ir);
+    CBSElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    bool flag;
 
-    //<RESTRICTED_SECTION>
-    this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
-    if ( vof > 0.0 ) {
+    PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_CBS_pvof, priority, flag) ;
+    if (flag && (vof > 0.0)) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_vof);
-        this->temp_vof = this->vof;
+        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_CBS_vof, priority, flag) ;
+        if (flag) {
+            this->temp_vof = this->vof;
+        }
     }
-
-    //</RESTRICTED_SECTION>
 }
 
 
@@ -122,9 +126,9 @@ TR1_2D_CBS :: giveInputRecord(DynamicInputRecord &input)
 {
     CBSElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, _IFT_Tr1CBS_pvof);
+        input.setField(this->vof, IPK_TR1_2D_CBS_pvof.getName());
     } else {
-        input.setField(this->vof, _IFT_Tr1CBS_vof);
+        input.setField(this->vof, IPK_TR1_2D_CBS_vof.getName());
     }
 }
 

@@ -40,11 +40,10 @@
 ///@name Input fields for HangingNode
 //@{
 #define _IFT_HangingNode_Name "hangingnode"
-#define _IFT_HangingNode_masterElement "masterelement"
-#define _IFT_HangingNode_masterRegion "masterregion"
 //@}
 
 namespace oofem {
+    class ParamKey;
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -72,6 +71,9 @@ protected:
     /// Flag whether node is fully initialized already.
     bool initialized;
 #endif
+
+    static ParamKey IPK_HangingNode_masterElement;
+    static ParamKey IPK_HangingNode_masterRegion;
 
 public:
     /**

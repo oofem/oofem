@@ -40,12 +40,12 @@
 ///@name Input fields for RigidArmNode
 //@{
 #define _IFT_RigidArmNode_Name "rigidarmnode"
-#define _IFT_RigidArmNode_master "master"
 //@}
 
 namespace oofem {
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /**
  * Class implementing node connected to other node (master) using rigid arm in finite element mesh.
@@ -79,6 +79,8 @@ protected:
     /// Pointer to master Node
     Node *masterNode;
 
+    static ParamKey IPK_RigidArmNode_master;
+
 private:
     void allocAuxArrays();
     void deallocAuxArrays();
@@ -93,7 +95,7 @@ public:
     /// Destructor.
     virtual ~RigidArmNode(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;
     int checkConsistency() override;

@@ -47,6 +47,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a simple linear spring element connecting the given node and the ground.
  * Its purpose is to introduce additional spring stiffness and mass for nodal DOFs.
@@ -68,6 +69,9 @@ class NodalSpringElement : public StructuralElement
     /// Dof mask
     IntArray dofMask;
 
+    static ParamKey IPK_NodalSpringElement_dofmask;
+    static ParamKey IPK_NodalSpringElement_springConstants;
+    static ParamKey IPK_NodalSpringElement_masses;
 public:
     NodalSpringElement(int n, Domain * d);
     virtual ~NodalSpringElement() { }
@@ -101,6 +105,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_NodalSpringElement_Name; }
     const char *giveClassName() const override { return "NodalSpringElement"; }
     void initializeFrom(InputRecord &ir) override;
+    void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
     bool isCast(TimeStep *tStep) override { return true; }
 

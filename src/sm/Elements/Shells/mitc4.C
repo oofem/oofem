@@ -53,6 +53,8 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "connectivitytable.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 #ifdef __OOFEG
@@ -64,6 +66,8 @@
 
 namespace oofem {
 REGISTER_Element(MITC4Shell);
+ParamKey MITC4Shell::IPK_MITC4Shell_nipZ("nipz");
+ParamKey MITC4Shell::IPK_MITC4Shell_directorType("directortype");
 
 FEI2dQuadLin MITC4Shell::interp_lin(1, 2);
 
@@ -75,6 +79,7 @@ MITC4Shell::MITC4Shell(int n, Domain *aDomain) :
 {
     numberOfDofMans = 4;
     numberOfGaussPoints = nPointsXY * nPointsZ;
+    directorType = 0; // default
 }
 
 
@@ -278,17 +283,13 @@ MITC4Shell::giveLocalCoordinates(const FloatArrayF< 3 > &global)
 }
 
 void
-MITC4Shell::initializeFrom(InputRecord &ir)
+MITC4Shell::initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
-    IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
-    //@todo: extend for nonlinear geometry
-    //IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
-
-    directorType = 0; // default
-    IR_GIVE_OPTIONAL_FIELD(ir, directorType, _IFT_MITC4Shell_directorType);
+    StructuralElement::initializeFrom(ir, priority);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(nPointsXY, ppm, ir, this->number, IPK_Element_nip, priority);
+    PM_UPDATE_PARAMETER(nPointsZ, ppm, ir, this->number, IPK_MITC4Shell_nipZ, priority);
+    PM_UPDATE_PARAMETER(directorType, ppm, ir, this->number, IPK_MITC4Shell_directorType, priority);
 }
 
 

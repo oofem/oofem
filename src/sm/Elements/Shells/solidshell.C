@@ -39,16 +39,20 @@
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "sm/CrossSections/structuralcrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(SolidShell);
 
 FEI3dHexaLin SolidShell :: interpolation;
+ParamKey SolidShell :: IPK_SolidShell_EAS_type("eas_type");
 
 SolidShell :: SolidShell(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
+    this->EAS_type = 0;
 }
 
 
@@ -97,17 +101,11 @@ FEInterpolation *SolidShell :: giveInterpolation() const { return & interpolatio
 
 
 void
-SolidShell :: initializeFrom(InputRecord &ir)
+SolidShell :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 8;
-    NLStructuralElement :: initializeFrom(ir);
-
-    // Check if EAS should be used
-    this->EAS_type = 0;
-    if ( ir.hasField(_IFT_SolidShell_EAS_type) ) {
-        IR_GIVE_FIELD(ir, this->EAS_type,   _IFT_SolidShell_EAS_type);
-
-    }
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    NLStructuralElement :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(EAS_type, ppm, ir, this->number, IPK_SolidShell_EAS_type, priority) ;
 }
 
 

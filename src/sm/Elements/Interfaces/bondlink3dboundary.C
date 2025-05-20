@@ -49,6 +49,8 @@
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "sm/CrossSections/structuralcrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -56,8 +58,9 @@
 
 namespace oofem {
 REGISTER_Element(BondLink3dBoundary);
+ParamKey BondLink3dBoundary::IPK_BondLink3dBoundary_location("location");
 
-BondLink3dBoundary :: BondLink3dBoundary(int n, Domain *aDomain) : BondLink3d(n, aDomain)
+BondLink3dBoundary :: BondLink3dBoundary(int n, Domain *aDomain) : BondLink3d(n, aDomain), location(2)
 {
     numberOfDofMans     = 3;
     geometryFlag = 0;
@@ -196,13 +199,12 @@ BondLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-BondLink3dBoundary :: initializeFrom(InputRecord &ir)
+BondLink3dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    StructuralElement :: initializeFrom(ir);
-
-    location.resize(2);
-    IR_GIVE_FIELD(ir, location, _IFT_LatticeLink3dBoundary_location); // Macro
+    StructuralElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_BondLink3dBoundary_location, priority);
 }
 
 

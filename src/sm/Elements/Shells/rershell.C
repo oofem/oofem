@@ -272,14 +272,10 @@ RerShell :: giveArea()
 
 
 void
-RerShell :: initializeFrom(InputRecord &ir)
+RerShell :: initializeFrom(InputRecord &ir, int priority)
 {
+    StructuralElement :: initializeFrom(ir, priority);
     numberOfGaussPoints = 1;
-    StructuralElement :: initializeFrom(ir);
-
-    if ( numberOfGaussPoints != 1 ) {
-        numberOfGaussPoints = 1;
-    }
 }
 
 

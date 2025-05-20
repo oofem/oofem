@@ -40,9 +40,4 @@ LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, Eleme
 { }
 
 
-void
-LatticeTransportElement :: initializeFrom(InputRecord &ir)
-{
-    TransportElement :: initializeFrom(ir);
-}
 } // end namespace oofem

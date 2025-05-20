@@ -42,6 +42,8 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 //#include "floatarrayf.h"
 
 #ifdef __OOFEG
@@ -52,11 +54,17 @@
 
 namespace oofem {
 REGISTER_Element(IntElPoint);
+ParamKey IntElPoint::IPK_IntElPoint_refnode("refnode");
+ParamKey IntElPoint::IPK_IntElPoint_normal("normal");
+ParamKey IntElPoint::IPK_IntElPoint_area("area");
+ParamKey IntElPoint::IPK_IntElPoint_length("length");
 
 IntElPoint :: IntElPoint(int n, Domain *aDomain) :
     StructuralInterfaceElement(n, aDomain)
 {
     numberOfDofMans = 2;
+    length = 1.;
+    area = 1.;
 }
 
 
@@ -225,39 +233,36 @@ IntElPoint :: computeAreaAround(GaussPoint *gp)
 
 
 void
-IntElPoint :: initializeFrom(InputRecord &ir)
+IntElPoint :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralInterfaceElement :: initializeFrom(ir);
+    // Initialize the receiver from the given input record.
+    bool flag;
+    ParameterManager & ppm = this->giveDomain()->elementPPM;
+    StructuralInterfaceElement :: initializeFrom(ir, priority);
 
-    if ( ir.hasField(_IFT_IntElPoint_refnode) &&ir.hasField(_IFT_IntElPoint_normal) ) {
-        throw ValueInputException(ir, _IFT_IntElPoint_refnode, "Ambiguous input: 'refnode' and 'normal' cannot both be specified");
-    }
-
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    FloatArray n(3);
-    IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
-    normal = n;
-    
-    /*if ( ir.hasField(_IFT_IntElPoint_refnode) ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-        normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
-    } else {
-        FloatArray n;
-        IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, _IFT_IntElPoint_refnode, priority);
+    FloatArray n;
+    PM_UPDATE_PARAMETER_AND_REPORT(normal, ppm, ir, this->number, _IFT_IntElPoint_normal, priority, flag);
+    if (flag) {
         normal = n;
     }
-    normal /= norm(normal);
-    */
-
-    this->area = 1.0; // Default area ///@todo Make non-optional? /JB
-    IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
-
-    this->length = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->length, _IFT_IntElPoint_length);
-
-    this->computeLocalSlipDir();     
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, _IFT_IntElPoint_refnode, priority);
+    PM_UPDATE_PARAMETER(area, ppm, ir, this->number, _IFT_IntElPoint_area, priority);
+    PM_UPDATE_PARAMETER(length, ppm, ir, this->number, _IFT_IntElPoint_length, priority);   
 }
 
+void
+IntElPoint :: postInitialize()
+{
+    StructuralInterfaceElement :: postInitialize();
+    ParameterManager & ppm = this->giveDomain()->elementPPM;
+    bool refnodeFlag = ppm.checkIfSet(this->number, _IFT_IntElPoint_refnode);
+    bool normalFlag = ppm.checkIfSet(this->number, _IFT_IntElPoint_normal);
+    if ( refnodeFlag && normalFlag ) {
+        OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
+    }
+    this->computeLocalSlipDir();     
+}
 
 int
 IntElPoint :: computeNumberOfDofs()

@@ -38,9 +38,8 @@
 #include "sm/Elements/nlstructuralelement.h"
 #include "feinterpol2d.h"
 
-#define _IFT_Structural2DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.
-
 namespace oofem {
+class ParamKey;
 /**
  * Base class for planar 2D elements.
  *
@@ -61,6 +60,7 @@ protected:
 
     bool matRotation;
 
+    static ParamKey IPK_Structural2DElement_materialCoordinateSystem; ///< [optional] Material coordinate system (local) for the element.
 public:
     /**
      * Constructor. Creates element with given number, belonging to given domain.
@@ -81,7 +81,7 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     double computeVolumeAround(GaussPoint *gp) override;
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override;
 

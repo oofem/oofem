@@ -37,6 +37,8 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -44,6 +46,11 @@
 
 namespace oofem {
 REGISTER_Element(SpringElement);
+
+ParamKey SpringElement::IPK_SpringElement_springConstant("k");
+ParamKey SpringElement::IPK_SpringElement_mass("m");
+ParamKey SpringElement::IPK_SpringElement_mode("mode");
+ParamKey SpringElement::IPK_SpringElement_orientation("orientation");
 
 SpringElement :: SpringElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -155,19 +162,21 @@ SpringElement :: computeNumberOfGlobalDofs()
 
 
 void
-SpringElement :: initializeFrom(InputRecord &ir)
+SpringElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
 
+    StructuralElement :: initializeFrom(ir, priority);
     int _mode;
-    IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
-    IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
-    this->mass = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->mass, _IFT_SpringElement_mass);
-
-    this->mode = ( SpringElementType ) _mode;
-    if ( mode != SE_1D_SPRING ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
+    bool modeFlag, dirFlag;
+    PM_UPDATE_PARAMETER_AND_REPORT(_mode, ppm, ir, this->number, IPK_SpringElement_mode, priority, modeFlag) ;
+    if (modeFlag) {
+        this->mode = ( SpringElementType ) _mode;
+    }
+    PM_UPDATE_PARAMETER(springConstant, ppm, ir, this->number, IPK_SpringElement_springConstant, priority) ;
+    PM_UPDATE_PARAMETER(mass, ppm, ir, this->number, IPK_SpringElement_mass, priority) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(dir, ppm, ir, this->number, IPK_SpringElement_orientation, priority, dirFag) ;
+    if (dirFlag) {
         this->dir.normalize();
     }
 }

@@ -55,8 +55,6 @@ class LatticeStructuralElement : public StructuralElement
 public:
     LatticeStructuralElement(int n, Domain *d);
 
-    void initializeFrom(InputRecord &ir) override;
-
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /**

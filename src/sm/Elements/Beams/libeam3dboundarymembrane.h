@@ -56,8 +56,6 @@ public:
     LIBeam3dBoundaryMembrane(int n, Domain *d);
     virtual ~LIBeam3dBoundaryMembrane() { }
 
-    void initializeFrom(InputRecord &ir) override;
-
     int computeNumberOfDofs() override { return 16; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 

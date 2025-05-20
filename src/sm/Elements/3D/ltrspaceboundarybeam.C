@@ -45,19 +45,23 @@
 #include "fei3dtetlin.h"
 #include "classfactory.h"
 #include "Materials/structuralms.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 namespace oofem {
 REGISTER_Element(LTRSpaceBoundaryBeam);
+ParamKey LTRSpaceBoundaryBeam::IPK_LTRSpaceBoundaryBeam_location("location");
+
 
 LTRSpaceBoundaryBeam :: LTRSpaceBoundaryBeam(int n, Domain *aDomain) :
     LTRSpaceBoundary(n, aDomain)
 {}
 
 void
-LTRSpaceBoundaryBeam :: initializeFrom(InputRecord &ir)
+LTRSpaceBoundaryBeam :: initializeFrom(InputRecord &ir, int priority)
 {
-    LTRSpaceBoundary :: initializeFrom(ir);
+    LTRSpaceBoundary :: initializeFrom(ir, priority);
 }
 
 void

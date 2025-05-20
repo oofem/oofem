@@ -42,11 +42,10 @@
 ///@name Input fields for LIBeam3dBoundary
 //@{
 #define _IFT_LIBeam3dBoundary_Name "libeam3dboundary"
-#define _IFT_LIBeam3dBoundary_refnode "refnode"
-#define _IFT_LIBeam3dBoundary_location "location"
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
@@ -61,11 +60,14 @@ protected:
     int referenceNode;
     IntArray location;
 
+    static ParamKey IPK_LIBeam3dBoundary_location;
+    static ParamKey IPK_LIBeam3dBoundary_refnode;
 public:
     LIBeam3dBoundary(int n, Domain *d);
     virtual ~LIBeam3dBoundary() { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int prio) override;
+    void postInitialize() override;
 
     int computeNumberOfDofs() override { return 21; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;

@@ -63,12 +63,12 @@ TR_SHELL02 :: TR_SHELL02(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-TR_SHELL02 :: initializeFrom(InputRecord &ir)
+TR_SHELL02 :: initializeFrom(InputRecord &ir, int priority)
 {
     // proc tady neni return = this...   ??? termitovo
-    StructuralElement :: initializeFrom(ir);
-    plate->initializeFrom(ir);
-    membrane->initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
+    plate->initializeFrom(ir, priority);
+    membrane->initializeFrom(ir, priority);
 }
 
 void

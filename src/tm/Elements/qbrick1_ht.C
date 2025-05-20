@@ -86,10 +86,9 @@ QBrick1_ht :: computeGaussPoints()
 
 
 void
-QBrick1_ht :: initializeFrom(InputRecord &ir)
+QBrick1_ht :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 27;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 }
 
 

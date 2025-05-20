@@ -152,7 +152,7 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
             irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
             //irEl.setField( ncrosssect, _IFT_Element_crosssect);
             //irEl.setField( nmat, _IFT_Element_mat);
-            elem->initializeFrom(irEl);
+            elem->initializeFrom(irEl, 1);
             elem->setGlobalNumber(elemNumber);
             d->setElement(elemNumber, std::move(elem));
         }

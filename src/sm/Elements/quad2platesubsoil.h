@@ -70,8 +70,6 @@ public:
     const char *giveClassName() const override { return "Quad2PlateSubSoil"; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
 
-    void initializeFrom(InputRecord &ir) override;
-
     int computeNumberOfDofs() override { return 8; }
 
 protected:

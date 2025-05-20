@@ -45,6 +45,7 @@ class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /**
  * Base class 3D elements.
@@ -56,7 +57,7 @@ class Structural3DElement : public NLStructuralElement
 {
 protected:
     bool matRotation;
-
+    static ParamKey IPK_Structural3DElement_materialCoordinateSystem; ///< [optional] Material coordinate system (local) for the element.
 public:
     /**
      * Constructor. Creates element with given number, belonging to given domain.
@@ -67,7 +68,7 @@ public:
     /// Destructor.
     virtual ~Structural3DElement() { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     MaterialMode giveMaterialMode() override;
     int computeNumberOfDofs() override;

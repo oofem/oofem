@@ -47,6 +47,7 @@
 //@}
 
 namespace oofem {
+
 /**
  * This class implements a 3-dimensional lattice element
  */
@@ -63,6 +64,11 @@ protected:
     double bondEndLength;
     FloatArray rigid;
     FloatArray globalCentroid;
+
+    static ParamKey IPK_LatticeLink3d_length;
+    static ParamKey IPK_LatticeLink3d_diameter;
+    static ParamKey IPK_LatticeLink3d_dirvector;
+    static ParamKey IPK_LatticeLink3d_l_end;
 
 public:
     LatticeLink3d(int n, Domain *);
@@ -94,7 +100,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_LatticeLink3d_Name; }
     const char *giveClassName()  const override { return "LatticeLink3d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 

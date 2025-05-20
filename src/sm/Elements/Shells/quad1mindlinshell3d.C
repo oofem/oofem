@@ -50,6 +50,8 @@
 #include "mathfem.h"
 #include "fei2dquadlin.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(Quad1MindlinShell3D);
@@ -57,6 +59,8 @@ REGISTER_Element(Quad1MindlinShell3D);
 FEI2dQuadLin Quad1MindlinShell3D::interp(1, 2);
 IntArray Quad1MindlinShell3D::shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23 };
 IntArray Quad1MindlinShell3D::drillOrdering = { 6, 12, 18, 24 };
+ParamKey Quad1MindlinShell3D::IPK_Quad1MindlinShell3D_reducedIntegration("reducedintegration");
+
 
 Quad1MindlinShell3D::Quad1MindlinShell3D(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
@@ -451,10 +455,11 @@ Quad1MindlinShell3D::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
 
 void
-Quad1MindlinShell3D::initializeFrom(InputRecord &ir)
+Quad1MindlinShell3D::initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
     StructuralElement::initializeFrom(ir);
-    this->reducedIntegrationFlag = ir.hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
+    PM_UPDATE_PARAMETER(reducedIntegrationFlag, ppm, ir, this->number, IPK_Element_activityTimeFunction, priority);
 }
 
 

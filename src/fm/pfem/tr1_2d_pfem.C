@@ -117,9 +117,9 @@ TR1_2D_PFEM ::   giveElementDofIDMask(IntArray &answer) const
 
 
 void
-TR1_2D_PFEM :: initializeFrom(InputRecord &ir)
+TR1_2D_PFEM :: initializeFrom(InputRecord &ir, int priority)
 {
-    PFEMElement :: initializeFrom(ir);
+    PFEMElement :: initializeFrom(ir, priority);
 
     this->computeGaussPoints();
 }

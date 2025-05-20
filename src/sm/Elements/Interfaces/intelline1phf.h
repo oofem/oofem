@@ -42,6 +42,7 @@
 
 namespace oofem {
 class FEI2dLineLin;
+class ParamKey;
 
 /**
  * 
@@ -53,6 +54,8 @@ protected:
     static FEI2dLineLin interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
     bool axisymmode = false;
+
+    static ParamKey IPK_IntElLine1PhF_axisymmode;
 
 public:
     IntElLine1PhF(int n, Domain * d);
@@ -71,7 +74,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElLine1PhF_Name; }
     const char *giveClassName() const override { return "IntElLine1PhF"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     //void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep) override;

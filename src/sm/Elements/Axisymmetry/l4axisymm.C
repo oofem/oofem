@@ -90,11 +90,14 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 
 
 void
-L4Axisymm :: initializeFrom(InputRecord &ir)
+L4Axisymm :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 4;
-    NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir, priority);
+}
 
+void 
+L4Axisymm :: postInitialize()
+{
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 9 ) ||
@@ -103,9 +106,9 @@ L4Axisymm :: initializeFrom(InputRecord &ir)
     }
 
     numberOfFiAndShGaussPoints = 1;
+
+    NLStructuralElement :: postInitialize();
 }
-
-
 
 void
 L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)

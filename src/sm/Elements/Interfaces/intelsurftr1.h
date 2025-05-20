@@ -77,7 +77,6 @@ public:
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElSurfTr1_Name; }
-    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_1; }
 
 #ifdef __OOFEG

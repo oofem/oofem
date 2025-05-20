@@ -51,6 +51,7 @@ class FEI3dTrQuad;
 class BoundaryLoad;
 class EnrichmentItem;
 class ShellCrack;
+class ParamKey;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
@@ -62,6 +63,8 @@ class ShellCrack;
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
+    static ParamKey IPK_Shell7BaseXFEM_CohesiveZoneMaterial;
+
     XfemManager *xMan;
     void updateYourself(TimeStep *tStep) override;
     void postInitialize() override;
@@ -170,7 +173,7 @@ public:
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     Interface *giveInterface(InterfaceType it) override;
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int giveNumberOfDofs() override;
 

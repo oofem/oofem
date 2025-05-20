@@ -67,7 +67,6 @@ public:
     /// Destructor.
     virtual ~ElementDofManager();
 
-    void initializeFrom(InputRecord &ir) override;
     void printYourself() override;
     const char *giveClassName() const override { return "ElementDofManager"; }
     const char *giveInputRecordName() const override { return ""; } // Note: Can't be created in input files.

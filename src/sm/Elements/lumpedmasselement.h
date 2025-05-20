@@ -45,6 +45,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a simple lumped mass element. Its purpose is to introduce
  * an additional mass (mass components or rotary inertias) into a node.
@@ -60,6 +61,8 @@ protected:
     /// List of DOFs
     IntArray dofs;
 
+    static ParamKey IPK_LumpedMassElement_components;
+    static ParamKey IPK_LumpedMassElement_dofs;
 public:
     LumpedMassElement(int n, Domain * d);
     virtual ~LumpedMassElement() { }
@@ -90,7 +93,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LumpedMassElement_Name; }
     const char *giveClassName() const override { return "LumpedMassElement"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
 
 protected:

@@ -49,6 +49,7 @@ namespace oofem {
 class Domain;
 class EngngModel;
 class MicroMaterial;
+class ParamKey;
 
 /**
  * This class implements a macroelement. It is derived from eight-node brick element.
@@ -58,6 +59,10 @@ class MicroMaterial;
  */
 class MacroLSpace : public LSpace
 {
+private:
+    static ParamKey IPK_MacroLSpace_microMasterNodes;
+    static ParamKey IPK_MacroLSpace_microBoundaryNodes;
+    static ParamKey IPK_MacroLSpace_stiffMatrixFileName;
 public:
     MacroLSpace(int n, Domain * d);
     virtual ~MacroLSpace();
@@ -65,7 +70,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MacroLSpace_Name; }
     const char *giveClassName() const override { return "MacroLSpace"; }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 

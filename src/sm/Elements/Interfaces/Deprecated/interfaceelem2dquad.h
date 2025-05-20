@@ -41,6 +41,7 @@
 #define _IFT_InterfaceElem2dQuad_axisymmode "axisymmode"
 
 namespace oofem {
+class ParamKey;
 class FEI2dLineQuad;
 
 /**
@@ -55,6 +56,8 @@ protected:
     static FEI2dLineQuad interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
     bool axisymmode;
+
+    static ParamKey IPK_InterfaceElem2dQuad_axisymmode;
 
 public:
     InterfaceElem2dQuad(int n, Domain * d);
@@ -83,7 +86,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_InterfaceElem2dQuad_Name; }
     const char *giveClassName() const override { return "InterfaceElem2dQuad"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     MaterialMode giveMaterialMode() override { return _2dInterface; }

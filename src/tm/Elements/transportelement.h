@@ -44,6 +44,7 @@
 
 namespace oofem {
 class TransportCrossSection;
+class ParamKey;
 
 /**
  * This abstract class represent a general base element class for transport problems.
@@ -61,6 +62,8 @@ protected:
     static const double stefanBoltzmann;
     /// Fuction determining the relative volume of reference material in element
     int vofFunction = 0;
+
+    static ParamKey IPK_TransportElement_vof_function;
 
 public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
@@ -89,7 +92,8 @@ public:
 
     TransportCrossSection * giveTransportCrossSection();
     Material * giveMaterial() override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     const char *giveClassName() const override { return "TransportElement"; }
     
     /**

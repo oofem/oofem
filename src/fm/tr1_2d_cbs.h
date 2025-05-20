@@ -48,8 +48,6 @@
 ///@name Input fields for TR12DCBS
 //@{
 #define _IFT_TR1_2D_CBS_Name "tr1cbs"
-#define _IFT_Tr1CBS_vof "vof"
-#define _IFT_Tr1CBS_pvof "pvof"
 //@}
 
 
@@ -62,6 +60,7 @@ class FloatMatrix;
 class FloatArray;
 class IntArray;
 class FEI2dTrLin;
+class ParamKey;
 
 /**
  * This class is the implementation of triangular CFD element with linear (and equal order) interpolation of velocity and pressure fields.
@@ -79,6 +78,9 @@ protected:
     double b [ 3 ];
     double c [ 3 ];
     double area = 0.;
+
+    static ParamKey IPK_TR1_2D_CBS_vof;
+    static ParamKey IPK_TR1_2D_CBS_pvof;
 
 public:
     TR1_2D_CBS(int n, Domain * aDomain);
@@ -106,7 +108,7 @@ public:
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c)

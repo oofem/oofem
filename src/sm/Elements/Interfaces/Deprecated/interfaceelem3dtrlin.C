@@ -167,13 +167,6 @@ InterfaceElement3dTrLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatR
 
 
 void
-InterfaceElement3dTrLin :: initializeFrom(InputRecord &ir)
-{
-    StructuralElement :: initializeFrom(ir);
-}
-
-
-void
 InterfaceElement3dTrLin :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};

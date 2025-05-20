@@ -45,22 +45,26 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 namespace oofem {
 REGISTER_Element(Truss3dnl);
+ParamKey Truss3dnl::IPK_Truss3dnl_initialStretch("initstretch");
 
 Truss3dnl :: Truss3dnl(int n, Domain *aDomain) : Truss3d(n, aDomain)
 {
+  initialStretch = 1;
 }
 
 
 void
-Truss3dnl :: initializeFrom(InputRecord &ir)
+Truss3dnl :: initializeFrom(InputRecord &ir, int priority)
 {
-  Truss3d :: initializeFrom(ir);
-  initialStretch = 1;
-  IR_GIVE_OPTIONAL_FIELD(ir, initialStretch, _IFT_Truss3dnl_initialStretch);
+  Truss3d :: initializeFrom(ir, priority);
+  ParameterManager &ppm = this->giveDomain()->dofmanPPM;
+  PM_UPDATE_PARAMETER(initialStretch, ppm, ir, this->number, IPK_Truss3dnl_initialStretch, priority) ;
 }
 
   

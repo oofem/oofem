@@ -26,6 +26,8 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -41,6 +43,8 @@
 
 namespace oofem {
 REGISTER_Element(TrPlaneStress2dXFEM);
+ParamKey TrPlaneStress2dXFEM::IPK_TrPlaneStress2dXFEM_RegCoeff("reg_coeff");
+ParamKey TrPlaneStress2dXFEM::IPK_TrPlaneStress2dXFEM_RegCoeffTol("reg_coeff_tol");
 
 void TrPlaneStress2dXFEM :: updateYourself(TimeStep *tStep)
 {
@@ -297,18 +301,14 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 #endif
 
 void
-TrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir)
+TrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir, int priority)
 {
-    TrPlaneStress2d :: initializeFrom(ir);
-    XfemStructuralElementInterface :: initializeCZFrom(ir);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    TrPlaneStress2d :: initializeFrom(ir, priority);
+    XfemStructuralElementInterface :: initializeCZFrom(ir, priority);
 
-    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
-        ir.giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
-    }
-
-    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
-        ir.giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
-    }
+    PM_UPDATE_PARAMETER(mRegCoeff, ppm, ir, this->giveNumber(), IPK_TrPlaneStress2dXFEM_RegCoeff, priority);
+    PM_UPDATE_PARAMETER(mRegCoeffTol, ppm, ir, this->giveNumber(), IPK_TrPlaneStress2dXFEM_RegCoeffTol, priority);
 }
 
 MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()

@@ -91,14 +91,10 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
 }
 
 void
-TrPlaneStrain :: initializeFrom(InputRecord &ir)
+TrPlaneStrain :: postInitialize()
 {
     numberOfGaussPoints = 1;
-    PlaneStrainElement :: initializeFrom(ir);
-
-    if ( numberOfGaussPoints != 1 ) {
-        numberOfGaussPoints = 1;
-    }
+    PlaneStrainElement :: postInitialize();
 }
 
 

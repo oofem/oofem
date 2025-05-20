@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef parameterprioritymanager_h
-#define parameterprioritymanager_h
+#ifndef parametermanager_h
+#define parametermanager_h
 
 #include <unordered_map>
 #include <string>
@@ -41,24 +41,32 @@
 #include <vector>
 #include <mutex>
 #include <shared_mutex>
+#include <variant>
+#include <optional>
+
+#include "intarray.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include "error.h"
 
 namespace oofem {
 
 
-#define PM_UPDATE_PARAMETER(_val, _pm, _ir, _componentnum, _kwd, _prio) \
+#define PM_UPDATE_PARAMETER(_val, _pm, _ir, _componentnum, _paramkey, _prio) \
     { \
-        std::size_t _indx=_pm.registerParam(_kwd); \
+        std::size_t _indx=_paramkey.getIndex(); \
+        const char* _kwd = _paramkey.getName().c_str(); \
         if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
             _ir.giveField(_val, _kwd); \
             _pm.setPriority(_componentnum-1, _indx, _prio); \
         } \
     }
 
-#define PM_UPDATE_PARAMETER_AND_REPORT(_val, _pm, _ir, _componentnum, _kwd, _prio, _flag) \
+#define PM_UPDATE_PARAMETER_AND_REPORT(_val, _pm, _ir, _componentnum, _paramkey, _prio, _flag) \
     { \
-        std::size_t _indx=_pm.registerParam(_kwd); \
+        std::size_t _indx=_paramkey.getIndex(); \
+        const char* _kwd = _paramkey.getName().c_str(); \
         if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
             _ir.giveField(_val, _kwd); \
             _pm.setPriority(_componentnum-1, _indx, _prio); \
@@ -68,9 +76,22 @@ namespace oofem {
         } \
     }
 
-#define PM_CHECK_FLAG_AND_REPORT(_pm, _ir, _componentnum, _kwd, _prio, _flag) \
+#define PM_UPDATE_TEMP_PARAMETER(_type, _pm, _ir, _componentnum, _paramkey, _prio) \
     { \
-        std::size_t _indx=_pm.registerParam(_kwd); \
+        std::size_t _indx=_paramkey.getIndex(); \
+        const char* _kwd = _paramkey.getName().c_str(); \
+        if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
+            _type _val; \
+            _ir.giveField(_val, _kwd); \
+            _pm.setPriority(_componentnum-1, _indx, _prio); \
+            _pm.setTemParam(_componentnum-1, _indx, _val); \
+        } \
+    }
+
+#define PM_CHECK_FLAG_AND_REPORT(_pm, _ir, _componentnum, _paramkey, _prio, _flag) \
+    { \
+        std::size_t _indx=_paramkey.getIndex(); \
+        const char* _kwd = _paramkey.getName().c_str(); \
         if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
             _pm.setPriority(_componentnum-1, _indx, _prio); \
             _flag=true; \
@@ -79,22 +100,20 @@ namespace oofem {
         } \
     }
 
-#define PM_ELEMENT_ERROR_IFNOTSET(_pm, _componentnum, _kwd) \
+#define PM_ELEMENT_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
-        if (!_pm.checkIfSet(_componentnum-1, _kwd)) { \
-            OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _kwd);\
+        if (!_pm.checkIfSet(_componentnum-1, _paramkey.getIndex())) { \
+            OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _paramkey.getName());\
         }\
     }    
 
-#define PM_DOFMAN_ERROR_IFNOTSET(_pm, _componentnum, _kwd) \
+#define PM_DOFMAN_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
-        if (!_pm.checkIfSet(_componentnum-1, _kwd)) { \
-            OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _kwd);\
+        if (!_pm.checkIfSet(_componentnum-1, _paramkey.getIndex())) { \
+            OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _paramkey.getName());\
         }\
     }    
 
-
- // ParameterPriorityManager 
  /**
   * ParameterPriorityManager class manages the actual priority for parameters that can be set from multiple sources, typically from component record or via set.
   * It allows setting and getting parameters with a priority system, where higher priority values override lower priority ones.
@@ -103,20 +122,14 @@ namespace oofem {
   * It uses a shared mutex for thread-safe access to the parameters.
   * The class is designed to be used in a multi-threaded environment where multiple threads may attempt to set or get parameters simultaneously.
   * The class provides methods to register parameters, set their priorities, and retrieve their priorities for a collection of components.
+  * 
+  * It also allows to manage temporary parameters for each component which can be set and retrieved.
+  * The temporary params are handy for pattern with multi-source initialization and single finalization.
   */
 // ParameterManager class to track parameter priorities
-class ParameterPriorityManager {
+class ParameterManager {
 public:
-
-    size_t registerParam(const std::string& paramName) {
-        std::unique_lock lock(mtx);
-        if (paramNameToIndex.find(paramName) == paramNameToIndex.end()) {
-            size_t index = paramNameToIndex.size();
-            paramNameToIndex[paramName] = index;
-        }
-        return paramNameToIndex[paramName];
-    }
-
+    using paramValue = std::variant<int, double, std::string, bool, IntArray, FloatArray, FloatMatrix>;
     void setPriority(size_t componentIndex, size_t paramIndex, int priority) {
         std::unique_lock lock(mtx);
         if (componentIndex >= priorities.size()) {
@@ -125,31 +138,46 @@ public:
         priorities[componentIndex][paramIndex] = priority;
     }
 
-    int getPriority(size_t componentIndex, size_t paramIndex) {
+    int getPriority(size_t componentIndex, size_t paramIndex) const {
         std::shared_lock lock(mtx);
         if (componentIndex < priorities.size() && priorities[componentIndex].find(paramIndex) != priorities[componentIndex].end()) {
-            return priorities[componentIndex][paramIndex];
+            return priorities[componentIndex].at(paramIndex);
         }
         return -1; // Return -1 if priority is not found
     }
 
     void clear() {
         std::unique_lock lock(mtx);
-        paramNameToIndex.clear();
         priorities.clear();
+        tempParams.clear();
     }
 
-    
-    bool checkIfSet(size_t componentIndex, std::string paramName) {
-        size_t paramIndex = registerParam(paramName);
-        
+    bool checkIfSet(size_t componentIndex, size_t paramIndex) {       
         return priorities[componentIndex].find(paramIndex) != priorities[componentIndex].end();
     }
 
+    void setTemParam(size_t componentIndex, size_t paramIndex, const paramValue &value) {
+        std::unique_lock lock(mtx);
+        tempParams[paramIndex] = value;
+    }
+    std::optional<paramValue> getTempParam(size_t componentIndex, size_t paramIndex) const {
+        std::shared_lock lock(mtx);
+        auto it = tempParams.find(paramIndex);
+        if (it != tempParams.end()) {
+            return it->second;
+        }
+        return std::nullopt; // Return nullopt if parameter is not found
+    }
+    bool hasTempParam(size_t componentIndex, size_t paramIndex) const {
+        std::shared_lock lock(mtx);
+        return tempParams.find(paramIndex) != tempParams.end();
+    }
+
 private:
-    std::unordered_map<std::string, size_t> paramNameToIndex;
     std::vector<std::unordered_map<size_t, int>> priorities;
     mutable std::shared_mutex mtx;
+
+    std::unordered_map<size_t, paramValue> tempParams;
 };
 
 
@@ -158,4 +186,4 @@ private:
 } // end namespace oofem
  
 
-#endif // parameterprioritymanager_h
+#endif // parametermanager_h

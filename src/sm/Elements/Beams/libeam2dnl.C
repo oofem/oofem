@@ -494,9 +494,9 @@ double LIBeam2dNL::givePitch()
 
 
 void
-LIBeam2dNL::initializeFrom(InputRecord &ir)
+LIBeam2dNL::initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement::initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir, priority);
 }
 
 

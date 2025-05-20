@@ -44,6 +44,7 @@
 
 namespace oofem {
 class FEI2dLineLin;
+class ParamKey;
 
 /**
  * This class implements a two dimensional interface element.
@@ -60,6 +61,8 @@ protected:
     static FEI2dLineLin interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
     bool axisymmode = false;
+
+    static ParamKey IPK_IntElLine1_axisymmode;
 
 public:
     IntElLine1(int n, Domain * d);
@@ -81,7 +84,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElLine1_Name; }
     const char *giveClassName() const override { return "IntElLine1"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {

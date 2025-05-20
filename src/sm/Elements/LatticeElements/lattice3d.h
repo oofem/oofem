@@ -48,6 +48,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional lattice element
  */
@@ -68,6 +69,11 @@ protected:
     IntArray couplingNumbers;
     FloatArray pressures;
 
+    static ParamKey IPK_Lattice3d_polycoords;
+    static ParamKey IPK_Lattice3d_couplingflag;
+    static ParamKey IPK_Lattice3d_couplingnumber;
+    static ParamKey IPK_Lattice3d_pressures;
+    static ParamKey IPK_Lattice3d_mlength;
 public:
     Lattice3d(int n, Domain *);
     virtual ~Lattice3d();
@@ -117,9 +123,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_Lattice3d_Name; }
     const char *giveClassName() const override { return "Lattice3d"; }
-    void initializeFrom(InputRecord &ir) override;
-
-
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 

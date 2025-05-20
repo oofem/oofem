@@ -37,17 +37,12 @@
 
 #include "fmelement.h"
 
-///@name Input fields for CBS elements
-//@{
-#define _IFT_CBSElement_bsides "bsides"
-#define _IFT_CBSElement_bcodes "bcodes"
-//@}
-
 namespace oofem {
 class TimeStep;
 class GaussPoint;
 class FloatMatrix;
 class FloatArray;
+class ParamKey;
 
 /**
  * This abstract class represent a general base element class for
@@ -61,10 +56,13 @@ protected:
     /// Boundary sides codes.
     IntArray boundaryCodes;
 
+    static ParamKey IPK_CBSElement_bsides;
+    static ParamKey IPK_CBSElement_bcodes;
+
 public:
     CBSElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;

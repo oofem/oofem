@@ -47,6 +47,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a cohesive surface element used by the
  * cohesive particle model.
@@ -65,6 +66,11 @@ protected:
     int kx, ky, kz;
     double kxa, kyb, kzc;
     //@}
+
+    static ParamKey IPK_CohesiveSurface3d_kx;
+    static ParamKey IPK_CohesiveSurface3d_ky;
+    static ParamKey IPK_CohesiveSurface3d_kz;
+    static ParamKey IPK_CohesiveSurface3d_area;
 
 public:
     CohesiveSurface3d(int n, Domain * d);
@@ -85,7 +91,8 @@ public:
 
 
     // input and output
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

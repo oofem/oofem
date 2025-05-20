@@ -99,9 +99,9 @@ QTruss1dGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 
 
 void
-QTruss1dGradDamage :: initializeFrom(InputRecord &ir)
+QTruss1dGradDamage :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
 }
 
 

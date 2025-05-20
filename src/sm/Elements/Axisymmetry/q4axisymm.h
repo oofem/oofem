@@ -42,11 +42,11 @@
 ///@name Input fields for Q4Axisymm
 //@{
 #define _IFT_Q4Axisymm_Name "q4axisymm"
-#define _IFT_Q4Axisymm_nipfish "nipfish"
 //@}
 
 namespace oofem {
 class FEI2dQuadQuadAxi;
+class ParamKey;
 
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral -
@@ -58,6 +58,7 @@ class Q4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface
 protected:
     static FEI2dQuadQuadAxi interp;
     int numberOfFiAndShGaussPoints;
+    static ParamKey IPK_Q4Axisymm_nipfish;
 
 public:
     Q4Axisymm(int n, Domain * d);
@@ -71,7 +72,7 @@ public:
     const char *giveClassName() const override { return "Q4axisymm"; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_quad_2;}
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;
 

@@ -44,6 +44,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a bond link for connecting beam (frame) and continuum elements in unstructured meshes.
  * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
@@ -59,7 +60,7 @@ class BondLink3dBoundary : public BondLink3d
 {
 protected:
     IntArray location;
-
+    static ParamKey IPK_BondLink3dBoundary_location;
 public:
     BondLink3dBoundary(int n, Domain *);
     virtual ~BondLink3dBoundary();
@@ -76,7 +77,7 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_BondLink3dBoundary_Name; }
     const char *giveClassName()  const override { return "BondLink3dBoundary"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 

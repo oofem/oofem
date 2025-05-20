@@ -42,6 +42,7 @@
 
 namespace oofem {
 class FEI2dLineQuad;
+class ParamKey;
 
 /**
  * This class implements a two dimensional interface element and is simply an extension 
@@ -55,12 +56,14 @@ protected:
     static FEI2dLineQuad interp;
     static FEI2dLineLin interpLin;
 
+    static ParamKey IPK_IntElLine2_LinearTraction;
+
 public:
     IntElLine2(int n, Domain * d);
     virtual ~IntElLine2() { }
     FEInterpolation *giveInterpolation() const override;
     int computeNumberOfDofs() override { return 12; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElLine2_Name; }

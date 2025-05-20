@@ -40,11 +40,11 @@
 ///@name Input fields for SlaveNode
 //@{
 #define _IFT_SlaveNode_Name "slavenode"
-#define _IFT_SlaveNode_masterDofManagers "masterdofman"
-#define _IFT_SlaveNode_weights "weights"
 //@}
 
 namespace oofem {
+
+class ParamKey;
 /**
  * Class implementing slave node connected to other nodes (masters) using predetermined weights.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -62,6 +62,9 @@ protected:
     /// Common dof weights for each master node.
     FloatArray masterWeights;
 
+    static ParamKey IPK_SlaveNode_masterDofManagers;
+    static ParamKey IPK_SlaveNode_weights;
+
 public:
     /**
      * Constructor. Creates a hanging node with number n, belonging to aDomain.
@@ -72,7 +75,7 @@ public:
     /// Destructor.
     virtual ~SlaveNode(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
     bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;

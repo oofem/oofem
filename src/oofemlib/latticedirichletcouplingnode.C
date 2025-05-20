@@ -54,6 +54,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "classfactory.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -61,7 +62,9 @@
 
 namespace oofem {
 
-  REGISTER_DofManager(LatticeDirichletCouplingNode);
+REGISTER_DofManager(LatticeDirichletCouplingNode);
+
+ParamKey LatticeDirichletCouplingNode::IPK_LatticeDirichletCouplingNode_couplingelements("couplingelements");
 
 LatticeDirichletCouplingNode :: LatticeDirichletCouplingNode(int n, Domain *aDomain) :
     Node(n, aDomain)
@@ -72,15 +75,23 @@ LatticeDirichletCouplingNode :: ~LatticeDirichletCouplingNode()
 {}
 
 void
-LatticeDirichletCouplingNode :: initializeFrom(InputRecord &ir)
+LatticeDirichletCouplingNode :: initializeFrom(InputRecord &ir, int priority)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    FloatArray triplets;
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+
 
     Node :: initializeFrom(ir);
+    PM_UPDATE_PARAMETER(couplingElements, ppm, ir, this->number, IPK_LatticeDirichletCouplingNode_couplingelements, priority) ;
+}
 
-    IR_GIVE_FIELD(ir, couplingElements, _IFT_LatticeDirichletCouplingNode_couplingelements);
+void
+LatticeDirichletCouplingNode :: postInitialize()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
 
+    Node :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeDirichletCouplingNode_couplingelements) ;
 }
 
 void LatticeDirichletCouplingNode :: printYourself()

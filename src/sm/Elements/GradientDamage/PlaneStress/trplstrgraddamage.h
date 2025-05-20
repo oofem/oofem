@@ -54,7 +54,7 @@ public:
     TrPlaneStressGradDamage(int n, Domain * d);
     virtual ~TrPlaneStressGradDamage() { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     const char *giveInputRecordName() const override { return _IFT_TrPlaneStressGradDamage_Name; }
     const char *giveClassName() const override { return "TrPlaneStressGradDamage"; }

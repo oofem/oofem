@@ -341,9 +341,9 @@ QDKTPlate::giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
 
 
 void
-QDKTPlate::initializeFrom(InputRecord &ir)
+QDKTPlate::initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
+    StructuralElement::initializeFrom(ir, priority);
 }
 
 

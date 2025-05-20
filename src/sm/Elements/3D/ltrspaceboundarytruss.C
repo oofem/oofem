@@ -55,12 +55,6 @@ LTRSpaceBoundaryTruss :: LTRSpaceBoundaryTruss(int n, Domain *aDomain) :
 {}
 
 void
-LTRSpaceBoundaryTruss :: initializeFrom(InputRecord &ir)
-{
-    LTRSpaceBoundary :: initializeFrom(ir);
-}
-
-void
 LTRSpaceBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 5 ) {

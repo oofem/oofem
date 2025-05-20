@@ -33,6 +33,9 @@
  */
 
 #include "domain.h"
+#include "parametermanager.h"
+#include "paramkey.h"
+
 #include "element.h"
 #include "timestep.h"
 #include "node.h"
@@ -76,7 +79,6 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
-#include "parameterprioritymanager.h"
 
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
@@ -972,7 +974,7 @@ Domain :: postInitialize()
                 // hack to set the cross section from the cross section model to the element
                 // this is obsolete feature, but supported here for backwards compatibility
                 // the supported way is to set cross section using set element properties
-                size_t indx = this->elementPPM.registerParam(_IFT_Element_crosssect);
+                size_t indx = Element::IPK_Element_crosssect.getIndex();
                 if (this->elementPPM.getPriority(ielem-1, indx) < 1) {
                     this->elementPPM.setPriority(ielem-1, indx, 1);
                     element->setCrossSection(i);

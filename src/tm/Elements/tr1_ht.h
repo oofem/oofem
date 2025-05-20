@@ -67,7 +67,7 @@ public:
 
 
     int computeNumberOfDofs() override { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override { return _2dHeat; }
     double giveThicknessAt(const FloatArray &gcoords) override;
 

@@ -53,9 +53,10 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-#include "parameterprioritymanager.h"
+#include "parametermanager.h"
 #include "domain.h"
 #include "engngm.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -66,75 +67,12 @@
 namespace oofem {
 REGISTER_DofManager(Node);
 
+ParamKey Node::IPK_Node_coords("coords");
+ParamKey Node::IPK_Node_lcs("lcs");
+
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain)
 { }
-
-
-void Node :: initializeFrom(InputRecord &ir)
-// Gets from the source line from the data file all the data of the receiver.
-{
-    int size;
-
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1("Instanciating node ",number)
-#  endif
-
-    DofManager :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
-
-    //
-    // scaling of coordinates if necessary
-    //
-    if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
-        double lscale = domain->giveEngngModel()->giveVariableScale(VST_Length);
-        this->coordinates.times(1. / lscale);
-    }
-
-
-    // Read if available local coordinate system in this node
-    if ( ir.hasField(_IFT_Node_lcs) ) {
-        FloatArray triplets;
-        IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
-        size = triplets.giveSize();
-        if ( size != 6 ) {
-            OOFEM_WARNING("lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
-        }
-
-        double n1 = 0.0, n2 = 0.0;
-        localCoordinateSystem = std::make_unique<FloatMatrix>(3, 3);
-
-        for ( int j = 1; j <= 3; j++ ) {
-            localCoordinateSystem->at(1, j) = triplets.at(j);
-            n1 += triplets.at(j) * triplets.at(j);
-            localCoordinateSystem->at(2, j) = triplets.at(j + 3);
-            n2 += triplets.at(j + 3) * triplets.at(j + 3);
-        }
-
-        n1 = sqrt(n1);
-        n2 = sqrt(n2);
-        if ( ( n1 <= 1.e-6 ) || ( n2 <= 1.e-6 ) ) {
-            OOFEM_ERROR("lcs input error");
-        }
-
-        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
-            localCoordinateSystem->at(1, j) /= n1;
-            localCoordinateSystem->at(2, j) /= n2;
-        }
-
-        // vector e3' computed from vector product of e1', e2'
-        localCoordinateSystem->at(3, 1) =
-            localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 3) -
-        localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 2);
-        localCoordinateSystem->at(3, 2) =
-            localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 1) -
-        localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 3);
-        localCoordinateSystem->at(3, 3) =
-            localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-        localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
-    }
-}
 
 
 void Node :: initializeFrom(InputRecord &ir, int priority)
@@ -142,7 +80,7 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
 {
     int size;
     bool flag = false;
-    ParameterPriorityManager &ppm =  this->giveDomain()->dofmanPPM;
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
@@ -150,7 +88,7 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
 
     DofManager :: initializeFrom(ir);
 
-    PM_UPDATE_PARAMETER_AND_REPORT(coordinates, ppm, ir, this->number, _IFT_Node_coords, priority, flag) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(coordinates, ppm, ir, this->number, IPK_Node_coords, priority, flag) ;
     //
     // scaling of coordinates if necessary
     //
@@ -160,7 +98,7 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
     }
     // Read if available local coordinate system in this node
     FloatArray triplets;
-    PM_UPDATE_PARAMETER_AND_REPORT(triplets, ppm, ir, this->number, _IFT_Node_lcs, priority, flag) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(triplets, ppm, ir, this->number, IPK_Node_lcs, priority, flag) ;
     // process lcs if defined
     if ( flag ) {
         size = triplets.giveSize();
@@ -205,9 +143,9 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
 void
 Node :: postInitialize()
 {
-    ParameterPriorityManager &ppm =  this->giveDomain()->dofmanPPM;
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, _IFT_Node_coords) ;
+    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_Node_coords) ;
     
 }
 

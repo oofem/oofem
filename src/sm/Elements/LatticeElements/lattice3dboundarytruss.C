@@ -50,6 +50,8 @@
 #include "datastream.h"
 #include "crosssection.h"
 #include "dof.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -57,8 +59,9 @@
 
 namespace oofem {
 REGISTER_Element(Lattice3dBoundaryTruss);
+ParamKey Lattice3dBoundaryTruss::IPK_Lattice3dBoundaryTruss_location("location");
 
-Lattice3dBoundaryTruss :: Lattice3dBoundaryTruss(int n, Domain *aDomain) : Lattice3dBoundary(n, aDomain)
+Lattice3dBoundaryTruss :: Lattice3dBoundaryTruss(int n, Domain *aDomain) : Lattice3dBoundary(n, aDomain), location (2)
 {
     numberOfDofMans = 3;
     geometryFlag = 0;
@@ -420,14 +423,21 @@ Lattice3dBoundaryTruss ::   giveDofManDofIDMask(int inode, IntArray &answer) con
 }
 
 void
-Lattice3dBoundaryTruss :: initializeFrom(InputRecord &ir)
+Lattice3dBoundaryTruss :: initializeFrom(InputRecord &ir, int priority)
 {
-    Lattice3d :: initializeFrom(ir);
-
-    this->location.resize(2);
-    IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundaryTruss_location); // Macro
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    Lattice3d :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_Lattice3dBoundaryTruss_location, priority) ;
 }
 
+void
+Lattice3dBoundaryTruss :: postInitialize()
+{
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    // first call parent
+    Lattice3d :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Lattice3dBoundaryTruss_location) ;
+}
 
 
 void

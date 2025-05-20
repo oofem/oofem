@@ -50,6 +50,8 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "sm/CrossSections/latticecrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,12 +61,21 @@
 namespace oofem {
 REGISTER_Element(Lattice3d);
 
+ParamKey Lattice3d::IPK_Lattice3d_mlength("mlength");
+ParamKey Lattice3d::IPK_Lattice3d_polycoords("polycoords");
+ParamKey Lattice3d::IPK_Lattice3d_couplingflag("couplingflag");
+ParamKey Lattice3d::IPK_Lattice3d_couplingnumber("couplingnumber");
+ParamKey Lattice3d::IPK_Lattice3d_pressures("pressures");
+
 Lattice3d :: Lattice3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
     numberOfDofMans = 2;
     geometryFlag = 0;
     this->eccS = 0.;
     this->eccT = 0.;
+    minLength = 1.e-20;
+    couplingFlag = 0;
+
 }
 
 Lattice3d :: ~Lattice3d()
@@ -370,27 +381,24 @@ Lattice3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-Lattice3d :: initializeFrom(InputRecord &ir)
+Lattice3d :: initializeFrom(InputRecord &ir, int priority)
 {
-    LatticeStructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    LatticeStructuralElement :: initializeFrom(ir, priority);
 
-    minLength = 1.e-20;
-    IR_GIVE_OPTIONAL_FIELD(ir, minLength, _IFT_Lattice3d_mlength);
-
-    polygonCoords.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, polygonCoords, _IFT_Lattice3d_polycoords);
-    numberOfPolygonVertices = polygonCoords.giveSize() / 3.;
-
-    couplingFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice3d_couplingflag);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers, _IFT_Lattice3d_couplingnumber);
-
-    pressures.resize(numberOfPolygonVertices);
-    pressures.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, pressures, _IFT_Lattice3d_pressures);
+    PM_UPDATE_PARAMETER(minLength, ppm, ir, this->number, IPK_Lattice3d_mlength, priority);
+    PM_UPDATE_PARAMETER(polygonCoords, ppm, ir, this->number, IPK_Lattice3d_polycoords, priority);
+    PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice3d_couplingflag, priority);
+    PM_UPDATE_PARAMETER(couplingNumbers, ppm, ir, this->number, IPK_Lattice3d_couplingnumber, priority);
+    PM_UPDATE_PARAMETER(pressures, ppm, ir, this->number, IPK_Lattice3d_pressures, priority);
 }
 
+void
+Lattice3d :: postInitialize()
+{
+    this->LatticeStructuralElement :: postInitialize();
+    numberOfPolygonVertices = (int) (polygonCoords.giveSize() / 3.);
+}
 
 int
 Lattice3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

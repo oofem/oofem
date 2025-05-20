@@ -55,6 +55,7 @@
 
 namespace oofem {
 class BoundaryLoad;
+class ParamKey;
 
 #define _ExportCZ
 
@@ -68,6 +69,8 @@ class BoundaryLoad;
 class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface,
     public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface, public FailureModuleElementInterface
 {
+protected:
+    static ParamKey IPK_Shell7Base_recoverStress;
 public:
     Shell7Base(int n, Domain *d); // constructor
 
@@ -141,7 +144,7 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override = 0;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const override = 0;
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     // Integration
     virtual double edgeComputeLengthAround(GaussPoint *gp, const int iedge);

@@ -735,10 +735,4 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
     }
 }
 
-
-void
-GradDpElement :: initializeFrom(InputRecord &ir)
-{
-    //nlGeo = 0;
-}
 } // end namespace oofem

@@ -58,15 +58,14 @@ FEI3dWedgeQuad QWedge :: interpolation;
 QWedge :: QWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans = 15;
+    numberOfGaussPoints = 9;
 }
 
 
 void
-QWedge :: initializeFrom(InputRecord &ir)
+QWedge :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 9;
-
-    Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir, priority);
 }
 
 FEInterpolation *

@@ -52,7 +52,7 @@ public:
     QPlaneStrainGradDamage(int n, Domain * d);
     virtual ~QPlaneStrainGradDamage() { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     const char *giveInputRecordName() const override { return _IFT_QPlaneStrainGradDamage_Name; }
     const char *giveClassName() const override { return "QPlaneStrainGradDamage"; }

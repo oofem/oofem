@@ -50,6 +50,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements an interface element that connects two nodes.
  * In order to compute the normal and tangential direction of the slip plane, 
@@ -69,6 +70,11 @@ protected:
     double area = 0.;
     double length = 0.;
 
+    static ParamKey IPK_IntElPoint_refnode;
+    static ParamKey IPK_IntElPoint_normal;
+    static ParamKey IPK_IntElPoint_area;
+    static ParamKey IPK_IntElPoint_length;
+
 public:
     IntElPoint(int n, Domain *d);
 
@@ -81,7 +87,8 @@ public:
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElPoint_Name; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     MaterialMode giveMaterialMode() override;

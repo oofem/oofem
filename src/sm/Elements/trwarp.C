@@ -94,10 +94,10 @@ Tr_Warp :: computeGaussPoints()
 
 
 void
-Tr_Warp :: initializeFrom(InputRecord &ir)
+Tr_Warp :: initializeFrom(InputRecord &ir.int priority)
 {
     numberOfGaussPoints = 1;
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
 }
 
 

@@ -52,14 +52,6 @@ LIBeam3dBoundaryTruss :: LIBeam3dBoundaryTruss(int n, Domain *aDomain) : LIBeam3
     // Constructor.
 {}
 
-
-void
-LIBeam3dBoundaryTruss :: initializeFrom(InputRecord &ir)
-{
-    LIBeam3dBoundary :: initializeFrom(ir);
-}
-
-
 void
 LIBeam3dBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {

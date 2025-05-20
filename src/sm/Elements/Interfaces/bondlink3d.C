@@ -52,6 +52,8 @@
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,6 +61,10 @@
 
 namespace oofem {
 REGISTER_Element(BondLink3d);
+ParamKey BondLink3d::IPK_BondLink3d_length("bondLength");
+ParamKey BondLink3d::IPK_BondLink3d_diameter("diameter");
+ParamKey BondLink3d::IPK_BondLink3d_dirvector("dirvector");
+ParamKey BondLink3d::IPK_BondLink3d_length_end("length_end");
 
 BondLink3d :: BondLink3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -251,24 +257,31 @@ BondLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-BondLink3d :: initializeFrom(InputRecord &ir)
+BondLink3d :: initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(bondLength, ppm, ir, this->number, IPK_BondLink3d_length, priority);
+    PM_UPDATE_PARAMETER(bondDiameter, ppm, ir, this->number, IPK_BondLink3d_diameter, priority);
+    PM_UPDATE_PARAMETER(directionVector, ppm, ir, this->number, IPK_BondLink3d_dirvector, priority);
+    PM_UPDATE_PARAMETER(bondEndLength, ppm, ir, this->number, IPK_BondLink3d_length_end, priority);
+}
 
-    IR_GIVE_FIELD(ir, this->bondLength, _IFT_BondLink3d_length);
-
-    IR_GIVE_FIELD(ir, this->bondDiameter, _IFT_BondLink3d_diameter);
-
-    IR_GIVE_FIELD(ir, this->directionVector, _IFT_BondLink3d_dirvector);
-
-    IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_BondLink3d_length_end);
-
+void
+BondLink3d :: postInitialize()
+{
+    // first call parent
+    StructuralElement :: postInitialize();
+    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_length);
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_diameter);
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_dirvector);
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_length_end);
     if ( this->bondEndLength < this->bondLength ) {
         this->bondLength = this->bondEndLength;
     }
 }
-
 
 int
 BondLink3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

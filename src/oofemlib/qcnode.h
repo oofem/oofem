@@ -40,11 +40,12 @@
 ///@name Input fields for HangingNode
 //@{
 #define _IFT_qcNode_Name "qcnode"
-#define _IFT_qcNode_masterElement "masterelement"
-#define _IFT_qcNode_masterRegion "masterregion"
 //@}
 
 namespace oofem {
+
+class ParamKey;
+
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -65,15 +66,19 @@ class OOFEM_EXPORT qcNode : public Node
 {
 protected:
     /// Number of the master element.
-    int masterElement;
+    int masterElement=-1;
     /// Region of the master element (used for automatic detection).
-    int masterRegion;
+    int masterRegion=0;
     /// Type of qcNode (0 deactive, 1 master, 2 hanging)
     int qcNodeTypeLabel;
 #ifdef __OOFEG
     /// Flag whether node is fully initialized already.
     bool initialized;
 #endif
+
+    /// Static input field keys
+    static ParamKey IPK_qcNode_masterElement;
+    static ParamKey IPK_qcNode_masterRegion;
 
 public:
     /**
@@ -85,7 +90,7 @@ public:
     /// Destructor.
     virtual ~qcNode(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
     void postInitializeAsHangingNode();
     int checkConsistency() override;

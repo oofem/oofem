@@ -49,6 +49,8 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "sm/CrossSections/latticecrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -57,6 +59,7 @@
 
 namespace oofem {
 REGISTER_Element(LatticeBeam3d);
+ParamKey LatticeBeam3d::IPK_LatticeBeam3d_diameter("diameter");
 
 LatticeBeam3d :: LatticeBeam3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
@@ -251,13 +254,19 @@ LatticeBeam3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-LatticeBeam3d :: initializeFrom(InputRecord &ir)
+LatticeBeam3d :: initializeFrom(InputRecord &ir, int priority)
 {
-    LatticeStructuralElement :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, this->diameter, _IFT_LatticeBeam3d_diameter);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    LatticeStructuralElement :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(diameter, ppm, ir, this->number, IPK_LatticeBeam3d_diameter, priority) ;
 }
 
+void
+LatticeBeam3d :: postInitialize()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    this->LatticeStructuralElement :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeBeam3d_diameter) ;
 
 int
 LatticeBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

@@ -107,18 +107,22 @@ Axisymm3d :: giveArea()
 
 
 void
-Axisymm3d :: initializeFrom(InputRecord &ir)
+Axisymm3d :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 1;
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
 
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ) ) {
-        numberOfGaussPoints = 1;
-    }
+    
 }
 
+void Axisymm3d :: postInitialize()
+{
+    if ( !( ( numberOfGaussPoints == 1 ) ||
+        ( numberOfGaussPoints == 4 ) ||
+        ( numberOfGaussPoints == 7 ) ) ) {
+        numberOfGaussPoints = 1;
+    }
+    StructuralElement :: postInitialize();
+}
 
 
 

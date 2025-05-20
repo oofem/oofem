@@ -47,8 +47,13 @@
 #include "gausspoint.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
+
+ParamKey NLStructuralElement::IPK_NLStructuralElement_nlgeoflag("nlgeo");
+
 NLStructuralElement::NLStructuralElement(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -503,12 +508,10 @@ NLStructuralElement::computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &an
 
 
 void
-NLStructuralElement::initializeFrom(InputRecord &ir)
+NLStructuralElement::initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
-
-    nlGeometry = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+    StructuralElement::initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(nCoords, ppm, ir, this->number, _IFT_AbaqusUserElement_numcoords, priority) ;
 }
 
 void NLStructuralElement::giveInputRecord(DynamicInputRecord &input)

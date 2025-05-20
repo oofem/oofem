@@ -65,7 +65,6 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QPlaneStress2dSlip_Name; }
     const char *giveClassName() const override { return "QPlaneStress2dSlip"; }
-    void initializeFrom(InputRecord &ir) override;
 
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;

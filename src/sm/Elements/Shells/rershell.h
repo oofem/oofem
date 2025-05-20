@@ -110,7 +110,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_RerShell_Name; }
     const char *giveClassName() const override { return "RerShell"; }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     integrationDomain giveIntegrationDomain() const override { return _Triangle; }
     MaterialMode giveMaterialMode() override { return _3dShell; }

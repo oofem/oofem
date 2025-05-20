@@ -55,12 +55,6 @@ LTRSpaceBoundaryPlate :: LTRSpaceBoundaryPlate(int n, Domain *aDomain) :
 {}
 
 void
-LTRSpaceBoundaryPlate :: initializeFrom(InputRecord &ir)
-{
-    LTRSpaceBoundary :: initializeFrom(ir);
-}
-
-void
 LTRSpaceBoundaryPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 5 ) {

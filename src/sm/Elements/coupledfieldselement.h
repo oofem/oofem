@@ -53,8 +53,6 @@ public:
     CoupledFieldsElement(int i, Domain *aDomain);
     virtual ~CoupledFieldsElement() {}
 
-    void initializeFrom(InputRecord &ir) override;
-
 protected:
     virtual void computeNStressAt(GaussPoint *, FloatArray &) = 0;
     virtual void computeBStressAt(GaussPoint *, FloatArray &) = 0;
