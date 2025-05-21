@@ -74,6 +74,9 @@ public:
     std::vector< int > :: const_iterator end() const { return this->values.end(); }
     //@}
 
+    constexpr static int Dim = 1;
+    typedef int Scalar;
+
     /// Constructor for sized array. Data is zeroed.
     IntArray(int n = 0) : values(n) { }
     /// Copy constructor. Creates the array from another array.

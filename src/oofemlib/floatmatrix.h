@@ -107,6 +107,9 @@ public:
     std::vector< double > :: const_iterator end() const { return this->values.end(); }
     //@}
 
+    constexpr static int Dim = 2;
+    typedef double Scalar;
+
     /**
      * Creates matrix of given size.
      * @param n Number of rows.

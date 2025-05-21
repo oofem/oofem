@@ -96,6 +96,9 @@ public:
     std::vector< double > :: const_iterator end() const { return this->values.end(); }
     //@}
 
+    static constexpr int Dim = 1;
+    typedef double Scalar;
+
     /// Constructor for sized array. Data is zeroed.
     FloatArray(int n = 0) : values(n) { }
     /// Disallow double parameter, which can otherwise give unexpected results.

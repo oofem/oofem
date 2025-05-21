@@ -9,6 +9,7 @@ if(PY_BUILD_CMAKE_IMPORT_NAME)
     set(SKBUILD_PROJECT_VERSION_FULL ${PY_BUILD_CMAKE_PROJECT_VERSION}) # PY_BUILD_CMAKE does not provide VERSION_FULL (?)
 endif()
 
+include (FetchContent)
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -660,18 +661,21 @@ if (USE_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
     find_package(Python COMPONENTS Interpreter Development)
+    link_libraries(Python::Python)
     if(USE_NANOBIND)
-        add_subdirectory(extern/nanobind)
-        #include(FetchContent)
-        #FetchContent_Declare(
-        #    nanobind
-        #    GIT_REPOSITORY https://github.com/wjakob/nanobind.git
-        #    GIT_TAG v2.7.0
-        #)
-        #FetchContent_MakeAvailable(nanobind)
+        if(0)
+            add_subdirectory(extern/nanobind)
+        else()
+            FetchContent_Declare(
+                nanobind
+                GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+                GIT_TAG v2.7.0
+            )
+            FetchContent_MakeAvailable(nanobind)
+        endif()
         nanobind_add_module(oofempy NB_STATIC STABLE_ABI LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
-        nanobind_build_library(nanobind-static)
-        link_libraries(nanobind-static)
+        nanobind_build_library(nanobind-static) # -static is added via NB_STATIC for the module
+        link_libraries(nanobind-static) # for pythonfield.C and possibly others using nanobind functions
         add_definitions(-D_USE_NANOBIND)
         include_directories(${oofem_SOURCE_DIR}/extern/nanobind/include)
     else()
