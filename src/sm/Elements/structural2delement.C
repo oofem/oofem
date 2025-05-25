@@ -63,6 +63,7 @@ Structural2DElement::~Structural2DElement()
 void
 Structural2DElement::initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &ppm = domain->elementPPM;
     NLStructuralElement::initializeFrom(ir, priority);
     PM_UPDATE_PARAMETER(matRotation, ppm, ir, this->number, IPK_Structural2DElement_materialCoordinateSystem, priority) ;
 }

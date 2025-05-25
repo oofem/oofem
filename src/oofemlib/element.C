@@ -59,7 +59,7 @@
 #include "unknownnumberingscheme.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
-#include "parameterprioritymanager.h"
+#include "parametermanager.h"
 #include "cltypes.h"
 #include "paramkey.h"
 
@@ -71,8 +71,8 @@
 
 namespace oofem {
 
-ParamKey Element::IPK_Element_material("material");
-ParamKey Element::IPK_Element_crosssection("crosssect");
+ParamKey Element::IPK_Element_mat("material");
+ParamKey Element::IPK_Element_crosssect("crosssect");
 ParamKey Element::IPK_Element_nodes("nodes");
 ParamKey Element::IPK_Element_bodyload("bodyloads");
 ParamKey Element::IPK_Element_boundaryload("boundaryloads");
@@ -719,19 +719,19 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
 
-    input.setField(material, _IFT_Element_mat);
+    input.setField(material, IPK_Element_mat.getNameCStr());
 
-    input.setField(crossSection, _IFT_Element_crosssect);
+    input.setField(crossSection, IPK_Element_crosssect.getNameCStr());
 
-    input.setField(dofManArray, _IFT_Element_nodes);
+    input.setField(dofManArray, IPK_Element_nodes.getNameCStr());
 
     if ( bodyLoadArray.giveSize() > 0 ) {
-        input.setField(bodyLoadArray, _IFT_Element_bodyload);
+        input.setField(bodyLoadArray, IPK_Element_bodyload.getNameCStr());
     }
 
 
     if ( boundaryLoadArray.giveSize() > 0 ) {
-        input.setField(boundaryLoadArray, _IFT_Element_boundaryload);
+        input.setField(boundaryLoadArray, IPK_Element_boundaryload.getNameCStr());
     }
 
 
@@ -741,22 +741,22 @@ Element :: giveInputRecord(DynamicInputRecord &input)
             triplets.at(j) = elemLocalCS.at(j, 1);
             triplets.at(j + 3) = elemLocalCS.at(j, 2);
         }
-        input.setField(triplets, _IFT_Element_lcs);
+        input.setField(triplets, IPK_Element_lcs.getNameCStr());
     }
 
 
     if ( partitions.giveSize() > 0 ) {
-        input.setField(this->partitions, _IFT_Element_partitions);
+        input.setField(this->partitions, IPK_Element_partitions.getNameCStr());
         if ( this->parallel_mode == Element_remote ) {
-            input.setField(_IFT_Element_remote);
+            input.setField(IPK_Element_remote.getNameCStr());
         }
     }
 
     if ( activityTimeFunction > 0 ) {
-        input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
+        input.setField(activityTimeFunction, IPK_Element_activityTimeFunction.getNameCStr());
     }
 
-    input.setField(numberOfGaussPoints, _IFT_Element_nip);
+    input.setField(numberOfGaussPoints, IPK_Element_nip.getNameCStr());
 }
 
 
@@ -766,8 +766,8 @@ Element :: postInitialize()
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
 
     //PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_mat) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_crosssect) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_nodes) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_crosssect) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_nodes) ;
     
     this->computeGaussPoints();
 }

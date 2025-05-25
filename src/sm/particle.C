@@ -36,6 +36,7 @@
 #include "classfactory.h"
 #include "error.h"
 #include "floatmatrix.h"
+#include "domain.h"
 #include "parametermanager.h"
 #include "paramkey.h"
 
@@ -51,7 +52,7 @@ Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 void
 Particle :: initializeFrom(InputRecord &ir, int priority)
 {
-    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+    ParameterManager &ppm =  domain->dofmanPPM;
 
     Node :: initializeFrom(ir, priority);
     PM_UPDATE_PARAMETER(radius, ppm, ir, this->number, IPK_Particle_rad, priority) ;
@@ -63,7 +64,7 @@ void Particle::postInitialize () {
     Node::postInitialize();
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Particle_rad) ;
     if ( radius < 0.0 ) {
-        throw ValueInputException(IPK_Particle_rad.getName(), "must be positive");
+        throw ComponentInputException(IPK_Particle_rad.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "must be positive");
     }
  
 }

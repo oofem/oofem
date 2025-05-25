@@ -288,7 +288,7 @@ Truss2d::resolveCoordIndices(int &c1, int &c2)
 void
 Truss2d::initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement::initializeFrom(ir, order);
+    NLStructuralElement::initializeFrom(ir, priority);
     ParameterManager &ppm = this->giveDomain()->dofmanPPM;
     PM_UPDATE_PARAMETER(cs_mode, ppm, ir, this->number, IPK_Truss2d_cs, priority) ;
 }
@@ -298,7 +298,7 @@ Truss2d::postInitialize()
 {
     NLStructuralElement::postInitialize();
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        throw ValueInputException(ir, IPK_Truss2d_cs.getName(), "Unsupported mode");
+        throw ComponentInputException(IPK_Truss2d_cs.getName(), ComponentInputException::ComponentType::ctElement, this->number, "Unsupported mode");
     }
 }
 

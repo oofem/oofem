@@ -126,9 +126,9 @@ TR1_2D_CBS :: giveInputRecord(DynamicInputRecord &input)
 {
     CBSElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, IPK_TR1_2D_CBS_pvof.getName());
+        input.setField(this->vof, IPK_TR1_2D_CBS_pvof.getNameCStr());
     } else {
-        input.setField(this->vof, IPK_TR1_2D_CBS_vof.getName());
+        input.setField(this->vof, IPK_TR1_2D_CBS_vof.getNameCStr());
     }
 }
 

@@ -66,8 +66,8 @@ LIBeam3dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
     LIBeam3d :: initializeFrom(ir, priority);
     ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(referenceNode, ic, ppm, ir, this->number, IPK_LIBeam3dBoundary_refnode, priority) ;
-    PM_UPDATE_PARAMETER(location, ic, ppm, ir, this->number, IPK_LIBeam3dBoundary_location, priority) ;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3dBoundary_refnode, priority) ;
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_LIBeam3dBoundary_location, priority) ;
 
 }
 

@@ -386,7 +386,7 @@ Beam2d :: initializeFrom(InputRecord &ir, int priority)
     // first call parent
     BeamBaseElement :: initializeFrom(ir, priority);
     ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_TEMP_PARAMETER(IntArray, ic, ppm, ir, this->number, IPK_Beam2d_dofstocondense, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_Beam2d_dofstocondense, priority) ;
 }
 
 void

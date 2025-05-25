@@ -94,7 +94,7 @@ void
 LSpace :: initializeFrom(InputRecord &ir, int priority)
 {
     Structural3DElement :: initializeFrom(ir, priority);
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
     PM_UPDATE_PARAMETER(reducedShearIntegration, ppm, ir, this->number, IPK_LSpace_reducedShearIntegration, priority) ;
 }
 

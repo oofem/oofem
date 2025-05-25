@@ -289,15 +289,17 @@ void
 LIBeam3d :: initializeFrom(InputRecord &ir, int priority)
 {
     StructuralElement :: initializeFrom(ir, priority);
-    ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(referenceNode, ic, ppm, ir, this->number, IPK_LIBeam3d_refnode, priority) ;
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3d_refnode, priority) ;
 }
 
 void 
 LIBeam3d :: postInitialize()
 {
+    ParameterManager &ppm = domain->elementPPM;
+
     StructuralElement :: postInitialize();
-    PM_ELEMENT_ERROR_IFNOTSET(this->number, IPK_LIBeam3d_refnode.giveIndex()) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d_refnode) ;
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified.");
     }

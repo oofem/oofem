@@ -70,7 +70,7 @@ void SlaveNode :: postInitialize()
         masterWeights.resize( masterDofManagers.giveSize() );
         masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        throw ValueInputException(ir, IPK_SlaveNode_weights.getName(), "master dof managers and weights size mismatch.");
+        throw ComponentInputException(IPK_SlaveNode_weights.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "master dof managers and weights size mismatch.");
     }
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)

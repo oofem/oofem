@@ -77,7 +77,7 @@ class SurfaceLoad;
 class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
-class Paramkey;
+class ParamKey;
 
 /**
  * In parallel mode, this type indicates the mode of element.

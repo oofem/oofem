@@ -48,19 +48,25 @@
 
 
 namespace oofem {
-void IGAElement :: initializeFrom(InputRecord &ir)
+void IGAElement :: initializeFrom(InputRecord &ir, int priority)
+{
+    Element :: initializeFrom(ir, ); // read nodes , material, cross section
+    this->giveInterpolation()->initializeFrom(ir, priority); // read geometry
+}
+
+void
+IGAElement::postInitialize ()
 {
     int indx = 0;
     numberOfGaussPoints = 1;
 #ifdef __MPI_PARALLEL_MODE
     int numberOfKnotSpans = 0;
-
 #endif
-
-    Element :: initializeFrom(ir); // read nodes , material, cross section
+    Element::postInitialize();
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
-    this->giveInterpolation()->initializeFrom(ir); // read geometry
+    this->giveInterpolation()->postInitialize();
+
 
     // generate individual IntegrationElements; one for each nonzero knot span
     int nsd = this->giveNsd(this->giveGeometryType());
@@ -177,7 +183,6 @@ void IGAElement :: initializeFrom(InputRecord &ir)
 #endif
 }
 
-
 #ifdef __MPI_PARALLEL_MODE
 elementParallelMode
 IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
@@ -199,22 +204,27 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
 
 // integration elements are setup in the same way as for IGAElement for now HUHU
 
-void IGATSplineElement :: initializeFrom(InputRecord &ir)
+void IGATSplineElement :: initializeFrom(InputRecord &ir, int priority)
 {
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
+    Element :: initializeFrom(ir, priority); // read nodes , material, cross section
 
+    this->giveInterpolation()->initializeFrom(ir, priority); // read geometry
+}
+
+void
+IGATSplineElement::postInitialize()
+{
+    IGAElement::postInitialize();
     int indx = 0, numberOfGaussPoints = 1;
-
-    Element :: initializeFrom(ir); // read nodes , material, cross section
-
+    TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     // set number of control points before initialization HUHU HAHA
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
-    this->giveInterpolation()->initializeFrom(ir); // read geometry
+    interpol->postInitialize();
 
-
-    // generate individual IntegrationElements; one for each nonzero knot span
+   // generate individual IntegrationElements; one for each nonzero knot span
     int nsd = giveNsd(this->giveGeometryType());
     if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
@@ -260,10 +270,6 @@ void IGATSplineElement :: initializeFrom(InputRecord &ir)
         throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
 }
-
-
-
-
 
 #ifdef __OOFEG
 

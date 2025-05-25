@@ -68,7 +68,7 @@ MacroLSpace :: ~MacroLSpace() { }
 void MacroLSpace :: initializeFrom(InputRecord &ir, int priority)
 {
     LSpace :: initializeFrom(ir, priority);
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_UPDATE_PARAMETER(microMasterNodes, ppm, ir, this->number, IPK_MacroLSpace_microMasterNodes, priority) ;
     PM_UPDATE_PARAMETER(microBoundaryNodes, ppm, ir, this->number, IPK_MacroLSpace_microBoundaryNodes, priority) ;
 
@@ -92,11 +92,11 @@ void MacroLSpace :: initializeFrom(InputRecord &ir, int priority)
 void MacroLSpace :: postInitialize()
 {
     LSpace :: postInitialize();
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_MacroLSpace_microMasterNodes) ;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_MacroLSpace_microBoundaryNodes) ;
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        throw ValueInputException(ir, IPK_MacroLSpace_microMasterNodes.getName(), "Need 8 master nodes from the microproblem defined on macroLspace element");
+        throw ComponentInputException(IPK_MacroLSpace_microMasterNodes.getName(), ComponentInputException::ComponentType::ctElement, this->number, "Need 8 master nodes from the microproblem defined on macroLspace element");
     }
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 }

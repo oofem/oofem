@@ -65,7 +65,7 @@ Q27Space :: Q27Space(int n, Domain *aDomain) : Structural3DElement(n, aDomain), 
 void
 Q27Space :: initializeFrom(InputRecord &ir, int priority)
 {
-    Structural3DElement :: initializeFrom(ir. priority);
+    Structural3DElement :: initializeFrom(ir, priority);
 }
 
 

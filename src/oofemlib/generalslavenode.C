@@ -81,8 +81,6 @@ GeneralSlaveNode::postInitialize()
         }
     }
 
-    IntArray masterList;
-    FloatArray masterWeights;
     masterSizes = 0;
     if ( size > 0 ) {
         if ( masterSizes.giveSize() != size ) {
@@ -90,10 +88,10 @@ GeneralSlaveNode::postInitialize()
         }
     }
 
-    auto val = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterList.getIndex());
-    IntArray masterList (std::get<IntArray>(*val)); 
-    auto val = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterWeights.getIndex());
-    FloatArray masterWeights (std::get<FloatArray>(*val)); 
+    auto val1 = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterList.getIndex());
+    IntArray masterList (std::get<IntArray>(*val1)); 
+    auto val2 = ppm.getTempParam(this->number, IPK_GeneralSlaveNode_masterWeights.getIndex());
+    FloatArray masterWeights (std::get<FloatArray>(*val2)); 
 
 
     int index = 0;

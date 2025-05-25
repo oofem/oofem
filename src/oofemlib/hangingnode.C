@@ -55,11 +55,11 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-void HangingNode :: initializeFrom(InputRecord &ir)
+void HangingNode :: initializeFrom(InputRecord &ir, int priority)
 {
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    Node :: initializeFrom(ir);
+    Node :: initializeFrom(ir, priority);
     PM_UPDATE_PARAMETER(masterElement, ppm, ir, this->number, IPK_HangingNode_masterElement, priority) ;
     PM_UPDATE_PARAMETER(masterRegion, ppm, ir, this->number, IPK_HangingNode_masterRegion, priority) ;
 }

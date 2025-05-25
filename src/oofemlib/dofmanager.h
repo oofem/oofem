@@ -47,6 +47,7 @@
 #include "contextioresulttype.h"
 #include "unknowntype.h"
 #include "chartype.h"
+#include "paramkey.h"
 
 namespace oofem {
 class DataStream;
@@ -60,7 +61,6 @@ class Load;
 class TimeStep;
 class FloatArray;
 class IntArray;
-class ParamKey;
 
 /// In parallel mode, this type indicates the mode of DofManager.
 enum dofManagerParallelMode {
@@ -142,6 +142,7 @@ protected:
     // List of BCs (to enable writing to DynamicInputRecord)
     IntArray mBC;
 
+public:
     static ParamKey IPK_DofManager_dofidmask;
     static ParamKey IPK_DofManager_load;
     static ParamKey IPK_DofManager_bc;

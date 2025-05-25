@@ -305,15 +305,17 @@ LIBeam3d2::initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
     NLStructuralElement::initializeFrom(ir), priority;
-    ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(referenceNode, ic, ppm, ir, this->number, IPK_LIBeam3d2_refnode, priority) ;
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3d2_refnode, priority) ;
 }
 
 void
 LIBeam3d2::postInitialize()
 {
+    ParameterManager &ppm = domain->elementPPM;
+
     NLStructuralElement::postInitialize();
-    PM_ELEMENT_ERROR_IFNOTSET(this->number, IPK_LIBeam3d2_refnode.giveIndex()) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d2_refnode.giveIndex()) ;
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified.");
     }

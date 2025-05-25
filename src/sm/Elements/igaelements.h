@@ -151,7 +151,7 @@ public:
     TSplinePlaneStressElement(int n, Domain * aDomain);
 
     void initializeFrom(InputRecord &ir, int priority) override {
-        IGATSplineElement :: initializeFrom(ir);
+        IGATSplineElement :: initializeFrom(ir, priority);
         //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
     }
 

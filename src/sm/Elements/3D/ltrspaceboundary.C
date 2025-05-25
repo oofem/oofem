@@ -67,17 +67,15 @@ void
 LTRSpaceBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
     Structural3DElement :: initializeFrom(ir, priority);
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
     PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_LTRSpaceBoundary_location, priority) ;
-
-    IR_GIVE_FIELD(ir, location, _IFT_LTRSpaceBoundary_Location);
 }
 
 void
 LTRSpaceBoundary :: postInitialize()
 {
     Structural3DElement :: postInitialize();
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LTRSpaceBoundary_location) ;
 }
 

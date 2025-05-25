@@ -43,9 +43,9 @@ namespace oofem {
 #define OPTIMIZED_VERSION_A4dot4
 
 
-void TSplineInterpolation :: initializeFrom(InputRecord &ir)
+void TSplineInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int elnum, int priority)
 {
-    BSplineInterpolation :: initializeFrom(ir);
+    BSplineInterpolation :: initializeFrom(ir, pm, elnum, priority);
 
     IntArray localIndexKnotVector_tmp;
 

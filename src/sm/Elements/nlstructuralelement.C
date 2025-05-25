@@ -510,15 +510,16 @@ NLStructuralElement::computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &an
 void
 NLStructuralElement::initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &ppm = this->domain->elementPPM;
     StructuralElement::initializeFrom(ir, priority);
-    PM_UPDATE_PARAMETER(nCoords, ppm, ir, this->number, _IFT_AbaqusUserElement_numcoords, priority) ;
+    PM_UPDATE_PARAMETER(nlGeometry, ppm, ir, this->number, IPK_NLStructuralElement_nlgeoflag, priority) ;
 }
 
 void NLStructuralElement::giveInputRecord(DynamicInputRecord &input)
 {
     StructuralElement::giveInputRecord(input);
 
-    input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+    input.setField(nlGeometry, IPK_NLStructuralElement_nlgeoflag.getNameCStr());
 }
 
 int

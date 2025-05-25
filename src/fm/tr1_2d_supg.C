@@ -111,7 +111,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord &ir, int priority)
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, tripletsflag) ;
+        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, flag) ;
         if (flag) {
             this->temp_vof = this->vof;
         }
@@ -126,9 +126,9 @@ TR1_2D_SUPG :: giveInputRecord(DynamicInputRecord &input)
 {
     SUPGElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getName());
+        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getNameCStr());
     } else {
-        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getName());
+        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getNameCStr());
     }
 }
 

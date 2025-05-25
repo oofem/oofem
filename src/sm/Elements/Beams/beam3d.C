@@ -564,13 +564,13 @@ void
 Beam3d :: initializeFrom(InputRecord &ir, int priority)
 {
     BeamBaseElement :: initializeFrom(ir, priority);
-    ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(yaxis, ic, ppm, ir, this->number, IPK_Beam3d_yaxis, priority) ;
-    PM_UPDATE_PARAMETER(zaxis, ic, ppm, ir, this->number, IPK_Beam3d_zaxis, priority) ;
-    PM_UPDATE_PARAMETER(referenceNode, ic, ppm, ir, this->number, IPK_Beam3d_refnode, priority) ;
-    PM_UPDATE_PARAMETER(referenceAngle, ic, ppm, ir, this->number, IPK_Beam3d_refangle, priority) ;
-    PM_UPDATE_PARAMETER(subsoilMat, ic, ppm, ir, this->number, IPK_Beam3d_subsoilMat, priority) ;
-    PM_UPDATE_TEMP_PARAMETER(IntArray, ic, ppm, ir, this->number, IPK_Beam3d_dofsToCondense, priority) ;
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(yaxis, ppm, ir, this->number, IPK_Beam3d_yaxis, priority) ;
+    PM_UPDATE_PARAMETER(zaxis, ppm, ir, this->number, IPK_Beam3d_zaxis, priority) ;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_Beam3d_refnode, priority) ;
+    PM_UPDATE_PARAMETER(referenceAngle, ppm, ir, this->number, IPK_Beam3d_refangle, priority) ;
+    PM_UPDATE_PARAMETER(subsoilMat, ppm, ir, this->number, IPK_Beam3d_subsoilMat, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_Beam3d_dofsToCondense, priority) ;
 
 }
 
@@ -578,7 +578,7 @@ void
 Beam3d :: postInitialize()
 {
     BeamBaseElement :: postInitialize();
-    ParameterManager &ppm = giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     if ( ppm.checkIfSet(this->number, IPK_Beam3d_refnode.getIndex())) {
         if ( referenceNode == 0 ) {
             OOFEM_WARNING("wrong reference node specified. Using default orientation.");

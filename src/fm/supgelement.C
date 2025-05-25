@@ -85,8 +85,8 @@ SUPGElement :: giveInputRecord(DynamicInputRecord &input)
 {
     FMElement :: giveInputRecord(input);
     if ( !boundarySides.isEmpty() ) {
-        input.setField(this->boundarySides, IPK_SUPGElement_bsides.getName());
-        input.setField(this->boundaryCodes, IPK_SUPGElement_bcodes.getName());
+        input.setField(this->boundarySides, IPK_SUPGElement_bsides.getNameCStr());
+        input.setField(this->boundaryCodes, IPK_SUPGElement_bcodes.getNameCStr());
     }
 }
 

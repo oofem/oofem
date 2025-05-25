@@ -78,8 +78,8 @@ CBSElement :: giveInputRecord(DynamicInputRecord &input)
 {
     FMElement :: giveInputRecord(input);
     if ( boundarySides.giveSize() > 0 ) {
-        input.setField(this->boundarySides, IPK_CBSElement_bsides.getName());
-        input.setField(this->boundaryCodes, IPK_CBSElement_bcodes.getName());
+        input.setField(this->boundarySides, IPK_CBSElement_bsides.getNameCStr());
+        input.setField(this->boundaryCodes, IPK_CBSElement_bcodes.getNameCStr());
     }
 }
 

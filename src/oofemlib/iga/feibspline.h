@@ -54,6 +54,7 @@ namespace oofem {
 class FloatMatrix;
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /**
  * Interpolation for B-splines.
@@ -79,6 +80,15 @@ protected:
     std::array<FloatArray, 3> knotVector;                           // eg. 0 0 0 1 2 3 4 4 5 5 5
     /// Nonzero spans in each directions [nsd]
     std::array<int, 3> numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
+
+    static ParamKey IPK_BSplineInterpolation_degree;
+    static ParamKey IPK_BSplineInterpolation_knotVectorU;
+    static ParamKey IPK_BSplineInterpolation_knotVectorV;
+    static ParamKey IPK_BSplineInterpolation_knotVectorW;
+    static ParamKey IPK_BSplineInterpolation_knotMultiplicityU;
+    static ParamKey IPK_BSplineInterpolation_knotMultiplicityV;
+    static ParamKey IPK_BSplineInterpolation_knotMultiplicityW;
+
 public:
     BSplineInterpolation(int nsd) : FEInterpolation(0),
         nsd(nsd)
@@ -128,7 +138,8 @@ public:
     }
 
     int giveNsd(const Element_Geometry_Type)  const override { return nsd; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, ParameterManager&pm, int elnum, int priority) override;
+    void postInitialize(ParameterManager&pm, int elnum) override;
 
     IntArray boundaryEdgeGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override
     { OOFEM_ERROR("Functions not supported for this interpolator.");}

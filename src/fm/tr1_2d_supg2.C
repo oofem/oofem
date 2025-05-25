@@ -56,6 +56,8 @@
 #include "crosssection.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -109,14 +111,14 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord &ir, int priority)
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, tripletsflag) ;
+        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, flag) ;
         if (flag) {
             this->temp_vof = this->vof;
         }
     }
 
     this->mat [ 0 ] = this->mat [ 1 ] = this->material;
-    PM_UPDATE_PARAMETER_AND_REPORT(mat [ 0 ], ppm, ir, this->number, IPK_TR1_2D_SUPG_mat0, priority, tripletsflag) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(mat [ 0 ], ppm, ir, this->number, IPK_TR1_2D_SUPG_mat0, priority, flag) ;
     if (flag) {
         this->material = this->mat [ 0 ];
     }
@@ -129,13 +131,13 @@ TR1_2D_SUPG2 :: giveInputRecord(DynamicInputRecord &input)
 {
     SUPGElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getName());
+        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getNameCStr());
     } else {
-        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getName());   
+        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getNameCStr());   
     }
 
-    input.setField(this->mat [ 0 ], IPK_TR1_2D_SUPG_mat0.getName());
-    input.setField(this->mat [ 1 ], IPK_TR1_2D_SUPG_mat1.getName());
+    input.setField(this->mat [ 0 ], IPK_TR1_2D_SUPG_mat0.getNameCStr());
+    input.setField(this->mat [ 1 ], IPK_TR1_2D_SUPG_mat1.getNameCStr());
 }
 
 

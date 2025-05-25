@@ -265,7 +265,7 @@ void qcNode :: setAsHanging()
     // set all doftype=2 in dofTypemap
 
     if ( this->giveDofTypeMap() == NULL ) {
-        this->dofTypemap = new std :: map< int, int >();
+        this->dofTypemap.clear();
     }
 
     int DofTypeMapSize = this->giveDofTypeMap()->size();

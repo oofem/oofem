@@ -46,6 +46,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "staggeredproblem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __SM_MODULE
  #include "../sm/Elements/LatticeElements/latticestructuralelement.h"
@@ -85,14 +87,15 @@ LatticeNeumannCouplingNode :: initializeFrom(InputRecord &ir, int priority)
     PM_UPDATE_PARAMETER(couplingNodes, ppm, ir, this->number, IPK_LatticeNeumannCouplingNode_couplingnodes, priority) ;
 }
 
-void postInitialize() {
-    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+void 
+LatticeNeumannCouplingNode::postInitialize() {
+    ParameterManager &ppm =  this->domain->elementPPM;
 
     Node::postInitialize();
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeNeumannCouplingNode_direction) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeDirichletCouplingNode_couplingelements) ;
-   
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeNeumannCouplingNode_couplingnodes);
 }
+
 
 void
 LatticeNeumannCouplingNode :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
