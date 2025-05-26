@@ -231,6 +231,8 @@ protected:
     std::string msg;
 public:
     ComponentInputException(const std::string keyword, ComponentType ct, int number, const std::string &reason);
+    ComponentInputException(ComponentType ct, int number, const std::string &reason);
+
     const char* what() const noexcept override;
 };
 

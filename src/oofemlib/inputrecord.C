@@ -207,6 +207,19 @@ ComponentInputException::ComponentInputException(const std::string keyword, Comp
           cname + "[" + std::to_string(number) + "]" + "\"";
 }
 
+
+ComponentInputException::ComponentInputException(ComponentType ct, int number, const std::string &reason)
+{
+    std::string cname;
+    if (ct==ctDofManager) {
+        cname = "DofManager";
+    } else if (ct ==ctElement) {
+        cname = "Element";
+    }
+    msg = "Value input error, reason: \"" + reason + "\"\n" + \
+          cname + "[" + std::to_string(number) + "]" + "\"";
+}
+
 const char* ComponentInputException::what() const noexcept
 { 
     return msg.c_str();

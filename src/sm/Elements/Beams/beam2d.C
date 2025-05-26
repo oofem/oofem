@@ -386,7 +386,7 @@ Beam2d :: initializeFrom(InputRecord &ir, int priority)
     // first call parent
     BeamBaseElement :: initializeFrom(ir, priority);
     ParameterManager &ppm = giveDomain()->elementPPM;
-    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_Beam2d_dofstocondense, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_Beam2d_dofsToCondense, priority) ;
 }
 
 void
@@ -394,8 +394,8 @@ Beam2d :: postInitialize()
 {
     BeamBaseElement :: postInitialize();
     ParameterManager &ppm = giveDomain()->elementPPM;
-    if (ppm.checkIfSet(this->number, IPK_Beam2d_dofsToCondense)) {
-        auto _val = ppm.getTempParameter(this->number, IPK_Beam2d_dofstocondense);
+    if (ppm.checkIfSet(this->number, IPK_Beam2d_dofsToCondense.getIndex())) {
+        auto _val = ppm.getTempParam(this->number, IPK_Beam2d_dofstocondense);
         IntArray val (std::get<IntArray>(*_val)); 
         
         if ( val.giveSize() >= 6 ) {

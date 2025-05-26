@@ -50,8 +50,9 @@
 namespace oofem {
 void IGAElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    Element :: initializeFrom(ir, ); // read nodes , material, cross section
-    this->giveInterpolation()->initializeFrom(ir, priority); // read geometry
+    ParameterManager &ppm = domain->elementPPM;
+    Element :: initializeFrom(ir, priority); // read nodes , material, cross section
+    this->giveInterpolation()->initializeFrom(ir, ppm, this->number, priority); // read geometry
 }
 
 void
@@ -59,13 +60,15 @@ IGAElement::postInitialize ()
 {
     int indx = 0;
     numberOfGaussPoints = 1;
+    ParameterManager &ppm = domain->elementPPM;
+
 #ifdef __MPI_PARALLEL_MODE
     int numberOfKnotSpans = 0;
 #endif
     Element::postInitialize();
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
-    this->giveInterpolation()->postInitialize();
+    this->giveInterpolation()->postInitialize(ppm, this->number);
 
 
     // generate individual IntegrationElements; one for each nonzero knot span
@@ -169,7 +172,7 @@ IGAElement::postInitialize ()
             }
         }
     } else {
-        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
+        throw ComponentInputException(ComponentInputException::ComponentType::ctElement, this->number, "Unsupported number of spatial dimensions");
     }
     
 #ifdef __MPI_PARALLEL_MODE
