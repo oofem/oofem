@@ -315,7 +315,7 @@ LIBeam3d2::postInitialize()
     ParameterManager &ppm = domain->elementPPM;
 
     NLStructuralElement::postInitialize();
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d2_refnode.getIndex()) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d2_refnode) ;
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified.");
     }

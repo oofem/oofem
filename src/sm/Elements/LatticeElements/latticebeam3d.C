@@ -267,6 +267,7 @@ LatticeBeam3d :: postInitialize()
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
     this->LatticeStructuralElement :: postInitialize();
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeBeam3d_diameter) ;
+}
 
 int
 LatticeBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

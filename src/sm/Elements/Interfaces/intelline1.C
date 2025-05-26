@@ -144,11 +144,11 @@ void
 IntElLine1 :: initializeFrom(InputRecord &ir, int priority)
 {
     StructuralInterfaceElement :: initializeFrom(ir, priority);
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_IntElLine1_axisymmode, priority) ;
 }
 
-void postInitialize()
+void IntElLine1::postInitialize()
 {
     StructuralInterfaceElement :: postInitialize();
     // Check if node numbering is ok

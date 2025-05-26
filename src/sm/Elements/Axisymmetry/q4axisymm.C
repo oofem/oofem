@@ -82,13 +82,13 @@ Q4Axisymm :: giveInterpolation() const
 
 void
 Q4Axisymm :: initializeFrom(InputRecord &ir, int priority)
-{
     // Initialize the receiver from the input record ir.
     // The priority is used to resolve conflicts in the input record
     // (e.g. when two elements are defined in the same input record).
     // The higher the priority, the more important the field is.
     // The default value of priority is 0.
 {
+    ParameterManager &ppm = domain->elementPPM;
     StructuralElement :: initializeFrom(ir, priority);
     PM_UPDATE_PARAMETER(numberOfFiAndShGaussPoints, ppm, ir, this->number, IPK_Q4Axisymm_nipfish, priority) ;
 }

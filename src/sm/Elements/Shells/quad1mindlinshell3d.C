@@ -458,7 +458,7 @@ void
 Quad1MindlinShell3D::initializeFrom(InputRecord &ir, int priority)
 {
     ParameterManager &ppm = this->giveDomain()->elementPPM;
-    StructuralElement::initializeFrom(ir);
+    StructuralElement::initializeFrom(ir, priority);
     PM_UPDATE_PARAMETER(reducedIntegrationFlag, ppm, ir, this->number, IPK_Element_activityTimeFunction, priority);
 }
 

@@ -601,7 +601,7 @@ GradientDamageElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatRespo
 
 
 void
-GradientDamageElement :: initializeFrom(InputRecord &i, int priority)
+GradientDamageElement :: initializeFrom(InputRecord &ir)
 {
     //nlGeo = 0;
     penalty = 0.;

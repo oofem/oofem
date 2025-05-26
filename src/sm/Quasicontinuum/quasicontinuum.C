@@ -149,7 +149,7 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
             int elemNumber = nelem + i;
             d->resizeElements(elemNumber);
             auto elem = classFactory.createElement(elemType, elemNumber, d);
-            irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
+            irEl.setField(interpolationMeshNodes [ i - 1 ], Element::IPK_Element_nodes.getNameCStr());
             //irEl.setField( ncrosssect, _IFT_Element_crosssect);
             //irEl.setField( nmat, _IFT_Element_mat);
             elem->initializeFrom(irEl, 1);

@@ -58,10 +58,10 @@
 
 namespace oofem {
 REGISTER_Element(LatticeLink3d);
-ParamKey LatticeLink3d::IK_LatticeLink3d_length("length");
-ParamKey LatticeLink3d::IK_LatticeLink3d_diameter("diameter");
-ParamKey LatticeLink3d::IK_LatticeLink3d_dirvector("dirvector");
-ParamKey LatticeLink3d::IK_LatticeLink3d_l_end("l_end");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_length("length");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_diameter("diameter");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_dirvector("dirvector");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_l_end("l_end");
 
 LatticeLink3d :: LatticeLink3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {

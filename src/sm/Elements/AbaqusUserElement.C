@@ -83,12 +83,12 @@ void AbaqusUserElement::initializeFrom(InputRecord &ir, int priority)
     StructuralElement::initializeFrom(ir, priority);
 
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(nCoords, ppm, ir, this->number, _IFT_AbaqusUserElement_numcoords, priority) ;
-    PM_UPDATE_PARAMETER(dofs, ppm, ir, this->number, _IFT_AbaqusUserElement_dofs, priority) ;
-    PM_UPDATE_PARAMETER(numSvars, ppm, ir, this->number, _IFT_AbaqusUserElement_numsvars, priority) ;
-    PM_UPDATE_PARAMETER(props, ppm, ir, this->number, _IFT_AbaqusUserElement_properties, priority) ;
-    PM_UPDATE_PARAMETER(jtype, ppm, ir, this->number, _IFT_AbaqusUserElement_type, priority) ;
-    PM_UPDATE_PARAMETER(filename, ppm, ir, this->number, _IFT_AbaqusUserElement_userElement, priority) ;
+    PM_UPDATE_PARAMETER(nCoords, ppm, ir, this->number, IPK_AbaqusUserElement_numcoords, priority) ;
+    PM_UPDATE_PARAMETER(dofs, ppm, ir, this->number, IPK_AbaqusUserElement_dofs, priority) ;
+    PM_UPDATE_PARAMETER(numSvars, ppm, ir, this->number, IPK_AbaqusUserElement_numsvars, priority) ;
+    PM_UPDATE_PARAMETER(props, ppm, ir, this->number, IPK_AbaqusUserElement_properties, priority) ;
+    PM_UPDATE_PARAMETER(jtype, ppm, ir, this->number, IPK_AbaqusUserElement_type, priority) ;
+    PM_UPDATE_PARAMETER(filename, ppm, ir, this->number, IPK_AbaqusUserElement_userElement, priority) ;
 }
 
 
@@ -97,11 +97,11 @@ void AbaqusUserElement::postInitialize()
     StructuralElement::postInitialize();
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
 
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_AbaqusUserElement_numcoords) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_AbaqusUserElement_numsvars) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_AbaqusUserElement_properties) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_AbaqusUserElement_type) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_AbaqusUserElement_userElement) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_numcoords) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_numsvars) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_properties) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_type) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_userElement) ;
 
     this->numberOfDofMans = dofManArray.giveSize();
     if ( this->numSvars < 0 ) {
@@ -171,12 +171,12 @@ void AbaqusUserElement::giveInputRecord(DynamicInputRecord &input)
 {
     StructuralElement::giveInputRecord(input);
 
-    input.setField(this->coords, _IFT_AbaqusUserElement_numcoords);
-    input.setField(this->dofs, _IFT_AbaqusUserElement_dofs);
-    input.setField(this->numSvars, _IFT_AbaqusUserElement_numsvars);
-    input.setField(this->props, _IFT_AbaqusUserElement_properties);
-    input.setField(this->jtype, _IFT_AbaqusUserElement_type);
-    input.setField(this->filename, _IFT_AbaqusUserElement_userElement);
+    input.setField(this->coords, IPK_AbaqusUserElement_numcoords.getNameCStr());
+    input.setField(this->dofs, IPK_AbaqusUserElement_dofs.getNameCStr());
+    input.setField(this->numSvars, IPK_AbaqusUserElement_numsvars.getNameCStr());
+    input.setField(this->props, IPK_AbaqusUserElement_properties.getNameCStr());
+    input.setField(this->jtype, IPK_AbaqusUserElement_type.getNameCStr());
+    input.setField(this->filename, IPK_AbaqusUserElement_userElement.getNameCStr());
 }
 
 void AbaqusUserElement::giveDofManDofIDMask(int inode, IntArray &answer) const

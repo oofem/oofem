@@ -121,7 +121,7 @@ void
 IntElLine2 :: initializeFrom(InputRecord &ir, int priority)
 {
     IntElLine1 :: initializeFrom(ir, priority);
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_UPDATE_PARAMETER(linear, ppm, ir, this->number, IPK_IntElLine2_LinearTraction, priority) ;
 }
 

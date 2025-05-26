@@ -182,19 +182,30 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int
 void
 BSplineInterpolation::postInitialize(ParameterManager&pm, int elnum)
 {
+    ParamKey* IPK_knotVector [ 3 ] = {
+        &IPK_BSplineInterpolation_knotVectorU,
+        &IPK_BSplineInterpolation_knotVectorV,
+        &IPK_BSplineInterpolation_knotVectorW
+    };
+
+    ParamKey* IPK_knotMultiplicity [ 3 ] = {
+        &IPK_BSplineInterpolation_knotMultiplicityU,
+        &IPK_BSplineInterpolation_knotMultiplicityV,
+        &IPK_BSplineInterpolation_knotMultiplicityW
+    };
 
     for ( int n = 0; n < nsd; n++ ) {
         //IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         int size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            throw ValueInputException(ir, IFT_knotVector [ n ], "invalid size of knot vector");
+            throw ComponentInputException(IPK_knotVector[n]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "invalid size of knot vector");
         }
 
         // check for monotonicity of knot vector without multiplicity
         double knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                throw ValueInputException(ir, IFT_knotVector [ n ], "knot vector is not monotonic");
+                throw ComponentInputException(IPK_knotVector [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot vector is not monotonic");
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -216,23 +227,23 @@ BSplineInterpolation::postInitialize(ParameterManager&pm, int elnum)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity size mismatch");
+                throw ComponentInputException(IPK_knotMultiplicity [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot multiplicity size mismatch");
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity out of range");
+                    throw ComponentInputException(IPK_knotMultiplicity [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot multiplicity out of range");
                 }
             }
 
             // check for multiplicity of the first and last one
             if ( knotMultiplicity [ n ].at(1) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IPK_knotVector [ n ]->getNameCStr(), degree [ n ] + 1);
             }
 
             if ( knotMultiplicity [ n ].at(size) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IPK_knotVector [ n ]->getNameCStr(), degree [ n ] + 1);
             }
         }
 

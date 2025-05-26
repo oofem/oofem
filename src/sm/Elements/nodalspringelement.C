@@ -129,10 +129,10 @@ NodalSpringElement :: postInitialize()
   StructuralElement::postInitialize();
   ParameterManager &ppm =  this->giveDomain()->elementPPM;
   PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_dofmask) ;
-  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_NodalSpringElement_springConstants) ;
-  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_nodes) ;
+  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_springConstants) ;
+  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_nodes) ;
 
-  if (!pmm.hasParameter(this->number, IPK_NodalSpringElement_masses)) {
+  if (!ppm.checkIfSet(this->number, IPK_NodalSpringElement_masses.getIndex())) {
     this->masses.resize(this->dofMask.giveSize());
     this->masses.zero();
   }

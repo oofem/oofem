@@ -36,19 +36,28 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "iga.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 // optimized version of A4.4 for d=1
 #define OPTIMIZED_VERSION_A4dot4
 
+ParamKey NURBSInterpolation::IPK_NURBSInterpolation_weights("weights");
+
 void
-NURBSInterpolation :: initializeFrom(InputRecord &ir)
+NURBSInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int elnum, int priority)
 {
-    BSplineInterpolation :: initializeFrom(ir);
-    
-    IR_GIVE_FIELD(ir, weights, _IFT_NURBSInterpolation_weights);
+    BSplineInterpolation :: initializeFrom(ir, pm, elnum, priority);
+    PM_UPDATE_PARAMETER(weights, pm, ir, elnum, IPK_NURBSInterpolation_weights, priority);
 }
 
+void
+NURBSInterpolation :: postInitialize(ParameterManager &pm, int elnum)
+{
+    BSplineInterpolation :: postInitialize(pm, elnum);
+    PM_ELEMENT_ERROR_IFNOTSET(pm, elnum, IPK_NURBSInterpolation_weights);
+}
     
 void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {

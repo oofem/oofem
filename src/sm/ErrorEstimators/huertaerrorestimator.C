@@ -1231,7 +1231,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                     bcs.followedBy(bcDofId);
                                     dofids.followedBy(nodeDof->giveDofID());
                                 }
-                                ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCS());
+                                ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
                                 ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                 // copy node load
@@ -1692,8 +1692,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         bcs.followedBy(bcDofId);
                                         dofids.followedBy(nodeDof->giveDofID());
                                     }
-                                    ir->setField(bcs, IPK_DofManager_bc.getNameCStr());
-                                    ir->setField(dofids, IPK_DofManager_dofidmask.getNameCStr());
+                                    ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
+                                    ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                     // copy node load
 
@@ -2297,8 +2297,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             bcs.followedBy(bcDofId);
                                             dofids.followedBy(nodeDof->giveDofID());
                                         }
-                                        ir->setField(bcs, IPK_DofManager_bc.getNameCStr());
-                                        ir->setField(dofids, IPK_DofManager_dofidmask.getNameCStr());
+                                        ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
+                                        ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                         // copy node load
 

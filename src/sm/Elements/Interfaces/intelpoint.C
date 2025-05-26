@@ -240,15 +240,15 @@ IntElPoint :: initializeFrom(InputRecord &ir, int priority)
     ParameterManager & ppm = this->giveDomain()->elementPPM;
     StructuralInterfaceElement :: initializeFrom(ir, priority);
 
-    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, _IFT_IntElPoint_refnode, priority);
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_IntElPoint_refnode, priority);
     FloatArray n;
-    PM_UPDATE_PARAMETER_AND_REPORT(normal, ppm, ir, this->number, _IFT_IntElPoint_normal, priority, flag);
+    PM_UPDATE_PARAMETER_AND_REPORT(n, ppm, ir, this->number, IPK_IntElPoint_normal, priority, flag);
     if (flag) {
         normal = n;
     }
-    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, _IFT_IntElPoint_refnode, priority);
-    PM_UPDATE_PARAMETER(area, ppm, ir, this->number, _IFT_IntElPoint_area, priority);
-    PM_UPDATE_PARAMETER(length, ppm, ir, this->number, _IFT_IntElPoint_length, priority);   
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_IntElPoint_refnode, priority);
+    PM_UPDATE_PARAMETER(area, ppm, ir, this->number, IPK_IntElPoint_area, priority);
+    PM_UPDATE_PARAMETER(length, ppm, ir, this->number, IPK_IntElPoint_length, priority);   
 }
 
 void
@@ -256,8 +256,8 @@ IntElPoint :: postInitialize()
 {
     StructuralInterfaceElement :: postInitialize();
     ParameterManager & ppm = this->giveDomain()->elementPPM;
-    bool refnodeFlag = ppm.checkIfSet(this->number, _IFT_IntElPoint_refnode);
-    bool normalFlag = ppm.checkIfSet(this->number, _IFT_IntElPoint_normal);
+    bool refnodeFlag = ppm.checkIfSet(this->number, IPK_IntElPoint_refnode.getIndex());
+    bool normalFlag = ppm.checkIfSet(this->number, IPK_IntElPoint_normal.getIndex());
     if ( refnodeFlag && normalFlag ) {
         OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
     }

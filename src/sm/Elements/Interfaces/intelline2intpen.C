@@ -54,7 +54,7 @@ IntElLine2IntPen::IntElLine2IntPen(int n, Domain * d):IntElLine2(n, d)
 
 
 void
-IntElLine2IntPen :: initializeFrom(InputRecord &ir, priority)
+IntElLine2IntPen :: initializeFrom(InputRecord &ir, int priority)
 {
     StructuralInterfaceElement :: initializeFrom(ir, priority);
     ParameterManager &ppm = giveDomain()->elementPPM;

@@ -209,15 +209,17 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
 
 void IGATSplineElement :: initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &pm = domain->elementPPM;
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
     Element :: initializeFrom(ir, priority); // read nodes , material, cross section
 
-    this->giveInterpolation()->initializeFrom(ir, priority); // read geometry
+    interpol->initializeFrom(ir, pm, this->number, priority); // read geometry
 }
 
 void
 IGATSplineElement::postInitialize()
 {
+    ParameterManager &pm = domain->elementPPM;
     IGAElement::postInitialize();
     int indx = 0, numberOfGaussPoints = 1;
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
@@ -225,7 +227,7 @@ IGATSplineElement::postInitialize()
     this->numberOfDofMans = dofManArray.giveSize();
     // set number of control points before initialization HUHU HAHA
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
-    interpol->postInitialize();
+    interpol->postInitialize(pm, this->number);
 
    // generate individual IntegrationElements; one for each nonzero knot span
     int nsd = giveNsd(this->giveGeometryType());
@@ -270,7 +272,7 @@ IGATSplineElement::postInitialize()
             }
         }
     } else {
-        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
+        throw ComponentInputException(ComponentInputException::ComponentType::ctElement, this->number, "Domain: unsupported number of spatial dimensions");
     }
 }
 

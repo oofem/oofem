@@ -395,11 +395,11 @@ Beam2d :: postInitialize()
     BeamBaseElement :: postInitialize();
     ParameterManager &ppm = giveDomain()->elementPPM;
     if (ppm.checkIfSet(this->number, IPK_Beam2d_dofsToCondense.getIndex())) {
-        auto _val = ppm.getTempParam(this->number, IPK_Beam2d_dofstocondense);
+        auto _val = ppm.getTempParam(this->number, IPK_Beam2d_dofsToCondense.getIndex());
         IntArray val (std::get<IntArray>(*_val)); 
         
         if ( val.giveSize() >= 6 ) {
-            throw ValueInputException(ir, IPK_Beam2d_dofstocondense.getName(), "wrong input data for condensed dofs");
+            throw ComponentInputException(IPK_Beam2d_dofsToCondense.getName(), ComponentInputException::ComponentType::ctElement, this->number, "wrong input data for condensed dofs");
         }
 
         DofIDItem mask[] = {

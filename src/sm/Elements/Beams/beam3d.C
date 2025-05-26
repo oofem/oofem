@@ -66,7 +66,7 @@ ParamKey Beam3d::IPK_Beam3d_refnode("refnode");
 ParamKey Beam3d::IPK_Beam3d_refangle("refangle");
 ParamKey Beam3d::IPK_Beam3d_yaxis("yaxis");
 ParamKey Beam3d::IPK_Beam3d_zaxis("zaxis");
-ParamKey Beam3d::IPK_Beam3d_subsoilMat("subsoilmat");
+ParamKey Beam3d::IPK_Beam3d_subsoilmat("subsoilmat");
 ParamKey Beam3d::IPK_Beam3d_dofsToCondense("dofstocondense");
 
 FEI3dLineLin Beam3d :: interp;
@@ -569,7 +569,7 @@ Beam3d :: initializeFrom(InputRecord &ir, int priority)
     PM_UPDATE_PARAMETER(zaxis, ppm, ir, this->number, IPK_Beam3d_zaxis, priority) ;
     PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_Beam3d_refnode, priority) ;
     PM_UPDATE_PARAMETER(referenceAngle, ppm, ir, this->number, IPK_Beam3d_refangle, priority) ;
-    PM_UPDATE_PARAMETER(subsoilMat, ppm, ir, this->number, IPK_Beam3d_subsoilMat, priority) ;
+    PM_UPDATE_PARAMETER(subsoilMat, ppm, ir, this->number, IPK_Beam3d_subsoilmat, priority) ;
     PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_Beam3d_dofsToCondense, priority) ;
 
 }
@@ -590,14 +590,14 @@ Beam3d :: postInitialize()
     bool refangle = ppm.checkIfSet(this->number, IPK_Beam3d_refangle.getIndex());
 
     if (!(yaxis || zaxis || refnode || refangle)) {
-        throw ValueInputException(ir, "Beam3d", "axis, reference node, or angle not set");
+        throw ComponentInputException(ComponentInputException::ComponentType::ctElement, this->number, "Beam3d: axis, reference node, or angle not set");
     }
 
     if ( ppm.checkIfSet(this->number, IPK_Beam3d_dofsToCondense.getIndex()) ) {
-        auto _val = ppm.getTempParameter(this->number, IPK_Beam2d_dofstocondense);
+        auto _val = ppm.getTempParam(this->number, IPK_Beam3d_dofsToCondense.getIndex());
         IntArray val (std::get<IntArray>(*_val)); 
         if ( val.giveSize() >= 12 ) {
-            throw ValueInputException(ir, IPK_Beam3d_dofsToCondense.getName(), "wrong input data for condensed dofs");
+            throw ComponentInputException(IPK_Beam3d_dofsToCondense.getName(), ComponentInputException::ComponentType::ctElement, this->number, "wrong input data for condensed dofs");
         }
 
         //dofsToCondense = new IntArray(val);

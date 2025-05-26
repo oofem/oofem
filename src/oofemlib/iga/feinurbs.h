@@ -46,6 +46,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * Interpolation class for NURBS.
  */
@@ -53,11 +54,13 @@ class OOFEM_EXPORT NURBSInterpolation : public BSplineInterpolation
 {
 protected:
     FloatArray weights;
+    static ParamKey IPK_NURBSInterpolation_weights;
 
 public:
     NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }
 
     void initializeFrom(InputRecord &ir, ParameterManager&pm, int elnum, int priority) override;
+    void postInitialize(ParameterManager&pm, int elnum) override;
 
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

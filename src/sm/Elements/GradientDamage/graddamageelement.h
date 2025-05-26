@@ -66,7 +66,7 @@ public:
     GradientDamageElement();
     virtual ~GradientDamageElement() { }
 
-    virtual void initializeFrom(InputRecord &ir, int priority);
+    virtual void initializeFrom(InputRecord &ir);
 
 protected:
     virtual StructuralElement *giveStructuralElement() = 0;

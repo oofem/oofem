@@ -175,7 +175,7 @@ SpringElement :: initializeFrom(InputRecord &ir, int priority)
     }
     PM_UPDATE_PARAMETER(springConstant, ppm, ir, this->number, IPK_SpringElement_springConstant, priority) ;
     PM_UPDATE_PARAMETER(mass, ppm, ir, this->number, IPK_SpringElement_mass, priority) ;
-    PM_UPDATE_PARAMETER_AND_REPORT(dir, ppm, ir, this->number, IPK_SpringElement_orientation, priority, dirFag) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(dir, ppm, ir, this->number, IPK_SpringElement_orientation, priority, dirFlag) ;
     if (dirFlag) {
         this->dir.normalize();
     }

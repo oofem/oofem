@@ -70,7 +70,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 
 
 void
-LumpedMassElement :: initializeFrom(InputRecord &ir, priority)
+LumpedMassElement :: initializeFrom(InputRecord &ir, int priority)
 {
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
     StructuralElement :: initializeFrom(ir, priority);
