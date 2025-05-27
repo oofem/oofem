@@ -59,7 +59,6 @@ void
 IGAElement::postInitialize ()
 {
     int indx = 0;
-    numberOfGaussPoints = 1;
     ParameterManager &ppm = domain->elementPPM;
 
 #ifdef __MPI_PARALLEL_MODE
@@ -221,7 +220,7 @@ IGATSplineElement::postInitialize()
 {
     ParameterManager &pm = domain->elementPPM;
     IGAElement::postInitialize();
-    int indx = 0, numberOfGaussPoints = 1;
+    int indx = 0;
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();

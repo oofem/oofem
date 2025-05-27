@@ -94,7 +94,7 @@ protected:
     IntArray knotSpanParallelMode;
 #endif
 public:
-    IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
+    IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { numberOfGaussPoints=1;}
     void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
 

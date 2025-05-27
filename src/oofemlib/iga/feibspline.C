@@ -68,9 +68,11 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int
         }
     }
     PM_UPDATE_PARAMETER(knotValues [ 0 ], pm, ir, elnum, IPK_BSplineInterpolation_knotVectorU, priority);
+    PM_UPDATE_PARAMETER(knotMultiplicity [ 0 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityU, priority);
+
     if (nsd>1) {
         PM_UPDATE_PARAMETER(knotValues [ 1 ], pm, ir, elnum, IPK_BSplineInterpolation_knotVectorV, priority);
-        PM_UPDATE_PARAMETER(knotMultiplicity [ 1 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityU, priority);
+        PM_UPDATE_PARAMETER(knotMultiplicity [ 1 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityV, priority);
     }
 
     if (nsd >2) {
@@ -78,105 +80,6 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int
         PM_UPDATE_PARAMETER(knotMultiplicity [ 2 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityW, priority);
     }
 
-
-
-/////////
-    InputFieldType IFT_knotVector [ 3 ] = {
-        _IFT_BSplineInterpolation_knotVectorU,
-        _IFT_BSplineInterpolation_knotVectorV,
-        _IFT_BSplineInterpolation_knotVectorW
-    };
-
-    InputFieldType IFT_knotMultiplicity [ 3 ] = {
-        _IFT_BSplineInterpolation_knotMultiplicityU,
-        _IFT_BSplineInterpolation_knotMultiplicityV,
-        _IFT_BSplineInterpolation_knotMultiplicityW
-    };
-
-    IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
-    if ( degree_tmp.giveSize() != nsd ) {
-        throw ValueInputException(ir, _IFT_BSplineInterpolation_degree, "degree size mismatch");
-    }
-
-    for ( int i = 0; i < nsd; i++ ) {
-        degree [ i ] = degree_tmp.at(i + 1);
-    }
-
-    for ( int n = 0; n < nsd; n++ ) {
-        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
-        int size = knotValues [ n ].giveSize();
-        if ( size < 2 ) {
-            throw ValueInputException(ir, IFT_knotVector [ n ], "invalid size of knot vector");
-        }
-
-        // check for monotonicity of knot vector without multiplicity
-        double knotVal = knotValues [ n ].at(1);
-        for ( int i = 1; i < size; i++ ) {
-            if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                throw ValueInputException(ir, IFT_knotVector [ n ], "knot vector is not monotonic");
-            }
-
-            knotVal = knotValues [ n ].at(i + 1);
-        }
-
-        // transform knot vector to interval <0;1>
-        double span = knotVal - knotValues [ n ].at(1);
-        for ( int i = 1; i <= size; i++ ) {
-            knotValues [ n ].at(i) /= span;
-        }
-
-        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicity [ n ]);
-        if ( knotMultiplicity [ n ].giveSize() == 0 ) {
-            // default multiplicity
-            knotMultiplicity [ n ].resize(size);
-            // skip the first and last one
-            for ( int i = 1; i < size - 1; i++ ) {
-                knotMultiplicity [ n ].at(i + 1) = 1;
-            }
-        } else {
-            if ( knotMultiplicity [ n ].giveSize() != size ) {
-                throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity size mismatch");
-            }
-
-            // check for multiplicity range (skip the first and last one)
-            for ( int i = 1; i < size - 1; i++ ) {
-                if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity out of range");
-                }
-            }
-
-            // check for multiplicity of the first and last one
-            if ( knotMultiplicity [ n ].at(1) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
-            }
-
-            if ( knotMultiplicity [ n ].at(size) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
-            }
-        }
-
-        // multiplicity of the 1st and last knot set to degree + 1
-        knotMultiplicity [ n ].at(1) = knotMultiplicity [ n ].at(size) = degree [ n ] + 1;
-
-        // sum the size of knot vector with multiplicity values
-        int sum = 0;
-        for ( int i = 0; i < size; i++ ) {
-            sum += knotMultiplicity [ n ][i];
-        }
-
-        knotVector [ n ].resize( sum );
-
-        // fill knot vector including multiplicity values
-        int pos = 0;
-        for ( int i = 0; i < size; i++ ) {
-            for ( int j = 0; j < knotMultiplicity [ n ].at(i + 1); j++ ) {
-                knotVector [ n ] [ pos++ ] = knotValues [ n ].at(i + 1);
-            }
-        }
-
-        numberOfKnotSpans [ n ] = size - 1;
-        numberOfControlPoints [ n ] = sum - degree [ n ] - 1;
-    }
 }
 
 void
