@@ -273,7 +273,7 @@ BondLink3d :: postInitialize()
 {
     // first call parent
     StructuralElement :: postInitialize();
-    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    ParameterManager &ppm = domain->elementPPM;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_length);
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_diameter);
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_dirvector);

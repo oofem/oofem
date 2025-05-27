@@ -54,6 +54,7 @@
 
 namespace oofem {
 REGISTER_Element(LIBeam3dNL);
+ParamKey LIBeam3dNL::IPK_LIBeam3dNL_refnode("refnode");
 
 LIBeam3dNL::LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3)   //, kappa (3)
 {

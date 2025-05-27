@@ -79,7 +79,10 @@
 namespace oofem {
 XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
     XfemElementInterface(e)
-{}
+{
+    mCZMaterialNum=-1;
+    mUsePlaneStrain = false;
+}
 
 bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
@@ -1454,22 +1457,12 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 }
 
 void
-XfemStructuralElementInterface :: initializeCZFrom(InputRecord &ir)
+XfemStructuralElementInterface :: initializeCZFrom(InputRecord &ir, int priority)
 {
-    int material = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_XfemElementInterface_CohesiveZoneMaterial);
-    mCZMaterialNum = material;
-
-
-    // Number of Gauss points used when integrating the cohesive zone
-    IR_GIVE_OPTIONAL_FIELD(ir, mCSNumGaussPoints, _IFT_XfemElementInterface_NumIntPointsCZ);
-    //    printf("mCSNumGaussPoints: %d\n", mCSNumGaussPoints );
-
-    int planeStrainFlag = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, planeStrainFlag, _IFT_XfemElementInterface_PlaneStrain);
-    if ( planeStrainFlag == 1 ) {
-        mUsePlaneStrain = true;
-    }
+    ParameterManager &pm = this->element->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(mCZMaterialNum, pm, ir, element->giveNumber(), IPK_XfemElementInterface_CohesiveZoneMaterial, priority);
+    PM_UPDATE_PARAMETER(mCSNumGaussPoints, pm, ir, element->giveNumber(), IPK_XfemElementInterface_NumIntPointsCZ, priority);
+    PM_UPDATE_PARAMETER(mUsePlaneStrain, pm, ir, element->giveNumber(), IPK_XfemElementInterface_PlaneStrain, priority);
 }
 
 void XfemStructuralElementInterface :: giveCZInputRecord(DynamicInputRecord &input)

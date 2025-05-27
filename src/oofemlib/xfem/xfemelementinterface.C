@@ -46,12 +46,20 @@
 #include "floatmatrix.h"
 #include "dynamicinputrecord.h"
 #include "mathfem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #include "XFEMDebugTools.h"
 #include <string>
 #include <sstream>
 
 namespace oofem {
+
+ParamKey XfemElementInterface::IPK_XfemElementInterface_CohesiveZoneMaterial("czmaterial");
+ParamKey XfemElementInterface::IPK_XfemElementInterface_NumIntPointsCZ("nipcz");
+ParamKey XfemElementInterface::IPK_XfemElementInterface_PlaneStrain("useplanestrain");
+
+
 XfemElementInterface :: XfemElementInterface(Element *e) :
     Interface(),
     element(e),

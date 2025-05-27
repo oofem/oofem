@@ -242,7 +242,7 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
     // construct OOFEMTXTInputRecord from bp::dict **kw
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // pass input record to elem
-    elem->initializeFrom(ir);
+    elem->initializeFrom(ir, 1);
     // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
     return py::cast(elem.release());
 }

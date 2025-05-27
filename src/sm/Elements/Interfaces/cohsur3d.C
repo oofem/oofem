@@ -391,17 +391,17 @@ CohesiveSurface3d :: postInitialize()
 
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_CohesiveSurface3d_area);
     if ( area < 0. ) {
-        throw ValueInputException(ir, _IFT_CohSur3d_area, "negative area specified");
+        throw ComponentInputException(IPK_CohesiveSurface3d_area.getName(), ComponentInputException::ComponentType::ctElement, this->number, "negative area specified");
     }
 
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
     if ( numberOfDofMans <= 0 ) {
-        throw ValueInputException(ir, _IFT_Element_nodes, "unread nodes" );
+        throw ComponentInputException(Element::IPK_Element_nodes.getName(), ComponentInputException::ComponentType::ctElement, this->number, "unread nodes" );
     }
 
     if ( ( numberOfDofMans == 3 ) & ( kx == 0 ) & ( ky == 0 ) & ( kz == 0 ) ) {
-        throw ValueInputException(ir, _IFT_CohSur3d_kx, "no periodic shift defined" );
+        throw ComponentInputException(IPK_CohesiveSurface3d_kx.getName(), ComponentInputException::ComponentType::ctElement, this->number, "no periodic shift defined" );
     }
 
 
@@ -417,7 +417,7 @@ CohesiveSurface3d :: postInitialize()
     // evaluate the length
     giveLength();
     if ( length <= 0. ) {
-        throw ValueInputException(ir, _IFT_Element_nodes, "negative length evaluated");
+        throw ComponentInputException(Element::IPK_Element_nodes.getName(), ComponentInputException::ComponentType::ctElement, this->number, "negative length evaluated");
         // evaluate the coordinates of the center
         //evaluateCenter(); /// @todo This will never execute. Verify this / Mikael
     }

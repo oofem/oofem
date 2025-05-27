@@ -86,7 +86,7 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    DofManager :: initializeFrom(ir);
+    DofManager :: initializeFrom(ir, priority);
 
     PM_UPDATE_PARAMETER_AND_REPORT(coordinates, ppm, ir, this->number, IPK_Node_coords, priority, flag) ;
     //

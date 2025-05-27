@@ -52,13 +52,13 @@
 namespace oofem {
 REGISTER_Element(AbaqusUserElement);
 
-static ParamKey IPK_AbaqusUserElement_userElement("uel");
-static ParamKey IPK_AbaqusUserElement_numcoords("coords");
-static ParamKey IPK_AbaqusUserElement_dofs("dofs");
-static ParamKey IPK_AbaqusUserElement_numsvars("numsvars");
-static ParamKey IPK_AbaqusUserElement_properties("properties");
-static ParamKey IPK_AbaqusUserElement_type("type");
-static ParamKey IPK_AbaqusUserElement_name("name");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_userElement("uel");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_numcoords("coords");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_dofs("dofs");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_numsvars("numsvars");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_properties("properties");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_type("type");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_name("name");
 
 AbaqusUserElement::AbaqusUserElement(int n, Domain *d) :
     StructuralElement(n, d), uelobj(NULL), hasTangentFlag(false), uel(NULL)

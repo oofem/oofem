@@ -74,7 +74,7 @@ public:
 
     virtual void initializeCZFrom(InputRecord &ir, int priority);
     virtual void giveCZInputRecord(DynamicInputRecord &input);
-    virtual void postInitialize ();
+    virtual void postInitialize () {}
 
     virtual void initializeCZMaterial();
 
