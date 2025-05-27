@@ -71,7 +71,7 @@
 
 namespace oofem {
 
-ParamKey Element::IPK_Element_mat("material");
+ParamKey Element::IPK_Element_mat("mat");
 ParamKey Element::IPK_Element_crosssect("crosssect");
 ParamKey Element::IPK_Element_nodes("nodes");
 ParamKey Element::IPK_Element_bodyload("bodyloads");

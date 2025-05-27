@@ -61,7 +61,7 @@
 
 namespace oofem {
 REGISTER_Element(BondLink3d);
-ParamKey BondLink3d::IPK_BondLink3d_length("bondLength");
+ParamKey BondLink3d::IPK_BondLink3d_length("length");
 ParamKey BondLink3d::IPK_BondLink3d_diameter("diameter");
 ParamKey BondLink3d::IPK_BondLink3d_dirvector("dirvector");
 ParamKey BondLink3d::IPK_BondLink3d_length_end("length_end");

@@ -975,8 +975,8 @@ Domain :: postInitialize()
                 // this is obsolete feature, but supported here for backwards compatibility
                 // the supported way is to set cross section using set element properties
                 size_t indx = Element::IPK_Element_crosssect.getIndex();
-                if (this->elementPPM.getPriority(ielem-1, indx) < 1) {
-                    this->elementPPM.setPriority(ielem-1, indx, 1);
+                if (this->elementPPM.getPriority(ielem, indx) < 1) {
+                    this->elementPPM.setPriority(ielem, indx, 1);
                     element->setCrossSection(i);
                 }  
             }

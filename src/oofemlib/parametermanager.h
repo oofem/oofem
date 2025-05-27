@@ -57,9 +57,9 @@ namespace oofem {
     { \
         std::size_t _indx=_paramkey.getIndex(); \
         const char* _kwd = _paramkey.getName().c_str(); \
-        if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
+        if ((_prio > _pm.getPriority(_componentnum, _indx)) && (_ir.hasField(_kwd))) { \
             _ir.giveField(_val, _kwd); \
-            _pm.setPriority(_componentnum-1, _indx, _prio); \
+            _pm.setPriority(_componentnum, _indx, _prio); \
         } \
     }
 
@@ -67,9 +67,9 @@ namespace oofem {
     { \
         std::size_t _indx=_paramkey.getIndex(); \
         const char* _kwd = _paramkey.getName().c_str(); \
-        if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
+        if ((_prio > _pm.getPriority(_componentnum, _indx)) && (_ir.hasField(_kwd))) { \
             _ir.giveField(_val, _kwd); \
-            _pm.setPriority(_componentnum-1, _indx, _prio); \
+            _pm.setPriority(_componentnum, _indx, _prio); \
             _flag=true; \
         } else { \
             _flag=false; \
@@ -80,11 +80,11 @@ namespace oofem {
     { \
         std::size_t _indx=_paramkey.getIndex(); \
         const char* _kwd = _paramkey.getName().c_str(); \
-        if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
+        if ((_prio > _pm.getPriority(_componentnum, _indx)) && (_ir.hasField(_kwd))) { \
             _type _val; \
             _ir.giveField(_val, _kwd); \
-            _pm.setPriority(_componentnum-1, _indx, _prio); \
-            _pm.setTemParam(_componentnum-1, _indx, _val); \
+            _pm.setPriority(_componentnum, _indx, _prio); \
+            _pm.setTemParam(_componentnum, _indx, _val); \
         } \
     }
 
@@ -92,8 +92,8 @@ namespace oofem {
     { \
         std::size_t _indx=_paramkey.getIndex(); \
         const char* _kwd = _paramkey.getName().c_str(); \
-        if ((_prio > _pm.getPriority(_componentnum-1, _indx)) && (_ir.hasField(_kwd))) { \
-            _pm.setPriority(_componentnum-1, _indx, _prio); \
+        if ((_prio > _pm.getPriority(_componentnum, _indx)) && (_ir.hasField(_kwd))) { \
+            _pm.setPriority(_componentnum, _indx, _prio); \
             _flag=true; \
         } else { \
             _flag=false; \
@@ -102,14 +102,14 @@ namespace oofem {
 
 #define PM_ELEMENT_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
-        if (!_pm.checkIfSet(_componentnum-1, _paramkey.getIndex())) { \
+        if (!_pm.checkIfSet(_componentnum, _paramkey.getIndex())) { \
             OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _paramkey.getName());\
         }\
     }    
 
 #define PM_DOFMAN_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
-        if (!_pm.checkIfSet(_componentnum-1, _paramkey.getIndex())) { \
+        if (!_pm.checkIfSet(_componentnum, _paramkey.getIndex())) { \
             OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _paramkey.getName());\
         }\
     }    
@@ -133,15 +133,16 @@ public:
     void setPriority(size_t componentIndex, size_t paramIndex, int priority) {
         std::unique_lock lock(mtx);
         if (componentIndex >= priorities.size()) {
-            priorities.resize(componentIndex + 1);
+            priorities.resize(componentIndex);
         }
-        priorities[componentIndex][paramIndex] = priority;
+        priorities[componentIndex-1][paramIndex] = priority;
     }
 
     int getPriority(size_t componentIndex, size_t paramIndex) const {
         std::shared_lock lock(mtx);
-        if (componentIndex < priorities.size() && priorities[componentIndex].find(paramIndex) != priorities[componentIndex].end()) {
-            return priorities[componentIndex].at(paramIndex);
+        int ci1 = componentIndex - 1; // Adjust for 0-based index
+        if (componentIndex < priorities.size() && priorities[ci1].find(paramIndex) != priorities[ci1].end()) {
+            return priorities[ci1].at(paramIndex);
         }
         return -1; // Return -1 if priority is not found
     }
@@ -152,32 +153,38 @@ public:
         tempParams.clear();
     }
 
-    bool checkIfSet(size_t componentIndex, size_t paramIndex) {       
-        return priorities[componentIndex].find(paramIndex) != priorities[componentIndex].end();
+    bool checkIfSet(size_t componentIndex, size_t paramIndex) {
+        int ci1 = componentIndex - 1; // Adjust for 0-based index       
+        return priorities[ci1].find(paramIndex) != priorities[ci1].end();
     }
 
     void setTemParam(size_t componentIndex, size_t paramIndex, const paramValue &value) {
         std::unique_lock lock(mtx);
-        tempParams[paramIndex] = value;
+        if (componentIndex >= tempParams.size()) {
+            tempParams.resize(componentIndex);
+        }
+        tempParams[componentIndex-1][paramIndex] = value;
     }
     std::optional<paramValue> getTempParam(size_t componentIndex, size_t paramIndex) const {
         std::shared_lock lock(mtx);
-        auto it = tempParams.find(paramIndex);
-        if (it != tempParams.end()) {
+        int ci1 = componentIndex - 1; // Adjust for 0-based index
+        auto it = tempParams[ci1].find(paramIndex);
+        if (it != tempParams[ci1].end()) {
             return it->second;
         }
         return std::nullopt; // Return nullopt if parameter is not found
     }
     bool hasTempParam(size_t componentIndex, size_t paramIndex) const {
         std::shared_lock lock(mtx);
-        return tempParams.find(paramIndex) != tempParams.end();
+        int ci1 = componentIndex - 1; // Adjust for 0-based index
+        return tempParams[ci1].find(paramIndex) != tempParams[ci1].end();
     }
 
 private:
     std::vector<std::unordered_map<size_t, int>> priorities;
     mutable std::shared_mutex mtx;
 
-    std::unordered_map<size_t, paramValue> tempParams;
+    std::vector<std::unordered_map<size_t, paramValue>> tempParams;
 };
 
 
