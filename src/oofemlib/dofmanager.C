@@ -333,14 +333,15 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) cons
 void
 DofManager :: initializeFrom(InputRecord &ir, int priority)
 {
-    bool boundaryFlag, sharedFlag, remoteFlag, nullFlag;
+    bool boundaryFlag, sharedFlag, remoteFlag, nullFlag, dofTypeMaskFlag;
+    IntArray dofTypeMask;
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
     PM_UPDATE_PARAMETER(loadArray, ppm, ir, this->number, IPK_DofManager_load, priority) ;
 
     PM_UPDATE_PARAMETER(dofidmask, ppm, ir, this->number, IPK_DofManager_dofidmask, priority) ;
     PM_UPDATE_PARAMETER(mBC, ppm, ir, this->number, IPK_DofManager_bc, priority) ;
     PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_ic, priority) ;
-    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_doftypemask, priority) ;
+    PM_UPDATE_PARAMETER_AND_REPORT(dofTypeMask, ppm, ir, this->number, IPK_DofManager_doftypemask, priority, dofTypeMaskFlag) ;
     PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_DofManager_boundaryflag, priority, boundaryFlag) ;
     if ( boundaryFlag ) {
         isBoundaryFlag = true;
@@ -360,8 +361,80 @@ DofManager :: initializeFrom(InputRecord &ir, int priority)
     }
     PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_mastermask, priority) ;
   
+    if ( dofTypeMaskFlag) {
+        ppm.setTemParam(this->number, IPK_DofManager_doftypemask.getIndex(), dofTypeMask);
+        if ( dofTypeMask.giveSize() != dofidmask.giveSize() ) {
+            OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofidmask.giveSize());
+        }
+
+        this->dofTypemap.clear();
+        for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
+            if ( dofTypeMask.at(i) != DT_master ) {
+                ( this->dofTypemap ) [ dofidmask.at(i) ] = dofTypeMask.at(i);
+            }
+        }
+    }
+    
 }
 
+void DofManager :: postInitialize()
+{
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+    
+    if ( ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex()) ) {
+        if ( mBC.giveSize() != dofidmask.giveSize() ) {
+            OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofidmask.giveSize());
+        }
+        this->dofBCmap.clear();
+        for ( int i = 1; i <= mBC.giveSize(); ++i ) {
+            if ( mBC.at(i) > 0 ) {
+                ( this->dofBCmap ) [ dofidmask.at(i) ] = mBC.at(i);
+            }
+        }
+    }
+
+    if ( ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex()) ) {
+        auto val = ppm.getTempParam(this->number, IPK_DofManager_ic.getIndex());
+        IntArray ic (std::get<IntArray>(*val)); 
+        if ( ic.giveSize() != dofidmask.giveSize() ) {
+            OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofidmask.giveSize());
+        }
+        this->dofICmap.clear();
+        for ( int i = 1; i <= ic.giveSize(); ++i ) {
+            if ( ic.at(i) > 0 ) {
+                ( this->dofICmap ) [ dofidmask.at(i) ] = ic.at(i);
+            }
+        }
+    }
+
+    if ( ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex()) ) {
+        auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
+        IntArray dofTypeMask (std::get<IntArray>(*val));
+        // For simple slave dofs:
+        if ( dofTypeMask.contains(DT_simpleSlave) ) {    
+            // get mastermask from temp storage
+            auto val = ppm.getTempParam(this->number, IPK_DofManager_mastermask.getIndex());
+            IntArray masterMask (std::get<double>(*val));
+            if ( masterMask.giveSize() != dofidmask.giveSize() ) {
+                OOFEM_ERROR("mastermask size mismatch");
+            }
+            this->dofMastermap.clear();
+            for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
+                if ( masterMask.at(i) > 0 ) {
+                    ( this->dofMastermap ) [ dofidmask.at(i) ] = masterMask.at(i);
+                }
+            }
+        }
+    }
+
+    hasSlaveDofs = false;
+    for ( Dof *dof: *this ) {
+        if ( !dof->isPrimaryDof() ) {
+            hasSlaveDofs = true;
+            continue;
+        }
+    }
+}
 
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
@@ -740,77 +813,6 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
 
     return answer;
 }
-
-
-void DofManager :: postInitialize()
-{
-    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
-    
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex()) ) {
-        if ( mBC.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofidmask.giveSize());
-        }
-        this->dofBCmap.clear();
-        for ( int i = 1; i <= mBC.giveSize(); ++i ) {
-            if ( mBC.at(i) > 0 ) {
-                ( this->dofBCmap ) [ dofidmask.at(i) ] = mBC.at(i);
-            }
-        }
-    }
-
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex()) ) {
-        auto val = ppm.getTempParam(this->number, IPK_DofManager_ic.getIndex());
-        IntArray ic (std::get<IntArray>(*val)); 
-        if ( ic.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofidmask.giveSize());
-        }
-        this->dofICmap.clear();
-        for ( int i = 1; i <= ic.giveSize(); ++i ) {
-            if ( ic.at(i) > 0 ) {
-                ( this->dofICmap ) [ dofidmask.at(i) ] = ic.at(i);
-            }
-        }
-    }
-
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex()) ) {
-        auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
-        IntArray dofTypeMask (std::get<IntArray>(*val)); 
-        if ( dofTypeMask.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofidmask.giveSize());
-        }
-
-        this->dofTypemap.clear();
-        for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
-            if ( dofTypeMask.at(i) != DT_master ) {
-                ( this->dofTypemap ) [ dofidmask.at(i) ] = dofTypeMask.at(i);
-            }
-        }
-        // For simple slave dofs:
-        if ( dofTypeMask.contains(DT_simpleSlave) ) {
-            // get mastermask from temp storage
-            auto val = ppm.getTempParam(this->number, IPK_DofManager_mastermask.getIndex());
-            IntArray masterMask (std::get<double>(*val));
-            if ( masterMask.giveSize() != dofidmask.giveSize() ) {
-                OOFEM_ERROR("mastermask size mismatch");
-            }
-            this->dofMastermap.clear();
-            for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
-                if ( masterMask.at(i) > 0 ) {
-                    ( this->dofMastermap ) [ dofidmask.at(i) ] = masterMask.at(i);
-                }
-            }
-        }
-    }
-
-    hasSlaveDofs = false;
-    for ( Dof *dof: *this ) {
-        if ( !dof->isPrimaryDof() ) {
-            hasSlaveDofs = true;
-            continue;
-        }
-    }
-}
-
 
 bool DofManager :: computeM2GTransformation(FloatMatrix &answer, const IntArray &dofMask)
 // computes transformation matrix of receiver.

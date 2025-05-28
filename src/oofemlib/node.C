@@ -144,7 +144,7 @@ void
 Node :: postInitialize()
 {
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
-
+    DofManager :: postInitialize();
     PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_Node_coords) ;
     
 }

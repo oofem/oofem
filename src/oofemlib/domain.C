@@ -934,6 +934,19 @@ Domain :: instanciateYourself(DataReader &dr)
 #  endif
     }
 
+    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+    spatialLocalizer->init();
+    connectivityTable = std::make_unique<ConnectivityTable>(this);
+    OOFEM_LOG_INFO("Spatial localizer init done\n");
+
+    return 1;
+}
+
+
+void
+Domain :: postInitialize()
+{
+
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofmanGlobal2LocalMap, elementGlobal2LocalMap);
     for ( auto &dman: this->dofManagerList ) {
@@ -948,21 +961,9 @@ Domain :: instanciateYourself(DataReader &dr)
         set->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-
     BuildMaterialToElementMap();
 
-    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
-    spatialLocalizer->init();
-    connectivityTable = std::make_unique<ConnectivityTable>(this);
-    OOFEM_LOG_INFO("Spatial localizer init done\n");
 
-    return 1;
-}
-
-
-void
-Domain :: postInitialize()
-{
     // New  - in development /JB
     // set element cross sections based on element set definition and set the corresponding
     // material based on the cs
@@ -1012,10 +1013,7 @@ Domain :: postInitialize()
         connectivityTable = std::make_unique<ConnectivityTable>(this);
     }
     
-
-    if ( this->hasXfemManager() ) {
-        this->giveXfemManager()->postInitialize();
-    }
+   
 
     // Dofs must be created before dof managers due their post-initialization:
     this->createDofs();
@@ -1032,6 +1030,10 @@ Domain :: postInitialize()
 
     for ( auto &bc: bcList ) {
         bc->postInitialize();
+    }
+
+    if ( this->hasXfemManager() ) {
+        this->giveXfemManager()->postInitialize();
     }
 
     this->elementPPM.clear();
