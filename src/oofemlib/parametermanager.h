@@ -132,7 +132,7 @@ public:
     using paramValue = std::variant<int, double, std::string, bool, IntArray, FloatArray, FloatMatrix>;
     void setPriority(size_t componentIndex, size_t paramIndex, int priority) {
         std::unique_lock lock(mtx);
-        if (componentIndex >= priorities.size()) {
+        if (componentIndex > priorities.size()) {
             priorities.resize(componentIndex);
         }
         priorities[componentIndex-1][paramIndex] = priority;
@@ -141,7 +141,7 @@ public:
     int getPriority(size_t componentIndex, size_t paramIndex) const {
         std::shared_lock lock(mtx);
         int ci1 = componentIndex - 1; // Adjust for 0-based index
-        if (componentIndex < priorities.size() && priorities[ci1].find(paramIndex) != priorities[ci1].end()) {
+        if (componentIndex <= priorities.size() && priorities[ci1].find(paramIndex) != priorities[ci1].end()) {
             return priorities[ci1].at(paramIndex);
         }
         return -1; // Return -1 if priority is not found
@@ -154,8 +154,12 @@ public:
     }
 
     bool checkIfSet(size_t componentIndex, size_t paramIndex) {
-        int ci1 = componentIndex - 1; // Adjust for 0-based index       
-        return priorities[ci1].find(paramIndex) != priorities[ci1].end();
+        int ci1 = componentIndex - 1; // Adjust for 0-based index 
+        if (componentIndex <= priorities.size()) {      
+            return priorities[ci1].find(paramIndex) != priorities[ci1].end();
+        } else {
+            return false; // Return false if componentIndex is out of bounds
+        }
     }
 
     void setTemParam(size_t componentIndex, size_t paramIndex, const paramValue &value) {

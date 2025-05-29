@@ -1005,6 +1005,12 @@ Domain :: postInitialize()
         }
     } 
 
+    // finish initialization of components (at present neded for dofManagers)
+    for ( auto &dman: dofManagerList ) {
+        dman->initializeFinish();
+    }
+    
+
     if (!spatialLocalizer) {
         spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
         spatialLocalizer->init();

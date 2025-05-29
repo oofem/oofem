@@ -455,6 +455,8 @@ public:
 
     void initializeFrom(InputRecord &ir) override { initializeFrom(ir, 1); };
     void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
+    void postInitialize() override;
 
     void giveInputRecord(DynamicInputRecord &input) override;
 
@@ -464,10 +466,7 @@ public:
 
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }
-    /**
-     * Performs post-initialization such like checking if there are any slave dofs etc.
-     */
-    void postInitialize() override;
+
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain
