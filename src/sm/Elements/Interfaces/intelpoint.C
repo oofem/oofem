@@ -246,7 +246,7 @@ IntElPoint :: initializeFrom(InputRecord &ir, int priority)
     if (flag) {
         normal = n;
     }
-    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_IntElPoint_refnode, priority);
+    //PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_IntElPoint_refnode, priority);
     PM_UPDATE_PARAMETER(area, ppm, ir, this->number, IPK_IntElPoint_area, priority);
     PM_UPDATE_PARAMETER(length, ppm, ir, this->number, IPK_IntElPoint_length, priority);   
 }

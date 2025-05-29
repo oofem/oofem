@@ -169,7 +169,7 @@ public:
     void initializeFrom(InputRecord &ir) override { initializeFrom(ir, 1); }
     void initializeFrom(InputRecord &ir, int priority) override;
      /// Performs post initialization steps.
-     void postInitialize() override;
+     void initializeFinish() override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     int checkConsistency() override;

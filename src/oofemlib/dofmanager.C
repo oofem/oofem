@@ -411,7 +411,7 @@ void DofManager :: initializeFinish()
         if ( dofTypeMask.contains(DT_simpleSlave) ) {
             // get mastermask from temp storage
             auto val = ppm.getTempParam(this->number, IPK_DofManager_mastermask.getIndex());
-            IntArray masterMask (std::get<double>(*val));
+            IntArray masterMask (std::get<IntArray>(*val));
             if ( masterMask.giveSize() != dofidmask.giveSize() ) {
                 OOFEM_ERROR("mastermask size mismatch");
             }
@@ -423,7 +423,10 @@ void DofManager :: initializeFinish()
             }
         }
     }
+}
 
+void DofManager :: postInitialize()
+{
     hasSlaveDofs = false;
     for ( Dof *dof: *this ) {
         if ( !dof->isPrimaryDof() ) {
@@ -432,9 +435,6 @@ void DofManager :: initializeFinish()
         }
     }
 }
-
-void DofManager :: postInitialize()
-{}
 
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {

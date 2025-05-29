@@ -141,10 +141,10 @@ void Node :: initializeFrom(InputRecord &ir, int priority)
 }
 
 void
-Node :: postInitialize()
+Node :: initializeFinish()
 {
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
-    DofManager :: postInitialize();
+    DofManager :: initializeFinish();
     PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_Node_coords) ;
     
 }

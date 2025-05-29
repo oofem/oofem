@@ -47,6 +47,8 @@ namespace oofem {
 REGISTER_DofManager(RigidArmNode);
 
 ParamKey RigidArmNode::IPK_RigidArmNode_master("master");
+ParamKey RigidArmNode::IPK_RigidArmNode_mastermask("mastermask");
+
 
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
@@ -60,7 +62,7 @@ RigidArmNode :: initializeFrom(InputRecord &ir, int priority)
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
     PM_UPDATE_PARAMETER(masterDofMngr, ppm, ir, this->number, IPK_RigidArmNode_master, priority) ;
-    PM_UPDATE_PARAMETER(masterMask, ppm, ir, this->number, IPK_DofManager_mastermask, priority) ;
+    PM_UPDATE_PARAMETER(masterMask, ppm, ir, this->number, IPK_RigidArmNode_mastermask, priority) ;
 }
 
 void
@@ -70,7 +72,7 @@ RigidArmNode :: postInitialize()
 
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
     PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_RigidArmNode_master) ;
-    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_DofManager_mastermask) ;
+    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_RigidArmNode_mastermask) ;
 
     if ( masterMask.giveSize() != this->dofidmask.giveSize() ) {
         throw ComponentInputException(IPK_DofManager_mastermask.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "mastermask size mismatch");

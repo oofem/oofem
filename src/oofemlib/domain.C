@@ -939,6 +939,11 @@ Domain :: instanciateYourself(DataReader &dr)
     connectivityTable = std::make_unique<ConnectivityTable>(this);
     OOFEM_LOG_INFO("Spatial localizer init done\n");
 
+    // finish initialization of components (at present neded for dofManagers)
+    for ( auto &dman: dofManagerList ) {
+        dman->initializeFinish();
+    }
+
     return 1;
 }
 
@@ -1005,10 +1010,6 @@ Domain :: postInitialize()
         }
     } 
 
-    // finish initialization of components (at present neded for dofManagers)
-    for ( auto &dman: dofManagerList ) {
-        dman->initializeFinish();
-    }
     
 
     if (!spatialLocalizer) {

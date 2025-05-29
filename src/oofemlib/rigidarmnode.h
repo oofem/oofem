@@ -80,6 +80,7 @@ protected:
     Node *masterNode;
 
     static ParamKey IPK_RigidArmNode_master;
+    static ParamKey IPK_RigidArmNode_mastermask;
 
 private:
     void allocAuxArrays();
