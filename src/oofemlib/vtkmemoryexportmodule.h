@@ -43,13 +43,6 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef _PYBIND_BINDINGS
- #include <pybind11/pybind11.h>
- #include <pybind11/stl.h>   //Conversion for lists
- #include "pybind11/numpy.h"
-namespace py = pybind11;
-#endif
-
 #ifdef _WIN32
  #define NULL_DEVICE "NUL:"
 #else
