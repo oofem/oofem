@@ -341,6 +341,8 @@ if (USE_XML)
     link_libraries(pugixml::pugixml)
 endif()
 
+
+
 ## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
 ## Therefore it is assumed that superlu include files
 ## are included using #include "SUPERLU_MT/include"
@@ -362,9 +364,25 @@ if (USE_SUPERLU_MT)
     if (NOT HAVE_SUPERLU_MT_DDEFS_H)
         message (FATAL_ERROR "Necessary SUPERLU_MT headers not found; refer to CMakeLists.txt for details")
     endif ()
-
-
 endif ()
+
+# perhaps use in the future instead
+#
+#if (USE_SUPERLU_MT)
+#    if(SUPERLU_MT_DIR)
+#        add_subdirectory(${SUPERLLU_MT_DIR})
+#    else()
+#        FetchContent_Declare(
+#            superlu_mt
+#            GIT_REPOSITORY https://github.com/xiaoyeli/superlu_mt.git
+#            GIT_TAG v4.0.1
+#        )
+#        FetchContent_MakeAvailable(superlu_mt)
+#    endif()
+#    # ...
+#endif()
+
+
 
 if (USE_VTK)
     set (CMAKE_LIBRARY_DIR ${VTK_DIR})
@@ -424,15 +442,19 @@ if (USE_PARDISO_ORG)
 endif ()
 
 if (USE_INTEL_MKL_PARDISO)
+    if(INTEL_MKL_PARDISO_DIR)
+        include_directories("${INTEL_MKL_PARDISO_DIR}/mkl/include")
+    else()
+        find_path (MKL_INCLUDE_DIR mkl.h PATHS /usr/include/mkl /opt/intel/composerxe/mkl/include REQUIRED)
+        include_directories("${MKL_INCLUDE_DIR}")
+    endif()
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
         if (INTEL_MKL_PARDISO_DIR)
             find_library (${f}_LIB ${f} PATH "${INTEL_MKL_PARDISO_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("${INTEL_MKL_PARDISO_DIR}/mkl/include")
         else ()
             find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("/opt/intel/composerxe/mkl/include")
         endif ()
         if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
             message (FATAL_ERROR "MKLPARDISO library not found")
@@ -510,17 +532,6 @@ endif ()
 
 
 if (USE_PETSC)
-    if (NOT "${PETSC_DIR}")
-        # setting defaults for typical linux environments:
-        #file (GLOB paths "/usr/lib/petscdir/*.*.*")
-        #list (GET paths 0 PETSC_DIR)
-        #message ("***************** PETSC_DIR: ${PETSC_DIR}")
-    endif ()
-    if (NOT "${PETSC_ARCH}")
-        #file (GLOB children RELATIVE ${PETSC_DIR} "${PETSC_DIR}/*")
-        #list (GET children 0 PETSC_ARCH)
-        #message ("***************** PETSC_ARCH: ${PETSC_ARCH}")
-    endif ()
     find_package (PETSc)
     # find_package(PETSc COMPONENTS CXX)
     include_directories (${PETSC_INCLUDES})

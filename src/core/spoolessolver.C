@@ -128,7 +128,7 @@ SpoolesSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     InpMtx *mtxA;
     DenseMtx *mtxY, *mtxX;
 
-    x.resize(b.giveSize();
+    x.resize(b.giveSize());
 
     Timer timer;
     timer.startTimer();
@@ -143,14 +143,14 @@ SpoolesSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
     symmetryflag = As->giveSymmetryFlag();
 
     int i;
-    int neqns = A->giveNumberOfRows();
+    int neqns = A.giveNumberOfRows();
     int nrhs = 1;
     /* convert right-hand side to DenseMtx */
     mtxY = DenseMtx_new();
     DenseMtx_init(mtxY, mtxType, 0, 0, neqns, nrhs, 1, neqns);
     DenseMtx_zero(mtxY);
     for ( i = 0; i < neqns; i++ ) {
-        DenseMtx_setRealEntry( mtxY, i, 0, b->at(i + 1) );
+        DenseMtx_setRealEntry( mtxY, i, 0, b.at(i + 1) );
     }
 
     if ( ( Lhs != &A ) || ( this->lhsVersion != A.giveVersion() ) ) {
