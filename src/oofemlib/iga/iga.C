@@ -56,7 +56,7 @@ void IGAElement :: initializeFrom(InputRecord &ir, int priority)
 }
 
 void
-IGAElement::postInitialize ()
+IGAElement::initializeFinish ()
 {
     int indx = 0;
     ParameterManager &ppm = domain->elementPPM;
@@ -64,7 +64,7 @@ IGAElement::postInitialize ()
 #ifdef __MPI_PARALLEL_MODE
     int numberOfKnotSpans = 0;
 #endif
-    Element::postInitialize();
+    Element::initializeFinish();
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->postInitialize(ppm, this->number);
@@ -216,10 +216,10 @@ void IGATSplineElement :: initializeFrom(InputRecord &ir, int priority)
 }
 
 void
-IGATSplineElement::postInitialize()
+IGATSplineElement::initializeFinish()
 {
     ParameterManager &pm = domain->elementPPM;
-    IGAElement::postInitialize();
+    IGAElement::initializeFinish();
     int indx = 0;
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
     // set number of dofmanagers

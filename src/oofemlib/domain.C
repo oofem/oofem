@@ -943,7 +943,9 @@ Domain :: instanciateYourself(DataReader &dr)
     for ( auto &dman: dofManagerList ) {
         dman->initializeFinish();
     }
-
+    for ( auto &el: elementList ) {
+        el->initializeFinish();
+    }
     return 1;
 }
 

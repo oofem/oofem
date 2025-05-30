@@ -83,7 +83,8 @@ public:
     virtual ~GeneralSlaveNode(void) {}
 
     void initializeFrom(InputRecord &ir, int priority) override;
-    virtual void postInitialize() override;
+    void initializeFinish() override;
+    void postInitialize() override;
     virtual bool isDofTypeCompatible(dofType type) const override {
         return ( type == DT_master || type == DT_slave );
     }

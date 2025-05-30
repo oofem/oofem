@@ -126,7 +126,7 @@ NodalSpringElement :: initializeFrom(InputRecord &ir, int priority)
 void
 NodalSpringElement :: postInitialize()
 {
-  StructuralElement::postInitialize();
+  //StructuralElement::postInitialize();
   ParameterManager &ppm =  this->giveDomain()->elementPPM;
   PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_dofmask) ;
   PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_springConstants) ;

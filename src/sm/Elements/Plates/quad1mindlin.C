@@ -178,7 +178,7 @@ void
 Quad1Mindlin::initializeFrom(InputRecord &ir, int priority)
 {
     ParameterManager &ppm = this->giveDomain()->elementPPM;
-    PM_UPDATE_PARAMETER(reducedIntegrationFlag, ppm, ir, this->number, IPK_Quad1Mindlin_reducedIntegration, priority);
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_Quad1Mindlin_reducedIntegration, priority, reducedIntegrationFlag);
     StructuralElement::initializeFrom(ir, priority);
 }
 

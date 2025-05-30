@@ -290,10 +290,10 @@ InterfaceElem1d :: initializeFrom(InputRecord &ir, int priority)
 }
 
 void
-InterfaceElem1d :: postInitialize()
+InterfaceElem1d :: initializeFinish()
 {
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
-    StructuralElement :: postInitialize();
+    StructuralElement :: initializeFinish();
 
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         OOFEM_ERROR("wrong reference node or normal specified");

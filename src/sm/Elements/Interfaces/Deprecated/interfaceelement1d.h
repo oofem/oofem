@@ -89,7 +89,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_InterfaceElem1d_Name; }
     const char *giveClassName() const override { return "InterfaceElem1d"; }
     void initializeFrom(InputRecord &ir, int priority) override;
-    void postInitialize() override;
+    void initializeFinish() override;
     
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
     integrationDomain giveIntegrationDomain() const override { return _Point; }

@@ -365,7 +365,7 @@ DofManager :: initializeFrom(InputRecord &ir, int priority)
 
 void DofManager :: initializeFinish()
 {
-  IntArray dofIDArry;
+    IntArray dofIDArry;
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
     if ( ppm.checkIfSet(this->number, IPK_DofManager_dofidmask.getIndex()) ) {
@@ -374,7 +374,16 @@ void DofManager :: initializeFinish()
         dofIDArry = domain->giveDefaultNodeDofIDArry();
     }
 
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex()) ) {
+    bool hasBc, hasIc, hasTypeinfo;
+    hasBc = ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex());
+    hasIc = ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex());
+    hasTypeinfo = ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex());
+
+    if ((hasIc || hasBc || hasTypeinfo) && dofidmask.isEmpty()) {
+        this->dofidmask = dofIDArry;
+    }
+
+    if ( hasBc ) {
         if ( mBC.giveSize() != dofIDArry.giveSize() ) {
             OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize());
         }
@@ -386,7 +395,7 @@ void DofManager :: initializeFinish()
         }
     }
 
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex()) ) {
+    if ( hasIc ) {
         auto val = ppm.getTempParam(this->number, IPK_DofManager_ic.getIndex());
         IntArray ic (std::get<IntArray>(*val)); 
         if ( ic.giveSize() != dofIDArry.giveSize() ) {
@@ -400,7 +409,7 @@ void DofManager :: initializeFinish()
         }
     }
 
-    if ( ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex()) ) {
+    if ( hasTypeinfo ) {
         auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
         IntArray dofTypeMask (std::get<IntArray>(*val)); 
         if ( dofTypeMask.giveSize() != dofIDArry.giveSize() ) {
