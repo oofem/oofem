@@ -75,7 +75,6 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
     parallel_mode = DofManager_local;
-    dofidmask = domain->giveDefaultNodeDofIDArry();
 }
 
 
@@ -366,16 +365,23 @@ DofManager :: initializeFrom(InputRecord &ir, int priority)
 
 void DofManager :: initializeFinish()
 {
+  IntArray dofIDArry;
     ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
+    if ( ppm.checkIfSet(this->number, IPK_DofManager_dofidmask.getIndex()) ) {
+        dofIDArry = dofidmask;
+    } else {
+        dofIDArry = domain->giveDefaultNodeDofIDArry();
+    }
+
     if ( ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex()) ) {
-        if ( mBC.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofidmask.giveSize());
+        if ( mBC.giveSize() != dofIDArry.giveSize() ) {
+            OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize());
         }
         this->dofBCmap.clear();
         for ( int i = 1; i <= mBC.giveSize(); ++i ) {
             if ( mBC.at(i) > 0 ) {
-                ( this->dofBCmap ) [ dofidmask.at(i) ] = mBC.at(i);
+                ( this->dofBCmap ) [ dofIDArry.at(i) ] = mBC.at(i);
             }
         }
     }
@@ -383,13 +389,13 @@ void DofManager :: initializeFinish()
     if ( ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex()) ) {
         auto val = ppm.getTempParam(this->number, IPK_DofManager_ic.getIndex());
         IntArray ic (std::get<IntArray>(*val)); 
-        if ( ic.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofidmask.giveSize());
+        if ( ic.giveSize() != dofIDArry.giveSize() ) {
+            OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofIDArry.giveSize());
         }
         this->dofICmap.clear();
         for ( int i = 1; i <= ic.giveSize(); ++i ) {
             if ( ic.at(i) > 0 ) {
-                ( this->dofICmap ) [ dofidmask.at(i) ] = ic.at(i);
+                ( this->dofICmap ) [ dofIDArry.at(i) ] = ic.at(i);
             }
         }
     }
@@ -397,14 +403,14 @@ void DofManager :: initializeFinish()
     if ( ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex()) ) {
         auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
         IntArray dofTypeMask (std::get<IntArray>(*val)); 
-        if ( dofTypeMask.giveSize() != dofidmask.giveSize() ) {
-            OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofidmask.giveSize());
+        if ( dofTypeMask.giveSize() != dofIDArry.giveSize() ) {
+            OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofIDArry.giveSize());
         }
 
         this->dofTypemap.clear();
         for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
             if ( dofTypeMask.at(i) != DT_master ) {
-                ( this->dofTypemap ) [ dofidmask.at(i) ] = dofTypeMask.at(i);
+                ( this->dofTypemap ) [ dofIDArry.at(i) ] = dofTypeMask.at(i);
             }
         }
         // For simple slave dofs:
@@ -412,13 +418,13 @@ void DofManager :: initializeFinish()
             // get mastermask from temp storage
             auto val = ppm.getTempParam(this->number, IPK_DofManager_mastermask.getIndex());
             IntArray masterMask (std::get<IntArray>(*val));
-            if ( masterMask.giveSize() != dofidmask.giveSize() ) {
+            if ( masterMask.giveSize() != dofIDArry.giveSize() ) {
                 OOFEM_ERROR("mastermask size mismatch");
             }
             this->dofMastermap.clear();
             for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
                 if ( masterMask.at(i) > 0 ) {
-                    ( this->dofMastermap ) [ dofidmask.at(i) ] = masterMask.at(i);
+                    ( this->dofMastermap ) [ dofIDArry.at(i) ] = masterMask.at(i);
                 }
             }
         }

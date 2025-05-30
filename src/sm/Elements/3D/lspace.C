@@ -66,6 +66,7 @@ LSpace :: LSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNo
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
+    reducedShearIntegration = false;
 }
 
 

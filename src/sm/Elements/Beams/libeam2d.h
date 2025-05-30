@@ -95,7 +95,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LIBeam2d_Name; }
     const char *giveClassName() const override { return "LIBeam2d"; }
     void initializeFrom(InputRecord &ir, int priority) override;
-    void postInitialize() override;
+    void initializeFinish() override;
 
     MaterialMode giveMaterialMode() override { return _2dBeam; }
 

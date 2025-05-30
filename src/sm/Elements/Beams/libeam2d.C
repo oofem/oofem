@@ -344,17 +344,15 @@ LIBeam2d :: initializeFrom(InputRecord &ir, int priority)
 {
     StructuralElement :: initializeFrom(ir, priority);
     ParameterManager &ppm = domain->elementPPM;
-    PM_UPDATE_PARAMETER(xy, ppm, ir, this->number, IPK_LIBeam2d_XY, priority) ;
-    PM_UPDATE_PARAMETER(xz, ppm, ir, this->number, IPK_LIBeam2d_XZ, priority) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_LIBeam2d_XY, priority, xy) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_LIBeam2d_XZ, priority, xz) ;
 }
 
 void 
-LIBeam2d :: postInitialize()
+LIBeam2d :: initializeFinish()
 {
-    StructuralElement :: postInitialize();
+    StructuralElement :: initializeFinish();
     ParameterManager &ppm = domain->elementPPM;
-    bool xz = ppm.checkIfSet(this->number, IPK_LIBeam2d_XZ.getIndex());
-    bool xy = ppm.checkIfSet(this->number, IPK_LIBeam2d_XY.getIndex());
     xy ? (xz = false) : (xz = true);
 }
 
