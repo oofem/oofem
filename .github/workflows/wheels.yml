@@ -1,0 +1,99 @@
+# https://cibuildwheel.pypa.io/en/stable/setup/#github-actions
+name: Wheels
+
+# on: [push, pull_request]
+
+# only run when manually requested (uses too much CI time)
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build_wheels:
+    name: CIBuildWheel on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # want to see all failures
+      fail-fast: false
+      matrix:
+        # macos-14, macos-13: compiles okay, tests segfault at import time
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
+        if: runner.os=='Windows'
+        with:
+          arch: x64
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+  build_pyodide:
+    name: Pyodide (wasm32) wheels
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Python
+      run: |
+          # skip this step if already installed (such as locally re-using container with naktos/act)
+          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
+          pip install pyodide-build py-build-cmake
+    - name: Pyodide build
+      run: |
+          [ -d emsdk ] || git clone https://github.com/emscripten-core/emsdk.git emsdk
+          pushd emsdk
+            export PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
+            ./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+            ./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
+            source emsdk_env.sh
+          popd
+          pyodide build --build-dependencies
+    - name: Pyodide test
+      run: |
+          pyodide venv build/venv-pyodide
+          source build/venv-pyodide/bin/activate
+          pip install dist/oofem-*_wasm32.whl
+          pip install pytest numpy
+          python -m pytest bindings/python/tests
+    - uses: actions/upload-artifact@v4
+      with:
+        # called cibw-* so that download-artifacts can collect it
+        name: cibw-notreally-pyodide
+        path: dist/oofem-*_wasm32.whl
+
+  upload_pypi:
+    needs: [build_wheels, build_sdist, build_pyodide]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    # disable this for now completely
+    if: false
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    ## or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        # with:
+        #   repository-url: https://test.pypi.org/legacy/
+

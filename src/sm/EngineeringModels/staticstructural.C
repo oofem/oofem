@@ -54,6 +54,8 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "assemblercallback.h"
+#include "maskedprimaryfield.h"
+
 
 #ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
@@ -554,6 +556,20 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int
     }
 
     return 0;
+}
+
+
+FieldPtr 
+StaticStructural::giveField (FieldType key, TimeStep *tStep) {
+    if ( tStep != this->giveCurrentStep() ) {
+        OOFEM_ERROR("Unable to return field representation for non-current time step");
+    }
+    if ( key == FT_Displacements ) {
+        FieldPtr _ptr ( new MaskedPrimaryField ( key, this->field.get(), {D_u, D_v, D_w} ) );
+        return _ptr;
+    } else {
+        return FieldPtr();
+    }
 }
 
 } // end namespace oofem

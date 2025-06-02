@@ -1,12 +1,19 @@
 # this example illustrates an injection of external temperature field during runtime
-import oofempy
-import util
+
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
+
+import numpy as np
 
 #Function returning temperature.
 def evalField(coords, mode, tStep):
     val = 10.*tStep.giveNumber()*coords[0]
     print("Evaluating field at %f,%f. Assigning temperature %f" % (coords[0], coords[1], val))
-    return (val,) #Return list of len 1
+    return np.array([val,]) #Return list of len 1
 
 
 def test_5():
@@ -97,8 +104,10 @@ def test_5():
     v3 = problem.giveUnknownComponent(oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(3).giveDofWithID(oofempy.DofIDItem.D_v))
     assert (round (v3-4.608e-4, 8) == 0), "Node 3 dof 2 displacement check failed"
     
-    
-    t1 = temperature[0][0]
+    try:
+        t1 = temperature[0][0] # np.array
+    except TypeError:
+        t1 = temperature[0,0]  # FloatMatrix
     assert (round (t1-48.0000, 4) == 0), "Export of primary field failed"
     
     problem.terminateAnalysis()

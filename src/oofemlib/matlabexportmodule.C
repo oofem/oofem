@@ -454,7 +454,8 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     */
 
     // Output weak periodic boundary conditions
-    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1, pdsdcount=1, pdsncount=1, pdsmcount=1, trccount=1;
+    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1, pdsdcount=1, pdsncount=1, trccount=1;
+    [[maybe_unused]] unsigned int pdsmcount=1;
 
     for ( auto &gbc : domain->giveBcs() ) {
         WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( gbc.get() );

@@ -537,4 +537,49 @@ bool ClassFactory :: registerField(const char *name, std::unique_ptr<Field> ( *c
 {
     return cf_store(fieldList, name, creator);
 }
+
+std::map<std::string,std::list<std::string>> ClassFactory :: getRegisteredNames () {
+    std::map<std::string,std::list<std::string>> ret=std::map<std::string,std::list<std::string>>();
+    #define N(a,b) { auto& l=ret[#a]; for(const auto& kv: b) l.push_back(kv.first); };
+    #define E(a,b) { auto& l=ret[#a]; for(const auto& kv: b) l.push_back(std::to_string((int)kv.first)); };
+       E(SparseMtrx,sparseMtrxList);
+       E(SparseLinSolver,sparseLinSolList);
+       E(ErrorEstimator,errEstList);
+       E(NodalRecoveryModel,nodalRecoveryModelList);
+       N(Element,elemList);
+       E(Dof,dofList);
+       N(DofManager,dofmanList);
+       N(BoundaryCondition,bcList);
+       N(CrossSection,csList);
+       N(Material,matList);
+       N(EngngModel,engngList);
+       N(Function,funcList);
+       N(NonlocalBarrier,nlbList);
+       N(ExportModule,exportList);
+       N(Monitor,monitorList);
+       N(SparseNonLinearSystemNM,nonlinList);
+       N(InitModule,initList);
+       N(TopologyDescription,topologyList);
+       N(EnrichmentItem,enrichFuncList);
+       N(EnrichmentFront,enrichmentFrontList);
+       N(PropagationLaw,propagationLawList);
+       N(Geometry,geometryList);
+       N(XfemManager,xManList);
+       N(FailureCriteria,failureCriteriaList);
+       N(FailureCrititeriaStatus,failureCriteriaStatusList);
+       N(ContactManager,contactManList);
+       N(ContactDefinition,contactDefList);
+       E(GeneratlizedEigenValueSolver,generalizedEigenValueSolverList);
+       E(MaterialMappingAlgorithm,materialMappingList);
+       E(MesherInterface,mesherInterfaceList);
+       N(LoadBalancerMonitor,loadMonitorList);
+       N(LoadBalancer,loadBalancerList);
+       N(Term,termList);
+       N(Field,fieldList);
+    #undef E
+    #undef N
+    return ret;
+}
+
+
 } // End namespace oofem

@@ -69,7 +69,7 @@ public:
     /// Reads count unsigned long values into array pointed by data.
     virtual int read(unsigned long *data, std::size_t count) = 0;
     int read(unsigned long &data) { return this->read(&data, 1); }
-#ifdef _MSC_VER
+#ifdef _WIN32
     /// Reads count unsigned std::size_t values into array pointed by data.
     virtual int read(std::size_t* data, std::size_t count) = 0;
     int read(std::size_t& data) { return this->read(&data, 1); }
@@ -101,7 +101,7 @@ public:
     /// Writes count unsigned long values from array pointed by data.
     virtual int write(const unsigned long *data, std::size_t count) = 0;
     int write(unsigned long data) { return this->write(&data, 1); }
-#ifdef _MSC_VER
+#ifdef _WIN32
     /// Writes count std::size_t values from array pointed by data.
     virtual int write(const std::size_t* data, std::size_t count) = 0;
     int write(std::size_t data) { return this->write(&data, 1); }
@@ -168,7 +168,7 @@ public:
 
     int read(int *data, std::size_t count) override;
     int read(unsigned long *data, std::size_t count) override;
-#ifdef _MSC_VER
+#ifdef _WIN32
     int read(std::size_t *data, std::size_t count) override;
 #endif
     int read(long *data, std::size_t count) override;
@@ -178,7 +178,7 @@ public:
 
     int write(const int *data, std::size_t count) override;
     int write(const unsigned long *data, std::size_t count) override;
-#ifdef _MSC_VER
+#ifdef _WIN32
     int write(const std::size_t* data, std::size_t count);
 #endif
     int write(const long *data, std::size_t count) override;

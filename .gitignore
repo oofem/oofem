@@ -12,6 +12,7 @@ debug/
 # ignore any files under build directories
 build*/
 _build*/
+build-*/
 
 # test results
 *.out
@@ -35,9 +36,19 @@ perf.data*
 *.bcf
 *-blx.bib
 *.blg
+*.auxlock
+elementlibmanual-figure*.dpth
+elementlibmanual-figure*.pdf
+elementlibmanual-figure*.md5
+
+# documentation artifacts
+doc/elementlibmanual/elementlibmanual.pdf
+doc/theorymanual/theorymanual.pdf
 
 
 *.idea
+.cache
+.wenv
 __pycache__
 *.pyc
 *.swp
@@ -55,3 +66,7 @@ tests/sm/crack0Step0.vtk
 tests/sm/crack1Step0.vtk
 tests/sm/crack2Step0.vtk
 tests/sm/t3d.bmf
+
+dist/
+.py-build-cmake_cache/
+

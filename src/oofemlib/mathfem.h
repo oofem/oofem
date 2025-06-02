@@ -69,7 +69,7 @@ inline unsigned long min(unsigned long i, unsigned long j)
     return (i <= j ? i : j);
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 /// Returns smaller value from two given decimals
 inline std::size_t min(std::size_t i, std::size_t j)
 { return ( i <= j ? i : j ); }
@@ -208,7 +208,7 @@ public:
 template< class T > double gss(double ax, double bx, double cx, const T &f,
                                double tol, double &xmin)
 {
-    int ii = 0;
+    [[maybe_unused]] int ii = 0;
     double f1, f2, x0, x1, x2, x3;
 
     x0 = ax;

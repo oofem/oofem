@@ -1,0 +1,54 @@
+name: Linux
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: recursive
+    - name: Install dependencies
+      run: |
+          # for naktos-act (not needed with GitHub CI)
+          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
+    - name: Configure
+      run: cmake -GNinja -B ./build -S. -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: cmake --build ./build
+    - name: Test
+      run: ctest --test-dir ./build --rerun-failed --output-on-failure --parallel
+    - name: CPack
+      working-directory: ./build
+      run: cpack -G "DEB;TGZ"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-linux-deb
+        path: |
+          build/oofem_*.deb
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oofem-linux-tgz
+        path: |
+          build/oofem_*.tar.gz
+
+  pybuild:
+    name: Python build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: recursive
+    - name: Python
+      run: |
+          # skip this step if already installed (such as locally re-using container with naktos/act)
+          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
+          pip install pyodide-build py-build-cmake pytest numpy
+    - name: Wheel build
+      run: python3 -m build .
+    - name: Wheel test
+      run: |
+          pip install dist/oofem-*-linux_x86_64.whl
+          python3 -m pytest bindings/python/tests
+

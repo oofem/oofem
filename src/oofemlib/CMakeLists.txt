@@ -390,8 +390,11 @@ if (USE_OOFEG)
     list (APPEND core ${core_oofeg})
 endif ()
 
+# OOFEMCFG_C_COMPILE_DEFINITIONS are defined in the main CMakeLists.txt
+set_source_files_properties(oofemcfg.C PROPERTIES COMPILE_DEFINITIONS "${OOFEMCFG_C_COMPILE_DEFINITIONS}")
 
 add_library (core
     ${LIB_TYPE}
     ${core}
-    )
+)
+

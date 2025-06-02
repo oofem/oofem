@@ -1,7 +1,14 @@
-import oofempy
+try: # installed
+    import oofem as oofempy
+    from oofem import util
+except: # in-tree
+    import oofempy
+    import util
 
+import pytest
 
-def test_1():
+@pytest.mark.skipif(oofempy.hasModule('nanobind'),reason='Skipping with nanobind')
+def test_arrays():
     a = oofempy.FloatArray((1.0, 2.0, 3.0))
     b = oofempy.FloatArray((0.0, -1.0, 1.0))
     x = oofempy.FloatArray(3)
@@ -51,5 +58,12 @@ def test_1():
     assert (round(y[2]-3.0, 6) == 0)
     print(y)
 
+    # test that asNumpyArray return view to the original data
+    a0=oofempy.FloatMatrix(3,3)
+    a1=a0.asNumpyArray()
+    a1[0,2]=99
+    assert a1[0,2]==a0[0,2]
+    assert a0[0,2]==99
+
 if __name__ == "__main__":
-    test_1()
+    test_arrays()

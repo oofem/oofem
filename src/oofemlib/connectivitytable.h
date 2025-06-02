@@ -111,6 +111,12 @@ private:
 #ifdef _OPENMP
     omp_lock_t initLock;
 #endif
+#ifdef _MSC_VER
+    // workaround for MSVC (compile error)
+    // make the class noncopyable (since it contains vector<unique_ptr<SharedBoundaryEntity>)
+    ConnectivityTable(ConnectivityTable const &)=delete;
+    void operator=(ConnectivityTable const &)=delete;
+#endif
 public:
     /**
      * Constructor. Creates new Connectivity table belonging to given domain.

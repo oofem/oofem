@@ -1,5 +1,5 @@
 
-OOFEM Input Manual
+Input Manual
 ==================
 .. toctree::
     :caption: Content

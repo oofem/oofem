@@ -47,6 +47,7 @@
 #include "varscaletype.h"
 #include "numericalcmpn.h"
 #include "valuemodetype.h"
+#include "internalstatetype.h"
 #include "problemmode.h"
 #include "fmode.h"
 #include "dofiditem.h"
@@ -529,6 +530,7 @@ public:
      *
      */
     virtual FieldPtr giveField (FieldType key, TimeStep *) { return FieldPtr();}
+    virtual FieldPtr giveField (InternalStateType key, TimeStep *) ;
 
 
     ///Returns the master engnmodel
