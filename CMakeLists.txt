@@ -654,11 +654,6 @@ if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
     MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
 endif()
 
-if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
-    MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
-endif()
-
-
 if (USE_PYBIND_BINDINGS)
     add_definitions(-D_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
