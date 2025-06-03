@@ -119,10 +119,10 @@ FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     const auto &p3 = cellgeo.giveVertexCoordinates(3);
     const auto &p4 = cellgeo.giveVertexCoordinates(4);
 
-    answer = {n1 * p1.at(xind) + n2 * p2.at(xind) +
+    answer = Vec2(n1 * p1.at(xind) + n2 * p2.at(xind) +
               n3 * p3.at(xind) + n4 * p4.at(xind),
               n1 * p1.at(yind) + n2 * p2.at(yind) +
-              n3 * p3.at(yind) + n4 * p4.at(yind)} ;
+              n3 * p3.at(yind) + n4 * p4.at(yind));
 }
 
 #define POINT_TOL 1.e-6
@@ -256,7 +256,7 @@ void
 FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
-    answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
+    answer = Vec2( ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 );
 }
 
 double
@@ -266,10 +266,10 @@ FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
     int nodeA = edgeNodes.at(1);
     int nodeB = edgeNodes.at(2);
 
-    answer = {
+    answer = Vec2(
         cellgeo.giveVertexCoordinates(nodeB).at(yind) - cellgeo.giveVertexCoordinates(nodeA).at(yind),
         cellgeo.giveVertexCoordinates(nodeA).at(xind) - cellgeo.giveVertexCoordinates(nodeB).at(xind)
-    };
+    );
     return answer.normalize_giveNorm() * 0.5;
 }
 
@@ -280,7 +280,7 @@ FEI2dQuadLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
-    answer = { -1.0 / l, 1.0 / l };
+    answer = Vec2( -1.0 / l, 1.0 / l );
 }
 
 void

@@ -42,7 +42,7 @@ namespace oofem {
 void
 FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = FloatArray{1.};
+    answer = Vec1(1.);
 }
 
 double
@@ -140,14 +140,14 @@ void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = { 0., 0. };
+    answer = Vec2( 0., 0. );
 }
 
 void
 FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    FloatArray n = { ( 1 - lcoords(0) ) * 0.5, ( 1 + lcoords(0) ) * 0.5 };
+    FloatArray n = Vec2( ( 1 - lcoords(0) ) * 0.5, ( 1 + lcoords(0) ) * 0.5 );
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
 
     answer.resize(2);
