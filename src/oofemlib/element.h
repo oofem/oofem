@@ -1211,6 +1211,7 @@ public:
 
     // Overloaded methods:
     void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
     /// Performs post initialization steps.
     void postInitialize() override;
     void giveInputRecord(DynamicInputRecord &input) override;

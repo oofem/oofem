@@ -943,16 +943,6 @@ Domain :: instanciateYourself(DataReader &dr)
     for ( auto &dman: dofManagerList ) {
         dman->initializeFinish();
     }
-    for ( auto &el: elementList ) {
-        el->initializeFinish();
-    }
-    return 1;
-}
-
-
-void
-Domain :: postInitialize()
-{
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofmanGlobal2LocalMap, elementGlobal2LocalMap);
@@ -1012,6 +1002,19 @@ Domain :: postInitialize()
         }
     } 
 
+
+    for ( auto &el: elementList ) {
+        el->initializeFinish();
+    }
+    return 1;
+}
+
+
+void
+Domain :: postInitialize()
+{
+
+    
     
 
     if (!spatialLocalizer) {
@@ -1022,7 +1025,9 @@ Domain :: postInitialize()
         connectivityTable = std::make_unique<ConnectivityTable>(this);
     }
     
-   
+    if ( this->hasXfemManager() ) {
+        this->giveXfemManager()->postInitialize();
+    }
 
     // Dofs must be created before dof managers due their post-initialization:
     this->createDofs();
@@ -1039,10 +1044,6 @@ Domain :: postInitialize()
 
     for ( auto &bc: bcList ) {
         bc->postInitialize();
-    }
-
-    if ( this->hasXfemManager() ) {
-        this->giveXfemManager()->postInitialize();
     }
 
     this->elementPPM.clear();
