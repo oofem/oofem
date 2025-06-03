@@ -67,7 +67,6 @@ class TimeStep;
 class DofManager;
 class GaussPoint;
 class UnknownNumberingScheme;
-class FloatMatrix;
 class IntegrationRule;
 
 // contact elements

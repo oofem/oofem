@@ -48,7 +48,6 @@
 namespace oofem {
 class XfemManager;
 class DofManager;
-class FloatArray;
 class InputRecord;
 class DynamicInputRecord;
 class LinElBranchFunction;

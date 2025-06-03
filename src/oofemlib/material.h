@@ -59,8 +59,6 @@ namespace oofem {
 
 class GaussPoint;
 class Dictionary;
-class FloatArray;
-class FloatMatrix;
 class Element;
 class ProcessCommunicator;
 

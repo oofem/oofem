@@ -46,8 +46,6 @@
 #define _IFT_XfemElementInterface_PlaneStrain "useplanestrain"
 
 namespace oofem {
-class FloatArray;
-class FloatMatrix;
 class Triangle;
 class Element;
 class GaussPoint;

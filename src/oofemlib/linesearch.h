@@ -50,7 +50,6 @@
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
-class FloatArray;
 class TimeStep;
 
 /**

@@ -36,9 +36,9 @@
 #define PRIMVARMAPPER_H_
 
 #include "valuemodetype.h"
+#include "floatarray.h"
 
 namespace oofem {
-class FloatArray;
 class Domain;
 class TimeStep;
 

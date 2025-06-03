@@ -36,13 +36,13 @@
 #define parallelcontext_h
 
 #include "oofemenv.h"
+#include "floatarray.h"
 #ifdef __MPI_PARALLEL_MODE
  #include "parallelordering.h"
 #endif
 
 namespace oofem {
 class EngngModel;
-class FloatArray;
 class DofManager;
 
 /**

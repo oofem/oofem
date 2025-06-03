@@ -80,7 +80,6 @@ class GaussPoint;
 class Element;
 class CrossSection;
 class Node;
-class FloatMatrix;
 class DofManager;
 class DataReader;
 

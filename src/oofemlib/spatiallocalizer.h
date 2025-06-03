@@ -49,7 +49,6 @@ class Domain;
 class Element;
 class TimeStep;
 class GaussPoint;
-class FloatArray;
 class IntArray;
 class Node;
 

@@ -45,7 +45,6 @@
 namespace oofem {
 class Domain;
 class EngngModel;
-class FloatMatrix;
 
 /**
  * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.

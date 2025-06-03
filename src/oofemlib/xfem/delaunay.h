@@ -36,11 +36,11 @@
 #define delaunay_h
 
 #include "oofemenv.h"
+#include "floatarray.h"
 
 #include <vector>
 
 namespace oofem {
-class FloatArray;
 class Triangle;
 
 /**

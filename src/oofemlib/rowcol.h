@@ -36,12 +36,11 @@
 #define rowcol_h
 
 #include "oofemenv.h"
-
+#include "floatarray.h"
 #include "vector"
 
 namespace oofem {
 class IntArray;
-class FloatArray;
 
 /**
  * This class implements a segment of a unsymmetric matrix stored in

@@ -52,7 +52,6 @@ class TimeStep;
 class DofManager;
 class GaussPoint;
 class UnknownNumberingScheme;
-class FloatMatrix;
 class IntegrationRule;
 class ContactElement;
 

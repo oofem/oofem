@@ -42,6 +42,7 @@
 #include "contextmode.h"
 #include "enumitem.h"
 #include "intarray.h"
+#include "floatarray.h"
 #include <string>
 #include <memory>
 
@@ -68,7 +69,6 @@ enum FieldType {
 #undef enumitem_h
 
 class TimeStep;
-class FloatArray;
 class DofManager;
 class DataStream;
 class InputRecord;

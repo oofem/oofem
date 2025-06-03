@@ -43,11 +43,11 @@
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemenv.h"
+#include "intarray.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 namespace oofem {
-class IntArray;
-class FloatArray;
-class FloatMatrix;
 class Dictionary;
 class Range;
 class ScalarFunction;

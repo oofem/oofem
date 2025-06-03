@@ -39,8 +39,6 @@
 
 namespace oofem {
 class StrainVector;
-class FloatArray;
-class FloatMatrix;
 
 /**
  * Specialization of a floating point array for representing a stress state.

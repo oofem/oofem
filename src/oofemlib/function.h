@@ -50,8 +50,6 @@
 //@}
 
 namespace oofem {
-class FloatArray;
-class IntArray;
 
 /**
  * Wrapper for values of varying types.

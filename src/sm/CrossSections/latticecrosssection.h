@@ -49,8 +49,6 @@
 namespace oofem {
 class GaussPoint;
 class Element;
-class FloatArray;
-class FloatMatrix;
 typedef GaussPoint IntegrationPoint;
 
 /**

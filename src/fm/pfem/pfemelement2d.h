@@ -55,8 +55,6 @@ class TimeStep;
 class Node;
 class Material;
 class GaussPoint;
-class FloatMatrix;
-class FloatArray;
 class IntArray;
 
 /**

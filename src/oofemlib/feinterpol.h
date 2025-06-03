@@ -44,11 +44,10 @@
 #include "materialmode.h"
 #include "node.h"
 #include "element.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Element;
-class FloatArray;
-class FloatMatrix;
 class IntArray;
 class IntegrationRule;
 class DummyFEInterpolation;

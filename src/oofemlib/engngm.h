@@ -107,8 +107,6 @@ class SparseMtrx;
 class NumericalMethod;
 class InitModuleManager;
 class ExportModuleManager;
-class FloatMatrix;
-class FloatArray;
 class LoadBalancer;
 class LoadBalancerMonitor;
 class oofegGraphicContext;

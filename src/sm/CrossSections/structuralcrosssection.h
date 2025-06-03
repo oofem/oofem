@@ -49,8 +49,6 @@ namespace oofem {
 class GaussPoint;
 typedef GaussPoint IntegrationPoint;
 class Element;
-class FloatArray;
-class FloatMatrix;
 
 /**
  * Abstract base class for all structural cross section models. It declares commons services provided by all

@@ -58,7 +58,6 @@ namespace oofem {
 class Dof;
 class NodalLoad;
 class TimeStep;
-class FloatArray;
 class IntArray;
 
 /**

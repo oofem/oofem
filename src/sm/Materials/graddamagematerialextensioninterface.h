@@ -47,8 +47,6 @@
 namespace oofem {
 class GaussPoint;
 class TimeStep;
-class FloatArray;
-class FloatMatrix;
 
 
 

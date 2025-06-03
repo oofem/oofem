@@ -46,8 +46,6 @@
 namespace oofem {
 class TimeStep;
 class GaussPoint;
-class FloatMatrix;
-class FloatArray;
 
 /**
  * This abstract class represent a general base element class for

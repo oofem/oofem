@@ -47,6 +47,7 @@
 #include "contextioresulttype.h"
 #include "unknowntype.h"
 #include "chartype.h"
+#include "floatarray.h"
 
 ///@name Input fields for DofManager
 //@{
@@ -69,13 +70,11 @@ class DataStream;
 class Dof;
 class Domain;
 class EntityRenumberingFunctor;
-class FloatMatrix;
+// class FloatMatrix;
 class PrimaryField;
 class UnknownNumberingScheme;
 class Load;
 class TimeStep;
-class FloatArray;
-class IntArray;
 
 /// In parallel mode, this type indicates the mode of DofManager.
 enum dofManagerParallelMode {

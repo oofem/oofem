@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-class FloatArray;
 class IntArray;
 
 /**

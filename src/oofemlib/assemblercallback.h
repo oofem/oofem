@@ -39,11 +39,10 @@
 #include "valuemodetype.h" ///@todo We shouldn't have this for assembling vectors or matrices(!) / Mikael
 #include "matresponsemode.h"
 #include "chartype.h"
+#include "floatarray.h"
 
 namespace oofem {
 class IntArray;
-class FloatArray;
-class FloatMatrix;
 class Element;
 class DofManager;
 class TimeStep;

@@ -35,11 +35,12 @@
 #ifndef MATFORCEEVALUATOR_H_
 #define MATFORCEEVALUATOR_H_
 
+#include"floatarray.h"
+
 namespace oofem {
 
 class TipInfo;
 class Domain;
-class FloatArray;
 class TimeStep;
 
 /**

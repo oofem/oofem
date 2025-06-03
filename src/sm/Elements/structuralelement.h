@@ -51,9 +51,7 @@ class TimeStep;
 class Node;
 class Material;
 class GaussPoint;
-class FloatArray;
 class IntArray;
-class FloatMatrix;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
 class StructuralCrossSection;
 class IDNLMaterial;

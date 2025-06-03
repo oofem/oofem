@@ -41,8 +41,6 @@
 
 namespace oofem {
 class IntArray;
-class FloatArray;
-class FloatMatrix;
 
  #define __CommunicationPacket_DEFAULT_SIZE 40960
 

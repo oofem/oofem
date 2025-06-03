@@ -54,7 +54,6 @@ namespace oofem {
 class Domain;
 class TimeStep;
 class IntArray;
-class FloatArray;
 class InsertionData;
 
 /**

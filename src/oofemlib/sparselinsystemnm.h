@@ -43,7 +43,6 @@
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
-class FloatArray;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse

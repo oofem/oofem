@@ -46,7 +46,6 @@
 //@}
 
 namespace oofem {
-class FloatArray;
 class IntArray;
 class StructuralEngngModel;
 class FluidStructureProblem;
