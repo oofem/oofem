@@ -756,10 +756,10 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
             } else   {
                 LatticeMaterialStatus *lmatStat = dynamic_cast< LatticeMaterialStatus * >( status );
                 if ( lmatStat ) {
-                    stress = lmatStat->giveLatticeStress();
+                    stress = lmatStat->giveLatticeStress().toFloatArray();
                 } else   {
                     StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
-                    stress = ms->giveTraction();
+                    stress = ms->giveTraction().toFloatArray();
                 }
             }
         } else {

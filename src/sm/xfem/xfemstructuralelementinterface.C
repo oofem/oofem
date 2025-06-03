@@ -406,12 +406,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                             StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
                                             if ( fe2ms ) {
-                                                fe2ms->letNormalBe(crackNormal);
+                                                fe2ms->letNormalBe(crackNormal.toFloatArray());
 
                                                 PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
                                                 if ( bc ) {
-                                                    FloatArray periodicityNormal = crackNormal;
+                                                    FloatArray periodicityNormal = crackNormal.toFloatArray();
 
                                                     periodicityNormal.normalize();
 
@@ -741,9 +741,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
                 if ( structCS != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        answer = structCS->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep).toFloatMatrix();
                     } else {
-                        answer = structCS->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep).toFloatMatrix();
                     }
                     return;
                 } else {
@@ -757,9 +757,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
     // compute stiffness based on the bulk material.
     auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( mUsePlaneStrain ) {
-        answer = cs->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep).toFloatMatrix();
     } else {
-        answer = cs->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep).toFloatMatrix();
     }
 }
 
@@ -784,9 +784,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
                 if ( structCSInclusion != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        answer = structCSInclusion->giveRealStress_PlaneStrain(strain, gp, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStrain(strain, gp, tStep).toFloatArray();
                     } else {
-                        answer = structCSInclusion->giveRealStress_PlaneStress(strain, gp, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStress(strain, gp, tStep).toFloatArray();
                     }
 
                     return;
@@ -799,9 +799,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
     // If no enrichment modifies the material:
     if ( mUsePlaneStrain ) {
-        answer = cs->giveRealStress_PlaneStrain(strain, gp, tStep);
+        answer = cs->giveRealStress_PlaneStrain(strain, gp, tStep).toFloatArray();
     } else {
-        answer = cs->giveRealStress_PlaneStress(strain, gp, tStep);
+        answer = cs->giveRealStress_PlaneStress(strain, gp, tStep).toFloatArray();
     }
 }
 
@@ -1102,7 +1102,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                             OOFEM_ERROR("Failed to fetch material status.");
                         }
 
-                        FloatArray crackNormal( ms->giveNormal() );
+                        FloatArray crackNormal( ms->giveNormal().toFloatArray() );
 
                         FloatArray crackNormal3D = Vec3(
                             crackNormal.at(1), crackNormal.at(2), 0.0
@@ -1141,7 +1141,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                             OOFEM_ERROR("Failed to fetch material status.");
                         }
 
-                        FloatArray crackNormal( ms->giveNormal() );
+                        FloatArray crackNormal( ms->giveNormal().toFloatArray() );
 
                         computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
 

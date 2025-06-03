@@ -296,7 +296,7 @@ PlaneStressElement::computeStressVector(FloatArray &answer, const FloatArray &e,
             s [ 1 ] * y [ 0 ] * y [ 1 ] + s [ 0 ] * x [ 0 ] * x [ 1 ] + s [ 2 ] * ( x [ 1 ] * y [ 0 ] + x [ 0 ] * y [ 1 ] )
         );
     } else {
-        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(e, gp, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(e, gp, tStep).toFloatArray();
     }
 }
 
@@ -304,7 +304,7 @@ PlaneStressElement::computeStressVector(FloatArray &answer, const FloatArray &e,
 void
 PlaneStressElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -323,7 +323,7 @@ PlaneStressElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponse
 void
 PlaneStressElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStress(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStress(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -418,7 +418,7 @@ PlaneStrainElement::computeStressVector(FloatArray &answer, const FloatArray &e,
             y [ 1 ] * ( s [ 3 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] ) + x [ 1 ] * ( s [ 0 ] * x [ 0 ] + s [ 3 ] * y [ 0 ] )
         );
     } else {
-        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(e, gp, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(e, gp, tStep).toFloatArray();
     }
 }
 
@@ -426,7 +426,7 @@ PlaneStrainElement::computeStressVector(FloatArray &answer, const FloatArray &e,
 void
 PlaneStrainElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -447,7 +447,7 @@ PlaneStrainElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponse
 void
 PlaneStrainElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStrain(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_PlaneStrain(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -624,7 +624,7 @@ AxisymElement::computeStressVector(FloatArray &answer, const FloatArray &e, Gaus
             y [ 1 ] * ( s [ 5 ] * x [ 0 ] + s [ 1 ] * y [ 0 ] ) + x [ 1 ] * ( s [ 0 ] * x [ 0 ] + s [ 5 ] * y [ 0 ] )
         );
     } else {
-        answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep).toFloatArray();
     }
 }
 
@@ -633,7 +633,7 @@ AxisymElement::computeConstitutiveMatrixAt(FloatMatrix &answer,
                                            MatResponseMode rMode, GaussPoint *gp,
                                            TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -655,7 +655,7 @@ AxisymElement::computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 AxisymElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_3d(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_3d(rMode, gp, tStep).toFloatMatrix();
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;

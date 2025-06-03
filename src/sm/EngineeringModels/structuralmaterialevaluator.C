@@ -150,7 +150,7 @@ void StructuralMaterialEvaluator :: solveYourself()
 #endif
 
                 strain.printYourself("Macro strain guess");
-                stress = mat->giveRealStressVector_3d(strain, gp, tStep);
+                stress = mat->giveRealStressVector_3d(strain, gp, tStep).toFloatArray();
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }
@@ -162,7 +162,7 @@ void StructuralMaterialEvaluator :: solveYourself()
                     break;
                 } else {
                     if ( tangent.giveNumberOfRows() == 0 || !keepTangent ) {
-                        tangent = mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
+                        tangent = mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep).toFloatMatrix();
                     }
 
                     // Pick out the stress-controlled part;

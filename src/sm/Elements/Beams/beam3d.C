@@ -639,14 +639,14 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
 void
 Beam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 
 void
 Beam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep).toFloatArray();
 }
 
 
@@ -1031,7 +1031,7 @@ Beam3d :: computeSubSoilStiffnessMatrix(FloatMatrix &answer,
     answer.clear();
     for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
         this->computeSubSoilNMatrixAt(gp, N);
-        d = static_cast<StructuralMaterial *>(this->domain->giveMaterial(subsoilMat))->give3dBeamSubSoilStiffMtrx(rMode, gp, tStep);
+        d = static_cast<StructuralMaterial *>(this->domain->giveMaterial(subsoilMat))->give3dBeamSubSoilStiffMtrx(rMode, gp, tStep).toFloatMatrix();
         double dV = gp->giveWeight() * 0.5 * l;
         DN.beProductOf(d, N);
         answer.plusProductSymmUpper(N, DN, dV);
@@ -1322,7 +1322,7 @@ Beam3d :: giveCompositeExportData(std :: vector< ExportRegion > &vtkPieces, IntA
             FloatMatrix Tgl, n;
             FloatArray d(3);
 
-            Tgl = this->B3SSMI_getUnknownsGtoLRotationMatrix();
+            Tgl = this->B3SSMI_getUnknownsGtoLRotationMatrix().toFloatMatrix();
             for ( int nN = 1; nN <= nNodes; nN++ ) {
                 FloatArray u, dl, dg;
                 this->computeVectorOf(VM_Total, tStep, u);

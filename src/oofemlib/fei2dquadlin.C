@@ -74,7 +74,7 @@ FEI2dQuadLin :: evalN(const FloatArrayF<2> &lcoords)
 void
 FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = evalN({lcoords[0], lcoords[1]});
+    answer = evalN({lcoords[0], lcoords[1]}).toFloatArray();
 }
 
 std::pair<double, FloatMatrixF<2,4>>
@@ -99,7 +99,7 @@ double
 FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     auto tmp = evaldNdx(lcoords, cellgeo);
-    answer = transpose(tmp.second);
+    answer = transpose(tmp.second).toFloatMatrix();
     return tmp.first;
 }
 
@@ -364,7 +364,7 @@ FloatMatrixF<2,4> FEI2dQuadLin :: evaldNdxi(const FloatArrayF<2> &lcoords)
 
 void FEI2dQuadLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = transpose(evaldNdxi({lcoords[0], lcoords[1]}));
+    answer = transpose(evaldNdxi({lcoords[0], lcoords[1]})).toFloatMatrix();
 }
 
 double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) const

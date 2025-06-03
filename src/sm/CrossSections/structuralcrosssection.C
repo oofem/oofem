@@ -45,25 +45,25 @@ StructuralCrossSection::giveRealStresses(const FloatArray &strain, GaussPoint *g
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        return this->giveGeneralizedStress_Beam2d(strain, gp, tStep);
+        return this->giveGeneralizedStress_Beam2d(strain, gp, tStep).toFloatArray();
     } else if ( mode == _3dBeam ) {
-        return this->giveGeneralizedStress_Beam3d(strain, gp, tStep);
+        return this->giveGeneralizedStress_Beam3d(strain, gp, tStep).toFloatArray();
     } else if ( mode == _2dPlate ) {
-        return this->giveGeneralizedStress_Plate(strain, gp, tStep);
+        return this->giveGeneralizedStress_Plate(strain, gp, tStep).toFloatArray();
     } else if ( mode == _3dShell ) {
-        return this->giveGeneralizedStress_Shell(strain, gp, tStep);
+        return this->giveGeneralizedStress_Shell(strain, gp, tStep).toFloatArray();
     } else if ( mode == _3dShellRot ) {
-        return this->giveGeneralizedStress_ShellRot(strain, gp, tStep);
+        return this->giveGeneralizedStress_ShellRot(strain, gp, tStep).toFloatArray();
     } else if ( mode == _3dMat ) {
-        return this->giveRealStress_3d(strain, gp, tStep);
+        return this->giveRealStress_3d(strain, gp, tStep).toFloatArray();
     } else if ( mode == _PlaneStrain ) {
-        return this->giveRealStress_PlaneStrain(strain, gp, tStep);
+        return this->giveRealStress_PlaneStrain(strain, gp, tStep).toFloatArray();
     } else if ( mode == _PlaneStress ) {
-        return this->giveRealStress_PlaneStress(strain, gp, tStep);
+        return this->giveRealStress_PlaneStress(strain, gp, tStep).toFloatArray();
     } else if ( mode == _1dMat ) {
-        return this->giveRealStress_1d(strain, gp, tStep);
+        return this->giveRealStress_1d(strain, gp, tStep).toFloatArray();
     } else if ( mode == _Warping ) {
-        return this->giveRealStress_Warping(strain, gp, tStep);
+        return this->giveRealStress_Warping(strain, gp, tStep).toFloatArray();
     } else {
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
@@ -84,13 +84,13 @@ StructuralCrossSection::giveFirstPKStresses(const FloatArray &reducedF, GaussPoi
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        return this->giveFirstPKStress_3d(reducedF, gp, tStep);
+        return this->giveFirstPKStress_3d(reducedF, gp, tStep).toFloatArray();
     } else if ( mode == _PlaneStrain ) {
-        return this->giveFirstPKStress_PlaneStrain(reducedF, gp, tStep);
+        return this->giveFirstPKStress_PlaneStrain(reducedF, gp, tStep).toFloatArray();
     } else if ( mode == _PlaneStress ) {
-        return this->giveFirstPKStress_PlaneStress(reducedF, gp, tStep);
+        return this->giveFirstPKStress_PlaneStress(reducedF, gp, tStep).toFloatArray();
     } else if ( mode == _1dMat ) {
-        return this->giveFirstPKStress_1d(reducedF, gp, tStep);
+        return this->giveFirstPKStress_1d(reducedF, gp, tStep).toFloatArray();
     } else {
         OOFEM_ERROR("unsupported mode");
     }

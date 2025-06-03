@@ -321,14 +321,14 @@ Quad1MindlinShell3D::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 void
 Quad1MindlinShell3D::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(strain, gp, tStep).toFloatArray();
 }
 
 
 void
 Quad1MindlinShell3D::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give3dShellStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 
@@ -380,7 +380,7 @@ Quad1MindlinShell3D::giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
             stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            stress = cs->giveGeneralizedStress_Shell(strain, gp, tStep);
+            stress = cs->giveGeneralizedStress_Shell(strain, gp, tStep).toFloatArray();
         }
         shellForces.plusProduct(b, stress, dV);
 
@@ -441,11 +441,11 @@ Quad1MindlinShell3D::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     answer.resize(24, 24);
     answer.zero();
-    answer.assemble(shellStiffness, this->shellOrdering);
+    answer=mathops::assemble(shellStiffness, this->shellOrdering);
 
     if ( drillCoeffFlag ) {
         drillStiffness.symmetrized();
-        answer.assemble(drillStiffness, this->drillOrdering);
+        answer=mathops::assemble(drillStiffness, this->drillOrdering);
     }
 }
 
@@ -468,11 +468,11 @@ Quad1MindlinShell3D::giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Quad1MindlinShell3D::computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
-    FloatArrayF< 3 >u = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
-    FloatArrayF< 3 >v = this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
+    FloatArrayF< 3 >u = (this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates()).eval();
+    FloatArrayF< 3 >v = (this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates()).eval();
 
     auto n = cross(u, v);
-    answer = n / norm(n);
+    answer = (n / norm(n)).toFloatArray();
 }
 
 

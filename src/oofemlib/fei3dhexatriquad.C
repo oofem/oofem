@@ -468,7 +468,7 @@ double
 FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     auto tmp = evaldNdx(lcoords, cellgeo);
-    answer = transpose(tmp.second);
+    answer = transpose(tmp.second).toFloatMatrix();
     return tmp.first;
 }
 

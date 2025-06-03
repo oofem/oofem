@@ -260,14 +260,14 @@ CCTPlate::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 CCTPlate::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep).toFloatArray();
 }
 
 
 void
 CCTPlate::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 

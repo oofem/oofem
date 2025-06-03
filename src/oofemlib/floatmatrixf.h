@@ -93,7 +93,11 @@ public:
                 " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
         }
 #endif
-        std::copy_n(mat.begin(), N*M, values.begin());
+        #ifdef _USE_EIGEN
+            for(size_t r=0; r<N; r++) for(size_t c=0; c<M; c++) (*this)(r,c)=mat(r,c);
+        #else
+            std::copy_n(mat.begin(), N*M, values.begin());
+        #endif
     }
     FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
     {
@@ -110,6 +114,10 @@ public:
         values = mat.values;
         return * this;
     }
+
+    // conversion operator
+    FloatMatrix toFloatMatrix() const { FloatMatrix ret(rows(),cols()); for(size_t r=0; r<rows(); r++) for(size_t c=0; c<cols(); c++) ret(r,c)=(*this)(r,c); return ret; }
+
 
     /**
      * Checks size of receiver towards requested bounds.

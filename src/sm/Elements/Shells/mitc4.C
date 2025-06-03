@@ -256,7 +256,7 @@ MITC4Shell::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 {
     auto scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
     //auto cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
-    answer = scs->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep);
+    answer = scs->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 
@@ -414,7 +414,7 @@ MITC4Shell::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
         }
         drillStiffness.symmetrized();
 #endif
-        answer.assemble(drillStiffness, drillDofs);
+        answer=mathops::assemble(drillStiffness.toFloatMatrix(), drillDofs);
     }
 }
 
@@ -725,9 +725,9 @@ MITC4Shell::computeGtoLRotationMatrix(FloatMatrix &answer)
     answer.zero();
 
     for ( int i = 0; i <= 3; i++ ) {
-        answer.setSubMatrix(GtoLRotationMatrix, i * 6 + 1, i * 6 + 1);
+        answer.setSubMatrix(GtoLRotationMatrix.toFloatMatrix(), i * 6 + 1, i * 6 + 1);
         auto help = dot(LtoDir [ i ], GtoLRotationMatrix);
-        answer.setSubMatrix(help, i * 6 + 4, i * 6 + 4);
+        answer.setSubMatrix(help.toFloatMatrix(), i * 6 + 4, i * 6 + 4);
     }
 
     return 1;
@@ -737,7 +737,7 @@ MITC4Shell::computeGtoLRotationMatrix(FloatMatrix &answer)
 void
 MITC4Shell::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(strain, gp, tStep).toFloatArray();
 }
 
 
@@ -751,12 +751,12 @@ MITC4Shell::giveCharacteristicTensor(CharTensor type, GaussPoint *gp, TimeStep *
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
         auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
-        return from_voigt_stress(stress);
+        return from_voigt_stress(stress).toFloatMatrix();
     } else if ( type == GlobalStrainTensor ) {
         FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
-        return from_voigt_strain(strain);
+        return from_voigt_strain(strain).toFloatMatrix();
     } else {
         throw std::runtime_error("unsupported tensor mode");
     }
@@ -837,7 +837,7 @@ MITC4Shell::giveMidplaneIPValue(int gpXY, InternalStateType type, TimeStep *tSte
         }
 
         // local to global
-        return StructuralMaterial::transformStressVectorTo(GtoLRotationMatrix, mLocal, false);
+        return StructuralMaterial::transformStressVectorTo(GtoLRotationMatrix, mLocal, false).toFloatArray();
     } else if ( type == IST_CurvatureTensor ) {
         auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
         const auto &coords = gp->giveNaturalCoordinates();
@@ -858,7 +858,7 @@ MITC4Shell::giveMidplaneIPValue(int gpXY, InternalStateType type, TimeStep *tSte
         cLocal.at(2) = -dot(rotX, hk [ 1 ]);
         cLocal.at(6) = dot(rotY, hk [ 1 ]) - dot(rotX, hk [ 0 ]);
 
-        return StructuralMaterial::transformStrainVectorTo(GtoLRotationMatrix, cLocal, false);
+        return StructuralMaterial::transformStrainVectorTo(GtoLRotationMatrix, cLocal, false).toFloatArray();
     } else if ( type == IST_ShellStrainTensor ) {
         auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
         auto coords = gp->giveNaturalCoordinates();
@@ -899,11 +899,11 @@ MITC4Shell::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 {
     if ( type == IST_StrainTensor ) {
         auto globTensor = this->giveCharacteristicTensor(GlobalStrainTensor, gp, tStep);
-        answer = to_voigt_strain(globTensor);
+        answer = to_voigt_strain(globTensor).toFloatArray();
         return 1;
     } else if ( type == IST_StressTensor ) {
         auto globTensor = this->giveCharacteristicTensor(GlobalForceTensor, gp, tStep);
-        answer = to_voigt_stress(globTensor);
+        answer = to_voigt_stress(globTensor).toFloatArray();
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
         int gpnXY = ( gp->giveNumber() - 1 ) / 2;
@@ -927,9 +927,9 @@ MITC4Shell::computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     auto inputCoords_ElCS = this->giveLocalCoordinates(coords);
     std::vector< FloatArray >lc(3);
     for ( int _i = 0; _i < 4; _i++ ) {
-        lc [ _i ] = this->giveLocalCoordinates( this->giveNode(_i + 1)->giveCoordinates() );
+        lc [ _i ] = this->giveLocalCoordinates( this->giveNode(_i + 1)->giveCoordinates() ).toFloatArray();
     }
-    bool inplane = interp_lin.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc, interp_lin.giveGeometryType()) ) > 0;
+    bool inplane = interp_lin.global2local(llc, inputCoords_ElCS.toFloatArray(), FEIVertexListGeometryWrapper(lc, interp_lin.giveGeometryType()) ) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
@@ -1076,10 +1076,10 @@ MITC4Shell::computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     auto lcF = this->giveNodeCoordinates();
     std::vector< FloatArray >lc;
-    lc [ 0 ] = lcF [ 0 ];
-    lc [ 1 ] = lcF [ 1 ];
-    lc [ 2 ] = lcF [ 2 ];
-    lc [ 3 ] = lcF [ 3 ];
+    lc [ 0 ] = lcF [ 0 ].toFloatArray();
+    lc [ 1 ] = lcF [ 1 ].toFloatArray();
+    lc [ 2 ] = lcF [ 2 ].toFloatArray();
+    lc [ 3 ] = lcF [ 3 ].toFloatArray();
     double detJ = this->interp_lin.edgeGiveTransformationJacobian(iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, interp_lin.giveGeometryType()) );
     return detJ * gp->giveWeight();
 }

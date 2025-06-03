@@ -539,14 +539,14 @@ TR_SHELL11 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 TR_SHELL11 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-  answer = this->giveStructuralCrossSection()->give3dShellRotStiffMtrx(rMode, gp, tStep);
+  answer = this->giveStructuralCrossSection()->give3dShellRotStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 
 void
 TR_SHELL11 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-  answer = this->giveStructuralCrossSection()->giveGeneralizedStress_ShellRot(strain, gp, tStep);
+  answer = this->giveStructuralCrossSection()->giveGeneralizedStress_ShellRot(strain, gp, tStep).toFloatArray();
 }
 
 

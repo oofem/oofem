@@ -76,13 +76,13 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double ti
 
     // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
     FloatArray dx;
-    dx.beDifferenceOf(coords, this->centerCoord);
+    dx.beDifferenceOf(coords, this->centerCoord.toFloatArray());
 
     // Assuming the coordinate system to be local, dx(3) = z
     this->setDeformationGradient( dx.at(3) );
 
     FloatArray u, u2;
-    u.beProductOf(gradient, dx);
+    u.beProductOf(gradient.toFloatMatrix(), dx);
 
     // Add second order contribution, note only higher order in the thickness direction
     this->evaluateHigherOrderContribution(u2, dx.at(3), dx);
@@ -180,14 +180,14 @@ PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer,
     G3.at(2) = Gcon.at(2,3);
     G3.at(3) = Gcon.at(3,3);
 
-    double factor = dot(G3, dx);
+    double factor = mathops::dot(G3.toFloatArray(), dx);
     double gamma = this->genEps.at(18);
     m.at(1) = this->genEps.at(13);
     m.at(2) = this->genEps.at(14);
     m.at(3) = this->genEps.at(15);
     auto g3prime = gamma*m;
     
-    answer = 0.5*factor*factor * g3prime;
+    answer = (0.5*factor*factor * g3prime).toFloatArray();
 
 
 }
@@ -298,6 +298,6 @@ void PrescribedGenStrainShell7 :: giveInputRecord(DynamicInputRecord &input)
     BoundaryCondition :: giveInputRecord(input);
     input.setField(this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     input.setField(this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
-    input.setField(this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords);
+    input.setField(this->centerCoord.toFloatArray(), _IFT_PrescribedGenStrainShell7_centercoords);
 }
 } // end namespace oofem

@@ -160,14 +160,14 @@ Quad1Mindlin::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 void
 Quad1Mindlin::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep).toFloatArray();
 }
 
 
 void
 Quad1Mindlin::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 
@@ -190,11 +190,11 @@ Quad1Mindlin::giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Quad1Mindlin::computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
-    FloatArrayF< 3 >u = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
-    FloatArrayF< 3 >v = this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
+    FloatArrayF< 3 >u = FloatArray(this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates());
+    FloatArrayF< 3 >v = FloatArray(this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates());
 
     auto n = cross(u, v);
-    answer = n / norm(n);
+    answer = (n / norm(n)).toFloatArray();
 }
 
 

@@ -510,7 +510,7 @@ LIBeam3dNL::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 void
 LIBeam3dNL::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
@@ -523,7 +523,7 @@ LIBeam3dNL::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMo
 void
 LIBeam3dNL::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep).toFloatArray();
 }
 
 

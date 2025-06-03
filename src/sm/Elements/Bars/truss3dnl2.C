@@ -132,7 +132,7 @@ double
 Truss3dnl2 :: computeLength()
 {
   FloatArray X12;
-  X12.beProductOf(this->givePmatrix(), X);
+  X12.beProductOf(this->givePmatrix().toFloatMatrix(), X);
   return X12.computeNorm();
 }
   
@@ -141,7 +141,7 @@ Truss3dnl2 :: computeDeformedLength(const FloatArray &d)
 {
   FloatArray x12, x(X);
   x.add(d);
-  x12.beProductOf(this->givePmatrix(), x);
+  x12.beProductOf(this->givePmatrix().toFloatMatrix(), x);
   return x12.computeNorm();  
 }
     
@@ -203,7 +203,7 @@ Truss3dnl2 :: computeStiffnessMatrix(FloatMatrix &answer,
 void
 Truss3dnl2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-  answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+  answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep).toFloatMatrix();
 }
 
 
@@ -216,7 +216,7 @@ Truss3dnl2 :: _computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *t
   FloatMatrixF<6,6> A = this->giveAmatrix();
   FloatArray x(X);
   x.add(d); 
-  answer.beTProductOf(x,A);
+  answer.beTProductOf(x,A.toFloatMatrix());
   answer.times(1./l/L);
 }
 
@@ -246,14 +246,14 @@ Truss3dnl2 :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode
 //
 {
     
-  FloatMatrix BB, A = this->giveAmatrix();
+  FloatMatrix BB, A = this->giveAmatrix().toFloatMatrix();
   double L = computeLength();
   double l = computeDeformedLength(d);
   FloatArray x(X);
   FloatMatrix xx, Axx, AxxA;
   x.add(d); 
 
-  xx.beProductTOf(x,x);
+  xx.beProductTOf_vec(x,x);
   Axx.beProductOf(A,xx);
   AxxA.beProductOf(Axx,A);
   AxxA.times(1./l/l);

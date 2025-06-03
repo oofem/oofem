@@ -81,19 +81,19 @@ QTruss1d::computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
 void
 QTruss1d::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep).toFloatArray();
 }
 
 void
 QTruss1d::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
 QTruss1d::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_dPdF_1d(rMode, gp, tStep).toFloatMatrix();
 }
 
 double

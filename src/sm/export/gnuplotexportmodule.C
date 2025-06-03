@@ -360,7 +360,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 
 				// Compute displacement jump in normal and tangential direction
 				// Local numbering: (tang_z, tang, normal)
-				const FloatArray &jumpLoc = matStat->giveJump();
+				const FloatArray &jumpLoc = matStat->giveJump().toFloatArray();
 
 				double normalJump = jumpLoc.at(3);
 				normalJumps.push_back(normalJump);
@@ -369,7 +369,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 				tangJumps.push_back( jumpLoc.at(2) );
 
 
-				const FloatArray &trac = matStat->giveFirstPKTraction();
+				const FloatArray &trac = matStat->giveFirstPKTraction().toFloatArray();
 				normalTractions.push_back(trac.at(3));
 
 				tangTractions.push_back(trac.at(2));
@@ -937,12 +937,12 @@ void GnuplotExportModule :: outputInterfaceEl(Domain &d, TimeStep *tStep) {
 			    MaterialStatus *ms = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
 				StructuralInterfaceMaterialStatus *ims = static_cast<StructuralInterfaceMaterialStatus*>(ms);
 
-				FloatArray traction = ims->giveTraction();
+				FloatArray traction = ims->giveTraction().toFloatArray();
 //				printf("traction: "); traction.printYourself();
 				tractions.push_back(traction);
 
 
-				FloatArray tractionProj = ims->giveProjectedTraction();
+				FloatArray tractionProj = ims->giveProjectedTraction().toFloatArray();
 				tractionsProj.push_back(tractionProj);
 
 			}

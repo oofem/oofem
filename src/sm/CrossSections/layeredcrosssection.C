@@ -142,7 +142,7 @@ LayeredCrossSection::giveRealStress_PlaneStress(const FloatArrayF< 3 > &strain, 
             //double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
             // Compute the layer stress
-            interface->computeStrainVectorInLayer(layerStrain, strain, masterGp, layerGp, tStep);
+            interface->computeStrainVectorInLayer(layerStrain, strain.toFloatArray(), masterGp, layerGp, tStep);
             auto reducedLayerStress = dynamic_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlaneStress(layerStrain, layerGp, tStep);
             answer.at(1) += reducedLayerStress.at(1) * layerThick * lgpw;
             answer.at(2) += reducedLayerStress.at(2) * layerThick * lgpw;
@@ -151,8 +151,8 @@ LayeredCrossSection::giveRealStress_PlaneStress(const FloatArrayF< 3 > &strain, 
     }
     answer *= ( 1. / totThick );
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(masterGp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -274,7 +274,7 @@ LayeredCrossSection::giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &strain
             double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
             // Compute the layer stress
-            interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
+            interface->computeStrainVectorInLayer(layerStrain, strain.toFloatArray(), gp, layerGp, tStep);
 
             FloatArrayF< 2 >reducedLayerStress;
             if ( this->layerRots.at(layer) != 0. ) {
@@ -294,8 +294,8 @@ LayeredCrossSection::giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &strain
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
     //gp->setMaterialStatus(status);
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -337,7 +337,7 @@ LayeredCrossSection::giveGeneralizedStress_Plate(const FloatArrayF< 5 > &strain,
             double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
             // Compute the layer stress
-            interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
+            interface->computeStrainVectorInLayer(layerStrain, strain.toFloatArray(), gp, layerGp, tStep);
 
             FloatArrayF< 5 >reducedLayerStress;
             if ( this->layerRots.at(layer) != 0. ) {
@@ -380,8 +380,8 @@ LayeredCrossSection::giveGeneralizedStress_Plate(const FloatArrayF< 5 > &strain,
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
     //gp->setMaterialStatus(status);
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
     return answer;
 }
 
@@ -415,7 +415,7 @@ LayeredCrossSection::giveGeneralizedStress_Shell(const FloatArrayF< 8 > &strain,
             double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
             // Compute the layer stress
-            interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep); // FIXME convert to return value fixed size array.
+            interface->computeStrainVectorInLayer(layerStrain, strain.toFloatArray(), gp, layerGp, tStep); // FIXME convert to return value fixed size array.
 
             FloatArrayF< 5 >reducedLayerStress;
             if ( this->layerRots.at(layer) != 0. ) {
@@ -465,8 +465,8 @@ LayeredCrossSection::giveGeneralizedStress_Shell(const FloatArrayF< 8 > &strain,
     //gp->setMaterialStatus(status);
     // Create material status according to the first layer material
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -479,7 +479,7 @@ LayeredCrossSection::giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &stra
     for ( int i = 1; i <= 8; i++ ) {
         rstrain.at(i) = strain.at(i);
     }
-    FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep);
+    FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep).toFloatArray();
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(i) = ra.at(i);
     }
@@ -491,8 +491,8 @@ LayeredCrossSection::giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &stra
     //gp->setMaterialStatus(status);
     // Create material status according to the first layer material
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -529,7 +529,7 @@ LayeredCrossSection::giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &s
             //double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
             // Compute the layer stress
-            interface->computeStrainVectorInLayer(layerStrain, strain, masterGp, layerGp, tStep);
+            interface->computeStrainVectorInLayer(layerStrain, strain.toFloatArray(), masterGp, layerGp, tStep);
             // extract membrane part only
             FloatArrayF< 3 >layerStrainMembrane( layerStrain.at(1), layerStrain.at(2), layerStrain.at(3) );
             auto reducedLayerStress = dynamic_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlaneStress(layerStrainMembrane, layerGp, tStep);
@@ -545,8 +545,8 @@ LayeredCrossSection::giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &s
     answer *= ( 1. / totThick );
 
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(layerMaterials.at(1) )->giveStatus(masterGp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -568,13 +568,13 @@ LayeredCrossSection::giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dBeam ) {
-        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _2dPlate ) {
-        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dShell ) {
-        answer = this->give3dShellStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else {
         int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
         int gpnum = gp->giveNumber();
@@ -769,7 +769,7 @@ LayeredCrossSection::give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *
 //
 {
     FloatMatrix d, answer;
-    d = this->give3dShellStiffMtrx(rMode, gp, tStep);
+    d = this->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     answer.resize(9, 9);
     answer.zero();
     answer.assemble(d, { 1, 2, 3, 4, 5, 6, 7, 8 });

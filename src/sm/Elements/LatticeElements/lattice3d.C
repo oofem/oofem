@@ -234,7 +234,7 @@ Lattice3d :: givePlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-    plasticStrain = status->givePlasticLatticeStrain();
+    plasticStrain = status->givePlasticLatticeStrain().toFloatArray();
     return;
 }
 
@@ -243,20 +243,20 @@ Lattice3d :: giveOldPlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-    plasticStrain = status->giveOldPlasticLatticeStrain();
+    plasticStrain = status->giveOldPlasticLatticeStrain().toFloatArray();
     return;
 }
 
 void
 Lattice3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
 Lattice3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep).toFloatArray();
 }
 
 void

@@ -180,7 +180,7 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
     lcoords.at(1) = gp->giveNaturalCoordinate(1);
     lcoords.at(2) = gp->giveNaturalCoordinate(2);
     lcoords.at(3) = xi;
-    Gcov = this->evalInitialCovarBaseVectorsAt(lcoords);
+    Gcov = this->evalInitialCovarBaseVectorsAt(lcoords).toFloatMatrix();
     G1.beColumnOf(Gcov, 1);
     G2.beColumnOf(Gcov, 2);
     temp.beVectorProductOf(G1, G2);

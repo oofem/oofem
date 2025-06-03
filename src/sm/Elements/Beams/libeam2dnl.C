@@ -393,14 +393,14 @@ LIBeam2dNL::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 void
 LIBeam2dNL::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep).toFloatArray();
 }
 
 
 void
 LIBeam2dNL::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give2dBeamStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 void

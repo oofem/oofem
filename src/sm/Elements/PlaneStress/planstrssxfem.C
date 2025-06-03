@@ -472,7 +472,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< ExportRegion > &vtkPie
                             }
 
 
-                            FloatArray valueArray = {levelSet};
+                            FloatArray valueArray = Vec1(levelSet);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
@@ -486,7 +486,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< ExportRegion > &vtkPie
                             }
 
 
-                            FloatArray valueArray = {levelSet};
+                            FloatArray valueArray = Vec1(levelSet);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
@@ -500,7 +500,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< ExportRegion > &vtkPie
                             }
 
 
-                            FloatArray valueArray = {nodeEnrMarker};
+                            FloatArray valueArray = Vec1(nodeEnrMarker);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                         }
 

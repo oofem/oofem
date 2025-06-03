@@ -464,9 +464,9 @@ Shell7BaseXFEM :: computeSectionalForcesAt(IntegrationPoint *ip, Material *mat, 
 
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
     FloatArray sectionalForces;
-    sectionalForces.plusProduct(lambda[0], PG1, 1.0);
-    sectionalForces.plusProduct(lambda[1], PG2, 1.0);
-    sectionalForces.plusProduct(lambda[2], PG3, 1.0);
+    sectionalForces.plusProduct(lambda[0].toFloatMatrix(), PG1, 1.0);
+    sectionalForces.plusProduct(lambda[1].toFloatMatrix(), PG2, 1.0);
+    sectionalForces.plusProduct(lambda[2].toFloatMatrix(), PG3, 1.0);
     return sectionalForces;
 }
 

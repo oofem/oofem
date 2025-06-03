@@ -302,14 +302,14 @@ QDKTPlate::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 QDKTPlate::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep).toFloatArray();
 }
 
 
 void
 QDKTPlate::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 

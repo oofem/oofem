@@ -413,7 +413,7 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
         bt.beTranspositionOf(b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            stress = matStat->giveLatticeStress();
+            stress = matStat->giveLatticeStress().toFloatArray();
         } else {
             if ( !this->isActivated(tStep) ) {
                 strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
@@ -471,13 +471,13 @@ LatticeLink3d :: giveLength()
 void
 LatticeLink3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
 LatticeLink3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep).toFloatArray();
 }
 
 

@@ -64,7 +64,7 @@ SimpleCrossSection::giveRealStress_3dDegeneratedShell(const FloatArrayF< 6 > &st
     IntArray strainControl = {
         1, 2, 4, 5, 6
     };
-    return mat->giveRealStressVector_ShellStressControl(strain, strainControl, gp, tStep);
+    return mat->giveRealStressVector_ShellStressControl(strain.toFloatArray(), strainControl, gp, tStep);
 }
 
 
@@ -158,8 +158,8 @@ SimpleCrossSection::giveGeneralizedStress_Beam2d(const FloatArrayF< 3 > &strain,
     auto answer = dot(tangent, elasticStrain);
 
     auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -193,8 +193,8 @@ SimpleCrossSection::giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &strain,
     auto answer = dot(tangent, elasticStrain);
 
     auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -225,8 +225,8 @@ SimpleCrossSection::giveGeneralizedStress_Plate(const FloatArrayF< 5 > &strain, 
     auto answer = dot(tangent, elasticStrain);
 
     auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -259,8 +259,8 @@ SimpleCrossSection::giveGeneralizedStress_Shell(const FloatArrayF< 8 > &strain, 
     auto answer = dot(tangent, elasticStrain);
 
     auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -281,7 +281,7 @@ SimpleCrossSection::giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &strai
     for ( int i = 1; i <= 8; i++ ) {
         rstrain.at(i) = strain.at(i);
     }
-    FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep);
+    FloatArray ra = this->giveGeneralizedStress_Shell(rstrain, gp, tStep).toFloatArray();
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(i) = ra.at(i);
     }
@@ -289,8 +289,8 @@ SimpleCrossSection::giveGeneralizedStress_ShellRot(const FloatArrayF< 9 > &strai
 
     auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     auto status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -303,8 +303,8 @@ SimpleCrossSection::giveGeneralizedStress_MembraneRot(const FloatArrayF< 4 > &st
     auto answer = dot(tangent, strain);
 
     auto status = static_cast< StructuralMaterialStatus * >( this->giveMaterial(gp)->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     ///@todo We should support nonlinear behavior for the membrane part. In fact, should be even bundle the rotation part with the membrane?
     /// We gain nothing from this design anyway as the rotation field is always separate. Separate manual integration by the element would be an option.
@@ -324,26 +324,26 @@ SimpleCrossSection::giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResp
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dBeam ) {
-        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _2dPlate ) {
-        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dShell ) {
-        answer = this->give3dShellStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dDegeneratedShell ) {
-        answer = this->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else {
         auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
         if ( mode == _3dMat ) {
-            answer = mat->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
+            answer = mat->give3dMaterialStiffnessMatrix(rMode, gp, tStep).toFloatMatrix();
         } else if ( mode == _PlaneStress ) {
-            answer = mat->givePlaneStressStiffMtrx(rMode, gp, tStep);
+            answer = mat->givePlaneStressStiffMtrx(rMode, gp, tStep).toFloatMatrix();
         } else if ( mode == _PlaneStrain ) {
-            answer = mat->givePlaneStrainStiffMtrx(rMode, gp, tStep);
+            answer = mat->givePlaneStrainStiffMtrx(rMode, gp, tStep).toFloatMatrix();
         } else if ( mode == _1dMat ) {
-            answer = mat->give1dStressStiffMtrx(rMode, gp, tStep);
+            answer = mat->give1dStressStiffMtrx(rMode, gp, tStep).toFloatMatrix();
         } else {
             mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         }
@@ -457,7 +457,7 @@ FloatMatrixF< 9, 9 >
 SimpleCrossSection::give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     FloatMatrix d, answer;
-    d = this->give3dShellStiffMtrx(rMode, gp, tStep);
+    d = this->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     answer.resize(9, 9);
     answer.zero();
     answer.assemble(d, { 1, 2, 3, 4, 5, 6, 7, 8 });
@@ -806,13 +806,13 @@ SimpleCrossSection::giveCharMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, Ma
     MaterialMode mode = gp->giveMaterialMode();
     auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     if ( mode == _3dMat ) {
-        answer = mat->give3dMaterialStiffnessMatrix_dPdF(rMode, gp, tStep);
+        answer = mat->give3dMaterialStiffnessMatrix_dPdF(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _PlaneStress ) {
-        answer = mat->givePlaneStressStiffnessMatrix_dPdF(rMode, gp, tStep);
+        answer = mat->givePlaneStressStiffnessMatrix_dPdF(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _PlaneStrain ) {
-        answer = mat->givePlaneStrainStiffnessMatrix_dPdF(rMode, gp, tStep);
+        answer = mat->givePlaneStrainStiffnessMatrix_dPdF(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _1dMat ) {
-        answer = mat->give1dStressStiffnessMatrix_dPdF(rMode, gp, tStep);
+        answer = mat->give1dStressStiffnessMatrix_dPdF(rMode, gp, tStep).toFloatMatrix();
     } else {
         OOFEM_ERROR("Unsupported material mode for large strain analysis");
     }

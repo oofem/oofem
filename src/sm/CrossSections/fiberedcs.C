@@ -218,7 +218,7 @@ FiberedCrossSection::giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &strain
         double fiberYCoord = fiberGp->giveNaturalCoordinate(1);
         double fiberZCoord = fiberGp->giveNaturalCoordinate(2);
 
-        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
+        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain.toFloatArray(), fiberGp, tStep);
 
         auto reducedFiberStress = fiberMat->giveRealStressVector_Fiber(fiberStrain, fiberGp, tStep);
 
@@ -236,8 +236,8 @@ FiberedCrossSection::giveGeneralizedStress_Beam3d(const FloatArrayF< 6 > &strain
 
     // now we must update master gp ///@ todo simply chosen the first fiber material as master material /JB
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial(fiberMaterials.at(1) )->giveStatus(gp) );
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain.toFloatArray());
+    status->letTempStressVectorBe(answer.toFloatArray());
 
     return answer;
 }
@@ -283,13 +283,13 @@ FiberedCrossSection::giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dBeam ) {
-        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _2dPlate ) {
-        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep);
+        answer = this->give2dPlateStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else if ( mode == _3dShell ) {
-        answer = this->give3dShellStiffMtrx(rMode, gp, tStep);
+        answer = this->give3dShellStiffMtrx(rMode, gp, tStep).toFloatMatrix();
     } else {
         OOFEM_ERROR("Not implemented for bulk materials.");
     }

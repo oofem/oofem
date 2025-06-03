@@ -380,7 +380,7 @@ Shell7Base :: edgeEvalCovarBaseVectorsAt(const FloatArrayF<3> &lcoords, const in
     FloatArray solVecEdge;
     FloatMatrix B;
     //const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
-    this->edgeComputeBmatrixAt(lcoords, B, 1, ALL_STRAINS);
+    this->edgeComputeBmatrixAt(lcoords.toFloatArray(), B, 1, ALL_STRAINS);
     this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 
     FloatArray genEpsEdge;                 // generalized strain
@@ -817,9 +817,9 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationP
 
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
     sectionalForces.clear();
-    sectionalForces.plusProduct(lambda[0], PG1, 1.0);
-    sectionalForces.plusProduct(lambda[1], PG2, 1.0);
-    sectionalForces.plusProduct(lambda[2], PG3, 1.0);
+    sectionalForces.plusProduct(lambda[0], PG1.toFloatArray(), 1.0);
+    sectionalForces.plusProduct(lambda[1], PG2.toFloatArray(), 1.0);
+    sectionalForces.plusProduct(lambda[2], PG3.toFloatArray(), 1.0);
 }
 
 #endif

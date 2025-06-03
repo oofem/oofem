@@ -160,13 +160,13 @@ Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 void
 Lattice2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give2dStiffnessMatrix(rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give2dStiffnessMatrix(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
 Lattice2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress2d(strain, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress2d(strain, gp, tStep).toFloatArray();
 }
 
 void

@@ -65,7 +65,7 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override { answer = FloatArray{this->giveValue()}; }
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override { answer = Vec1({this->giveValue()}); }
     double evaluateAtTime(double t) override { return this->giveValue(); }
     double evaluateVelocityAtTime(double t) override { return 0.; }
     double evaluateAccelerationAtTime(double t) override { return 0.; }

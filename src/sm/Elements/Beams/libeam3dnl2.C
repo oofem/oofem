@@ -433,7 +433,7 @@ LIBeam3dNL2::computeGaussPoints()
 void
 LIBeam3dNL2::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep).toFloatMatrix();
 }
 
 void
@@ -446,7 +446,7 @@ LIBeam3dNL2::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatResponseM
 void
 LIBeam3dNL2::computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep).toFloatArray();
 }
 
 
