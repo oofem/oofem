@@ -49,7 +49,6 @@ class TimeStep;
 class Node;
 class StructuralInterfaceMaterial;
 class GaussPoint;
-class FloatArray;
 class IntArray;
 class FEInterpolation;
 

@@ -101,12 +101,12 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FloatArray nx = this->GiveDerivativeUX(gp->giveNaturalCoordinates());
     FloatArray ny = this->GiveDerivativeVY(gp->giveNaturalCoordinates());
 
-    FloatArray center = {0.33333333, 0.33333333};
+    FloatArray center = Vec2(0.33333333, 0.33333333);
     FloatArray nxRed = this->GiveDerivativeVX( center );
     FloatArray nyRed = this->GiveDerivativeUY( center );
     
     // These are the regular shape functions of a linear triangle evaluated at the center
-    FloatArray shapeFunct = { center.at(1), center.at(2), 1.0 - center.at(1) - center.at(2) }; // = {0, 0, 1}
+    FloatArray shapeFunct = Vec3( center.at(1), center.at(2), 1.0 - center.at(1) - center.at(2) ); // = {0, 0, 1}
     
     double area = this->giveArea();
     double detJ = 1.0 / ( 2.0 * area );
@@ -667,11 +667,11 @@ TrPlaneStrRot :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 {
     if ( type == IST_StressTensor ) {
         const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-        answer = {help.at(1), help.at(2), 0., 0., 0.,  help.at(3)};
+        answer = Vec6(help.at(1), help.at(2), 0., 0., 0.,  help.at(3));
         return 1;
     } else if ( type == IST_StrainTensor ) {
         const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        answer = {help.at(1), help.at(2), 0., 0., 0.,  help.at(3)};
+        answer = Vec6(help.at(1), help.at(2), 0., 0., 0.,  help.at(3));
         return 1;
     } else {
         return TrPlaneStress2d :: giveIPValue(answer, gp, type, tStep);

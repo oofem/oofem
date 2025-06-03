@@ -40,7 +40,6 @@ namespace oofem {
 class TimeStep;
 class StructuralEngngModel;
 class StaticStructural;
-class FloatArray;
 
 /**
  * Provides extra solver functionality needed for XFEM.

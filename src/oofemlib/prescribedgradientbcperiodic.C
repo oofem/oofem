@@ -110,12 +110,12 @@ void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
         OOFEM_ERROR("Only 3d implemented yet!");
     }
     jumps.emplace_back(jump);
-    jumps.emplace_back(FloatArray{jump.at(1), jump.at(2), 0.});
-    jumps.emplace_back(FloatArray{jump.at(1), 0., jump.at(3)});
-    jumps.emplace_back(FloatArray{0., jump.at(2), jump.at(3)});
-    jumps.emplace_back(FloatArray{jump.at(1), 0., 0.});
-    jumps.emplace_back(FloatArray{0., jump.at(2), 0.});
-    jumps.emplace_back(FloatArray{0., 0., jump.at(3)});
+    jumps.emplace_back(Vec3(jump.at(1), jump.at(2), 0.));
+    jumps.emplace_back(Vec3(jump.at(1), 0., jump.at(3)));
+    jumps.emplace_back(Vec3(0., jump.at(2), jump.at(3)));
+    jumps.emplace_back(Vec3(jump.at(1), 0., 0.));
+    jumps.emplace_back(Vec3(0., jump.at(2), 0.));
+    jumps.emplace_back(Vec3(0., 0., jump.at(3)));
 
     this->slavemap.clear();
     for ( int inode : nodes ) {

@@ -47,6 +47,7 @@
 #include "interfacetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "floatarray.h"
 
 namespace oofem {
 class DataStream;
@@ -57,9 +58,6 @@ class InputRecord;
 class DynamicInputRecord;
 class oofegGraphicContext;
 class EntityRenumberingFunctor;
-class FloatArray;
-class IntArray;
-class FloatMatrix;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.

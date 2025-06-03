@@ -81,7 +81,7 @@ Node2NodeContact :: computeGap(FloatArray &answer, TimeStep *tStep)
     FloatArray dx = xs-xm;
 
     FloatArray normal = this->giveNormal();
-    answer = {dx.dotProduct(normal), 0.0, 0.0};
+    answer = Vec3(dx.dotProduct(normal), 0.0, 0.0);
 
     //printf("normal gap = %e \n", answer.at(1));
     // store in gp?
@@ -95,8 +95,8 @@ Node2NodeContact :: computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeSte
     // The normal is not updated for node2node which is for small deformations only
     // C = {n -n}
     FloatArray normal = this->giveNormal();
-    answer = {  normal.at(1),  normal.at(2),  normal.at(3),
-               -normal.at(1), -normal.at(2), -normal.at(3) };
+    answer = Vec6( normal.at(1),  normal.at(2),  normal.at(3),
+               -normal.at(1), -normal.at(2), -normal.at(3) );
 }
 
 
@@ -108,7 +108,7 @@ Node2NodeContact :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, Floa
     if ( gap.at(1) < 0.0 ) {
         t = this->epsN * gap;
     } else {
-        t = {0.0, 0.0, 0.0};
+        t = Vec3(0.0, 0.0, 0.0);
     }
 }
 
@@ -284,10 +284,10 @@ Node2NodeContactL :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, Flo
     if ( gap.at(1) < 0.0 ) {
         auto dof = masterNode->giveDofWithID( this->giveDofIdArray().at(1) );
         double lambda = dof->giveUnknown(VM_Total, tStep);
-        t = {lambda, 0.0, 0.0};
+        t = Vec3(lambda, 0.0, 0.0);
         //printf("lambda %e \n\n", lambda);
     } else {
-        t = {0.0, 0.0, 0.0};
+        t = Vec3(0.0, 0.0, 0.0);
     }
 }
 

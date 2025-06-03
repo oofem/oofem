@@ -107,7 +107,7 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
 
-    answer = {
+    answer = Vec8(
         ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. ),
         ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. ),
         ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. ),
@@ -116,7 +116,7 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
         0.5 * ( 1. - ksi ) * ( 1. - eta * eta ),
         0.5 * ( 1. - ksi * ksi ) * ( 1. - eta ),
         0.5 * ( 1. + ksi ) * ( 1. - eta * eta )
-    };
+    );
 }
 
 
@@ -276,7 +276,7 @@ FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoo
     double ksi = lcoords.at(1);
     double n3 = 1. - ksi * ksi;
 
-    answer = { ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 };
+    answer = Vec3( ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 );
 }
 
 void
@@ -284,7 +284,7 @@ FEI2dQuadQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
-    answer = { ksi - 0.5, ksi + 0.5, ksi * 2.0 };
+    answer = Vec3( ksi - 0.5, ksi + 0.5, ksi * 2.0 );
 }
 
 void

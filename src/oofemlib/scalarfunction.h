@@ -38,6 +38,7 @@
 #include "parser.h"
 #include "error.h"
 #include "gausspoint.h"
+#include "floatarray.h"
 
 #include <string>
 #include <map>
@@ -45,7 +46,6 @@
 namespace oofem {
 class FunctionArgument;
 class Domain;
-class FloatArray;
 
 /**
  * Implementation of Scalar function. The scalar function can be defined as

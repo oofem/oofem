@@ -62,8 +62,8 @@ void DirectEI :: evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatAr
     FloatArray tangent;
     mpBasicGeometry->giveTangent(tangent, arcPos);
 
-    oGradLevelSet = {
+    oGradLevelSet = Vec2(
         -tangent [ 1 ], tangent [ 0 ]
-    };
+    );
 }
 } /* namespace oofem */

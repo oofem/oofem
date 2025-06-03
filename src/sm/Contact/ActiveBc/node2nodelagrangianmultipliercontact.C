@@ -247,7 +247,7 @@ Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer
 {
     const auto &xs = slaveNode->giveCoordinates();
     const auto &xm = masterNode->giveCoordinates();
-    auto normal = xs - xm;
+    FloatArray normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
@@ -256,10 +256,10 @@ Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer
     }
     // The normal is not updated for node2node which is for small deformations only
     // C = {n -n}
-    answer = {
+    answer = Vec4(
         normal.at(1), normal.at(2),
         -normal.at(1), -normal.at(2)
-    };
+    );
 }
 
 

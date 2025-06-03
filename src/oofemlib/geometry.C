@@ -139,8 +139,8 @@ double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatAr
             lockEta = true;
         }
 
-        FloatArray R = {   d.dotProduct(u) + c1*xi,
-                          -d.dotProduct(v) + c2*eta};
+        FloatArray R=Vec2(   d.dotProduct(u) + c1*xi,
+                          -d.dotProduct(v) + c2*eta);
 
         if ( lockXi ) {
             R[0] = 0.0;
@@ -543,9 +543,9 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 
     if( p1p2.giveSize() == 2 ) {
         // 2D
-        a1 = {-t1[1], t1[0]};
-        a2 = {-t2[1], t2[0]};
-        a3 = {-t3[1], t3[0]};
+        a1 = Vec2(-t1[1], t1[0]);
+        a2 = Vec2(-t2[1], t2[0]);
+        a3 = Vec2(-t3[1], t3[0]);
     }
     else {
         // 3D
@@ -852,7 +852,7 @@ PolygonLine :: PolygonLine() : BasicGeometry()
 
 void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-    FloatArray point = {iPoint[0], iPoint[1]};
+    FloatArray point = Vec2(iPoint[0], iPoint[1]);
 
     oDist = std :: numeric_limits< double > :: max();
     int numSeg = this->giveNrVertices() - 1;

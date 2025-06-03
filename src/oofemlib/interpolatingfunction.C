@@ -242,7 +242,7 @@ InterpolatingFuction :: evaluate(FloatArray &answer, const std :: map< std :: st
       OOFEM_ERROR("Unknown dimension. Must be 2 or 3.");
     }
 
-    answer = FloatArray{randomVariable};
+    answer = Vec1(randomVariable);
 }
 
 double

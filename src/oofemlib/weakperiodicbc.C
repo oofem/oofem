@@ -597,7 +597,7 @@ WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, FloatArray
     if (this->domain->giveNumberOfSpatialDimensions() == 2) {
         return computeBaseFunctionValue1D(baseID, coordinate.at(surfaceIndexes.at(1)));
     } else {
-        return computeBaseFunctionValue2D(baseID, {coordinate.at(surfaceIndexes.at(1)), coordinate.at(surfaceIndexes.at(2))});
+        return computeBaseFunctionValue2D(baseID, Vec2(coordinate.at(surfaceIndexes.at(1)), coordinate.at(surfaceIndexes.at(2))));
     }
 }
 

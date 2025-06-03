@@ -181,7 +181,7 @@ void GeometryBasedEI :: updateDofIdPool()
 
 void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
 {
-    auto eiRec = std::unique_ptr<DynamicInputRecord>();
+    auto eiRec = std::unique_ptr<DynamicInputRecord>(new DynamicInputRecord);
     FEMComponent :: giveInputRecord(* eiRec);
 
     eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
@@ -459,9 +459,9 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
     //    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
-    const FloatArray globalCoord = {
+    const FloatArray globalCoord = Vec2(
         iGlobalCoord [ 0 ], iGlobalCoord [ 1 ]
-    };
+    );
     mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
 
     FloatArray edGlobalCoord, localTangDir;
