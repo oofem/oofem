@@ -105,6 +105,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_NodalSpringElement_Name; }
     const char *giveClassName() const override { return "NodalSpringElement"; }
     void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
     void postInitialize() override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
     bool isCast(TimeStep *tStep) override { return true; }

@@ -103,14 +103,14 @@ namespace oofem {
 #define PM_ELEMENT_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
         if (!_pm.checkIfSet(_componentnum, _paramkey.getIndex())) { \
-            OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _paramkey.getName());\
+            OOFEM_ERROR("Element %d: Parameter %s not set", _componentnum, _paramkey.getNameCStr());\
         }\
     }    
 
 #define PM_DOFMAN_ERROR_IFNOTSET(_pm, _componentnum, _paramkey) \
     { \
         if (!_pm.checkIfSet(_componentnum, _paramkey.getIndex())) { \
-            OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _paramkey.getName());\
+            OOFEM_ERROR("DofManager %d: Parameter %s not set", _componentnum, _paramkey.getNameCStr());\
         }\
     }    
 

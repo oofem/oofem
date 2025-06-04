@@ -124,9 +124,8 @@ NodalSpringElement :: initializeFrom(InputRecord &ir, int priority)
 }
 
 void
-NodalSpringElement :: postInitialize()
+NodalSpringElement :: initializeFinish()
 {
-  //StructuralElement::postInitialize();
   ParameterManager &ppm =  this->giveDomain()->elementPPM;
   PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_dofmask) ;
   PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_springConstants) ;
@@ -145,6 +144,11 @@ NodalSpringElement :: postInitialize()
       OOFEM_ERROR ("Masses array size not equal to number of DOFs");
   }
 }
+
+
+void
+NodalSpringElement :: postInitialize()
+{}
 
 void NodalSpringElement :: printOutputAt(FILE *File, TimeStep *tStep)
 {

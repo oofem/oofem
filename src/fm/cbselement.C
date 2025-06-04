@@ -62,13 +62,17 @@ CBSElement :: initializeFrom(InputRecord &ir, int priority)
 {
     FMElement :: initializeFrom(ir, priority);
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
-    bool flag;
-    PM_UPDATE_PARAMETER_AND_REPORT(boundarySides, ppm, ir, this->number, IPK_CBSElement_bsides, priority, flag) ;
-    if (flag) {
-        PM_UPDATE_PARAMETER_AND_REPORT(boundaryCodes, ppm, ir, this->number, IPK_CBSElement_bcodes, priority, flag) ;
-        if (!flag) {
-            OOFEM_ERROR("Boundary codes not provided for element %d", this->giveNumber());
-        }
+    PM_UPDATE_PARAMETER(boundarySides, ppm, ir, this->number, IPK_CBSElement_bsides, priority) ;
+    PM_UPDATE_PARAMETER(boundaryCodes, ppm, ir, this->number, IPK_CBSElement_bcodes, priority) ;
+}
+
+void 
+CBSElement :: initializeFinish()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    FMElement :: initializeFinish();
+    if (!boundarySides.isEmpty() ) {
+        PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_CBSElement_bcodes);
     }
 }
 

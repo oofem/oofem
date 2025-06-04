@@ -63,6 +63,7 @@ public:
     CBSElement(int n, Domain * aDomain);
 
     void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;

@@ -16,7 +16,7 @@ node 6 coords 3 3.0           0.           1.0
 node 7 coords 3 3.0           2.0          1.0 
 node 8 coords 3 0.0           2.0          1.0 
 #
-tmbrick11 1 nodes 8 1 2 3 4 5 6 7 8 crosssect 0 mat 1
+tmbrick11 1 nodes 8 1 2 3 4 5 6 7 8 
 #
 dummycs 1 mat 1 set 1
 # thermo-mechanical material model
