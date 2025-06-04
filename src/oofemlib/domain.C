@@ -934,6 +934,12 @@ Domain :: instanciateYourself(DataReader &dr)
 #  endif
     }
 
+    this->initializeFinish();
+    return 1;
+}
+
+void
+Domain::initializeFinish() {
     spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
     spatialLocalizer->init();
     connectivityTable = std::make_unique<ConnectivityTable>(this);
@@ -1006,9 +1012,7 @@ Domain :: instanciateYourself(DataReader &dr)
     for ( auto &el: elementList ) {
         el->initializeFinish();
     }
-    return 1;
 }
-
 
 void
 Domain :: postInitialize()

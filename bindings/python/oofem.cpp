@@ -1086,6 +1086,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
         .def("giveSet", &oofem::Domain::giveSet, py::return_value_policy::reference)
         .def("giveSpatialLocalizer", &oofem::Domain::giveSpatialLocalizer, py::return_value_policy::reference)
+        .def("initializeFinish", &oofem::Domain::initializeFinish)
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -1429,6 +1430,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("initialize", &oofem::Integral::initialize)
         .def("assemble_lhs", &oofem::Integral::assemble_lhs)
         .def("assemble_rhs", &oofem::Integral::assemble_rhs)
+        /*.def("assemble_rhs", &oofem::Integral::assemble_rhs, py::arg("dest"), py::arg("s"), py::arg("tstep"), py::arg("eNorms") = static_cast<oofem::FloatArray *>(nullptr))*/
     ;
     /* end mpm experimental */
 #endif

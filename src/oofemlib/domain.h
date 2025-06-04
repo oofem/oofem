@@ -429,6 +429,7 @@ public:
      * @see FemComponent::initializeFrom
      */
     int instanciateYourself(DataReader &dr);
+    void initializeFinish();
     /**
      * Performs post-initialization for all the domain contents (which is called after initializeFrom).
      * Currently, it only calls Element::postInitialize.
