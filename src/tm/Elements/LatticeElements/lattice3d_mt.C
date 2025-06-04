@@ -196,6 +196,7 @@ void Lattice3d_mt :: postInitialize()
     this->LatticeTransportElement :: postInitialize();
     numberOfGaussPoints = 1;
     numberOfPolygonVertices = (int) (polygonCoords.giveSize() / 3.);
+    crackWidths.resizeWithValues(numberOfPolygonVertices);
     this->computeGaussPoints();
 }
 

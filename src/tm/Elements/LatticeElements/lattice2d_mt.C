@@ -75,6 +75,8 @@ Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     numberOfGaussPoints = 1;
     couplingNumbers.resize(1);
     couplingNumbers.zero();
+    crackWidths.resize(1);
+    crackWidths.zero();
 }
 
 double Lattice2d_mt :: giveLength()
@@ -204,7 +206,7 @@ Lattice2d_mt :: initializeFrom(InputRecord &ir, int priority)
     PM_UPDATE_PARAMETER(thickness, ppm, ir, this->number, IPK_Lattice2d_mt_thickness, priority) ;
     PM_UPDATE_PARAMETER(width, ppm, ir, this->number, IPK_Lattice2d_mt_width, priority) ;
     PM_UPDATE_PARAMETER(gpCoords, ppm, ir, this->number, IPK_Lattice2d_mt_gpcoords, priority) ;
-    PM_UPDATE_PARAMETER(crackWidths, ppm, ir, this->number, IPK_Lattice2d_mt_crackwidth, priority) ;
+    PM_UPDATE_PARAMETER(crackWidths.at(1), ppm, ir, this->number, IPK_Lattice2d_mt_crackwidth, priority) ;
     PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice2d_mt_couplingflag, priority) ;
     PM_UPDATE_PARAMETER(couplingNumbers.at(1), ppm, ir, this->number, IPK_Lattice2d_mt_couplingnumber, priority) ;
 }
