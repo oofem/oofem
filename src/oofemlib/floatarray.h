@@ -109,7 +109,7 @@ public:
     FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline FloatArray(std :: initializer_list< double >list) : values(list) { }
-    static fromList(std::initializer_list<double> ini){ return FloatArray(ini); }
+    static FloatArray fromList(std::initializer_list<double> ini){ return FloatArray(ini); }
     /// Wrapper to direct assignment from iterator pairs
     template< class InputIt >
     FloatArray( InputIt first, InputIt last ) : values(first, last) { }
@@ -123,11 +123,11 @@ public:
     FloatArray &operator = (const FloatArray &src) { values = src.values; return *this; }
     /// Move operator
     FloatArray &operator = (FloatArray &&src) noexcept { values = std::move(src.values); return *this; }
-    /// Assignment operator.
-    inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
     /// Assign from fixed size array
-    template< std::size_t N >
-    inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
+    //template< std::size_t N >
+    //inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
+    //template< std::size_t N >
+    //static FloatArray fromFixed(const FloatArrayF<N> &src) { return FloatArray(src.begin(), src.end()); }
 
     /// Add one element
     void push_back(double iVal) { values.push_back(iVal); }
@@ -577,6 +577,18 @@ OOFEM_EXPORT bool isfinite(const FloatArray &x);
 OOFEM_EXPORT bool iszero(const FloatArray &x);
 OOFEM_EXPORT double sum(const FloatArray & x);
 OOFEM_EXPORT double product(const FloatArray & x);
+
+
+inline static FloatArray Vec1(const double& a){ return FloatArray::fromList({a}); }
+inline static FloatArray Vec2(const double& a, const double& b){ return FloatArray::fromList({a,b}); }
+inline static FloatArray Vec3(const double& a, const double& b, const double& c){ return FloatArray::fromList({a,b,c}); }
+inline static FloatArray Vec4(const double& a, const double& b, const double& c, const double& d){ return FloatArray::fromList({a,b,c,d}); }
+inline static FloatArray Vec5(const double& a, const double& b, const double& c, const double& d, const double& e){ return FloatArray::fromList({a,b,c,d,e}); }
+inline static FloatArray Vec6(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f){ return FloatArray::fromList({a,b,c,d,e,f}); }
+inline static FloatArray Vec7(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g){ return FloatArray::fromList({a,b,c,d,e,f,g}); }
+inline static FloatArray Vec8(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g, const double& h){ return FloatArray::fromList({a,b,c,d,e,f,g,h}); }
+inline static FloatArray Vec9(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g, const double& h, const double& i){ return FloatArray::fromList({a,b,c,d,e,f,g,h,i}); }
+inline static FloatArray VecX(std::initializer_list<double> ini){ return FloatArray::fromList(ini); }
 //@}
 } // end namespace oofem
 #endif // floatarray_h

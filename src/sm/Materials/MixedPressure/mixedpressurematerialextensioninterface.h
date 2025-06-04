@@ -38,6 +38,7 @@
 #include "interface.h"
 #include "matresponsemode.h"
 #include "domain.h"
+#include "floatmatrix.h"
 
 ///@name micromorphicmaterialextensioninterface
 //@{

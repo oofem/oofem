@@ -253,7 +253,7 @@ Truss3dnl2 :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode
   FloatMatrix xx, Axx, AxxA;
   x.add(d); 
 
-  xx.beProductTOf_vec(x,x);
+  xx.beProductTOf(x,x);
   Axx.beProductOf(A,xx);
   AxxA.beProductOf(Axx,A);
   AxxA.times(1./l/l);

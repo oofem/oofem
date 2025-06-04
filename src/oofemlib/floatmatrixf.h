@@ -115,8 +115,11 @@ public:
         return * this;
     }
 
-    // conversion operator
-    FloatMatrix toFloatMatrix() const { FloatMatrix ret(rows(),cols()); for(size_t r=0; r<rows(); r++) for(size_t c=0; c<cols(); c++) ret(r,c)=(*this)(r,c); return ret; }
+    #ifdef _USE_EIGEN
+        FloatMatrix toFloatMatrix() const { FloatMatrix ret(rows(),cols()); for(size_t r=0; r<rows(); r++) for(size_t c=0; c<cols(); c++) ret(r,c)=(*this)(r,c); return ret; }
+    #else
+        FloatMatrixF toFloatMatrix() const { return FloatMatrix(*this); }
+    #endif
 
 
     /**

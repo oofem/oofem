@@ -24,6 +24,11 @@ pyodide:
 	pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
 	pip install pytest numpy
 	cd bindings/python/tests; python -m pytest
+debug:
+	mkdir -p build-debug
+	cmake -Bbuild-debug -H. -GNinja -DCMAKE_BUILD_TYPE=Debug -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	ninja -C build-debug/
+	ctest --test-dir build-debug/ --parallel=16 --output-on-failure
 shared:
 	mkdir -p build-shared
 	cmake -Bbuild-shared -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1

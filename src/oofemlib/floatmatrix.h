@@ -153,14 +153,6 @@ public:
         values = std :: move(mat.values);
         return * this;
     }
-    /// Assignment operator, adjusts size of the receiver if necessary.
-    template<std::size_t N, std::size_t M>
-    FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
-        nRows = N;
-        nColumns = M;
-        values.assign(mat.begin(), mat.end());
-        return * this;
-    }
 
     /**
      * Checks size of receiver towards requested bounds.

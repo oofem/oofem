@@ -414,7 +414,7 @@ MITC4Shell::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
         }
         drillStiffness.symmetrized();
 #endif
-        answer=mathops::assemble(drillStiffness.toFloatMatrix(), drillDofs);
+        answer.assemble(drillStiffness.toFloatMatrix(), drillDofs);
     }
 }
 

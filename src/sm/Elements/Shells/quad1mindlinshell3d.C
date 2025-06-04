@@ -441,11 +441,11 @@ Quad1MindlinShell3D::computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     answer.resize(24, 24);
     answer.zero();
-    answer=mathops::assemble(shellStiffness, this->shellOrdering);
+    answer.assemble(shellStiffness, this->shellOrdering);
 
     if ( drillCoeffFlag ) {
         drillStiffness.symmetrized();
-        answer=mathops::assemble(drillStiffness, this->drillOrdering);
+        answer.assemble(drillStiffness, this->drillOrdering);
     }
 }
 
@@ -468,8 +468,8 @@ Quad1MindlinShell3D::giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Quad1MindlinShell3D::computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
-    FloatArrayF< 3 >u = (this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates()).eval();
-    FloatArrayF< 3 >v = (this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates()).eval();
+    FloatArrayF< 3 >u = FloatArray(this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates());
+    FloatArrayF< 3 >v = FloatArray(this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates());
 
     auto n = cross(u, v);
     answer = (n / norm(n)).toFloatArray();

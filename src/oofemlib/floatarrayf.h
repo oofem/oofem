@@ -91,6 +91,14 @@ public:
     /// Assignment operator
     void operator = (const FloatArrayF<N> &src) { values = src.values; }
 
+    // conversion operator
+    #ifdef _USE_EIGEN
+        FloatArray toFloatArray() const { FloatArray ret(values.size()); for(size_t i=0; i<values.size(); i++) ret[i]=(*this)[i]; return ret; }
+    #else
+        FloatArray toFloatArray() const { return FloatArray(begin(),end()); }
+    #endif
+
+
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 1-based indexing access.

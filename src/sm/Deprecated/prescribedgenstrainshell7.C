@@ -180,7 +180,7 @@ PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer,
     G3.at(2) = Gcon.at(2,3);
     G3.at(3) = Gcon.at(3,3);
 
-    double factor = mathops::dot(G3.toFloatArray(), dx);
+    double factor = dot(G3.toFloatArray(), dx);
     double gamma = this->genEps.at(18);
     m.at(1) = this->genEps.at(13);
     m.at(2) = this->genEps.at(14);
