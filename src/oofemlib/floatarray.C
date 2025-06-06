@@ -51,7 +51,7 @@
 #include <fstream>
 #include <iomanip>
 
-#define __MATH_OPS
+#define __MATH_INTERNAL
 #include "ops-vec.h"
 
 namespace oofem{
@@ -443,42 +443,7 @@ double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, doub
 
 double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
-#if _MATHOPS_STAGE>2
     return vec::distance_square(*this,iP1,iP2,oXi,oXiUnbounded);
-#else
-    const double l2 = iP1.distance_square(iP2);
-
-    if ( l2 > 0.0 ) {
-
-        const double s = (dot(*this, iP2) - dot(*this, iP1) ) - ( dot(iP1, iP2) - dot(iP1, iP1) );
-
-        if ( s < 0.0 ) {
-            // X is closest to P1
-            oXi = 0.0;
-            oXiUnbounded = s/l2;
-            return this->distance_square(iP1);
-        } else {
-            if ( s > l2 ) {
-                // X is closest to P2
-                oXi = 1.0;
-                oXiUnbounded = s/l2;
-                return this->distance_square(iP2);
-            } else {
-                oXi = s / l2;
-                oXiUnbounded = s/l2;
-                const FloatArray q = ( 1.0 - oXi ) * iP1 + oXi * iP2;
-                return this->distance_square(q);
-            }
-        }
-    } else {
-        // If the points P1 and P2 coincide,
-        // we can compute the distance to any
-        // of these points.
-        oXi = 0.5;
-        oXiUnbounded = 0.5;
-        return this->distance_square(iP1);
-    }
-#endif
 }
 
 
@@ -498,52 +463,14 @@ double FloatArray :: distance_square(const FloatArray &from) const
 
 
 void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
-// Assembles the array fe (typically, the load vector of a finite
-// element) to the receiver, using loc as location array.
 {
-#if _MATHOPS_STAGE>50
     vec::assemble(*this,fe,loc);
-#else
-    std::size_t n = fe.size();
-#  ifndef NDEBUG
-    if ( n != loc.size() ) {
-        OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
-    }
-
-#  endif
-
-    for (std::size_t i = 1; i <= n; i++ ) {
-        int ii = loc.at(i);
-        if ( ii ) { // if non 0 coefficient,
-            this->at(ii) += fe.at(i);
-        }
-    }
-#endif
 }
 
 
 void FloatArray :: assembleSquared(const FloatArray &fe, const IntArray &loc)
-// Assembles the array fe (typically, the load vector of a finite
-// element) to the receiver, using loc as location array.
 {
-#if _MATHOPS_STAGE>50
     vec::assembleSquared(*this,fe,loc);
-#else
-    std::size_t n = fe.size();
-#  ifndef NDEBUG
-    if ( n != loc.size() ) {
-        OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
-    }
-
-#  endif
-
-    for (std::size_t i = 1; i <= n; i++ ) {
-        int ii = loc.at(i);
-        if ( ii ) { // if non 0 coefficient,
-            this->at(ii) += fe.at(i) * fe.at(i);
-        }
-    }
-#endif
 }
 
 
@@ -702,93 +629,30 @@ void FloatArray :: negated()
 
 
 void FloatArray :: printYourself() const
-// Prints the receiver on screen.
 {
-#if _MATHOPS_STAGE>0
     vec::printYourself(*this);
-#else
-    printf("FloatArray of size : %d \n", this->giveSize());
-    for ( double x: *this ) {
-        printf( "%10.3e  ", x );
-    }
-
-    printf("\n");
-#endif
 }
 
 
 void FloatArray :: printYourself(const std::string &name) const
-// Prints the receiver on screen.
 {
-#if _MATHOPS_STAGE>0
     vec::printYourself(*this,name);
-#else
-    printf("%s (%d): \n", name.c_str(), this->giveSize());
-    for ( double x: *this ) {
-        printf( "%10.3e  ", x );
-    }
-
-    printf("\n");
-#endif
 }
 
 void FloatArray :: printYourselfToFile(const std::string filename, const bool showDimensions) const
-// Prints the receiver to file.
 {
-#if _MATHOPS_STAGE>0
     vec::printYourselfToFile(*this,filename,showDimensions);
-#else
-    std :: ofstream arrayfile (filename);
-    if (arrayfile.is_open()) {
-        if (showDimensions)
-            arrayfile << "FloatArray of size : " << this->giveSize() << "\n";
-        arrayfile << std::scientific << std::right << std::setprecision(3);
-        for ( double x: *this ) {
-            arrayfile << std::setw(10) << x << "\t";
-        }
-        arrayfile.close();
-    } else {
-        OOFEM_ERROR("Failed to write to file");
-    }
-#endif
 }
 
 void FloatArray :: pY() const
-// Prints the receiver on screen with higher accuracy than printYourself.
 {
-#if _MATHOPS_STAGE>0
     vec::pY(*this);
-#else
-    printf("[");
-    for ( double x: *this ) {
-        printf( "%20.14e; ", x );
-    }
-
-    printf("];\n");
-#endif
 }
 
 
 void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
-// Returns the receiver 'a' rotated according the change-of-base matrix r.
-// If mode = 't', the method performs the operation  a = r(transp) * a .
-// If mode = 'n', the method performs the operation  a = r * a .
 {
-#if _MATHOPS_STAGE>2
     vec::rotatedWith(*this,r,mode);
-#else
-    FloatArray rta;
-
-    if ( mode == 't' ) {
-        rta.beTProductOf(r, * this);
-    } else if ( mode == 'n' ) {
-        rta.beProductOf(r, * this);
-    } else {
-        OOFEM_ERROR("unsupported mode");
-    }
-
-    * this = rta;
-#endif
 }
 
 
@@ -954,7 +818,6 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
     return x;
 }
 
-#if _MATHOPS_STAGE>40
 double dot(const FloatArray &x, const FloatArray &y){ return vec::dot(x,y); }
 double distance(const FloatArray &x, const FloatArray &y){ return vec::distance(x,y); }
 double distance_square(const FloatArray &x, const FloatArray &y){ return vec::distance_square(x,y); }
@@ -964,157 +827,28 @@ bool isfinite(const FloatArray &x){ return vec::isfinite(x); }
 bool iszero(const FloatArray &x){ return vec::iszero(x); }
 double sum(const FloatArray & x){ return vec::sum(x); }
 double product(const FloatArray & x){ return vec::product(x); }
-#else
-double dot(const FloatArray &x, const FloatArray &y)
-{
-    return x.dotProduct(y);
-}
-
-double distance(const FloatArray &x, const FloatArray &y)
-{
-    return x.distance(y);
-}
-
-double distance_square(const FloatArray &x, const FloatArray &y)
-{
-    return x.distance_square(y);
-}
-
-double norm(const FloatArray &x)
-{
-    return x.computeNorm();
-}
-
-double norm_square(const FloatArray &x)
-{
-    return x.computeSquaredNorm();
-}
-
-bool isfinite(const FloatArray &x)
-{
-    return x.isFinite();
-}
-
-bool iszero(const FloatArray &x)
-{
-    return x.containsOnlyZeroes();
-}
-
-double sum(const FloatArray & x)
-{
-    return x.sum();
-}
-
-double product(const FloatArray & x)
-{
-    return x.product();
-}
-#endif
-
 
 // End of IML compat
 
 void FloatArray :: beVectorForm(const FloatMatrix &aMatrix)
 {
-#if _MATHOPS_STAGE>3
     *this=vec::beVectorForm(aMatrix);
-#else
-    // Rewrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
-#  ifndef NDEBUG
-    if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfRows() != 3 ) {
-        OOFEM_ERROR("matrix dimension is not 3x3");
-    }
-
-#  endif
-    *this = {
-        aMatrix.at(1, 1),
-        aMatrix.at(2, 2),
-        aMatrix.at(3, 3),
-        aMatrix.at(2, 3),
-        aMatrix.at(1, 3),
-        aMatrix.at(1, 2),
-        aMatrix.at(3, 2),
-        aMatrix.at(3, 1),
-        aMatrix.at(2, 1)
-    };
-#endif
 }
 
 void FloatArray :: beSymVectorFormOfStrain(const FloatMatrix &aMatrix)
 {
-#if _MATHOPS_STAGE>1
     *this = vec::beSymVectorFormOfStrain(aMatrix);
-#else
-    // Revrites a symmetric strain matrix on reduced vector form, order: 11, 22, 33, 23, 13, 12
-    // shear components are multiplied with a factor 2
-#  ifndef NDEBUG
-    if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfRows() != 3 ) {
-        OOFEM_ERROR("matrix dimension is not 3x3");
-    }
-#  endif
-
-    *this = {
-        aMatrix.at(1, 1),
-        aMatrix.at(2, 2),
-        aMatrix.at(3, 3),
-        ( aMatrix.at(2, 3) + aMatrix.at(3, 2) ),
-        ( aMatrix.at(1, 3) + aMatrix.at(3, 1) ),
-        ( aMatrix.at(1, 2) + aMatrix.at(2, 1) )
-    };
-#endif
 }
 
 
 void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 {
-#if _MATHOPS_STAGE>1
     *this = vec::beSymVectorForm(aMatrix);
-#else
-    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
-#  ifndef NDEBUG
-    if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfRows() != 3 ) {
-        OOFEM_ERROR("matrix dimension is not 3x3");
-    }
-
-#  endif
-
-    *this = {
-        aMatrix.at(1, 1),
-        aMatrix.at(2, 2),
-        aMatrix.at(3, 3),
-        0.5 * ( aMatrix.at(2, 3) + aMatrix.at(3, 2) ),
-        0.5 * ( aMatrix.at(1, 3) + aMatrix.at(3, 1) ),
-        0.5 * ( aMatrix.at(1, 2) + aMatrix.at(2, 1) )
-    };
-#endif
 }
 
 void FloatArray :: changeComponentOrder()
 {
-#if _MATHOPS_STAGE>1
     vec::changeComponentOrder(*this);
-#else
-
-    // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
-    // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
-
-    if ( this->giveSize() == 6 ) {
-        std :: swap( this->at(4), this->at(6) );
-    } else if ( this->giveSize() == 9 )    {
-        // OOFEM:       11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:        11, 22, 33, 12, 13, 23, 32, 21, 31
-        const int abq2oo [ 9 ] = {
-            1,  2,  3,  6,  5,  4,  7,  9,  8
-        };
-
-        FloatArray tmp(9);
-        for ( int i = 0; i < 9; i++ ) {
-            tmp(i) = this->at(abq2oo [ i ]);
-        }
-
-        * this = tmp;
-    }
-#endif
 }
 
 

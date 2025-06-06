@@ -1,8 +1,8 @@
 #include"floatmatrix.h"
 #include"floatarray.h"
 #include"intarray.h"
-#ifndef __MATH_OPS
-    #define __MATH_OPS
+#ifndef __MATH_INTERNAL
+    #define __MATH_INTERNAL
 #endif
 #include"ops-vec.h"
 

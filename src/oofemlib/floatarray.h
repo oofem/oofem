@@ -553,11 +553,6 @@ public:
     FloatArray &operator = ( const double & );
     //@}
 
-#ifdef _BOOSTPYTHON_BINDINGS
-    void __setitem__(int i, double val) { this->values[i] = val; }
-    double __getitem__(int i) { return this->values[i]; }
-    void beCopyOf(const FloatArray &src) { this->operator = ( src ); }
-#endif
 };
 
 const FloatArray ZeroVector = {0.0,0.0,0.0};

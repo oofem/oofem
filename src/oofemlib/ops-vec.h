@@ -1,15 +1,11 @@
 #pragma once
 
-#ifndef __MATH_OPS
-    #error __MATH_OPS must be defined to use this header (only oofem internal headers should include it)
+#ifndef __MATH_INTERNAL
+    #error __MATH_INTERNAL must be defined to use this header (only oofem internal headers should include it)
 #endif
 
 #include<string>
 #include<initializer_list>
-
-#ifndef _MATHOPS_STAGE
-    #define _MATHOPS_STAGE 100
-#endif
 
 
 namespace oofem{
@@ -21,8 +17,6 @@ namespace oofem{
 }
 
 namespace oofem::vec{
-
-    /***** FloatArray *****/
 
     /**
      * Returns the receiver a rotated according the change-of-base matrix r.

@@ -1,8 +1,8 @@
 #include"floatmatrix.h"
 #include"floatarray.h"
 #include"intarray.h"
-#ifndef __MATH_OPS
-    #define __MATH_OPS
+#ifndef __MATH_INTERNAL
+    #define __MATH_INTERNAL
 #endif
 #include"ops-mat.h"
 
@@ -13,6 +13,48 @@
 #include <iomanip>
 
 namespace oofem::mat {
+
+
+// Some forward declarations for LAPACK. Remember to append the underscore to the function name.
+#ifdef __LAPACK_MODULE
+extern "C" {
+/// Computes the reciprocal condition number for a LU decomposed function.
+extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
+                    const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
+/// Replaces a with the LU-decomposition.
+extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
+/// Replaces a with its inverse.
+extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
+/// Solves a system of equations.
+extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+/// Computes the norm.
+extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
+/// Computes eigenvalues and vectors.
+extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
+                   const double *vl, const double *vu, const int *il, const int *iu,
+                   const double *abstol, int *m, double *w, double *z, const int *ldz,
+                   double *work, int *lwork, int *iwork, int *ifail, int *info,
+                   int jobz_len, int range_len, int uplo_len);
+/// Solves system which has been LU-factorized.
+extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+/// General matrix multiplication
+extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
+                   const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
+                   int a_columns, int b_columns, int c_columns);
+/// General dyad product of vectors
+extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
+                  const double *y, const int *incy, double *a, const int *lda,
+                  int x_len, int y_len, int a_columns);
+/// Symmetric dyad product of vector
+extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
+                  double *a, const int *lda, int x_len, int a_columns);
+/// Y = Y + alpha * X
+extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
+/// X = alpha * X
+extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
+}
+#endif
+
 
 void assemble(FloatMatrix& dst, const FloatMatrix &src, const IntArray &loc)
 {
