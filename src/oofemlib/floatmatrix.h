@@ -45,15 +45,6 @@
 #include <algorithm>
 #include <string>
 
-#ifdef _BOOSTPYTHON_BINDINGS
-namespace boost {
-namespace python {
-namespace api {
-class object;
-};
-};
-};
-#endif
 
 namespace oofem {
 class FloatArray;
@@ -110,6 +101,7 @@ public:
     constexpr static int Dim = 2;
     typedef double Scalar;
 
+
     /**
      * Creates matrix of given size.
      * @param n Number of rows.
@@ -164,10 +156,12 @@ public:
     /// Returns number of rows of receiver.
     inline int giveNumberOfRows() const { return (int)nRows; }
     inline std::size_t giveRowSize() const { return nRows; }
+    size_t giveNColumns() const { return nColumns; }
 
     /// Returns number of columns of receiver.
     inline int giveNumberOfColumns() const { return (int)nColumns; }
     inline std::size_t giveColSize() const { return nColumns; }
+    size_t giveNRows() const { return nRows; }
 
 
     /// Returns nonzero if receiver is square matrix.
@@ -543,6 +537,13 @@ public:
      * @param c Number of columns.
      */
     void hardResize(int r, int c);
+    /**
+     * Resize and set to zero, though with some funny semantics (TBD)
+     * @param r Number of rows.
+     * @param c Number of columns.
+     */
+    void resize_funny(int r, int c);
+
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
     void clear() {
         this->nRows = 0;
@@ -611,14 +612,6 @@ public:
     int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
-
-
-#ifdef _BOOSTPYTHON_BINDINGS
-    void __setitem__(boost :: python :: api :: object t, double val);
-    double __getitem__(boost :: python :: api :: object t);
-    void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
-#endif
-
 
 }; // class FloatMatrix
 

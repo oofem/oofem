@@ -216,6 +216,8 @@ set (core_arrays
     intarray.C
     floatarray.C
     floatmatrix.C
+    ops-vec.C
+    ops-mat.C
     )
 
 set (core_engng

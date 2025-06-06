@@ -228,6 +228,11 @@ public:
      */
     void resize(int s);
     /**
+     * Resizes receiver towards requested size, zeroes only some elements (hence the _funny name, to be investigated); internal use only (!)
+     * @param s New size.
+     */
+    void resize_funny(size_t s);
+    /**
      * Clears receiver (zero size).
      * Same effect as resizing to zero, but has a clearer meaning and intent when used.
      */
@@ -568,16 +573,17 @@ OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y 
 OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
 OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
 
-OOFEM_EXPORT double norm(const FloatArray &x);
-OOFEM_EXPORT double norm_square(const FloatArray &x);
-OOFEM_EXPORT double dot(const FloatArray &x, const FloatArray &y);
-OOFEM_EXPORT double distance(const FloatArray &x, const FloatArray &y);
-OOFEM_EXPORT double distance_square(const FloatArray &x, const FloatArray &y);
-OOFEM_EXPORT bool isfinite(const FloatArray &x);
-OOFEM_EXPORT bool iszero(const FloatArray &x);
-OOFEM_EXPORT double sum(const FloatArray & x);
-OOFEM_EXPORT double product(const FloatArray & x);
-
+#if 1
+double norm(const FloatArray &x);
+double norm_square(const FloatArray &x);
+double dot(const FloatArray &x, const FloatArray &y);
+double distance(const FloatArray &x, const FloatArray &y);
+double distance_square(const FloatArray &x, const FloatArray &y);
+bool isfinite(const FloatArray &x);
+bool iszero(const FloatArray &x);
+double sum(const FloatArray & x);
+double product(const FloatArray & x);
+#endif
 
 inline static FloatArray Vec1(const double& a){ return FloatArray::fromList({a}); }
 inline static FloatArray Vec2(const double& a, const double& b){ return FloatArray::fromList({a,b}); }

@@ -47,8 +47,13 @@
 #include <fstream>
 #include <iomanip>
 #include <numeric>
-#define RESIZE(nr, nc) \
-    { \
+
+#define __MATH_OPS
+#include "ops-mat.h"
+
+
+namespace oofem{
+    void FloatMatrix::resize_funny(int nr, int nc){
         this->nRows = nr; this->nColumns = nc; \
         std::size_t nsize = this->nRows * this->nColumns; \
         if ( nsize < this->values.size() ) { \
@@ -58,10 +63,7 @@
         } \
     }
 
-#ifdef _BOOSTPYTHON_BINDINGS
- #include <boost/python.hpp>
- #include <boost/python/extract.hpp>
-#endif
+}
 
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
@@ -125,7 +127,7 @@ FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 
 FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
 {
-    RESIZE( mat.size(), mat.begin()->size() )
+    resize_funny( mat.size(), mat.begin()->size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -143,7 +145,7 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
 {
-    RESIZE( ( int ) mat.begin()->size(), ( int ) mat.size() );
+    resize_funny( ( int ) mat.begin()->size(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -163,7 +165,7 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
 {
-    RESIZE( mat.begin()->giveSize(), ( int ) mat.size() );
+    resize_funny( mat.begin()->giveSize(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -214,6 +216,9 @@ bool FloatMatrix :: isFinite() const
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
+#if _MATHOPS_STAGE>10
+    mat::assemble(*this,src,loc);
+#else
     std::size_t ii, jj, size = src.giveRowSize();
 
 #ifndef NDEBUG
@@ -235,11 +240,15 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
             }
         }
     }
+#endif
 }
 
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
+#if _MATHOPS_STAGE>11
+    mat::assemble(*this,src,rowind,colind);
+#else
     int ii, jj;
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
@@ -263,10 +272,14 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
             }
         }
     }
+#endif
 }
 
 void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
+#if _MATHOPS_STAGE>12
+    mat::assembleT(*this,src,rowind,colind);
+#else
     int ii, jj;
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
@@ -290,11 +303,15 @@ void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, co
             }
         }
     }
+#endif
 }
 
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
 {
+#if _MATHOPS_STAGE>13
+    mat::assemble(*this,src,rowind,colind);
+#else
     int ii, jj;
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
@@ -308,6 +325,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const in
             }
         }
     }
+#endif
 }
 
 
@@ -315,7 +333,7 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
     int nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
-    RESIZE(nrows, ncols);
+    resize_funny(nrows, ncols);
 
     for ( int i = 1; i <= nrows; i++ ) {
         for ( int j = 1; j <= ncols; j++ ) {
@@ -333,7 +351,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
         OOFEM_ERROR("error in product A*B : dimensions do not match, A(*,%d), B(%d,*)", aMatrix.nColumns, bMatrix.nRows);
     }
 #  endif
-    RESIZE(aMatrix.nRows, bMatrix.nColumns);
+    resize_funny(aMatrix.nRows, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
@@ -363,7 +381,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
-    RESIZE(aMatrix.nColumns, bMatrix.nColumns);
+    resize_funny(aMatrix.nColumns, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows,
@@ -393,7 +411,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
-    RESIZE(aMatrix.nRows, bMatrix.nRows);
+    resize_funny(aMatrix.nRows, bMatrix.nRows);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns,
@@ -485,7 +503,7 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
 {
     int n1 = vec1.giveSize();
     int n2 = vec2.giveSize();
-    RESIZE(n1, n2);
+    resize_funny(n1, n2);
     for ( int j = 1; j <= n2; j++ ) {
         for ( int i = 1; i <= n1; i++ ) {
             this->at(i, j) = vec1.at(i) * vec2.at(j);
@@ -505,6 +523,10 @@ void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 
 void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
 { //normal should be at the first position, easier for interface material models
+#if _MATHOPS_STAGE>29
+    *this=mat::beLocalCoordSys(normal);
+#else
+
     if ( normal.giveSize() == 1 ) {
         this->resize(1, 1);
         this->at(1, 1) = normal(0);
@@ -543,6 +565,7 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
     } else {
         OOFEM_ERROR("Normal needs 1 to 3 components.");
     }
+#endif
 }
 
 void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
@@ -694,6 +717,9 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // receiver ; the lower half is not modified. Other advantage : it does
 // not compute the transposition of matrix a.
 {
+#if _MATHOPS_STAGE>25
+    mat::plusProductSymmUpper(*this,a,b,dV);
+#else
     if ( !this->isNotEmpty() ) {
         this->nRows = a.nColumns;
         this->nColumns = b.nColumns;
@@ -741,11 +767,15 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
         }
     }
 #endif
+#endif
 }
 
 
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
+#if _MATHOPS_STAGE>25
+    mat::plusDyadSymmUpper(*this,a,dV);
+#else
     if ( !this->isNotEmpty() ) {
         this->nRows = a.giveSize();
         this->nColumns = a.giveSize();
@@ -764,6 +794,7 @@ void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
         }
     }
 #endif
+#endif
 }
 
 
@@ -773,6 +804,9 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // If the receiver has a null size, it is expanded.
 // Advantage : does not compute the transposition of matrix a.
 {
+#if _MATHOPS_STAGE>25
+    mat::plusProductUnsym(*this,a,b,dV);
+#else
     if ( !this->isNotEmpty() ) {
         this->nRows = a.nColumns;
         this->nColumns = b.nColumns;
@@ -796,11 +830,15 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
         }
     }
 #endif
+#endif
 }
 
 
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
 {
+#if _MATHOPS_STAGE>25
+    mat::plusDyadUnsym(*this,a,b,dV);
+#else
     if ( !this->isNotEmpty() ) {
         this->nRows = a.giveSize();
         this->nColumns = b.giveSize();
@@ -820,12 +858,16 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
         }
     }
 #endif
+#endif
 }
 
 
 bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
 {
+#if _MATHOPS_STAGE>28
+    return mat::beInverseOf(*this,src);
+#else
     double det;
 
 #  ifndef NDEBUG
@@ -834,7 +876,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
     }
 #  endif
 
-    RESIZE(src.nRows, src.nColumns);
+    resize_funny(src.nRows, src.nColumns);
 
     if ( nRows == 1 ) {
         if (fabs(src.at(1,1)) > 1.e-30) {
@@ -952,6 +994,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
         return true;
 #endif
     }
+#endif
 }
 
 
@@ -1108,6 +1151,10 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
 {
+#if _MATHOPS_STAGE>26
+    return mat::solveForRhs(*this,b,answer,transpose);
+#else
+
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
@@ -1194,6 +1241,7 @@ bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 #endif
 
     return true;
+#endif
 }
 
 
@@ -1204,6 +1252,9 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 // gaussian elimination - slow but safe
 //
 {
+#if _MATHOPS_STAGE>26
+    return mat::solveForRhs(*this,b,answer,transpose);
+#else
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
@@ -1294,6 +1345,7 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         }
     }
     return true;
+#endif
 #endif
 }
 
@@ -1451,6 +1503,9 @@ double FloatMatrix :: giveTrace() const
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
 {
+#if _MATHOPS_STAGE>21
+    mat::printYourself(*this);
+#else
     printf("FloatMatrix with dimensions : %zu %zu\n",
            nRows, nColumns);
     if ( nRows <= 250 && nColumns <= 250 ) {
@@ -1464,12 +1519,16 @@ void FloatMatrix :: printYourself() const
     } else {
         printf("   large matrix : coefficients not printed \n");
     }
+#endif
 }
 
 
 void FloatMatrix :: printYourselfToFile(const std::string filename, const bool showDimensions) const
 // Prints the receiver to file.
 {
+#if _MATHOPS_STAGE>21
+    mat::printYourselfToFile(*this,filename,showDimensions);
+#else
     std :: ofstream matrixfile (filename);
     if (matrixfile.is_open()) {
         if (showDimensions)
@@ -1486,12 +1545,16 @@ void FloatMatrix :: printYourselfToFile(const std::string filename, const bool s
     } else {
         OOFEM_ERROR("Failed to write to file");
     }
+#endif
 }
 
 
 void FloatMatrix :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
+#if _MATHOPS_STAGE>21
+    mat::printYourself(*this,name);
+#else
     printf("%s (%zu x %zu): \n", name.c_str(), nRows, nColumns);
     if ( nRows <= 250 && nColumns <= 250 ) {
         for (std::size_t i = 1; i <= nRows; ++i ) {
@@ -1511,12 +1574,16 @@ void FloatMatrix :: printYourself(const std::string &name) const
         }
         if ( nRows > 20 )  printf(" ...\n");
     }
+#endif
 }
 
 
 void FloatMatrix :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.
 {
+#if _MATHOPS_STAGE>21
+    mat::pY(*this);
+#else
     printf("[");
     for (std::size_t i = 1; i <= nRows; ++i ) {
         for (std::size_t j = 1; j <= nColumns; ++j ) {
@@ -1530,11 +1597,15 @@ void FloatMatrix :: pY() const
     }
 
     printf("];\n");
+#endif
 }
 
 
 void FloatMatrix :: writeCSV(const std :: string &name) const
 {
+#if _MATHOPS_STAGE>21
+    mat::writeCSV(*this,name);
+#else
     FILE *file = fopen(name.c_str(), "w");
     for (std::size_t i = 1; i <= nRows; ++i ) {
         for (std::size_t j = 1; j <= nColumns; ++j ) {
@@ -1544,6 +1615,7 @@ void FloatMatrix :: writeCSV(const std :: string &name) const
         fprintf(file, "\n");
     }
     fclose(file);
+#endif
 }
 
 
@@ -1551,6 +1623,9 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
 // The method performs the operation  a = r^T . a . r . or the inverse
 {
+#if _MATHOPS_STAGE>20
+    mat::rotatedWith(*this,r,mode);
+#else
     FloatMatrix rta;
 
     if ( mode == 'n' ) {
@@ -1562,6 +1637,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
     } else {
         OOFEM_ERROR("unsupported mode");
     }
+#endif
 }
 
 
@@ -1610,6 +1686,9 @@ double FloatMatrix :: computeFrobeniusNorm() const
 
 double FloatMatrix :: computeNorm(char p) const
 {
+#if _MATHOPS_STAGE>14
+    return mat::computeNorm(*this,p);
+#else
 #  ifdef __LAPACK_MODULE
     FloatArray work( this->giveNumberOfRows() );
     int lda = max(this->nRows, 1);
@@ -1643,12 +1722,16 @@ double FloatMatrix :: computeNorm(char p) const
         // return 0.0;
     }
 #  endif
+#endif
 }
 
 
 
 void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 {
+#if _MATHOPS_STAGE>24
+    *this=mat::beMatrixForm(aArray);
+#else
     // Revrites the vector on matrix form (symmetrized matrix used if size is 6),
     // order: 11, 22, 33, 23, 13, 12
     // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
@@ -1679,6 +1762,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
         this->at(3, 1) = aArray.at(5);
         this->at(2, 1) = aArray.at(6);
     }
+#endif
 }
 
 void FloatMatrix :: changeComponentOrder()
@@ -1689,6 +1773,9 @@ void FloatMatrix :: changeComponentOrder()
 //        OOFEM_ERROR("matrix dimension is not 6x6");
 //    }
 //#  endif
+#if _MATHOPS_STAGE>17
+    mat::changeComponentOrder(*this);
+#else
 
     if ( nRows == 6 && nColumns == 6 ) {
         // This could probably be done more beautifully + efficiently.
@@ -1723,12 +1810,16 @@ void FloatMatrix :: changeComponentOrder()
 
         * this = tmp;
     }
+#endif
 }
 
 
 
 double FloatMatrix :: computeReciprocalCondition(char p) const
 {
+#if _MATHOPS_STAGE>16
+    return mat::computeReciprocalCondition(*this,p);
+#else
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("receiver must be square (is %d by %d)", this->nRows, this->nColumns);
@@ -1762,6 +1853,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     FloatMatrix inv;
     inv.beInverseOf(* this);
     return 1.0 / ( inv.computeNorm(p) * anorm );
+#endif
 }
 
 void FloatMatrix :: beMatrixFormOfStress(const FloatArray &aArray)
@@ -1904,6 +1996,10 @@ FloatMatrix :: givePackSize(DataStream &buff) const
 
 bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {
+#if _MATHOPS_STAGE>22
+    return mat::jaco_(*this,eval,v,nf);
+#else
+
     /*
      * Solves the eigenvalues and eigenvectors of real
      * symmetric matrix by jacobi method.
@@ -2070,22 +2166,10 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     }
 
     return 0;
+#endif
 } /* jaco_ */
 
 
-#ifdef _BOOSTPYTHON_BINDINGS
-void
-FloatMatrix :: __setitem__(boost :: python :: api :: object t, double val)
-{
-    this->at(boost :: python :: extract< int >(t [ 0 ]) + 1, boost :: python :: extract< int >(t [ 1 ]) + 1) = val;
-}
-
-double
-FloatMatrix :: __getitem__(boost :: python :: api :: object t)
-{
-    return this->at(boost :: python :: extract< int >(t [ 0 ]) + 1, boost :: python :: extract< int >(t [ 1 ]) + 1);
-}
-#endif
 
 std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 {
