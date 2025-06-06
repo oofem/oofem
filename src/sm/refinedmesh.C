@@ -125,7 +125,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
     long mesh_edge_id, fine_edge_id, fine_quad_id, fine_hexa_id;
     long *tmp_array_start [ 4 ], *tmp_array_end [ 4 ];
     long *tmp_array_cen [ 6 ], *tmp_array [ 12 ];
-    int swap [ 6 ], flag;
+    int swap [ 6 ] = {0,0,0,0,0,0}, flag;
 
     Element *element = NULL;
     IntArray *connectivity = NULL, *boundary = NULL;
