@@ -69,7 +69,7 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray :: isFinite() const
+bool FloatArray :: isAllFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {
@@ -567,12 +567,6 @@ void FloatArray :: resize(int n)
     //this->values.assign(n, 0.);
 }
 
-
-void FloatArray :: hardResize(int n)
-{
-    this->values.assign(n, 0.);
-    this->values.shrink_to_fit();
-}
 
 
 bool FloatArray :: containsOnlyZeroes() const
