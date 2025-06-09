@@ -60,8 +60,11 @@ void
 Truss3dnl2 :: initializeFrom(InputRecord &ir)
 {
   Truss3d :: initializeFrom(ir);
-  X = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
-  X.append(this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 ));
+  FloatArray vc1 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
+  FloatArray vc2 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 );
+  X.resize(vc1.size()+vc2.size());
+  X.copySubVector(vc1,1);
+  X.copySubVector(vc2,vc1.size()+1);
   L = this->computeLength();
 }
 

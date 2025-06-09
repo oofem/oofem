@@ -143,8 +143,9 @@ void TransverseReinfConstraint :: assembleVector(FloatArray &answer, TimeStep *t
                 loc=loc_s;
                 loc.followedBy(loc_c);
 
-                u=u_s;
-                u.append(u_c);
+                u.resize(u_s.size()+u_c.size());
+                u.copySubVector(u_s,1);
+                u.copySubVector(u_c,u_s.size()+1);
 
                 //Compute the stiffness matrix expansion
                 this->integrateTangent(Klam, es, ec, boundary);
