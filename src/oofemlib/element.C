@@ -66,6 +66,7 @@
 #endif
 
 #include <cstdio>
+#include <cassert>
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :
@@ -91,19 +92,22 @@ Element :: computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer)
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.reserve( this->computeNumberOfGlobalDofs() );
-
+    answer.resize( this->computeNumberOfGlobalDofs() );
+    int offset=0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, dofIDMask);
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, true);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, dofIDMask);
         this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, true);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
         answer.rotatedWith(G2L, 'n');
@@ -117,17 +121,21 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.reserve( dofIDMask.giveSize() * ( this->giveNumberOfDofManagers() + this->giveNumberOfInternalDofManagers() ) );
+    answer.resize( dofIDMask.giveSize() * ( this->giveNumberOfDofManagers() + this->giveNumberOfInternalDofManagers() ) );
+    int offset=0;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, padding);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, padding);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     ///@todo This rotation matrix needs to have the dofidmask/eid/primary field or something passed to it, otherwise it won't work generally.
     if ( this->computeGtoLRotationMatrix(G2L) ) {
@@ -143,12 +151,15 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofID
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.reserve( dofIDMask.giveSize() * bNodes.giveSize() );
+    answer.resize( dofIDMask.giveSize() * bNodes.giveSize() );
+    int offset=0;
 
     for ( int bNode: bNodes ) {
         this->giveDofManager( bNode )->giveUnknownVector(vec, dofIDMask, u, tStep, padding);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
         OOFEM_ERROR("Local coordinate system is not implemented yet");
@@ -161,17 +172,21 @@ Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, Value
 {
     FloatMatrix G2L;
     FloatArray vec;
-    answer.reserve( this->computeNumberOfGlobalDofs() );
+    answer.resize( this->computeNumberOfGlobalDofs() );
+    int offset=0;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
         answer.rotatedWith(G2L, 'n');
@@ -186,19 +201,23 @@ Element :: computeVectorOfPrescribed(ValueModeType u, TimeStep *tStep, FloatArra
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.reserve( this->computeNumberOfGlobalDofs() );
+    answer.resize( this->computeNumberOfGlobalDofs() );
+    int offset=0;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, dofIDMask);
         this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, dofIDMask);
 	this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, u, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
         answer.rotatedWith(G2L, 'n');
@@ -213,17 +232,21 @@ Element :: computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType mo
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.reserve( dofIDMask.giveSize() * this->computeNumberOfGlobalDofs() );
+    answer.resize( dofIDMask.giveSize() * this->computeNumberOfGlobalDofs() );
+    int offset=0;
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, tStep);
-        answer.append(vec);
+        answer.copySubVector(vec,offset+1);
+        offset+=vec.size();
     }
+    assert(offset==(int)answer.size());
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
         answer.rotatedWith(G2L, 'n');
