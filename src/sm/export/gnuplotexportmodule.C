@@ -787,28 +787,31 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
             // Add the start and end nodes of the segment
             DofManager *startNode = e->giveDofManager( bNodes[0] );
-            FloatArray xS = startNode->giveCoordinates();
+            int dim=startNode->giveCoordinates().size();
+            FloatArray xS(dim+2);
+            xS.copySubVector(startNode->giveCoordinates(),1);
 
             Dof *dSu = startNode->giveDofWithID(D_u);
             double dU = dSu->giveUnknown(VM_Total, tStep);
-            xS.push_back(dU);
+            xS.at(dim+1)=dU;
 
             Dof *dSv = startNode->giveDofWithID(D_v);
             double dV = dSv->giveUnknown(VM_Total, tStep);
-            xS.push_back(dV);
+            xS.at(dim+2)=dV;
 
             bndSegNodes.push_back(xS);
 
             DofManager *endNode = e->giveDofManager( bNodes[1] );
-            FloatArray xE = endNode->giveCoordinates();
+            FloatArray xE(dim+2);
+            xE.copySubVector(endNode->giveCoordinates(),1);
 
             Dof *dEu = endNode->giveDofWithID(D_u);
             dU = dEu->giveUnknown(VM_Total, tStep);
-            xE.push_back(dU);
+            xE.at(dim+1)=dU;
 
             Dof *dEv = endNode->giveDofWithID(D_v);
             dV = dEv->giveUnknown(VM_Total, tStep);
-            xE.push_back(dV);
+            xE.at(dim+2)=dV;
 
             bndSegNodes.push_back(xE);
 

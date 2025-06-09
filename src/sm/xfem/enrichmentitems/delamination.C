@@ -364,7 +364,7 @@ void Delamination :: initializeFrom(InputRecord &ir)
     // update: csnum is now an IntArray of cross sections viable for delamination
     bool checkCS = false; 
     double totalThickness(0.0);
-    FloatArray layerThicknesses;
+    std::vector<double> layerThicknesses;
     int numberOfLayers(0);
     for (int iCS : this->crossSectionNum) {
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(iCS) );
@@ -397,12 +397,12 @@ void Delamination :: initializeFrom(InputRecord &ir)
         for ( int i = 1 ; i <= numberOfLayers ; i++) {
             double layerThickness = layeredCS->giveLayerThickness(i);
             if (checkCS) {
-                if ( layerThickness != layerThicknesses.at(i) ) {
+                if ( layerThickness != layerThicknesses[i-1] ) {
                     throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination cross section have different layer thicknesses");
                 }
-                layerThicknesses.at(i) = layerThickness;
+                layerThicknesses[i-1] = layerThickness;
             } else {
-                layerThicknesses.append(layeredCS->giveLayerThickness(i));
+                layerThicknesses.push_back(layeredCS->giveLayerThickness(i));
             }
         }
 

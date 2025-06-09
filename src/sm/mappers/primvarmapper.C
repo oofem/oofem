@@ -186,7 +186,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     // Fetch nodal displacements for the old element
-                    FloatArray nodeDispOld;
+                    std::vector<double> nodeDispOld_;
                     dofsPassed = 1;
                     IntArray elDofsGlobOld;
                     elOld->giveLocationArray( elDofsGlobOld, num );
@@ -212,11 +212,11 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                                         OOFEM_ERROR("dofUnknowns.giveSize() < 1")
                                     }
 #endif
-                                    nodeDispOld.push_back(dofUnknowns.at(1));
+                                    nodeDispOld_.push_back(dofUnknowns.at(1));
                                 }
                                 else {
                                     // TODO: Why does this case occur?
-                                    nodeDispOld.push_back(0.0);
+                                    nodeDispOld_.push_back(0.0);
                                 }
                             } else {
                                 if ( dof->hasBc(& iTStep) ) {
@@ -226,11 +226,11 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                                         OOFEM_ERROR("!std::isfinite(dof->giveBcValue(iMode, & iTStep))")
                                     }
 #endif
-                                    nodeDispOld.push_back( dof->giveBcValue(iMode, & iTStep) );
+                                    nodeDispOld_.push_back( dof->giveBcValue(iMode, & iTStep) );
                                 }
                                 else {
 //                                    printf("Unhandled case in LSPrimaryVariableMapper :: mapPrimaryVariables().\n");
-                                    nodeDispOld.push_back( 0.0 );
+                                    nodeDispOld_.push_back( 0.0 );
                                 }
                             }
 
@@ -241,6 +241,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     FloatArray oldDisp;
+                    FloatArray nodeDispOld(nodeDispOld_.begin(),nodeDispOld_.end());
                     oldDisp.beProductOf(NOld, nodeDispOld);
 
                     FloatArray temp, duu;
