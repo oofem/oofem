@@ -204,8 +204,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                                     dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
 
 #ifdef DEBUG
-                                    if(!dofUnknowns.isFinite()) {
-                                        OOFEM_ERROR("!dofUnknowns.isFinite()")
+                                    if(!dofUnknowns.isAllFinite()) {
+                                        OOFEM_ERROR("!dofUnknowns.isAllFinite()")
                                     }
 
                                     if(dofUnknowns.giveSize() < 1) {
@@ -246,12 +246,12 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray temp, duu;
 
 #ifdef DEBUG
-                    if(!oldDisp.isFinite()) {
-                        OOFEM_ERROR("!oldDisp.isFinite()")
+                    if(!oldDisp.isAllFinite()) {
+                        OOFEM_ERROR("!oldDisp.isAllFinite()")
                     }
 
-                    if(!newDisp.isFinite()) {
-                        OOFEM_ERROR("!newDisp.isFinite()")
+                    if(!newDisp.isAllFinite()) {
+                        OOFEM_ERROR("!newDisp.isAllFinite()")
                     }
 #endif
 
@@ -272,8 +272,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             elNew->computeConsistentMassMatrix(me, & iTStep, mass, & density);
 
 #ifdef DEBUG
-            if(!me.isFinite()) {
-                OOFEM_ERROR("!me.isFinite()")
+            if(!me.isAllFinite()) {
+                OOFEM_ERROR("!me.isAllFinite()")
             }
 #endif
 
@@ -319,8 +319,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         }
 
 #ifdef DEBUG
-        if(!res.isFinite()) {
-            OOFEM_ERROR("!res.isFinite()")
+        if(!res.isAllFinite()) {
+            OOFEM_ERROR("!res.isAllFinite()")
         }
 #endif
 
@@ -333,8 +333,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         solver->solve(*K, res, du);
 
 #ifdef DEBUG
-        if(!du.isFinite()) {
-            OOFEM_ERROR("!du.isFinite()")
+        if(!du.isAllFinite()) {
+            OOFEM_ERROR("!du.isAllFinite()")
         }
 #endif
 

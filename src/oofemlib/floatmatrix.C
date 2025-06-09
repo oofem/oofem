@@ -203,7 +203,7 @@ void FloatMatrix :: checkBounds(std::size_t i, std::size_t j) const
     }
 }
 
-bool FloatMatrix :: isFinite() const
+bool FloatMatrix :: isAllFinite() const
 {
     for (double val : values) {
         if ( !std::isfinite(val) ) {
@@ -855,17 +855,6 @@ void FloatMatrix :: resizeWithData(std::size_t rows, std::size_t columns)
     }
 }
 
-
-void FloatMatrix :: hardResize(int rows, int columns)
-//
-// resizes receiver, all data will be lost
-//
-{
-    this->nRows = rows;
-    this->nColumns = columns;
-    values.assign(rows * columns, 0.);
-    this->values.shrink_to_fit();
-}
 
 
 double FloatMatrix :: giveDeterminant() const

@@ -133,7 +133,7 @@ public:
     void push_back(double iVal) { values.push_back(iVal); }
 
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -237,12 +237,6 @@ public:
      * Same effect as resizing to zero, but has a clearer meaning and intent when used.
      */
     void clear() { this->values.clear(); }
-    /**
-     * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
-     * resize() function instead. Array is zeroed.
-     * @param s New size.
-     */
-    void hardResize(int s);
     /**
      * Returns nonzero if all coefficients of the receiver are 0, else returns zero.
      */

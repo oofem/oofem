@@ -301,7 +301,7 @@ double norm_square(const FloatArray &x)
 
 bool isfinite(const FloatArray &x)
 {
-    return x.isFinite();
+    return x.isAllFinite();
 }
 
 bool iszero(const FloatArray &x)

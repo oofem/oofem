@@ -170,7 +170,7 @@ public:
     inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
 
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -530,13 +530,6 @@ public:
      * Note: New coefficients are initialized to zero, old are kept.
      */
     void resizeWithData(std::size_t, std::size_t);
-    /**
-     * Resizing that enforces reallocation of memory.
-     * Data is zeroed.
-     * @param r Number of rows.
-     * @param c Number of columns.
-     */
-    void hardResize(int r, int c);
     /**
      * Resize and set to zero, though with some funny semantics (TBD)
      * @param r Number of rows.

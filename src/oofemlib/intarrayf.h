@@ -324,7 +324,7 @@ public:
     void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
 
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
