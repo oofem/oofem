@@ -428,9 +428,14 @@ class MPElement : public Element {
         } else {
             bNodes = this->giveBoundaryEdgeNodes(ibc);
         }
+        int num = 0;
+        for (int i: bNodes){ this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tStep); num+=uloc.size(); }
+        answer.resize(num);
+        int offset=0;
         for (int i : bNodes) {
             this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tStep);
-            answer.append(uloc);
+            answer.copySubVector(uloc,offset+1);
+            offset+=uloc.size();
         }
     }
   
@@ -466,19 +471,22 @@ class MPElement : public Element {
      * @param tstep 
      */
     virtual const void getUnknownVector(FloatArray& answer, const Variable* field, ValueModeType mode, TimeStep* tstep) {
-        FloatArray uloc;
         IntArray nodes, internalNodes, dofs;
         field->interpolation->giveCellDofMans(nodes, internalNodes, this);
+        std::vector<double> ans;
         for (int i : nodes) {
             dofs=field->getDofManDofIDs();
+            FloatArray uloc;
             this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
-            answer.append(uloc);
+            ans.insert(ans.end(),uloc.begin(),uloc.end());
         }
         for (int i : internalNodes) {
             dofs=field->getDofManDofIDs();
+            FloatArray uloc;
             this->giveInternalDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
-            answer.append(uloc);
+            ans.insert(ans.end(),uloc.begin(),uloc.end());
         }
+        answer = FloatArray(ans.begin(),ans.end());
     }
 
   virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf) 
