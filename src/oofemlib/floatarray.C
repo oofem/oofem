@@ -489,13 +489,6 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 }
 
 
-void FloatArray :: reserve(int s)
-{
-    this->values.reserve(s);
-    this->values.clear();
-}
-
-
 void FloatArray :: resizeWithValues(std::size_t n, std::size_t allocChunk)
 {
 #ifndef NDEBUG
@@ -538,17 +531,6 @@ void FloatArray :: zero()
     std::fill(this->begin(), this->end(), 0.);
 }
 
-
-void FloatArray :: append(const FloatArray &a)
-{
-    this->values.insert(this->end(), a.begin(), a.end());
-}
-
-
-void FloatArray :: append(double a)
-{
-    this->values.push_back(a);
-}
 
 
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
