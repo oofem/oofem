@@ -569,7 +569,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(const FloatArray &strain, Ga
         c = lambda * sqrt( J2e ) / ( 1 + nu) + ottob * I1e / ( 1 - 2 * nu );
         d = 4 * ottoa * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
 
-        return ( a + b * sqrt(c * c + d) ) / ( 2 * k );
+        return ( a + b + sqrt(c * c + d) ) / ( 2 * k );
 
 // Menetrey Willam equivStrain
     } else if ( this->equivStrainType == EST_Menetrey_Willam ) {
