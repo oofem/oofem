@@ -667,7 +667,7 @@ void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iAr
     double angle = 2.0*M_PI*iArcPos;
 
     oGlobalCoord.resize(2);
-    oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
+    oGlobalCoord = Vec2( mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) );
 }
 
 void Circle :: initializeFrom(InputRecord &ir)
@@ -870,10 +870,10 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
         double dist2 = 0.0;
         if ( segId == 1 ) {
             // Vector from start P1 to point X
-            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = Vec2( point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2) );
 
             // Line tangent vector
-            FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
+            FloatArray t = Vec2( crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2) );
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
@@ -896,10 +896,10 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             }
         } else if ( segId == numSeg ) {
             // Vector from start P1 to point X
-            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = Vec2(point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2));
 
             // Line tangent vector
-            FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
+            FloatArray t = Vec2(crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2));
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
@@ -932,7 +932,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             FloatArray t;
             t.beDifferenceOf(crackP2, crackP1, dim);
 
-            FloatArray n = {-t.at(2), t.at(1)};
+            FloatArray n = Vec2(-t.at(2), t.at(1));
 
             oDist = sgn( lineToP.dotProduct(n) ) * sqrt(dist2);
         }
@@ -1198,7 +1198,7 @@ void PolygonLine :: giveNormal(FloatArray &oNormal, const double &iArcPosition) 
             const FloatArray &p1 = mVertices [ i ];
             const FloatArray &p2 = mVertices [ i+1 ];
 
-            FloatArray t = {p2(0) - p1(0), p2(1) - p1(1)};
+            FloatArray t = Vec2(p2(0) - p1(0), p2(1) - p1(1));
 
             oNormal.resize(2);
             oNormal(0) = -t(1);
@@ -1233,7 +1233,7 @@ void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition
             const FloatArray &p1 = mVertices [ i ];
             const FloatArray &p2 = mVertices [ i+1 ];
 
-            oTangent = {p2(0) - p1(0), p2(1) - p1(1)};
+            oTangent = Vec2(p2(0) - p1(0), p2(1) - p1(1));
 
             oTangent.normalize();
 
@@ -1253,7 +1253,7 @@ void PolygonLine :: initializeFrom(InputRecord &ir)
     int numPoints = points.giveSize() / 2;
 
     for ( int i = 1; i <= numPoints; i++ ) {
-        mVertices.push_back({points.at(2 * ( i - 1 ) + 1), points.at( 2 * ( i   ) )});
+        mVertices.push_back(Vec2(points.at(2 * ( i - 1 ) + 1), points.at( 2 * ( i   ) )));
     }
 
 #ifdef __BOOST_MODULE
