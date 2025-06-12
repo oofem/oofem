@@ -119,7 +119,7 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
 
         ast = this->at(1) + this->at(2);
         dst = this->at(1) - this->at(2);
-        D = sqrt( dst * dst + 4.0 * this->at(3) * this->at(3) );
+        D = std::sqrt( dst * dst + 4.0 * this->at(3) * this->at(3) );
         answer.at(1) = 0.5 * ( ast + D );
         answer.at(2) = 0.5 * ( ast - D );
     } else {
@@ -294,6 +294,9 @@ StressVector :: computeFirstInvariant() const
     // This function computes the first invariant
     // of the stress vector
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
@@ -314,6 +317,9 @@ StressVector :: computeSecondInvariant() const
     // This function computes the second invariant of
     // of the deviatoric stress vector
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
@@ -339,6 +345,9 @@ StressVector :: computeThirdInvariant() const
     // This function computes the third invariant
     // of the deviatoric stress vector.
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
@@ -385,7 +394,7 @@ StressVector :: computeFirstCoordinate() const
     // This function computes the first Haigh-Westergaard coordinate
     // from the stress state
     //
-    return computeFirstInvariant() / sqrt(3.);
+    return computeFirstInvariant() / std::sqrt(3.);
 }
 
 double
@@ -395,7 +404,7 @@ StressVector :: computeSecondCoordinate() const
     // This function computes the second Haigh-Westergaard coordinate
     // from the deviatoric stress state
     //
-    return sqrt( 2. * computeSecondInvariant() );
+    return std::sqrt( 2. * computeSecondInvariant() );
 }
 
 double
@@ -409,7 +418,7 @@ StressVector :: computeThirdCoordinate() const
     if ( computeSecondInvariant() == 0. ) {
         c1 = 0.0;
     } else {
-        c1 = ( 3. * sqrt(3.) / 2. ) * computeThirdInvariant() / ( pow( computeSecondInvariant(), ( 3. / 2. ) ) );
+        c1 = ( 3. * std::sqrt(3.) / 2. ) * computeThirdInvariant() / ( std::pow( computeSecondInvariant(), ( 3. / 2. ) ) );
     }
 
     if ( c1 > 1.0 ) {
@@ -430,6 +439,9 @@ StressVector :: applyElasticCompliance(StrainVector &strain, const double EModul
     // This function multiplies the receiver by the elastic compliance matrix
     // and stores the result in strain
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         strain(0) = values [ 0 ] / EModulus;
@@ -470,6 +482,9 @@ StressVector :: applyDeviatoricElasticCompliance(StrainVector &strain,
     //
     // This function applies the elastic compliance to the deviatoric strain vector
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         OOFEM_ERROR("No Split for 1D");
@@ -502,24 +517,27 @@ StressVector :: computeStressNorm() const
     //
     // This function computes the tensorial Norm of the stress in engineering notation
     //
+    #ifdef _USE_EIGEN
+        const StressVector& values=*this;
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
         return fabs(values [ 0 ]);
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
-        return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);
+        return std::sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);
     } else if ( myMode == _PlaneStrain ) {
         //  plane strain or axisymmetry
-        return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
+        return std::sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);
     } else if ( myMode == _PlaneStrainGrad ) {
         //  plane strain or axisymmetry
-        return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
+        return std::sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);
     } else {
         // 3d problem
-        return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
+        return std::sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ] + 2. * values [ 4 ] * values [ 4 ] + 2. * values [ 5 ] * values [ 5 ]);
     }
 }

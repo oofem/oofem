@@ -62,7 +62,12 @@ StressStrainBaseVector &
 StressStrainBaseVector :: operator = ( const StressStrainBaseVector & src )
 {
     if ( this != & src ) { // beware of s=s;
-        this->values = src.values;
+        #ifdef _USE_EIGEN
+            this->resizeLike(src);
+            for(Eigen::Index i=0; i<this->size(); i++) (*this)[i]=src[i];
+        #else
+            this->values = src.values;
+        #endif
     }
 
     this->mode = src.mode;
