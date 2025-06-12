@@ -402,7 +402,7 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
     oContrib_disp.beTProductOf(contrib, tracUnknowns);
     oContrib_disp.negated();
 
-    FloatArray dispUnknowns(dispUnknowns_.begin(),dispUnknowns_.end());
+    FloatArray dispUnknowns=FloatArray::fromVector(dispUnknowns_);
     oContrib_trac.beProductOf(contrib, dispUnknowns);
     oContrib_trac.negated();
 }

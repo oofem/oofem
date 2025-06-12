@@ -241,7 +241,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     FloatArray oldDisp;
-                    FloatArray nodeDispOld(nodeDispOld_.begin(),nodeDispOld_.end());
+                    FloatArray nodeDispOld=FloatArray::fromVector(nodeDispOld_);
                     oldDisp.beProductOf(NOld, nodeDispOld);
 
                     FloatArray temp, duu;

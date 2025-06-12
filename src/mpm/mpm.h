@@ -486,7 +486,7 @@ class MPElement : public Element {
             this->giveInternalDofManager(i)->giveUnknownVector(uloc, dofs, mode, tstep);
             ans.insert(ans.end(),uloc.begin(),uloc.end());
         }
-        answer = FloatArray(ans.begin(),ans.end());
+        answer = FloatArray::fromVector(ans);
     }
 
   virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf) 

@@ -810,7 +810,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         std::vector<double> lengths_; // to store lengths ofintersections
 
         computeIntersectionsOfLinkWithInterpElements(intersected, lengths_, d, e, qn1, qn2);
-        FloatArray lengths(lengths_.begin(),lengths_.end());
+        FloatArray lengths=FloatArray::fromVector(lengths_);
 
         // check: is there any intersectted elements
         int noIntersected = lengths.giveSize();
