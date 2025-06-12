@@ -109,6 +109,8 @@ public:
     FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline FloatArray(std :: initializer_list< double >list) : values(list) { }
+    static FloatArray fromList(std::initializer_list<double> ini){ return FloatArray(ini); }
+    static FloatArray fromVector(const std::vector<double>& v){ return FloatArray(v.begin(),v.end()); }
     /// Wrapper to direct assignment from iterator pairs
     template< class InputIt >
     FloatArray( InputIt first, InputIt last ) : values(first, last) { }
