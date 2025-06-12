@@ -361,6 +361,8 @@ public:
 
 
     friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
+
+    std::vector<int> minusOne() const { std::vector<int> ret(values.size()); for(size_t i=0; i<values.size(); i++) ret[i]=values[i]-1; return ret; }
 };
 
 
