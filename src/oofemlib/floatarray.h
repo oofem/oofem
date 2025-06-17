@@ -83,6 +83,7 @@ template<std::size_t N> class FloatArrayF;
  */
 class OOFEM_EXPORT FloatArray
 {
+    void _resize_internal(int newsize);
 protected:
     /// Stored values.
     std::vector< double > values;

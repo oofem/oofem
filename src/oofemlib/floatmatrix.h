@@ -45,16 +45,6 @@
 #include <algorithm>
 #include <string>
 
-#ifdef _BOOSTPYTHON_BINDINGS
-namespace boost {
-namespace python {
-namespace api {
-class object;
-};
-};
-};
-#endif
-
 namespace oofem {
 class FloatArray;
 template<std::size_t N> class FloatArrayF;
@@ -90,6 +80,7 @@ class DataStream;
  */
 class OOFEM_EXPORT FloatMatrix
 {
+    void _resize_internal(int nr, int nc);
 protected:
     /// Number of rows.
     std::size_t nRows;
