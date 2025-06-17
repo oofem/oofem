@@ -181,7 +181,7 @@ void GeometryBasedEI :: updateDofIdPool()
 
 void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
 {
-    auto eiRec = std::unique_ptr<DynamicInputRecord>();
+    auto eiRec = std::make_unique<DynamicInputRecord>();
     FEMComponent :: giveInputRecord(* eiRec);
 
     eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
