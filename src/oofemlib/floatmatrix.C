@@ -62,10 +62,6 @@ void FloatMatrix::_resize_internal(int nr, int nc)
 };
 
 
-#ifdef _BOOSTPYTHON_BINDINGS
- #include <boost/python.hpp>
- #include <boost/python/extract.hpp>
-#endif
 
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
