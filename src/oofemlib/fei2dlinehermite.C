@@ -68,7 +68,7 @@ double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     FloatArray vec(2);
     vec.at(1) = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
     vec.at(2) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
-    double detJ = vec.normalize() * 0.5;
+    double detJ = vec.normalize_giveNorm() * 0.5;
 
     answer.beDyadicProductOf(dNds, vec);
     return detJ;
@@ -131,7 +131,7 @@ double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const F
     normal.at(1) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
     normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind) );
 
-    return normal.normalize() * 0.5;
+    return normal.normalize_giveNorm() * 0.5;
 }
 
 double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const 

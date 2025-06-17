@@ -280,7 +280,7 @@ double FEI2dTrQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
                    - dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(xind) +
                    - dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) ).at(xind);
 
-    return normal.normalize();
+    return normal.normalize_giveNorm();
 }
 
 void

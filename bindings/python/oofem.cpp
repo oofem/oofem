@@ -839,6 +839,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("assemble", &oofem::FloatArray::assemble)
         .def("distance", (double (oofem::FloatArray::*)(const oofem::FloatArray &) const) &oofem::FloatArray::distance)
         .def("normalize", &oofem::FloatArray::normalize)
+        .def("normalize_giveNorm", &oofem::FloatArray::normalize_giveNorm)
         .def("computeNorm", &oofem::FloatArray::computeNorm)
         .def("product", &oofem::FloatArray::product)
         .def("zero", &oofem::FloatArray::zero)

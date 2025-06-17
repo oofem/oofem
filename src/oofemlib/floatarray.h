@@ -83,7 +83,7 @@ template<std::size_t N> class FloatArrayF;
  */
 class OOFEM_EXPORT FloatArray
 {
-    void _resize_internal(int newsize);
+    void _resize_internal(size_t newsize);
 protected:
     /// Stored values.
     std::vector< double > values;
@@ -441,13 +441,17 @@ public:
      * will have this norm equal to 1.0.
      * @return modified receiver
      */
-    double normalize();
+    double normalize_giveNorm();
+    /**
+     * Normalizes receiver. Euclidean norm is used, after operation receiver
+     * will have this norm equal to 1.0.
+     */
+    void normalize();
     /**
      * Computes the norm (or length) of the vector.
      * @return The Euclidean norm of the vector.
      */
     double computeNorm() const;
-
     /**
      * Computes the square of the norm.
      * @return Squared norm.

@@ -52,7 +52,7 @@
 #include <iomanip>
 
 namespace oofem{
-void FloatArray::_resize_internal(int newsize){
+void FloatArray::_resize_internal(size_t newsize){
     if ( (newsize) < this->size() ) { \
         this->values.resize((newsize)); \
     } else if ( (newsize) > this->size() ) { \
@@ -741,14 +741,17 @@ void FloatArray :: times(double factor)
     }
 }
 
+void FloatArray :: normalize(){
+    (void) normalize_giveNorm();
+}
 
-double FloatArray :: normalize()
+
+double FloatArray :: normalize_giveNorm()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
         OOFEM_ERROR("cannot norm receiver, norm is too small");
     }
-
     this->times(1. / norm);
     return norm;
 }

@@ -877,7 +877,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-                double l = t.normalize();
+                double l = t.normalize_giveNorm();
                 double s = dot(u, t);
 
                 if ( s > l ) {
@@ -903,7 +903,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-                double l = t.normalize();
+                double l = t.normalize_giveNorm();
                 double s = dot(u, t);
 
                 if ( s < 0.0 ) {
