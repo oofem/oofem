@@ -42,6 +42,7 @@
 
 #include <initializer_list>
 #include <vector>
+#include <list>
 #include <iosfwd>
 
 namespace oofem {
@@ -110,8 +111,9 @@ public:
     FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline FloatArray(std :: initializer_list< double >list) : values(list) { }
-    static FloatArray fromList(std::initializer_list<double> ini){ return FloatArray(ini); }
-    static FloatArray fromVector(const std::vector<double>& v){ return FloatArray(v.begin(),v.end()); }
+    static FloatArray fromIniList(std::initializer_list<double> ini){ return FloatArray(ini); }
+    static FloatArray fromVector(const std::vector<double>& v){ FloatArray ret; ret.values=v; return ret; }
+    static FloatArray fromList(const std::list<double>& l){ FloatArray ret((int)l.size()); std::copy(l.begin(),l.end(),ret.begin()); return ret; }
     /// Wrapper to direct assignment from iterator pairs
     template< class InputIt >
     FloatArray( InputIt first, InputIt last ) : values(first, last) { }

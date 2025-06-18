@@ -428,15 +428,12 @@ class MPElement : public Element {
         } else {
             bNodes = this->giveBoundaryEdgeNodes(ibc);
         }
-        int num = 0;
-        for (int i: bNodes){ this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tStep); num+=uloc.size(); }
-        answer.resize(num);
-        int offset=0;
+        std::list<double> ans;
         for (int i : bNodes) {
             this->giveDofManager(i)->giveUnknownVector(uloc, dofs, mode, tStep);
-            answer.copySubVector(uloc,offset+1);
-            offset+=uloc.size();
+            for(const double& u: uloc){ ans.push_back(u); }
         }
+        answer=FloatArray::fromList(ans);
     }
   
     /// @brief  Assembles the partial element contribution into local element matrix
