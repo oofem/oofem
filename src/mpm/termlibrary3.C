@@ -71,10 +71,7 @@ void TMBTSigTerm::computeTMgeneralizedStrain (FloatArray& answer, FloatMatrix& B
     // evaluate temperature at given point
     this->temperatureField->interpolation->evalN(Nt, lcoords, FEIElementGeometryWrapper(&cell));
     double t = Nt.dotProduct(rt);
-    answer.resize(Bu.size()+gradT.size()+1);
-    answer.copySubVector(Bu,1);
-    answer.copySubVector(gradT,Bu.size()+1); // construct generalized strain vector
-    answer.at(Bu.size()+gradT.size()+1)=t; // add temperature
+    answer=FloatArray::fromConcatenated({Bu,gradT,Vec1(t)});
 }
 
 TMgNTfTerm::TMgNTfTerm (const Variable *testField, const Variable* unknownField, MatResponseMode lhsType, MatResponseMode rhsType) : gNTfTerm(testField, unknownField, lhsType, rhsType) {}

@@ -71,6 +71,18 @@ extern "C" {
 
 namespace oofem {
 
+
+FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
+    int len=0; for(const auto& a: ini) len+=a.size();
+    FloatArray ret(len);
+    int ix=0;
+    for(const auto& a: ini){
+        for(size_t i=0; i<a.size(); i++) ret[ix++]=a[i];
+    }
+    return ret;
+}
+
+
 bool FloatArray :: isAllFinite() const
 {
     for(double val : values) {

@@ -62,9 +62,7 @@ Truss3dnl2 :: initializeFrom(InputRecord &ir)
   Truss3d :: initializeFrom(ir);
   FloatArray vc1 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
   FloatArray vc2 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 );
-  X.resize(vc1.size()+vc2.size());
-  X.copySubVector(vc1,1);
-  X.copySubVector(vc2,vc1.size()+1);
+  X=FloatArray::fromConcatenated({vc1,vc2});
   L = this->computeLength();
 }
 
