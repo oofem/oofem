@@ -305,10 +305,9 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
         (*this) [ i ] = a [ i ] - b [ i ];
     }
 #else
-    this->values.reserve(a.giveSize());
-    this->values.resize(0);
+    this->resize(a.giveSize());
     for ( std::size_t i = 0; i < a.size(); ++i ) {
-        this->values.push_back( a[i] - b[i] );
+        (*this)[i]=a[i] - b[i];
     }
 
 #endif

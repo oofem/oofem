@@ -134,9 +134,6 @@ public:
     template< std::size_t N >
     inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
 
-    /// Add one element
-    void push_back(double iVal) { values.push_back(iVal); }
-
     /// Returns true if no element is NAN or infinite
     bool isAllFinite() const;
 
