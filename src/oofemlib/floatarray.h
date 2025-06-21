@@ -84,7 +84,8 @@ template<std::size_t N> class FloatArrayF;
  */
 class OOFEM_EXPORT FloatArray
 {
-    void _resize_internal(size_t newsize);
+    typedef int Index;
+    void _resize_internal(Index newsize);
 protected:
     /// Stored values.
     std::vector< double > values;
@@ -142,24 +143,24 @@ public:
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &at(std::size_t i)
+    inline double &at(Index i)
     {
 #ifndef NDEBUG
         this->checkBounds( i );
 #endif
-        return values [ i - 1 ];
+        return (*this)[ i - 1 ];
     }
     /**
      * Coefficient access function. Returns l-value of coefficient at given
      * position of the receiver. Provides 1-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double at(std::size_t i) const
+    inline double at(Index i) const
     {
 #ifndef NDEBUG
         this->checkBounds( i );
 #endif
-        return values [ i - 1 ];
+        return (*this)[ i - 1 ];
     }
 
     /**
@@ -167,11 +168,11 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline double &operator() (std::size_t i) { return this->operator[](i); }
-    inline double &operator[] (std::size_t i)
+    inline double &operator() (Index i) { return this->operator[](i); }
+    inline double &operator[] (Index i)
     {
 #ifndef NDEBUG
-        if ( i >= values.size()) {
+        if ( i >= size()) {
             OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
         }
 #endif
@@ -182,10 +183,10 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline const double &operator() (std::size_t i) const { return this->operator[](i); } 
-    inline const double &operator[] (std::size_t i) const {
+    inline const double &operator() (Index i) const { return this->operator[](i); } 
+    inline const double &operator[] (Index i) const {
 #ifndef NDEBUG
-        if ( i >= values.size() ) {
+        if ( i >= size() ) {
             OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
         }
 #endif
@@ -197,12 +198,12 @@ public:
      * mismatch found.
      * @param i Required size of receiver.
      */
-    void checkBounds(std::size_t i) const
+    void checkBounds(Index i) const
     {
         if ( i <= 0 ) {
             OOFEM_ERROR("array error on index : %d <= 0", i);
-        } else if ( i > values.size()) {
-            OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
+        } else if ( i > size()) {
+            OOFEM_ERROR("array error on index : %d > %d", i, this->size());
         }
     }
     /**
@@ -218,28 +219,29 @@ public:
      * @param s New size.
      * @param allocChunk Additional space to allocate.
      */
-    void resizeWithValues(std::size_t s, std::size_t allocChunk = 0);
+    void resizeWithValues(Index s, std::size_t allocChunk = 0);
     /**
      * Resizes receiver towards requested size. Array is zeroed.
      * @param s New size.
      */
-    void resize(int s);
+    void resize(Index s);
     /**
      * Clears receiver (zero size).
      * Same effect as resizing to zero, but has a clearer meaning and intent when used.
      */
-    void clear() { this->values.clear(); }
+    void clear() { this->resize(0); }
     /**
      * Returns nonzero if all coefficients of the receiver are 0, else returns zero.
      */
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
-    int giveSize() const { return (int)this->values.size(); }
-    std::size_t size() const { return this->values.size(); }
+    //[[deprecated("use size() instead.")]]
+    Index giveSize() const { return (Index)this->values.size(); }
+    Index size() const { return this->values.size(); }
     /// Returns true if receiver is not empty.
-    bool isNotEmpty() const { return !this->values.empty(); }
+    bool isNotEmpty() const { return size()>0; }
     /// Returns true if receiver is empty.
-    bool isEmpty() const { return this->values.empty(); }
+    bool isEmpty() const { return size()==0; }
     /**
      * Switches the sign of every coefficient of receiver.
      * @return receiver.
@@ -353,7 +355,7 @@ public:
      * @param b Array which receiver comes from.
      * @param n Only first n entries are taken.
      */
-    void beDifferenceOf(const FloatArray &a, const FloatArray &b, std::size_t n);
+    void beDifferenceOf(const FloatArray &a, const FloatArray &b, Index n);
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
@@ -368,7 +370,7 @@ public:
      * @param src Sub-vector to be added.
      * @param si Determines the position (receiver's 1-based index) of first src value to be added.
      */
-    void addSubVector(const FloatArray &src, std::size_t si);
+    void addSubVector(const FloatArray &src, Index si);
     /**
      * Assembles the array fe (typically, the load vector of a finite
      * element) into the receiver, using loc as location array.
@@ -434,7 +436,7 @@ public:
      * @param x Vector to contract to receiver.
      * @param size Number of elements to contract. May not be larger than
      */
-    double dotProduct(const FloatArray &x, std::size_t size) const;
+    double dotProduct(const FloatArray &x, Index size) const;
 
     /**
      * Normalizes receiver. Euclidean norm is used, after operation receiver
@@ -517,7 +519,7 @@ public:
     /**
      * Reciever will be set to a given row in a matrix
      */
-    void beRowOf(const FloatMatrix &mat, std::size_t row);
+    void beRowOf(const FloatMatrix &mat, Index row);
     
     contextIOResultType storeYourself(DataStream &stream) const;
     contextIOResultType restoreYourself(DataStream &stream);

@@ -87,9 +87,9 @@ public:
     FloatMatrixF(const FloatMatrix &mat)
     {
 #ifndef NDEBUG
-        if ( mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M ) {
+        if ( mat.rows() != N || mat.cols() != M ) {
             throw std::out_of_range("Can't convert dynamic float matrix of size " + 
-                std::to_string(mat.giveNumberOfRows()) + "x" + std::to_string(mat.giveNumberOfRows()) + 
+                std::to_string(mat.rows()) + "x" + std::to_string(mat.cols()) + 
                 " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
         }
 #endif

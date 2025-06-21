@@ -101,6 +101,7 @@ public:
     constexpr static int Dim = 2;
     typedef double Scalar;
 
+    typedef int Index;
     /**
      * Creates matrix of given size.
      * @param n Number of rows.
@@ -159,20 +160,22 @@ public:
      * @param i Required number of rows.
      * @param j Required number of columns.
      */
-    void checkBounds(std::size_t i, std::size_t j) const;
+    void checkBounds(Index i, Index j) const;
     /// Returns number of rows of receiver.
-    inline int giveNumberOfRows() const { return (int)nRows; }
-    inline std::size_t giveRowSize() const { return nRows; }
+    //[[deprecated("use rows() instead")]]
+    inline int giveNumberOfRows() const { return rows(); }
+    inline int rows() const { return (int)nRows; }
 
     /// Returns number of columns of receiver.
-    inline int giveNumberOfColumns() const { return (int)nColumns; }
-    inline std::size_t giveColSize() const { return nColumns; }
+    //[[deprecated("use cols() instead")]]
+    inline int giveNumberOfColumns() const { return cols(); }
+    inline int cols() const { return (int)nColumns; }
 
 
     /// Returns nonzero if receiver is square matrix.
-    inline bool isSquare() const { return nRows == nColumns; }
+    inline bool isSquare() const { return rows() == cols(); }
     /// Tests for empty matrix.
-    inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
+    inline bool isNotEmpty() const { return rows() > 0 && cols() > 0; }
 
     /// Returns true if no element is NAN or infinite
     bool isAllFinite() const;
@@ -185,10 +188,7 @@ public:
      */
     inline double at(std::size_t i, std::size_t j) const
     {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * nRows + i - 1 ];
+        return (*this)(i-1,j-1);
     }
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -198,10 +198,7 @@ public:
      */
     inline double &at(std::size_t i, std::size_t j)
     {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * nRows + i - 1 ];
+        return (*this)(i-1,j-1);
     }
 
     /**
@@ -382,7 +379,7 @@ public:
      * @param topCol Index of top column of sub-matrix.
      * @param bottomCol index of bottom column of sub-matrix.
      */
-    void beSubMatrixOf(const FloatMatrix &src, std::size_t topRow, std::size_t bottomRow, std::size_t topCol, std::size_t bottomCol);
+    void beSubMatrixOf(const FloatMatrix &src, Index topRow, Index bottomRow, Index topCol, Index bottomCol);
     /**
      * Modifies receiver to be a sub-matrix of another matrix.
      * @param src Matrix from which sub-matrix is taken
@@ -528,13 +525,13 @@ public:
      * @param rows New number of rows.
      * @param cols New number of columns.
      */
-    void resize(std::size_t rows, std::size_t cols);
+    void resize(Index rows, Index cols);
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Note: New coefficients are initialized to zero, old are kept.
      */
-    void resizeWithData(std::size_t, std::size_t);
+    void resizeWithData(Index, Index);
 
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
     void clear() {

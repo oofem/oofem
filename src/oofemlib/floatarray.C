@@ -51,15 +51,6 @@
 #include <fstream>
 #include <iomanip>
 
-namespace oofem{
-void FloatArray::_resize_internal(size_t newsize){
-    if ( (newsize) < this->size() ) { \
-        this->values.resize((newsize)); \
-    } else if ( (newsize) > this->size() ) { \
-        this->values.assign((newsize), 0.); \
-    }
-}};
-
 #ifdef __LAPACK_MODULE
 extern "C" {
     extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
@@ -72,12 +63,47 @@ extern "C" {
 namespace oofem {
 
 
+
+void FloatArray::_resize_internal(Index newsize){
+    if ( (newsize) < this->size() ) {
+        this->values.resize((newsize));
+    } else if ( (newsize) > this->size() ) {
+        this->values.assign((newsize), 0.);
+    }
+}
+
+void FloatArray :: resizeWithValues(Index n, std::size_t allocChunk)
+{
+#ifndef NDEBUG
+    if ( allocChunk < 0 ) {
+        OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
+    }
+
+#endif
+
+    if ( allocChunk > 0 && this->values.capacity() < n ) {
+        this->values.reserve(n + allocChunk);
+    }
+
+    this->values.resize(n);
+}
+
+void FloatArray :: resize(int n)
+{
+    this->values.resize(n);
+    ///@todo Change to this (faster) 
+    //this->values.assign(n, 0.);
+}
+
+
+
+
 FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
     int len=0; for(const auto& a: ini) len+=a.size();
     FloatArray ret(len);
     int ix=0;
     for(const auto& a: ini){
-        for(size_t i=0; i<a.size(); i++) ret[ix++]=a[i];
+        for(Index i=0; i<a.size(); i++) ret[ix++]=a[i];
     }
     return ret;
 }
@@ -85,8 +111,8 @@ FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
 
 bool FloatArray :: isAllFinite() const
 {
-    for(double val : values) {
-        if(!std::isfinite(val)) {
+    for(Index i=0; i<this->size(); i++){
+        if(!std::isfinite((*this)[i])) {
             return false;
         }
     }
@@ -100,7 +126,7 @@ FloatArray :: beScaled(double s, const FloatArray &b)
 {
     _resize_internal(b.size());
 
-    for ( std::size_t i = 0; i < this->size(); ++i ) {
+    for ( Index i = 0; i < this->size(); ++i ) {
         (*this) [ i ] = s * b [ i ];
     }
 }
@@ -133,7 +159,7 @@ void FloatArray :: add(const FloatArray &b)
     int size = this->giveSize();
     daxpy_(& size, & s, b.givePointer(), & inc, this->givePointer(), & inc, b.giveSize(), this->giveSize());
 #else
-    for ( std::size_t i = 0; i < this->size(); i++ ) {
+    for (Index i = 0; i < this->size(); i++ ) {
         (*this) [ i ] += b [ i ];
     }
 #endif
@@ -169,7 +195,7 @@ void FloatArray :: add(double factor, const FloatArray &b)
     int size = this->giveSize();
     daxpy_(& size, & factor, b.givePointer(), & inc, this->givePointer(), & inc, b.giveSize(), this->giveSize());
 #else
-    for ( std::size_t i = 0; i < this->size(); ++i ) {
+    for ( Index i = 0; i < this->size(); ++i ) {
         (*this) [ i ] += factor * b [ i ];
     }
 #endif
@@ -179,11 +205,11 @@ void FloatArray :: add(double factor, const FloatArray &b)
 void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV)
 // Performs the operation a += b^T . s * dV
 {
-    std::size_t nRows = b.giveNumberOfRows();
-    std::size_t nColumns = b.giveNumberOfColumns();
+    Index nRows = b.giveNumberOfRows();
+    Index nColumns = b.giveNumberOfColumns();
 
     if ( this->isEmpty() ) {
-        this->values.assign( nColumns, 0. );
+        this->resize( nColumns );
     }
 
 #  ifndef NDEBUG
@@ -197,9 +223,9 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
     int inc = 1;
     dgemv_("t", & nRows, & nColumns, & dV, b.givePointer(), & nRows, s.givePointer(), & inc, & beta, this->givePointer(), & inc, nColumns, nColumns, nRows);
 #else
-    for ( std::size_t i = 1; i <= nColumns; i++ ) {
+    for ( Index i = 1; i <= nColumns; i++ ) {
         double sum = 0.;
-        for ( std::size_t j = 1; j <= nRows; j++ ) {
+        for ( Index j = 1; j <= nRows; j++ ) {
             sum += b.at(j, i) * s.at(j);
         }
         this->at(i) += sum * dV;
@@ -218,7 +244,7 @@ void FloatArray :: subtract(const FloatArray &src)
 
     if ( this->isEmpty() ) {
         _resize_internal(src.size());
-        for ( std::size_t i = 0; i < this->size(); ++i ) {
+        for ( Index i = 0; i < this->size(); ++i ) {
             (*this) [ i ] = -src [ i ];
         }
 
@@ -232,7 +258,7 @@ void FloatArray :: subtract(const FloatArray &src)
 
 #  endif
 
-    for ( std::size_t i = 0; i < this->size(); ++i ) {
+    for ( Index i = 0; i < this->size(); ++i ) {
         (*this) [ i ] -= src [ i ];
     }
 }
@@ -240,7 +266,7 @@ void FloatArray :: subtract(const FloatArray &src)
 
 void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 {
-    std::size_t n = a.size();
+    Index n = a.size();
 
     if ( a.size() == 0 ) {
         *this = b;
@@ -259,7 +285,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
     _resize_internal(n);
 
-    for ( std::size_t i = 0; i < n; i++ ) {
+    for ( Index i = 0; i < n; i++ ) {
         (*this) [ i ] = max( a [ i ], b [ i ] );
     }
 }
@@ -267,7 +293,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 {
-    std::size_t n = a.size();
+    Index n = a.size();
 
     if ( a.size() == 0 ) {
         *this = b;
@@ -285,7 +311,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 #  endif
 
     _resize_internal(n);
-    for ( std::size_t i = 0; i < n; i++ ) {
+    for ( Index i = 0; i < n; i++ ) {
         (*this) [ i ] = min( a [ i ], b [ i ] );
     }
 }
@@ -306,14 +332,14 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
     }
 #else
     this->resize(a.giveSize());
-    for ( std::size_t i = 0; i < a.size(); ++i ) {
+    for ( Index i = 0; i < a.size(); ++i ) {
         (*this)[i]=a[i] - b[i];
     }
 
 #endif
 }
 
-void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, std::size_t n)
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, Index n)
 {
 #ifndef NDEBUG
     if ( a.size() < n || b.size() < n ) {
@@ -322,7 +348,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, std:
 
 #endif
     _resize_internal(n);
-    for ( std::size_t i = 0; i < n; ++i ) {
+    for ( Index i = 0; i < n; ++i ) {
         (*this) [ i ] = a [ i ] - b [ i ];
     }
 }
@@ -340,17 +366,17 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
     }
 #endif
 
-    std::size_t n = indx.size();
+    Index n = indx.size();
     _resize_internal(n);
-    for ( std::size_t i = 1; i <= n; i++ ) {
+    for ( Index i = 1; i <= n; i++ ) {
         this->at(i) = src.at( indx.at(i) );
     }
 }
 
 
-void FloatArray :: addSubVector(const FloatArray &src, std::size_t si)
+void FloatArray :: addSubVector(const FloatArray &src, Index si)
 {
-    std::size_t reqSize, n = src.size();
+    Index reqSize, n = src.size();
 
     si--;
     reqSize = si + n;
@@ -358,7 +384,7 @@ void FloatArray :: addSubVector(const FloatArray &src, std::size_t si)
         this->resizeWithValues(reqSize);
     }
 
-    for (std::size_t i = 0; i < n; i++ ) {
+    for (Index i = 0; i < n; i++ ) {
         (*this) [si + i] += src [ i ];
     }
 }
@@ -382,12 +408,12 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 
 int FloatArray :: giveIndexMinElem()
 {
-    std::size_t index = 1;
+    Index index = 1;
     if ( !this->giveSize() ) {
         return -1;
     }
     double val = (*this) [ 0 ];
-    for (std::size_t i = 1; i < this->size(); i++ ) {
+    for (Index i = 1; i < this->size(); i++ ) {
         if ( val > (*this) [ i ] ) {
             val = (*this) [ i ];
             index = i + 1;
@@ -398,12 +424,12 @@ int FloatArray :: giveIndexMinElem()
 
 int FloatArray :: giveIndexMaxElem()
 {
-    std::size_t index = 1;
+    Index index = 1;
     if ( !this->giveSize() ) {
         return -1;
     }
     double val = (*this) [ 0 ];
-    for (std::size_t i = 1; i < this->size(); i++ ) {
+    for (Index i = 1; i < this->size(); i++ ) {
         if ( val < (*this) [ i ] ) {
             val = (*this) [ i ];
             index = i + 1;
@@ -425,7 +451,7 @@ double FloatArray :: dotProduct(const FloatArray &x) const
 }
 
 
-double FloatArray :: dotProduct(const FloatArray &x, std::size_t size) const
+double FloatArray :: dotProduct(const FloatArray &x, Index size) const
 {
 #  ifndef NDEBUG
     if ( size > this->size() || size > x.size() ) {
@@ -490,8 +516,8 @@ double FloatArray :: distance_square(const FloatArray &from) const
 // computed using generalized pythagorean formulae
 {
     double dist = 0.;
-    std::size_t s = min(this->size(), from.size());
-    for (std::size_t i = 1; i <= s; ++i ) {
+    Index s = min(this->size(), from.size());
+    for (Index i = 1; i <= s; ++i ) {
         double dx = this->at(i) - from.at(i);
         dist += dx * dx;
     }
@@ -504,15 +530,15 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    std::size_t n = fe.size();
+    Index n = fe.size();
 #  ifndef NDEBUG
-    if ( n != loc.size() ) {
+    if ( n != (Index) loc.size() ) {
         OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
 
-    for (std::size_t i = 1; i <= n; i++ ) {
+    for (Index i = 1; i <= n; i++ ) {
         int ii = loc.at(i);
         if ( ii ) { // if non 0 coefficient,
             this->at(ii) += fe.at(i);
@@ -525,15 +551,15 @@ void FloatArray :: assembleSquared(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    std::size_t n = fe.size();
+    Index n = fe.size();
 #  ifndef NDEBUG
-    if ( n != loc.size() ) {
+    if ( n != (Index) loc.size() ) {
         OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
 
-    for (std::size_t i = 1; i <= n; i++ ) {
+    for (Index i = 1; i <= n; i++ ) {
         int ii = loc.at(i);
         if ( ii ) { // if non 0 coefficient,
             this->at(ii) += fe.at(i) * fe.at(i);
@@ -552,33 +578,10 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
     }
 
     if ( high > this->giveSize() ) {   // receiver must be expanded
-        this->values.resize(high);
+        this->resize(high);
     }
 }
 
-
-void FloatArray :: resizeWithValues(std::size_t n, std::size_t allocChunk)
-{
-#ifndef NDEBUG
-    if ( allocChunk < 0 ) {
-        OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
-    }
-
-#endif
-
-    if ( allocChunk > 0 && this->values.capacity() < n ) {
-        this->values.reserve(n + allocChunk);
-    }
-
-    this->values.resize(n);
-}
-
-void FloatArray :: resize(int n)
-{
-    this->values.resize(n);
-    ///@todo Change to this (faster) 
-    //this->values.assign(n, 0.);
-}
 
 
 
@@ -604,8 +607,8 @@ void FloatArray :: zero()
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
-    std::size_t nColumns = aMatrix.giveNumberOfColumns();
-    std::size_t nRows = aMatrix.giveNumberOfRows();
+    Index nColumns = aMatrix.giveNumberOfColumns();
+    Index nRows = aMatrix.giveNumberOfRows();
 
     _resize_internal(nRows);
 
@@ -621,9 +624,9 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
     int inc = 1;
     dgemv_("n", & nRows, & nColumns, & alpha, aMatrix.givePointer(), & nRows, anArray.givePointer(), & inc, & beta, this->givePointer(), & inc, nColumns, nColumns, nRows);
 #else
-    for (std::size_t i = 1; i <= nRows; i++ ) {
+    for (Index i = 1; i <= nRows; i++ ) {
         double sum = 0.;
-        for (std::size_t j = 1; j <= nColumns; j++ ) {
+        for (Index j = 1; j <= nColumns; j++ ) {
             sum += aMatrix.at(i, j) * anArray.at(j);
         }
 
@@ -636,8 +639,8 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix^T * anArray in to receiver
 {
-    std::size_t nRows = aMatrix.giveNumberOfRows();
-    std::size_t nColumns = aMatrix.giveNumberOfColumns();
+    Index nRows = aMatrix.giveNumberOfRows();
+    Index nColumns = aMatrix.giveNumberOfColumns();
 
 #  ifndef NDEBUG
     if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {
@@ -652,9 +655,9 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     int inc = 1;
     dgemv_("t", & nRows, & nColumns, & alpha, aMatrix.givePointer(), & nRows, anArray.givePointer(), & inc, & beta, this->givePointer(), & inc, nColumns, nColumns, nRows);
 #else
-    for (std::size_t i = 1; i <= nColumns; i++ ) {
+    for (Index i = 1; i <= nColumns; i++ ) {
         double sum = 0.;
-        for (std::size_t j = 1; j <= nRows; j++ ) {
+        for (Index j = 1; j <= nRows; j++ ) {
             sum += aMatrix.at(j, i) * anArray.at(j);
         }
 
@@ -807,7 +810,7 @@ contextIOResultType FloatArray :: storeYourself(DataStream &stream) const
 //              =0 file i/o error
 {
     // write size
-    std::size_t size = this->size();
+    Index size = this->size();
     if ( !stream.write(size) ) {
         return CIO_IOERR;
     }
@@ -830,12 +833,12 @@ contextIOResultType FloatArray :: restoreYourself(DataStream &stream)
 //        -1 if id od class id is not correct
 {
     // read size
-    std::size_t size;
+    Index size;
     if ( !stream.read(size) ) {
         return CIO_IOERR;
     }
 
-    this->values.resize(size);
+    this->resize(size); // FIXME: useless zero-initialization
 
     // read raw data
     if ( size ) {
@@ -1084,19 +1087,19 @@ void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
     mat.copyColumn(*this, col);
 }
 
-void FloatArray :: beRowOf(const FloatMatrix &mat, std::size_t row)
+void FloatArray :: beRowOf(const FloatMatrix &mat, Index row)
 {
-    [[maybe_unused]] std::size_t nRows = mat.giveRowSize();
-    std::size_t nColumns = mat.giveColSize();
+    Index nColumns = mat.cols();
 
 #  ifndef NDEBUG
+    Index nRows = mat.rows();
     if (row>nRows) {
         OOFEM_ERROR( "dimension mismatch, matrix rows = %d, wanted row = %d", nRows, row)    
     }
 #  endif    
     
     _resize_internal(nColumns);
-    for ( std::size_t i = 1; i <= nColumns; i++ ) {
+    for ( Index i = 1; i <= nColumns; i++ ) {
         this->at(i) = mat.at(row,i);
     }
 }
