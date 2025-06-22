@@ -50,46 +50,6 @@
 
 
 
-// Some forward declarations for LAPACK. Remember to append the underscore to the function name.
-#ifdef __LAPACK_MODULE
-extern "C" {
-/// Computes the reciprocal condition number for a LU decomposed function.
-extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
-                    const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
-/// Replaces a with the LU-decomposition.
-extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
-/// Replaces a with its inverse.
-extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
-/// Solves a system of equations.
-extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-/// Computes the norm.
-extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
-/// Computes eigenvalues and vectors.
-extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
-                   const double *vl, const double *vu, const int *il, const int *iu,
-                   const double *abstol, int *m, double *w, double *z, const int *ldz,
-                   double *work, int *lwork, int *iwork, int *ifail, int *info,
-                   int jobz_len, int range_len, int uplo_len);
-/// Solves system which has been LU-factorized.
-extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-/// General matrix multiplication
-extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
-                   const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
-                   int a_columns, int b_columns, int c_columns);
-/// General dyad product of vectors
-extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
-                  const double *y, const int *incy, double *a, const int *lda,
-                  int x_len, int y_len, int a_columns);
-/// Symmetric dyad product of vector
-extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
-                  double *a, const int *lda, int x_len, int a_columns);
-/// Y = Y + alpha * X
-extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
-/// X = alpha * X
-extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
-}
-#endif
-
 
 namespace oofem {
 
@@ -148,14 +108,6 @@ void FloatMatrix :: resizeWithData(Index rows, Index columns)
 
 
 
-FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
-//
-// constructor : creates (vector->giveSize(),1) FloatMatrix
-// if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
-//
-{
-    this->initFromVector(vector,transpose);
-}
 
 
 FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
@@ -193,9 +145,9 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 }
 
 
-FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
+FloatMatrix FloatMatrix :: fromCols ( std :: initializer_list< FloatArray >mat )
 {
-    _resize_internal( mat.begin()->giveSize(), ( int ) mat.size() );
+    FloatMatrix ret( mat.begin()->giveSize(), ( int ) mat.size() );
     Index c=0;
     for ( auto col : mat ) {
 #if DEBUG
@@ -203,11 +155,11 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >ma
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
 #endif
-        for(Index r=0; r<col.size(); r++) (*this)(r,c);
+        for(Index r=0; r<col.size(); r++) ret(r,c);
         c++;
     }
 
-    return * this;
+    return ret;
 }
 
 void FloatMatrix :: checkBounds(Index i, Index j) const
@@ -1313,19 +1265,21 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 }
 
 
-void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
+FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
 // if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
 //
 {
+    FloatMatrix ret;
     if ( transposed ) {
-        this->resize(1,vector.size());
-        for(int c=0; c<cols(); c++) (*this)(0,c)=vector(c);
+        ret.resize(1,vector.size());
+        for(int c=0; c<ret.cols(); c++) ret(0,c)=vector(c);
     } else {
-        this->resize(vector.size(),1);
-        for(int r=0; r<rows(); r++) (*this)(r,0)=vector(r);
+        ret.resize(vector.size(),1);
+        for(int r=0; r<ret.rows(); r++) ret(r,0)=vector(r);
     }
+    return ret;
 }
 
 
@@ -2042,8 +1996,8 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 {
     out << x.rows() << " " << x.cols() << " {";
-    for (FloatMatrix::Index i = 0; i < x.rows(); ++i ) {
-        for (FloatMatrix::Index j = 0; j < x.cols(); ++j ) {
+    for (Index i = 0; i < x.rows(); ++i ) {
+        for (Index j = 0; j < x.cols(); ++j ) {
             out << " " << x(i, j);
         }
         out << ";";

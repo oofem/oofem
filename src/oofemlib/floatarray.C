@@ -51,14 +51,6 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef __LAPACK_MODULE
-extern "C" {
-    extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
-                       const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
-    // Y = Y + alpha * X
-    extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
-}
-#endif
 
 namespace oofem {
 
@@ -81,7 +73,7 @@ void FloatArray :: resizeWithValues(Index n, std::size_t allocChunk)
 
 #endif
 
-    if ( allocChunk > 0 && this->values.capacity() < n ) {
+    if ( allocChunk > 0 && (Index)this->values.capacity() < n ) {
         this->values.reserve(n + allocChunk);
     }
 

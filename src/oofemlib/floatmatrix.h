@@ -38,6 +38,7 @@
 #include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "numerics.h"
 
 #include <vector>
 #include <iosfwd>
@@ -90,18 +91,8 @@ protected:
     std :: vector< double >values;
 
 public:
-    /// @name Iterator for for-each loops (columns-wise order):
-    //@{
-    std::vector< double > :: iterator begin() { return this->values.begin(); }
-    std::vector< double > :: iterator end() { return this->values.end(); }
-    std::vector< double > :: const_iterator begin() const { return this->values.begin(); }
-    std::vector< double > :: const_iterator end() const { return this->values.end(); }
-    //@}
-
     constexpr static int Dim = 2;
     typedef double Scalar;
-
-    typedef int Index;
     /**
      * Creates matrix of given size.
      * @param n Number of rows.
@@ -111,27 +102,27 @@ public:
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
     /**
-     * Constructor. Creates float matrix from float vector. Vector may be stored row wise
+     * Creates float matrix from float vector. Vector may be stored row wise
      * or column wise, depending on second parameter.
      * @param vector Float vector from which matrix is constructed
      * @param transpose If false (default) then a matrix of size (vector->giveSize(),1)
      * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
      * will be created.
      */
-    FloatMatrix(const FloatArray &vector, bool transpose = false);
+    static FloatMatrix fromArray(const FloatArray &vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
     /// Copy constructor.
     FloatMatrix(FloatMatrix && mat) noexcept : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
+    /// Assignment operator.
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Initializer list constructor.
     template<std::size_t M, std::size_t N>
     FloatMatrix(const FloatMatrixF<N,M> &src) : nRows(N), nColumns(M), values(src.begin(), src.end()) { }
     /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< FloatArray >mat);
+    static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
@@ -500,13 +491,6 @@ public:
      * Changes sign of receiver values.
      */
     void negated();
-    /**
-     * Assigns to receiver one column or one row matrix containing vector.
-     * @param vector Source vector.
-     * @param transposed If false then (vector->giveSize(),1) FloatMatrix is assigned
-     * else (1,vector->giveSize()) FloatMatrix is assigned.
-     */
-    void initFromVector(const FloatArray &vector, bool transposed);
     /**
      * Initializes the lower half of the receiver according to the upper half.
      */

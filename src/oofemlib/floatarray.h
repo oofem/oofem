@@ -39,6 +39,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "error.h"
+#include "numerics.h"
 
 #include <initializer_list>
 #include <vector>
@@ -84,7 +85,6 @@ template<std::size_t N> class FloatArrayF;
  */
 class OOFEM_EXPORT FloatArray
 {
-    typedef int Index;
     void _resize_internal(Index newsize);
 protected:
     /// Stored values.
@@ -535,8 +535,6 @@ public:
     FloatArray &operator = ( const double & );
     //@}
 };
-
-const FloatArray ZeroVector = {0.0,0.0,0.0};
 
 ///@name IML compatibility
 //@{
