@@ -1229,7 +1229,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveDefaultIntegrationRulePtr", &oofem::Element::giveDefaultIntegrationRulePtr, py::return_value_policy::reference)
         .def("giveIPValue", &oofem::Element::giveIPValue)
         .def("giveLabel", &oofem::Element::giveLabel)
-        .def("initializeFrom", (void (oofem::Element::*)(oofem::InputRecord & )) &oofem::Element::initializeFrom)
+        .def("initializeFrom", (void (oofem::Element::*)(oofem::InputRecord & , int)) &oofem::Element::initializeFrom)
         .def("postInitialize", &oofem::Element::postInitialize)
         .def("setDofManagers", &oofem::Element::setDofManagers)
         .def("setNumberOfDofManagers", &oofem::Element::setNumberOfDofManagers)

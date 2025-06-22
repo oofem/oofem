@@ -93,7 +93,7 @@ def test_3():
     ir = oofempy.OOFEMTXTInputRecord()
     ir.setRecordString ("nodes 2 1 2 mat 1 crosssect 1")
     # pass input record to elem
-    e1.initializeFrom(ir)
+    e1.initializeFrom(ir,2)
     elems = (e1,)
 
     # setup domain
