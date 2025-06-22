@@ -63,14 +63,6 @@ protected:
     std::array< double, N*M > values;
 
 public:
-    /// @name Iterator for for-each loops:
-    //@{
-    auto begin() { return this->values.begin(); }
-    auto end() { return this->values.end(); }
-    auto begin() const { return this->values.begin(); }
-    auto end() const { return this->values.end(); }
-    //@}
-
     /**
      * Constructor (values are specified column-wise)
      * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 

@@ -118,9 +118,8 @@ public:
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Initializer list constructor.
     template<std::size_t M, std::size_t N>
-    FloatMatrix(const FloatMatrixF<N,M> &src) : nRows(N), nColumns(M), values(src.begin(), src.end()) { }
+    FloatMatrix(const FloatMatrixF<N,M> &src) { assignFloatMatrixF(src); }
     /// Assignment operator.
     static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
@@ -138,11 +137,14 @@ public:
     }
     /// Assignment operator, adjusts size of the receiver if necessary.
     template<std::size_t N, std::size_t M>
+    void assignFloatMatrixF(const FloatMatrixF<N,M> &mat){
+        nRows=N; nColumns=M; values.resize(N*M);
+        for(Index c=0; c<cols(); c++) for(Index r=0; r<rows(); r++) (*this)(r,c)=mat(r,c);
+    }
+    template<std::size_t N, std::size_t M>
     FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
-        nRows = N;
-        nColumns = M;
-        values.assign(mat.begin(), mat.end());
-        return * this;
+        this->assignFloatMatrixF(mat);
+        return *this;
     }
 
     /**
