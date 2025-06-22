@@ -110,7 +110,7 @@ Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *t
 #ifdef _OPENMP
             if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
 #endif
-            answer.assemble(lambdaeq.at(pos - 1), one);
+            answer.assemble(lambdaeq.at(pos - 1), FloatMatrix::fromArray(one));
 #ifdef _OPENMP
             if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
 #endif
@@ -208,7 +208,7 @@ Node2NodeLagrangianMultiplierContact :: computeTangentFromContact(FloatMatrix &a
     FloatArray Nv;
     this->computeGap(gap, masterNode, slaveNode, tStep);
     this->computeNormalMatrixAt(Nv, masterNode, slaveNode, tStep);
-    answer.initFromVector(Nv, false);
+    answer=FloatMatrix::fromArray(Nv, false);
 
     return gap;
     //answer.times(this->penalty);

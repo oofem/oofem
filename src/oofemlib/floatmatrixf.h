@@ -93,7 +93,11 @@ public:
                 " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
         }
 #endif
-        std::copy_n(mat.begin(), N*M, values.begin());
+        #if 0
+             std::copy_n(mat.begin(), N*M, values.begin());
+        #else
+             for(Index c=0; c<mat.cols(); c++) for(Index r=0; r<mat.rows(); r++) (*this)(r,c)=mat(r,c);
+        #endif
     }
     FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
     {

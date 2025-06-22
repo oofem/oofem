@@ -216,7 +216,7 @@ Truss3dnl :: computeBnlMatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *t
   if(!lin) {
     factor /= 2;
   } 
-  Bnl.beProductOf(A,d);
+  Bnl.beProductOf(A,FloatMatrix::fromArray(d));
   Bnl.times(factor);
   answer.beTranspositionOf(Bnl);
   

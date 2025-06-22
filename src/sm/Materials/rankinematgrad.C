@@ -471,7 +471,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, M
         {
             RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
             FloatArray GradP = status->giveTempNonlocalDamageDrivingVariableGrad();
-            answer = GradP;
+            answer = FloatMatrix::fromArray(GradP);
             double iBPrime = this->computeEikonalInternalLength_bPrime(gp);
             double tempKappa = status->giveTempCumulativePlasticStrain();
             double gPrime = this->computeDamageParamPrime(tempKappa);

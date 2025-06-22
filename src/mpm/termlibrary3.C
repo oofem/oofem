@@ -113,7 +113,7 @@ void BDalphaPiTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint*
 
     DaPI.beProductOf(D, alphaPi);
     BDaPI.beTProductOf(B,DaPI);
-    FloatMatrix Ntm(Nt, true);
+    FloatMatrix Ntm=FloatMatrix::fromArray(Nt, true);
     answer.beProductOf(BDaPI,Ntm);
 
 }
@@ -139,7 +139,7 @@ void BTdSigmadT::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp
     e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicMatrix(D, DSigmaDT, gp, tstep);
     this->field->interpolation->evalN(Nt, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     evalB(B, this->testField, this->testField->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
-    FloatMatrix Ntm(Nt, true);
+    FloatMatrix Ntm=FloatMatrix::fromArray(Nt, true);
     DB.beProductOf(D, Ntm);
     //answer.plusProductSymmUpper(B, DB, 1.0);
     answer.beTProductOf(B,DB);

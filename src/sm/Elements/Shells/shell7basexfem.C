@@ -2541,8 +2541,7 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
 
     nodeLocalXi3Coords = { -z, -z, -z, z, z, z, -z, -z, -z, z, z, z, 0., 0., 0. };
 
-    FloatMatrix localNodeCoordsT;
-    localNodeCoordsT = {nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords};
+    FloatMatrix localNodeCoordsT = FloatMatrix::fromCols({nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords});
     localNodeCoords.beTranspositionOf(localNodeCoordsT);
 }
 
@@ -2593,8 +2592,7 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
 
     nodeLocalXi3Coords = { 0., 0., 0., 0., 0., 0. };
 
-    FloatMatrix localNodeCoordsT;
-    localNodeCoordsT = {nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords};
+    FloatMatrix localNodeCoordsT = FloatMatrix::fromCols({nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords});
     localNodeCoords.beTranspositionOf(localNodeCoordsT);
 }
 

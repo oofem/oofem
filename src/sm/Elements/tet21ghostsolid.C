@@ -778,7 +778,7 @@ tet21ghostsolid::giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeS
             momentum.add(-pressure * detJ * weight, dNv);
 
             // Conservation equation
-            divv.beTProductOf(dNv, aTotal);
+            divv.beTProductOf(FloatMatrix::fromArray(dNv), aTotal);
             divv.times(-detJ * weight);
 
             conservation.add(divv.at(1), Nlin);
@@ -937,7 +937,7 @@ tet21ghostsolid::giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer, 
             momentum.add(-pressure * detJ * weight, dNv);
 
             // Conservation equation
-            divv.beTProductOf(dNv, aTotal);
+            divv.beTProductOf(FloatMatrix::fromArray(dNv), aTotal);
             divv.times(-detJ * weight);
 
             conservation.add(divv.at(1), Nlin);

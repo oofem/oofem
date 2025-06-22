@@ -94,7 +94,7 @@ void PrescribedDispSlipMultiple::setSlipField( const FloatArray &t )
 
 void PrescribedDispSlipMultiple::setDispGradient( const FloatArray &t )
 {
-    this->slipGradient = t;
+    this->slipGradient = FloatMatrix::fromArray(t);
     for ( int i : this->bcs ) {
         auto bc = dynamic_cast<PrescribedDispSlipHomogenization*>(this->giveDomain()->giveBc(i));
         bc->setDispGradient(t);
@@ -104,7 +104,7 @@ void PrescribedDispSlipMultiple::setDispGradient( const FloatArray &t )
 
 void PrescribedDispSlipMultiple::setSlipGradient( const FloatArray &t )
 {
-    this->slipGradient = t;
+    this->slipGradient = FloatMatrix::fromArray(t);
     for ( int i : this->bcs ) {
         auto bc = dynamic_cast<PrescribedDispSlipHomogenization*>(this->giveDomain()->giveBc(i));
         bc->setSlipGradient(t);
