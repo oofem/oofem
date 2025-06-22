@@ -267,11 +267,15 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
+    #pragma GCC diagnostic push
+    /// hidden by virtual oofem::Material* TransportCrossSection::giveMaterial() const
+    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
     /**
      * Returns the material associated with the GP.
      * Default implementation uses gp->giveMaterial() for backwards compatibility, but it should be overloaded in each specialized cross-section.
      */
     virtual Material *giveMaterial(IntegrationPoint *ip) const = 0;
+    #pragma GCC diagnostic pop
 
     /**
      * Stores integration point state to output stream.

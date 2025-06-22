@@ -748,7 +748,9 @@ MPSMaterial::giveEModulus(GaussPoint *gp, TimeStep *tStep) const
     if ( status->giveStoredEmodulusFlag() ) {
         Emodulus = status->giveStoredEmodulus();
     } else {
-#pragma omp critical (MPS_Emodulus)
+        #ifdef _OPENMP
+            #pragma omp critical (MPS_Emodulus)
+        #endif
         { // critical section as EparVal is a class variable; if the receiver is slave model (e.g. ConcreteFCMViscoElastic) 
           // it can be shared by several master models with different parameters
             if ( EparVal.giveSize() == 0 ) {

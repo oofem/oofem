@@ -56,8 +56,12 @@ public:
      */
     TransportCrossSection(int n, Domain * d) : CrossSection(n, d) { }
 
+    #pragma GCC diagnostic push
+    /// hides virtual oofem::Material* CrossSection::giveMaterial(oofem::IntegrationPoint*) const
+    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
     /// @todo Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
     virtual TransportMaterial *giveMaterial() const = 0;
+    #pragma GCC diagnostic pop
 };
 } // end namespace oofem
 #endif // transportcrosssection_h
