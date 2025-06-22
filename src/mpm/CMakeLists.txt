@@ -33,4 +33,3 @@ add_library (mpm
     ${mpm}
     )
 
-add_dependencies(mpm version)

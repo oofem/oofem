@@ -119,7 +119,7 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
 
         ast = this->at(1) + this->at(2);
         dst = this->at(1) - this->at(2);
-        D = sqrt( dst * dst + this->at(3) * this->at(3) );
+        D = std::sqrt( dst * dst + this->at(3) * this->at(3) );
         answer.at(1) = 0.5 * ( ast + D );
         answer.at(2) = 0.5 * ( ast - D );
     } else {
@@ -294,8 +294,11 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 void
 StrainVector :: printYourself() const
 {
+    #ifdef _USE_EIGEN
+        const StrainVector& values(*this);
+    #endif
     printf("StrainVector (MaterialMode %d)\n", mode);
-    for ( double x : this->values ) {
+    for ( double x : values ) {
         printf("%10.3e  ", x);
     }
 
@@ -309,6 +312,9 @@ StrainVector :: computeVolumeChange() const
     //
     // This function computes the change of volume. This is different from the volumetric strain.
     //
+    #ifdef _USE_EIGEN
+        const StrainVector& values(*this);
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
@@ -328,20 +334,23 @@ StrainVector :: computeStrainNorm() const
     //
     // This function computes the tensorial Norm of the strain in engineering notation
     //
+    #ifdef _USE_EIGEN
+        const StrainVector& values(*this);
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
-        return sqrt(values [ 0 ] * values [ 0 ]);
+        return std::sqrt(values [ 0 ] * values [ 0 ]);
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
-        return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2 * values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] ) );
+        return std::sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2 * values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] ) );
     } else if ( myMode == _PlaneStrain ) {
         //  plane strain or axisymmetry
-        return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
+        return std::sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
                             values [ 3 ] * values [ 3 ] ) );
     } else {
         // 3d problem
-        return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
+        return std::sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
                             values [ 3 ] * values [ 3 ] + values [ 4 ] * values [ 4 ] + values [ 5 ] * values [ 5 ] ) );
     }
 }
@@ -353,6 +362,9 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
     // This function applies the elastic stiffness to the total strain vector
     //
 
+    #ifdef _USE_EIGEN
+        const StrainVector& values(*this);
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         stress(0) = EModulus * values [ 0 ];
@@ -406,6 +418,9 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
     // This function applies the elastic stiffness to the deviatoric strain vector
     //
 
+    #ifdef _USE_EIGEN
+        const StrainVector& values(*this);
+    #endif
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         OOFEM_ERROR("No Split for 1D");

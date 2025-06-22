@@ -1,7 +1,7 @@
 <hr />
-This page is part of the <a href="@oofem_HOMEPAGE@">OOFEM-@oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@</a> documentation. Copyright @oofem_COPYRIGHT@ <a href="@bp_HOMEPAGE@">Bořek Patzák</a>
+This page is part of the <a href="@OOFEM_HOMEPAGE@">OOFEM-@OOFEM_VERSION_MAJOR@.@OOFEM_VERSION_MINOR@</a> documentation. Copyright @OOFEM_COPYRIGHT@ <a href="@bp_HOMEPAGE@">Bořek Patzák</a>
 <br />
-Project e-mail: <a href="mailto:@oofem_EMAIL@">@oofem_EMAIL@</a>
+Project e-mail: <a href="mailto:@OOFEM_EMAIL@">@OOFEM_EMAIL@</a>
 <br clear=all />
 <address><small>
 Generated at $datetime for $projectname by <a href="http://www.doxygen.org/index.html">

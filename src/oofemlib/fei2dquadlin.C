@@ -270,7 +270,7 @@ FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
         cellgeo.giveVertexCoordinates(nodeB).at(yind) - cellgeo.giveVertexCoordinates(nodeA).at(yind),
         cellgeo.giveVertexCoordinates(nodeA).at(xind) - cellgeo.giveVertexCoordinates(nodeB).at(xind)
     };
-    return answer.normalize() * 0.5;
+    return answer.normalize_giveNorm() * 0.5;
 }
 
 void

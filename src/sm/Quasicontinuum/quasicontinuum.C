@@ -807,9 +807,10 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         return true;
     } else {   // ends are located in different elements -> all intersected el needs to be found
         IntArray intersected; // to store numbers of intersected elem
-        FloatArray lengths; // to store lengths ofintersections
+        std::vector<double> lengths_; // to store lengths ofintersections
 
-        computeIntersectionsOfLinkWithInterpElements(intersected, lengths, d, e, qn1, qn2);
+        computeIntersectionsOfLinkWithInterpElements(intersected, lengths_, d, e, qn1, qn2);
+        FloatArray lengths=FloatArray::fromVector(lengths_);
 
         // check: is there any intersectted elements
         int noIntersected = lengths.giveSize();
@@ -844,7 +845,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
 
 
 void
-Quasicontinuum :: computeIntersectionsOfLinkWithInterpElements(IntArray &intersected, FloatArray &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
+Quasicontinuum :: computeIntersectionsOfLinkWithInterpElements(IntArray &intersected, std::vector<double> &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
 {
     int dim = d->giveNumberOfSpatialDimensions();
     if ( dim == 2 ) {
@@ -858,7 +859,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWithInterpElements(IntArray &interse
 
 
 bool
-Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &intersected, FloatArray &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
+Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &intersected, std::vector<double> &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
 {
     intersected.clear();
     lengths.clear();
@@ -1043,7 +1044,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
 
 
         // check: all length of link is assembles
-        sumLength = lengths.sum();
+        sumLength = std::accumulate(lengths.begin(), lengths.end(), 0.);
         if ( ( fabs(sumLength / TotalLength - 1) ) <= ( 0.0001 ) ) {
             return true;
         }
@@ -1059,7 +1060,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
 
 
 bool
-Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &intersected, FloatArray &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
+Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &intersected, std::vector<double> &lengths, Domain *d, Element *e, qcNode *qn1, qcNode *qn2)
 {
     intersected.clear();
     lengths.clear();
@@ -1247,7 +1248,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
 
 
         // check: all length of link is assembles
-        sumLength = lengths.sum();
+        sumLength = std::accumulate(lengths.begin(), lengths.end(), 0.);
         if ( ( fabs(sumLength / TotalLength - 1) ) <= ( 0.0001 ) ) {
             return true;
         }

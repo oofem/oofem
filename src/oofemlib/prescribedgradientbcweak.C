@@ -298,14 +298,14 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             IntArray dispLockRows;
             mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), dispLockRows, s);
 
-            FloatArray fe_dispLock;
 
             int lockNodePlaceInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
             FloatArray nodeUnknowns;
             domain->giveDofManager(lockNodePlaceInArray)->giveUnknownVector(nodeUnknowns,this->giveRegularDispDofIDs(), mode, tStep);
 
+            FloatArray fe_dispLock(domain->giveNumberOfSpatialDimensions());
             for ( int i = 0; i < domain->giveNumberOfSpatialDimensions(); i++ ) {
-                fe_dispLock.push_back(nodeUnknowns [ i ]);
+                fe_dispLock[i] = nodeUnknowns [ i ];
             }
 
             fe_dispLock.times(mDispLockScaling);
@@ -379,8 +379,8 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
     Element *dispEl = localizer->giveElementClosestToPoint(dispElLocCoord, closestPoint, iBndCoord );
 
     // Compute vector of displacement unknowns
-    FloatArray dispUnknowns;
     int numDMan = dispEl->giveNumberOfDofManagers();
+    std::vector<double> dispUnknowns_;
     for ( int i = 1; i <= numDMan; i++ ) {
         FloatArray nodeUnknowns;
         DofManager *dMan = dispEl->giveDofManager(i);
@@ -392,7 +392,7 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
         }
 
         dMan->giveUnknownVector(nodeUnknowns, dispIDs,mode, tStep);
-        dispUnknowns.append(nodeUnknowns);
+        dispUnknowns_.insert(dispUnknowns_.end(),nodeUnknowns.begin(),nodeUnknowns.end());
 
     }
 
@@ -402,6 +402,7 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
     oContrib_disp.beTProductOf(contrib, tracUnknowns);
     oContrib_disp.negated();
 
+    FloatArray dispUnknowns=FloatArray::fromVector(dispUnknowns_);
     oContrib_trac.beProductOf(contrib, dispUnknowns);
     oContrib_trac.negated();
 }

@@ -8,6 +8,7 @@ try: # installed
 except: # in-tree
     import oofempy
     import util
+import numpy as np
 
 
 class MyFunc(oofempy.Function):
@@ -87,7 +88,7 @@ def test_3():
     # elements
     #e1 = oofempy.truss1d(1, domain, nodes=(1,n2),  mat=1,   crossSect=1)
     e1 = MyElement(1, domain)
-    e1.setDofManagers((1,2))
+    e1.setDofManagers(np.array([1,2]))
     # construct OOFEMTXTInputRecord from bp::dict **kw
     ir = oofempy.OOFEMTXTInputRecord()
     ir.setRecordString ("nodes 2 1 2 mat 1 crosssect 1")
@@ -98,12 +99,14 @@ def test_3():
     # setup domain
     util.setupDomain (domain, nodes, elems, (cs,), (mat,), bcs, (), ltfs, ())
 
-    print("\nSolving problem")
+    print("\nInitializing problem")
     problem.checkProblemConsistency()
     problem.init()
     problem.postInitialize()
-    problem.setRenumberFlag()
+    print("\nSolving problem")
+    #problem.setRenumberFlag()
     problem.solveYourself()
+    print("\nProblem solved")
 
     #check solution
     u2 = problem.giveUnknownComponent (oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(2).giveDofWithID(oofempy.DofIDItem.D_u))

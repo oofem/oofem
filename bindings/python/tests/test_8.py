@@ -64,7 +64,7 @@ def test_8():
     interpolation = oofempy.linearinterpolation()
     w= u = oofempy.Variable(interpolation, oofempy.VariableQuantity.Displacement, oofempy.VariableType.vector, 2, [1,2], None)
     mt = oofempy.BTSigmaTerm(w, u, oofempy.MaterialMode._PlaneStress)
-    lt = oofempy.NTfTerm(w, u, oofempy.MaterialMode._PlaneStress)
+    lt = oofempy.NTfTerm(w, u, oofempy.MaterialMode._PlaneStress, (1.,0.))
     tstep = problem.giveNextStep()
 
 
@@ -86,8 +86,9 @@ def test_8():
 
 
     rhs = oofempy.FloatArray(5)
+    enorms = oofempy.FloatArray(5)
 
-    I2.assemble_rhs(rhs, oofempy.EModelDefaultEquationNumbering(), tstep)
+    I2.assemble_rhs(rhs, oofempy.EModelDefaultEquationNumbering(), tstep, enorms)
     rhs.printYourself()
 
     r = oofempy.FloatArray(5)

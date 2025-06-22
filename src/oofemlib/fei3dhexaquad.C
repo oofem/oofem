@@ -561,7 +561,7 @@ FEI3dHexaQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArr
     }
 
     answer.beVectorProductOf(a, b);
-    return answer.normalize();
+    return answer.normalize_giveNorm();
 }
 
 void

@@ -176,31 +176,31 @@ ExportRegion::clear()
     this->nodeVarsFromXFEMIS.clear();
 }
 
-#ifdef _PYBIND_BINDINGS
 
-py::array_t<double>
+FloatMatrix
 ExportRegion::getVertices () {
-  double* result = new double[this->numNodes*3];
+  FloatMatrix result(this->numNodes,3);
   for (int i=0; i<this->numNodes; i++) {
     FloatArray &c = this->giveNodeCoords(i+1);
     for (int j=0; j<c.giveSize(); j++) {
-      result[i*3+j]=c[j];
+      result(i,j)=c[j];
     }
     for (int j=c.giveSize(); j<3; j++) {
-      result[i*3+j] = 0.0;
+      result(i,j) = 0.0;
     }
   }
-  return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, 3}, &result[0]);
+  return result;
 }
 
-py::array_t<int>
+
+IntArray
 ExportRegion::getCellConnectivity () {
   int reqSize = 0;
   for (int i=0; i<this->numCells; i++) {
     reqSize++;
     reqSize+=this->giveCellConnectivity(i+1).giveSize();
   }
-  int* result = new int[reqSize];
+  IntArray result(reqSize);
   int pos=0;
   for (int i=0; i<this->numCells; i++) {
     IntArray &c = this->giveCellConnectivity(i+1);
@@ -210,84 +210,79 @@ ExportRegion::getCellConnectivity () {
       result[pos++]=c[i]-1;
     }
   }
-  return py::array_t<int>(reqSize, result);
+  return result;
 }
 
-py::array_t<int>
+IntArray
 ExportRegion::getCellTypes () {
-  int* result = new int[this->numCells];
+  IntArray result(this->numCells);
   for (int i=0; i<this->numCells; i++) {
     result[i]=this->giveCellType(i+1); // m.giveCellType(this->regionElInd.at(i+1));
   }
-  return py::array_t<int>(this->numCells, result);     
+  return result;
 }
 
-py::array_t<double>
-ExportRegion::getPrimaryVertexValues (UnknownType u) {
 
+
+FloatMatrix
+ExportRegion::getPrimaryVertexValues (UnknownType u) {
   if (this->nodeVars.find(u) != this->nodeVars.end()) {
     // key exists
     std::vector<FloatArray>& nodalVars = this->nodeVars[u];
     // get size of nodal record
-    int recSize = nodalVars[0].giveSize();    
-    double* result = new double[this->numNodes*recSize];
-    int counter = 0;
+    int recSize = nodalVars[0].giveSize();
+    FloatMatrix result(this->numNodes,recSize);
     for (int i=0;i<this->numNodes; i++) {
       FloatArray& v = nodalVars[i];
       for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
+        result(i,j)=v[j];
       }
     }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, recSize}, result);
-    //return py::array_t<double>(this->numNodes*recSize, result);     
+    return result;
   } else {
-    return py::array_t<double>(0);
+    return FloatMatrix(0,0);
   }
 }
 
-py::array_t<double>
+FloatMatrix
 ExportRegion::getInternalVertexValues(InternalStateType u) {
   if (this->nodeVarsFromIS.find(u)!=this->nodeVarsFromIS.end()) {
     // key exists
     std::vector<FloatArray>& nodalVars = this->nodeVarsFromIS[u];
     // get size of nodal record
     int recSize = nodalVars[0].giveSize();
-    double* result = new double[this->numNodes*recSize];
-    int counter = 0;
+    FloatMatrix result(this->numNodes,recSize);
     for (int i=0;i<this->numNodes; i++) {
       FloatArray& v = nodalVars[i];
       for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
+        result(i,j)=v[j];
       }
     }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numNodes, recSize}, result);
+    return result;
   } else {
-    return py::array_t<double>(0);   
+    return FloatMatrix(0,0);
   }
 }
   
-py::array_t<double>
+FloatMatrix
 ExportRegion::getCellValues(InternalStateType u) {
   if (this->cellVars.find(u)!=this->cellVars.end()) {
     // key exists
     std::vector<FloatArray>& cv = this->cellVars[u];
     // get size of nodal record
     int recSize = cv[0].giveSize();
-    double* result = new double[this->numCells*recSize];
-    int counter = 0;
+    FloatMatrix result(this->numCells,recSize);
     for (int i=0;i<this->numCells; i++) {
       FloatArray& v = cv[i];
       for (int j=0; j<recSize; j++) {
-        result[counter++]=v[j];
+        result(i,j)=v[j];
       }
     }
-    return py::array_t<double>(std::vector<ptrdiff_t>{this->numCells, recSize}, result);
+    return result;
   } else {
-    return py::array_t<double>(0);   
+    return FloatMatrix(0,0);
   }
 }
-
-#endif
 
 
 } // end namespace oofem

@@ -551,7 +551,7 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
         b.add( dNdeta[i], cellgeo.giveVertexCoordinates( snodes[i] ) );
     }
     answer.beVectorProductOf(a, b);
-    return answer.normalize();
+    return answer.normalize_giveNorm();
 }
 
 double

@@ -1,12 +1,12 @@
-@OOFEM_EXPORT_HEADER@
+#ifndef oofemcfg_h
+#define oofemcfg_h
 
-#define __OOFEM_MAJOR_VERSION "@oofem_VERSION_MAJOR@"
-#define __OOFEM_MINOR_VERSION "@oofem_VERSION_MINOR@"
-#define __OOFEM_VERSION "@oofem_VERSION_MAJOR@" "." "@oofem_VERSION_MINOR@"
-#define __OOFEM_COPYRIGHT "@oofem_COPYRIGHT@"
-#define __HOST_TYPE "@HOST_TYPE@"
-#define __HOST_NAME "@HOST_NAME@"
-#define __MODULE_LIST "@MODULE_LIST@" 
+#ifdef _USE_SHARED
+    #include "oofem_export.h"
+#else
+    #define OOFEM_EXPORT
+    #define OOFEM_NO_EXPORT
+#endif
 
 OOFEM_EXPORT extern const char* PRG_VERSION;
 OOFEM_EXPORT extern const char* OOFEG_VERSION;
@@ -19,4 +19,4 @@ OOFEM_EXPORT extern const char* MODULE_LIST;
 OOFEM_EXPORT extern const char* OOFEM_GIT_HASH;
 OOFEM_EXPORT extern const char* OOFEM_GIT_REPOURL;
 OOFEM_EXPORT extern const char* OOFEM_GIT_BRANCH;
-#
+#endif /* oofemcfg.h */

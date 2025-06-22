@@ -47,7 +47,9 @@
 #include <fstream>
 #include <iomanip>
 #include <numeric>
-#define RESIZE(nr, nc) \
+
+namespace oofem{
+void FloatMatrix::_resize_internal(int nr, int nc)
     { \
         this->nRows = nr; this->nColumns = nc; \
         std::size_t nsize = this->nRows * this->nColumns; \
@@ -57,11 +59,9 @@
             this->values.assign(nsize, 0.); \
         } \
     }
+};
 
-#ifdef _BOOSTPYTHON_BINDINGS
- #include <boost/python.hpp>
- #include <boost/python/extract.hpp>
-#endif
+
 
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
@@ -125,7 +125,7 @@ FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 
 FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
 {
-    RESIZE( mat.size(), mat.begin()->size() )
+    _resize_internal( mat.size(), mat.begin()->size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -143,7 +143,7 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
 {
-    RESIZE( ( int ) mat.begin()->size(), ( int ) mat.size() );
+    _resize_internal( ( int ) mat.begin()->size(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -163,7 +163,7 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
 {
-    RESIZE( mat.begin()->giveSize(), ( int ) mat.size() );
+    _resize_internal( mat.begin()->giveSize(), ( int ) mat.size() );
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
@@ -201,7 +201,7 @@ void FloatMatrix :: checkBounds(std::size_t i, std::size_t j) const
     }
 }
 
-bool FloatMatrix :: isFinite() const
+bool FloatMatrix :: isAllFinite() const
 {
     for (double val : values) {
         if ( !std::isfinite(val) ) {
@@ -315,7 +315,7 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
     int nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
-    RESIZE(nrows, ncols);
+    _resize_internal(nrows, ncols);
 
     for ( int i = 1; i <= nrows; i++ ) {
         for ( int j = 1; j <= ncols; j++ ) {
@@ -333,7 +333,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
         OOFEM_ERROR("error in product A*B : dimensions do not match, A(*,%d), B(%d,*)", aMatrix.nColumns, bMatrix.nRows);
     }
 #  endif
-    RESIZE(aMatrix.nRows, bMatrix.nColumns);
+    _resize_internal(aMatrix.nRows, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
@@ -363,7 +363,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
-    RESIZE(aMatrix.nColumns, bMatrix.nColumns);
+    _resize_internal(aMatrix.nColumns, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows,
@@ -393,7 +393,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
-    RESIZE(aMatrix.nRows, bMatrix.nRows);
+    _resize_internal(aMatrix.nRows, bMatrix.nRows);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns,
@@ -485,7 +485,7 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
 {
     int n1 = vec1.giveSize();
     int n2 = vec2.giveSize();
-    RESIZE(n1, n2);
+    _resize_internal(n1, n2);
     for ( int j = 1; j <= n2; j++ ) {
         for ( int i = 1; i <= n1; i++ ) {
             this->at(i, j) = vec1.at(i) * vec2.at(j);
@@ -834,7 +834,7 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
     }
 #  endif
 
-    RESIZE(src.nRows, src.nColumns);
+    _resize_internal(src.nRows, src.nColumns);
 
     if ( nRows == 1 ) {
         if (fabs(src.at(1,1)) > 1.e-30) {
@@ -1385,17 +1385,6 @@ void FloatMatrix :: resizeWithData(std::size_t rows, std::size_t columns)
     }
 }
 
-
-void FloatMatrix :: hardResize(int rows, int columns)
-//
-// resizes receiver, all data will be lost
-//
-{
-    this->nRows = rows;
-    this->nColumns = columns;
-    values.assign(rows * columns, 0.);
-    this->values.shrink_to_fit();
-}
 
 
 double FloatMatrix :: giveDeterminant() const

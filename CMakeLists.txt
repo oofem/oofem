@@ -1,6 +1,15 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.15...3.30)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+
+# use py-build-cmake variables for scikit-build-core as well
+if(PY_BUILD_CMAKE_IMPORT_NAME)
+    set(SKBUILD_PROJECT_NAME ${PY_BUILD_CMAKE_IMPORT_NAME})
+    set(SKBUILD_PROJECT_VERSION ${PY_BUILD_CMAKE_PROJECT_VERSION})
+    set(SKBUILD_PROJECT_VERSION_FULL ${PY_BUILD_CMAKE_PROJECT_VERSION}) # PY_BUILD_CMAKE does not provide VERSION_FULL (?)
+endif()
+
+include (FetchContent)
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -8,7 +17,9 @@ include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (ProcessorCount)
-include (GenerateVersion)
+
+## local script, in src/
+include(src/DefineVersionsFromGit.cmake)
 
 
 # Use ccache if available. Needs to be performed early for it to work with cmake.
@@ -24,14 +35,11 @@ set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
 
 project (oofem CXX C)
-set (oofem_VERSION_MAJOR 2)
-set (oofem_VERSION_MINOR 6)
-set (oofem_VERSION_PATCH 0) # Unused
-set (oofem_HOMEPAGE "http://www.oofem.org")
+set (OOFEM_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 string(TIMESTAMP YEAR "%Y")
-set (oofem_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
-set (oofem_EMAIL "oofem@fsv.cvut.cz")
+set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
+set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -159,6 +167,7 @@ option (USE_CEMHYD "Enable CemHyd support" OFF)
 option (USE_AM "Enable additive manufacturing module" OFF)
 option (USE_T3D "Enable T3D support" OFF)
 option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable from Python and vice versa)." OFF)
+option (USE_NANOBIND "Use nanobind instead of pybind; requires USE_PYBIND_BINDINGS" OFF)
 option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
@@ -635,30 +644,50 @@ else()
 endif()
 
 
-
-if (USE_PYBIND_BINDINGS OR USE_PYTHON_EXTENSION)
-    # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
-    set(PYBIND11_FINDPYTHON ON)
-
-    find_package(Python COMPONENTS Interpreter Development)
-    if (PYBIND_DIR)
-        message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
-        include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
-        add_git_submodule(${PYBIND_DIR})
-    else()
-        add_git_submodule(extern/pybind11)
-    endif ()
-
-    # use python include paths and libs for all future targets (liboofem and oofem binary)
-    link_libraries(pybind11::embed)
-endif()
-
 if(USE_PYTHON_EXTENSION)
     add_definitions(-D_PYTHON_EXTENSION)
+    find_package(Python COMPONENTS Interpreter Development)
+    link_libraries(Python::Python)
 endif ()
 
-if(USE_PYBIND_BINDINGS)
-    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
+if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
+    MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
+endif()
+
+if (USE_PYBIND_BINDINGS)
+    add_definitions(-D_PYBIND_BINDINGS)
+    # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
+    set(PYBIND11_FINDPYTHON ON)
+    find_package(Python COMPONENTS Interpreter Development)
+    link_libraries(Python::Python)
+    if(USE_NANOBIND)
+        if(0)
+            add_subdirectory(extern/nanobind)
+        else()
+            FetchContent_Declare(
+                nanobind
+                GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+                GIT_TAG v2.7.0
+            )
+            FetchContent_MakeAvailable(nanobind)
+        endif()
+        nanobind_add_module(oofempy NB_STATIC STABLE_ABI LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
+        nanobind_build_library(nanobind-static) # -static is added via NB_STATIC for the module
+        link_libraries(nanobind-static) # for pythonfield.C and possibly others using nanobind functions
+        add_definitions(-D_USE_NANOBIND)
+        include_directories(${oofem_SOURCE_DIR}/extern/nanobind/include)
+    else()
+        if (PYBIND_DIR)
+            message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
+            include_directories (${PYBIND_DIR}) # need also to manually set it up since it can be anywhere
+            add_git_submodule(${PYBIND_DIR})
+        else()
+            add_git_submodule(extern/pybind11)
+        endif ()
+        # use python include paths and libs for all future targets (liboofem and oofem binary)
+        link_libraries(pybind11::embed)
+        pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp)
+    endif()
     if(USE_SHARED_LIB)
         if(EMSCRIPTEN)
             MESSAGE(FATAL_ERROR "USE_SHARED_LIB=1 is incompatible with Emscripten (some unresolved symbols at runtime).")
@@ -668,11 +697,10 @@ if(USE_PYBIND_BINDINGS)
         set_target_properties(oofempy PROPERTIES BUILD_RPATH ".") # look for liboofem.so in the build directory (before installation, for tests)
     else()
         target_sources(oofempy PRIVATE ${LIBS} ${EXT_LIBS})
-        add_dependencies(oofempy version)
     endif()
     # set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
-    if(PY_BUILD_CMAKE_IMPORT_NAME)
-        install(TARGETS oofempy DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+    if(SKBUILD_PROJECT_NAME)
+        install(TARGETS oofempy DESTINATION ${SKBUILD_PROJECT_NAME} COMPONENT python_module)
     endif()
     # Make sure pytest is found or produce a fatal error
     if(NOT PYTEST_FOUND)
@@ -684,15 +712,23 @@ if(USE_PYBIND_BINDINGS)
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
     endif()
-    add_definitions(-D_PYBIND_BINDINGS)
+endif()
+
+if(USE_PYTHON_EXTENSION)
+    find_package(Python COMPONENTS Interpreter Development)
+    add_definitions(-D_PYTHON_EXTENSION)
+    link_libraries(Python::Python)
 endif()
 
 #######################################################################
 ######################## Configuration ################################
 #######################################################################
+
 site_name (HOST_NAME)
-set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
-set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
+list(JOIN MODULE_LIST " " MODULE_LIST_SPACES) # space-saparated so that it can be passed with -D
+# OOFEMCFG_C_COMPILE_DEFINITIONS is used with oofemcfg.C bu in src/oofemlib (visible only in the same dir)
+set(OOFEMCFG_C_COMPILE_DEFINITIONS "__OOFEM_VERSION=\"${OOFEM_VERSION}\";__OOFEM_MAJOR_VERSION=\"${OOFEM_VERSION_MAJOR}\";__OOFEM_MINOR_VERSION=\"${OOFEM_VERSION_MINOR}\";__OOFEM_GIT_HASH=\"${OOFEM_GIT_HASH}\";__OOFEM_GIT_REPOURL=\"${OOFEM_GIT_REPOURL}\";__OOFEM_GIT_BRANCH=\"${OOFEM_GIT_BRANCH}\";__HOST_TYPE=\"${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}\";__HOST_NAME=\"${HOST_NAME}\";__OOFEM_COPYRIGHT=\"${OOFEM_COPYRIGHT}\";__MODULE_LIST=\"${MODULE_LIST_SPACES}\";")
+
 
 check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
@@ -700,15 +736,12 @@ check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
+    add_definitions(-D_USE_SHARED)
     # For consistant library on linux and windows platforms.
     #add_compiler_export_flags (LIBOOFEM_EXPORT_CFLAGS)
 else ()
     set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
 endif ()
-configure_file (
-  "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
-  "${oofem_BINARY_DIR}/oofemcfg.h"
-  )
 configure_file (
   "${oofem_SOURCE_DIR}/src/oofemenv.h.in"
   "${oofem_BINARY_DIR}/oofemenv.h"
@@ -748,10 +781,9 @@ if (USE_SHARED_LIB)
     target_sources(liboofem PRIVATE ${LIBS})
     target_link_libraries (liboofem PUBLIC ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
-    add_dependencies(liboofem version)
-    if(PY_BUILD_CMAKE_IMPORT_NAME)
+    if(SKBUILD_PROJECT_NAME)
         # if shared, install liboofem.so alongside with the python module
-        install(TARGETS liboofem DESTINATION ${PY_BUILD_CMAKE_IMPORT_NAME} COMPONENT python_module)
+        install(TARGETS liboofem DESTINATION ${SKBUILD_PROJECT_NAME} COMPONENT python_module)
     endif()
 
     if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
@@ -805,11 +837,9 @@ endif (USE_SHARED_LIB)
 if (USE_OOFEM_EXE)
     if (USE_SHARED_LIB) # Prefer dynamic lib if available.
         add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-        add_dependencies(oofem version)
         target_link_libraries (oofem PUBLIC liboofem)
     else ()
         add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
-        add_dependencies(oofem version)
         target_link_libraries (oofem PUBLIC ${EXT_LIBS})
     endif ()
     install (TARGETS oofem DESTINATION bin)
@@ -830,14 +860,12 @@ if (USE_OOFEG)
         target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
-    add_dependencies(oofeg version)
 endif ()
 
 
 if (BUILD_EXTRA_BENCHMARKS)
     find_package(benchmark REQUIRED)
     add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
-    add_dependencies(liboofem_benchmark version)
     set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_link_libraries (liboofem_benchmark liboofem benchmark)
 endif ()
@@ -845,7 +873,6 @@ endif ()
 if (BUILD_EXTRA_EXAMPLES)
     # Example of using liboofem with dynamic input record:
     add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
-    add_dependencies(beam2d_1 version)
     set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_link_libraries (beam2d_1 liboofem)
 endif ()
@@ -865,7 +892,8 @@ endif ()
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
-add_custom_command(TARGET cppcheck 
+add_custom_command(TARGET cppcheck
+    PRE_BUILD
     COMMAND cppcheck "--xml" "--template=gcc" "--enable=all" 
     "-I${oofem_BINARY_DIR}/"
     "-I${oofem_SOURCE_DIR}/src/oofemlib/"

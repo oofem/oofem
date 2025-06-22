@@ -12,6 +12,7 @@ debug/
 # ignore any files under build directories
 build*/
 _build*/
+build-*/
 
 # test results
 *.out
@@ -46,6 +47,8 @@ doc/theorymanual/theorymanual.pdf
 
 
 *.idea
+.cache
+.wenv
 __pycache__
 *.pyc
 *.swp

@@ -42,6 +42,7 @@
 
 #include <initializer_list>
 #include <vector>
+#include <list>
 #include <iosfwd>
 
 namespace oofem {
@@ -83,6 +84,7 @@ template<std::size_t N> class FloatArrayF;
  */
 class OOFEM_EXPORT FloatArray
 {
+    void _resize_internal(size_t newsize);
 protected:
     /// Stored values.
     std::vector< double > values;
@@ -96,6 +98,9 @@ public:
     std::vector< double > :: const_iterator end() const { return this->values.end(); }
     //@}
 
+    static constexpr int Dim = 1;
+    typedef double Scalar;
+
     /// Constructor for sized array. Data is zeroed.
     FloatArray(int n = 0) : values(n) { }
     /// Disallow double parameter, which can otherwise give unexpected results.
@@ -106,6 +111,10 @@ public:
     FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline FloatArray(std :: initializer_list< double >list) : values(list) { }
+    static FloatArray fromIniList(std::initializer_list<double> ini){ return FloatArray(ini); }
+    static FloatArray fromVector(const std::vector<double>& v){ FloatArray ret; ret.values=v; return ret; }
+    static FloatArray fromList(const std::list<double>& l){ FloatArray ret((int)l.size()); std::copy(l.begin(),l.end(),ret.begin()); return ret; }
+    static FloatArray fromConcatenated(std::initializer_list<FloatArray> ini);
     /// Wrapper to direct assignment from iterator pairs
     template< class InputIt >
     FloatArray( InputIt first, InputIt last ) : values(first, last) { }
@@ -125,11 +134,8 @@ public:
     template< std::size_t N >
     inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
 
-    /// Add one element
-    void push_back(double iVal) { values.push_back(iVal); }
-
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -206,11 +212,6 @@ public:
      */
     void checkSizeTowards(const IntArray &loc);
     /**
-     * Allocates enough size to fit s, and clears the array.
-     * @param s New reserved size.
-     */
-    void reserve(int s);
-    /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Old values are copied over and new space is zeroed.
@@ -228,12 +229,6 @@ public:
      * Same effect as resizing to zero, but has a clearer meaning and intent when used.
      */
     void clear() { this->values.clear(); }
-    /**
-     * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
-     * resize() function instead. Array is zeroed.
-     * @param s New size.
-     */
-    void hardResize(int s);
     /**
      * Returns nonzero if all coefficients of the receiver are 0, else returns zero.
      */
@@ -271,16 +266,6 @@ public:
     virtual void pY() const;
     /// Zeroes all coefficients of receiver.
     void zero();
-    /**
-     * Appends array to reciever.
-     * @param a Values to be appended.
-     */
-    void append(const FloatArray &a);
-    /**
-     * Appends value to reciever.
-     * @param a Value to be appended.
-     */
-    void append(double a);
     /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.
@@ -456,13 +441,17 @@ public:
      * will have this norm equal to 1.0.
      * @return modified receiver
      */
-    double normalize();
+    double normalize_giveNorm();
+    /**
+     * Normalizes receiver. Euclidean norm is used, after operation receiver
+     * will have this norm equal to 1.0.
+     */
+    void normalize();
     /**
      * Computes the norm (or length) of the vector.
      * @return The Euclidean norm of the vector.
      */
     double computeNorm() const;
-
     /**
      * Computes the square of the norm.
      * @return Squared norm.
@@ -543,12 +532,6 @@ public:
     /// Assignment of scalar to all components of receiver
     FloatArray &operator = ( const double & );
     //@}
-
-#ifdef _BOOSTPYTHON_BINDINGS
-    void __setitem__(int i, double val) { this->values[i] = val; }
-    double __getitem__(int i) { return this->values[i]; }
-    void beCopyOf(const FloatArray &src) { this->operator = ( src ); }
-#endif
 };
 
 const FloatArray ZeroVector = {0.0,0.0,0.0};
@@ -573,6 +556,19 @@ OOFEM_EXPORT bool isfinite(const FloatArray &x);
 OOFEM_EXPORT bool iszero(const FloatArray &x);
 OOFEM_EXPORT double sum(const FloatArray & x);
 OOFEM_EXPORT double product(const FloatArray & x);
+
+
+inline static FloatArray Vec1(const double& a){ return FloatArray::fromIniList({a}); }
+inline static FloatArray Vec2(const double& a, const double& b){ return FloatArray::fromIniList({a,b}); }
+inline static FloatArray Vec3(const double& a, const double& b, const double& c){ return FloatArray::fromIniList({a,b,c}); }
+inline static FloatArray Vec4(const double& a, const double& b, const double& c, const double& d){ return FloatArray::fromIniList({a,b,c,d}); }
+inline static FloatArray Vec5(const double& a, const double& b, const double& c, const double& d, const double& e){ return FloatArray::fromIniList({a,b,c,d,e}); }
+inline static FloatArray Vec6(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f){ return FloatArray::fromIniList({a,b,c,d,e,f}); }
+inline static FloatArray Vec7(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g){ return FloatArray::fromIniList({a,b,c,d,e,f,g}); }
+inline static FloatArray Vec8(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g, const double& h){ return FloatArray::fromIniList({a,b,c,d,e,f,g,h}); }
+inline static FloatArray Vec9(const double& a, const double& b, const double& c, const double& d, const double& e, const double& f, const double& g, const double& h, const double& i){ return FloatArray::fromIniList({a,b,c,d,e,f,g,h,i}); }
+inline static FloatArray VecX(std::initializer_list<double> ini){ return FloatArray::fromIniList(ini); }
+
 //@}
 } // end namespace oofem
 #endif // floatarray_h

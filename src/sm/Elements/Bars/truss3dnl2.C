@@ -59,9 +59,9 @@ void
 Truss3dnl2 :: postInitialize()
 {
   Truss3d :: postInitialize();
-  // Initialize the length of the truss
-  X = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
-  X.append(this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 ));
+  FloatArray vc1 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 1 );
+  FloatArray vc2 = this-> giveCellGeometryWrapper()->giveVertexCoordinates( 2 );
+  X=FloatArray::fromConcatenated({vc1,vc2});
   L = this->computeLength();
 }
   
