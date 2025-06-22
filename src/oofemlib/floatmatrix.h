@@ -79,9 +79,18 @@ class DataStream;
  * @author Jim Brouzoulis 
  * @author many others (please add yourselves) 
  */
+
 class OOFEM_EXPORT FloatMatrix
+#ifdef _USE_EIGEN
+    : public MatrixXXd
+#endif
 {
-    void _resize_internal(int nr, int nc);
+#ifdef _USE_EIGEN
+    public:
+        OOFEM_EIGEN_DERIVED(FloatMatrix,MatrixXXd);
+        FloatMatrix(int r, int c): MatrixXXd(r,c) {}
+        /// Assignment operator, adjusts size of the receiver if necessary.
+#else
 protected:
     /// Number of rows.
     std::size_t nRows;
@@ -101,27 +110,10 @@ public:
     FloatMatrix(std::size_t  n, std::size_t m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
-    /**
-     * Creates float matrix from float vector. Vector may be stored row wise
-     * or column wise, depending on second parameter.
-     * @param vector Float vector from which matrix is constructed
-     * @param transpose If false (default) then a matrix of size (vector->giveSize(),1)
-     * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
-     * will be created.
-     */
-    static FloatMatrix fromArray(const FloatArray &vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
     /// Copy constructor.
     FloatMatrix(FloatMatrix && mat) noexcept : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
-    /// Initializer list constructor.
-    FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-    template<std::size_t M, std::size_t N>
-    FloatMatrix(const FloatMatrixF<N,M> &src) { assignFloatMatrixF(src); }
-    /// Assignment operator.
-    static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
@@ -135,12 +127,36 @@ public:
         values = std :: move(mat.values);
         return * this;
     }
-    /// Assignment operator, adjusts size of the receiver if necessary.
+    inline int rows() const { return (int)nRows; }
+    inline int cols() const { return (int)nColumns; }
+#endif
+
     template<std::size_t N, std::size_t M>
     void assignFloatMatrixF(const FloatMatrixF<N,M> &mat){
-        nRows=N; nColumns=M; values.resize(N*M);
+        resize(N,M); // FIXME: useless 0-write
         for(Index c=0; c<cols(); c++) for(Index r=0; r<rows(); r++) (*this)(r,c)=mat(r,c);
     }
+
+    void _resize_internal(int nr, int nc);
+    /// Initializer list constructor.
+    FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
+    /// Assignment operator.
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
+
+    static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
+    template<std::size_t M, std::size_t N>
+    FloatMatrix(const FloatMatrixF<N,M> &src) { assignFloatMatrixF(src); }
+
+    /**
+     * Creates float matrix from float vector. Vector may be stored row wise
+     * or column wise, depending on second parameter.
+     * @param vector Float vector from which matrix is constructed
+     * @param transpose If false (default) then a matrix of size (vector->giveSize(),1)
+     * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
+     * will be created.
+     */
+    static FloatMatrix fromArray(const FloatArray &vector, bool transpose = false);
+
     template<std::size_t N, std::size_t M>
     FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
         this->assignFloatMatrixF(mat);
@@ -157,12 +173,10 @@ public:
     /// Returns number of rows of receiver.
     //[[deprecated("use rows() instead")]]
     inline int giveNumberOfRows() const { return rows(); }
-    inline int rows() const { return (int)nRows; }
-
     /// Returns number of columns of receiver.
     //[[deprecated("use cols() instead")]]
     inline int giveNumberOfColumns() const { return cols(); }
-    inline int cols() const { return (int)nColumns; }
+
 
 
     /// Returns nonzero if receiver is square matrix.
@@ -193,7 +207,7 @@ public:
     {
         return (*this)(i-1,j-1);
     }
-
+#ifndef _USE_EIGEN
     /**
      * Coefficient access function. Returns l-value of coefficient at given
      * position of the receiver. Implements 0-based indexing.
@@ -219,6 +233,7 @@ public:
 #endif 
         return values [ j * nRows + i ];
     }
+#endif
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
      * have dimensions large enough to localize contribution.
@@ -504,14 +519,16 @@ public:
      * @param mode If set to 't' then the transpose of the rotation matrix is used instead.
      */
     void rotatedWith(const FloatMatrix &r, char mode = 'n');
-    /**
-     * Checks size of receiver towards requested bounds.
-     * If dimension mismatch, size is adjusted accordingly.
-     * Content is always zeroed.
-     * @param rows New number of rows.
-     * @param cols New number of columns.
-     */
-    void resize(Index rows, Index cols);
+    #ifndef _USE_EIGEN
+        /**
+        * Checks size of receiver towards requested bounds.
+        * If dimension mismatch, size is adjusted accordingly.
+        * Content is always zeroed.
+        * @param rows New number of rows.
+        * @param cols New number of columns.
+        */
+        void resize(Index rows, Index cols);
+    #endif
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
@@ -520,10 +537,7 @@ public:
     void resizeWithData(Index, Index);
 
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void clear() {
-        this->nRows = 0;
-        this->nColumns = 0;
-    }
+    void clear() { resize(0,0); }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
@@ -562,8 +576,13 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    inline const double *givePointer() const { return values.data(); }
-    inline double *givePointer() { return values.data(); }
+    #ifndef _USE_EIGEN
+        inline const double *data() const { return values.data(); }
+        inline double *data() { return values.data(); }
+    #endif
+
+    inline const double *givePointer() const { return data(); }
+    inline double *givePointer() { return data(); }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.

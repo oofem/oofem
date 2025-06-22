@@ -37,21 +37,20 @@
 
 #ifdef _USE_EIGEN
     #define EIGEN_INITIALIZE_MATRICES_BY_ZERO
-    // #include<Eigen/Core>
+    #include<Eigen/Core>
 #endif
 
 
 namespace oofem{
-    typedef int Index;
 
 
     #ifdef _USE_EIGEN
         #define OOFEM_EIGEN_DERIVED(MyKlass,EigenBase) \
-        MyKlass(void): EigenBase() {} \
-        /* This constructor allows you to construct MyKlass from Eigen expressions */ \
-        template<typename OtherDerived> MyKlass(const Eigen::MatrixBase<OtherDerived>& other): EigenBase(other) { } \
-        /* This method allows you to assign Eigen expressions to MyKlass */ \
-        template<typename OtherDerived> MyKlass& operator=(const Eigen::MatrixBase<OtherDerived>& other) { this->EigenBase::operator=(other); return *this; }
+            MyKlass(void): EigenBase() {} \
+            /* This constructor allows you to construct MyKlass from Eigen expressions */ \
+            template<typename OtherDerived> MyKlass(const Eigen::MatrixBase<OtherDerived>& other): EigenBase(other) { } \
+            /* This method allows you to assign Eigen expressions to MyKlass */ \
+            template<typename OtherDerived> MyKlass& operator=(const Eigen::MatrixBase<OtherDerived>& other) { this->EigenBase::operator=(other); return *this; }
 
         typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::ColMajor> MatrixXXd;
         typedef Eigen::Matrix<double,Eigen::Dynamic,1> VectorXd;
@@ -67,9 +66,13 @@ namespace oofem{
 
         class FloatArray;
         class FloatMatrix;
-        template<Index N> class FloatArrayF;
-        template<Index R, Index C> class FloatMatrixF;
+        template<std::size_t N> class FloatArrayF;
+        template<std::size_t R, std::size_t C> class FloatMatrixF;
         const double NaN(std::numeric_limits<double>::signaling_NaN());
+        // using Eigen::Index;
+        typedef int Index;
+    #else
+        typedef int Index;
     #endif
 
 

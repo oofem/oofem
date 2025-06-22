@@ -172,6 +172,7 @@ option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to p
 option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
+OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -317,17 +318,11 @@ endif ()
 ######################## External libraries ###########################
 #######################################################################
 
-#if (USE_BOOST) 
-#    set (CMAKE_LIBRARY_DIR ${BOOST_DIR})
-#    find_package (BOOST REQUIRED)
-#    list (APPEND EXT_LIBS ${BOOST_LIBRARIES})
-#    if (BOOST_DIR)
-#        include_directories ("${BOOST_DIR}")
-#        list (APPEND MODULE_LIST "BOOST")
-#     endif ()
-#
-#    add_definitions (-D__BOOST_MODULE)
-#endif ()
+if (USE_EIGEN)
+    add_definitions(-D_USE_EIGEN)
+    find_package(Eigen3 REQUIRED NO_MODULE)
+    link_libraries(Eigen3::Eigen)
+endif()
 
 if (USE_LAPACK)
     set (CMAKE_LIBRARY_DIR ${LAPACK_DIR})

@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <ostream>
 #include <iostream>
 #include <fstream>
@@ -56,28 +57,34 @@ namespace oofem {
 
 #define _LOOP_MATRIX(r,c) for(Index c=0; c<cols(); c++) for(Index r=0; r<rows(); r++)
 
-
-void FloatMatrix::_resize_internal(int nr, int nc){
-    this->nRows = nr; this->nColumns = nc;
-    std::size_t nsize = this->nRows * this->nColumns;
-    if ( nsize < this->values.size() ) {
-        this->values.resize(nsize);
-    } else if ( nsize > this->values.size() ) {
-        this->values.assign(nsize, 0.);
+#ifdef _USE_EIGEN
+    void FloatMatrix::_resize_internal(int nr, int nc){
+        MatrixXXd::resize(nr,nc);
     }
-};
+    //void FloatMatrix::resizeWithData(Index rows, Index columns){ conservativeResize(rows,columns); }
+#else
+    void FloatMatrix::_resize_internal(int nr, int nc){
+        this->nRows = nr; this->nColumns = nc;
+        std::size_t nsize = this->nRows * this->nColumns;
+        if ( nsize < this->values.size() ) {
+            this->values.resize(nsize);
+        } else if ( nsize > this->values.size() ) {
+            this->values.assign(nsize, 0.);
+        }
+    };
 
 
-void FloatMatrix :: resize(Index rows, Index columns)
-//
-// resizes receiver, all data will be lost
-//
-{
-    this->nRows = rows;
-    this->nColumns = columns;
-    this->values.assign(rows * columns, 0.);
-}
+    void FloatMatrix :: resize(Index rows, Index columns)
+    //
+    // resizes receiver, all data will be lost
+    //
+    {
+        this->nRows = rows;
+        this->nColumns = columns;
+        this->values.assign(rows * columns, 0.);
+    }
 
+#endif
 
 void FloatMatrix :: resizeWithData(Index rows, Index columns)
 //
@@ -91,9 +98,13 @@ void FloatMatrix :: resizeWithData(Index rows, Index columns)
 
     FloatMatrix old( std :: move(* this) );
 
-    this->nRows = rows;
-    this->nColumns = columns;
-    this->values.resize(rows * columns);
+    #ifdef _USE_EIGEN
+        resize(rows,columns); // FIXME: useless zeroing
+    #else
+        this->nRows = rows;
+        this->nColumns = columns;
+        this->values.resize(rows * columns);
+    #endif
 
     Index ii = min( rows, (Index)old.rows() );
     Index jj = min( columns, (Index)old.cols() );
@@ -1371,8 +1382,8 @@ double FloatMatrix :: giveTrace() const
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
 {
-    printf("FloatMatrix with dimensions : %d %d\n",
-           rows(), cols());
+    printf("FloatMatrix with dimensions : %ld %ld\n",
+           (long)rows(), (long)cols());
     if ( rows() <= 250 && cols() <= 250 ) {
         for (Index i = 1; i <= rows(); ++i ) {
             for (Index j = 1; j <= cols() && j <= 100; ++j ) {
@@ -1412,7 +1423,7 @@ void FloatMatrix :: printYourselfToFile(const std::string filename, const bool s
 void FloatMatrix :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
-    printf("%s (%d x %d): \n", name.c_str(), rows(), cols());
+    printf("%s (%ld x %ld): \n", name.c_str(), (long)rows(), (long)cols());
     if ( rows() <= 250 && cols() <= 250 ) {
         for (Index i = 1; i <= rows(); ++i ) {
             for (Index j = 1; j <= cols() && j <= 100; ++j ) {
@@ -1824,6 +1835,7 @@ FloatMatrix :: givePackSize(DataStream &buff) const
 
 bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {
+    using std::pow, std::sin, std::cos, std::atan2;
     /*
      * Solves the eigenvalues and eigenvectors of real
      * symmetric matrix by jacobi method.
