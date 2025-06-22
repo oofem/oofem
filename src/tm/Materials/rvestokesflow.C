@@ -207,7 +207,11 @@ RVEStokesFlow :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep
         FloatMatrix answer;
         status->giveRVE()->computeTangent(answer, tStep);
         answer.resizeWithData(3, 3);
+        #pragma GCC diagnostic push
+        // answer is possible uninitialized
+        #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         status->letTempTangentMatrixBe(answer);
+        #pragma GCC diagnostic pop
         status->oldTangent = false;
         return answer;
     } else {
