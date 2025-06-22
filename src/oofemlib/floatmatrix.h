@@ -45,16 +45,6 @@
 #include <algorithm>
 #include <string>
 
-#ifdef _BOOSTPYTHON_BINDINGS
-namespace boost {
-namespace python {
-namespace api {
-class object;
-};
-};
-};
-#endif
-
 namespace oofem {
 class FloatArray;
 template<std::size_t N> class FloatArrayF;
@@ -90,6 +80,7 @@ class DataStream;
  */
 class OOFEM_EXPORT FloatMatrix
 {
+    void _resize_internal(int nr, int nc);
 protected:
     /// Number of rows.
     std::size_t nRows;
@@ -184,7 +175,7 @@ public:
     inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
 
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -544,13 +535,7 @@ public:
      * Note: New coefficients are initialized to zero, old are kept.
      */
     void resizeWithData(std::size_t, std::size_t);
-    /**
-     * Resizing that enforces reallocation of memory.
-     * Data is zeroed.
-     * @param r Number of rows.
-     * @param c Number of columns.
-     */
-    void hardResize(int r, int c);
+
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
     void clear() {
         this->nRows = 0;
@@ -619,14 +604,6 @@ public:
     int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
-
-
-#ifdef _BOOSTPYTHON_BINDINGS
-    void __setitem__(boost :: python :: api :: object t, double val);
-    double __getitem__(boost :: python :: api :: object t);
-    void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
-#endif
-
 
 }; // class FloatMatrix
 

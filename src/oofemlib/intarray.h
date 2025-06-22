@@ -336,7 +336,7 @@ public:
     void printYourselfToFile(const std::string filename, const bool showDimensions=true) const;
 
     /// Returns true if no element is NAN or infinite
-    bool isFinite() const;
+    bool isAllFinite() const;
 
     /**
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
@@ -362,11 +362,7 @@ public:
 
     friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
 
-#ifdef _BOOSTPYTHON_BINDINGS
-    void __setitem__(int i, int val) { this->at(i + 1) = val; }
-    int __getitem__(int i) { return this->at(i + 1); }
-    void beCopyOf(const IntArray &src) { this->operator = ( src ); }
-#endif
+    std::vector<int> minusOne() const { std::vector<int> ret(values.size()); for(size_t i=0; i<values.size(); i++) ret[i]=values[i]-1; return ret; }
 };
 
 

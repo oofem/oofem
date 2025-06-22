@@ -543,7 +543,7 @@ FEI3dWedgeQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatAr
     }
 
     answer.beVectorProductOf(a, b);
-    return answer.normalize();
+    return answer.normalize_giveNorm();
 }
 
 

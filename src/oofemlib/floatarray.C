@@ -51,12 +51,14 @@
 #include <fstream>
 #include <iomanip>
 
-#define FAST_RESIZE(newsize) \
+namespace oofem{
+void FloatArray::_resize_internal(size_t newsize){
     if ( (newsize) < this->size() ) { \
         this->values.resize((newsize)); \
     } else if ( (newsize) > this->size() ) { \
         this->values.assign((newsize), 0.); \
     }
+}};
 
 #ifdef __LAPACK_MODULE
 extern "C" {
@@ -69,7 +71,19 @@ extern "C" {
 
 namespace oofem {
 
-bool FloatArray :: isFinite() const
+
+FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
+    int len=0; for(const auto& a: ini) len+=a.size();
+    FloatArray ret(len);
+    int ix=0;
+    for(const auto& a: ini){
+        for(size_t i=0; i<a.size(); i++) ret[ix++]=a[i];
+    }
+    return ret;
+}
+
+
+bool FloatArray :: isAllFinite() const
 {
     for(double val : values) {
         if(!std::isfinite(val)) {
@@ -84,7 +98,7 @@ bool FloatArray :: isFinite() const
 void
 FloatArray :: beScaled(double s, const FloatArray &b)
 {
-    FAST_RESIZE(b.size());
+    _resize_internal(b.size());
 
     for ( std::size_t i = 0; i < this->size(); ++i ) {
         (*this) [ i ] = s * b [ i ];
@@ -203,7 +217,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
     if ( this->isEmpty() ) {
-        FAST_RESIZE(src.size());
+        _resize_internal(src.size());
         for ( std::size_t i = 0; i < this->size(); ++i ) {
             (*this) [ i ] = -src [ i ];
         }
@@ -243,7 +257,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    FAST_RESIZE(n);
+    _resize_internal(n);
 
     for ( std::size_t i = 0; i < n; i++ ) {
         (*this) [ i ] = max( a [ i ], b [ i ] );
@@ -270,7 +284,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    FAST_RESIZE(n);
+    _resize_internal(n);
     for ( std::size_t i = 0; i < n; i++ ) {
         (*this) [ i ] = min( a [ i ], b [ i ] );
     }
@@ -286,15 +300,14 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
 
 #endif
 #if 0
-    FAST_RESIZE(a.giveSize());
+    _resize_internal(a.giveSize());
     for ( int i = 0; i < this->giveSize(); ++i ) {
         (*this) [ i ] = a [ i ] - b [ i ];
     }
 #else
-    this->values.reserve(a.giveSize());
-    this->values.resize(0);
+    this->resize(a.giveSize());
     for ( std::size_t i = 0; i < a.size(); ++i ) {
-        this->values.push_back( a[i] - b[i] );
+        (*this)[i]=a[i] - b[i];
     }
 
 #endif
@@ -308,7 +321,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, std:
     }
 
 #endif
-    FAST_RESIZE(n);
+    _resize_internal(n);
     for ( std::size_t i = 0; i < n; ++i ) {
         (*this) [ i ] = a [ i ] - b [ i ];
     }
@@ -328,7 +341,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 #endif
 
     std::size_t n = indx.size();
-    FAST_RESIZE(n);
+    _resize_internal(n);
     for ( std::size_t i = 1; i <= n; i++ ) {
         this->at(i) = src.at( indx.at(i) );
     }
@@ -360,7 +373,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     }
 #  endif
 
-    FAST_RESIZE(3);
+    _resize_internal(3);
 
     this->at(1) = v1.at(2) * v2.at(3) - v1.at(3) * v2.at(2);
     this->at(2) = v1.at(3) * v2.at(1) - v1.at(1) * v2.at(3);
@@ -544,13 +557,6 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 }
 
 
-void FloatArray :: reserve(int s)
-{
-    this->values.reserve(s);
-    this->values.clear();
-}
-
-
 void FloatArray :: resizeWithValues(std::size_t n, std::size_t allocChunk)
 {
 #ifndef NDEBUG
@@ -575,12 +581,6 @@ void FloatArray :: resize(int n)
 }
 
 
-void FloatArray :: hardResize(int n)
-{
-    this->values.assign(n, 0.);
-    this->values.shrink_to_fit();
-}
-
 
 bool FloatArray :: containsOnlyZeroes() const
 {
@@ -600,17 +600,6 @@ void FloatArray :: zero()
 }
 
 
-void FloatArray :: append(const FloatArray &a)
-{
-    this->values.insert(this->end(), a.begin(), a.end());
-}
-
-
-void FloatArray :: append(double a)
-{
-    this->values.push_back(a);
-}
-
 
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
@@ -618,7 +607,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
     std::size_t nColumns = aMatrix.giveNumberOfColumns();
     std::size_t nRows = aMatrix.giveNumberOfRows();
 
-    FAST_RESIZE(nRows);
+    _resize_internal(nRows);
 
 #  ifndef NDEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
@@ -656,7 +645,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     }
 
 #  endif
-    FAST_RESIZE(nColumns);
+    _resize_internal(nColumns);
 
 #ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
@@ -763,14 +752,17 @@ void FloatArray :: times(double factor)
     }
 }
 
+void FloatArray :: normalize(){
+    (void) normalize_giveNorm();
+}
 
-double FloatArray :: normalize()
+
+double FloatArray :: normalize_giveNorm()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
         OOFEM_ERROR("cannot norm receiver, norm is too small");
     }
-
     this->times(1. / norm);
     return norm;
 }
@@ -943,7 +935,7 @@ double norm_square(const FloatArray &x)
 
 bool isfinite(const FloatArray &x)
 {
-    return x.isFinite();
+    return x.isAllFinite();
 }
 
 bool iszero(const FloatArray &x)
@@ -1103,7 +1095,7 @@ void FloatArray :: beRowOf(const FloatMatrix &mat, std::size_t row)
     }
 #  endif    
     
-    FAST_RESIZE(nColumns);
+    _resize_internal(nColumns);
     for ( std::size_t i = 1; i <= nColumns; i++ ) {
         this->at(i) = mat.at(row,i);
     }

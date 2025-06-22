@@ -204,7 +204,7 @@ void IntArray :: printYourself(const std::string name) const
     printf("\n");
 }
 
-bool IntArray :: isFinite() const
+bool IntArray :: isAllFinite() const
 {
     for ( int val : values ) {
         if( !std::isfinite((double)val) ) {

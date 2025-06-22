@@ -212,8 +212,8 @@ namespace oofem {
         // returns unknown quantity like displacement, velocity of equation eq
         // This function translates this request to numerical method language
         {
-            int eq = dof->__giveEquationNumber();
         #ifdef DEBUG
+            int eq = dof->__giveEquationNumber();
             if ( eq == 0 ) {
                 OOFEM_ERROR("invalid equation number");
             }

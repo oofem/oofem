@@ -420,7 +420,7 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
     b.beDifferenceOf( cellgeo.giveVertexCoordinates( snodes.at(3) ), cellgeo.giveVertexCoordinates( snodes.at(1) ) );
     answer.beVectorProductOf(a, b);
 
-    return answer.normalize();
+    return answer.normalize_giveNorm();
 }
 
 double

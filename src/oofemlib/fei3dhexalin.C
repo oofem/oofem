@@ -554,7 +554,7 @@ FEI3dHexaLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
     }
 
     answer.beVectorProductOf(a, b);
-    return answer.normalize() * 0.0625;
+    return answer.normalize_giveNorm() * 0.0625;
 }
 
 double
