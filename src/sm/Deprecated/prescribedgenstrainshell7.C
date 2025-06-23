@@ -301,6 +301,6 @@ void PrescribedGenStrainShell7 :: giveInputRecord(DynamicInputRecord &input)
     BoundaryCondition :: giveInputRecord(input);
     input.setField(this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     input.setField(this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
-    input.setField(this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords);
+    input.setField(FloatArray(this->centerCoord), _IFT_PrescribedGenStrainShell7_centercoords);
 }
 } // end namespace oofem
