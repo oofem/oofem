@@ -458,12 +458,12 @@ double FloatArray :: dotProduct(const FloatArray &x, Index size) const
 
 double FloatArray :: distance(const FloatArray &x) const
 {
-    return sqrt( this->distance_square(x) );
+    return std::sqrt( this->distance_square(x) );
 }
 
 double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
-    return sqrt( distance_square(iP1, iP2, oXi, oXiUnbounded) );
+    return std::sqrt( distance_square(iP1, iP2, oXi, oXiUnbounded) );
 }
 
 double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
@@ -472,7 +472,7 @@ double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP
 
     if ( l2 > 0.0 ) {
 
-        const double s = (dot(*this, iP2) - dot(*this, iP1) ) - ( dot(iP1, iP2) - dot(iP1, iP1) );
+        const double s = (oofem::dot(*this, iP2) - oofem::dot(*this, iP1) ) - ( oofem::dot(iP1, iP2) - oofem::dot(iP1, iP1) );
 
         if ( s < 0.0 ) {
             // X is closest to P1
@@ -670,7 +670,7 @@ void FloatArray :: negated()
 void FloatArray :: printYourself() const
 // Prints the receiver on screen.
 {
-    printf("FloatArray of size : %d \n", this->giveSize());
+    printf("FloatArray of size : %d \n", (int)this->giveSize());
     for ( double x: *this ) {
         printf( "%10.3e  ", x );
     }
@@ -682,7 +682,7 @@ void FloatArray :: printYourself() const
 void FloatArray :: printYourself(const std::string &name) const
 // Prints the receiver on screen.
 {
-    printf("%s (%d): \n", name.c_str(), this->giveSize());
+    printf("%s (%d): \n", name.c_str(), (int)this->giveSize());
     for ( double x: *this ) {
         printf( "%10.3e  ", x );
     }
@@ -765,7 +765,7 @@ double FloatArray :: normalize_giveNorm()
 
 double FloatArray :: computeNorm() const
 {
-    return sqrt( this->computeSquaredNorm() );
+    return std::sqrt( this->computeSquaredNorm() );
 }
 
 
@@ -1067,7 +1067,7 @@ std :: ostream &operator << ( std :: ostream & out, const FloatArray & x )
 void FloatArray :: power(const double exponent)
 {
     for ( double &x : *this ) {
-        x = pow(x, exponent);
+        x = std::pow(x, exponent);
     }
 }
 

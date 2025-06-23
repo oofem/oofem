@@ -138,7 +138,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     // export internal variables
                     for ( auto vartype : vartypes ) {
                         elem->giveIPValue(intvar, gp, ( InternalStateType )vartype, tStep);
-                        fprintf(stream, "%d ", intvar.giveSize());
+                        fprintf(stream, "%d ", (int)intvar.giveSize());
                         for ( auto &val : intvar ) {
                             fprintf( stream, "%.6e ", val );
                         }
