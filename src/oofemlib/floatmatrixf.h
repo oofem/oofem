@@ -51,6 +51,9 @@
 
 namespace oofem {
 
+
+#define _LOOP_FLOATMATRIX(M,r,c) for(Index c=0; c<M.cols(); c++) for(Index r=0; r<M.rows(); r++)
+
 /**
  * Implementation of matrix containing floating point numbers.
  * @author Mikael Öhman
@@ -460,9 +463,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator * ( double a, const FloatMatrixF<N,M> & x )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] * a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)*a;
     return out;
 }
 
@@ -476,9 +477,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator / ( const FloatMatrixF<N,M> & x, double a )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] / a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)/a;
     return out;
 }
 
@@ -486,9 +485,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator + ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] + y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)+y(r,c);
     return out;
 }
 
@@ -496,36 +493,28 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator - ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] - y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)-y(r,c);
     return out;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator += ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] += y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)+=y(r,c);
     return x;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator -= ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] -= y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)-=y(r,c);
     return x;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator *= ( FloatMatrixF<N,M> & x, double a )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] *= a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)*=a;
     return x;
 }
 
@@ -1016,9 +1005,7 @@ template<std::size_t N>
 double frobeniusNorm(const FloatMatrixF<N,N> &mat)
 {
     double n = 0.;
-    for ( std::size_t i = 0; i < N*N; ++i ) {
-        n += mat[i] * mat[i];
-    }
+    _LOOP_FLOATMATRIX(mat,r,c) n+=mat(r,c)*mat(r,c);
     return std::sqrt( n );
     //return std::sqrt( std::inner_product(mat.values.begin(), mat.values.end(), mat.values.begin(), 0.) );
 }
