@@ -61,7 +61,6 @@ namespace oofem {
     void FloatMatrix::_resize_internal(int nr, int nc){
         MatrixXXd::resize(nr,nc);
     }
-    //void FloatMatrix::resizeWithData(Index rows, Index columns){ conservativeResize(rows,columns); }
 #else
     void FloatMatrix::_resize_internal(int nr, int nc){
         this->nRows = nr; this->nColumns = nc;
@@ -96,11 +95,13 @@ void FloatMatrix :: resizeWithData(Index rows, Index columns)
         return;
     }
 
-    FloatMatrix old( std :: move(* this) );
+
 
     #ifdef _USE_EIGEN
+        FloatMatrix old(*this); // inefficient, but for testing okay
         resize(rows,columns); // FIXME: useless zeroing
     #else
+        FloatMatrix old( std :: move(* this) );
         this->nRows = rows;
         this->nColumns = columns;
         this->values.resize(rows * columns);
@@ -119,40 +120,21 @@ void FloatMatrix :: resizeWithData(Index rows, Index columns)
 
 
 
-
-
-FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
-{
-    _resize_internal( mat.size(), mat.begin()->size() );
+FloatMatrix FloatMatrix::fromIniList(std::initializer_list<std::initializer_list<double>> ini){
+    FloatMatrix ret;
+    ret._resize_internal( ( int ) ini.begin()->size(), ( int ) ini.size() );
     Index c=0;
-    for ( auto col : mat ) {
+    for (auto col : ini) {
 #if DEBUG
-        if ( this->nRows != col.size() ) {
-            OOFEM_ERROR("Initializer list has inconsistent column sizes.");
-        }
-#endif
-        for(size_t r=0; r<col.size(); r++) (*this)(r,c);
-        c++;
-    }
-}
-
-
-
-FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
-{
-    _resize_internal( ( int ) mat.begin()->size(), ( int ) mat.size() );
-    Index c=0;
-    for ( auto col : mat ) {
-#if DEBUG
-        if ( rows() != (Index) col.size() ) {
+        if ( ret.rows() != (Index) col.size() ) {
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
 #endif
-        for(size_t r=0; r<col.size(); r++) (*this)(r,c);
+        Index r=0;
+        for(const double& x: col) ret(r++,c)=x;
         c++;
     }
-
-    return * this;
+    return ret;
 }
 
 
@@ -162,11 +144,11 @@ FloatMatrix FloatMatrix :: fromCols ( std :: initializer_list< FloatArray >mat )
     Index c=0;
     for ( auto col : mat ) {
 #if DEBUG
-        if ( rows() != (Index) col.size() ) {
-                OOFEM_ERROR("Initializer list has inconsistent column sizes.");
+        if ( ret.rows() != (Index) col.size() ) {
+                OOFEM_ERROR("Columns have inconsistent column sizes.");
         }
 #endif
-        for(Index r=0; r<col.size(); r++) ret(r,c);
+        for(Index r=0; r<col.size(); r++) ret(r,c)=col(r);
         c++;
     }
 

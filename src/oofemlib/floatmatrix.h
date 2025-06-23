@@ -89,7 +89,6 @@ class OOFEM_EXPORT FloatMatrix
     public:
         OOFEM_EIGEN_DERIVED(FloatMatrix,MatrixXXd);
         FloatMatrix(int r, int c): MatrixXXd(r,c) {}
-        /// Assignment operator, adjusts size of the receiver if necessary.
 #else
 protected:
     /// Number of rows.
@@ -129,6 +128,34 @@ public:
     }
     inline int rows() const { return (int)nRows; }
     inline int cols() const { return (int)nColumns; }
+
+    /**
+     * Coefficient access function. Returns l-value of coefficient at given
+     * position of the receiver. Implements 0-based indexing.
+     * @param i Row position of coefficient.
+     * @param j Column position of coefficient.
+     */
+    inline double &operator()(std::size_t i, std::size_t j)
+    {
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
+        return values [ j * nRows + i ];
+    }
+    /**
+     * Coefficient access function. Implements 0-based indexing.
+     * @param i Row position of coefficient.
+     * @param j Column position of coefficient.
+     */
+    inline double operator()(std::size_t i, std::size_t j) const
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i + 1, j + 1);
+        #endif
+        return values [ j * nRows + i ];
+    }
+    inline const double *data() const { return values.data(); }
+    inline double *data() { return values.data(); }
 #endif
 
     template<std::size_t N, std::size_t M>
@@ -138,11 +165,9 @@ public:
     }
 
     void _resize_internal(int nr, int nc);
-    /// Initializer list constructor.
-    FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-
+    FloatMatrix(std :: initializer_list< std :: initializer_list< double > > ini){ (*this)=FloatMatrix::fromIniList(ini); }
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat){ (*this)=fromIniList(mat); return *this; }
+    static FloatMatrix fromIniList(std :: initializer_list< std :: initializer_list< double > >);
     static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
     template<std::size_t M, std::size_t N>
     FloatMatrix(const FloatMatrixF<N,M> &src) { assignFloatMatrixF(src); }
@@ -207,33 +232,6 @@ public:
     {
         return (*this)(i-1,j-1);
     }
-#ifndef _USE_EIGEN
-    /**
-     * Coefficient access function. Returns l-value of coefficient at given
-     * position of the receiver. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double &operator()(std::size_t i, std::size_t j)
-    {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif
-        return values [ j * nRows + i ];
-    }
-    /**
-     * Coefficient access function. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double operator()(std::size_t i, std::size_t j) const
-    {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif 
-        return values [ j * nRows + i ];
-    }
-#endif
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
      * have dimensions large enough to localize contribution.
@@ -576,11 +574,6 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    #ifndef _USE_EIGEN
-        inline const double *data() const { return values.data(); }
-        inline double *data() { return values.data(); }
-    #endif
-
     inline const double *givePointer() const { return data(); }
     inline double *givePointer() { return data(); }
 

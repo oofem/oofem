@@ -83,9 +83,20 @@ template<std::size_t N> class FloatArrayF;
  * @author Jim Brouzoulis
  * @author many others (please add yourselves)
  */
+
+
 class OOFEM_EXPORT FloatArray
+#ifdef _USE_EIGEN
+: public VectorXd
+#endif
 {
-    void _resize_internal(Index newsize);
+#ifdef _USE_EIGEN
+public:
+    OOFEM_EIGEN_DERIVED(FloatArray,VectorXd);
+    FloatArray(int sz): VectorXd(sz) {}
+    void resize(Index s);
+#else
+
 protected:
     /// Stored values.
     std::vector< double > values;
@@ -110,30 +121,75 @@ public:
     FloatArray(const FloatArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
     FloatArray(FloatArray &&src) noexcept : values(std::move(src.values)) { }
-    /// Initializer list constructor.
-    inline FloatArray(std :: initializer_list< double >list) : values(list) { }
-    static FloatArray fromIniList(std::initializer_list<double> ini){ return FloatArray(ini); }
-    static FloatArray fromVector(const std::vector<double>& v){ FloatArray ret; ret.values=v; return ret; }
-    static FloatArray fromList(const std::list<double>& l){ FloatArray ret((int)l.size()); std::copy(l.begin(),l.end(),ret.begin()); return ret; }
-    static FloatArray fromConcatenated(std::initializer_list<FloatArray> ini);
-    /// Wrapper to direct assignment from iterator pairs
-    template< class InputIt >
-    FloatArray( InputIt first, InputIt last ) : values(first, last) { }
-    /// Wrapper to direct assignment from iterator pairs
-    template< std::size_t N >
-    inline FloatArray( const FloatArrayF<N> &src ) : values(src.begin(), src.end()) { }
-    /// Destructor.
-    virtual ~FloatArray() {}
-
     /// Assignment operator
     FloatArray &operator = (const FloatArray &src) { values = src.values; return *this; }
     /// Move operator
     FloatArray &operator = (FloatArray &&src) noexcept { values = std::move(src.values); return *this; }
+
+
+    inline const double *data() const { return values.data(); }
+    inline double *data() { return values.data(); }
+    /**
+     * Coefficient access function. Returns value of coefficient at given
+     * position of the receiver. Provides 0-based indexing access.
+     * @param i Position of coefficient in array.
+     */
+    inline double &operator() (Index i) { return this->operator[](i); }
+    inline double &operator[] (Index i)
+    {
+        #ifndef NDEBUG
+            checkBounds(i+1);
+        #endif
+        return values [ i ];
+    }
+    /**
+     * Coefficient access function. Returns value of coefficient at given
+     * position of the receiver. Provides 0-based indexing access.
+     * @param i Position of coefficient in array.
+     */
+    inline const double &operator() (Index i) const { return this->operator[](i); }
+    inline const double &operator[] (Index i) const {
+        #ifndef NDEBUG
+            checkBounds(i+1);
+        #endif
+        return values [ i ];
+    }
+    /**
+     * Resizes receiver towards requested size. Array is zeroed.
+     * @param s New size.
+     */
+    void resize(Index s);
+    Index size() const { return this->values.size(); }
+#endif
+    void _resize_internal(Index newsize);
+    /// Initializer list constructor.
+    FloatArray(std :: initializer_list< double >list) { (*this)=fromIniList(list); }
+    static FloatArray fromVector(const std::vector<double>& v);
+    static FloatArray fromList(const std::list<double>& l);
+    static FloatArray fromConcatenated(std::initializer_list<FloatArray> ini);
+    static FloatArray fromIniList(std::initializer_list<double> ini);
+    template< std::size_t N >
+    inline FloatArray( const FloatArrayF<N> &src ) {
+        #ifdef _USE_EIGEN
+            VectorXd::resize(src.size());
+        #else
+            values.resize(src.size());
+        #endif
+        for(Index i=0; i<src.size(); i++) (*this)[i]=src[i];
+    }
+    /// Destructor.
+    virtual ~FloatArray() {}
+
+
     /// Assignment operator.
-    inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
+    inline FloatArray &operator = (std :: initializer_list< double >list) { (*this)=fromIniList(list); return *this; }
     /// Assign from fixed size array
     template< std::size_t N >
-    inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
+    inline FloatArray &operator = (const FloatArrayF<N> &src){
+        this->resize(src.size()); // FIXME: useless zeroing
+        for(Index i=0; i<src.size(); i++) (*this)[i]=src[i];
+        return *this;
+    }
 
     /// Returns true if no element is NAN or infinite
     bool isAllFinite() const;
@@ -164,35 +220,6 @@ public:
     }
 
     /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Provides 0-based indexing access.
-     * @param i Position of coefficient in array.
-     */
-    inline double &operator() (Index i) { return this->operator[](i); }
-    inline double &operator[] (Index i)
-    {
-#ifndef NDEBUG
-        if ( i >= size()) {
-            OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
-        }
-#endif
-        return values [ i ];
-    }
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Provides 0-based indexing access.
-     * @param i Position of coefficient in array.
-     */
-    inline const double &operator() (Index i) const { return this->operator[](i); } 
-    inline const double &operator[] (Index i) const {
-#ifndef NDEBUG
-        if ( i >= size() ) {
-            OOFEM_ERROR( "array error on index : %d >= %d", i, this->giveSize() );
-        }
-#endif
-        return values [ i ];
-    }
-    /**
      * Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension
      * mismatch found.
@@ -221,11 +248,6 @@ public:
      */
     void resizeWithValues(Index s, std::size_t allocChunk = 0);
     /**
-     * Resizes receiver towards requested size. Array is zeroed.
-     * @param s New size.
-     */
-    void resize(Index s);
-    /**
      * Clears receiver (zero size).
      * Same effect as resizing to zero, but has a clearer meaning and intent when used.
      */
@@ -236,8 +258,7 @@ public:
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
     //[[deprecated("use size() instead.")]]
-    Index giveSize() const { return (Index)this->values.size(); }
-    Index size() const { return this->values.size(); }
+    Index giveSize() const { return this->size(); }
     /// Returns true if receiver is not empty.
     bool isNotEmpty() const { return size()>0; }
     /// Returns true if receiver is empty.
@@ -482,8 +503,8 @@ public:
      * Gives the pointer to the raw data, breaking encapsulation.
      * @return Pointer to values of array
      */
-    inline const double *givePointer() const { return values.data(); }
-    inline double *givePointer() { return values.data(); }
+    inline const double *givePointer() const { return data(); }
+    inline double *givePointer() { return data(); }
     /**
      * Reciever will be a vector with 9 components formed from a 3x3 matrix.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21

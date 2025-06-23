@@ -43,6 +43,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <ostream>
 #include <memory>
 #include <numeric>
@@ -53,42 +54,94 @@
 
 
 namespace oofem {
+// enable this to get text trace of all resize operations (useful to compare eigen and non-eigen version if they diverge)
+// #define _DBG(tag) printYourself(tag)
+#define _DBG(tag)
 
-
-
-void FloatArray::_resize_internal(Index newsize){
-    if ( (newsize) < this->size() ) {
-        this->values.resize((newsize));
-    } else if ( (newsize) > this->size() ) {
-        this->values.assign((newsize), 0.);
+#ifdef _USE_EIGEN
+    void FloatArray::_resize_internal(Index newsize){
+        _DBG("ri/BEFORE");
+        if(newsize==size()) /* nothing */;
+        else if(newsize<size()) conservativeResize(newsize);
+        else (*this)=VectorXd::Zero(newsize);
+        _DBG("ri/AFTER");
     }
-}
-
-void FloatArray :: resizeWithValues(Index n, std::size_t allocChunk)
-{
-#ifndef NDEBUG
-    if ( allocChunk < 0 ) {
-        OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
+    void FloatArray::resizeWithValues(Index n, /* ignored*/ std::size_t allocChunk){
+        _DBG("rwv/BEFORE");
+        if(n==size()){ _DBG("rwv/AFTER"); return; }
+        Index size0=size();
+        VectorXd::conservativeResize(n);
+        (*this).tail(size()-size0).array()=0.;
+        _DBG("rwv/AFTER");
+    }
+    void FloatArray::resize(Index n){
+        _DBG("r/BEFORE");
+        Index size0=size();
+        VectorXd::conservativeResize(n);
+        (*this).tail(size()-size0).array()=0.;
+        _DBG("r/AFTER");
+    }
+#else
+    void FloatArray::_resize_internal(Index newsize){
+        _DBG("ri/BEFORE");
+        if ( (newsize) < this->size() ) {
+            this->values.resize((newsize));
+        } else if ( (newsize) > this->size() ) {
+            this->values.assign((newsize), 0.);
+        }
+        _DBG("ri/AFTER");
+    }
+    void FloatArray :: resize(int n)
+    {
+        _DBG("r/BEFORE");
+        this->values.resize(n);
+        ///@todo Change to this (faster)
+        //this->values.assign(n, 0.);
+        _DBG("r/AFTER");
     }
 
+    void FloatArray :: resizeWithValues(Index n, std::size_t allocChunk)
+    {
+    #ifndef NDEBUG
+        if ( allocChunk < 0 ) {
+            OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
+        }
+
+    #endif
+        _DBG("rwv/BEFORE");
+        if ( allocChunk > 0 && (Index)this->values.capacity() < n ) {
+            this->values.reserve(n + allocChunk);
+        }
+
+        this->values.resize(n);
+
+        _DBG("rwv/AFTER");
+    }
 #endif
 
-    if ( allocChunk > 0 && (Index)this->values.capacity() < n ) {
-        this->values.reserve(n + allocChunk);
-    }
+FloatArray FloatArray::fromList(const std::list<double>& lst){
+    FloatArray ret;
+    ret.resize(lst.size());
+    Index i=0;
+    for(const double& x: lst) ret(i++)=x;
+    return ret;
 
-    this->values.resize(n);
 }
 
-void FloatArray :: resize(int n)
-{
-    this->values.resize(n);
-    ///@todo Change to this (faster) 
-    //this->values.assign(n, 0.);
+FloatArray FloatArray::fromVector(const std::vector<double>& v){
+    FloatArray ret;
+    ret.resize(v.size());
+    for(size_t i=0; i<v.size(); i++) ret(i)=v[i];
+    return ret;
 }
 
-
-
+FloatArray FloatArray::fromIniList(std::initializer_list<double> ini) {
+    FloatArray ret;
+    ret.resize(ini.size());
+    Index i=0;
+    for(const double& x: ini) ret(i++)=x;
+    return ret;
+}
 
 FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
     int len=0; for(const auto& a: ini) len+=a.size();
