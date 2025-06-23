@@ -172,7 +172,7 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         const auto &xbar = this->giveNode(i)->giveCoordinates();
         const auto &M = this->giveInitialNodeDirector(i);
-        answer.add(N.at(i), ( xbar + zeta * M ));
+        answer.add(N.at(i), ( xbar + FloatArray(zeta * M)));
     }
 
     return 1;

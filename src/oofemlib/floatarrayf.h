@@ -56,7 +56,24 @@ namespace oofem {
  */
 template<std::size_t N>
 class OOFEM_EXPORT FloatArrayF
+#ifdef _USE_EIGEN
+    : public VectorNd<N>
+#endif
 {
+#ifdef _USE_EIGEN
+public:
+    OOFEM_EIGEN_DERIVED(FloatArrayF,VectorNd<N>);
+    Index size() const { return VectorNd<N>::size(); }
+    const double *data() const { return VectorNd<N>::data(); }
+    double *data() {  return VectorNd<N>::data(); }
+
+    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N>>
+    FloatArrayF(V... x) { this->array()=NaN; /* TODO */}
+
+    // since we re-declare operator[ {...} ] below, we need to include those as well for overload resolution
+    double &operator[] (Index i){ return VectorNd<N>::operator[](i); }
+    const double &operator[] (Index i) const { return VectorNd<N>::operator[](i); }
+#else
 protected:
     /// Stored values.
     std::array< double, N > values;
@@ -91,32 +108,6 @@ public:
     /// Assignment operator
     void operator = (const FloatArrayF<N> &src) { values = src.values; }
 
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Provides 1-based indexing access.
-     * @param i Position of coefficient in array.
-     */
-    inline double &at(std::size_t i)
-    {
-#ifndef NDEBUG
-        return values.at( i - 1 );
-#else
-        return values [ i - 1 ];
-#endif
-    }
-    /**
-     * Coefficient access function. Returns l-value of coefficient at given
-     * position of the receiver. Provides 1-based indexing access.
-     * @param i Position of coefficient in array.
-     */
-    inline double at(std::size_t i) const
-    {
-#ifndef NDEBUG
-        return values.at( i - 1 );
-#else
-        return values [ i - 1 ];
-#endif
-    }
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -125,25 +116,30 @@ public:
      */
     inline double &operator[] (std::size_t i)
     {
-#ifndef NDEBUG
+        #ifndef NDEBUG
         return values.at( i );
-#else
+        #else
         return values [ i ];
-#endif
+        #endif
     }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline const double &operator[] (std::size_t i) const { 
-#ifndef NDEBUG
+    inline const double &operator[] (std::size_t i) const {
+        #ifndef NDEBUG
         return values.at( i );
-#else
+        #else
         return values [ i ];
-#endif
+        #endif
     }
+    /// Returns the size of receiver.
+    int size() const { return N; }
+    const double *data() const { return values.data(); }
+    double *data() { return values.data(); }
 
+#endif
     /**
      * Multi-indexing to select sub-vectors,
      * @param c Position of coefficient in array.
@@ -153,10 +149,23 @@ public:
     {
         FloatArrayF<M> x;
         for ( std::size_t i = 0; i < M; ++i ) {
-            x[i] = values[ c[i] ];
+            x[i] = (*this)[ c[i] ];
         }
         return x;
     }
+
+    /**
+     * Coefficient access function. Returns value of coefficient at given
+     * position of the receiver. Provides 1-based indexing access.
+     * @param i Position of coefficient in array.
+     */
+    inline double &at(std::size_t i) { return (*this)[i-1]; }
+    /**
+     * Coefficient access function. Returns l-value of coefficient at given
+     * position of the receiver. Provides 1-based indexing access.
+     * @param i Position of coefficient in array.
+     */
+    inline double at(std::size_t i) const { return (*this)[i-1]; }
 
     /// Assign x into self.
     template<size_t M>
@@ -175,11 +184,8 @@ public:
             (*this)[c[i]] += x[i];
         }
     }
-    
     /// Returns the size of receiver.
-    int size() const { return N; }
-    /// Returns the size of receiver.
-    int giveSize() const { return N; }
+    int giveSize() const { return size(); }
     /**
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
@@ -196,8 +202,8 @@ public:
      * Gives the pointer to the raw data, breaking encapsulation.
      * @return Pointer to values of array
      */
-    const double *givePointer() const { return values.data(); }
-    double *givePointer() { return values.data(); }
+    const double *givePointer() const { return data(); }
+    double *givePointer() { return data(); }
 
     contextIOResultType storeYourself(DataStream &stream) const
     {

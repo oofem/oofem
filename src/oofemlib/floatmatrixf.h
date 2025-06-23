@@ -52,7 +52,7 @@
 namespace oofem {
 
 
-#define _LOOP_FLOATMATRIX(M,r,c) for(Index c=0; c<M.cols(); c++) for(Index r=0; r<M.rows(); r++)
+#define _LOOP_FLOATMATRIX(M,r,c) for(std::size_t c=0; c<M.cols(); c++) for(std::size_t r=0; r<M.rows(); r++)
 
 /**
  * Implementation of matrix containing floating point numbers.
@@ -60,11 +60,22 @@ namespace oofem {
  */
 template<std::size_t N, std::size_t M>
 class OOFEM_EXPORT FloatMatrixF
+#ifdef _USE_EIGEN
+: public MatrixRCd<N,M>
+#endif
 {
+#ifdef _USE_EIGEN
+public:
+    typedef MatrixRCd<N,M> MatrixRCd_NM;
+    OOFEM_EIGEN_DERIVED(FloatMatrixF,MatrixRCd_NM);
+    const double *data() const { return MatrixRCd_NM::data(); }
+    double *data() { return MatrixRCd_NM::data(); }
+    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == M*N>>
+    FloatMatrixF(V... x) { this->array()=NaN; /* TODO */}
+#else
 protected:
     /// Values of matrix stored column wise.
     std::array< double, N*M > values;
-
 public:
     /**
      * Constructor (values are specified column-wise)
@@ -93,14 +104,6 @@ public:
         #else
              for(Index c=0; c<mat.cols(); c++) for(Index r=0; r<mat.rows(); r++) (*this)(r,c)=mat(r,c);
         #endif
-    }
-    FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
-    {
-        for (std::size_t i = 0; i < N; ++i) {
-            for (std::size_t j = 0; j < M; ++j) {
-                (*this)(i,j) = x[j][i];
-            }
-        }
     }
 
     /// Assignment operator
@@ -132,33 +135,10 @@ public:
     std::size_t rows() const { return N; }
     /// Returns number of columns of receiver.
     std::size_t cols() const { return M; }
+    const double *data() const { return values.data(); }
+    double *data() { return values.data(); }
 
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    double at(std::size_t i, std::size_t j) const
-    {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double &at(std::size_t i, std::size_t j)
-    {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
+
 
     /**
      * Direct value access (column major). Implements 0-based indexing.
@@ -219,16 +199,45 @@ public:
         }
         return x;
     }
-    
+#endif
+    /**
+    * Coefficient access function. Returns value of coefficient at given
+    * position of the receiver. Implements 1-based indexing.
+    * @param i Row position of coefficient.
+    * @param j Column position of coefficient.
+    */
+    double at(std::size_t i, std::size_t j) const
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i, j);
+        #endif
+        return (*this)(i-1, j-1);
+    }
+    /**
+    * Coefficient access function. Returns value of coefficient at given
+    * position of the receiver. Implements 1-based indexing.
+    * @param i Row position of coefficient.
+    * @param j Column position of coefficient.
+    */
+    inline double &at(std::size_t i, std::size_t j)
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i, j);
+        #endif
+        return (*this)(i-1, j-1);
+    }
+
     static FloatMatrixF<N,M> fromColumns(FloatArrayF<N> const (&x)[M]) noexcept
     {
         FloatMatrixF<N,M> ret;
-        for (Index r = 0; r < N; ++r) {
-            for (Index c = 0; c < M; ++c) {
+        for ( std::size_t r = 0; r < N; ++r) {
+            for ( std::size_t c = 0; c < M; ++c) {
                 ret(r,c) = x[c][r];
             }
         }
+        return ret;
     }
+
 
     /// Assemble x into self.
     template<std::size_t R, std::size_t C>
@@ -405,12 +414,12 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    const double *givePointer() const { return values.data(); }
-    double *givePointer() { return values.data(); }
+    const double *givePointer() const { return data(); }
+    double *givePointer() { return data(); }
 
     contextIOResultType storeYourself(DataStream &stream) const
     {
-        if ( !stream.write(values.data(), N*M) ) {
+        if ( !stream.write(data(), N*M) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -418,7 +427,7 @@ public:
 
     contextIOResultType restoreYourself(DataStream &stream)
     {
-        if ( !stream.read(values.data(), N*M) ) {
+        if ( !stream.read(data(), N*M) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -855,9 +864,7 @@ template<std::size_t N, std::size_t M>
 FloatArrayF<N*M> flatten(const FloatMatrixF<N,M> &m)
 {
     FloatArrayF<N*M> out;
-    for (std::size_t i = 0; i < N*M; ++i) {
-        out[i] = m[i];
-    }
+    for(std::size_t c=0; c<m.cols(); c++) for(std::size_t r=0; r<m.rows(); r++) out[c*m.rows()+r]=m(r,c);
     return out;
 }
 
