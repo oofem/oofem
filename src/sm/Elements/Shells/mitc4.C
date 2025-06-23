@@ -880,7 +880,7 @@ MITC4Shell::givedNdx(const FloatArrayF< 3 > &coords)
     auto dn = interp_lin.evaldNdxi(coords [ { 0, 1 } ]);
     auto J = this->giveJacobian(coords);
     auto invJ = inv(J);
-    auto invJ2 = invJ({ 0, 1 }, { 0, 1 });
+    FloatMatrixF<2,2> invJ2 = invJ({ 0, 1 }, { 0, 1 });
     auto dndx = dot(invJ2, dn);
 
     auto hkx = dndx.row< 0 >();

@@ -217,6 +217,16 @@ public:
         return x;
     }
     
+    static FloatMatrixF<N,M> fromColumns(FloatArrayF<N> const (&x)[M]) noexcept
+    {
+        FloatMatrixF<N,M> ret;
+        for (Index r = 0; r < N; ++r) {
+            for (Index c = 0; c < M; ++c) {
+                ret(r,c) = x[c][r];
+            }
+        }
+    }
+
     /// Assemble x into self.
     template<std::size_t R, std::size_t C>
     inline void assemble(const FloatMatrixF<R,C> &x, int const (&r)[R], int const (&c)[C] )

@@ -1641,7 +1641,7 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArrayF<3> &lcoords, c
     const auto g3 = normalize(fac3*m);                              // director field
     const auto g1 = normalize(cross(g2, g3));
 
-    return FloatMatrixF<3,3>({g1, g2, g3});
+    return FloatMatrixF<3,3>::fromColumns({g1, g2, g3});
 }
 
 
