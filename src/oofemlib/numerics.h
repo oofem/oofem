@@ -40,10 +40,7 @@
     #include<Eigen/Core>
 #endif
 
-
 namespace oofem{
-
-
     #ifdef _USE_EIGEN
         #define OOFEM_EIGEN_DERIVED(MyKlass,EigenBase) \
             MyKlass(void): EigenBase() {} \
@@ -74,8 +71,6 @@ namespace oofem{
     #else
         typedef int Index;
     #endif
-
-
 } // end namespace oofem
 
 

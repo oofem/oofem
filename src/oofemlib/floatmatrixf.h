@@ -80,7 +80,7 @@ public:
         assert(ini.size()==rows()*cols());
         int i=0;
         for(const double& x: ini){
-            (*this)(i/rows(),i%rows())=x;
+            (*this)(i%rows(),i/rows())=x;
             i++;
         }
     }
