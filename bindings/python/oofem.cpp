@@ -847,13 +847,23 @@ PYBIND11_MODULE(oofempy, m) {
         // enable conversion to numpy representation
         .def("asNumpyArray", [](const oofem::FloatArray &s) { return floatarray2numpy(s); })
         // expose FloatArray operators
-        .def(py::self + py::self)
-        .def(py::self - py::self)
-        .def(py::self * float())
-        .def(float() * py::self)
-        .def(py::self += py::self)
-        .def(py::self -= py::self)
-        .def(py::self *= float())
+        #ifdef _USE_EIGEN
+            .def("__add__",[](const FloatArray& a, const FloatArray& b)->FloatArray{ return a+b; },py::is_operator())
+            .def("__sub__",[](const FloatArray& a, const FloatArray& b)->FloatArray{ return a-b; },py::is_operator())
+            .def("__mul__",[](const FloatArray& a, const double& b)->FloatArray{ return a*b; },py::is_operator())
+            .def("__rmul__",[](const FloatArray& a, const double& b)->FloatArray{ return a*b; },py::is_operator())
+            .def("__iadd__",[](FloatArray& a, const FloatArray& b)->FloatArray{ a+=b; return a; },py::is_operator())
+            .def("__isub__",[](FloatArray& a, const FloatArray& b)->FloatArray{ a=(a-b).eval(); return a; },py::is_operator())
+            .def("__imul__",[](FloatArray& a, const double& b)->FloatArray{ a.array()*=b; return a; },py::is_operator())
+        #else
+            .def(py::self + py::self)
+            .def(py::self - py::self)
+            .def(py::self * float())
+            .def(float() * py::self)
+            .def(py::self += py::self)
+            .def(py::self -= py::self)
+            .def(py::self *= float())
+        #endif
         ;
      py::implicitly_convertible<py::sequence, oofem::FloatArray>();
 
@@ -907,7 +917,13 @@ PYBIND11_MODULE(oofempy, m) {
                 a.append("}>");
                 return a;
             })
-        .def("resize", &oofem::FloatMatrix::resize)
+        .def("resize",
+            #ifdef _USE_EIGEN
+                [](oofem::FloatMatrix& m, size_t r, size_t c){ m.resize(r,c); }
+            #else
+                &oofem::FloatMatrix::resize
+            #endif
+        )
         .def("isSquare", &oofem::FloatMatrix::isSquare)
         .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
         .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &, const IntArray&)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
@@ -935,12 +951,21 @@ PYBIND11_MODULE(oofempy, m) {
         // enable conversion to numpy representation
         .def("asNumpyArray", [](oofem::FloatMatrix &s) { return floatmatrix2numpy(s,/*reference*/true); })
         // expose FloatArray operators
-        .def(py::self + py::self)
-        .def(py::self - py::self)
-        .def(py::self * py::self)
-        .def(py::self * FloatArray())
-        .def(py::self += py::self)
-        .def(py::self -= py::self)
+        #ifdef _USE_EIGEN
+            .def("__add__",[](const FloatMatrix& a, const FloatMatrix& b)->FloatMatrix{ return a+b; },py::is_operator())
+            .def("__sub__",[](const FloatMatrix& a, const FloatMatrix& b)->FloatMatrix{ return a-b; },py::is_operator())
+            .def("__mul__",[](const FloatMatrix& a, const FloatMatrix& b)->FloatMatrix{ return a*b; },py::is_operator())
+            .def("__mul__",[](const FloatMatrix& a, const FloatArray& b)->FloatArray{ return a*b; },py::is_operator())
+            .def("__iadd__",[](FloatMatrix& a, const FloatMatrix& b)->FloatMatrix{ a+=b; return a; },py::is_operator())
+            .def("__isub__",[](FloatMatrix& a, const FloatMatrix& b)->FloatMatrix{ a-=b; return a; },py::is_operator())
+        #else
+            .def(py::self + py::self)
+            .def(py::self - py::self)
+            .def(py::self * py::self)
+            .def(py::self * FloatArray())
+            .def(py::self += py::self)
+            .def(py::self -= py::self)
+        #endif
         ;
 
     py::class_<oofem::IntArray>(m, "IntArray")
