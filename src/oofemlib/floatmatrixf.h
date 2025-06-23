@@ -70,8 +70,20 @@ public:
     OOFEM_EIGEN_DERIVED(FloatMatrixF,MatrixRCd_NM);
     const double *data() const { return MatrixRCd_NM::data(); }
     double *data() { return MatrixRCd_NM::data(); }
-    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == M*N>>
-    FloatMatrixF(V... x) { this->array()=NaN; /* TODO */}
+    template<
+        typename... Args,
+        class = typename std::enable_if_t<sizeof...(Args) == M*N>,
+        class = std::enable_if_t<(std::conjunction_v<std::is_same<double, Args>...>)>
+    >
+    FloatMatrixF(Args... args) {
+        std::initializer_list<double> ini{ args ... };
+        assert(ini.size()==rows()*cols());
+        int i=0;
+        for(const double& x: ini){
+            (*this)(i/rows(),i%rows())=x;
+            i++;
+        }
+    }
     // redefine because of signedness (move to Index in the future pehaps)
     std::size_t rows() const{ return MatrixRCd_NM::rows(); }
     std::size_t cols() const{ return MatrixRCd_NM::cols(); }

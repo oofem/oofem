@@ -67,8 +67,16 @@ public:
     const double *data() const { return VectorNd<N>::data(); }
     double *data() {  return VectorNd<N>::data(); }
 
-    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N>>
-    FloatArrayF(V... x) { this->array()=NaN; /* TODO */}
+    template<
+        typename... Args,
+        class = typename std::enable_if_t<sizeof...(Args) == N>,
+        class = std::enable_if_t<(std::conjunction_v<std::is_same<double, Args>...>)>
+    >
+    FloatArrayF(Args... args){
+        std::initializer_list<double> ini{ args ... };
+        int i=0; for(const double& x: ini){ (*this)[i++]=x; }
+    }
+
 
     // since we re-declare operator[ {...} ] below, we need to include those as well for overload resolution
     double &operator[] (Index i){ return VectorNd<N>::operator[](i); }
