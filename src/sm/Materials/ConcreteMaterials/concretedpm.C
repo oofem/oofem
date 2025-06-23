@@ -629,7 +629,7 @@ ConcreteDPM::initDamaged(double kappaD,
         status->setLe(helem);
     } else if ( status->giveDamage() == 0. ) {
         //auto [principalStrains, principalDir] = computePrincipalValDir(from_voigt_strain(strain)); // c++17
-        auto tmp = computePrincipalValDir(from_voigt_strain(strain) );
+        auto tmp = computePrincipalValDir(from_voigt_strain_6(strain) );
         auto principalStrains = tmp.first;
         auto principalDir = tmp.second;
         // find index of max positive principal strain
@@ -670,7 +670,7 @@ ConcreteDPM::computeDuctilityMeasureDamage(const FloatArrayF< 6 > &strain, Gauss
 
     double volStrain = tempPlasticStrain [ 0 ] + tempPlasticStrain [ 1 ] + tempPlasticStrain [ 2 ];
     //    auto principalStrain = computePrincipalValues(from_voigt_strain(strain));
-    auto principalStrain = computePrincipalValues(from_voigt_strain(tempPlasticStrain) );
+    auto principalStrain = computePrincipalValues(from_voigt_strain_6(tempPlasticStrain) );
 
     double negativeVolStrain = 0.;
     for ( int i = 0; i < 3; i++ ) {
@@ -795,7 +795,7 @@ ConcreteDPM::performRegularReturn(FloatArrayF< 6 > &effectiveStress, GaussPoint 
 
     //compute the principal directions of the stress
     //auto [help, stressPrincipalDir] = computePrincipalValDir(from_voigt_stress(effectiveStress)); // c++17
-    auto tmp = computePrincipalValDir(from_voigt_stress(effectiveStress) );
+    auto tmp = computePrincipalValDir(from_voigt_stress_6(effectiveStress) );
     auto stressPrincipalDir = tmp.second;
 
     //compute invariants from stress state
@@ -1667,7 +1667,7 @@ ConcreteDPM::computeDCosThetaDStress(const FloatArrayF< 6 > &stress) const
 
     //compute principal stresses and directions
     //auto [principalDeviatoricStress, principalDir] = computePrincipalValDir(from_voigt_stress(deviatoricStress)); // c++17
-    auto tmp = computePrincipalValDir(from_voigt_stress(deviatoricStress) );
+    auto tmp = computePrincipalValDir(from_voigt_stress_6(deviatoricStress) );
     auto principalDeviatoricStress = tmp.first;
     auto principalDir = tmp.second;
 

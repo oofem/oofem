@@ -701,9 +701,9 @@ FloatMatrixF<3,3>
 Shell7Base :: computeStressMatrix(FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep)
 {
     auto F = computeFAt(gp->giveNaturalCoordinates(), genEps, tStep);
-    auto vF = to_voigt_form(F);
+    auto vF = to_voigt_form_33(F);
     auto vP = static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(vF, gp, tStep);
-    return from_voigt_form(vP);
+    return from_voigt_form_9(vP);
 }
 
 

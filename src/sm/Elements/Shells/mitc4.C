@@ -751,12 +751,12 @@ MITC4Shell::giveCharacteristicTensor(CharTensor type, GaussPoint *gp, TimeStep *
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
         auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
-        return from_voigt_stress(stress);
+        return from_voigt_stress_6(stress);
     } else if ( type == GlobalStrainTensor ) {
         FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
-        return from_voigt_strain(strain);
+        return from_voigt_strain_6(strain);
     } else {
         throw std::runtime_error("unsupported tensor mode");
     }
@@ -899,11 +899,11 @@ MITC4Shell::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 {
     if ( type == IST_StrainTensor ) {
         auto globTensor = this->giveCharacteristicTensor(GlobalStrainTensor, gp, tStep);
-        answer = to_voigt_strain(globTensor);
+        answer = to_voigt_strain_33(globTensor);
         return 1;
     } else if ( type == IST_StressTensor ) {
         auto globTensor = this->giveCharacteristicTensor(GlobalForceTensor, gp, tStep);
-        answer = to_voigt_stress(globTensor);
+        answer = to_voigt_stress_33(globTensor);
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
         int gpnXY = ( gp->giveNumber() - 1 ) / 2;

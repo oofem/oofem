@@ -333,16 +333,16 @@ StructuralMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, Gauss
     // 2) Treat stress as second Piola-Kirchhoff stress and convert to first Piola-Kirchhoff stress.
     // 3) Set state variables F, P
 
-    auto F = from_voigt_form(vF);
+    auto F = from_voigt_form_9(vF);
     auto E = 0.5 * ( Tdot(F, F) - eye< 3 >() );
-    auto vE = to_voigt_strain(E);
+    auto vE = to_voigt_strain_33(E);
     auto vS = this->giveRealStressVector_3d(vE, gp, tStep);
 
     // Compute first PK stress from second PK stress
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    auto S = from_voigt_stress(vS);
+    auto S = from_voigt_stress_6(vS);
     auto P = dot(F, S);
-    auto vP = to_voigt_form(P);
+    auto vP = to_voigt_form_33(P);
     status->letTempPVectorBe(vP);
     status->letTempFVectorBe(vF);
 

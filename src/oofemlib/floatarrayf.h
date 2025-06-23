@@ -510,13 +510,13 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
 /// Convert stress to strain Voigt form
-inline FloatArrayF<6> to_voigt_strain(const FloatArrayF<6> &s)
+inline FloatArrayF<6> to_voigt_strain_6(const FloatArrayF<6> &s)
 {
     return {s[0], s[1], s[2], 0.5*s[3], 0.5*s[4], 0.5*s[5]};
 }
 
 /// Convert strain to stress Voigt form
-inline FloatArrayF<6> to_voigt_stress(const FloatArrayF<6> &e)
+inline FloatArrayF<6> to_voigt_stress_6(const FloatArrayF<6> &e)
 {
     return {e[0], e[1], e[2], 2*e[3], 2*e[4], 2*e[5]};
 }

@@ -409,9 +409,9 @@ AbaqusUserMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, Gauss
     FloatArrayF< 9 >abq_stress; // PK1 or cauchy
 
     // compute Green-Lagrange strain
-    auto F = from_voigt_form(vF);
+    auto F = from_voigt_form_9(vF);
     auto E = 0.5 * ( Tdot(F, F) - eye< 3 >() );
-    auto strain = to_voigt_strain(E);
+    auto strain = to_voigt_strain_33(E);
 
     auto strainIncrement = strain - FloatArrayF< 6 >( ms->giveStrainVector() );
     FloatArray state = ms->giveStateVector();
@@ -465,12 +465,12 @@ AbaqusUserMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, Gauss
 
     /* Array containing the deformation gradient at the beginning of the increment. See the discussion
      * regarding the availability of the deformation gradient for various element types. */
-    auto dfgrd0 = from_voigt_form(ms->giveFVector() );
+    auto dfgrd0 = from_voigt_form_9(ms->giveFVector() );
     /* Array containing the deformation gradient at the end of the increment. The components of this array
      * are set to zero if nonlinear geometric effects are not included in the step definition associated with
      * this increment. See the discussion regarding the availability of the deformation gradient for various
      * element types. */
-    auto dfgrd1 = from_voigt_form(vF);
+    auto dfgrd1 = from_voigt_form_9(vF);
 
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
@@ -534,11 +534,11 @@ AbaqusUserMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, Gauss
 
     if ( mStressInterpretation == 0 ) {
         auto stress = abq_stress [ abq2oo9 ];
-        auto P = from_voigt_form(stress);
-        auto vP = to_voigt_form(P);
+        auto P = from_voigt_form_9(stress);
+        auto vP = to_voigt_form_33(P);
 
         auto cauchyStress = dotT(P, F) * ( 1. / det(F) );
-        auto vCauchyStress = to_voigt_stress(cauchyStress);
+        auto vCauchyStress = to_voigt_stress_33(cauchyStress);
 
         ms->letTempStrainVectorBe(strain);
         ms->letTempStressVectorBe(vCauchyStress);
@@ -550,15 +550,15 @@ AbaqusUserMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, Gauss
         return vP;
     } else {
         auto vsigma = abq_stress [ abq2oo6 ];
-        auto sigma = from_voigt_stress(vsigma);
+        auto sigma = from_voigt_stress_6(vsigma);
 
         auto P = dot(F, sigma);
-        auto vP = to_voigt_form(P);
+        auto vP = to_voigt_form_33(P);
 
         // Convert from sigma to S
         auto F_inv = inv(F);
         auto S = dot(F_inv, P);
-        auto vS = to_voigt_stress(S);
+        auto vS = to_voigt_stress_33(S);
 
         // @todo Should convert from dsigmadE to dSdE here
         // L2=detF*matmul( matmul ( inv(op_a_V9(F,F), cm-op_a_V9(ident,Tau)-op_b_V9(Tau,ident) ), inv(op_a_V9(Ft,Ft)))

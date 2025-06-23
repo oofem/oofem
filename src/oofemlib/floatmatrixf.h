@@ -736,7 +736,7 @@ FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, std::size_t col)
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-inline FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
+inline FloatMatrixF<3,3> from_voigt_form_9(const FloatArrayF<9> &v)
 {
     return {
         v[0], v[8], v[7], 
@@ -749,7 +749,7 @@ inline FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-inline FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<9> to_voigt_form_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -768,7 +768,7 @@ inline FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-inline FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_stress_6(const FloatArrayF<6> &v)
 {
     return {
         v[0], v[5], v[4], 
@@ -781,7 +781,7 @@ inline FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-inline FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_stress_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -797,7 +797,7 @@ inline FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
  * Converts Voigt vector to matrix form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-inline FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_strain_6(const FloatArrayF<6> &v)
 {
     return {
         v[0], 0.5*v[5], 0.5*v[4],
@@ -810,7 +810,7 @@ inline FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in strain Voigt form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-inline FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_strain_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
