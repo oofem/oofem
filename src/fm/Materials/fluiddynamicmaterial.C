@@ -106,11 +106,11 @@ FluidDynamicMaterial :: computeTangents3D(MatResponseMode mode, GaussPoint *gp, 
 FluidDynamicMaterial::Tangents<3>
 FluidDynamicMaterial :: computeTangents2D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    auto t = this->computeTangents3D(mode, gp, tStep);
+    Tangents<6> t = this->computeTangents3D(mode, gp, tStep);
 
-    auto dsdd = t.dsdd({0, 1, 5}, {0, 1, 5});
-    auto dsdp = t.dsdp[{0, 1, 5}];
-    auto dedd = t.dedd[{0, 1, 5}];
+    FloatMatrixF<3,3> dsdd = t.dsdd({0, 1, 5}, {0, 1, 5});
+    FloatArrayF<3> dsdp = t.dsdp[{0, 1, 5}];
+    FloatArrayF<3> dedd = t.dedd[{0, 1, 5}];
     return {dsdd, dsdp, dedd, t.dedp};
 }
 
