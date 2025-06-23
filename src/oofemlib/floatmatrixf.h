@@ -72,6 +72,9 @@ public:
     double *data() { return MatrixRCd_NM::data(); }
     template<typename... V, class = typename std::enable_if_t<sizeof...(V) == M*N>>
     FloatMatrixF(V... x) { this->array()=NaN; /* TODO */}
+    // redefine because of signedness (move to Index in the future pehaps)
+    std::size_t rows() const{ return MatrixRCd_NM::rows(); }
+    std::size_t cols() const{ return MatrixRCd_NM::cols(); }
 #else
 protected:
     /// Values of matrix stored column wise.
@@ -92,13 +95,13 @@ public:
     /// FloatMatrix conversion constructor.
     FloatMatrixF(const FloatMatrix &mat)
     {
-#ifndef NDEBUG
-        if ( mat.rows() != N || mat.cols() != M ) {
-            throw std::out_of_range("Can't convert dynamic float matrix of size " + 
-                std::to_string(mat.rows()) + "x" + std::to_string(mat.cols()) + 
-                " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
-        }
-#endif
+        #ifndef NDEBUG
+            if ( mat.rows() != N || mat.cols() != M ) {
+                throw std::out_of_range("Can't convert dynamic float matrix of size " +
+                    std::to_string(mat.rows()) + "x" + std::to_string(mat.cols()) +
+                    " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
+            }
+        #endif
         #if 0
              std::copy_n(mat.begin(), N*M, values.begin());
         #else
@@ -165,9 +168,9 @@ public:
      */
     double &operator()(std::size_t i, std::size_t j)
     {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
         return values [ j * N + i ];
     }
     /**
@@ -177,9 +180,9 @@ public:
      */
     double operator()(std::size_t i, std::size_t j) const
     {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif 
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
         return values [ j * N + i ];
     }
 
@@ -1075,10 +1078,43 @@ inline double det(const FloatMatrixF<3,3> &mat)
            mat(1, 2) * mat(2, 1) * mat(0, 0) - mat(2, 2) * mat(0, 1) * mat(1, 0);
 }
 
+
+/// Computes the inverse
+inline FloatMatrixF<2,2> inv_22(const FloatMatrixF<2,2> &mat, double /*zeropiv*/)
+{
+    FloatMatrixF<2,2> out;
+    double d = det(mat);
+    out(0, 0) = mat(1, 1) / d;
+    out(1, 0) = -mat(1, 0) / d;
+    out(0, 1) = -mat(0, 1) / d;
+    out(1, 1) = mat(0, 0) / d;
+    return out;
+}
+
+/// Computes the inverse
+inline FloatMatrixF<3,3> inv_33(const FloatMatrixF<3,3> &mat, double /*zeropiv*/)
+{
+    FloatMatrixF<3,3> out;
+    double d = det(mat);
+    out(0, 0) = ( mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1) ) / d;
+    out(1, 0) = ( mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2) ) / d;
+    out(2, 0) = ( mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0) ) / d;
+    out(0, 1) = ( mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2) ) / d;
+    out(1, 1) = ( mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0) ) / d;
+    out(2, 1) = ( mat(0, 1) * mat(2, 0) - mat(0, 0) * mat(2, 1) ) / d;
+    out(0, 2) = ( mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1) ) / d;
+    out(1, 2) = ( mat(0, 2) * mat(1, 0) - mat(0, 0) * mat(1, 2) ) / d;
+    out(2, 2) = ( mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0) ) / d;
+    return out;
+}
+
+
 /// Computes the inverse
 template<std::size_t N>
 FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
 {
+    if constexpr (N==2) return inv_22(mat,zeropiv);
+    if constexpr (N==3) return inv_33(mat,zeropiv);
     // gaussian elimination - slow but safe
     auto tmp = mat;
     // initialize answer to be unity matrix;
@@ -1121,36 +1157,6 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
     return out;
 }
 
-/// Computes the inverse
-template<>
-inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat, double /*zeropiv*/)
-{
-    FloatMatrixF<2,2> out;
-    double d = det(mat);
-    out(0, 0) = mat(1, 1) / d;
-    out(1, 0) = -mat(1, 0) / d;
-    out(0, 1) = -mat(0, 1) / d;
-    out(1, 1) = mat(0, 0) / d;
-    return out;
-}
-
-/// Computes the inverse
-template<>
-inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat, double /*zeropiv*/)
-{
-    FloatMatrixF<3,3> out;
-    double d = det(mat);
-    out(0, 0) = ( mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1) ) / d;
-    out(1, 0) = ( mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2) ) / d;
-    out(2, 0) = ( mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0) ) / d;
-    out(0, 1) = ( mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2) ) / d;
-    out(1, 1) = ( mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0) ) / d;
-    out(2, 1) = ( mat(0, 1) * mat(2, 0) - mat(0, 0) * mat(2, 1) ) / d;
-    out(0, 2) = ( mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1) ) / d;
-    out(1, 2) = ( mat(0, 2) * mat(1, 0) - mat(0, 0) * mat(1, 2) ) / d;
-    out(2, 2) = ( mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0) ) / d;
-    return out;
-}
 
 /**
  * Computes (real) eigenvalues and eigenvectors of receiver (must be symmetric)

@@ -602,18 +602,20 @@ public:
 
 }; // class FloatMatrix
 
-//@name operators
-//@{
-/// Vector multiplication by scalar
-OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
-OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
-OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+#ifndef _USE_EIGEN
+    //@name operators
+    //@{
+    /// Vector multiplication by scalar
+    OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
+    OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
+    OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+    //@}
+#endif
 
-//@}
 
 } // end namespace oofem
 #endif // flotmtrx_h

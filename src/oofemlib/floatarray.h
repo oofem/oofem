@@ -557,17 +557,22 @@ public:
     //@}
 };
 
-///@name IML compatibility
-//@{
-/// Vector multiplication by scalar
-OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
-OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
-OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
-OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+#ifndef _USE_EIGEN
+    ///@name IML compatibility: operators
+    //@{
+    OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
+    OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+    //@}
+#endif
 
+
+///@name IML compatibility: functions
+//@{
 OOFEM_EXPORT double norm(const FloatArray &x);
 OOFEM_EXPORT double norm_square(const FloatArray &x);
 OOFEM_EXPORT double dot(const FloatArray &x, const FloatArray &y);
@@ -577,6 +582,7 @@ OOFEM_EXPORT bool isfinite(const FloatArray &x);
 OOFEM_EXPORT bool iszero(const FloatArray &x);
 OOFEM_EXPORT double sum(const FloatArray & x);
 OOFEM_EXPORT double product(const FloatArray & x);
+//@}
 
 
 inline static FloatArray Vec1(const double& a){ return FloatArray::fromIniList({a}); }
