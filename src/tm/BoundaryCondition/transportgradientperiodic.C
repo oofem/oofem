@@ -321,7 +321,7 @@ void TransportGradientPeriodic :: computeDofTransformation(ActiveDof *dof, Float
     const auto &coords = dof->giveDofManager()->giveCoordinates();
     const auto &masterCoords = master->giveCoordinates();
 
-    auto dx = coords - masterCoords;
+    FloatArray dx = coords - masterCoords;
 
     masterContribs.resize(dx.giveSize() + 1);
 

@@ -2520,9 +2520,9 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     this->computeLocalCoordinates(loc3, gs3);
 
     // Compute coordinates for the three mid nodes 
-    auto loc12 = 0.5 * (loc1 + loc2);
-    auto loc23 = 0.5 * (loc2 + loc3);
-    auto loc31 = 0.5 * (loc3 + loc1);
+    FloatArray loc12 = 0.5 * (loc1 + loc2);
+    FloatArray loc23 = 0.5 * (loc2 + loc3);
+    FloatArray loc31 = 0.5 * (loc3 + loc1);
     double a = loc1.at(1);
     double b = loc2.at(1);
     double c = loc3.at(1);
@@ -2571,9 +2571,9 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     this->computeLocalCoordinates(loc3, gs3);
 
     // Compute coordinates for the three mid nodes 
-    auto loc12 = 0.5 * (loc1 + loc2);
-    auto loc23 = 0.5 * (loc2 + loc3);
-    auto loc31 = 0.5 * (loc3 + loc1);
+    FloatArray loc12 = 0.5 * (loc1 + loc2);
+    FloatArray loc23 = 0.5 * (loc2 + loc3);
+    FloatArray loc31 = 0.5 * (loc3 + loc1);
     double a = loc1.at(1);
     double b = loc2.at(1);
     double c = loc3.at(1);

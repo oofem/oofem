@@ -424,7 +424,7 @@ ConcreteDPM::giveRealStressVector_3d(const FloatArrayF< 6 > &totalStrain, GaussP
     // check whether the second-order work is negative
     // (must be done !!!before!!! the update of strain and stress)
     if ( status->giveEpsLoc() < 0. ) {
-        auto strainIncrement = totalStrain - status->giveStrainVector();
+        FloatArray strainIncrement = totalStrain - status->giveStrainVector();
         auto stressIncrement = stress - FloatArrayF< 6 >(status->giveStressVector() );
         int n = strainIncrement.giveSize();
         double work = strainIncrement.dotProduct(stressIncrement, n);

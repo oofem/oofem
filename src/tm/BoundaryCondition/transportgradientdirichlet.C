@@ -127,7 +127,7 @@ double TransportGradientDirichlet :: give(Dof *dof, ValueModeType mode, double t
     }
 
     // Reminder: u_i = g_i . (x_i - xc_i + xi_i)
-    auto dx = coords - this->mCenterCoord;
+    FloatArray dx = coords - this->mCenterCoord;
     // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
     if ( !xis.empty() ) {
         dx.add(xis[dof->giveDofManager()->giveNumber()]);
@@ -591,7 +591,7 @@ void TransportGradientDirichlet :: computeXi()
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
                 int enode = bNodes.at(i);
                 Node *n = e->giveNode(enode);
-                auto x = n->giveCoordinates() + this->xis[n->giveNumber()];
+                FloatArray x = n->giveCoordinates() + this->xis[n->giveNumber()];
                 cvec.at(i, 1) = x.at(1);
                 cvec.at(i, 2) = x.at(2);
                 cvec.at(i, 3) = x.at(3);

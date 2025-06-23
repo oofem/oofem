@@ -62,6 +62,7 @@ std::array< std::array< int, 3 >, 3 >StructuralMaterial::svIndex = {{
 }};
 
 
+
 StructuralMaterial::StructuralMaterial(int n, Domain *d) : Material(n, d) { }
 
 
@@ -716,7 +717,7 @@ StructuralMaterial::givePlaneStressStiffnessMatrix_dPdF(MatResponseMode mode,
 {
     auto m3d = this->give3dMaterialStiffnessMatrix_dPdF(mode, gp, tStep);
     auto c3d = inv(m3d);
-    return inv(c3d({ 0, 1, 5, 8 }, { 0, 1, 5, 8 }) );
+    return inv( FloatMatrixF<4,4>(c3d({ 0, 1, 5, 8 }, { 0, 1, 5, 8 })));
 }
 
 
@@ -1033,7 +1034,7 @@ StructuralMaterial::givePlaneStressStiffMtrx(MatResponseMode mode,
 {
     auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     auto c3d = inv(m3d);
-    return inv(c3d({ 0, 1, 5 }, { 0, 1, 5 }) );
+    return inv(FloatMatrixF<3,3>(c3d({ 0, 1, 5 }, { 0, 1, 5 })));
 }
 
 FloatMatrixF< 4, 4 >
@@ -1065,7 +1066,7 @@ StructuralMaterial::give2dBeamLayerStiffMtrx(MatResponseMode mode,
 {
     auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     auto c3d = inv(m3d);
-    return inv(c3d({ 0, 4 }, { 0, 4 }) );
+    return inv(FloatMatrixF<2,2>(c3d({ 0, 4 }, { 0, 4 })));
 }
 
 
@@ -1076,7 +1077,7 @@ StructuralMaterial::givePlateLayerStiffMtrx(MatResponseMode mode,
 {
     auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     auto c3d = inv(m3d);
-    return inv(c3d({ 0, 1, 3, 4, 5 }, { 0, 1, 3, 4, 5 }) );
+    return inv(FloatMatrixF<5,5>(c3d({ 0, 1, 3, 4, 5 }, { 0, 1, 3, 4, 5 })));
 }
 
 FloatMatrixF< 3, 3 >
@@ -1086,7 +1087,7 @@ StructuralMaterial::giveFiberStiffMtrx(MatResponseMode mode,
 {
     auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     auto c3d = inv(m3d);
-    return inv(c3d({ 0, 4, 5 }, { 0, 4, 5 }) );
+    return inv(FloatMatrixF<3,3>(c3d({ 0, 4, 5 }, { 0, 4, 5 })));
 }
 
 
