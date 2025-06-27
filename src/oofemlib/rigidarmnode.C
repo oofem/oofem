@@ -40,31 +40,43 @@
 #include "classfactory.h"
 #include "domain.h"
 #include "entityrenumberingscheme.h"
+#include "paramkey.h"
+#include "parametermanager.h"
 
 namespace oofem {
 REGISTER_DofManager(RigidArmNode);
+
+ParamKey RigidArmNode::IPK_RigidArmNode_master("master");
+ParamKey RigidArmNode::IPK_RigidArmNode_mastermask("mastermask");
+
 
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
 void
-RigidArmNode :: initializeFrom(InputRecord &ir)
+RigidArmNode :: initializeFrom(InputRecord &ir, int priority)
 {
-    Node :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, masterDofMngr, _IFT_RigidArmNode_master);
+    Node :: initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
-    if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        throw ValueInputException(ir, _IFT_DofManager_mastermask, "mastermask size mismatch");
-    }
+    PM_UPDATE_PARAMETER(masterDofMngr, ppm, ir, this->number, IPK_RigidArmNode_master, priority) ;
+    PM_UPDATE_PARAMETER(masterMask, ppm, ir, this->number, IPK_RigidArmNode_mastermask, priority) ;
 }
 
 void
 RigidArmNode :: postInitialize()
 {
     Node :: postInitialize();
+
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_RigidArmNode_master) ;
+    PM_DOFMAN_ERROR_IFNOTSET(ppm, this->number, IPK_RigidArmNode_mastermask) ;
+
+    if ( masterMask.giveSize() != this->dofidmask.giveSize() ) {
+        throw ComponentInputException(IPK_DofManager_mastermask.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "mastermask size mismatch");
+    }
 
     // auxiliary arrays
     std::map< DofIDItem, IntArray > masterDofID;
@@ -251,16 +263,16 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     }
     
     // assemble DOF weights for relevant dofs
-    for ( int i = 1; i <= this->dofidmask->giveSize(); i++ ) {
-      Dof *dof = this->giveDofWithID(dofidmask->at(i));
+    for ( int i = 1; i <= this->dofidmask.giveSize(); i++ ) {
+      Dof *dof = this->giveDofWithID(dofidmask.at(i));
       DofIDItem id = dof->giveDofID();
-      masterDofID [ id ] = *dofidmask;
-      masterContribution [ id ].resize(dofidmask->giveSize());
+      masterDofID [ id ] = dofidmask;
+      masterContribution [ id ].resize(dofidmask.giveSize());
       
-      for (int j = 1; j <= this->dofidmask->giveSize(); j++ ) {
-          if ( dofidmask->at(j) <= 6 && id <= 6 ) {
-              masterContribution [ id ].at(j) = T.at(id, dofidmask->at(j));
-          } else if ( dofidmask->findFirstIndexOf(id) == j ) {
+      for (int j = 1; j <= this->dofidmask.giveSize(); j++ ) {
+          if ( dofidmask.at(j) <= 6 && id <= 6 ) {
+              masterContribution [ id ].at(j) = T.at(id, dofidmask.at(j));
+          } else if ( dofidmask.findFirstIndexOf(id) == j ) {
               masterContribution [ id ].at(j) = 1;
           }
       }

@@ -900,9 +900,9 @@ TR_SHELL11 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 void
-TR_SHELL11 :: initializeFrom(InputRecord &ir)
+TR_SHELL11 :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir, priority);
 }
 
 Interface *

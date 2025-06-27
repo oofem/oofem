@@ -36,23 +36,37 @@
 #include "classfactory.h"
 #include "error.h"
 #include "floatmatrix.h"
+#include "domain.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_DofManager(Particle);
 
+ParamKey Particle::IPK_Particle_rad("rad");
 
 Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
 void
-Particle :: initializeFrom(InputRecord &ir)
+Particle :: initializeFrom(InputRecord &ir, int priority)
 {
-    Node :: initializeFrom(ir);
+    ParameterManager &ppm =  domain->dofmanPPM;
 
-    IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
-    if ( radius < 0.0 ) {
-        throw ValueInputException(ir, _IFT_Particle_rad, "must be positive");
-    }
+    Node :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(radius, ppm, ir, this->number, IPK_Particle_rad, priority) ;
 }
+
+void Particle::postInitialize () {
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+
+    Node::postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Particle_rad) ;
+    if ( radius < 0.0 ) {
+        throw ComponentInputException(IPK_Particle_rad.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "must be positive");
+    }
+ 
+}
+
 } // namespace oofem

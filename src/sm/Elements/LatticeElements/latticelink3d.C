@@ -49,6 +49,8 @@
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "sm/CrossSections/latticecrosssection.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -56,6 +58,10 @@
 
 namespace oofem {
 REGISTER_Element(LatticeLink3d);
+ParamKey LatticeLink3d::IPK_LatticeLink3d_length("length");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_diameter("diameter");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_dirvector("dirvector");
+ParamKey LatticeLink3d::IPK_LatticeLink3d_l_end("l_end");
 
 LatticeLink3d :: LatticeLink3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
@@ -267,20 +273,29 @@ LatticeLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-LatticeLink3d :: initializeFrom(InputRecord &ir)
+LatticeLink3d :: initializeFrom(InputRecord &ir, int priority)
 {
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
     // first call parent
-    LatticeStructuralElement :: initializeFrom(ir);
+    LatticeStructuralElement :: initializeFrom(ir, priority);
 
-    IR_GIVE_FIELD(ir, this->bondLength, _IFT_LatticeLink3d_length);
+    PM_UPDATE_PARAMETER(bondLength, ppm, ir, this->number, IPK_LatticeLink3d_length, priority) ;
+    PM_UPDATE_PARAMETER(bondDiameter, ppm, ir, this->number, IPK_LatticeLink3d_diameter, priority) ;
+    PM_UPDATE_PARAMETER(directionVector, ppm, ir, this->number, IPK_LatticeLink3d_dirvector, priority) ;
+    PM_UPDATE_PARAMETER(bondEndLength, ppm, ir, this->number, IPK_LatticeLink3d_l_end, priority) ;
 
-    IR_GIVE_FIELD(ir, this->bondDiameter, _IFT_LatticeLink3d_diameter);
-
-    IR_GIVE_FIELD(ir, this->directionVector, _IFT_LatticeLink3d_dirvector);
-
-    IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_LatticeLink3d_l_end);
 }
 
+void
+LatticeLink3d :: postInitialize()
+{
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    LatticeStructuralElement :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_length) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_diameter) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_dirvector) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_l_end) ;
+}
 
 int
 LatticeLink3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

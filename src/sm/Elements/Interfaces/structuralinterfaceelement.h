@@ -128,7 +128,7 @@ public:
     void updateInternalState(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
     int checkConsistency() override;
-    void initializeFrom(InputRecord &ir) override;
+
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "StructuralInterfaceElement"; }
 

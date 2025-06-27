@@ -53,6 +53,7 @@
 
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional lattice mass transport element
  */
@@ -78,6 +79,15 @@ protected:
     FloatArray crackLengths;
 
     double dimension = 0.;
+
+    static ParamKey IPK_Lattice3d_mt_polycoords;
+    static ParamKey IPK_Lattice3d_mt_crackwidths;
+    static ParamKey IPK_Lattice3d_mt_couplingflag;
+    static ParamKey IPK_Lattice3d_mt_couplingnumber;
+    static ParamKey IPK_Lattice3d_mt_dim;
+    static ParamKey IPK_Lattice3d_mt_area;
+    static ParamKey IPK_Lattice3d_mt_ranarea;
+    static ParamKey IPK_Lattice3d_mt_mlength;
 
 public:
     Lattice3d_mt(int, Domain *, ElementMode em = HeatTransferEM);
@@ -106,7 +116,8 @@ public:
 
     int computeNumberOfDofs() override { return 2; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     void updateInternalState(TimeStep *tStep) override;
 
     double giveLength() override;

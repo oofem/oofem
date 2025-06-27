@@ -55,6 +55,7 @@ class Element;
 class XfemManager;
 class IntegrationRule;
 class MaterialStatus;
+class ParamKey;
 
 /**
  * Provides Xfem interface for an element.
@@ -62,6 +63,11 @@ class MaterialStatus;
  */
 class OOFEM_EXPORT XfemElementInterface : public Interface
 {
+protected:
+    static ParamKey IPK_XfemElementInterface_CohesiveZoneMaterial;
+    static ParamKey IPK_XfemElementInterface_NumIntPointsCZ;
+    static ParamKey IPK_XfemElementInterface_PlaneStrain;
+    
 public:
     Element *element;
 

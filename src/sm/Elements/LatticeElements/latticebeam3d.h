@@ -44,6 +44,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 3-dimensional elastic bernoulli beam element in the lattice framework
  */
@@ -58,6 +59,8 @@ protected:
     FloatArray midPoint, globalCentroid, normal;
     int geometryFlag;
     double myPi;
+
+    static ParamKey IPK_LatticeBeam3d_diameter;
 
 public:
     LatticeBeam3d(int n, Domain *);
@@ -91,7 +94,8 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_LatticeBeam3d_Name; }
     const char *giveClassName() const override { return "LatticeBeam3d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 

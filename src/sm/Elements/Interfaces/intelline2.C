@@ -42,6 +42,8 @@
 #include "fei2dlinequad.h"
 #include "fei2dlinelin.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,8 @@ REGISTER_Element(IntElLine2);
 
 FEI2dLineQuad IntElLine2 :: interp(2, 2);
 FEI2dLineLin IntElLine2 :: interpLin(1, 1);
+
+ParamKey IntElLine2::IPK_IntElLine2_LinearTraction("linear");
 
 
 IntElLine2 :: IntElLine2(int n, Domain *aDomain) : IntElLine1(n, aDomain)
@@ -114,10 +118,11 @@ IntElLine2 :: giveInterpolation() const
 
 
 void
-IntElLine2 :: initializeFrom(InputRecord &ir)
+IntElLine2 :: initializeFrom(InputRecord &ir, int priority)
 {
-    IntElLine1 :: initializeFrom(ir);
-    linear = ir.hasField(_IFT_IntElLine2_LinearTraction);
+    IntElLine1 :: initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(linear, ppm, ir, this->number, IPK_IntElLine2_LinearTraction, priority) ;
 }
 
 

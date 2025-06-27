@@ -59,7 +59,9 @@
 #include "unknownnumberingscheme.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
+#include "parametermanager.h"
 #include "cltypes.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -69,6 +71,18 @@
 #include <cassert>
 
 namespace oofem {
+
+ParamKey Element::IPK_Element_mat("mat");
+ParamKey Element::IPK_Element_crosssect("crosssect");
+ParamKey Element::IPK_Element_nodes("nodes");
+ParamKey Element::IPK_Element_bodyload("bodyloads");
+ParamKey Element::IPK_Element_boundaryload("boundaryloads");
+ParamKey Element::IPK_Element_lcs("lcs");
+ParamKey Element::IPK_Element_partitions("partitions");
+ParamKey Element::IPK_Element_remote("remote");
+ParamKey Element::IPK_Element_activityTimeFunction("activityltf");
+ParamKey Element::IPK_Element_nip("nip");
+    
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), dofManArray(), crossSection(0), 
     bodyLoadArray(), boundaryLoadArray(), integrationRulesArray(),
@@ -669,35 +683,28 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     OOFEM_ERROR("Unknown Type of characteristic mtrx.");
 }
 
-
 void
-Element :: initializeFrom(InputRecord &ir)
+Element :: initializeFrom(InputRecord &ir, int priority)
 {
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
     //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
-    material = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Element_mat);
-
-    //IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
-    crossSection = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, crossSection, _IFT_Element_crosssect);
-
-    IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
-
-    bodyLoadArray.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, _IFT_Element_bodyload);
-
-    boundaryLoadArray.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, _IFT_Element_boundaryload);
-
-    elemLocalCS.clear();
-
-    if ( ir.hasField(_IFT_Element_lcs) ) { //local coordinate system
+    PM_UPDATE_PARAMETER(material, ppm, ir, this->number, IPK_Element_mat, priority) ;
+    PM_UPDATE_PARAMETER(crossSection, ppm, ir, this->number, IPK_Element_crosssect, priority) ;
+    PM_UPDATE_PARAMETER(dofManArray, ppm, ir, this->number, IPK_Element_nodes, priority) ;
+    PM_UPDATE_PARAMETER(bodyLoadArray, ppm, ir, this->number, IPK_Element_bodyload, priority) ;
+    PM_UPDATE_PARAMETER(boundaryLoadArray, ppm, ir, this->number, IPK_Element_boundaryload, priority) ;
+    bool tripletsflag = false;
+    FloatArray triplets;
+    PM_UPDATE_PARAMETER_AND_REPORT(triplets, ppm, ir, this->number, IPK_Element_lcs, priority, tripletsflag) ;
+    PM_UPDATE_PARAMETER(partitions, ppm, ir, this->number, IPK_Element_partitions, priority) ;
+    PM_UPDATE_PARAMETER(activityTimeFunction, ppm, ir, this->number, IPK_Element_activityTimeFunction, priority) ;
+    PM_UPDATE_PARAMETER(numberOfGaussPoints, ppm, ir, this->number, IPK_Element_nip, priority) ;
+    
+    if (tripletsflag ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
-        FloatArray triplets;
-        IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( int j = 1; j <= 3; j++ ) {
             elemLocalCS.at(j, 1) = triplets.at(j);
@@ -719,18 +726,14 @@ Element :: initializeFrom(InputRecord &ir)
         elemLocalCS.at(3, 3) = ( elemLocalCS.at(1, 1) * elemLocalCS.at(2, 2) - elemLocalCS.at(2, 1) * elemLocalCS.at(1, 2) );
     }
 
-    partitions.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
-    if ( ir.hasField(_IFT_Element_remote) ) {
+    bool flag = false;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_Element_remote, priority, flag) ;
+    if (flag) {
         parallel_mode = Element_remote;
     } else {
         parallel_mode = Element_local;
     }
-
-    activityTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    
 }
 
 
@@ -739,19 +742,19 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
 
-    input.setField(material, _IFT_Element_mat);
+    input.setField(material, IPK_Element_mat.getNameCStr());
 
-    input.setField(crossSection, _IFT_Element_crosssect);
+    input.setField(crossSection, IPK_Element_crosssect.getNameCStr());
 
-    input.setField(dofManArray, _IFT_Element_nodes);
+    input.setField(dofManArray, IPK_Element_nodes.getNameCStr());
 
     if ( bodyLoadArray.giveSize() > 0 ) {
-        input.setField(bodyLoadArray, _IFT_Element_bodyload);
+        input.setField(bodyLoadArray, IPK_Element_bodyload.getNameCStr());
     }
 
 
     if ( boundaryLoadArray.giveSize() > 0 ) {
-        input.setField(boundaryLoadArray, _IFT_Element_boundaryload);
+        input.setField(boundaryLoadArray, IPK_Element_boundaryload.getNameCStr());
     }
 
 
@@ -761,22 +764,32 @@ Element :: giveInputRecord(DynamicInputRecord &input)
             triplets.at(j) = elemLocalCS.at(j, 1);
             triplets.at(j + 3) = elemLocalCS.at(j, 2);
         }
-        input.setField(triplets, _IFT_Element_lcs);
+        input.setField(triplets, IPK_Element_lcs.getNameCStr());
     }
 
 
     if ( partitions.giveSize() > 0 ) {
-        input.setField(this->partitions, _IFT_Element_partitions);
+        input.setField(this->partitions, IPK_Element_partitions.getNameCStr());
         if ( this->parallel_mode == Element_remote ) {
-            input.setField(_IFT_Element_remote);
+            input.setField(IPK_Element_remote.getNameCStr());
         }
     }
 
     if ( activityTimeFunction > 0 ) {
-        input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
+        input.setField(activityTimeFunction, IPK_Element_activityTimeFunction.getNameCStr());
     }
 
-    input.setField(numberOfGaussPoints, _IFT_Element_nip);
+    input.setField(numberOfGaussPoints, IPK_Element_nip.getNameCStr());
+}
+
+void
+Element :: initializeFinish()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+
+    //PM_ERROR_IFNOTSET(ppm, this->number, _IFT_Element_mat) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_crosssect) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_nodes) ;
 }
 
 

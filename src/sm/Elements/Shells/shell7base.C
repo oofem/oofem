@@ -49,12 +49,15 @@
 #include "floatarrayf.h"
 #include "floatmatrixf.h"
 #include "connectivitytable.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include <fstream>
 
 namespace oofem {
 
 FEI3dTrQuad  Shell7Base   :: interpolationForCZExport;
 FEI3dWedgeQuad Shell7Base :: interpolationForExport;
+ParamKey Shell7Base :: IPK_Shell7Base_recoverStress("recoverstress");
 
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
@@ -62,14 +65,11 @@ Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
     recoverStress(false) 
     {}
 
-void Shell7Base :: initializeFrom(InputRecord &ir)
+void Shell7Base :: initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement :: initializeFrom(ir);
-    //IR_GIVE_OPTIONAL_FIELD(ir, this->recoverStress, _IFT_Shell7base_recoverStress);
-    if ( ir.hasField(_IFT_Shell7base_recoverStress) ) {
-        this->recoverStress = true;
-    }
-
+    ParameterManager & pm = this->giveDomain()->elementPPM;
+    NLStructuralElement :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(recoverStress, pm, ir, this->number, IPK_Shell7Base_recoverStress, priority);
 }
 
 int 

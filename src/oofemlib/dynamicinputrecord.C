@@ -42,6 +42,7 @@
 #include "node.h"
 #include "element.h"
 #include "scalarfunction.h"
+#include "paramkey.h"
 
 #include <sstream>
 
@@ -56,9 +57,9 @@ std::unique_ptr<DynamicInputRecord> CreateNodeIR(int i, InputFieldType nodeType,
 std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
 {
     auto result = std::make_unique<DynamicInputRecord>(elementType, i);
-    result->setField(std :: move(nodes), _IFT_Element_nodes);
+    result->setField(std :: move(nodes), Element::IPK_Element_nodes.getName().c_str());
     if ( cs != 0 ) {
-        result->setField(cs, _IFT_Element_crosssect);
+        result->setField(cs, Element::IPK_Element_crosssect.getName().c_str());
     }
     return result;
 }

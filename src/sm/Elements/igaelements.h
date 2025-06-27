@@ -60,7 +60,7 @@ protected:
 public:
     BsplinePlaneStressElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     int checkConsistency() override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
@@ -104,7 +104,7 @@ protected:
 public:
     NURBSPlaneStressElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     int checkConsistency() override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
@@ -150,8 +150,8 @@ protected:
 public:
     TSplinePlaneStressElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override {
-        IGATSplineElement :: initializeFrom(ir);
+    void initializeFrom(InputRecord &ir, int priority) override {
+        IGATSplineElement :: initializeFrom(ir, priority);
         //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
     }
 
@@ -192,7 +192,7 @@ protected:
 public:
     NURBSSpace3dElement(int n, Domain * aDomain);
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     int checkConsistency() override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {

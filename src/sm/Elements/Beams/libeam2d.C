@@ -45,9 +45,14 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(LIBeam2d);
+ParamKey LIBeam2d::IPK_LIBeam2d_XZ("xz");
+ParamKey LIBeam2d::IPK_LIBeam2d_XY("xy");
+
 
 // Set up interpolation coordinates
 FEI2dLineLin LIBeam2d :: interpolationXZ(1, 3);
@@ -335,14 +340,21 @@ LIBeam2d :: givePitch()
 
 
 void
-LIBeam2d :: initializeFrom(InputRecord &ir)
+LIBeam2d :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
-    xy = ir.hasField(_IFT_LIBeam2d_XY);
-    xz = ir.hasField(_IFT_LIBeam2d_XZ);
-    xy ? (xz = false) : (xz = true);
+    StructuralElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_LIBeam2d_XY, priority, xy) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_LIBeam2d_XZ, priority, xz) ;
 }
 
+void 
+LIBeam2d :: initializeFinish()
+{
+    StructuralElement :: initializeFinish();
+    ParameterManager &ppm = domain->elementPPM;
+    xy ? (xz = false) : (xz = true);
+}
 
 
 void

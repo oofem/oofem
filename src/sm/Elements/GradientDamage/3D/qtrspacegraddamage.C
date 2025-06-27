@@ -69,10 +69,10 @@ QTRSpaceGradDamage :: QTRSpaceGradDamage(int n, Domain *aDomain) :  QTRSpace(n, 
 
 
 void
-QTRSpaceGradDamage :: initializeFrom(InputRecord &ir)
+QTRSpaceGradDamage :: initializeFrom(InputRecord &ir, int priority)
 {
     numberOfGaussPoints = 4;
-    Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir, priority);
 }
 
 

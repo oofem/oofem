@@ -46,7 +46,7 @@
 #define _IFT_QTrPlaneStress2dXFEM_RegCoeffTol "reg_coeff_tol"
 
 namespace oofem {
-
+class ParamKey;
 
 /**
  * 6-node triangle with XFEM kinematics.
@@ -60,7 +60,9 @@ protected:
     void postInitialize() override;
 
     double mRegCoeff, mRegCoeffTol;
-
+    
+    static ParamKey IPK_QTrPlaneStress2dXFEM_RegCoeff;
+    static ParamKey IPK_QTrPlaneStress2dXFEM_RegCoeffTol;
 public:
     QTrPlaneStress2dXFEM(int n, Domain * d) : QTrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 6; mRegCoeff = 1.0e-6; mRegCoeffTol = 1.0e-6; }
     virtual ~QTrPlaneStress2dXFEM();
@@ -89,7 +91,7 @@ public:
 
     Element_Geometry_Type giveGeometryType() const override;
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override;
     void giveInputRecord(DynamicInputRecord &input) override;
 

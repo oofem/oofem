@@ -43,10 +43,10 @@
 #include "spatiallocalizer.h"
 
 #define _IFT_LSpace_Name "lspace"
-#define _IFT_LSpace_reducedShearIntegration "reducedshearint"
 
 namespace oofem {
 class FEI3dHexaLin;
+class ParamKey;
 
 /**
  * This class implements a Linear 3d 8-node finite element for stress analysis.
@@ -66,6 +66,7 @@ class LSpace  : public Structural3DElement, public ZZNodalRecoveryModelInterface
 protected:
     static FEI3dHexaLin interpolation;
     bool reducedShearIntegration;
+    static ParamKey IPK_LSpace_reducedShearIntegration; ///< [optional] Reduced shear integration flag.
 public:
     LSpace(int n, Domain *d);
     virtual ~LSpace() { }
@@ -97,7 +98,7 @@ public:
     const char *giveClassName() const override { return "LSpace"; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_1;}
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

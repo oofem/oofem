@@ -45,11 +45,15 @@
 #include "spatiallocalizer.h"
 #include "classfactory.h"
 #include "engngm.h"
+#include "paramkey.h"
 
 #include "outputmanager.h"
 
 namespace oofem {
 REGISTER_DofManager(qcNode);
+
+ParamKey qcNode::IPK_qcNode_masterElement("masterElement");
+ParamKey qcNode::IPK_qcNode_masterRegion("masterRegion");
 
 qcNode :: qcNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
@@ -58,33 +62,16 @@ qcNode :: qcNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-void qcNode :: initializeFrom(InputRecord &ir)
+void qcNode :: initializeFrom(InputRecord &ir, int priority)
 {
-    Node :: initializeFrom(ir);
-    this->masterElement = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_qcNode_masterElement);
-    this->masterRegion = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_qcNode_masterRegion);
+    Node :: initializeFrom(ir, priority);
 
-#ifdef __SM_MODULE
-    QClinearStatic *em = dynamic_cast< QClinearStatic * >( this->giveDomain()->giveEngngModel() );
-    if ( em ) {
-        if ( em->giveQcApproachNumber() == 0 ) {
-            this->setAsRepnode();
-        } else {
-            // set node type according to fullsolveddomain
-            if ( this->initializeAsRepnode() ) {
-                this->setAsRepnode();
-            } else {
-                this->setAsHanging();
-            }
-        }
-    } else {
-        OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
-    }
-#else
-    OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
-#endif
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+
+    PM_UPDATE_PARAMETER(masterElement, ppm, ir, this->number, IPK_qcNode_masterElement, priority) ;
+    PM_UPDATE_PARAMETER(masterRegion, ppm, ir, this->number, IPK_qcNode_masterRegion, priority) ;
+
+
 }
 
 int qcNode :: checkConsistency()
@@ -121,11 +108,33 @@ int qcNode :: checkConsistency()
 
 void qcNode :: postInitialize()
 {
+    #ifdef __SM_MODULE
+    QClinearStatic *em = dynamic_cast< QClinearStatic * >( this->giveDomain()->giveEngngModel() );
+    if ( em ) {
+        if ( em->giveQcApproachNumber() == 0 ) {
+            this->setAsRepnode();
+        } else {
+            // set node type according to fullsolveddomain
+            if ( this->initializeAsRepnode() ) {
+                this->setAsRepnode();
+            } else {
+                this->setAsHanging();
+            }
+        }
+    } else {
+        OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
+    }
+#else
+    OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
+#endif
+
+
     Node :: postInitialize();
     if ( this->qcNodeTypeLabel == 2 ) {
         this->postInitializeAsHangingNode();
     }
 }
+
 
 void qcNode :: postInitializeAsHangingNode()
 {
@@ -256,7 +265,7 @@ void qcNode :: setAsHanging()
     // set all doftype=2 in dofTypemap
 
     if ( this->giveDofTypeMap() == NULL ) {
-        this->dofTypemap = new std :: map< int, int >();
+        this->dofTypemap.clear();
     }
 
     int DofTypeMapSize = this->giveDofTypeMap()->size();

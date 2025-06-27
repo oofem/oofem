@@ -48,6 +48,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a simple spring element. Its purpose is to introduce
  * a longitudinal or torsional spring between two nodes. The spring element is defined
@@ -70,7 +71,7 @@ protected:
     /// The longitudinal spring constant [Force/Length], torsional spring constant [Force*Length/Radians].
     double springConstant;
     /// total mass of the spring; to be distributed to nodes
-    double mass;
+    double mass=0.0;
     /**
      * Orientation vector. Defines orientation of spring element- for spring it defines the direction of spring,
      * for torsional spring it defines the axis of rotation.
@@ -78,6 +79,11 @@ protected:
     FloatArray dir;
     /// Mode.
     SpringElementType mode;
+
+    static ParamKey IPK_SpringElement_mode;
+    static ParamKey IPK_SpringElement_orientation;
+    static ParamKey IPK_SpringElement_springConstant;
+    static ParamKey IPK_SpringElement_mass;
 
 public:
     SpringElement(int n, Domain * d);
@@ -112,7 +118,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_SpringElement_Name; }
     const char *giveClassName() const override { return "SpringElement"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
 
 protected:

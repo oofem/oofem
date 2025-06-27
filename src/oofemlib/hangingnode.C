@@ -40,9 +40,13 @@
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
 #include "classfactory.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_DofManager(HangingNode);
+
+ParamKey HangingNode::IPK_HangingNode_masterElement("masterelement");
+ParamKey HangingNode::IPK_HangingNode_masterRegion("masterregion");
 
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
@@ -51,11 +55,13 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-void HangingNode :: initializeFrom(InputRecord &ir)
+void HangingNode :: initializeFrom(InputRecord &ir, int priority)
 {
-    Node :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_HangingNode_masterElement);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_HangingNode_masterRegion);
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+
+    Node :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(masterElement, ppm, ir, this->number, IPK_HangingNode_masterElement, priority) ;
+    PM_UPDATE_PARAMETER(masterRegion, ppm, ir, this->number, IPK_HangingNode_masterRegion, priority) ;
 }
 
 int HangingNode :: checkConsistency()

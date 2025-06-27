@@ -505,6 +505,7 @@ namespace oofem {
         public:
         NTfTerm () : MPMSymbolicTerm() {}
         NTfTerm (const Variable *testField, const Variable* unknownField, MaterialMode m)  : MPMSymbolicTerm(testField, unknownField, m) {};
+        NTfTerm (const Variable *testField, const Variable* unknownField, MaterialMode m, const FloatArray* f)  : MPMSymbolicTerm(testField, unknownField, m) {flux = *f;};
 
         void evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const override {}
 

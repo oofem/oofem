@@ -38,9 +38,11 @@
 #include "oofemenv.h"
 #include "domaintype.h"
 #include "statecountertype.h"
+#include "parametermanager.h"
 #include "intarray.h"
 #include "error.h"
 #include "bctracker.h"
+
 #ifdef __MPI_PARALLEL_MODE
  #include "entityrenumberingscheme.h"
 #endif
@@ -98,6 +100,7 @@ class FractureManager;
 class oofegGraphicContext;
 class ProcessCommunicator;
 class ContactManager;
+
 /**
  * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
  * description of domain associated to particular processor or thread of execution. Generally, it contain and
@@ -121,6 +124,13 @@ class OOFEM_EXPORT Domain
     std :: vector< std :: unique_ptr< DofManager > > dofManagerList;
     /// Cross section list.
     std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;    
+    /**
+     * Parameter priority manager for the elements. It is used to store and manage priorities of parameters.
+     * This supports setting the parameter (attribute) from different sources (e.g. from component record or trough set).
+     */
+    ParameterManager elementPPM;
+    ParameterManager dofmanPPM;
+
 private:
     /// Material list.
     std :: vector< std :: unique_ptr< Material > > materialList;
@@ -419,6 +429,7 @@ public:
      * @see FemComponent::initializeFrom
      */
     int instanciateYourself(DataReader &dr);
+    void initializeFinish();
     /**
      * Performs post-initialization for all the domain contents (which is called after initializeFrom).
      * Currently, it only calls Element::postInitialize.

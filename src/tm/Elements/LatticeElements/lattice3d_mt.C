@@ -48,6 +48,8 @@
 #include "engngm.h"
 #include "load.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -57,10 +59,23 @@
 namespace oofem {
 REGISTER_Element(Lattice3d_mt);
 
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_polycoords("polycoords");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_crackwidths("crackwidths");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_couplingflag("couplingflag");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_couplingnumber("couplingnumber");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_dim("dim");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_area("area");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_ranarea("ranarea");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_mlength("mlength");
+
 Lattice3d_mt :: Lattice3d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
 {
     this->numberOfDofMans  = 2;
+    numberOfGaussPoints = 1;
+    minLength = 1.e-20;
+    dimension = 3.;
+    couplingFlag = 0;
 }
 
 double Lattice3d_mt :: giveLength()
@@ -162,40 +177,29 @@ Lattice3d_mt ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-Lattice3d_mt :: initializeFrom(InputRecord &ir)
+Lattice3d_mt :: initializeFrom(InputRecord &ir, int priority)
 {
-    this->Element :: initializeFrom(ir);
+    this->Element :: initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(minLength, ppm, ir, this->number, IPK_Lattice3d_mt_mlength, priority) ;
+    PM_UPDATE_PARAMETER(dimension, ppm, ir, this->number, IPK_Lattice3d_mt_dim, priority) ;
+    PM_UPDATE_PARAMETER(area, ppm, ir, this->number, IPK_Lattice3d_mt_area, priority) ;
+    PM_UPDATE_PARAMETER(polygonCoords, ppm, ir, this->number, IPK_Lattice3d_mt_polycoords, priority) ;
+    PM_UPDATE_PARAMETER(crackWidths, ppm, ir, this->number, IPK_Lattice3d_mt_crackwidths, priority) ;
+    PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice3d_mt_couplingflag, priority) ;
+    PM_UPDATE_PARAMETER(couplingNumbers, ppm, ir, this->number, IPK_Lattice3d_mt_couplingnumber, priority) ;
 
+}
+
+void Lattice3d_mt :: postInitialize()
+{
+    this->LatticeTransportElement :: postInitialize();
     numberOfGaussPoints = 1;
-
-    minLength = 1.e-20;
-    IR_GIVE_OPTIONAL_FIELD(ir, minLength, _IFT_Lattice3DMT_mlength);
-
-    dimension = 3.;
-    IR_GIVE_OPTIONAL_FIELD(ir, dimension, _IFT_Lattice3DMT_dim);
-
-
-    IR_GIVE_OPTIONAL_FIELD(ir, area, _IFT_Lattice3DMT_area);
-
-
-    polygonCoords.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, polygonCoords, _IFT_Lattice3DMT_polycoords);
     numberOfPolygonVertices = (int) (polygonCoords.giveSize() / 3.);
-
-    crackWidths.resize(numberOfPolygonVertices);
-    crackWidths.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, crackWidths, _IFT_Lattice3DMT_crackwidths);
-
-    couplingFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice3DMT_couplingflag);
-
-    couplingNumbers.resize(numberOfPolygonVertices);
-    if ( couplingFlag == 1 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers, _IFT_Lattice3DMT_couplingnumber);
-    }
-
+    crackWidths.resizeWithValues(numberOfPolygonVertices);
     this->computeGaussPoints();
 }
+
 
 void
 Lattice3d_mt :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)

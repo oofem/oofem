@@ -94,7 +94,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Truss3d_Name; }
     const char *giveClassName() const override { return "Truss3d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override { return _1dMat; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_line_1;}
 

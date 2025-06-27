@@ -38,8 +38,13 @@
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
+
+ParamKey Structural2DElement::IPK_Structural2DElement_materialCoordinateSystem("matcs");
+
 Structural2DElement::Structural2DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     matRotation(false)
@@ -56,10 +61,11 @@ Structural2DElement::~Structural2DElement()
 
 
 void
-Structural2DElement::initializeFrom(InputRecord &ir)
+Structural2DElement::initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement::initializeFrom(ir);
-    matRotation = ir.hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
+    ParameterManager &ppm = domain->elementPPM;
+    NLStructuralElement::initializeFrom(ir, priority);
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_Structural2DElement_materialCoordinateSystem, priority, matRotation) ;
 }
 
 

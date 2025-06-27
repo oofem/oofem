@@ -1215,8 +1215,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                 bcs.followedBy(++localBcId);
                                 dofids.followedBy(dof->giveDofID());
                             }
-                            ir->setField(bcs, _IFT_DofManager_bc);
-                            ir->setField(dofids, _IFT_DofManager_dofidmask);
+                            ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
                         }
                     } else {
                         if ( hasBc == true ) {
@@ -1232,12 +1231,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                     bcs.followedBy(bcDofId);
                                     dofids.followedBy(nodeDof->giveDofID());
                                 }
-                                ir->setField(bcs, _IFT_DofManager_bc);
-                                ir->setField(dofids, _IFT_DofManager_dofidmask);
+                                ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
+                                ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                 // copy node load
                                 if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
-                                    ir->setField(* loadArray, _IFT_DofManager_load);
+                                    ir->setField(* loadArray, DofManager::IPK_DofManager_load.getNameCStr());
                                 }
                             } else {
                                 if ( sideNumBc != 0 ) {
@@ -1258,7 +1257,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                                         bcs.at(idof) = bcDofId;
                                     }
-                                    ir->setField(bcs, _IFT_DofManager_bc);
+                                    ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
                                     //ir->setField(dofids, _IFT_DofManager_dofidmask);
                                 }
                             }
@@ -1267,7 +1266,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                             if ( m == 0 ) {
                                 if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
-                                    ir->setField(* loadArray, _IFT_DofManager_load);
+                                    ir->setField(* loadArray, DofManager::IPK_DofManager_load.getNameCStr());
                                 }
                             }
                         }
@@ -1693,8 +1692,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         bcs.followedBy(bcDofId);
                                         dofids.followedBy(nodeDof->giveDofID());
                                     }
-                                    ir->setField(bcs, _IFT_DofManager_bc);
-                                    ir->setField(dofids, _IFT_DofManager_dofidmask);
+                                    ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
+                                    ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                     // copy node load
 
@@ -2298,8 +2297,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             bcs.followedBy(bcDofId);
                                             dofids.followedBy(nodeDof->giveDofID());
                                         }
-                                        ir->setField(bcs, _IFT_DofManager_bc);
-                                        ir->setField(dofids, _IFT_DofManager_dofidmask);
+                                        ir->setField(bcs, DofManager::IPK_DofManager_bc.getNameCStr());
+                                        ir->setField(dofids, DofManager::IPK_DofManager_dofidmask.getNameCStr());
 
                                         // copy node load
 

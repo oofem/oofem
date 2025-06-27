@@ -93,18 +93,20 @@ def test_3():
     ir = oofempy.OOFEMTXTInputRecord()
     ir.setRecordString ("nodes 2 1 2 mat 1 crosssect 1")
     # pass input record to elem
-    e1.initializeFrom(ir)
+    e1.initializeFrom(ir,2)
     elems = (e1,)
 
     # setup domain
     util.setupDomain (domain, nodes, elems, (cs,), (mat,), bcs, (), ltfs, ())
 
-    print("\nSolving problem")
+    print("\nInitializing problem")
     problem.checkProblemConsistency()
     problem.init()
     problem.postInitialize()
-    problem.setRenumberFlag()
+    print("\nSolving problem")
+    #problem.setRenumberFlag()
     problem.solveYourself()
+    print("\nProblem solved")
 
     #check solution
     u2 = problem.giveUnknownComponent (oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(2).giveDofWithID(oofempy.DofIDItem.D_u))

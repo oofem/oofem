@@ -56,8 +56,6 @@ public:
     LIBeam3dBoundaryTruss(int n, Domain *d);
     virtual ~LIBeam3dBoundaryTruss() { }
 
-    void initializeFrom(InputRecord &ir) override;
-
     int computeNumberOfDofs() override { return 13; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 

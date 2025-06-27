@@ -47,9 +47,14 @@
 #include "load.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(LineDistributedSpring);
+
+ParamKey LineDistributedSpring::IPK_LineDistributedSpring_Dofs("dofs");
+ParamKey LineDistributedSpring::IPK_LineDistributedSpring_Stiffnesses("k");
 
 FEI3dLineLin LineDistributedSpring :: interp_lin;
 
@@ -151,17 +156,27 @@ LineDistributedSpring::giveInternalForcesVector(FloatArray &answer,
 
   
 void
-LineDistributedSpring :: initializeFrom(InputRecord &ir)
+LineDistributedSpring :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    StructuralElement::initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(dofs, ppm, ir, this->number, IPK_LineDistributedSpring_Dofs, priority) ;
+    PM_UPDATE_PARAMETER(springStiffnesses, ppm, ir, this->number, IPK_LineDistributedSpring_Stiffnesses, priority) ;
+}
 
-    IR_GIVE_FIELD (ir, dofs, _IFT_LineDistributedSpring_Dofs);
-    IR_GIVE_FIELD (ir, springStiffnesses, _IFT_LineDistributedSpring_Stifnesses);
+void
+LineDistributedSpring :: postInitialize()
+{
+    StructuralElement::postInitialize();
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LineDistributedSpring_Dofs) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LineDistributedSpring_Stiffnesses) ;
 
     if (dofs.giveSize() != springStiffnesses.giveSize()) {
       OOFEM_ERROR ("dofs and k params size mismatch");
     }
 }
+
 
 int
 LineDistributedSpring::checkConsistency()

@@ -44,6 +44,8 @@
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 #include "floatmatrixf.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,9 @@
 
 namespace oofem {
 REGISTER_Element(InterfaceElem1d);
+ParamKey InterfaceElem1d::IPK_InterfaceElem1d_refnode("refnode");
+ParamKey InterfaceElem1d::IPK_InterfaceElem1d_normal("normal");
+ParamKey InterfaceElem1d::IPK_InterfaceElem1d_dofIDs("dofids");
 
 InterfaceElem1d :: InterfaceElem1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
@@ -274,18 +279,27 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-InterfaceElem1d :: initializeFrom(InputRecord &ir)
+InterfaceElem1d :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    StructuralElement :: initializeFrom(ir, priority);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_InterfaceElem1d_refnode);
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_InterfaceElem1d_normal);
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_InterfaceElem1d_refnode, priority);
+    PM_UPDATE_PARAMETER(normal, ppm, ir, this->number, IPK_InterfaceElem1d_normal, priority);
+    PM_UPDATE_PARAMETER(dofids, ppm, ir, this->number, IPK_InterfaceElem1d_dofIDs, priority);
+}
+
+void
+InterfaceElem1d :: initializeFinish()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    StructuralElement :: initializeFinish();
+
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         OOFEM_ERROR("wrong reference node or normal specified");
     }
-    if ( ir.hasField(_IFT_InterfaceElem1d_dofIDs) ) {
-        IR_GIVE_FIELD(ir, dofids, _IFT_InterfaceElem1d_refnode);
-    } else {
+    if (!ppm.checkIfSet(this->number, IPK_InterfaceElem1d_dofIDs.getIndex()) ) {
+        
         switch ( domain->giveNumberOfSpatialDimensions() ) {
         case 1:
             this->dofids = IntArray{D_u};
@@ -301,9 +315,9 @@ InterfaceElem1d :: initializeFrom(InputRecord &ir)
         }
     }
 
-    this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
-}
+    this->computeLocalSlipDir(normal); 
 
+}
 
 int
 InterfaceElem1d :: computeNumberOfDofs()

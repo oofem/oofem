@@ -58,13 +58,6 @@ QTruss1d::QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
     numberOfDofMans = 3;
 }
 
-
-void
-QTruss1d::initializeFrom(InputRecord &ir)
-{
-    StructuralElement::initializeFrom(ir);
-}
-
 void
 QTruss1d::giveDofManDofIDMask(int inode, IntArray &answer) const
 {

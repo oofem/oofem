@@ -72,7 +72,7 @@ public:
     virtual ~PFEMElement();
 
     ///Initializes receiver acording to object description stored in input record.
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     // characteristic  matrix
     void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *) override;

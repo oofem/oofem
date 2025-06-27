@@ -94,8 +94,9 @@ protected:
     IntArray knotSpanParallelMode;
 #endif
 public:
-    IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
-    void initializeFrom(InputRecord &ir) override;
+    IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { numberOfGaussPoints=1;}
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
 
 #ifdef __MPI_PARALLEL_MODE
     elementParallelMode giveKnotSpanParallelMode(int) const override;
@@ -117,7 +118,8 @@ class OOFEM_EXPORT IGATSplineElement : public IGAElement
 {
 public:
     IGATSplineElement(int n, Domain * aDomain) : IGAElement(n, aDomain) { }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
 };
 } // end namespace oofem
 #endif //iga_h

@@ -299,8 +299,8 @@ class SADGBLine1 : public SADGBoundaryElement {
             this->numberOfGaussPoints = 2;
     }
     
-    void initializeFrom(InputRecord &ir) override {
-        SADGBoundaryElement::initializeFrom(ir);
+    void initializeFrom(InputRecord &ir, int priority) override {
+        SADGBoundaryElement::initializeFrom(ir, priority);
         this->numberOfDofMans = this->dofManArray.giveSize();
         if (!((numberOfDofMans == 2) || (numberOfDofMans == 4))) {
             OOFEM_ERROR("Invalid number of dofs");
@@ -519,8 +519,8 @@ class SADGBQuad1 : public SADGBoundaryElement {
             this->numberOfGaussPoints = 8;
         }
     
-    void initializeFrom(InputRecord &ir) override {
-        SADGBoundaryElement::initializeFrom(ir);
+    void initializeFrom(InputRecord &ir, int priority) override {
+        SADGBoundaryElement::initializeFrom(ir, priority);
         this->numberOfDofMans = this->dofManArray.giveSize();
         if (!((numberOfDofMans == 4) || (numberOfDofMans == 8))) {
             OOFEM_ERROR("Invalid number of dofs");

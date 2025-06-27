@@ -46,6 +46,8 @@
 //@}
 
 namespace oofem {
+
+class ParamKey;
 /**
  * Class implementing slave node connected to other nodes (masters) using predetermined weights.
  * The node can not have its own boundary or initial conditions,
@@ -66,6 +68,10 @@ protected:
 
     IntArray masterSizes;
 
+    static ParamKey IPK_GeneralSlaveNode_masterSizes;
+    static ParamKey IPK_GeneralSlaveNode_masterWeights;
+    static ParamKey IPK_GeneralSlaveNode_masterList;
+
 public:
     /**
      * Constructor. Creates a general slave  node with number n, belonging to aDomain.
@@ -76,8 +82,9 @@ public:
     /// Destructor.
     virtual ~GeneralSlaveNode(void) {}
 
-    void initializeFrom(InputRecord &ir) override;
-    virtual void postInitialize() override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
+    void postInitialize() override;
     virtual bool isDofTypeCompatible(dofType type) const override {
         return ( type == DT_master || type == DT_slave );
     }

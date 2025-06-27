@@ -46,6 +46,8 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,7 @@
 
 namespace oofem {
 REGISTER_Element(LIBeam3dNL2);
+ParamKey LIBeam3dNL2::IPK_LIBeam3dNL2_refnode("refnode");
 
 LIBeam3dNL2::LIBeam3dNL2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), q(4), tempQ(4)   //, kappa (3)
 {
@@ -451,27 +454,23 @@ LIBeam3dNL2::computeStressVector(FloatArray &answer, const FloatArray &strain, G
 
 
 void
-LIBeam3dNL2::initializeFrom(InputRecord &ir)
+LIBeam3dNL2::initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    NLStructuralElement::initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3dNL2_refnode, priority);
+}
 
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
+void
+LIBeam3dNL2::postInitialize()
+{
+    NLStructuralElement::postInitialize();
+    ParameterManager &ppm = domain->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified");
     }
-
-    /*
-     * if (this->hasString (initString, "dofstocondense")) {
-     *  dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
-     *  if (dofsToCondense->giveSize() >= 12)
-     *    OOFEM_ERROR("wrong input data for condensed dofs");
-     * } else {
-     *  dofsToCondense = NULL;
-     * }
-     */
-
-    ///@todo Move this to postInitialize?
     // compute initial triad at centre - requires nodal coordinates
     FloatMatrix lcs, tc;
     this->giveLocalCoordinateSystem(lcs);
@@ -480,7 +479,6 @@ LIBeam3dNL2::initializeFrom(InputRecord &ir)
     this->computeQuaternionFromRotMtrx(q, tc);
     this->nlGeometry = 0; // element always nonlinear, this is to force ouput in strains and stresses in GP (see structuralms.C)
 }
-
 
 double
 LIBeam3dNL2::computeLength()

@@ -1225,12 +1225,6 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     return result;
 }
 
-void
-StructuralElement :: initializeFrom(InputRecord &ir)
-{
-    Element :: initializeFrom(ir);
-}
-
 void StructuralElement :: giveInputRecord(DynamicInputRecord &input)
 {
     Element :: giveInputRecord(input);

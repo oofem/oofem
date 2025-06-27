@@ -185,14 +185,6 @@ CoupledFieldsElement :: computeStiffnessMatrixGen(FloatMatrix &answer, MatRespon
 }
 
 
-
-void
-CoupledFieldsElement :: initializeFrom(InputRecord &ir)
-{
-    //nlGeo = 0;
-}
-
-
 } // end namespace oofem
 
 #endif

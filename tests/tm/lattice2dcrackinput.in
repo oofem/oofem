@@ -18,7 +18,7 @@ Set 2 nodes 1 1
 Set 3 nodes 1 2
 
 #%BEGIN_CHECK% tolerance 1.e-5
-##REACTION tStep 1 number 1 dof 11 value 7.3657e-03
-##REACTION tStep 1 number 2 dof 11 value -7.3657e-03
+##REACTION tStep 1 number 1 dof 11 value -7.3657e-03
+##REACTION tStep 1 number 2 dof 11 value  7.3657e-03
 ##ELEMENT tStep 1 number 1 keyword 38 component 1 value 9.24e-11
 #%END_CHECK%

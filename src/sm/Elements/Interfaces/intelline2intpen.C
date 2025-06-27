@@ -39,6 +39,8 @@
 #include "fei2dlinequad.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 namespace oofem {
@@ -52,74 +54,11 @@ IntElLine2IntPen::IntElLine2IntPen(int n, Domain * d):IntElLine2(n, d)
 
 
 void
-IntElLine2IntPen :: initializeFrom(InputRecord &ir)
+IntElLine2IntPen :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralInterfaceElement :: initializeFrom(ir);
-    this->axisymmode = ir.hasField(_IFT_IntElLine1_axisymmode);
-
-    // Check if node numbering is ok
-//    printf("this->dofManArray: "); this->dofManArray.printYourself();
-//    DofManager *node1 = this->giveDofManager(1);
-//    const FloatArray &x1 = *(node1->giveCoordinates());
-//    printf("x1: "); x1.printYourself();
-
-//    DofManager *node2 = this->giveDofManager(2);
-//    const FloatArray &x2 = *(node2->giveCoordinates());
-//    printf("x2: "); x2.printYourself();
-
-//    DofManager *node3 = this->giveDofManager(3);
-//    const FloatArray &x3 = *(node3->giveCoordinates());
-//    printf("x3: "); x3.printYourself();
-
-//    DofManager *node4 = this->giveDofManager(4);
-//    const FloatArray &x4 = *(node4->giveCoordinates());
-//    printf("x4: "); x4.printYourself();
-
-//    IntArray nodeInd = {dofManArray.at(2), dofManArray.at(3), dofManArray.at(4)};
-
-//    double L2 = distance_square(x1, x2);
-//    printf("L2: %e\n", L2);
-
-//    double L3 = distance_square(x1, x3);
-//    printf("L3: %e\n", L3);
-
-//    double L4 = distance_square(x1, x4);
-//    printf("L4: %e\n", L4);
-//
-//    FloatArray dist2 = {L2, L3, L4};
-//
-//    double minDist2 = 1.0e20, maxDist2 =-1.0;
-//    int minDistInd = -1, maxDistInd = -1;
-
-//    for(int i = 1; i <= 3; i++ ) {
-//    	if(dist2.at(i) <= minDist2) {
-//    		minDist2 = dist2.at(i);
-//    		minDistInd = i;
-//    	}
-//
-//    	if(dist2.at(i) >= maxDist2) {
-//    		maxDist2 = dist2.at(i);
-//    		maxDistInd = i;
-//    	}
-//    }
-//
-//    printf("minDistInd: %d\n", minDistInd);
-//    printf("maxDistInd: %d\n", maxDistInd);
-
-
-//    int midDistInd = -1;
-//    for(int i = 1; i <= 3; i++ ) {
-//    	if(i != minDistInd && i != maxDistInd) {
-//    		midDistInd = i;
-//    	}
-//    }
-//    printf("midDistInd: %d\n", midDistInd);
-
-
-//    if(L2 < L3) {
-//    	printf("Renumbering element %d\n.\n", this->giveNumber());
-//    	std::swap(dofManArray.at(2), dofManArray.at(3));
-//    }
+    StructuralInterfaceElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_IntElLine1_axisymmode, priority) ;
 }
 
 

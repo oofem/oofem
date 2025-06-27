@@ -63,9 +63,9 @@ Shell7BasePhFi :: Shell7BasePhFi(int n, Domain *aDomain) : Shell7Base(n, aDomain
 	this->numberOfLayers = nLayers;
 }
 
-void Shell7BasePhFi :: initializeFrom(InputRecord &ir)
+void Shell7BasePhFi :: initializeFrom(InputRecord &ir, int priority)
 {
-    Shell7Base :: initializeFrom(ir);
+    Shell7Base :: initializeFrom(ir, priority);
 }
 
 
@@ -73,9 +73,7 @@ void Shell7BasePhFi :: initializeFrom(InputRecord &ir)
 void
 Shell7BasePhFi :: postInitialize()
 {
-    
     Shell7Base :: postInitialize();
-
 }
 
 

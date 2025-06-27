@@ -40,24 +40,39 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "dynamicinputrecord.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+ParamKey CBSElement::IPK_CBSElement_bsides("bsides");
+ParamKey CBSElement::IPK_CBSElement_bcodes("bcodes");
+
+
 CBSElement :: CBSElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
 { }
 
 
 void
-CBSElement :: initializeFrom(InputRecord &ir)
+CBSElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    FMElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
-    if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
+    FMElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(boundarySides, ppm, ir, this->number, IPK_CBSElement_bsides, priority) ;
+    PM_UPDATE_PARAMETER(boundaryCodes, ppm, ir, this->number, IPK_CBSElement_bcodes, priority) ;
+}
+
+void 
+CBSElement :: initializeFinish()
+{
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    FMElement :: initializeFinish();
+    if (!boundarySides.isEmpty() ) {
+        PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_CBSElement_bcodes);
     }
 }
 
@@ -67,8 +82,8 @@ CBSElement :: giveInputRecord(DynamicInputRecord &input)
 {
     FMElement :: giveInputRecord(input);
     if ( boundarySides.giveSize() > 0 ) {
-        input.setField(this->boundarySides, _IFT_CBSElement_bsides);
-        input.setField(this->boundaryCodes, _IFT_CBSElement_bcodes);
+        input.setField(this->boundarySides, IPK_CBSElement_bsides.getNameCStr());
+        input.setField(this->boundaryCodes, IPK_CBSElement_bcodes.getNameCStr());
     }
 }
 

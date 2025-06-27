@@ -308,10 +308,9 @@ CCTPlate::computeArea()
 }
 
 void
-CCTPlate::initializeFrom(InputRecord &ir)
+CCTPlate::initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 1;
-    StructuralElement::initializeFrom(ir);
+    StructuralElement::initializeFrom(ir, priority);
 }
 
 

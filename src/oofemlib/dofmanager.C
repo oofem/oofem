@@ -49,18 +49,31 @@
 #include "unknownnumberingscheme.h"
 #include "entityrenumberingscheme.h"
 #include "engngm.h"
+#include "paramkey.h"
 
 namespace oofem {
+
+
+ParamKey DofManager::IPK_DofManager_dofidmask("dofidmask");
+ParamKey DofManager::IPK_DofManager_load("load");
+ParamKey DofManager::IPK_DofManager_bc("bc");
+ParamKey DofManager::IPK_DofManager_ic("ic");
+ParamKey DofManager::IPK_DofManager_mastermask("mastermask");
+ParamKey DofManager::IPK_DofManager_doftypemask("doftype");
+ParamKey DofManager::IPK_DofManager_boundaryflag("boundary");
+ParamKey DofManager::IPK_DofManager_globnum("globnum");
+ParamKey DofManager::IPK_DofManager_partitions("partitions");
+ParamKey DofManager::IPK_DofManager_sharedflag ("shared");
+ParamKey DofManager::IPK_DofManager_remoteflag ("remote");
+ParamKey DofManager::IPK_DofManager_nullflag ("null");
+
+
 DofManager :: DofManager(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofArray(), loadArray(), globalNumber(n), partitions()
+    FEMComponent(n, aDomain), dofArray(), loadArray(), globalNumber(n), partitions(), dofTypemap(), dofMastermap(), dofBCmap(), dofICmap(),
+    parallel_mode(DofManager_local), isBoundaryFlag(false), hasSlaveDofs(false)
 {
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
-    dofidmask = NULL;
-    dofTypemap = NULL;
-    dofMastermap = NULL;
-    dofBCmap = NULL;
-    dofICmap = NULL;
     parallel_mode = DofManager_local;
 }
 
@@ -70,12 +83,6 @@ DofManager :: ~DofManager()
     for ( Dof *dof: dofArray ) {
         delete dof;
     }
-
-    delete dofidmask;
-    delete dofTypemap;
-    delete dofMastermap;
-    delete dofBCmap;
-    delete dofICmap;
 }
 
 
@@ -323,133 +330,126 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) cons
 
 
 void
-DofManager :: initializeFrom(InputRecord &ir)
+DofManager :: initializeFrom(InputRecord &ir, int priority)
 {
-    delete dofidmask;
-    dofidmask = NULL;
-    delete dofTypemap;
-    dofTypemap = NULL;
-    delete dofMastermap;
-    dofMastermap = NULL;
-    delete dofBCmap;
-    dofBCmap = NULL;
-    delete dofICmap;
-    dofICmap = NULL;
+    bool boundaryFlag, sharedFlag, remoteFlag, nullFlag;
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+    PM_UPDATE_PARAMETER(loadArray, ppm, ir, this->number, IPK_DofManager_load, priority) ;
 
-    IntArray dofIDArry;
-    IntArray ic, masterMask, dofTypeMask;
-
-    loadArray.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
-
-    ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
-    int dummy;
-    IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
-
-    if ( ir.hasField(_IFT_DofManager_dofidmask) ) {
-        IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
-        this->dofidmask = new IntArray(dofIDArry);
-    } else {
-        dofIDArry = domain->giveDefaultNodeDofIDArry();
-    }
-
-    mBC.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, mBC, _IFT_DofManager_bc);
-
-    ic.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
-
-    // reads master mask - in this array are numbers of master dofManagers
-    // to which are connected dofs in receiver.
-    // if master mask index is zero then dof is created as master (i.e., having own equation number)
-    // othervise slave dof connected to master DofManager is created.
-    // by default if masterMask is not specifyed, all dofs are created as masters.
-    dofTypeMask.clear(); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
-
-    // read boundary flag
-    if ( ir.hasField(_IFT_DofManager_boundaryflag) ) {
+    PM_UPDATE_PARAMETER(dofidmask, ppm, ir, this->number, IPK_DofManager_dofidmask, priority) ;
+    PM_UPDATE_PARAMETER(mBC, ppm, ir, this->number, IPK_DofManager_bc, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_ic, priority) ;
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_doftypemask, priority) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_DofManager_boundaryflag, priority, boundaryFlag) ;
+    if ( boundaryFlag ) {
         isBoundaryFlag = true;
     }
-
-
-    partitions.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
-
-    if ( ir.hasField(_IFT_DofManager_sharedflag) ) {
+    PM_UPDATE_PARAMETER(partitions, ppm, ir, this->number, IPK_DofManager_partitions, priority) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_DofManager_sharedflag, priority, sharedFlag) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_DofManager_remoteflag, priority, remoteFlag) ;
+    PM_CHECK_FLAG_AND_REPORT(ppm, ir, this->number, IPK_DofManager_nullflag, priority, nullFlag) ;
+    if ( sharedFlag ) {
         parallel_mode = DofManager_shared;
-    } else if ( ir.hasField(_IFT_DofManager_remoteflag) ) {
+    } else if ( remoteFlag ) {
         parallel_mode = DofManager_remote;
-    } else if ( ir.hasField(_IFT_DofManager_nullflag) ) {
+    } else if ( nullFlag ) {
         parallel_mode = DofManager_null;
     } else {
         parallel_mode = DofManager_local;
     }
+    PM_UPDATE_TEMP_PARAMETER(IntArray, ppm, ir, this->number, IPK_DofManager_mastermask, priority) ;
+  
 
-    // in parallel mode,  slaves are allowed, because ((Dr. Rypl promissed)
-    // masters have to be in same partition as slaves. They can be again Remote copies.
+    
+}
 
+void DofManager :: initializeFinish()
+{
+    IntArray dofIDArry;
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    bool hasIc = ic.giveSize() != 0;
-    bool hasBc = mBC.giveSize() != 0;
-    bool hasTypeinfo = dofTypeMask.giveSize() != 0;
-
-    ///@todo This should eventually be removed, still here to preserve backwards compatibility:
-    if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask ) {
-        this->dofidmask = new IntArray(dofIDArry);
+    if ( ppm.checkIfSet(this->number, IPK_DofManager_dofidmask.getIndex()) ) {
+        dofIDArry = dofidmask;
+    } else {
+        dofIDArry = domain->giveDefaultNodeDofIDArry();
     }
 
-    // check sizes
+    bool hasBc, hasIc, hasTypeinfo;
+    hasBc = ppm.checkIfSet(this->number, IPK_DofManager_bc.getIndex());
+    hasIc = ppm.checkIfSet(this->number, IPK_DofManager_ic.getIndex());
+    hasTypeinfo = ppm.checkIfSet(this->number, IPK_DofManager_doftypemask.getIndex());
+
+    if ((hasIc || hasBc || hasTypeinfo) && dofidmask.isEmpty()) {
+        this->dofidmask = dofIDArry;
+    }
+
     if ( hasBc ) {
         if ( mBC.giveSize() != dofIDArry.giveSize() ) {
             OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize());
         }
-        this->dofBCmap = new std :: map< int, int >();
+        this->dofBCmap.clear();
         for ( int i = 1; i <= mBC.giveSize(); ++i ) {
             if ( mBC.at(i) > 0 ) {
-                ( * this->dofBCmap ) [ dofIDArry.at(i) ] = mBC.at(i);
+                ( this->dofBCmap ) [ dofIDArry.at(i) ] = mBC.at(i);
             }
         }
     }
 
     if ( hasIc ) {
+        auto val = ppm.getTempParam(this->number, IPK_DofManager_ic.getIndex());
+        IntArray ic (std::get<IntArray>(*val)); 
         if ( ic.giveSize() != dofIDArry.giveSize() ) {
             OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofIDArry.giveSize());
         }
-        this->dofICmap = new std :: map< int, int >();
+        this->dofICmap.clear();
         for ( int i = 1; i <= ic.giveSize(); ++i ) {
             if ( ic.at(i) > 0 ) {
-                ( * this->dofICmap ) [ dofIDArry.at(i) ] = ic.at(i);
+                ( this->dofICmap ) [ dofIDArry.at(i) ] = ic.at(i);
             }
         }
     }
 
     if ( hasTypeinfo ) {
+        auto val = ppm.getTempParam(this->number, IPK_DofManager_doftypemask.getIndex());
+        IntArray dofTypeMask (std::get<IntArray>(*val)); 
         if ( dofTypeMask.giveSize() != dofIDArry.giveSize() ) {
             OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofIDArry.giveSize());
         }
-        this->dofTypemap = new std :: map< int, int >();
-        for ( int i = 1; i <= dofTypeMask.giveSize(); ++i ) {
+
+        this->dofTypemap.clear();
+        for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
             if ( dofTypeMask.at(i) != DT_master ) {
-                ( * this->dofTypemap ) [ dofIDArry.at(i) ] = dofTypeMask.at(i);
+                ( this->dofTypemap ) [ dofIDArry.at(i) ] = dofTypeMask.at(i);
             }
         }
         // For simple slave dofs:
         if ( dofTypeMask.contains(DT_simpleSlave) ) {
-            IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
+            // get mastermask from temp storage
+            auto val = ppm.getTempParam(this->number, IPK_DofManager_mastermask.getIndex());
+            IntArray masterMask (std::get<IntArray>(*val));
             if ( masterMask.giveSize() != dofIDArry.giveSize() ) {
                 OOFEM_ERROR("mastermask size mismatch");
             }
-            this->dofMastermap = new std :: map< int, int >();
+            this->dofMastermap.clear();
             for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
                 if ( masterMask.at(i) > 0 ) {
-                    ( * this->dofMastermap ) [ dofIDArry.at(i) ] = masterMask.at(i);
+                    ( this->dofMastermap ) [ dofIDArry.at(i) ] = masterMask.at(i);
                 }
             }
         }
     }
 }
 
+void DofManager :: postInitialize()
+{
+    hasSlaveDofs = false;
+    for ( Dof *dof: *this ) {
+        if ( !dof->isPrimaryDof() ) {
+            hasSlaveDofs = true;
+            continue;
+        }
+    }
+}
 
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
@@ -464,41 +464,41 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
       if (dof->giveBcId()) mbc.followedBy(dof->giveBcId(),3);
       else mbc.followedBy(0,3);
     }
-    input.setField(mbc, _IFT_DofManager_bc);
-    input.setField(dofids, _IFT_DofManager_dofidmask);
+    input.setField(mbc, IPK_DofManager_bc.getNameCStr());
+    input.setField(dofids, IPK_DofManager_dofidmask.getNameCStr());
 
 
-    if ( this->dofTypemap ) {
-        IntArray typeMask( this->dofidmask->giveSize() );
-        for ( int i = 1; i <= dofidmask->giveSize(); ++i ) {
-            typeMask.at(i) = ( * this->dofTypemap ) [ dofidmask->at(i) ];
+    if ( !this->dofTypemap.empty() ) {
+        IntArray typeMask( this->dofidmask.giveSize() );
+        for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
+            typeMask.at(i) = this->dofTypemap[ dofidmask.at(i) ];
         }
-        input.setField(typeMask, _IFT_DofManager_doftypemask);
+        input.setField(typeMask, IPK_DofManager_doftypemask.getNameCStr());
     }
 
-    if ( this->dofMastermap ) {
-        IntArray masterMask( this->dofidmask->giveSize() );
-        for ( int i = 1; i <= dofidmask->giveSize(); ++i ) {
-            masterMask.at(i) = ( * this->dofMastermap ) [ dofidmask->at(i) ];
+    if ( !this->dofMastermap.empty() ) {
+        IntArray masterMask( this->dofidmask.giveSize() );
+        for ( int i = 1; i <= dofidmask.giveSize(); ++i ) {
+            masterMask.at(i) = this->dofMastermap[ dofidmask.at(i) ];
         }
-        input.setField(masterMask, _IFT_DofManager_mastermask);
+        input.setField(masterMask, IPK_DofManager_mastermask.getNameCStr());
     }
 
     if ( isBoundaryFlag ) {
-        input.setField(_IFT_DofManager_boundaryflag);
+        input.setField(IPK_DofManager_boundaryflag.getNameCStr());
     }
 
 
     if ( this->partitions.giveSize() > 0 ) {
-        input.setField(this->partitions, _IFT_DofManager_partitions);
+        input.setField(this->partitions, IPK_DofManager_partitions.getNameCStr());  
     }
 
     if ( parallel_mode == DofManager_shared ) {
-        input.setField(_IFT_DofManager_sharedflag);
+        input.setField(IPK_DofManager_sharedflag.getNameCStr());
     } else if ( parallel_mode == DofManager_remote ) {
-        input.setField(_IFT_DofManager_remoteflag);
+        input.setField(IPK_DofManager_remoteflag.getNameCStr());
     } else if ( parallel_mode == DofManager_null ) {
-        input.setField(_IFT_DofManager_nullflag);
+        input.setField(IPK_DofManager_nullflag.getNameCStr());
     }
 }
 
@@ -829,19 +829,6 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
     return answer;
 }
 
-
-void DofManager :: postInitialize()
-{
-    hasSlaveDofs = false;
-    for ( Dof *dof: *this ) {
-        if ( !dof->isPrimaryDof() ) {
-            hasSlaveDofs = true;
-            continue;
-        }
-    }
-}
-
-
 bool DofManager :: computeM2GTransformation(FloatMatrix &answer, const IntArray &dofMask)
 // computes transformation matrix of receiver.
 // transformation should include transformation from global cs to nodal cs,
@@ -921,8 +908,8 @@ bool DofManager :: requiresTransformation()
 void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
-    if ( this->dofMastermap ) {
-        for ( auto & mapper: *this->dofMastermap ) {
+    if ( !this->dofMastermap.empty() ) {
+        for ( auto & mapper: this->dofMastermap ) {
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }

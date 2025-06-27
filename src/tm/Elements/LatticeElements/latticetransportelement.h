@@ -51,8 +51,6 @@ class LatticeTransportElement : public TransportElement
 public:
     LatticeTransportElement(int, Domain *, ElementMode);
 
-    void initializeFrom(InputRecord &ir) override;
-
     /**
      * Returns the cross-sectional area of the lattice element.
      * @return Cross-section area.

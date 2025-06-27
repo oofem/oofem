@@ -130,14 +130,6 @@ Tria1PlateSubSoil :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespons
 
 
 void
-Tria1PlateSubSoil :: initializeFrom(InputRecord &ir)
-{
-    this->numberOfGaussPoints = 1;
-    StructuralElement :: initializeFrom(ir);
-}
-
-
-void
 Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};

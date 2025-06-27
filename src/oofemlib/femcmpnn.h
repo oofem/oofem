@@ -123,11 +123,21 @@ public:
      * constructor. Input record can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
+     * Note that initializeFrom may be called mutiple times.
      * @see IR_GIVE_FIELD
      * @see IR_GIVE_OPTIONAL_FIELD
      * @param ir Input record to initialize from.
+     * @param priority Priority of the input record. This is used to determine the order of initialization
      */
     virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir, int priority) { initializeFrom(ir); }
+    /** Finishes the initialization. Note that initializeFrom may be called multiple times. 
+     * The initializeFinish typycally performs the input parameter checking (if compulsory parameters set, etc.)
+     * After initializeFinish, DOFs and other components may be created.
+     */
+    virtual void initializeFinish() {}
+    /// Performs post initialization steps. Called after all components are created and initialized.
+    virtual void postInitialize() {}
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.

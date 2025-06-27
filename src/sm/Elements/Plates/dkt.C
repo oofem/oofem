@@ -346,9 +346,9 @@ DKTPlate::giveNodeCoordinates(double &x1, double &x2, double &x3,
 
 
 void
-DKTPlate::initializeFrom(InputRecord &ir)
+DKTPlate::initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
+    StructuralElement::initializeFrom(ir, priority);
 }
 
 

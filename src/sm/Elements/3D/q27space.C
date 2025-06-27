@@ -58,14 +58,14 @@ FEInterpolation *Q27Space :: giveInterpolation() const
 Q27Space :: Q27Space(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 27;
+    numberOfGaussPoints = 27;
 }
 
 
 void
-Q27Space :: initializeFrom(InputRecord &ir)
+Q27Space :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 27;
-    Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir, priority);
 }
 
 

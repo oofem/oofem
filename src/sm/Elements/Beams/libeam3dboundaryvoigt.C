@@ -54,13 +54,6 @@ LIBeam3dBoundaryVoigt :: LIBeam3dBoundaryVoigt(int n, Domain *aDomain) : LIBeam3
 
 
 void
-LIBeam3dBoundaryVoigt :: initializeFrom(InputRecord &ir)
-{
-    LIBeam3dBoundary :: initializeFrom(ir);
-}
-
-
-void
 LIBeam3dBoundaryVoigt :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 3 ) {

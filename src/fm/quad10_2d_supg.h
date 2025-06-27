@@ -77,7 +77,7 @@ public:
     void giveInternalDofManDofIDMask(int i, IntArray &answer) const override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     int checkConsistency() override;

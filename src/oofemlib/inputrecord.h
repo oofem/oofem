@@ -219,6 +219,22 @@ public:
     const char* what() const noexcept override;
 };
 
+class ComponentInputException : public std::exception {
+public:
+    enum ComponentType 
+    {
+        ctElement,
+        ctDofManager
+    };
+
+protected:
+    std::string msg;
+public:
+    ComponentInputException(const std::string keyword, ComponentType ct, int number, const std::string &reason);
+    ComponentInputException(ComponentType ct, int number, const std::string &reason);
+
+    const char* what() const noexcept override;
+};
 
 } // end namespace oofem
 #endif // inputrecord_h

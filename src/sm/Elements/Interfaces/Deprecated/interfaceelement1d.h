@@ -46,6 +46,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a one-dimensional interface element connecting two nodes (with the same position)
  * In order to compute normal and tangential direction of the slip plane, a reference node or specific direction is needed.
@@ -58,6 +59,9 @@ protected:
     FloatArray normal;
     IntArray dofids;
 
+    static ParamKey IPK_InterfaceElem1d_refnode;
+    static ParamKey IPK_InterfaceElem1d_normal;
+    static ParamKey IPK_InterfaceElem1d_dofIDs;
 public:
     InterfaceElem1d(int n, Domain * d);
     virtual ~InterfaceElem1d() { }
@@ -84,7 +88,9 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_InterfaceElem1d_Name; }
     const char *giveClassName() const override { return "InterfaceElem1d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
+    
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
     integrationDomain giveIntegrationDomain() const override { return _Point; }
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;

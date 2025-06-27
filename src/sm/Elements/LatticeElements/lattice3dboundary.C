@@ -50,6 +50,8 @@
 #include "datastream.h"
 #include "crosssection.h"
 #include "dof.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -57,8 +59,9 @@
 
 namespace oofem {
 REGISTER_Element(Lattice3dBoundary);
+ParamKey Lattice3dBoundary::IPK_Lattice3dBoundary_location("location");
 
-Lattice3dBoundary :: Lattice3dBoundary(int n, Domain *aDomain) : Lattice3d(n, aDomain)
+Lattice3dBoundary :: Lattice3dBoundary(int n, Domain *aDomain) : Lattice3d(n, aDomain), location(2)
 {
     numberOfDofMans = 3;
     geometryFlag = 0;
@@ -451,15 +454,20 @@ Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-Lattice3dBoundary :: initializeFrom(InputRecord &ir)
+Lattice3dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
-    Lattice3d :: initializeFrom(ir);
-
-    this->location.resize(2);
-    IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundary_location); // Macro
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    Lattice3d :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_Lattice3dBoundary_location, priority) ;
 }
 
-
+void
+Lattice3dBoundary :: postInitialize()
+{
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    Lattice3d :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Lattice3dBoundary_location) ;
+}
 
 void
 Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)

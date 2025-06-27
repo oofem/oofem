@@ -137,18 +137,21 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-PlaneStress2d :: initializeFrom(InputRecord &ir)
+PlaneStress2d :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 4;
-    PlaneStressElement :: initializeFrom(ir);
+    PlaneStressElement :: initializeFrom(ir, priority);
+}
 
+void 
+PlaneStress2d :: postInitialize()
+{
+    PlaneStressElement :: postInitialize();
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 && numberOfGaussPoints != 25 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING("Number of Gauss points enforced to 4");
     }
+    
 }
-
-
 
 
 double

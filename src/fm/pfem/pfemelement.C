@@ -64,9 +64,9 @@ PFEMElement :: ~PFEMElement()
 { }
 
 void
-PFEMElement :: initializeFrom(InputRecord &ir)
+PFEMElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    FMElement :: initializeFrom(ir);
+    FMElement :: initializeFrom(ir, priority);
 
     this->computeGaussPoints();
 }

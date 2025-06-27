@@ -71,7 +71,6 @@ public:
 
     const char *giveClassName() const override { return "ElementSide"; }
     const char *giveInputRecordName() const override { return _IFT_ElementSide_Name; }
-    void initializeFrom(InputRecord &ir) override;
     void printYourself() override;
 
     /**

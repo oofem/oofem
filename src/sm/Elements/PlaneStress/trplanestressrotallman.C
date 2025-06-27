@@ -452,13 +452,6 @@ void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer,
  * }
  */
 
-void
-TrPlanestressRotAllman :: initializeFrom(InputRecord &ir)
-{
-    TrPlaneStress2d :: initializeFrom(ir);
-    numberOfGaussPoints = 4;
-}
-
 
 
 int

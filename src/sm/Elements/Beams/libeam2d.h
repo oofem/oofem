@@ -44,6 +44,7 @@
 
 namespace oofem {
 class FEI2dLineLin;
+class ParamKey;
 
 /**
  * A 2-dimensional Linear Isoparametric
@@ -55,6 +56,9 @@ protected:
     /// Interpolation
     static FEI2dLineLin interpolationXZ;
     static FEI2dLineLin interpolationXY;
+
+    static ParamKey IPK_LIBeam2d_XZ;
+    static ParamKey IPK_LIBeam2d_XY;
 
 public:
     double pitch, length;
@@ -90,7 +94,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam2d_Name; }
     const char *giveClassName() const override { return "LIBeam2d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
 
     MaterialMode giveMaterialMode() override { return _2dBeam; }
 

@@ -45,6 +45,8 @@
 #include "mathfem.h"
 #include "crosssection.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,7 @@
 
 namespace oofem {
 REGISTER_Element(Q4Axisymm);
+ParamKey Q4Axisymm::IPK_Q4Axisymm_nipfish("nipfish");
 
 FEI2dQuadQuadAxi Q4Axisymm :: interp(1, 2);
 
@@ -78,14 +81,16 @@ Q4Axisymm :: giveInterpolation() const
 
 
 void
-Q4Axisymm :: initializeFrom(InputRecord &ir)
+Q4Axisymm :: initializeFrom(InputRecord &ir, int priority)
+    // Initialize the receiver from the input record ir.
+    // The priority is used to resolve conflicts in the input record
+    // (e.g. when two elements are defined in the same input record).
+    // The higher the priority, the more important the field is.
+    // The default value of priority is 0.
 {
-    numberOfGaussPoints = 4;
-    StructuralElement :: initializeFrom(ir);
-
-    numberOfFiAndShGaussPoints = 1;
-    ///@todo only works for 1 //JB
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
+    ParameterManager &ppm = domain->elementPPM;
+    StructuralElement :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(numberOfFiAndShGaussPoints, ppm, ir, this->number, IPK_Q4Axisymm_nipfish, priority) ;
 }
 
 

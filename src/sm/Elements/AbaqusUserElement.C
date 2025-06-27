@@ -38,6 +38,8 @@
 #include "dynamicinputrecord.h"
 #include "dofmanager.h"
 #include "node.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
  #include <Windows.h>
@@ -50,6 +52,13 @@
 namespace oofem {
 REGISTER_Element(AbaqusUserElement);
 
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_userElement("uel");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_numcoords("coords");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_dofs("dofs");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_numsvars("numsvars");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_properties("properties");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_type("type");
+ParamKey AbaqusUserElement::IPK_AbaqusUserElement_name("name");
 
 AbaqusUserElement::AbaqusUserElement(int n, Domain *d) :
     StructuralElement(n, d), uelobj(NULL), hasTangentFlag(false), uel(NULL)
@@ -69,28 +78,40 @@ AbaqusUserElement::~AbaqusUserElement()
 }
 
 
-void AbaqusUserElement::initializeFrom(InputRecord &ir)
+void AbaqusUserElement::initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement::initializeFrom(ir);
+    StructuralElement::initializeFrom(ir, priority);
+
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(nCoords, ppm, ir, this->number, IPK_AbaqusUserElement_numcoords, priority) ;
+    PM_UPDATE_PARAMETER(dofs, ppm, ir, this->number, IPK_AbaqusUserElement_dofs, priority) ;
+    PM_UPDATE_PARAMETER(numSvars, ppm, ir, this->number, IPK_AbaqusUserElement_numsvars, priority) ;
+    PM_UPDATE_PARAMETER(props, ppm, ir, this->number, IPK_AbaqusUserElement_properties, priority) ;
+    PM_UPDATE_PARAMETER(jtype, ppm, ir, this->number, IPK_AbaqusUserElement_type, priority) ;
+    PM_UPDATE_PARAMETER(filename, ppm, ir, this->number, IPK_AbaqusUserElement_userElement, priority) ;
+}
+
+
+void AbaqusUserElement::postInitialize()
+{
+    StructuralElement::postInitialize();
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_numcoords) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_numsvars) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_properties) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_type) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_AbaqusUserElement_userElement) ;
 
     this->numberOfDofMans = dofManArray.giveSize();
-
-    // necessary to prevent an array dimension error in Init
-    IR_GIVE_FIELD(ir, nCoords, _IFT_AbaqusUserElement_numcoords);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, this->dofs, _IFT_AbaqusUserElement_dofs);
-    IR_GIVE_FIELD(ir, this->numSvars, _IFT_AbaqusUserElement_numsvars);
     if ( this->numSvars < 0 ) {
         OOFEM_ERROR("'numsvars' field has an invalid value");
     }
-    IR_GIVE_FIELD(ir, this->props, _IFT_AbaqusUserElement_properties);
-    IR_GIVE_FIELD(ir, this->jtype, _IFT_AbaqusUserElement_type);
     if ( this->jtype < 0 ) {
         OOFEM_ERROR("'type' has an invalid value");
     }
-    IR_GIVE_FIELD(ir, this->filename, _IFT_AbaqusUserElement_userElement);
 
-#if 0
+    #if 0
     uelname = "uel";
     IR_GIVE_OPTIONAL_FIELD(ir, uelname, _IFT_AbaqusUserElement_name);
 #endif
@@ -119,12 +140,6 @@ void AbaqusUserElement::initializeFrom(InputRecord &ir)
         OOFEM_ERROR("couldn't load symbol uel,\ndlerror: %s\n", dlresult);
     }
 #endif
-}
-
-
-void AbaqusUserElement::postInitialize()
-{
-    StructuralElement::postInitialize();
 
     this->ndofel = this->numberOfDofMans * this->nCoords;
     this->mlvarx = this->ndofel;
@@ -156,12 +171,12 @@ void AbaqusUserElement::giveInputRecord(DynamicInputRecord &input)
 {
     StructuralElement::giveInputRecord(input);
 
-    input.setField(this->coords, _IFT_AbaqusUserElement_numcoords);
-    input.setField(this->dofs, _IFT_AbaqusUserElement_dofs);
-    input.setField(this->numSvars, _IFT_AbaqusUserElement_numsvars);
-    input.setField(this->props, _IFT_AbaqusUserElement_properties);
-    input.setField(this->jtype, _IFT_AbaqusUserElement_type);
-    input.setField(this->filename, _IFT_AbaqusUserElement_userElement);
+    input.setField(this->coords, IPK_AbaqusUserElement_numcoords.getNameCStr());
+    input.setField(this->dofs, IPK_AbaqusUserElement_dofs.getNameCStr());
+    input.setField(this->numSvars, IPK_AbaqusUserElement_numsvars.getNameCStr());
+    input.setField(this->props, IPK_AbaqusUserElement_properties.getNameCStr());
+    input.setField(this->jtype, IPK_AbaqusUserElement_type.getNameCStr());
+    input.setField(this->filename, IPK_AbaqusUserElement_userElement.getNameCStr());
 }
 
 void AbaqusUserElement::giveDofManDofIDMask(int inode, IntArray &answer) const

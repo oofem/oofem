@@ -57,7 +57,7 @@ public:
     QSpaceGradDamage(int n, Domain * d);
     virtual ~QSpaceGradDamage() { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int prio) override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     void giveDofManDofIDMask_u(IntArray &answer) const override;
     void giveDofManDofIDMask_d(IntArray &answer) const override;

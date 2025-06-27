@@ -49,8 +49,8 @@
 
 namespace oofem {
 
-Set::Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) {
-    #ifdef _OPENMP
+Set::Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false), elementprops() {
+#ifdef _OPENMP
     omp_init_lock(&initLock);
 #endif
  }
@@ -93,6 +93,9 @@ void Set :: initializeFrom(InputRecord &ir)
 
     this->elementInternalNodes.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementInternalNodes, _IFT_Set_internalElementNodes);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->elementprops, _IFT_Set_elementprops);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->dofmanprops, _IFT_Set_dofmanprops);
 #if 0
     this->inputRec = ir.clone();
 #endif
@@ -120,6 +123,9 @@ void Set :: giveInputRecord(DynamicInputRecord &input)
     }
     if ( this->giveInternalElementDofManagerList().giveSize() ) {
         input.setField(this->elementInternalNodes, _IFT_Set_internalElementNodes);
+    }
+    if ( this->elementprops.size() ) {
+        input.setField(this->elementprops, _IFT_Set_elementprops);
     }
 }
 

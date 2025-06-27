@@ -44,6 +44,8 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "fei2dlinelin.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -51,6 +53,8 @@
 
 namespace oofem {
 REGISTER_Element(Truss2d);
+ParamKey Truss2d::IPK_Truss2d_cs("cs");
+
 
 FEI2dLineLin Truss2d::interp[ 3 ] = { FEI2dLineLin(1, 3),
                                       FEI2dLineLin(1, 2),
@@ -282,18 +286,21 @@ Truss2d::resolveCoordIndices(int &c1, int &c2)
 }
 
 void
-Truss2d::initializeFrom(InputRecord &ir)
+Truss2d::initializeFrom(InputRecord &ir, int priority)
 {
-    NLStructuralElement::initializeFrom(ir);
-
-    cs_mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
-
-    if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        throw ValueInputException(ir, _IFT_Truss2d_cs, "Unsupported mode");
-    }
+    NLStructuralElement::initializeFrom(ir, priority);
+    ParameterManager &ppm = this->giveDomain()->dofmanPPM;
+    PM_UPDATE_PARAMETER(cs_mode, ppm, ir, this->number, IPK_Truss2d_cs, priority) ;
 }
 
+void
+Truss2d::postInitialize()
+{
+    NLStructuralElement::postInitialize();
+    if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
+        throw ComponentInputException(IPK_Truss2d_cs.getName(), ComponentInputException::ComponentType::ctElement, this->number, "Unsupported mode");
+    }
+}
 
 void
 Truss2d::giveDofManDofIDMask(int inode, IntArray &answer) const

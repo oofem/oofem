@@ -129,7 +129,7 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "DKTPlate"; }
     const char *giveInputRecordName() const override { return _IFT_DKTPlate_Name; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     void computeGaussPoints() override;
     int computeNumberOfDofs() override { return 9; }

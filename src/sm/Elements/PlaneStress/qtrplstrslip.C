@@ -55,14 +55,7 @@ REGISTER_Element(QTrPlaneStress2dSlip);
 QTrPlaneStress2dSlip :: QTrPlaneStress2dSlip(int n, Domain *aDomain) :
     QTrPlaneStress2d(n, aDomain)
 {
-}
-
-
-void
-QTrPlaneStress2dSlip :: initializeFrom(InputRecord &ir)
-{
     numberOfGaussPoints = 4;
-    QTrPlaneStress2d :: initializeFrom(ir);
 }
 
 

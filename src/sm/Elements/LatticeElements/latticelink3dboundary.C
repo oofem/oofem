@@ -50,6 +50,8 @@
 #include "datastream.h"
 #include "crosssection.h"
 #include "dof.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -57,8 +59,9 @@
 
 namespace oofem {
 REGISTER_Element(LatticeLink3dBoundary);
+ParamKey LatticeLink3dBoundary::IPK_LatticeLink3dBoundary_location("location");
 
-LatticeLink3dBoundary :: LatticeLink3dBoundary(int n, Domain *aDomain) : LatticeLink3d(n, aDomain)
+LatticeLink3dBoundary :: LatticeLink3dBoundary(int n, Domain *aDomain) : LatticeLink3d(n, aDomain), location(2)
 {
     numberOfDofMans = 3;
     geometryFlag = 0;
@@ -318,13 +321,20 @@ LatticeLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) cons
 }
 
 void
-LatticeLink3dBoundary :: initializeFrom(InputRecord &ir)
+LatticeLink3dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {   
-    LatticeLink3d :: initializeFrom(ir);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    LatticeLink3d :: initializeFrom(ir, priority);
 
-    location.resize(2);
-    IR_GIVE_FIELD(ir, location, _IFT_LatticeLink3dBoundary_location); // Macro
-    
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_LatticeLink3dBoundary_location, priority) ;    
+}
+
+void 
+LatticeLink3dBoundary :: postInitialize()
+{
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    LatticeLink3d :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3dBoundary_location) ;
 }
 
 

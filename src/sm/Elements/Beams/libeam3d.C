@@ -44,6 +44,8 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -51,6 +53,7 @@
 
 namespace oofem {
 REGISTER_Element(LIBeam3d);
+ParamKey LIBeam3d::IPK_LIBeam3d_refnode("refnode");
 
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
@@ -283,24 +286,24 @@ LIBeam3d :: computeLength()
 
 
 void
-LIBeam3d :: initializeFrom(InputRecord &ir)
+LIBeam3d :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralElement :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d_refnode);
-    if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
-    }
-
-    //  if (this->hasString (initString, "dofstocondense")) {
-    //    dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
-    //    if (dofsToCondense->giveSize() >= 12)
-    //      OOFEM_ERROR("wrong input data for condensed dofs");
-    //  } else {
-    //    dofsToCondense = NULL;
-    //  }
+    StructuralElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3d_refnode, priority) ;
 }
 
+void 
+LIBeam3d :: postInitialize()
+{
+    ParameterManager &ppm = domain->elementPPM;
+
+    StructuralElement :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d_refnode) ;
+    if ( referenceNode == 0 ) {
+        OOFEM_ERROR("wrong reference node specified.");
+    }
+}
 
 void
 LIBeam3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const

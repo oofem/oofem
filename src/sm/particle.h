@@ -40,10 +40,10 @@
 ///@name Input fields for Particle
 //@{
 #define _IFT_Particle_Name "particle"
-#define _IFT_Particle_rad "rad"
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * Class implementing spherical particles as special nodes having a certain radius.
  * Such particles are used by the cohesive particle model.
@@ -54,6 +54,8 @@ class Particle : public Node
 protected:
     /// Particle radius (only spherical particles considered).
     double radius;
+
+    static ParamKey IPK_Particle_rad;
 
 public:
     /**
@@ -67,7 +69,8 @@ public:
      */
     virtual ~Particle(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     const char *giveInputRecordName() const override { return _IFT_Particle_Name; }
     const char *giveClassName() const override { return "Particle"; }
 

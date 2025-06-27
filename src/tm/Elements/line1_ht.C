@@ -84,10 +84,9 @@ Line1_ht :: computeGaussPoints()
 
 
 void
-Line1_ht :: initializeFrom(InputRecord &ir)
+Line1_ht :: initializeFrom(InputRecord &ir, int priority)
 {
-    numberOfGaussPoints = 1;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 }
 
 

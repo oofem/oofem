@@ -37,47 +37,78 @@
 #include "iga.h"
 #include "feibspline.h"
 #include "mathfem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_degree("degree");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotVectorU("knotvectoru");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotVectorV("knotvectorv");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotVectorW("knotvectorw");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotMultiplicityU("knotmultiplicityu");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotMultiplicityV("knotmultiplicityv");
+ParamKey BSplineInterpolation::IPK_BSplineInterpolation_knotMultiplicityW("knotmultiplicityw");
+
+
+
 void
-BSplineInterpolation :: initializeFrom(InputRecord &ir)
+BSplineInterpolation :: initializeFrom(InputRecord &ir, ParameterManager&pm, int elnum, int priority)
 {
+    bool flag;
     IntArray degree_tmp;
+    PM_UPDATE_PARAMETER_AND_REPORT(degree_tmp, pm, ir, elnum, IPK_BSplineInterpolation_degree, priority, flag);
+    if (flag) {
+        if ( degree_tmp.giveSize() != nsd ) {
+            throw ValueInputException(ir, _IFT_BSplineInterpolation_degree, "degree size mismatch");
+        }
 
-    InputFieldType IFT_knotVector [ 3 ] = {
-        _IFT_BSplineInterpolation_knotVectorU,
-        _IFT_BSplineInterpolation_knotVectorV,
-        _IFT_BSplineInterpolation_knotVectorW
-    };
+        for ( int i = 0; i < nsd; i++ ) {
+            degree [ i ] = degree_tmp.at(i + 1);
+        }
+    }
+    PM_UPDATE_PARAMETER(knotValues [ 0 ], pm, ir, elnum, IPK_BSplineInterpolation_knotVectorU, priority);
+    PM_UPDATE_PARAMETER(knotMultiplicity [ 0 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityU, priority);
 
-    InputFieldType IFT_knotMultiplicity [ 3 ] = {
-        _IFT_BSplineInterpolation_knotMultiplicityU,
-        _IFT_BSplineInterpolation_knotMultiplicityV,
-        _IFT_BSplineInterpolation_knotMultiplicityW
-    };
-
-    IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
-    if ( degree_tmp.giveSize() != nsd ) {
-        throw ValueInputException(ir, _IFT_BSplineInterpolation_degree, "degree size mismatch");
+    if (nsd>1) {
+        PM_UPDATE_PARAMETER(knotValues [ 1 ], pm, ir, elnum, IPK_BSplineInterpolation_knotVectorV, priority);
+        PM_UPDATE_PARAMETER(knotMultiplicity [ 1 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityV, priority);
     }
 
-    for ( int i = 0; i < nsd; i++ ) {
-        degree [ i ] = degree_tmp.at(i + 1);
+    if (nsd >2) {
+        PM_UPDATE_PARAMETER(knotValues [ 2 ], pm, ir, elnum, IPK_BSplineInterpolation_knotVectorW, priority);
+        PM_UPDATE_PARAMETER(knotMultiplicity [ 2 ], pm, ir, elnum, IPK_BSplineInterpolation_knotMultiplicityW, priority);
     }
+
+}
+
+void
+BSplineInterpolation::postInitialize(ParameterManager&pm, int elnum)
+{
+    ParamKey* IPK_knotVector [ 3 ] = {
+        &IPK_BSplineInterpolation_knotVectorU,
+        &IPK_BSplineInterpolation_knotVectorV,
+        &IPK_BSplineInterpolation_knotVectorW
+    };
+
+    ParamKey* IPK_knotMultiplicity [ 3 ] = {
+        &IPK_BSplineInterpolation_knotMultiplicityU,
+        &IPK_BSplineInterpolation_knotMultiplicityV,
+        &IPK_BSplineInterpolation_knotMultiplicityW
+    };
 
     for ( int n = 0; n < nsd; n++ ) {
-        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
+        //IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         int size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            throw ValueInputException(ir, IFT_knotVector [ n ], "invalid size of knot vector");
+            throw ComponentInputException(IPK_knotVector[n]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "invalid size of knot vector");
         }
 
         // check for monotonicity of knot vector without multiplicity
         double knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                throw ValueInputException(ir, IFT_knotVector [ n ], "knot vector is not monotonic");
+                throw ComponentInputException(IPK_knotVector [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot vector is not monotonic");
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -89,7 +120,7 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir)
             knotValues [ n ].at(i) /= span;
         }
 
-        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicity [ n ]);
+        //IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicity [ n ]);
         if ( knotMultiplicity [ n ].giveSize() == 0 ) {
             // default multiplicity
             knotMultiplicity [ n ].resize(size);
@@ -99,23 +130,23 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity size mismatch");
+                throw ComponentInputException(IPK_knotMultiplicity [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot multiplicity size mismatch");
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity out of range");
+                    throw ComponentInputException(IPK_knotMultiplicity [ n ]->getName(), ComponentInputException::ComponentType::ctElement, elnum, "knot multiplicity out of range");
                 }
             }
 
             // check for multiplicity of the first and last one
             if ( knotMultiplicity [ n ].at(1) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IPK_knotVector [ n ]->getNameCStr(), degree [ n ] + 1);
             }
 
             if ( knotMultiplicity [ n ].at(size) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IPK_knotVector [ n ]->getNameCStr(), degree [ n ] + 1);
             }
         }
 
@@ -142,8 +173,6 @@ BSplineInterpolation :: initializeFrom(InputRecord &ir)
         numberOfControlPoints [ n ] = sum - degree [ n ] - 1;
     }
 }
-
-
 void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);

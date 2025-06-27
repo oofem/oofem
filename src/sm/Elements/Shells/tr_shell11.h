@@ -76,7 +76,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TR_SHELL11_Name; }
     const char *giveClassName() const override { return "TR_SHELL11"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
 
     void computeGaussPoints() override;
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;

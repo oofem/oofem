@@ -45,10 +45,14 @@
 #include "fei3dtetlin.h"
 #include "classfactory.h"
 #include "Materials/structuralms.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 namespace oofem {
 REGISTER_Element(LTRSpaceBoundary);
+
+ParamKey LTRSpaceBoundary::IPK_LTRSpaceBoundary_location("location");
 
 FEI3dTetLin LTRSpaceBoundary :: interpolation;
 
@@ -60,10 +64,19 @@ LTRSpaceBoundary :: LTRSpaceBoundary(int n, Domain *aDomain) :
 }
 
 void
-LTRSpaceBoundary :: initializeFrom(InputRecord &ir)
+LTRSpaceBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
-    Structural3DElement :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, location, _IFT_LTRSpaceBoundary_Location);
+    Structural3DElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_LTRSpaceBoundary_location, priority) ;
+}
+
+void
+LTRSpaceBoundary :: postInitialize()
+{
+    Structural3DElement :: postInitialize();
+    ParameterManager &ppm = domain->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LTRSpaceBoundary_location) ;
 }
 
 Interface *

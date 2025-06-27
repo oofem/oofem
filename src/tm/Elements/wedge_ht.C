@@ -69,10 +69,10 @@ Wedge_mt :: Wedge_mt(int n, Domain *aDomain) : Wedge_ht(n, aDomain)
 
 
 void
-Wedge_ht :: initializeFrom(InputRecord &ir)
+Wedge_ht :: initializeFrom(InputRecord &ir, int priority)
 {
     numberOfGaussPoints = 6;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 
 }
 

@@ -383,13 +383,6 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 }
 
 
-void
-PhaseFieldElement :: initializeFrom(InputRecord &ir)
-{
-    //nlGeo = 0;
-}
-
-
 #if 0
 void
 PhaseFieldElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)

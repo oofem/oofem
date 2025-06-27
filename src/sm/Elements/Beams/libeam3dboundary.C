@@ -44,9 +44,13 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 REGISTER_Element(LIBeam3dBoundary);
+ParamKey LIBeam3dBoundary::IPK_LIBeam3dBoundary_refnode("refnode");
+ParamKey LIBeam3dBoundary::IPK_LIBeam3dBoundary_location("location");
 
 LIBeam3dBoundary :: LIBeam3dBoundary(int n, Domain *aDomain) : LIBeam3d(n, aDomain)
     // Constructor.
@@ -58,18 +62,26 @@ LIBeam3dBoundary :: LIBeam3dBoundary(int n, Domain *aDomain) : LIBeam3d(n, aDoma
 
 
 void
-LIBeam3dBoundary :: initializeFrom(InputRecord &ir)
+LIBeam3dBoundary :: initializeFrom(InputRecord &ir, int priority)
 {
-    LIBeam3d :: initializeFrom(ir);
+    LIBeam3d :: initializeFrom(ir, priority);
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3dBoundary_refnode, priority) ;
+    PM_UPDATE_PARAMETER(location, ppm, ir, this->number, IPK_LIBeam3dBoundary_location, priority) ;
 
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dBoundary_refnode);
+}
+
+void
+LIBeam3dBoundary :: postInitialize()
+{
+    LIBeam3d :: postInitialize();
+    ParameterManager &ppm = giveDomain()->elementPPM;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3dBoundary_refnode) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3dBoundary_location) ;
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified");
     }
-
-    IR_GIVE_FIELD(ir, location, _IFT_LIBeam3dBoundary_location);
 }
-
 
 void
 LIBeam3dBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const

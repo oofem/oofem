@@ -115,11 +115,11 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 
 
 void
-Quad10_2D_SUPG :: initializeFrom(InputRecord &ir)
+Quad10_2D_SUPG :: initializeFrom(InputRecord &ir, int priority)
 {
-    this->pressureNode.initializeFrom(ir);
+    this->pressureNode.initializeFrom(ir, priority);
 
-    SUPGElement2 :: initializeFrom(ir);
+    SUPGElement2 :: initializeFrom(ir, priority);
 }
 
 

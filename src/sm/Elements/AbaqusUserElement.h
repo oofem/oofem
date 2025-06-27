@@ -53,6 +53,7 @@
 //@}
 
 namespace oofem {
+class ParamKey;
 /**
  * UEL interface from Abaqus user elements.
  *
@@ -156,6 +157,14 @@ private:
     /// File containing the uel function
     std::string filename;
 
+    static ParamKey IPK_AbaqusUserElement_userElement;
+    static ParamKey IPK_AbaqusUserElement_numcoords;
+    static ParamKey IPK_AbaqusUserElement_dofs;
+    static ParamKey IPK_AbaqusUserElement_numsvars;
+    static ParamKey IPK_AbaqusUserElement_properties;
+    static ParamKey IPK_AbaqusUserElement_type;
+    static ParamKey IPK_AbaqusUserElement_name;
+
 public:
     /// Constructor
     AbaqusUserElement(int n, Domain *d);
@@ -198,7 +207,7 @@ public:
         return tempAmatrx;
     }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void postInitialize() override;
 

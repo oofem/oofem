@@ -54,6 +54,9 @@
 #include "dof.h"
 #include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "function.h"
+#include "parametermanager.h"
+#include "paramkey.h"
+
 #ifdef __CEMHYD_MODULE
  #include "tm/Materials/cemhyd/cemhydmat.h"
 #endif
@@ -66,21 +69,29 @@
 namespace oofem {
 
 const double TransportElement :: stefanBoltzmann = 5.67e-8; //W/m2/K4
+ParamKey TransportElement::IPK_TransportElement_vof_function("voffunction");
+
 
 TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
     Element(n, aDomain), emode( em )
 {
+    this->vofFunction = 0;
 }
 
 
 void
-TransportElement :: initializeFrom(InputRecord &ir)
+TransportElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    Element::initializeFrom(ir);
-    this->vofFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vofFunction, _IFT_TransportElement_vof_function);
+    Element::initializeFrom(ir, priority);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(vofFunction, ppm, ir, this->number, IPK_TransportElement_vof_function, priority) ;
 }
 
+void
+TransportElement :: postInitialize()
+{
+    Element::postInitialize();
+}
 
 void
 TransportElement :: giveDofManDofIDMask(int inode, IntArray &answer) const

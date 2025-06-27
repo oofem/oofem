@@ -3798,10 +3798,10 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         if ( parent ) {
             // Copy most of the existing parent element:
             DynamicInputRecord ir( *domain->giveElement ( parent ) );
-            ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
+            ir.setField(* mesh->giveElement(ielem)->giveNodes(), Element::IPK_Element_nodes.getNameCStr());
             ir.giveRecordKeywordField(name);
             auto elem = classFactory.createElement(name.c_str(), eNum, * dNew);
-            elem->initializeFrom(ir);
+            elem->initializeFrom(ir,1);
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
 #ifdef __MPI_PARALLEL_MODE
             //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );

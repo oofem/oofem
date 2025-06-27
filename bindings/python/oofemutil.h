@@ -261,7 +261,7 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
     // construct OOFEMTXTInputRecord from bp::dict **kw
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // pass input record to elem
-    elem->initializeFrom(ir);
+    elem->initializeFrom(ir, 1);
     // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
     return py::cast(elem.release());
 }
@@ -539,12 +539,20 @@ py::object createTermOfType(std::string type, py::args args, py::kwargs kw)
             return py::cast(t.release());
         }
     } else if (type == "NTfTerm") {
-        if (len(args)>2) {
+        if (len(args)>=3) {
             oofem::Variable * f = PY_CAST(oofem::Variable*,args[0]);
             oofem::Variable * tf = PY_CAST(oofem::Variable*,args[1]);
             oofem::MaterialMode m = PY_CAST(oofem::MaterialMode,args[2]);
-            std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m);
-            return py::cast(t.release());
+            std::unique_ptr<Term> t;
+            if (len(args)==3) {
+                std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m);
+                return py::cast(t.release());
+
+            } else {
+                oofem::FloatArray* flux = PY_CAST(oofem::FloatArray*,args[3]);
+                std::unique_ptr<Term> t = std::make_unique<NTfTerm>(f, tf, m, flux);
+                return py::cast(t.release());
+            }
         }
     }
     return py::none();

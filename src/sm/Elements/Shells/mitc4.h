@@ -50,6 +50,7 @@
 
 namespace oofem {
 class FEI2dQuadLin;
+class ParamKey;
 #ifndef __CHARTENSOR
  #define __CHARTENSOR
 enum CharTensor {
@@ -84,6 +85,9 @@ protected:
     int nPointsXY = 0, nPointsZ = 0, directorType = 0;
     double drillCoeff = 0.;
 
+    static ParamKey IPK_MITC4Shell_nipZ;
+    static ParamKey IPK_MITC4Shell_directorType;
+
 public:
     MITC4Shell(int n, Domain *d);
 
@@ -97,7 +101,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MITC4Shell_Name; }
     integrationDomain giveIntegrationDomain() const override { return _3dDegShell; }
     MaterialMode giveMaterialMode() override { return _3dDegeneratedShell; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
     int computeNumberOfDofs() override { return 24; }
     int computeNumberOfGlobalDofs() override { return 24; }

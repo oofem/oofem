@@ -45,6 +45,7 @@
 #include "engngm.h"
 #include "node.h"
 #include "dof.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -52,18 +53,29 @@
 #endif
 
 namespace oofem {
+
+ParamKey SUPGElement::IPK_SUPGElement_bsides("bsides");
+ParamKey SUPGElement::IPK_SUPGElement_bcodes("bcodes");
+
+
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
 { }
 
 
 void
-SUPGElement :: initializeFrom(InputRecord &ir)
+SUPGElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    FMElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
-    if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
+    FMElement :: initializeFrom(ir, priority);
+
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    bool flag;
+    PM_UPDATE_PARAMETER_AND_REPORT(boundarySides, ppm, ir, this->number, IPK_SUPGElement_bsides, priority, flag) ;
+    if (flag && !boundarySides.isEmpty()) {
+        PM_UPDATE_PARAMETER_AND_REPORT(boundaryCodes, ppm, ir, this->number, IPK_SUPGElement_bcodes, priority, flag) ;
+        if (!flag) {
+            OOFEM_ERROR("Boundary codes not provided for element %d", this->giveNumber());
+        }
     }
 }
 
@@ -73,8 +85,8 @@ SUPGElement :: giveInputRecord(DynamicInputRecord &input)
 {
     FMElement :: giveInputRecord(input);
     if ( !boundarySides.isEmpty() ) {
-        input.setField(this->boundarySides, _IFT_SUPGElement_bsides);
-        input.setField(this->boundaryCodes, _IFT_SUPGElement_bcodes);
+        input.setField(this->boundarySides, IPK_SUPGElement_bsides.getNameCStr());
+        input.setField(this->boundaryCodes, IPK_SUPGElement_bcodes.getNameCStr());
     }
 }
 

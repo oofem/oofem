@@ -43,11 +43,10 @@
 #include "mmashapefunctprojection.h"
 
 #define _IFT_LTRSpaceBoundary_Name "ltrspaceboundary"
-#define _IFT_LTRSpaceBoundary_Location "location"
 
 namespace oofem {
 class FEI3dTetLin;
-
+class ParamKey;
 /**
  * This class implements a linear tetrahedral four-node finite element.
  * Each node has 3 degrees of freedom. This element is used for 3D RVE analyses with Periodic Boundary Conditions.
@@ -77,6 +76,7 @@ protected:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     double giveLengthInDir(const FloatArray &normalToCrackPlane) override;
 
+    static ParamKey IPK_LTRSpaceBoundary_location; ///< [optional] Location of the element (1-4) - 1: left, 2: right, 3: top, 4: bottom 
 public:
     LTRSpaceBoundary(int n, Domain *d);
     virtual ~LTRSpaceBoundary() { }
@@ -91,7 +91,8 @@ public:
     void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
 
     // definition & identification
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundary_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundary"; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_tetra_1;}

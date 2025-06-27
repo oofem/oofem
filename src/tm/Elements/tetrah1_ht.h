@@ -67,7 +67,7 @@ public:
 
 
     int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
 
     Interface *giveInterface(InterfaceType t) override;

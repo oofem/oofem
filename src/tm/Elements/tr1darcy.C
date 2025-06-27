@@ -58,12 +58,12 @@ FEI2dTrLin Tr1Darcy :: interpolation_lin(1, 2);
 Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 {
     numberOfDofMans = 3;
+    this->numberOfGaussPoints = 1;
 }
 
-void Tr1Darcy :: initializeFrom(InputRecord &ir)
+void Tr1Darcy :: initializeFrom(InputRecord &ir, int priority)
 {
-    this->numberOfGaussPoints = 1;
-    TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir, priority);
 }
 
 FEInterpolation *

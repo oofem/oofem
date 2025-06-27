@@ -33,6 +33,9 @@
  */
 
 #include "domain.h"
+#include "parametermanager.h"
+#include "paramkey.h"
+
 #include "element.h"
 #include "timestep.h"
 #include "node.h"
@@ -76,6 +79,7 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
+
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
@@ -90,8 +94,11 @@
 #include <set>
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
-                                                     bcTracker(this)
+Domain :: Domain(int n, int serNum, EngngModel *e) : elementPPM(),
+                                                    dofmanPPM(),
+                                                    defaultNodeDofIDArry(),
+                                                    bcTracker(this)
+                                                     
     // Constructor. Creates a new domain.
 {
     if ( !e->giveSuppressOutput() ) {
@@ -480,6 +487,7 @@ Domain :: instanciateYourself(DataReader &dr)
     bool nxfemman = false;
     bool ncontactman = false;
     bool nfracman = false;
+    int componentRecPriority = 2;
 
     // read type of Domain to be solved
     {
@@ -559,7 +567,7 @@ Domain :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR("Couldn't create node of type: %s\n", name.c_str());
         }
 
-        dman->initializeFrom(ir);
+        dman->initializeFrom(ir, componentRecPriority);
         dman->setGlobalNumber(num);    // set label
         dofManagerList[i - 1] = std :: move(dman);
 
@@ -585,7 +593,7 @@ Domain :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
 
-        elem->initializeFrom(ir);
+        elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
         elementList[i - 1] = std :: move(elem);
 
@@ -926,6 +934,22 @@ Domain :: instanciateYourself(DataReader &dr)
 #  endif
     }
 
+    this->initializeFinish();
+    return 1;
+}
+
+void
+Domain::initializeFinish() {
+    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+    spatialLocalizer->init();
+    connectivityTable = std::make_unique<ConnectivityTable>(this);
+    OOFEM_LOG_INFO("Spatial localizer init done\n");
+
+    // finish initialization of components (at present neded for dofManagers)
+    for ( auto &dman: dofManagerList ) {
+        dman->initializeFinish();
+    }
+
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofmanGlobal2LocalMap, elementGlobal2LocalMap);
     for ( auto &dman: this->dofManagerList ) {
@@ -940,21 +964,9 @@ Domain :: instanciateYourself(DataReader &dr)
         set->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-
     BuildMaterialToElementMap();
 
-    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
-    spatialLocalizer->init();
-    connectivityTable = std::make_unique<ConnectivityTable>(this);
-    OOFEM_LOG_INFO("Spatial localizer init done\n");
 
-    return 1;
-}
-
-
-void
-Domain :: postInitialize()
-{
     // New  - in development /JB
     // set element cross sections based on element set definition and set the corresponding
     // material based on the cs
@@ -963,10 +975,51 @@ Domain :: postInitialize()
             Set *set = this->giveSet(setNum);
             for ( int ielem: set->giveElementList() ) {
                 Element *element = this->giveElement( ielem );
-                element->setCrossSection(i);
+                // hack to set the cross section from the cross section model to the element
+                // this is obsolete feature, but supported here for backwards compatibility
+                // the supported way is to set cross section using set element properties
+                size_t indx = Element::IPK_Element_crosssect.getIndex();
+                if (this->elementPPM.getPriority(ielem, indx) <= 1) {
+                    this->elementPPM.setPriority(ielem, indx, 1);
+                    element->setCrossSection(i);
+                }  
             }
         }
     }
+
+    // process sets and apply element and dofman properties
+    for ( int i = 1; i <= this->giveNumberOfSets(); i++ ) {
+        Set *set = this->giveSet(i);
+        std::string elemProps = set->giveElementProperties();
+        if (!elemProps.empty()) {
+            OOFEMTXTInputRecord ir (-1, elemProps);
+            for ( int ielem: set->giveElementList() ) {
+                Element *element = this->giveElement( ielem );
+                element->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)
+            }
+        }
+        std::string dofmanProps = set->giveDofManProperties();
+        if (!dofmanProps.empty()) {
+            OOFEMTXTInputRecord ir (-1, dofmanProps);
+            for ( int idofman: set->giveNodeList() ) {
+                DofManager *dofman = this->giveDofManager( idofman );
+                dofman->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)
+            }
+        }
+    } 
+
+
+    for ( auto &el: elementList ) {
+        el->initializeFinish();
+    }
+}
+
+void
+Domain :: postInitialize()
+{
+
+    
+    
 
     if (!spatialLocalizer) {
         spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
@@ -976,7 +1029,6 @@ Domain :: postInitialize()
         connectivityTable = std::make_unique<ConnectivityTable>(this);
     }
     
-
     if ( this->hasXfemManager() ) {
         this->giveXfemManager()->postInitialize();
     }
@@ -992,11 +1044,14 @@ Domain :: postInitialize()
     for ( auto &el: elementList ) {
         el->postInitialize();
     }
+    //@TODO clear parameterPriorityManager
 
     for ( auto &bc: bcList ) {
         bc->postInitialize();
     }
 
+    this->elementPPM.clear();
+    this->dofmanPPM.clear();
 
 }
 

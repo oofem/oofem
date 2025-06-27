@@ -58,6 +58,8 @@ namespace oofem {
 #define _IFT_Set_elementEdges "elementedges" ///< Interleaved array of element index + edge number
 #define _IFT_Set_elementSurfaces "elementsurfaces" ///< Interleaved array of element index + surface number
 #define _IFT_Set_internalElementNodes "internalelementnodes" ///< Interleaved array of element index + internal node number
+#define _IFT_Set_elementprops "elemprops" ///< Element properties 
+#define _IFT_Set_dofmanprops "dofmanprops" ///< Dof manager properties
 //@}
 
 class EntityRenumberingFunction;
@@ -88,6 +90,8 @@ protected:
     IntArray elementInternalNodes; /// Element numbers + internal dof manager numbers (interleaved).
     IntArray nodes; ///< Node numbers.
     IntArray totalNodes; ///< Unique set of nodes (computed).
+    std::string elementprops; ///< Element properties.
+    std::string dofmanprops; ///< Dof manager properties.
 #if 0
     /// receiver original input record
     std::unique_ptr<InputRecord> inputRec;
@@ -173,6 +177,10 @@ public:
     void addAllElements();
     /// Return True if given element is contained
     bool hasElement(int elem) const;
+
+    std::string giveElementProperties() const { return this->elementprops; }
+    std::string giveDofManProperties() const { return this->dofmanprops; }
+
 
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;
     /**

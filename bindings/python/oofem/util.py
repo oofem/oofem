@@ -41,6 +41,8 @@ def setupDomain (domain, nodes, elems, css, mats, bcs, ics, ltfs, sets):
     domain.resizeSets(len(sets)) # process sets
     for s in sets:
         domain.setSet(s.number, s)
+    
+    domain.initializeFinish()
        
     return
 

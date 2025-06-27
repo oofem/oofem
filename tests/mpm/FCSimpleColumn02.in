@@ -28,10 +28,10 @@ node 18 coords 3 -0.0198999997 0.0401000008 0.000250000012
 node 19 coords 3 -0.0198999997 0.0399999991           0.
 node 20 coords 3 -0.0198999997 0.0401000008           0.
 #
-upbrick11 1 nodes 8 11 12 14 13  1  2  4  3 crosssect 0 mat 1
-upbrick11 2 nodes 8 13 14 16 15  3  4  6  5 crosssect 0 mat 1
-upbrick11 3 nodes 8 15 16 18 17  5  6  8  7 crosssect 0 mat 1
-upbrick11 4 nodes 8 17 18 20 19  7  8 10  9 crosssect 0 mat 1
+upbrick11 1 nodes 8 11 12 14 13  1  2  4  3 
+upbrick11 2 nodes 8 13 14 16 15  3  4  6  5 
+upbrick11 3 nodes 8 15 16 18 17  5  6  8  7 
+upbrick11 4 nodes 8 17 18 20 19  7  8 10  9 
 #
 dummycs 1 mat 1 set 1
 # ks = inifinity, kw=1e+09

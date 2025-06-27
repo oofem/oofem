@@ -44,10 +44,13 @@
 #include "mathfem.h"
 #include "fei2dlinelin.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 
 namespace oofem {
 REGISTER_Element(IntElLine1PhF);
+ParamKey IntElLine1PhF::IPK_IntElLine1PhF_axisymmode("axisymmode");
 
 FEI2dLineLin IntElLine1PhF :: interp(1, 1);
 
@@ -56,6 +59,7 @@ IntElLine1PhF :: IntElLine1PhF(int n, Domain *aDomain) : StructuralInterfaceElem
 {
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;
+    this->axisymmode = false;
 }
 
 
@@ -132,11 +136,11 @@ IntElLine1PhF :: computeAreaAround(IntegrationPoint *ip)
 
 
 void
-IntElLine1PhF :: initializeFrom(InputRecord &ir)
+IntElLine1PhF :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralInterfaceElement :: initializeFrom(ir);
-    this->axisymmode = false;
-    this->axisymmode = ir.hasField(_IFT_IntElLine1PhF_axisymmode);
+    StructuralInterfaceElement :: initializeFrom(ir, priority);
+    ParameterManager *ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_IntElLine1PhF_axisymmode, priority) ;
 }
 
 

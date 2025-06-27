@@ -68,9 +68,9 @@ PFEMElement2d :: ~PFEMElement2d()
 
 
 void
-PFEMElement2d :: initializeFrom(InputRecord &ir)
+PFEMElement2d :: initializeFrom(InputRecord &ir, int priority)
 {
-    PFEMElement :: initializeFrom(ir);
+    PFEMElement :: initializeFrom(ir, priority);
 }
 
 int

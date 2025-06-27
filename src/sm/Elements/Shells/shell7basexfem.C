@@ -48,6 +48,8 @@
 #include "mathfem.h"
 #include "gausspoint.h"
 #include "spatiallocalizer.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 namespace oofem {
 
@@ -55,6 +57,9 @@ namespace oofem {
     must be scaled with 1/factor in the input file
 */
 const double DISC_DOF_SCALE_FAC = 1.0;
+
+ParamKey Shell7BaseXFEM::IPK_Shell7BaseXFEM_CohesiveZoneMaterial("czmaterial");
+
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -161,9 +166,10 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 }
 
 
-void Shell7BaseXFEM :: initializeFrom(InputRecord &ir)
+void Shell7BaseXFEM :: initializeFrom(InputRecord &ir, int priority)
 {
-    Shell7Base :: initializeFrom(ir);
+    Shell7Base :: initializeFrom(ir, priority);
+    
     if ( ir.hasField(_IFT_Shell7BaseXFEM_CohesiveZoneMaterial) ) {
         OOFEM_ERROR("'czmaterial' this keyword is not in use anymore! Instead define cz material for each interface in the cross secton, ex: interfacematerials 3 x x x ");
     }

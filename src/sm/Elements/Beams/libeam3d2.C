@@ -47,6 +47,8 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "engngm.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -56,6 +58,7 @@
 
 namespace oofem {
 REGISTER_Element(LIBeam3d2);
+ParamKey LIBeam3d2::IPK_LIBeam3d2_refnode("refnode");
 
 LIBeam3d2::LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
@@ -298,29 +301,28 @@ LIBeam3d2::computeLength()
 
 
 void
-LIBeam3d2::initializeFrom(InputRecord &ir)
+LIBeam3d2::initializeFrom(InputRecord &ir, int priority)
 {
     // first call parent
-    NLStructuralElement::initializeFrom(ir);
+    NLStructuralElement::initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(referenceNode, ppm, ir, this->number, IPK_LIBeam3d2_refnode, priority) ;
+}
 
-    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d2_refnode);
+void
+LIBeam3d2::postInitialize()
+{
+    ParameterManager &ppm = domain->elementPPM;
+
+    NLStructuralElement::postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LIBeam3d2_refnode) ;
     if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified.");
     }
-
-    //  if (this->hasString (initString, "dofstocondense")) {
-    //    dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
-    //    if (dofsToCondense->giveSize() >= 12)
-    //      OOFEM_ERROR("wrong input data for condensed dofs");
-    //  } else {
-    //    dofsToCondense = NULL;
-    //  }
-    // compute initial triad at centre - requires nodal coordinates
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
 }
-
 
 void
 LIBeam3d2::giveEdgeDofMapping(IntArray &answer, int iEdge) const

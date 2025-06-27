@@ -54,6 +54,8 @@
 #include "classfactory.h"
 #include "domain.h"
 #include "dynamicinputrecord.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -68,6 +70,8 @@
 
 namespace oofem {
 REGISTER_Element(QTrPlaneStress2dXFEM);
+ParamKey QTrPlaneStress2dXFEM::IPK_QTrPlaneStress2dXFEM_RegCoeff("reg_coeff");
+ParamKey QTrPlaneStress2dXFEM::IPK_QTrPlaneStress2dXFEM_RegCoeffTol("reg_coeff_tol");
 
 QTrPlaneStress2dXFEM::~QTrPlaneStress2dXFEM() {
 	// TODO Auto-generated destructor stub
@@ -220,18 +224,14 @@ QTrPlaneStress2dXFEM :: giveGeometryType() const
 }
 
 void
-QTrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir)
+QTrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir, int priority)
 {
-    QTrPlaneStress2d :: initializeFrom(ir);
-    XfemStructuralElementInterface :: initializeCZFrom(ir);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    QTrPlaneStress2d :: initializeFrom(ir, priority);
+    XfemStructuralElementInterface :: initializeCZFrom(ir, priority);
 
-    if ( ir.hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeff) ) {
-        ir.giveOptionalField(mRegCoeff, _IFT_QTrPlaneStress2dXFEM_RegCoeff);
-    }
-
-    if ( ir.hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeffTol) ) {
-        ir.giveOptionalField(mRegCoeffTol, _IFT_QTrPlaneStress2dXFEM_RegCoeffTol);
-    }
+    PM_UPDATE_PARAMETER(mRegCoeff, ppm, ir, this->number, IPK_QTrPlaneStress2dXFEM_RegCoeff, priority);
+    PM_UPDATE_PARAMETER(mRegCoeffTol, ppm, ir, this->number, IPK_QTrPlaneStress2dXFEM_RegCoeffTol, priority);
 }
 
 MaterialMode QTrPlaneStress2dXFEM :: giveMaterialMode()

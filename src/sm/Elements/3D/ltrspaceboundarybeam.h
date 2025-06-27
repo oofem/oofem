@@ -42,6 +42,7 @@
 
 namespace oofem {
 class FEI3dTetLin;
+class ParamKey;
 
 /**
  * This class implements a linear tetrahedral four-node finite element.
@@ -59,7 +60,7 @@ class LTRSpaceBoundaryBeam : public LTRSpaceBoundary
 {
 protected:
     void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
-
+    static ParamKey IPK_LTRSpaceBoundaryBeam_location;
 public:
     LTRSpaceBoundaryBeam(int n, Domain *d);
     virtual ~LTRSpaceBoundaryBeam() { }
@@ -68,7 +69,7 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     // definition & identification
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundaryBeam_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundaryBeam"; }
 };

@@ -126,14 +126,6 @@ IntElSurfTr1 :: computeAreaAround(IntegrationPoint *ip)
     return 0.5 * G3.computeNorm() * weight;
 }
 
-
-void
-IntElSurfTr1 :: initializeFrom(InputRecord &ir)
-{
-    StructuralInterfaceElement :: initializeFrom(ir);
-}
-
-
 void
 IntElSurfTr1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {

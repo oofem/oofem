@@ -50,6 +50,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,14 +60,19 @@
 
 namespace oofem {
 REGISTER_Element(Lattice2d);
+ParamKey Lattice2d::IPK_Lattice2d_thick("thick");
+ParamKey Lattice2d::IPK_Lattice2d_width("width");
+ParamKey Lattice2d::IPK_Lattice2d_gpcoords("gpcoords");
+ParamKey Lattice2d::IPK_Lattice2d_couplingflag("couplingflag");
+ParamKey Lattice2d::IPK_Lattice2d_couplingnumber("couplingnumber");
 
-Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
+Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain), couplingNumbers(1)
 {
     numberOfDofMans = 2;
 
     length = 0.;
     pitch = 10.;  // a dummy value
-    couplingNumbers.zero();
+    couplingFlag = 0;
 }
 
 Lattice2d :: ~Lattice2d()
@@ -330,24 +337,16 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 void
-Lattice2d :: initializeFrom(InputRecord &ir)
+Lattice2d :: initializeFrom(InputRecord &ir, int priority)
 {
-    LatticeStructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    LatticeStructuralElement :: initializeFrom(ir, priority);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2d_width);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2d_gpcoords);
-
-    couplingFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice2d_couplingflag);
-
-    couplingNumbers.resize(1);
-    couplingNumbers.zero();
-    if ( couplingFlag == 1 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2d_couplingnumber);
-    }
+    PM_UPDATE_PARAMETER(thickness, ppm, ir, this->number, IPK_Lattice2d_thick, priority);
+    PM_UPDATE_PARAMETER(width, ppm, ir, this->number, IPK_Lattice2d_width, priority);
+    PM_UPDATE_PARAMETER(gpCoords, ppm, ir, this->number, IPK_Lattice2d_gpcoords, priority);
+    PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice2d_couplingflag, priority);
+    PM_UPDATE_PARAMETER(couplingNumbers.at(1), ppm, ir, this->number, IPK_Lattice2d_couplingnumber, priority);
 }
 
 

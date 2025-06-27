@@ -57,6 +57,7 @@
 namespace oofem {
 
 class FEI3dLineLin;
+class ParamKey;
 
 /**
  * This class implements a 2-dimensional beam element
@@ -95,6 +96,13 @@ protected:
 
     /// Subsoil material
     int subsoilMat;
+
+    static ParamKey IPK_Beam3d_dofsToCondense; ///< [optional] DOFs to condense
+    static ParamKey IPK_Beam3d_refnode; ///< [optional] Reference node for the beam 
+    static ParamKey IPK_Beam3d_refangle; ///< [optional] Reference angle for the beam
+    static ParamKey IPK_Beam3d_yaxis; ///< [optional] Y axis for the beam
+    static ParamKey IPK_Beam3d_zaxis; ///< [optional] Z axis for the beam
+    static ParamKey IPK_Beam3d_subsoilmat; ///< [optional] Subsoil material for the beam
 
 public:
     Beam3d(int n, Domain *d);
@@ -169,7 +177,8 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "Beam3d"; }
     const char *giveInputRecordName() const override { return _IFT_Beam3d_Name; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     ///@todo Introduce interpolator and remove these two:
     integrationDomain giveIntegrationDomain() const override { return _Line; }
     //Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }

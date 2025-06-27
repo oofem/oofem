@@ -52,6 +52,7 @@
 
 
 namespace oofem {
+class ParamKey;
 /**
  * This class implements a 2-dimensional lattice mass transport element
  */
@@ -71,6 +72,14 @@ protected:
     FloatArray gpCoords;
 
     double crackWidth = 0.;
+
+    static ParamKey IPK_Lattice2d_mt_dim;
+    static ParamKey IPK_Lattice2d_mt_thickness;
+    static ParamKey IPK_Lattice2d_mt_width;
+    static ParamKey IPK_Lattice2d_mt_gpcoords;
+    static ParamKey IPK_Lattice2d_mt_crackwidth;
+    static ParamKey IPK_Lattice2d_mt_couplingflag;
+    static ParamKey IPK_Lattice2d_mt_couplingnumber;
 
 public:
     Lattice2d_mt(int, Domain *, ElementMode em = HeatTransferEM);
@@ -104,7 +113,8 @@ public:
     double giveWidth() { return width; }
     int computeNumberOfDofs() override { return 2; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
 
     void updateInternalState(TimeStep *tStep) override;
 

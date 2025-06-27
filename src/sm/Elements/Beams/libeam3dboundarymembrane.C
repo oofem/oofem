@@ -54,13 +54,6 @@ LIBeam3dBoundaryMembrane :: LIBeam3dBoundaryMembrane(int n, Domain *aDomain) : L
 
 
 void
-LIBeam3dBoundaryMembrane :: initializeFrom(InputRecord &ir)
-{
-    LIBeam3dBoundary :: initializeFrom(ir);
-}
-
-
-void
 LIBeam3dBoundaryMembrane :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 3 ) {

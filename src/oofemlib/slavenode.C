@@ -38,29 +38,40 @@
 #include "intarray.h"
 #include "entityrenumberingscheme.h"
 #include "classfactory.h"
+#include "domain.h"
+#include "paramkey.h"
+#include "parametermanager.h"
 
 namespace oofem {
 REGISTER_DofManager(SlaveNode);
 
-void SlaveNode :: initializeFrom(InputRecord &ir)
+ParamKey SlaveNode::IPK_SlaveNode_masterDofManagers("masterdofman");
+ParamKey SlaveNode::IPK_SlaveNode_weights("weights");
+
+void SlaveNode :: initializeFrom(InputRecord &ir, int priority)
 {
-    Node :: initializeFrom(ir);
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    IR_GIVE_FIELD(ir, masterDofManagers, _IFT_SlaveNode_masterDofManagers);
-    IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, _IFT_SlaveNode_weights);
+    Node :: initializeFrom(ir, priority);
 
-    if ( masterWeights.giveSize() == 0 ) {
-        masterWeights.resize( masterDofManagers.giveSize() );
-        masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
-    } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        throw ValueInputException(ir, _IFT_SlaveNode_weights, "master dof managers and weights size mismatch.");
-    }
+    PM_UPDATE_PARAMETER(masterDofManagers, ppm, ir, this->number, IPK_SlaveNode_masterDofManagers, priority) ;
+    PM_UPDATE_PARAMETER(masterWeights, ppm, ir, this->number, IPK_SlaveNode_weights, priority) ;
 }
 
 
 void SlaveNode :: postInitialize()
 {
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
+
     Node :: postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_SlaveNode_masterDofManagers) ;
+
+    if ( masterWeights.giveSize() == 0 ) {
+        masterWeights.resize( masterDofManagers.giveSize() );
+        masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
+    } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
+        throw ComponentInputException(IPK_SlaveNode_weights.getName(), ComponentInputException::ComponentType::ctDofManager, this->number, "master dof managers and weights size mismatch.");
+    }
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( Dof *dof: *this ) {

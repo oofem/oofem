@@ -40,11 +40,11 @@
 ///@name Input fields for 2D truss element
 //@{
 #define _IFT_Truss2d_Name "truss2d"
-#define _IFT_Truss2d_cs "cs"
 //@}
 
 namespace oofem {
 class FEI2dLineLin;
+class ParamKey;
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -65,6 +65,7 @@ protected:
     int cs_mode;
     // array for diffrent cs_modes
     static FEI2dLineLin interp[ 3 ];  // only defined it so far...
+    static ParamKey IPK_Truss2d_cs;
 
 public:
     Truss2d(int n, Domain *d);
@@ -100,7 +101,8 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Truss2d_Name; }
     const char *giveClassName() const override { return "Truss2d"; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void postInitialize() override;
     ///@todo Introduce interpolator and remove these:
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
     integrationDomain giveIntegrationDomain() const override { return _Line; }

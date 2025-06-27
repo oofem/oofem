@@ -46,6 +46,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "staggeredproblem.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __SM_MODULE
  #include "../sm/Elements/LatticeElements/latticestructuralelement.h"
@@ -54,6 +56,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "classfactory.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -61,6 +64,9 @@
 
 namespace oofem {
 REGISTER_DofManager(LatticeNeumannCouplingNode);
+
+ParamKey LatticeNeumannCouplingNode::IPK_LatticeNeumannCouplingNode_direction("direction");
+ParamKey LatticeNeumannCouplingNode::IPK_LatticeNeumannCouplingNode_couplingnodes("couplingnodes");
 
 LatticeNeumannCouplingNode :: LatticeNeumannCouplingNode(int n, Domain *aDomain) :
     Node(n, aDomain), directionVector(), couplingNodes()
@@ -71,15 +77,23 @@ LatticeNeumannCouplingNode :: ~LatticeNeumannCouplingNode()
 {}
 
 void
-LatticeNeumannCouplingNode :: initializeFrom(InputRecord &ir)
+LatticeNeumannCouplingNode :: initializeFrom(InputRecord &ir, int priority)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    FloatArray triplets;
+    ParameterManager &ppm =  this->giveDomain()->dofmanPPM;
 
-    Node :: initializeFrom(ir);
+    Node :: initializeFrom(ir, priority);
+    PM_UPDATE_PARAMETER(directionVector, ppm, ir, this->number, IPK_LatticeNeumannCouplingNode_direction, priority) ;
+    PM_UPDATE_PARAMETER(couplingNodes, ppm, ir, this->number, IPK_LatticeNeumannCouplingNode_couplingnodes, priority) ;
+}
 
-    IR_GIVE_FIELD(ir, directionVector, _IFT_LatticeNeumannCouplingNode_direction);
-    IR_GIVE_FIELD(ir, couplingNodes, _IFT_LatticeNeumannCouplingNode_couplingnodes);
+void 
+LatticeNeumannCouplingNode::postInitialize() {
+    ParameterManager &ppm =  this->domain->elementPPM;
+
+    Node::postInitialize();
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeNeumannCouplingNode_direction) ;
+    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeNeumannCouplingNode_couplingnodes);
 }
 
 

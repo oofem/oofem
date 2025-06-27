@@ -45,6 +45,8 @@
 #include "fei2dlinelin.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,7 @@
 
 namespace oofem {
 REGISTER_Element(InterfaceElem2dLin);
+ParamKey InterfaceElem2dLin::IPK_InterfaceElem2dLin_axisymmode("axisymmode");
 
 FEI2dLineLin InterfaceElem2dLin :: interp(1, 2);
 
@@ -131,10 +134,11 @@ InterfaceElem2dLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespon
 
 
 void
-InterfaceElem2dLin :: initializeFrom(InputRecord &ir)
+InterfaceElem2dLin :: initializeFrom(InputRecord &ir, int priority)
 {
-    this->axisymmode = ir.hasField(_IFT_InterfaceElem2dLin_axisymmode);
-    StructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_InterfaceElem2dLin_axisymmode, priority) ;
+    StructuralElement :: initializeFrom(ir, priority);
 }
 
 

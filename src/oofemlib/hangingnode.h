@@ -40,11 +40,10 @@
 ///@name Input fields for HangingNode
 //@{
 #define _IFT_HangingNode_Name "hangingnode"
-#define _IFT_HangingNode_masterElement "masterelement"
-#define _IFT_HangingNode_masterRegion "masterregion"
 //@}
 
 namespace oofem {
+    class ParamKey;
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -73,6 +72,9 @@ protected:
     bool initialized;
 #endif
 
+    static ParamKey IPK_HangingNode_masterElement;
+    static ParamKey IPK_HangingNode_masterRegion;
+
 public:
     /**
      * Constructor. Creates a hanging node with number n, belonging to aDomain.
@@ -83,7 +85,7 @@ public:
     /// Destructor.
     virtual ~HangingNode(void) { }
 
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     void postInitialize() override;
     int checkConsistency() override;
     bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }

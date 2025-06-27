@@ -60,6 +60,7 @@ class NodalLoad;
 class TimeStep;
 class FloatArray;
 class IntArray;
+class ParamKey;
 
 /**
  * Class implementing node in finite element mesh. Node possess degrees of freedom
@@ -97,6 +98,9 @@ protected:
      * base vector of global c.s.
      */
     std::unique_ptr<FloatMatrix> localCoordinateSystem;
+
+    static ParamKey IPK_Node_lcs;
+    static ParamKey IPK_Node_coords;
 
 public:
     /**
@@ -162,7 +166,10 @@ public:
     // miscellaneous
     const char *giveClassName() const override { return "Node"; }
     const char *giveInputRecordName() const override { return _IFT_Node_Name; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir) override { initializeFrom(ir, 1); }
+    void initializeFrom(InputRecord &ir, int priority) override;
+     /// Performs post initialization steps.
+     void initializeFinish() override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     int checkConsistency() override;

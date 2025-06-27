@@ -83,7 +83,7 @@ public:
     void giveElementDofIDMask(IntArray &answer) const override = 0;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override = 0;
     int computeNumberOfDofs() override = 0;
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     int checkConsistency() override;
 
     Interface *giveInterface(InterfaceType) override = 0;

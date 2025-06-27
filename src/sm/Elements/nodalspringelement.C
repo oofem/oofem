@@ -37,6 +37,8 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -44,6 +46,10 @@
 
 namespace oofem {
 REGISTER_Element(NodalSpringElement);
+
+ParamKey NodalSpringElement::IPK_NodalSpringElement_dofmask("dofmask");
+ParamKey NodalSpringElement::IPK_NodalSpringElement_springConstants("k");
+ParamKey NodalSpringElement::IPK_NodalSpringElement_masses("m");
 
 NodalSpringElement :: NodalSpringElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -105,29 +111,44 @@ NodalSpringElement :: computeNumberOfGlobalDofs()
 
 
 void
-NodalSpringElement :: initializeFrom(InputRecord &ir)
+NodalSpringElement :: initializeFrom(InputRecord &ir, int priority)
 {
-    IR_GIVE_FIELD(ir, dofMask, _IFT_NodalSpringElement_dofmask);
-    IR_GIVE_FIELD(ir, springConstants, _IFT_NodalSpringElement_springConstants);
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    //StructuralElement::initializeFrom(ir, priority);
 
-    this->masses.resize(dofMask.giveSize());
-    this->masses.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, masses, _IFT_NodalSpringElement_masses);
-    
-    int ndofs = dofMask.giveSize();
-    if (ndofs != springConstants.giveSize()) {
-      OOFEM_ERROR ("Spring constants size not equal to number of DOFs");
-    }
-
-    if (ndofs != masses.giveSize()) {
-      OOFEM_ERROR ("Masses array size not equal to number of DOFs");
-    }
-
-    // from element
-    activityTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
-    IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
+    PM_UPDATE_PARAMETER(dofMask, ppm, ir, this->number, IPK_NodalSpringElement_dofmask, priority) ;
+    PM_UPDATE_PARAMETER(springConstants, ppm, ir, this->number, IPK_NodalSpringElement_springConstants, priority) ;
+    PM_UPDATE_PARAMETER(masses, ppm, ir, this->number, IPK_NodalSpringElement_masses, priority) ;
+    PM_UPDATE_PARAMETER(activityTimeFunction, ppm, ir, this->number, IPK_Element_activityTimeFunction, priority) ;
+    PM_UPDATE_PARAMETER(dofManArray, ppm, ir, this->number, IPK_Element_nodes, priority) ;
 }
+
+void
+NodalSpringElement :: initializeFinish()
+{
+  ParameterManager &ppm =  this->giveDomain()->elementPPM;
+  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_dofmask) ;
+  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_NodalSpringElement_springConstants) ;
+  PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Element_nodes) ;
+
+  if (!ppm.checkIfSet(this->number, IPK_NodalSpringElement_masses.getIndex())) {
+    this->masses.resize(this->dofMask.giveSize());
+    this->masses.zero();
+  }
+  int ndofs = dofMask.giveSize();
+  if (ndofs != springConstants.giveSize()) {
+      OOFEM_ERROR ("Spring constants size not equal to number of DOFs");
+  }
+
+  if (ndofs != masses.giveSize()) {
+      OOFEM_ERROR ("Masses array size not equal to number of DOFs");
+  }
+}
+
+
+void
+NodalSpringElement :: postInitialize()
+{}
 
 void NodalSpringElement :: printOutputAt(FILE *File, TimeStep *tStep)
 {

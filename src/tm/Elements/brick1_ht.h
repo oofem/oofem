@@ -67,7 +67,7 @@ public:
     const char *giveClassName() const override { return "Brick1_ht"; }
 
     int computeNumberOfDofs() override { return 8; }
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
     Element_Geometry_Type giveGeometryType() const override {return EGT_hexa_1;}
 

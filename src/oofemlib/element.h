@@ -59,20 +59,6 @@
 #include <vector>
 #include <memory>
 
-///@name Input fields for general element.
-//@{
-#define _IFT_Element_mat "mat"
-#define _IFT_Element_crosssect "crosssect"
-#define _IFT_Element_nodes "nodes"
-#define _IFT_Element_bodyload "bodyloads"
-#define _IFT_Element_boundaryload "boundaryloads"
-#define _IFT_Element_lcs "lcs"
-#define _IFT_Element_partitions "partitions"
-#define _IFT_Element_remote "remote"
-#define _IFT_Element_activityTimeFunction "activityltf"
-#define _IFT_Element_nip "nip"
-//@}
-
 namespace oofem {
 class TimeStep;
 class Node;
@@ -91,6 +77,7 @@ class SurfaceLoad;
 class EdgeLoad;
 class PrimaryField;
 class UnknownNumberingScheme;
+class ParamKey;
 
 /**
  * In parallel mode, this type indicates the mode of element.
@@ -207,6 +194,18 @@ protected:
      * Each surface keeps list of shared elements, can have DofManagers, etc.
      */
     IntArray globalSurfaceIDs;
+
+public:
+    static ParamKey IPK_Element_mat;
+    static ParamKey IPK_Element_crosssect;
+    static ParamKey IPK_Element_nodes;
+    static ParamKey IPK_Element_bodyload;
+    static ParamKey IPK_Element_boundaryload;
+    static ParamKey IPK_Element_lcs;
+    static ParamKey IPK_Element_partitions;
+    static ParamKey IPK_Element_remote;
+    static ParamKey IPK_Element_activityTimeFunction;
+    static ParamKey IPK_Element_nip;
 
 
 public:
@@ -755,9 +754,6 @@ public:
     /// @return Corresponding element region. Currently corresponds to cross section model number.
     int giveRegionNumber();
 
-    /// Performs post initialization steps.
-    virtual void postInitialize();
-
     /**
      * Updates element state after equilibrium in time step has been reached.
      * Default implementation updates all integration rules defined by
@@ -1214,7 +1210,10 @@ public:
     IntArray *giveBoundaryLoadArray();
 
     // Overloaded methods:
-    void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir, int priority) override;
+    void initializeFinish() override;
+    /// Performs post initialization steps.
+    void postInitialize() override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

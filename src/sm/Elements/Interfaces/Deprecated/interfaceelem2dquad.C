@@ -45,6 +45,8 @@
 #include "fei2dlinequad.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -55,6 +57,7 @@ namespace oofem {
 REGISTER_Element(InterfaceElem2dQuad);
 
 FEI2dLineQuad InterfaceElem2dQuad :: interp(1, 2);
+ParamKey InterfaceElem2dQuad::IPK_InterfaceElem2dQuad_axisymmode("axisymmode");
 
 
 InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
@@ -155,10 +158,11 @@ InterfaceElem2dQuad :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 
 
 void
-InterfaceElem2dQuad :: initializeFrom(InputRecord &ir)
+InterfaceElem2dQuad :: initializeFrom(InputRecord &ir, int priority)
 {
-    this->axisymmode = ir.hasField(_IFT_InterfaceElem2dQuad_axisymmode);
-    StructuralElement :: initializeFrom(ir);
+    ParameterManager &ppm = this->giveDomain()->elementPPM;
+    PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_InterfaceElem2dQuad_axisymmode, priority);
+    StructuralElement :: initializeFrom(ir, priority);
 }
 
 

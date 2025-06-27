@@ -62,8 +62,6 @@ public:
     LIBeam3dBoundaryPlate(int n, Domain *d);
     virtual ~LIBeam3dBoundaryPlate() { }
 
-    void initializeFrom(InputRecord &ir) override;
-
     int computeNumberOfDofs() override { return 22; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 

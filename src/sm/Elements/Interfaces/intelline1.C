@@ -45,6 +45,8 @@
 #include "fei2dlinelin.h"
 #include "classfactory.h"
 #include "nodalaveragingrecoverymodel.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +55,7 @@
 
 namespace oofem {
 REGISTER_Element(IntElLine1);
+ParamKey IntElLine1::IPK_IntElLine1_axisymmode("axisymmode");
 
 FEI2dLineLin IntElLine1 :: interp(1, 1);
 
@@ -138,12 +141,16 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 
 
 void
-IntElLine1 :: initializeFrom(InputRecord &ir)
+IntElLine1 :: initializeFrom(InputRecord &ir, int priority)
 {
-    StructuralInterfaceElement :: initializeFrom(ir);
+    StructuralInterfaceElement :: initializeFrom(ir, priority);
+    ParameterManager &ppm = domain->elementPPM;
+    PM_UPDATE_PARAMETER(axisymmode, ppm, ir, this->number, IPK_IntElLine1_axisymmode, priority) ;
+}
 
-    this->axisymmode = ir.hasField(_IFT_IntElLine1_axisymmode);
-
+void IntElLine1::postInitialize()
+{
+    StructuralInterfaceElement :: postInitialize();
     // Check if node numbering is ok
     int nodeInd1 = this->giveDofManagerNumber(1);
     int arrayInd1 = domain->giveDofManPlaceInArray(nodeInd1);
@@ -171,7 +178,6 @@ IntElLine1 :: initializeFrom(InputRecord &ir)
         dofManArray = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
     }
 }
-
 
 void
 IntElLine1 :: giveDofManDofIDMask(int inode, IntArray &answer) const

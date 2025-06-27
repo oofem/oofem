@@ -57,6 +57,7 @@
 #include "crosssection.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -67,6 +68,11 @@ namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
 REGISTER_Element(TR1_2D_SUPG);
+
+ParamKey TR1_2D_SUPG::IPK_TR1_2D_SUPG_vof("vof");
+ParamKey TR1_2D_SUPG::IPK_TR1_2D_SUPG_pvof("pvof");
+ParamKey TR1_2D_SUPG::IPK_TR1_2D_SUPG_mat0("mat0");
+ParamKey TR1_2D_SUPG::IPK_TR1_2D_SUPG_mat1("mat1");
 
 FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
@@ -92,21 +98,24 @@ FEInterpolation *
 TR1_2D_SUPG :: giveInterpolation() const { return & interp; }
 
 void
-TR1_2D_SUPG :: initializeFrom(InputRecord &ir)
+TR1_2D_SUPG :: initializeFrom(InputRecord &ir, int priority)
 {
-    SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir, priority);
 
-    this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
-    if ( vof > 0.0 ) {
+    ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    bool flag;
+
+    PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_pvof, priority, flag) ;
+    if (flag && (vof > 0.0)) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_vof);
-        this->temp_vof = this->vof;
+        PM_UPDATE_PARAMETER_AND_REPORT(vof, ppm, ir, this->number, IPK_TR1_2D_SUPG_vof, priority, flag) ;
+        if (flag) {
+            this->temp_vof = this->vof;
+        }
     }
-
 
     this->initGeometry();
 }
@@ -117,9 +126,9 @@ TR1_2D_SUPG :: giveInputRecord(DynamicInputRecord &input)
 {
     SUPGElement :: giveInputRecord(input);
     if ( this->permanentVofFlag ) {
-        input.setField(this->vof, _IFT_Tr1SUPG_pvof);
+        input.setField(this->vof, IPK_TR1_2D_SUPG_pvof.getNameCStr());
     } else {
-        input.setField(this->vof, _IFT_Tr1SUPG_vof);
+        input.setField(this->vof, IPK_TR1_2D_SUPG_vof.getNameCStr());
     }
 }
 
