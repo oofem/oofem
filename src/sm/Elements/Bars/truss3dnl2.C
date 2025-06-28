@@ -215,7 +215,7 @@ Truss3dnl2 :: _computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *t
   FloatMatrixF<6,6> A = this->giveAmatrix();
   FloatArray x(X);
   x.add(d); 
-  answer.beTProductOf(x,A);
+  answer.beTProductOf(FloatMatrix::fromArray(x),A);
   answer.times(1./l/L);
 }
 
@@ -252,7 +252,7 @@ Truss3dnl2 :: computeInitialStressStiffness(FloatMatrix &answer, MatResponseMode
   FloatMatrix xx, Axx, AxxA;
   x.add(d); 
 
-  xx.beProductTOf(x,x);
+  xx.beProductTOf(FloatMatrix::fromArray(x),FloatMatrix::fromArray(x));
   Axx.beProductOf(A,xx);
   AxxA.beProductOf(Axx,A);
   AxxA.times(1./l/l);

@@ -110,7 +110,7 @@ Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *t
 #ifdef _OPENMP
             if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
 #endif
-            answer.assemble(lambdaeq.at(pos - 1), one);
+            answer.assemble(lambdaeq.at(pos - 1), FloatMatrix::fromArray(one));
 #ifdef _OPENMP
             if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
 #endif
@@ -208,7 +208,7 @@ Node2NodeLagrangianMultiplierContact :: computeTangentFromContact(FloatMatrix &a
     FloatArray Nv;
     this->computeGap(gap, masterNode, slaveNode, tStep);
     this->computeNormalMatrixAt(Nv, masterNode, slaveNode, tStep);
-    answer.initFromVector(Nv, false);
+    answer=FloatMatrix::fromArray(Nv, false);
 
     return gap;
     //answer.times(this->penalty);
@@ -247,7 +247,7 @@ Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer
 {
     const auto &xs = slaveNode->giveCoordinates();
     const auto &xm = masterNode->giveCoordinates();
-    auto normal = xs - xm;
+    FloatArray normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
@@ -256,10 +256,10 @@ Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer
     }
     // The normal is not updated for node2node which is for small deformations only
     // C = {n -n}
-    answer = {
+    answer = Vec4(
         normal.at(1), normal.at(2),
         -normal.at(1), -normal.at(2)
-    };
+    );
 }
 
 

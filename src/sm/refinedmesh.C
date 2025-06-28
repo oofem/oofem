@@ -1974,6 +1974,9 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
             p = ( level + 2 ) * ( level + 1 );
             mesh_face = mesh_fc [ 0 ];
+            #pragma GCC diagnostic push
+            // swap[0] possibly uninitialized
+            #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
             for ( k = 0; k < 3; k++ ) {
                 if ( mesh_face->node [ k ] == fe_tetra->node [ j ] ) {
                     if ( swap [ 0 ] == 1 ) {
@@ -1987,6 +1990,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
                     break;
                 }
             }
+            #pragma GCC diagnostic pop
 
             for ( m = 0; m < level + 2; m++ ) {
                 tmp_array [ j ] [ pos++ ] = mesh_face->fine_id [ kk ] [ p++ ];
@@ -2329,6 +2333,9 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
             p = ( level + 2 ) * ( level + 1 );
             mesh_quad = mesh_qd [ 0 ];
+            #pragma GCC diagnostic push
+            // swap[0] possibly uninitialized
+            #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
             for ( k = 0; k < 4; k++ ) {
                 if ( mesh_quad->node [ k ] == fe_hexa->node [ j ] ) {
                     if ( swap [ 0 ] == 1 ) {
@@ -2342,6 +2349,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
                     break;
                 }
             }
+            #pragma GCC diagnostic pop
 
             for ( m = 0; m < level + 2; m++ ) {
                 tmp_array [ j ] [ pos++ ] = mesh_quad->fine_id [ kk ] [ p++ ];
@@ -2388,6 +2396,9 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
             p = ( level + 2 ) * ( level + 1 );
             mesh_quad = mesh_qd [ 5 ];
+            #pragma GCC diagnostic push
+            // swap[5] possibly uninitialized
+            #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
             for ( k = 0; k < 4; k++ ) {
                 if ( mesh_quad->node [ k ] == fe_hexa->node [ j + 4 ] ) {
                     if ( swap [ 5 ] == 0 ) {
@@ -2401,6 +2412,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
                     break;
                 }
             }
+            #pragma GCC diagnostic pop
 
             for ( m = 0; m < level + 2; m++ ) {
                 tmp_array [ j + 4 ] [ pos++ ] = mesh_quad->fine_id [ kk ] [ p++ ];

@@ -132,7 +132,7 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
             }
 
             // delta p part:
-            temp = N * (scale * detJ * gp->giveWeight() / domainSize);
+            temp = FloatMatrix::fromArray(N * (scale * detJ * gp->giveWeight() / domainSize));
             tempT.beTranspositionOf(temp);
 #ifdef _OPENMP
             if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));

@@ -51,26 +51,47 @@
 
 namespace oofem {
 
+
+#define _LOOP_FLOATMATRIX(M,r,c) for(std::size_t c=0; c<M.cols(); c++) for(std::size_t r=0; r<M.rows(); r++)
+
 /**
  * Implementation of matrix containing floating point numbers.
  * @author Mikael Öhman
  */
 template<std::size_t N, std::size_t M>
 class OOFEM_EXPORT FloatMatrixF
+#ifdef _USE_EIGEN
+: public MatrixRCd<N,M>
+#endif
 {
+#ifdef _USE_EIGEN
+public:
+    typedef MatrixRCd<N,M> MatrixRCd_NM;
+    OOFEM_EIGEN_DERIVED(FloatMatrixF,MatrixRCd_NM);
+    const double *data() const { return MatrixRCd_NM::data(); }
+    double *data() { return MatrixRCd_NM::data(); }
+    template<
+        typename... Args,
+        class = typename std::enable_if_t<sizeof...(Args) == M*N>,
+        class = std::enable_if_t<(std::conjunction_v<std::is_same<double, Args>...>)>
+    >
+    FloatMatrixF(Args... args) {
+        std::initializer_list<double> ini{ args ... };
+        assert(ini.size()==rows()*cols());
+        int i=0;
+        for(const double& x: ini){
+            (*this)(i%rows(),i/rows())=x;
+            i++;
+        }
+    }
+    // redefine because of signedness (move to Index in the future pehaps)
+    std::size_t rows() const{ return MatrixRCd_NM::rows(); }
+    std::size_t cols() const{ return MatrixRCd_NM::cols(); }
+#else
 protected:
     /// Values of matrix stored column wise.
     std::array< double, N*M > values;
-
 public:
-    /// @name Iterator for for-each loops:
-    //@{
-    auto begin() { return this->values.begin(); }
-    auto end() { return this->values.end(); }
-    auto begin() const { return this->values.begin(); }
-    auto end() const { return this->values.end(); }
-    //@}
-
     /**
      * Constructor (values are specified column-wise)
      * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 
@@ -86,22 +107,18 @@ public:
     /// FloatMatrix conversion constructor.
     FloatMatrixF(const FloatMatrix &mat)
     {
-#ifndef NDEBUG
-        if ( mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M ) {
-            throw std::out_of_range("Can't convert dynamic float matrix of size " + 
-                std::to_string(mat.giveNumberOfRows()) + "x" + std::to_string(mat.giveNumberOfRows()) + 
-                " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
-        }
-#endif
-        std::copy_n(mat.begin(), N*M, values.begin());
-    }
-    FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
-    {
-        for (std::size_t i = 0; i < N; ++i) {
-            for (std::size_t j = 0; j < M; ++j) {
-                (*this)(i,j) = x[j][i];
+        #ifndef NDEBUG
+            if ( mat.rows() != N || mat.cols() != M ) {
+                throw std::out_of_range("Can't convert dynamic float matrix of size " +
+                    std::to_string(mat.rows()) + "x" + std::to_string(mat.cols()) +
+                    " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
             }
-        }
+        #endif
+        #if 0
+             std::copy_n(mat.begin(), N*M, values.begin());
+        #else
+             for(Index c=0; c<mat.cols(); c++) for(Index r=0; r<mat.rows(); r++) (*this)(r,c)=mat(r,c);
+        #endif
     }
 
     /// Assignment operator
@@ -133,33 +150,10 @@ public:
     std::size_t rows() const { return N; }
     /// Returns number of columns of receiver.
     std::size_t cols() const { return M; }
+    const double *data() const { return values.data(); }
+    double *data() { return values.data(); }
 
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    double at(std::size_t i, std::size_t j) const
-    {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double &at(std::size_t i, std::size_t j)
-    {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
+
 
     /**
      * Direct value access (column major). Implements 0-based indexing.
@@ -186,9 +180,9 @@ public:
      */
     double &operator()(std::size_t i, std::size_t j)
     {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
         return values [ j * N + i ];
     }
     /**
@@ -198,9 +192,9 @@ public:
      */
     double operator()(std::size_t i, std::size_t j) const
     {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif 
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
         return values [ j * N + i ];
     }
 
@@ -220,7 +214,46 @@ public:
         }
         return x;
     }
-    
+#endif
+    /**
+    * Coefficient access function. Returns value of coefficient at given
+    * position of the receiver. Implements 1-based indexing.
+    * @param i Row position of coefficient.
+    * @param j Column position of coefficient.
+    */
+    double at(std::size_t i, std::size_t j) const
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i, j);
+        #endif
+        return (*this)(i-1, j-1);
+    }
+    /**
+    * Coefficient access function. Returns value of coefficient at given
+    * position of the receiver. Implements 1-based indexing.
+    * @param i Row position of coefficient.
+    * @param j Column position of coefficient.
+    */
+    inline double &at(std::size_t i, std::size_t j)
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i, j);
+        #endif
+        return (*this)(i-1, j-1);
+    }
+
+    static FloatMatrixF<N,M> fromColumns(FloatArrayF<N> const (&x)[M]) noexcept
+    {
+        FloatMatrixF<N,M> ret;
+        for ( std::size_t r = 0; r < N; ++r) {
+            for ( std::size_t c = 0; c < M; ++c) {
+                ret(r,c) = x[c][r];
+            }
+        }
+        return ret;
+    }
+
+
     /// Assemble x into self.
     template<std::size_t R, std::size_t C>
     inline void assemble(const FloatMatrixF<R,C> &x, int const (&r)[R], int const (&c)[C] )
@@ -396,12 +429,12 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    const double *givePointer() const { return values.data(); }
-    double *givePointer() { return values.data(); }
+    const double *givePointer() const { return data(); }
+    double *givePointer() { return data(); }
 
     contextIOResultType storeYourself(DataStream &stream) const
     {
-        if ( !stream.write(values.data(), N*M) ) {
+        if ( !stream.write(data(), N*M) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -409,7 +442,7 @@ public:
 
     contextIOResultType restoreYourself(DataStream &stream)
     {
-        if ( !stream.read(values.data(), N*M) ) {
+        if ( !stream.read(data(), N*M) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -454,9 +487,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator * ( double a, const FloatMatrixF<N,M> & x )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] * a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)*a;
     return out;
 }
 
@@ -470,9 +501,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator / ( const FloatMatrixF<N,M> & x, double a )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] / a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)/a;
     return out;
 }
 
@@ -480,9 +509,7 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator + ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] + y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)+y(r,c);
     return out;
 }
 
@@ -490,36 +517,28 @@ template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator - ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        out[i] = x[i] - y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) out(r,c)=x(r,c)-y(r,c);
     return out;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator += ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] += y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)+=y(r,c);
     return x;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator -= ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] -= y[i];
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)-=y(r,c);
     return x;
 }
 
 template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator *= ( FloatMatrixF<N,M> & x, double a )
 {
-    for ( std::size_t i = 0; i < N*M; ++i ) {
-        x[i] *= a;
-    }
+    _LOOP_FLOATMATRIX(x,r,c) x(r,c)*=a;
     return x;
 }
 
@@ -740,7 +759,7 @@ FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, std::size_t col)
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-inline FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
+inline FloatMatrixF<3,3> from_voigt_form_9(const FloatArrayF<9> &v)
 {
     return {
         v[0], v[8], v[7], 
@@ -753,7 +772,7 @@ inline FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-inline FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<9> to_voigt_form_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -772,7 +791,7 @@ inline FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-inline FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_stress_6(const FloatArrayF<6> &v)
 {
     return {
         v[0], v[5], v[4], 
@@ -785,7 +804,7 @@ inline FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-inline FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_stress_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -801,7 +820,7 @@ inline FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
  * Converts Voigt vector to matrix form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-inline FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_strain_6(const FloatArrayF<6> &v)
 {
     return {
         v[0], 0.5*v[5], 0.5*v[4],
@@ -814,7 +833,7 @@ inline FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in strain Voigt form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-inline FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_strain_33(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -860,9 +879,7 @@ template<std::size_t N, std::size_t M>
 FloatArrayF<N*M> flatten(const FloatMatrixF<N,M> &m)
 {
     FloatArrayF<N*M> out;
-    for (std::size_t i = 0; i < N*M; ++i) {
-        out[i] = m[i];
-    }
+    for(std::size_t c=0; c<m.cols(); c++) for(std::size_t r=0; r<m.rows(); r++) out[c*m.rows()+r]=m(r,c);
     return out;
 }
 
@@ -1010,9 +1027,7 @@ template<std::size_t N>
 double frobeniusNorm(const FloatMatrixF<N,N> &mat)
 {
     double n = 0.;
-    for ( std::size_t i = 0; i < N*N; ++i ) {
-        n += mat[i] * mat[i];
-    }
+    _LOOP_FLOATMATRIX(mat,r,c) n+=mat(r,c)*mat(r,c);
     return std::sqrt( n );
     //return std::sqrt( std::inner_product(mat.values.begin(), mat.values.end(), mat.values.begin(), 0.) );
 }
@@ -1075,10 +1090,43 @@ inline double det(const FloatMatrixF<3,3> &mat)
            mat(1, 2) * mat(2, 1) * mat(0, 0) - mat(2, 2) * mat(0, 1) * mat(1, 0);
 }
 
+
+/// Computes the inverse
+inline FloatMatrixF<2,2> inv_22(const FloatMatrixF<2,2> &mat, double /*zeropiv*/)
+{
+    FloatMatrixF<2,2> out;
+    double d = det(mat);
+    out(0, 0) = mat(1, 1) / d;
+    out(1, 0) = -mat(1, 0) / d;
+    out(0, 1) = -mat(0, 1) / d;
+    out(1, 1) = mat(0, 0) / d;
+    return out;
+}
+
+/// Computes the inverse
+inline FloatMatrixF<3,3> inv_33(const FloatMatrixF<3,3> &mat, double /*zeropiv*/)
+{
+    FloatMatrixF<3,3> out;
+    double d = det(mat);
+    out(0, 0) = ( mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1) ) / d;
+    out(1, 0) = ( mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2) ) / d;
+    out(2, 0) = ( mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0) ) / d;
+    out(0, 1) = ( mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2) ) / d;
+    out(1, 1) = ( mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0) ) / d;
+    out(2, 1) = ( mat(0, 1) * mat(2, 0) - mat(0, 0) * mat(2, 1) ) / d;
+    out(0, 2) = ( mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1) ) / d;
+    out(1, 2) = ( mat(0, 2) * mat(1, 0) - mat(0, 0) * mat(1, 2) ) / d;
+    out(2, 2) = ( mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0) ) / d;
+    return out;
+}
+
+
 /// Computes the inverse
 template<std::size_t N>
 FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
 {
+    if constexpr (N==2) return inv_22(mat,zeropiv);
+    if constexpr (N==3) return inv_33(mat,zeropiv);
     // gaussian elimination - slow but safe
     auto tmp = mat;
     // initialize answer to be unity matrix;
@@ -1121,36 +1169,6 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
     return out;
 }
 
-/// Computes the inverse
-template<>
-inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat, double /*zeropiv*/)
-{
-    FloatMatrixF<2,2> out;
-    double d = det(mat);
-    out(0, 0) = mat(1, 1) / d;
-    out(1, 0) = -mat(1, 0) / d;
-    out(0, 1) = -mat(0, 1) / d;
-    out(1, 1) = mat(0, 0) / d;
-    return out;
-}
-
-/// Computes the inverse
-template<>
-inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat, double /*zeropiv*/)
-{
-    FloatMatrixF<3,3> out;
-    double d = det(mat);
-    out(0, 0) = ( mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1) ) / d;
-    out(1, 0) = ( mat(1, 2) * mat(2, 0) - mat(1, 0) * mat(2, 2) ) / d;
-    out(2, 0) = ( mat(1, 0) * mat(2, 1) - mat(1, 1) * mat(2, 0) ) / d;
-    out(0, 1) = ( mat(0, 2) * mat(2, 1) - mat(0, 1) * mat(2, 2) ) / d;
-    out(1, 1) = ( mat(0, 0) * mat(2, 2) - mat(0, 2) * mat(2, 0) ) / d;
-    out(2, 1) = ( mat(0, 1) * mat(2, 0) - mat(0, 0) * mat(2, 1) ) / d;
-    out(0, 2) = ( mat(0, 1) * mat(1, 2) - mat(0, 2) * mat(1, 1) ) / d;
-    out(1, 2) = ( mat(0, 2) * mat(1, 0) - mat(0, 0) * mat(1, 2) ) / d;
-    out(2, 2) = ( mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0) ) / d;
-    return out;
-}
 
 /**
  * Computes (real) eigenvalues and eigenvectors of receiver (must be symmetric)

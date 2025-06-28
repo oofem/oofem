@@ -261,7 +261,7 @@ FRCFCM :: computeCrackFibreAngle(GaussPoint *gp, int index) const
 
     double theta = 0.;
 
-    for ( int i = 1; i <= min( status->giveCrackDirs().giveNumberOfRows(), this->orientationVector.giveSize() ); i++ ) {
+    for ( int i = 1; i <= min( (int)status->giveCrackDirs().giveNumberOfRows(), (int)this->orientationVector.giveSize() ); i++ ) {
         theta += status->giveCrackDirs().at(i, index) * this->orientationVector.at(i);
     }
 

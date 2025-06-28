@@ -333,8 +333,8 @@ BaseMixedPressureElement :: computeStiffnessMatrix_up(FloatMatrix &answer, MatRe
     for ( GaussPoint *gp : *elem->giveIntegrationRule(0) ) {
         this->computeVolumetricBmatrixAt(gp, Bvol, elem);
         this->computePressureNMatrixAt(gp, N_p);
-        FloatMatrix mNp(N_p, true);
-        FloatMatrix mBvol(Bvol, true);
+        FloatMatrix mNp=FloatMatrix::fromArray(N_p, true);
+        FloatMatrix mBvol=FloatMatrix::fromArray(Bvol, true);
 
         dV = elem->computeVolumeAround(gp);
         answer.plusProductUnsym(mBvol, mNp, -dV);
@@ -358,7 +358,7 @@ BaseMixedPressureElement :: computeStiffnessMatrix_pp(FloatMatrix &answer, MatRe
 
         mixedPressureMat->giveInverseOfBulkModulus(kappa, rMode, gp, tStep);
         this->computePressureNMatrixAt(gp, N_p);
-        FloatMatrix mN_p(N_p, true);
+        FloatMatrix mN_p=FloatMatrix::fromArray(N_p, true);
         dV = elem->computeVolumeAround(gp);
         answer.plusProductUnsym(mN_p, mN_p, -dV * kappa);
     }

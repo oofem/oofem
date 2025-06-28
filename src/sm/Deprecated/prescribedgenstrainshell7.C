@@ -124,8 +124,11 @@ PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatArray &genEps, double z
     auto g1 = dxdxi1 + fac1*dmdxi1 + fac2*dgamdxi1*m;
     auto g2 = dxdxi2 + fac1*dmdxi2 + fac2*dgamdxi2*m;
     auto g3 = fac3*m;
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
     FloatMatrixF<3,3> gcov;
     gcov.setColumn(g1,1); gcov.setColumn(g2,2); gcov.setColumn(g3,3);
+    #pragma GCC diagnostic pop
     return gcov;
 }
 
@@ -298,6 +301,6 @@ void PrescribedGenStrainShell7 :: giveInputRecord(DynamicInputRecord &input)
     BoundaryCondition :: giveInputRecord(input);
     input.setField(this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     input.setField(this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
-    input.setField(this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords);
+    input.setField(FloatArray(this->centerCoord), _IFT_PrescribedGenStrainShell7_centercoords);
 }
 } // end namespace oofem

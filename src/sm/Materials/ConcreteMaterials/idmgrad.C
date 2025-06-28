@@ -155,7 +155,7 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_ud(FloatMat
         } else {
             stress.times(0.);
         }
-        answer.initFromVector(stress, false);
+        answer=FloatMatrix::fromArray(stress, false);
         if ( tempDamage > status->giveDamage() ) {
             answer.times(-gPrime);
             /*
@@ -178,7 +178,7 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_ud(FloatMat
         }
         // zero block for now
     } else {
-        answer.initFromVector(stress, false);
+        answer=FloatMatrix::fromArray(stress, false);
         answer.times(0);
     }
 }
@@ -193,7 +193,7 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_du(FloatMat
     FloatArray totalStrain = status->giveTempStrainVector();
     StructuralMaterial :: giveReducedSymVectorForm( reducedStrain, totalStrain, gp->giveMaterialMode() );
     this->computeEta(eta, reducedStrain, gp, tStep);
-    answer.initFromVector(eta, false);
+    answer=FloatMatrix::fromArray(eta, false);
     if ( mode == TangentStiffness ) {
         double tempDamage = status->giveTempDamage();
         if ( tempDamage > status->giveDamage() ) {
@@ -336,7 +336,7 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_dd_BN(Float
             double denom = sqrt( ( 1. - exp(-di_eta) ) * ( ( 1. - di_rho ) * exp(-di_eta * damage) + di_rho - exp(-di_eta) ) );
             double gPrime = this->damageFunctionPrime(tempKappa, gp);
             double factor = iL * internalLength * nom / denom * gPrime;
-            answer.initFromVector(status->giveTempNonlocalDamageDrivingVariableGrad(), false);
+            answer=FloatMatrix::fromArray(status->giveTempNonlocalDamageDrivingVariableGrad(), false);
             if ( tempKappa > status->giveKappa() ) {
                 answer.times(factor);
             } else {
@@ -349,7 +349,7 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_dd_BN(Float
             double iBPrime = this->computeEikonalInternalLength_bPrime(gp);
             double gPrime = this->damageFunctionPrime(tempKappa, gp);
 
-            answer.initFromVector(status->giveTempNonlocalDamageDrivingVariableGrad(), false);
+            answer=FloatMatrix::fromArray(status->giveTempNonlocalDamageDrivingVariableGrad(), false);
 
             if ( tempKappa > status->giveKappa() ) {
                 answer.times(iBPrime * gPrime);

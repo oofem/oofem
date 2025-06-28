@@ -84,7 +84,7 @@ AnisotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
     }
     input.setField(stiffness, _IFT_AnisotropicLinearElasticMaterial_stiff);
 
-    input.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
+    input.setField(FloatArray(alpha), _IFT_AnisotropicLinearElasticMaterial_talpha);
 }
 
 } // end namespace oofem

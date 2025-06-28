@@ -38,6 +38,7 @@
 #include "oofemenv.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "numerics.h"
 
 #include <vector>
 #include <iosfwd>
@@ -78,9 +79,17 @@ class DataStream;
  * @author Jim Brouzoulis 
  * @author many others (please add yourselves) 
  */
+
 class OOFEM_EXPORT FloatMatrix
+#ifdef _USE_EIGEN
+    : public MatrixXXd
+#endif
 {
-    void _resize_internal(int nr, int nc);
+#ifdef _USE_EIGEN
+    public:
+        OOFEM_EIGEN_DERIVED(FloatMatrix,MatrixXXd);
+        FloatMatrix(int r, int c): MatrixXXd(r,c) {}
+#else
 protected:
     /// Number of rows.
     std::size_t nRows;
@@ -90,17 +99,8 @@ protected:
     std :: vector< double >values;
 
 public:
-    /// @name Iterator for for-each loops (columns-wise order):
-    //@{
-    std::vector< double > :: iterator begin() { return this->values.begin(); }
-    std::vector< double > :: iterator end() { return this->values.end(); }
-    std::vector< double > :: const_iterator begin() const { return this->values.begin(); }
-    std::vector< double > :: const_iterator end() const { return this->values.end(); }
-    //@}
-
     constexpr static int Dim = 2;
     typedef double Scalar;
-
     /**
      * Creates matrix of given size.
      * @param n Number of rows.
@@ -109,28 +109,10 @@ public:
     FloatMatrix(std::size_t  n, std::size_t m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
-    /**
-     * Constructor. Creates float matrix from float vector. Vector may be stored row wise
-     * or column wise, depending on second parameter.
-     * @param vector Float vector from which matrix is constructed
-     * @param transpose If false (default) then a matrix of size (vector->giveSize(),1)
-     * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
-     * will be created.
-     */
-    FloatMatrix(const FloatArray &vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
     /// Copy constructor.
     FloatMatrix(FloatMatrix && mat) noexcept : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
-    /// Initializer list constructor.
-    FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Initializer list constructor.
-    template<std::size_t M, std::size_t N>
-    FloatMatrix(const FloatMatrixF<N,M> &src) : nRows(N), nColumns(M), values(src.begin(), src.end()) { }
-    /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-    /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
@@ -144,13 +126,66 @@ public:
         values = std :: move(mat.values);
         return * this;
     }
-    /// Assignment operator, adjusts size of the receiver if necessary.
+    inline int rows() const { return (int)nRows; }
+    inline int cols() const { return (int)nColumns; }
+
+    /**
+     * Coefficient access function. Returns l-value of coefficient at given
+     * position of the receiver. Implements 0-based indexing.
+     * @param i Row position of coefficient.
+     * @param j Column position of coefficient.
+     */
+    inline double &operator()(std::size_t i, std::size_t j)
+    {
+        #ifndef NDEBUG
+            this->checkBounds(i + 1, j + 1);
+        #endif
+        return values [ j * nRows + i ];
+    }
+    /**
+     * Coefficient access function. Implements 0-based indexing.
+     * @param i Row position of coefficient.
+     * @param j Column position of coefficient.
+     */
+    inline double operator()(std::size_t i, std::size_t j) const
+    {
+        #ifndef NDEBUG
+        this->checkBounds(i + 1, j + 1);
+        #endif
+        return values [ j * nRows + i ];
+    }
+    inline const double *data() const { return values.data(); }
+    inline double *data() { return values.data(); }
+#endif
+
+    template<std::size_t N, std::size_t M>
+    void assignFloatMatrixF(const FloatMatrixF<N,M> &mat){
+        resize(N,M); // FIXME: useless 0-write
+        for(Index c=0; c<cols(); c++) for(Index r=0; r<rows(); r++) (*this)(r,c)=mat(r,c);
+    }
+
+    void _resize_internal(int nr, int nc);
+    FloatMatrix(std :: initializer_list< std :: initializer_list< double > > ini){ (*this)=FloatMatrix::fromIniList(ini); }
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat){ (*this)=fromIniList(mat); return *this; }
+    static FloatMatrix fromIniList(std :: initializer_list< std :: initializer_list< double > >);
+    static FloatMatrix fromCols(std :: initializer_list< FloatArray >mat);
+    template<std::size_t M, std::size_t N>
+    FloatMatrix(const FloatMatrixF<N,M> &src) { assignFloatMatrixF(src); }
+
+    /**
+     * Creates float matrix from float vector. Vector may be stored row wise
+     * or column wise, depending on second parameter.
+     * @param vector Float vector from which matrix is constructed
+     * @param transpose If false (default) then a matrix of size (vector->giveSize(),1)
+     * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
+     * will be created.
+     */
+    static FloatMatrix fromArray(const FloatArray &vector, bool transpose = false);
+
     template<std::size_t N, std::size_t M>
     FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
-        nRows = N;
-        nColumns = M;
-        values.assign(mat.begin(), mat.end());
-        return * this;
+        this->assignFloatMatrixF(mat);
+        return *this;
     }
 
     /**
@@ -159,20 +194,20 @@ public:
      * @param i Required number of rows.
      * @param j Required number of columns.
      */
-    void checkBounds(std::size_t i, std::size_t j) const;
+    void checkBounds(Index i, Index j) const;
     /// Returns number of rows of receiver.
-    inline int giveNumberOfRows() const { return (int)nRows; }
-    inline std::size_t giveRowSize() const { return nRows; }
-
+    //[[deprecated("use rows() instead")]]
+    inline int giveNumberOfRows() const { return rows(); }
     /// Returns number of columns of receiver.
-    inline int giveNumberOfColumns() const { return (int)nColumns; }
-    inline std::size_t giveColSize() const { return nColumns; }
+    //[[deprecated("use cols() instead")]]
+    inline int giveNumberOfColumns() const { return cols(); }
+
 
 
     /// Returns nonzero if receiver is square matrix.
-    inline bool isSquare() const { return nRows == nColumns; }
+    inline bool isSquare() const { return rows() == cols(); }
     /// Tests for empty matrix.
-    inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
+    inline bool isNotEmpty() const { return rows() > 0 && cols() > 0; }
 
     /// Returns true if no element is NAN or infinite
     bool isAllFinite() const;
@@ -185,10 +220,7 @@ public:
      */
     inline double at(std::size_t i, std::size_t j) const
     {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * nRows + i - 1 ];
+        return (*this)(i-1,j-1);
     }
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -198,36 +230,7 @@ public:
      */
     inline double &at(std::size_t i, std::size_t j)
     {
-#ifndef NDEBUG
-        this->checkBounds(i, j);
-#endif
-        return values [ ( j - 1 ) * nRows + i - 1 ];
-    }
-
-    /**
-     * Coefficient access function. Returns l-value of coefficient at given
-     * position of the receiver. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double &operator()(std::size_t i, std::size_t j)
-    {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif
-        return values [ j * nRows + i ];
-    }
-    /**
-     * Coefficient access function. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double operator()(std::size_t i, std::size_t j) const
-    {
-#ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
-#endif 
-        return values [ j * nRows + i ];
+        return (*this)(i-1,j-1);
     }
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
@@ -382,7 +385,7 @@ public:
      * @param topCol Index of top column of sub-matrix.
      * @param bottomCol index of bottom column of sub-matrix.
      */
-    void beSubMatrixOf(const FloatMatrix &src, std::size_t topRow, std::size_t bottomRow, std::size_t topCol, std::size_t bottomCol);
+    void beSubMatrixOf(const FloatMatrix &src, Index topRow, Index bottomRow, Index topCol, Index bottomCol);
     /**
      * Modifies receiver to be a sub-matrix of another matrix.
      * @param src Matrix from which sub-matrix is taken
@@ -504,13 +507,6 @@ public:
      */
     void negated();
     /**
-     * Assigns to receiver one column or one row matrix containing vector.
-     * @param vector Source vector.
-     * @param transposed If false then (vector->giveSize(),1) FloatMatrix is assigned
-     * else (1,vector->giveSize()) FloatMatrix is assigned.
-     */
-    void initFromVector(const FloatArray &vector, bool transposed);
-    /**
      * Initializes the lower half of the receiver according to the upper half.
      */
     void symmetrized();
@@ -521,26 +517,25 @@ public:
      * @param mode If set to 't' then the transpose of the rotation matrix is used instead.
      */
     void rotatedWith(const FloatMatrix &r, char mode = 'n');
-    /**
-     * Checks size of receiver towards requested bounds.
-     * If dimension mismatch, size is adjusted accordingly.
-     * Content is always zeroed.
-     * @param rows New number of rows.
-     * @param cols New number of columns.
-     */
-    void resize(std::size_t rows, std::size_t cols);
+    #ifndef _USE_EIGEN
+        /**
+        * Checks size of receiver towards requested bounds.
+        * If dimension mismatch, size is adjusted accordingly.
+        * Content is always zeroed.
+        * @param rows New number of rows.
+        * @param cols New number of columns.
+        */
+        void resize(Index rows, Index cols);
+    #endif
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Note: New coefficients are initialized to zero, old are kept.
      */
-    void resizeWithData(std::size_t, std::size_t);
+    void resizeWithData(Index, Index);
 
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void clear() {
-        this->nRows = 0;
-        this->nColumns = 0;
-    }
+    void clear() { resize(0,0); }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
@@ -579,8 +574,8 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    inline const double *givePointer() const { return values.data(); }
-    inline double *givePointer() { return values.data(); }
+    inline const double *givePointer() const { return data(); }
+    inline double *givePointer() { return data(); }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
@@ -607,18 +602,20 @@ public:
 
 }; // class FloatMatrix
 
-//@name operators
-//@{
-/// Vector multiplication by scalar
-OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
-OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
-OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
-OOFEM_EXPORT FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+#ifndef _USE_EIGEN
+    //@name operators
+    //@{
+    /// Vector multiplication by scalar
+    OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
+    OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
+    OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
+    OOFEM_EXPORT FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+    //@}
+#endif
 
-//@}
 
 } // end namespace oofem
 #endif // flotmtrx_h

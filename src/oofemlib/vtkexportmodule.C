@@ -688,7 +688,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 fprintf(stream, "%e ", 0.0);
             }
         } else if ( type == ISVT_VECTOR ) {
-            jsize = min( 3, val->giveSize() );
+            jsize = min( 3, (int)val->giveSize() );
             for ( j = 1; j <= jsize; j++ ) {
                 fprintf( stream, "%e ", val->at(j) );
             }
@@ -855,7 +855,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 fprintf(stream, "%e ", 0.0);
             }
         } else if ( type == ISVT_VECTOR ) {
-            jsize = min( 3, iVal.giveSize() );
+            jsize = min( 3, (int)iVal.giveSize() );
             //rotate back from nodal CS to global CS if applies
             if ( d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
                 iVal.resize(3);

@@ -26,14 +26,19 @@ pyodide:
 	cd bindings/python/tests; python -m pytest
 shared:
 	mkdir -p build-shared
-	cmake -Bbuild-shared -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-shared/
 	ctest --test-dir build-shared/ --parallel=16 --output-on-failure
+eigen:
+	mkdir -p build-eigen
+	cmake -Bbuild-eigen -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_EIGEN=1 -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	ninja -C build-eigen/
+	ctest --test-dir build-eigen/ --parallel=16 --output-on-failure
 notshared:
 	mkdir -p build-notshared
 	cmake -Bbuild-notshared -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-notshared/
-	ctest --test-dir build-notshared/ --parallel=16
+	ctest --verbose --test-dir build-notshared/ --parallel=16
 nanobind:
 	cmake -Bbuild-nanobind -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_NANOBIND=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-nanobind

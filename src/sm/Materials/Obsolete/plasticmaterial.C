@@ -157,7 +157,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                       fullStressVector, * fullStressSpaceHardeningVars);
 
         // obtain increment to consistency parameter
-        helpMtrx.initFromVector(* gradientVectorR, 1);
+        helpMtrx=FloatMatrix::fromArray(* gradientVectorR, 1);
         helpMtrx2.beProductOf(helpMtrx, consistentModuli);
         helpVec.beProductOf(helpMtrx2, * gradientVectorR);
         helpVal1 = helpVec.at(1);

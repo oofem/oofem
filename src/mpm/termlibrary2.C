@@ -111,7 +111,7 @@ NTBdivTerm::NTBdivTerm (const Variable *testField, const Variable* unknownField,
 void NTBdivTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, TimeStep* tstep) const {
     FloatArray Np;
     this->testField->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    FloatMatrix Npm(Np), B;   
+    FloatMatrix Npm=FloatMatrix::fromArray(Np), B;
     deltaB(B, this->field, this->field->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     answer.beTProductOf(Npm,B);
 }
@@ -143,7 +143,7 @@ void deltaBTfiNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoin
     deltaB(B, this->testField, this->testField->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     double vf = evalVolumeFraction(this->volumeFraction, e, gp->giveNaturalCoordinates(), tstep);
     this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    FloatMatrix Npm(Np);
+    FloatMatrix Npm=FloatMatrix::fromArray(Np);
     answer.beTProductOf(B,Npm);
     answer.times(vf);
 }
@@ -177,8 +177,8 @@ void NdTdvfNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* 
     e.getUnknownVector(rvf, this->volumeFraction, VM_TotalIntrinsic, tstep);
     dvf.beTProductOf(dndx, rvf);
     this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    FloatMatrix Npm(Np);
-    help.beTProductOf(N,dvf); // Nv * dv
+    FloatMatrix Npm=FloatMatrix::fromArray(Np);
+    help.beTProductOf(N,FloatMatrix::fromArray(dvf)); // Nv * dv
     answer.beProductOf(help, Npm);
 }
 
@@ -303,7 +303,7 @@ void deltaBTNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint*
     FloatMatrix B;   
     deltaB(B, this->testField, this->testField->interpolation, e, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
     this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
-    FloatMatrix Npm(Np);
+    FloatMatrix Npm=FloatMatrix::fromArray(Np);
     answer.beTProductOf(B,Npm);
 }
 

@@ -58,7 +58,7 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
         answer = status->giveFirstPKTraction();
         return 1;
     } else if ( type == IST_DeformationGradientTensor ) {
-        answer = to_voigt_form( status->giveF() );
+        answer = to_voigt_form_33( status->giveF() );
         return 1;
     } else if ( type == IST_InterfaceNormal ) {
         answer = status->giveNormal();

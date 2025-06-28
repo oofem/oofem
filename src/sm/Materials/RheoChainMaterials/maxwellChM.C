@@ -121,7 +121,9 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
     }
 
     double tPrime = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
-#pragma omp critical (MaxwellChainMaterial_EModulus)
+    #ifdef _OPENMP
+        #pragma omp critical (MaxwellChainMaterial_EModulus)
+    #endif
     {
         this->updateEparModuli(tPrime, gp, tStep);
 

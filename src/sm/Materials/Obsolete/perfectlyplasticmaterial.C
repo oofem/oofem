@@ -550,13 +550,13 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     yeldStressGrad = this->GiveYCStressGradient(gp, currentStressVector,
                                                 currentPlasticStrainVector);
     crossSection->imposeStressConstrainsOnGradient(gp, yeldStressGrad);
-    yeldStressGradMat = new FloatMatrix(*yeldStressGrad, 1); // transpose
+    yeldStressGradMat = new FloatMatrix(FloatMatrix::fromArray(*yeldStressGrad, 1)); // transpose
 
     loadingStressGrad = this->GiveLCStressGradient(gp, currentStressVector,
                                                    currentPlasticStrainVector);
 
     crossSection->imposeStrainConstrainsOnGradient(gp, loadingStressGrad);
-    loadingStressGradMat = new FloatMatrix(*yeldStressGrad);
+    loadingStressGradMat = new FloatMatrix(FloatMatrix::fromArray(*yeldStressGrad));
 
     help.beProductOf(de, * loadingStressGrad);
     delete loadingStressGrad;

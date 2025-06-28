@@ -53,10 +53,10 @@ int
 Node2NodeContact :: instanciateYourself(DataReader &dr)
 {
     // compute normal as direction vector from master node to slave node
-    const auto &xs = this->slaveNode->giveCoordinates();
-    const auto &xm = this->masterNode->giveCoordinates();
+    const FloatArray &xs = this->slaveNode->giveCoordinates();
+    const FloatArray &xm = this->masterNode->giveCoordinates();
 
-    auto _normal = xs - xm;
+    FloatArray _normal = xs - xm;
     double norm = _normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", 

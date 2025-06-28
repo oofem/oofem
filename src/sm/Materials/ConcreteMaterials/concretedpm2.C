@@ -1120,7 +1120,7 @@ ConcreteDPM2::computeRateFactor(double alpha,
     const auto &strain = status->giveTempReducedStrain();
 
     //Determine the principal values of the strain
-    auto principalStrain = StructuralMaterial::computePrincipalValues(from_voigt_strain(strain) );    ///@todo CHECK
+    auto principalStrain = StructuralMaterial::computePrincipalValues(from_voigt_strain_6(strain) );    ///@todo CHECK
 
     //Determine max and min value;
     double maxStrain = -1.e20, minStrain = 1.e20;
@@ -1423,7 +1423,7 @@ ConcreteDPM2::initDamaged(double kappaD,
         status->setLe(helem);
     } else if ( status->giveDamageTension() == 0. && status->giveDamageCompression() == 0. ) {
         //auto [principalStrains, principalDir] = computePrincipalValDir(from_voigt_strain(strain)); // c++17
-        auto tmp = computePrincipalValDir(from_voigt_strain(strain) );
+        auto tmp = computePrincipalValDir(from_voigt_strain_6(strain) );
         auto principalStrains = tmp.first;
         auto principalDir = tmp.second;
 
@@ -1893,7 +1893,7 @@ ConcreteDPM2::performRegularReturn(FloatArrayF< 6 > &effectiveStress,
 
     //compute the principal directions of the stress
     //auto [helpStress, stressPrincipalDir] = StructuralMaterial :: computePrincipalValDir(from_voigt_stress(trialStress)); // c++17
-    auto tmpEig = StructuralMaterial::computePrincipalValDir( from_voigt_stress(trialStress) );
+    auto tmpEig = StructuralMaterial::computePrincipalValDir( from_voigt_stress_6(trialStress) );
     auto stressPrincipalDir = tmpEig.second;
 
     FloatArrayF< 6 >stressPrincipal;
@@ -2566,7 +2566,7 @@ ConcreteDPM2::computeAlpha(FloatArrayF< 6 > &effectiveStressTension,
                            FloatArrayF< 6 > &effectiveStressCompression,
                            const FloatArrayF< 6 > &effectiveStress) const
 {
-    auto tmp = StructuralMaterial::computePrincipalValDir(from_voigt_stress(effectiveStress) );
+    auto tmp = StructuralMaterial::computePrincipalValDir(from_voigt_stress_6(effectiveStress) );
     auto principalStress = tmp.first;
     auto stressPrincipalDir = tmp.second;
 
@@ -2870,7 +2870,7 @@ ConcreteDPM2::computeDCosThetaDStress(const FloatArrayF< 6 > &stress) const
 
     //compute principal stresses and directions
     //auto [principalDeviatoricStress, principalDir] = computePrincipalValDir(from_voigt_stress(deviatoricStress)); // c++17
-    auto tmp = computePrincipalValDir(from_voigt_stress(deviatoricStress) );
+    auto tmp = computePrincipalValDir(from_voigt_stress_6(deviatoricStress) );
     auto principalDeviatoricStress = tmp.first;
     auto principalDir = tmp.second;
 
@@ -2901,7 +2901,7 @@ ConcreteDPM2::computeDDCosThetaDDStress(const FloatArrayF< 6 > &stress) const
 
     //compute principal stresses and directions
     //auto [principalDeviatoricStress, principalDir] = computePrincipalValDir(from_voigt_stress(deviatoricStress)); // c++17
-    auto tmp = computePrincipalValDir(from_voigt_stress(deviatoricStress) );
+    auto tmp = computePrincipalValDir(from_voigt_stress_6(deviatoricStress) );
     auto principalDeviatoricStress = tmp.first;
     auto principalDir = tmp.second;
 

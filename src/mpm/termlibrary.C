@@ -227,8 +227,8 @@ void NTamTBTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp
     this->testField->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     m.times(e.giveCrossSection()->giveMaterial(gp)->giveCharacteristicValue(aType, gp, tstep));
     this->grad(B, this->field, this->field->interpolation, e, gp->giveNaturalCoordinates(), mmode);
-    mb.beTProductOf(m, B);
-    FloatMatrix Npm(Np);
+    mb.beTProductOf(FloatMatrix::fromArray(m), B);
+    FloatMatrix Npm=FloatMatrix::fromArray(Np);
     answer.beProductOf(Npm, mb);
 }
 

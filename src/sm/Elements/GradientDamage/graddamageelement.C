@@ -490,7 +490,7 @@ GradientDamageElement :: computeStiffnessMatrix_du(FloatMatrix &answer, MatRespo
         dV = elem->computeVolumeAround(gp);
         if ( Ddu.giveNumberOfRows() > 0 ) {
             DduB.beTProductOf(Ddu, B);
-            FloatMatrix Ndm(Nd, true);
+            FloatMatrix Ndm=FloatMatrix::fromArray(Nd, true);
             answer.plusProductUnsym(Ndm, DduB, dV);
         } else {
             if ( answer.giveNumberOfColumns() == 0 ) {
@@ -521,7 +521,7 @@ GradientDamageElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatRespo
         }
 
         this->computeNdMatrixAt(gp, Nd);
-        FloatMatrix Ndm(Nd, true);
+        FloatMatrix Ndm=FloatMatrix::fromArray(Nd, true);
         this->computeBdMatrixAt(gp, Bd);
         dV = elem->computeVolumeAround(gp);
 
@@ -594,7 +594,7 @@ GradientDamageElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatRespo
         }
         dV = elem->computeVolumeAround(gp);
 
-        DudN.beProductTOf(Dud, Nd);
+        DudN.beProductTOf(Dud, FloatMatrix::fromArray(Nd));
         answer.plusProductUnsym(B, DudN, dV);
     }
 }
