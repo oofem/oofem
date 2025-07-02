@@ -405,7 +405,8 @@ condition, though sets can be used for many other things as well.
 
 ``Set`` ``#(in)`` [``elements #(ia)``] [``elementranges #(rl)``]
 [``allElements``] [``nodes #(ia)``] [``noderanges #(rl)``] [``allNodes``]
-[``elementboundaries #(ia)``] [``elementedges #(ia)``]
+[``elementboundaries #(ia)``] [``elementedges #(ia)``] 
+<``ver 1.6`` [``dofmanprops #(s)``] [``elemprops #(s)``]>
 
 Volumes (elements) and nodes can be specified using either a list,
 ``elements``, ``nodes``, or with a range list ``elementranges``,
@@ -432,6 +433,14 @@ would be applied to ``elements`` in a set. A external pressure would be
 defined as a surface load an be applied to the ``elementboundaries`` in
 a set. The element integrates the load (analytically) around the axis,
 so the load would still count as a surface load.
+
+Arbitrary dof manager and element properties can be specified using
+``dofmanprops`` and ``elemprops`` parameters (supported by ver. 1.6 and higher). The optional ``dofmanprops``
+parameter is a string, which contains any dof manager parameters that are subsequently set for all 
+dof managers in the set. The optional ``elemprops`` parameter is a string, which contains any element
+parameters that are subsequently set for all elements in the set. The syntax for setting the individual parameters is the syntax of input file records.
+Note that parameters defined using this mechanism have the lowest priority, i.e. 
+they can be overridden by the parameters defined in the dof manager or element records (see tests/sm/setprops01.in for an example).
 
 .. _CrossSectionRecords:
 
