@@ -23,7 +23,7 @@ The source directory tree holds source code to the OOFEM package.
   |
   |-- src - source files of all oofem modules
   |   |
-  |   |-- oofemlib - sources of the core part of OOFEM, the OOFEMlib module.
+  |   |-- core     - sources of the core part of OOFEM.
   |   |
   |   |-- sm       - sources of structural analysis module.
   |   |

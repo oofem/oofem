@@ -1,12 +1,12 @@
-The sources in this directory illustrate the use of oofemlib from external C/C++ applications.
+The sources in this directory illustrate the use of oofem core from external C/C++ applications.
 beam2d_1.C    ->   2d beam example (see InputManual, section examples for reference)
 
 You may try following compilation and linking on Linux machines, demonstrating the concept. The
 prerequisite is existent library liboofem.so (in this case located under ../../default)
 
 Compilation:
-g++ -c -I../../src/oofemlib -I../../src -I../../default beam2d_1.C -o beam2d_1.o
-g++ -c -I../../src/oofemlib -I../../src -I../../default ../../src/oofemcfg.C -o oofemcfg.o
+g++ -c -I../../src/core -I../../src -I../../default beam2d_1.C -o beam2d_1.o
+g++ -c -I../../src/core -I../../src -I../../default ../../src/oofemcfg.C -o oofemcfg.o
 
 Linking:
 g++ oofemcfg.o beam2d_1.o -L../../default -loofem -o beam2d_1

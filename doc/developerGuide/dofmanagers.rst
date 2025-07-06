@@ -9,7 +9,7 @@ one `Dof` instance  can belong to only one `DofManager` instance.
 `Dof` maintain its physical meaning and reference to
 related DofManager (reference to DofManager which possess particular DOF).
 To describe physical meaning of particular Dof, special enum type `DofId` has
-been introduced (see src/oofemlib/cltypes.h). This type is more descriptive than 
+been introduced (see src/core/cltypes.h). This type is more descriptive than 
 UnknownType, which determines physical meaning for unknowns generally 
 (displacement or temperature). `DofId` type has to distinguish between 
 DOFs representing displacement, but in different directions, since
@@ -136,7 +136,7 @@ following services:
 - Instantiating service `initializeFrom`.
 - Miscellaneous services for receiver printing, identification, etc.
 
-In the OOFEMlib the common specialized dof managers are
+In the OOFEM core module, the common specialized dof managers are
 defined and implemented. Those currently provided are:
 
 - `Node` class. Class implementing node in finite element mesh. 
@@ -190,7 +190,7 @@ Derived classes should represent the base classes for particular boundary condit
 force load, or boundary condition prescribed directly on some DOF) and should declare
 the basic common interface. For example, the `Load` is derived
 from `GeneralBoundaryCondition` and represent base class for all
-boundary conditions representing load. The following derived classes are provided by OOFEMlib
+boundary conditions representing load. The following derived classes are provided by OOFEM core:
 
 - `Load` class - base abstract class for all loads. Declares the
   attribute `componentArray` to store load components and

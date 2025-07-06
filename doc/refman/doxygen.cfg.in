@@ -245,10 +245,10 @@ MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = @oofem_SOURCE_DIR@/src/ \
-                         @oofem_SOURCE_DIR@/src/oofemlib/ \
-                         @oofem_SOURCE_DIR@/src/oofemlib/xfem/ \
-                         @oofem_SOURCE_DIR@/src/oofemlib/iga/ \
-                         @oofem_SOURCE_DIR@/src/oofemlib/iml/ \
+                         @oofem_SOURCE_DIR@/src/core/ \
+                         @oofem_SOURCE_DIR@/src/core/xfem/ \
+                         @oofem_SOURCE_DIR@/src/core/iga/ \
+                         @oofem_SOURCE_DIR@/src/core/iml/ \
                          @oofem_SOURCE_DIR@/src/fm/ \
                          @oofem_SOURCE_DIR@/src/sm/ \
                          @oofem_SOURCE_DIR@/src/tm/

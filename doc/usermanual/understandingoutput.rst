@@ -60,7 +60,7 @@ consisting of output for all nodes and elements. We start with nodal output.
 The output for each node starts with ``Node`` keyword, followed by node label and number (in parenthesis).
 This is followed by indented block containing the output for every degree of freedom of the node.
 DOF meaning is identified by a integer code after ``dof`` keyword. The codes are defined by DofIDItem enum. 
-For example, the mechanical unknowns have following codes: ``1`` for displacement in x direction, ``2`` for displacement in y direction, ``3`` for displacement in z direction, ``4`` for rotation around x axis, ``5`` for rotation around y axis and ``6`` for rotation around z axis (see src/oofemlib/dofiditem.h for full definition).
+For example, the mechanical unknowns have following codes: ``1`` for displacement in x direction, ``2`` for displacement in y direction, ``3`` for displacement in z direction, ``4`` for rotation around x axis, ``5`` for rotation around y axis and ``6`` for rotation around z axis (see src/core/dofiditem.h for full definition).
 Our 2D beam structure is in xz plane, so the relevant DOFs are displacement in x, displacement in z and rotation around y, corresponding to DOF codes 1,3,5. 
 The ``d`` code dof output means that actual value is printed, for some analyses, also velocities and accelerations of the corresponding unknown can be printed.
 
