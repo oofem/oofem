@@ -817,7 +817,7 @@ evaluate the actual displacements of controlled dofs.
   be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
   defines maximum limit on the length of iterative step (allowed range
   is $(1.5,15)$).
-\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/core/dofiditem.h for reference).
 \item \param{rtolv} determines relative convergence norm (both for displacement
 iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
 independent relative convergence crteria for unbalanced forces and displacement
@@ -897,7 +897,7 @@ be N.
   be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
   defines maximum limit on the length of iterative step (allowed range
   is $(1.5,15)$).
-\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/core/dofiditem.h for reference).
 \item \param{rtolv} determines relative convergence norm (both for displacement
 iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
 independent relative convergence crteria for unbalanced forces and displacement
@@ -3003,25 +3003,25 @@ Currently, the supported export modules are following
 \item The array \param{vars} contains identifiers for those internal
 variables which are to be exported. These variables will be smoothed and transfered to nodes. The id values are defined by
 InternalStateType enumeration, which is defined in include file
-``src/oofemlib/internal\-statetype.h''.
+``src/core/internal\-statetype.h''.
 
 \item The array \param{primvars}
 contains identifiers of primary variables to be exported.
 The possible values correspond to the values of enumerated type
-UnknownType, which is again defined in ``src/oofemlib/unknown\-type.h''.
+UnknownType, which is again defined in ``src/core/unknown\-type.h''.
 Please note, that the values corresponding to enumerated type values
 start from zero, if not specified directly and that not all values are
 supported by particular material model or analysis type.
 
 \item The array \param{cellvars} contains identifiers of constant variables defined
 on an element (cell), e.g. a material number. Identifier numbers are specified in
-``src/oofemlib/internalstatetype.h''.
+``src/core/internalstatetype.h''.
 
 \item The array \param{ipvars} contains identifiers for those internal
 variables which are to be exported. These variables will be directly exported (no smoothing) as point dataset, where each point corresponds to individual integration point. A separate vtu file for these raw, point data will be created. 
 The id values are defined by
 InternalStateType enumeration, which is defined in include file
-``src/oofemlib/internal\-statetype.h''.
+``src/core/internal\-statetype.h''.
 
 
 \item The parameter \param{stype} allows to select smoothing procedure for
@@ -3079,7 +3079,7 @@ distribution along a one-dimensional bar.
 \item The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
 InternalStateType enumeration, which is defined in include file
-``src/oofemlib/internal\-statetype.h''.
+``src/core/internal\-statetype.h''.
 \item Parameter \param{ncoords} specifies the number of spatial coordinates to be exported at each Gauss point. Depending on the spatial dimension of the
 domain, the points can have one, two or three coordinates. If  \param{ncoords}
 is set to -1, only those coordinates that are actually used are exported.

@@ -23,8 +23,8 @@ As an example, consider an example of 3-point bending test input file (located i
     vtkxml tstep_all dofman_all element_all primvars 1 1 vars 2 1 4         
     ...
 
-The export has been requested for all solution steps ``tstep_all``, all dof managers (nodes) ``dofman_all`` and all elements ``element_all``. The primary variables exported consists of displacement vector: ``primvars 1 1``, where ``primvars`` is the keyword for primary variable export, what follows is an array of primary variables IDs (defined in `src/oofemlib/unknowntype.h <https://github.com/oofem/oofem/blob/master/src/oofemlib/unknowntype.h>`_), first number determines the array size.
-The export of secondary (internal) variables consists of strain and stress tensors (``vars 2 1 4``, where internal variable codes are defined in `src/oofemlib/internalstatetype.h <https://github.com/oofem/oofem/blob/master/src/oofemlib/internalstatetype.h>`_).
+The export has been requested for all solution steps ``tstep_all``, all dof managers (nodes) ``dofman_all`` and all elements ``element_all``. The primary variables exported consists of displacement vector: ``primvars 1 1``, where ``primvars`` is the keyword for primary variable export, what follows is an array of primary variables IDs (defined in `src/core/unknowntype.h <https://github.com/oofem/oofem/blob/master/src/core/unknowntype.h>`_), first number determines the array size.
+The export of secondary (internal) variables consists of strain and stress tensors (``vars 2 1 4``, where internal variable codes are defined in `src/core/internalstatetype.h <https://github.com/oofem/oofem/blob/master/src/core/internalstatetype.h>`_).
 
 After running the modified, extended  input the solver will produce for each solution step ``vtu`` file.
 
