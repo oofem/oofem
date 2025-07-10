@@ -101,6 +101,8 @@ analysis types are
 
 -  Non-linear static analysis, see section :ref:`NonLinearStatic`.
 
+-  Stationary symbolic MPM analysis, see section :ref:`StationaryMPMSProblem`,
+
 -  Dymmy problem, see section :ref:`DummyEngngModel` 
 
 Structural Problems
@@ -1111,6 +1113,28 @@ performed, if not specified by ``maxiter``.
 
 Note: This problem type **is included in PFEM module** and it can be
 used only when this module is configured.
+
+
+.. _StationaryMPMSProblem:
+
+Stationary Symbolic MPM Problem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Stationary symbolic multiphysic problem (StationaryMPMSProblem) allows to formulate the problem 
+symbolically by defining its weak form in terms of variables, terms, and integrals.
+
+``StationaryMPMSProblem`` ``nsteps #(in)`` ``nvariables #(in)`` ``nterms #(in)``
+``nintegrals #(in)`` ``lhsterms #(ia)`` ``rhsterms #(ia)``
+
+The problem is defined by its weak form in terms of set of integrals of specific (predefined) terms as a function of defined variables.
+The number of variables, terms and integrals is defined by ``nvariables``, ``nterms``, and ``nintegrals`` parameters, respectively.
+The ``lhsterms`` and ``rhsterms`` parameters are integer arrays, 
+defining the integrals (of terms) that contribute to 
+the non-linear problem left-hand and right-hand sides, respectively.
+
+See https://oofem.github.io/blog/mpm-incompressible-elasticity-up-formulation/ for commented example and https://github.com/oofem/oofem/blob/devel/tests/mpm/cook2_u1p0_2.in for an example of complete input file.
+
+
+
 
 .. _DummyEngngModel:
 
