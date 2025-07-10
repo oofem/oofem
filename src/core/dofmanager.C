@@ -69,8 +69,9 @@ ParamKey DofManager::IPK_DofManager_nullflag ("null");
 
 
 DofManager :: DofManager(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofArray(), loadArray(), globalNumber(n), partitions(), dofTypemap(), dofMastermap(), dofBCmap(), dofICmap(),
-    parallel_mode(DofManager_local), isBoundaryFlag(false), hasSlaveDofs(false)
+    FEMComponent(n, aDomain), dofArray(), loadArray(),
+    isBoundaryFlag(false), hasSlaveDofs(false), globalNumber(n), parallel_mode(DofManager_local),
+    partitions(), dofTypemap(), dofMastermap(), dofBCmap(), dofICmap()
 {
     isBoundaryFlag = false;
     hasSlaveDofs  = false;

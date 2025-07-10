@@ -4,7 +4,7 @@ Utility classes
 Vectors and Matrices
 --------------------
 
-The OOFEMlib provides the abstraction for integer vectors (`IntArray`)
+The OOFEM core provides the abstraction for integer vectors (`IntArray`)
 and for real vectors and matrices (`FloatArray` and
 `FloatMatrix` classes). The usual arithmetic operations (like vector and
 matrix additions, subtractions, matrix vector multiplication, matrix

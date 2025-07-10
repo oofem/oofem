@@ -194,8 +194,8 @@ endif ()
 #######################################################################
 # I believe the subdirs should be used when including instead.
 include_directories ("${oofem_SOURCE_DIR}/src")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
+include_directories ("${oofem_SOURCE_DIR}/src/core")
+include_directories ("${oofem_SOURCE_DIR}/src/core/T3d/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -564,8 +564,8 @@ endif ()
 
 if (USE_T3D)
     add_definitions (-D__T3D)
-    include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
-    check_include_file_cxx ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src/t3d.h" HAVE_T3D_H)
+    include_directories ("${oofem_SOURCE_DIR}/src/core/T3d/src")
+    check_include_file_cxx ("${oofem_SOURCE_DIR}/src/core/T3d/src/t3d.h" HAVE_T3D_H)
     if ((NOT HAVE_T3D_H))
         message (FATAL_ERROR "Necessary T3D headers not found")
     endif ()
@@ -721,7 +721,7 @@ endif()
 
 site_name (HOST_NAME)
 list(JOIN MODULE_LIST " " MODULE_LIST_SPACES) # space-saparated so that it can be passed with -D
-# OOFEMCFG_C_COMPILE_DEFINITIONS is used with oofemcfg.C bu in src/oofemlib (visible only in the same dir)
+# OOFEMCFG_C_COMPILE_DEFINITIONS is used with oofemcfg.C bu in src/core (visible only in the same dir)
 set(OOFEMCFG_C_COMPILE_DEFINITIONS "__OOFEM_VERSION=\"${OOFEM_VERSION}\";__OOFEM_MAJOR_VERSION=\"${OOFEM_VERSION_MAJOR}\";__OOFEM_MINOR_VERSION=\"${OOFEM_VERSION_MINOR}\";__OOFEM_GIT_HASH=\"${OOFEM_GIT_HASH}\";__OOFEM_GIT_REPOURL=\"${OOFEM_GIT_REPOURL}\";__OOFEM_GIT_BRANCH=\"${OOFEM_GIT_BRANCH}\";__HOST_TYPE=\"${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}\";__HOST_NAME=\"${HOST_NAME}\";__OOFEM_COPYRIGHT=\"${OOFEM_COPYRIGHT}\";__MODULE_LIST=\"${MODULE_LIST_SPACES}\";")
 
 
@@ -747,7 +747,7 @@ configure_file (
 #######################################################################
 # Subtargets
 set (LIB_TYPE OBJECT)
-add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")
+add_subdirectory ("${oofem_SOURCE_DIR}/src/core")
 if (USE_DSS)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/dss")
 endif ()
@@ -867,19 +867,19 @@ endif ()
 
 if (BUILD_EXTRA_EXAMPLES)
     # Example of using liboofem with dynamic input record:
-    add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+    add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/core/beam2d_1.C)
     set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_link_libraries (beam2d_1 liboofem)
 endif ()
 
 if (BUILD_EXTRA_HEXGRID)
-    add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
+    add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/core/hexgrid.C)
     set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_link_libraries (hexgrid liboofem)
 endif ()
 
 if (BUILD_EXTRA_DREAM3D)
-    add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/oofemlib/dream3d_analysis.C)
+    add_executable(dream3d_analysis ${oofem_SOURCE_DIR}/bindings/core/dream3d_analysis.C)
     set_target_properties(dream3d_analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
     target_link_libraries(dream3d_analysis liboofem)
 endif ()
@@ -891,12 +891,12 @@ add_custom_command(TARGET cppcheck
     PRE_BUILD
     COMMAND cppcheck "--xml" "--template=gcc" "--enable=all" 
     "-I${oofem_BINARY_DIR}/"
-    "-I${oofem_SOURCE_DIR}/src/oofemlib/"
+    "-I${oofem_SOURCE_DIR}/src/core/"
     "-I${oofem_SOURCE_DIR}/src/sm/"
     "-I${oofem_SOURCE_DIR}/src/fm/"
     "-I${oofem_SOURCE_DIR}/src/tm/"
     "-DDEBUG"
-    ${oofem_SOURCE_DIR}/src/oofemlib/
+    ${oofem_SOURCE_DIR}/src/core/
     ${oofem_SOURCE_DIR}/src/sm/
     ${oofem_SOURCE_DIR}/src/fm/
     ${oofem_SOURCE_DIR}/src/tm/

@@ -237,7 +237,7 @@ Represents direct implicit integration of linear dynamic problems. Solution proc
 K. Subbaraj and M. A. Dokainish, A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS,
 Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989.
 
-Parameter ``ddtscheme`` determines integration scheme, as defined in src/oofemlib/timediscretizationtype.h (TD_ThreePointBackward=0 (default), TD_TwoPointBackward =  1,
+Parameter ``ddtscheme`` determines integration scheme, as defined in src/core/timediscretizationtype.h (TD_ThreePointBackward=0 (default), TD_TwoPointBackward =  1,
 TD_Newmark =  2, TD_Wilson =  3, TD_Explicit  =  4).
 
 Parameters ``beta`` and ``gamma`` determine the stability and acuracy of the integration algorithm, both have zero values as default. For ``gamma=0.5`` and ``beta = l/6``, the linear acceleration method is obtained. Unconditional stability is obtained, when :math:`2\beta \ge \gamma \ge 1/2`. 
@@ -426,7 +426,7 @@ where
    should be replaced by group number (numbering starts from 1). This
    array contains the DofIDItem values, that identify the physical
    meaning of DOFs in the group. The values and their physical meaning
-   is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for
+   is defined by DofIDItem enum type (see src/core/dofiditem.h for
    reference).
 
 -  ``rtolv`` determines relative convergence norm (both for displacement
@@ -554,7 +554,7 @@ where
    should be replaced by group number (numbering starts from 1). This
    array contains the DofIDItem values, that identify the physical
    meaning of DOFs in the group. The values and their physical meaning
-   is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for
+   is defined by DofIDItem enum type (see src/core/dofiditem.h for
    reference).
 
 -  ``rtolv`` determines relative convergence norm (both for displacement

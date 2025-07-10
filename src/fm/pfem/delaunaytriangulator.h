@@ -36,7 +36,7 @@
 //   *** DELAUNAY MESH GENERATOR ***
 //   *******************************
 
-// based on oofemlib/mesherinterface.h
+// based on core/mesherinterface.h
 
 
 #ifndef delaunaytrinagulator_h

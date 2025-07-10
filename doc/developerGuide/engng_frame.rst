@@ -92,7 +92,7 @@ The basic `EngngModel` tasks are following:
 - Storing and restoring problem state to/from context file.
 - Managing and updating unknowns 
 
-The complete listing of `EngngModel` class declaration can be found here: https://github.com/oofem/oofem/blob/master/src/oofemlib/engngm.h. It is well commented and should be self-explanatory.
+The complete listing of `EngngModel` class declaration can be found here: https://github.com/oofem/oofem/blob/master/src/core/engngm.h. It is well commented and should be self-explanatory.
 
 One of the key methods of `EngngModel` class is
 `solveYourself`, which is invoked to starts the solution of the problem. 
@@ -311,7 +311,7 @@ to serve the connectivity and  spatial localization related services
 finding the element containing given point, etc.).
 
 For complete definition of `Domain` class interface, 
-please go to  https://github.com/oofem/oofem/blob/master/src/oofemlib/domain.h
+please go to  https://github.com/oofem/oofem/blob/master/src/core/domain.h
 
 
 

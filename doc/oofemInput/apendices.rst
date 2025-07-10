@@ -522,19 +522,19 @@ Currently, the supported export modules are following
       variables which are to be exported. These variables will be
       smoothed and transfered to nodes. The id values are defined by
       InternalStateType enumeration, which is defined in include file
-      “src/oofemlib/internalstatetype.h”.
+      “src/core/internalstatetype.h”.
 
    -  The array ``primvars`` contains identifiers of primary variables
       to be exported. The possible values correspond to the values of
       enumerated type UnknownType, which is again defined in
-      “src/oofemlib/unknowntype.h”. Please note, that the values
+      “src/core/unknowntype.h”. Please note, that the values
       corresponding to enumerated type values start from zero, if not
       specified directly and that not all values are supported by
       particular material model or analysis type.
 
    -  The array ``cellvars`` contains identifiers of constant variables
       defined on an element (cell), e.g. a material number. Identifier
-      numbers are specified in “src/oofemlib/internalstatetype.h”.
+      numbers are specified in “src/core/internalstatetype.h”.
 
    -  The array ``ipvars`` contains identifiers for those internal
       variables which are to be exported. These variables will be
@@ -542,7 +542,7 @@ Currently, the supported export modules are following
       point corresponds to individual integration point. A separate vtu
       file for these raw, point data will be created. The id values are
       defined by InternalStateType enumeration, which is defined in
-      include file “src/oofemlib/internalstatetype.h”.
+      include file “src/core/internalstatetype.h”.
 
    -  The parameter ``stype`` allows to select smoothing procedure for
       internal variables, which is used to compute nodal values from
@@ -615,7 +615,7 @@ Currently, the supported export modules are following
    -  The array ``vars`` contains identifiers for those internal
       variables which are to be exported. The id values are defined by
       InternalStateType enumeration, which is defined in include file
-      “src/oofemlib/internalstatetype.h”.
+      “src/core/internalstatetype.h”.
 
    -  Parameter ``ncoords`` specifies the number of spatial coordinates
       to be exported at each Gauss point. Depending on the spatial
@@ -755,7 +755,7 @@ where the parameters have following meaning:
    - 3 - for pressure field
 - ``size`` attribute determines the size (dimension) of variable.
 - ``dofs`` array of integers, defining the physical meaning of variable DOFs. The size of the array should be equal to the size of the variable. 
-    The supported values are defined in src/oofemlib/dofiditem.h file.
+    The supported values are defined in src/core/dofiditem.h file.
 
 .. _TermsSec:
 

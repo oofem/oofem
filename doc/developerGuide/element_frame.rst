@@ -194,7 +194,7 @@ The following important services are declared/introduced by the `Element`:
 - Services for handling transformations between element local coordinate
   system and coordinate system used in nodes (possibly different from
   global coordinate system).  
-- Othetr miscellaneous services. Their detailed description can be found in `Element` class definition in `sr/oofemlib/element.h`.
+- Othetr miscellaneous services. Their detailed description can be found in `Element` class definition in `src/core/element.h`.
 
 
 Analysis specific element classes
