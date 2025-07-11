@@ -1,4 +1,4 @@
-Mixed formulation for incompressible elasticity using MPM symbolic module
+Symbolic MPM module (Concept & Formulation) 
 ===========================================================================
 
 The symbolic MPM module allows to define problems using syntax describing their weak form.

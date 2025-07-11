@@ -12,7 +12,8 @@ Theory manual
 
    introduction
    general
-   problems
+   problemformulations
+   solutionprocedures
    elements
    materials 
    
