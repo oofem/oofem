@@ -2266,6 +2266,47 @@ supports modelling of two immiscible fluids.}
 \end{elementsummary}
 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
+\section{MPM Symbolic Elements (MPM Module)}
+In this section we describe the elements supporting the Symbolic mode of Multiphysics Module (MPM).
+The symbolic mode is used to define the weak form of the problem in terms of variables, terms and integrals.
+The symbolic MPM elements support different types of approximations. The additional nodes are generated authomatically and this process ensures the reauired continuity of interpolations among element boundaries.
+Also, the needed DOFs are generated automatically, depending on the configured variables.  
+
+\subsubsection{Q1 element}
+\label{Q1}
+
+Represents 2D  isoparametric quad element. The element geometry in (x,y) plane is defined using 
+4 corner nodes. The element supports linear and quadratic approximation. 
+
+
+\begin{elementsummary}{q1}{q1 element}{-}{q1 element summary}{q1summary}
+\elementDescription{Unknowns}{Depending on configured variables}
+\elementDescription{Approximation}{Linear and quadratic unknown approximation; Linear approximation of geometry.}
+\elementDescription{Integration}{Exact}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{As required by individual terms}
+\elementDescription{Loads}{None, need to be defined using terms}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+\subsubsection{L1 element}
+\label{L1}
+
+Represents 1D isoparametric line element in 3D space. The element geometry is defined using 
+2 nodes. The element supports linear and quadratic approximation. 
+
+\begin{elementsummary}{l1}{l1 element}{-}{l1 element summary}{l1summary}
+\elementDescription{Unknowns}{Depending on configured variables}
+\elementDescription{Approximation}{Linear and quadratic unknown approximation; Linear approximation of geometry.}
+\elementDescription{Integration}{Exact}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{As required by individual terms}
+\elementDescription{Loads}{None, need to be defined using terms}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 % References;
 %\printbibliography
 
