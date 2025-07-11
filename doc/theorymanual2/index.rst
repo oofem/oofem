@@ -15,7 +15,8 @@ Theory manual
    problems
    elements
    materials 
-   terms 
+   
+   symbolicmpm
 
 * :download:`How to contribute <docs/Introduction/Adding_documentation/Readme.pdf>`
   
