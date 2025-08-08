@@ -488,10 +488,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 {
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0;
-    bool nxfemman = false;
-    bool ncontactman = false;
-    bool nfracman = false;
     int componentRecPriority = 2;
 
     // read type of Domain to be solved
@@ -504,9 +500,9 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         // irDomain.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciating domain ", this->number);
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instanciating domain ", this->number);
+    #  endif
 
     resolveDomainDofsDefaults( name.c_str() );
 
@@ -523,25 +519,26 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     // read domain description
-    {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_domainCompRec, 1);
-        IR_GIVE_FIELD(ir, nnode, _IFT_Domain_ndofman);
-        IR_GIVE_FIELD(ir, nelem, _IFT_Domain_nelem);
-        IR_GIVE_FIELD(ir, ncrossSections, _IFT_Domain_ncrosssect);
-        IR_GIVE_FIELD(ir, nmat, _IFT_Domain_nmat);
-        IR_GIVE_FIELD(ir, nload, _IFT_Domain_nbc);
-        IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
-        IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nfunct);
-        IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
-        IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
-        IR_GIVE_OPTIONAL_FIELD(ir, ncontactman, _IFT_Domain_ncontactman);
-        IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
+    //{
+        std::unique_ptr<InputRecord> irdPtr(dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
+        InputRecord& ird(*irdPtr);
+        // IR_GIVE_FIELD(ird, nnode, _IFT_Domain_ndofman);
+        // IR_GIVE_FIELD(ird, nelem, _IFT_Domain_nelem);
+        // IR_GIVE_FIELD(ird, ncrossSections, _IFT_Domain_ncrosssect);
+        // IR_GIVE_FIELD(ird, nmat, _IFT_Domain_nmat);
+        // IR_GIVE_FIELD(ird, nload, _IFT_Domain_nbc);
+        // IR_GIVE_FIELD(ird, nic, _IFT_Domain_nic);
+        // IR_GIVE_FIELD(ird, nloadtimefunc, _IFT_Domain_nfunct);
+        // IR_GIVE_OPTIONAL_FIELD(ird, nset, _IFT_Domain_nset);
+        // IR_GIVE_OPTIONAL_FIELD(ird, nxfemman, _IFT_Domain_nxfemman);
+        // IR_GIVE_OPTIONAL_FIELD(ird, ncontactman, _IFT_Domain_ncontactman);
+        IR_GIVE_OPTIONAL_FIELD(ird, topologytype, _IFT_Domain_topology);
         this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
-        IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
-        this->axisymm = ir.hasField(_IFT_Domain_axisymmetric);
-        IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
-        IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  _IFT_Domain_nbarrier);
-    }
+        IR_GIVE_OPTIONAL_FIELD(ird, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
+        this->axisymm = ird.hasField(_IFT_Domain_axisymmetric);
+        // IR_GIVE_OPTIONAL_FIELD(ird, nfracman, _IFT_Domain_nfracman);
+        // IR_GIVE_OPTIONAL_FIELD(ird, nbarrier,  _IFT_Domain_nbarrier);
+    //}
 
     ///@todo Eventually remove this backwards compatibility:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
@@ -558,51 +555,55 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     // read nodes
+    DataReader::GroupRecords dofManagerRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ndofman,"Nodes",DataReader::IR_dofmanRec,/*optional*/false);
+    dr.enterRecord(irdPtr.get()); // ???
     dofManagerList.clear();
-    dofManagerList.resize(nnode);
-    for ( int i = 1; i <= nnode; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_dofmanRec, i);
-        // read type of dofManager
+    dofManagerList.resize(dofManagerRecs.size());
+    int dofManagerIndex0=0;
+    for(auto& ir: dofManagerRecs){
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        std :: unique_ptr< DofManager > dman( classFactory.createDofManager(name.c_str(), i, this) );
+        std :: unique_ptr< DofManager > dman( classFactory.createDofManager(name.c_str(), dofManagerIndex0+1, this) );
         if ( !dman ) {
             OOFEM_ERROR("Couldn't create node of type: %s\n", name.c_str());
         }
 
         dman->initializeFrom(ir, componentRecPriority);
         dman->setGlobalNumber(num);    // set label
-        dofManagerList[i - 1] = std :: move(dman);
+        dofManagerList[dofManagerIndex0] = std :: move(dman);
 
         ir.finish();
+        dofManagerIndex0++;
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated nodes & sides ", nnode)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated nodes & sides ", dofManagerList.size())
+    #  endif
 
     BuildDofManPlaceInArrayMap();
 
     // read elements
+    DataReader::GroupRecords elemRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nelem,"Elements",DataReader::IR_elemRec,/*optional*/false);
     elementList.clear();
-    elementList.resize(nelem);
-    for ( int i = 1; i <= nelem; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_elemRec, i);
+    elementList.resize(elemRecs.size());
+    int elemIndex0=0;
+    for(auto& ir: elemRecs){
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        std :: unique_ptr< Element >elem( classFactory.createElement(name.c_str(), i, this) );
+        std :: unique_ptr< Element >elem( classFactory.createElement(name.c_str(), elemIndex0+1, this) );
         if ( !elem ) {
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
 
         elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
-        elementList[i - 1] = std :: move(elem);
+        elementList[elemIndex0] = std :: move(elem);
 
         ir.finish();
+        elemIndex0++;
     }
 
     BuildElementPlaceInArrayMap();
@@ -610,9 +611,9 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
     if ( dr.peekNext("set") ) {
-        setList.resize(nset);
-        for ( int i = 1; i <= nset; i++ ) {
-            auto &ir = dr.giveInputRecord(DataReader :: IR_setRec, i);
+        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,"Sets",DataReader::IR_setRec,/*optional*/true);
+        setList.resize(setRecs.size());
+        for(InputRecord& ir: setRecs){
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
@@ -624,7 +625,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
             set->initializeFrom(ir);
 
             // check number
-            if ( num < 1 || num > nset ) {
+            if ( num < 1 || num > (int)setRecs.size() ) {
                 OOFEM_ERROR("Invalid set number (num=%d)", num);
             }
 
@@ -638,15 +639,15 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         }
     }
     
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated elements ", nelem);
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated elements ", elementList.size());
+    #  endif
 
     // read cross sections
+    DataReader::GroupRecords csRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncrosssect,"CrossSections",DataReader::IR_crosssectRec,/*optional*/false);
     crossSectionList.clear();
-    crossSectionList.resize(ncrossSections);
-    for ( int i = 1; i <= ncrossSections; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_crosssectRec, i);
+    crossSectionList.resize(csRecs.size());
+    for(InputRecord& ir: csRecs){
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         std :: unique_ptr< CrossSection >crossSection( classFactory.createCrossSection(name.c_str(), num, this) );
@@ -657,7 +658,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         crossSection->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > ncrossSections ) ) {
+        if ( ( num < 1 ) || ( num > (int)csRecs.size() ) ) {
             OOFEM_ERROR("Invalid crossSection number (num=%d)", num);
         }
 
@@ -670,15 +671,15 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated cross sections ", ncrossSections)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated cross sections ", crossSectionList.size())
+    #  endif
 
     // read materials
+    DataReader::GroupRecords matRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nmat,"Materials",DataReader::IR_matRec,/*optional*/false);
     materialList.clear();
-    materialList.resize(nmat);
-    for ( int i = 1; i <= nmat; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_matRec, i);
+    materialList.resize(matRecs.size());
+    for(InputRecord& ir: matRecs){
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -690,7 +691,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         mat->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > nmat ) ) {
+        if ( ( num < 1 ) || ( num > (int)matRecs.size() ) ) {
             OOFEM_ERROR("Invalid material number (num=%d)", num);
         }
 
@@ -703,15 +704,15 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated materials ", nmat)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated materials ", materialList.size())
+    #  endif
 
     // read barriers
+    DataReader::GroupRecords barrRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbarrier,"NonlocalBarriers",DataReader::IR_nlocBarRec,/*optional*/true);
     nonlocalBarrierList.clear();
-    nonlocalBarrierList.resize(nbarrier);
-    for ( int i = 1; i <= nbarrier; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_nlocBarRec, i);
+    nonlocalBarrierList.resize(barrRecs.size());
+    for(InputRecord& ir: barrRecs){
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -723,7 +724,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         barrier->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > nbarrier ) ) {
+        if ( ( num < 1 ) || ( num > (int)barrRecs.size() ) ) {
             OOFEM_ERROR("Invalid barrier number (num=%d)", num);
         }
 
@@ -736,17 +737,17 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    if ( nbarrier ) {
-        VERBOSE_PRINT0("Instanciated barriers ", nbarrier);
-    }
-#  endif
+    #  ifdef VERBOSE
+        if ( !nonlocalBarrierList.empty() ) {
+            VERBOSE_PRINT0("Instantiated barriers ", nonlocalBarrierList.size());
+        }
+    #  endif
 
     // read boundary conditions
+    DataReader::GroupRecords bcRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbc,"BoundaryConditions",DataReader::IR_bcRec,/*optional*/false);
     bcList.clear();
-    bcList.resize(nload);
-    for ( int i = 1; i <= nload; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_bcRec, i);
+    bcList.resize(bcRecs.size());
+    for(InputRecord& ir: bcRecs){
         // read type of bc
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -758,7 +759,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         bc->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > nload ) ) {
+        if ( ( num < 1 ) || ( num > (int)bcRecs.size() ) ) {
             OOFEM_ERROR("Invalid boundary condition number (num=%d)", num);
         }
 
@@ -771,15 +772,15 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated BCs ", nload)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated BCs ", bcList.size())
+    #  endif
 
     // read initial conditions
+    DataReader::GroupRecords icRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nic,"InitialConditions",DataReader::IR_icRec,/*optional*/false);
     icList.clear();
-    icList.resize(nic);
-    for ( int i = 1; i <= nic; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_icRec, i);
+    icList.resize(icRecs.size());
+    for(InputRecord& ir: icRecs){
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -791,7 +792,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ic->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > nic ) ) {
+        if ( ( num < 1 ) || ( num > (int)icRecs.size() ) ) {
             OOFEM_ERROR("Invalid initial condition number (num=%d)", num);
         }
 
@@ -804,16 +805,16 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated ICs ", nic)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated ICs ", icList.size())
+    #  endif
 
 
     // read load time functions
+    DataReader::GroupRecords ltfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nfunct,"LoadTimeFunctions",DataReader::IR_funcRec,/*optional*/false);
     functionList.clear();
-    functionList.resize(nloadtimefunc);
-    for ( int i = 1; i <= nloadtimefunc; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_funcRec, i);
+    functionList.resize(ltfRecs.size());
+    for(InputRecord& ir: ltfRecs){
         // read type of func
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -825,7 +826,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         func->initializeFrom(ir);
 
         // check number
-        if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {
+        if ( ( num < 1 ) || ( num > (int)ltfRecs.size() ) ) {
             OOFEM_ERROR("Invalid Function number (num=%d)", num);
         }
 
@@ -838,15 +839,15 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
-#  endif
+    #  ifdef VERBOSE
+        VERBOSE_PRINT0("Instantiated load-time fncts ", functionList.size())
+    #  endif
 
     // read sets
     if ( setList.size() == 0 ) {
-        setList.resize(nset);
-        for ( int i = 1; i <= nset; i++ ) {
-            auto &ir = dr.giveInputRecord(DataReader :: IR_setRec, i);
+        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,"Sets",DataReader::IR_setRec,/*optional*/true);
+        setList.resize(setRecs.size());
+        for(InputRecord& ir: setRecs){
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
@@ -858,7 +859,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
             set->initializeFrom(ir);
 
             // check number
-            if ( ( num < 1 ) || ( num > nset ) ) {
+            if ( ( num < 1 ) || ( num > (int)setRecs.size() ) ) {
                 OOFEM_ERROR("Invalid set number (num=%d)", num);
             }
 
@@ -872,47 +873,41 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         }
     }
 
-#  ifdef VERBOSE
-    if ( nset ) {
-        VERBOSE_PRINT0("Instanciated sets ", nset);
-    }
-#  endif
+    #  ifdef VERBOSE
+        if ( setList.size() ) {
+            VERBOSE_PRINT0("Instantiated sets ", setList.size());
+        }
+    #  endif
 
-    if ( nxfemman ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_xfemManRec, 1);
-
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+    InputRecord* xfmIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nxfemman,"XFEMManager",DataReader::IR_xfemManRec,/*optional*/true);
+    if(xfmIr){
+        IR_GIVE_RECORD_KEYWORD_FIELD(*xfmIr, name, num);
         xfemManager = classFactory.createXfemManager(name.c_str(), this);
         if ( !xfemManager ) {
             OOFEM_ERROR("Couldn't create xfemmanager: %s", name.c_str());
         }
 
-        xfemManager->initializeFrom(ir);
+        xfemManager->initializeFrom(*xfmIr);
         xfemManager->instanciateYourself(dr);
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
-#  endif
+        #  ifdef VERBOSE
+            VERBOSE_PRINT0("Instantiated xfem ", 1);
+        #  endif
     }
 
-
-    if ( ncontactman ) {
-        // don't read any input yet
-        auto &ir = dr.giveInputRecord(DataReader :: IR_contactManRec, 1);
-
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+    InputRecord* cmanIr=dr.giveChildRecord(irdPtr,_IFT_Domain_ncontactman,"ContactManager",DataReader::IR_contactManRec,/*optional*/true);
+    if (cmanIr) {
+        IR_GIVE_RECORD_KEYWORD_FIELD(*cmanIr, name, num);
         contactManager = classFactory.createContactManager(name.c_str(), this);
         if ( !contactManager ) {
             OOFEM_ERROR("Couldn't create contact manager: %s", name.c_str());
         }
 
-        contactManager->initializeFrom(ir);
+        contactManager->initializeFrom(*cmanIr);
         contactManager->instanciateYourself(dr);
+        #  ifdef VERBOSE
+            VERBOSE_PRINT0("Instantiated contact manager ", 1);
+        #  endif
     }
-#  ifdef VERBOSE
-    if ( ncontactman ) {
-        VERBOSE_PRINT0("Instanciated contact manager ", ncontactman);
-    }
-#  endif
 
 
     this->topology = NULL;
@@ -923,22 +918,22 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         }
 
         return this->topology->instanciateYourself(dr);
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
-#  endif
+        #  ifdef VERBOSE
+            VERBOSE_PRINT0("Instantiated topologies ", topologytype.length());
+        #  endif
     }
 
-
-    if ( nfracman ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_fracManRec, 1);
+    InputRecord* fmanIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nfracman,"FractureManager",DataReader::IR_fracManRec,/*optional*/true);
+    if (fmanIr) {
         fracManager = std::make_unique<FractureManager>(this);
-        fracManager->initializeFrom(ir);
+        fracManager->initializeFrom(*fmanIr);
         fracManager->instanciateYourself(dr);
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
-#  endif
+        #  ifdef VERBOSE
+            VERBOSE_PRINT0("Instantiated fracture manager ", 1);
+        #  endif
     }
 
+    dr.leaveRecord(irdPtr.get()); // ???
     this->initializeFinish();
     return 1;
 }
