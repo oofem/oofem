@@ -69,5 +69,5 @@ xml:
 	ninja -C build-static
 	# gdb -ex=run -args
 	# gdb -ex=run -args
-	build-static/oofem -f tests/sm/truss2d_01.in # spring01.in
-	# build-static/oofem -f tests/sm/spring01.xml
+	build-static/oofem -f tests/sm/spring01.in
+	build-static/oofem -f tests/sm/spring01.xml
