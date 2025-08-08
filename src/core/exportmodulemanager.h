@@ -51,7 +51,6 @@ public:
     ExportModuleManager(EngngModel * emodel);
     virtual ~ExportModuleManager();
 
-    void initializeFrom(InputRecord &ir) override;
     std::unique_ptr<ExportModule> CreateModule(const char *name, int num, EngngModel *emodel) override;
 
     /**

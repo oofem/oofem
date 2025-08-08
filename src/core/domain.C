@@ -556,7 +556,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 
     // read nodes
     DataReader::GroupRecords dofManagerRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ndofman,"Nodes",DataReader::IR_dofmanRec,/*optional*/false);
-    dr.enterRecord(irdPtr.get()); // ???
+    DataReader::RecordGuard scope(dr,irdPtr.get()); // till the end of the scope
     dofManagerList.clear();
     dofManagerList.resize(dofManagerRecs.size());
     int dofManagerIndex0=0;
@@ -933,7 +933,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         #  endif
     }
 
-    dr.leaveRecord(irdPtr.get()); // ???
     this->initializeFinish();
     return 1;
 }

@@ -198,7 +198,7 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
-
+    std::unique_ptr<InputRecord> irPtr(ir.clone());
     Timer timer;
     timer.startTimer();
 
@@ -228,30 +228,29 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
 
     try {
         // instanciate receiver
-        this->initializeFrom(ir);
-        exportModuleManager.initializeFrom(ir);
-        initModuleManager.initializeFrom(ir);
-        monitorManager.initializeFrom(ir);
-
+        this->initializeFrom(*irPtr);
 
         if ( this->nMetaSteps == 0 ) {
             inputReaderFinish = false;
-            this->instanciateDefaultMetaStep(ir);
+            this->instanciateDefaultMetaStep(*irPtr);
         } else {
             this->instanciateMetaSteps(dr);
         }
 
-        // instanciate initialization module manager
-        initModuleManager.instanciateYourself(dr, ir);
-        // instanciate export module manager
-        exportModuleManager.instanciateYourself(dr, ir);
-        // instanciate monitor manager
-        monitorManager.instanciateYourself(dr, ir);
-        this->giveContext()->giveFieldManager()->instanciateYourself(dr, ir);
-#ifdef __MPM_MODULE
-        // instanciate mpm stuff (variables, terms, and integrals)
-        this->instanciateMPM(dr,ir);
-#endif
+        {
+            DataReader::RecordGuard scope(dr,irPtr.get());
+            // instanciate initialization module manager
+            initModuleManager.instanciateYourself(dr, irPtr, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);
+            // instanciate export module manager
+            exportModuleManager.instanciateYourself(dr, irPtr, "nmodules", "ExportModules",DataReader::IR_expModuleRec);
+            // instanciate monitor manager
+            monitorManager.instanciateYourself(dr, irPtr, "nmonitors", "Monitors",DataReader::IR_expModuleRec);
+            this->giveContext()->giveFieldManager()->instanciateYourself(dr, *irPtr);
+            #ifdef __MPM_MODULE
+                // instanciate mpm stuff (variables, terms, and integrals)
+                this->instanciateMPM(dr,*irPtr);
+            #endif
+        }
         this->instanciateDomains(dr);
 
         exportModuleManager.initialize();
@@ -263,14 +262,14 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
 
         if ( this->nMetaSteps == 0 ) {
             inputReaderFinish = false;
-            this->instanciateDefaultMetaStep(ir);
+            this->instanciateDefaultMetaStep(*irPtr);
         } 
 
         // check emodel input record if no default metastep, since all has been read
         if ( inputReaderFinish ) {
-            ir.finish();
+            irPtr->finish();
         } else {
-            this->metaStepList.at(0).updateAttributesRecord(ir);
+            this->metaStepList.at(0).updateAttributesRecord(*irPtr);
         }
     } catch ( InputException &e ) {
         OOFEM_ERROR("Error initializing from user input: %s\n", e.what());

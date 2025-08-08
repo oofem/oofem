@@ -60,8 +60,6 @@ public:
      */
     void doInit();
 
-    void initializeFrom(InputRecord &ir) override;
-
     const char *giveClassName() const override { return "InitModuleManager"; }
 };
 } // end namespace oofem
