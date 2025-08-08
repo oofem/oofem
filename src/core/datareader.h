@@ -203,7 +203,7 @@ public:
     GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1) {
         int count=giveGroupCount(name);
         if(count>=0 && numRequired>=0 && count!=numRequired) OOFEM_ERROR("Mismatch in %s: %d records of type '%s' required, %d found.",giveReferenceName().c_str(),numRequired,name.c_str(),count);
-        return GroupRecords(*this,name,irType,count);
+        return GroupRecords(*this,name,irType,numRequired>=0?numRequired:count);
     }
     /**
      * Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.

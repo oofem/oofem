@@ -106,6 +106,7 @@ public:
     void printYourself() override;
 
     void setLineNumber(int num) { this->lineNumber = num; }
+    int giveLineNumber() const { return lineNumber; }
 
 protected:
     int giveKeywordIndx(const char *kwd);

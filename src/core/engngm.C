@@ -357,8 +357,11 @@ EngngModel :: instanciateDomains(DataReader &dr)
 {
     int result = 1;
     // read problem domains
-    for ( auto &domain: domainList ) {
-        result &= domain->instanciateYourself(dr);
+    auto Idomain=domainList.begin();
+    auto drecs=dr.giveGroupRecords("Domains",DataReader::IR_domainRec,domainList.size());
+    for(InputRecord& drec: drecs){
+        result&=(*Idomain)->instanciateYourself(dr,drec);
+        Idomain++;
     }
     this->postInitialize();
 

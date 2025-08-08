@@ -477,8 +477,13 @@ void Domain :: setXfemManager(std::unique_ptr<XfemManager> obj) { xfemManager = 
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
 void Domain :: clearElements() { elementList.clear(); }
+
+int Domain::instanciateYourself(DataReader& dr){
+    auto &ir = dr.giveInputRecord(DataReader :: IR_domainRec, 1);
+    return this->instanciateYourself(dr,ir);
+}
 int
-Domain :: instanciateYourself(DataReader &dr)
+Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 // Creates all objects mentioned in the data file.
 {
     int num;
@@ -491,12 +496,12 @@ Domain :: instanciateYourself(DataReader &dr)
 
     // read type of Domain to be solved
     {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_domainRec, 1);
-        IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
+        // ·auto &ir = dr.giveInputRecord(DataReader :: IR_domainRec, 1);
+        IR_GIVE_FIELD(irDomain, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
 
         mDomainType = name;
 
-        ir.finish();
+        // irDomain.finish();
     }
 
 #  ifdef VERBOSE
