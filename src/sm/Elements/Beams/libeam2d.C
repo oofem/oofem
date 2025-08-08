@@ -352,7 +352,7 @@ void
 LIBeam2d :: initializeFinish()
 {
     StructuralElement :: initializeFinish();
-    ParameterManager &ppm = domain->elementPPM;
+    // ParameterManager &ppm = domain->elementPPM;
     xy ? (xz = false) : (xz = true);
 }
 

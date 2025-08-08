@@ -71,7 +71,7 @@ DynamicDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 }
 
 bool
-DynamicDataReader :: peakNext(const std :: string &keyword)
+DynamicDataReader :: peekNext(const std :: string &keyword)
 {
     std :: string nextKey;
     auto temp = this->it;

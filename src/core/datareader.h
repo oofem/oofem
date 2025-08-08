@@ -37,6 +37,9 @@
 
 #include "oofemenv.h"
 #include "inputrecord.h"
+#include "error.h"
+
+#include<iostream>
 
 namespace oofem {
 /**
@@ -67,6 +70,16 @@ public:
         // MPM specific
         IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec
     };
+    /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
+    const std::vector<std::string> InputRecordTags={
+        /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
+        "Analysis","MetaStep",/*ExportModule*/"","Node",/*Element*/"",
+        /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
+        "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
+        "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
+        "ContactManager","ContactDefinition","Field",
+        "MPMVariable","MPMTerm","MPMIntegral"
+    };
 
     DataReader() { }
     virtual ~DataReader() { }
@@ -83,7 +96,7 @@ public:
      * Peak in advance into the record list.
      * @return True if next keyword is a set.
      */
-    virtual bool peakNext(const std :: string &keyword) { return false; }
+    virtual bool peekNext(const std :: string &keyword) { return false; }
 
     /**
      * Allows to detach all data connections.
@@ -96,6 +109,109 @@ public:
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
+
+    virtual void enterGroup(const std::string& name) {};
+    virtual void leaveGroup(const std::string& name) {};
+    virtual void enterRecord(InputRecord* rec) {};
+    virtual void leaveRecord(InputRecord* rec) {};
+    class GroupGuard{
+        DataReader& reader;
+        std::string name;
+    public:
+        GroupGuard(DataReader& reader_, const std::string& name_): reader(reader_), name(name_) { reader.enterGroup(name); }
+        ~GroupGuard() { reader.leaveGroup(name); }
+    };
+    class RecordGuard{
+        DataReader& reader;
+        InputRecord* rec;
+    public:
+        RecordGuard(DataReader& reader_, InputRecord* rec_): reader(reader_), rec(rec_) { reader.enterRecord(rec); }
+        ~RecordGuard() { reader.leaveRecord(rec); }
+    };
+
+
+
+    class GroupRecords {
+        DataReader& dr;
+        std::string group;
+        InputRecordType irType;
+        int size_;
+    public:
+        class Iterator {
+            DataReader& dr;
+            std::string group;
+            InputRecordType irType;
+            int size;
+            int index;
+            InputRecord* irPtr=nullptr;
+            bool entered=false;
+        public:
+            Iterator(DataReader& dr_, const std::string& group_, InputRecordType irType_, int size_, int index_): dr(dr_), group(group_), irType(irType_), size(size_), index(index_) {
+                /* read the first line for begin(), unless there are no lines to read at all */
+                if(index==0 && size_>0) {
+                    if(!this->group.empty()){ entered=true; dr.enterGroup(this->group); }
+                    irPtr=&dr.giveInputRecord(irType,/*recordId*/1);
+                    if(irPtr) dr.enterRecord(irPtr);
+                }
+                #if 0
+                    // open 0-sized group to mark it as processed
+                    if(index==0 && size_==0 && !this->group.empty() && dr.hasGroup(this->group)){ dr.enterGroup(this->group); dr.leaveGroup(this->group); }
+                #endif
+            };
+            Iterator& operator++(){
+                if(irPtr) dr.leaveRecord(irPtr);
+                index++;
+                /* don't read past the last line, assign nullptr instead */
+                if(index>=size){
+                    irPtr=nullptr;
+                    if(entered) dr.leaveGroup(this->group);
+                }
+                else {
+                    irPtr=&dr.giveInputRecord(irType,/*recordId*/index+1);
+                    if(irPtr) dr.enterRecord(irPtr);
+                }
+                return *this;
+            }
+            InputRecord& operator*() { return *irPtr; }
+            bool operator!=(const Iterator& other){ return this->index!=other.index; }
+            int index1() const { return index+1; }
+        };
+        GroupRecords(DataReader& dr_, const std::string& group_, InputRecordType irType_, int size): dr(dr_), group(group_), irType(irType_), size_(size) { };
+        Iterator begin(){ return Iterator(dr,group,irType,size_,0); }
+        Iterator end(){ return Iterator(dr,group,irType,size_,std::max(size_,0)); }
+        int size(){ return size_; }
+    };
+    /**
+     * Give range (provides begin(), end(), size()) to iterate over records.
+     * Some readers (text) specify the number of records in the InputRecord with the given input field type.
+     * Other readers (XML) find the number of records as number of elements in the subgroup enclosed with *name* tag.
+     * @param ir Input record which may hold the number of subsequent entries to be read from the stream
+     * @param ift Field type in *ir* record specifying the number of records.
+     * @param name Subgroup name for tag-based readers.
+     * @param irType Expected input record type for all records to be read.
+     * @param optional If not optional and the number of records is not given, fail with error. Otherwise assume 0-sized subgroup.
+     * @return Object providing begin(), end() iterators and and also size().
+     */
+    GroupRecords giveGroupRecords(const std::unique_ptr<InputRecord>& ir, InputFieldType ift, const std::string& name, InputRecordType irType, bool optional){
+        return GroupRecords(*this,name,irType,ir->giveGroupCount(ift,name,optional));
+    }
+    // GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired;);
+    static const int NoSuchGroup=-1;
+    bool hasGroup(const std::string& name){ return giveGroupCount(name)>=0; }
+    virtual int giveGroupCount(const std::string& name){ return NoSuchGroup; }
+
+    GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1) {
+        int count=giveGroupCount(name);
+        if(count>=0 && numRequired>=0 && count!=numRequired) OOFEM_ERROR("Mismatch in %s: %d records of type '%s' required, %d found.",giveReferenceName().c_str(),numRequired,name.c_str(),count);
+        return GroupRecords(*this,name,irType,count);
+    }
+    /**
+     * Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
+     */
+    InputRecord* giveChildRecord(const std::unique_ptr<InputRecord>& ir, InputFieldType ift, const std::string& name, InputRecordType irType, bool optional){
+        if(ir->hasChild(ift,name,optional)) return &(this->giveInputRecord(irType,/*recordId*/1));
+        return nullptr;
+    };
 };
 } // end namespace oofem
 #endif // datareader_h

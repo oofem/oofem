@@ -104,7 +104,7 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 }
 
 bool
-OOFEMTXTDataReader :: peakNext(const std :: string &keyword)
+OOFEMTXTDataReader :: peekNext(const std :: string &keyword)
 {
     std :: string nextKey;
     this->it->giveRecordKeywordField(nextKey);

@@ -604,7 +604,7 @@ Domain :: instanciateYourself(DataReader &dr)
 
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
-    if ( dr.peakNext("set") ) {
+    if ( dr.peekNext("set") ) {
         setList.resize(nset);
         for ( int i = 1; i <= nset; i++ ) {
             auto &ir = dr.giveInputRecord(DataReader :: IR_setRec, i);

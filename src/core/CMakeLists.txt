@@ -84,6 +84,9 @@ if (USE_SUPERLU_MT)
   list (APPEND core_unsorted superlusolver.C)
 endif ()
 
+if (USE_XML)
+  list (APPEND core_unsorted xmldatareader.C xmlinputrecord.C)
+endif ()
 
 set (core_oofeg oofeggraphiccontext.C)
 

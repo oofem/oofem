@@ -42,6 +42,8 @@
 #include <vector>
 
 namespace oofem {
+
+class DataReader;
 /**
  * Class representing the Input Record for OOFEM txt input file format.
  * The input record is represented as string consisting of several fields.
@@ -96,6 +98,9 @@ public:
     void giveField(Dictionary &answer, InputFieldType id) override;
     void giveField(std :: list< Range > &answer, InputFieldType id) override;
     void giveField(ScalarFunction &answer, InputFieldType id) override;
+
+    int giveGroupCount(InputFieldType id, const std::string& name, bool optional) override;
+    bool hasChild(InputFieldType id, const std::string& name, bool optional) override;
 
     bool hasField(InputFieldType id) override;
     void printYourself() override;
