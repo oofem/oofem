@@ -538,19 +538,7 @@ Domain :: instanciateYourself(DataReader &dr)
         IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  _IFT_Domain_nbarrier);
     }
 
-    ///@todo Eventually remove this backwards compatibility:
-    //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
-    // set the number of spatial dimensions
-    if ( dType == _1dTrussMode ) {
-        nsd = 1;
-    } else if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode || dType == _WarpingMode ) {
-        nsd = 2;
-    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
-        nsd = 3;
-    } else if ( dType == _3dAxisymmMode ) {
-        nsd = 2;
-        axisymm = true;
-    }
+    
 
     // read nodes
     dofManagerList.clear();
@@ -940,6 +928,24 @@ Domain :: instanciateYourself(DataReader &dr)
 
 void
 Domain::initializeFinish() {
+
+    ///@todo Eventually remove this backwards compatibility:
+    //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
+    // set the number of spatial dimensions
+    if (this->nsd <=0) {
+        if ( dType == _1dTrussMode ) {
+            nsd = 1;
+        } else if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode || dType == _WarpingMode ) {
+            nsd = 2;
+        } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
+            nsd = 3;
+        } else if ( dType == _3dAxisymmMode ) {
+            nsd = 2;
+            axisymm = true;
+        } 
+    }
+    
+
     spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
     spatialLocalizer->init();
     connectivityTable = std::make_unique<ConnectivityTable>(this);
@@ -1017,9 +1023,6 @@ Domain::initializeFinish() {
 void
 Domain :: postInitialize()
 {
-
-    
-    
 
     if (!spatialLocalizer) {
         spatialLocalizer= std::make_unique<OctreeSpatialLocalizer>(this);
