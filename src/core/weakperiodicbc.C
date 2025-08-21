@@ -95,9 +95,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
     nlgeo = false;
     IR_GIVE_OPTIONAL_FIELD(ir, nlgeo, _IFT_WeakPeriodicBoundaryCondition_nlgeo );
 
-
-    g.resize(domain->giveNumberOfSpatialDimensions());
-    g.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, g, _IFT_WeakPeriodicBoundaryCondition_gradient);
 
     IntArray temp;
@@ -124,6 +121,16 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
         }
     }
 
+}
+
+void WeakPeriodicBoundaryCondition :: postInitialize()
+{
+    ActiveBoundaryCondition :: postInitialize();
+    if (g.isEmpty()) {
+        g.resize(this->domain->giveNumberOfSpatialDimensions());
+        g.zero();
+    }
+    
     if ( this->domain->giveNumberOfSpatialDimensions() == 2 ) {
         ndof = (orderOfPolygon + 1) * dofids.giveSize();
         tcount = (orderOfPolygon + 1);
@@ -145,7 +152,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
         gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
 }
-
 void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()
 {
     /* gsMatrix contains the coefficients for the orthogonal basis. The row represents the basis and the column the coefficients. */

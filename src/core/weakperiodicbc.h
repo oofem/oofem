@@ -162,6 +162,7 @@ public:
     virtual ~WeakPeriodicBoundaryCondition();
 
     void initializeFrom(InputRecord &ir) override;
+    void postInitialize() override;
 
     basisType giveBasisType() { return useBasisType; }
 
