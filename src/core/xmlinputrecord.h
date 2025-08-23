@@ -96,6 +96,9 @@ public:
     void printYourself() override { _XML_NI; }
 
     std::string giveRecordAsString() const override { _XML_NI; }
+
+    static bool node_seen_get(const pugi::xml_node& n);
+    static void node_seen_set(pugi::xml_node& n, bool seen);
     static constexpr char SeenMark[]="__seen";
 };
 } // end namespace oofem

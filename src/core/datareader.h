@@ -114,13 +114,8 @@ public:
     virtual void leaveGroup(const std::string& name) {};
     virtual void enterRecord(InputRecord* rec) {};
     virtual void leaveRecord(InputRecord* rec) {};
-    class GroupGuard{
-        DataReader& reader;
-        std::string name;
-    public:
-        GroupGuard(DataReader& reader_, const std::string& name_): reader(reader_), name(name_) { reader.enterGroup(name); }
-        ~GroupGuard() { reader.leaveGroup(name); }
-    };
+
+    /// RAII guard for DataReader::enterRecord and DataReader::leaveRecord.
     class RecordGuard{
         DataReader& reader;
         InputRecord* rec;
@@ -129,8 +124,7 @@ public:
         ~RecordGuard() { reader.leaveRecord(rec); }
     };
 
-
-
+    /// Internal range-like class, return type for giveGroupRecords methods
     class GroupRecords {
         DataReader& dr;
         std::string group;
@@ -146,41 +140,27 @@ public:
             InputRecord* irPtr=nullptr;
             bool entered=false;
         public:
-            Iterator(DataReader& dr_, const std::string& group_, InputRecordType irType_, int size_, int index_): dr(dr_), group(group_), irType(irType_), size(size_), index(index_) {
-                /* read the first line for begin(), unless there are no lines to read at all */
-                if(index==0 && size_>0) {
-                    if(!this->group.empty()){ entered=true; dr.enterGroup(this->group); }
-                    irPtr=&dr.giveInputRecord(irType,/*recordId*/1);
-                    if(irPtr) dr.enterRecord(irPtr);
-                }
-                #if 0
-                    // open 0-sized group to mark it as processed
-                    if(index==0 && size_==0 && !this->group.empty() && dr.hasGroup(this->group)){ dr.enterGroup(this->group); dr.leaveGroup(this->group); }
-                #endif
-            };
-            Iterator& operator++(){
-                if(irPtr) dr.leaveRecord(irPtr);
-                index++;
-                /* don't read past the last line, assign nullptr instead */
-                if(index>=size){
-                    irPtr=nullptr;
-                    if(entered) dr.leaveGroup(this->group);
-                }
-                else {
-                    irPtr=&dr.giveInputRecord(irType,/*recordId*/index+1);
-                    if(irPtr) dr.enterRecord(irPtr);
-                }
-                return *this;
-            }
+            Iterator( DataReader &dr_, const std::string &group_, InputRecordType irType_, int size_, int index_ );
+            Iterator &operator++();
             InputRecord& operator*() { return *irPtr; }
             bool operator!=(const Iterator& other){ return this->index!=other.index; }
             int index1() const { return index+1; }
         };
-        GroupRecords(DataReader& dr_, const std::string& group_, InputRecordType irType_, int size): dr(dr_), group(group_), irType(irType_), size_(size) { };
+        GroupRecords( DataReader &dr_, const std::string &group_, InputRecordType irType_, int size );
         Iterator begin(){ return Iterator(dr,group,irType,size_,0); }
         Iterator end(){ return Iterator(dr,group,irType,size_,std::max(size_,0)); }
         int size(){ return size_; }
     };
+
+    static const int NoSuchGroup=-1;
+    /**
+     * Return number of items in a named group
+     * @param name name of the group; if empty, current group is used
+     * @return Number of items in the named group; returns 0 if the group is empty, and -1 (DatReader::NoSuchGroup) if the group does not exist at all.
+     */
+    virtual int giveGroupCount(const std::string& name){ return NoSuchGroup; }
+    /// Predicate whether a named group exists (it can still be empty).
+    bool hasGroup(const std::string& name){ return giveGroupCount(name)>=0; }
     /**
      * Give range (provides begin(), end(), size()) to iterate over records.
      * Some readers (text) specify the number of records in the InputRecord with the given input field type.
@@ -190,28 +170,19 @@ public:
      * @param name Subgroup name for tag-based readers.
      * @param irType Expected input record type for all records to be read.
      * @param optional If not optional and the number of records is not given, fail with error. Otherwise assume 0-sized subgroup.
-     * @return Object providing begin(), end() iterators and and also size().
+     * @return Object providing begin(), end() iterators and size().
      */
-    GroupRecords giveGroupRecords(const std::unique_ptr<InputRecord>& ir, InputFieldType ift, const std::string& name, InputRecordType irType, bool optional){
-        return GroupRecords(*this,name,irType,ir->giveGroupCount(ift,name,optional));
-    }
-    // GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired;);
-    static const int NoSuchGroup=-1;
-    bool hasGroup(const std::string& name){ return giveGroupCount(name)>=0; }
-    virtual int giveGroupCount(const std::string& name){ return NoSuchGroup; }
-
-    GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1) {
-        int count=giveGroupCount(name);
-        if(count>=0 && numRequired>=0 && count!=numRequired) OOFEM_ERROR("Mismatch in %s: %d records of type '%s' required, %d found.",giveReferenceName().c_str(),numRequired,name.c_str(),count);
-        return GroupRecords(*this,name,irType,numRequired>=0?numRequired:count);
-    }
+    GroupRecords giveGroupRecords(const std::unique_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
     /**
-     * Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
+     * Give range to iterate over records within a named group
+     * @param name Subgroup name; if not given, give records within the current group
+     * @param irType Input record type for records to be read
+     * @param numRequired if non-negative, this number is checked against number of records present (for readers which can determine that), and mismatch error is thrown when they are different
+     * @return Object providing being(), end() iterators and size().
      */
-    InputRecord* giveChildRecord(const std::unique_ptr<InputRecord>& ir, InputFieldType ift, const std::string& name, InputRecordType irType, bool optional){
-        if(ir->hasChild(ift,name,optional)) return &(this->giveInputRecord(irType,/*recordId*/1));
-        return nullptr;
-    };
+    GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1);
+    /// Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
+    InputRecord *giveChildRecord( const std::unique_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
 };
 } // end namespace oofem
 #endif // datareader_h

@@ -10,6 +10,7 @@ set (core_unsorted
     nonlocalbarrier.C
     geotoolbox.C geometry.C
     datastream.C
+    datareader.C
     set.C
     weakperiodicbc.C
     solutionbasedshapefunction.C

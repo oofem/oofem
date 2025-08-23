@@ -53,6 +53,14 @@
 namespace oofem {
 
 
+    bool XMLInputRecord::node_seen_get(const pugi::xml_node& n){ return !!n.attribute(SeenMark); }
+
+    void XMLInputRecord::node_seen_set(pugi::xml_node& n, bool seen){
+        if(seen && !n.attribute(SeenMark)) n.append_attribute(SeenMark);
+        else if(!seen && n.attribute(SeenMark)) n.remove_attribute(SeenMark);
+    }
+
+
     template<typename T>
     T string_to(const char* what, const std::string& s){
         T val;
@@ -86,7 +94,7 @@ namespace oofem {
     };
 
     XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_): InputRecord((DataReader*)reader_), node(node_) {
-        if(!node.attribute("__seen")) node.append_attribute("__seen");
+        node_seen_set(node,true);
         _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
     }
 
@@ -98,7 +106,7 @@ namespace oofem {
             OOFEM_ERROR("%s has no child node %s.",node.name(),name.c_str());
         }
         int ret=0;
-        if(!ch.attribute("__seen")) ch.append_attribute("__seen");
+        node_seen_set(ch,true);
         for([[maybe_unused]] pugi::xml_node n: ch.children()) ret++;
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<" has "<<ret<<" children.");
         return ret;
@@ -140,7 +148,7 @@ namespace oofem {
     void XMLInputRecord::finish(bool wrn) {
         int aLeft=0;
         for([[maybe_unused]] const pugi::xml_attribute& a: node.attributes()) {
-            if(std::string(a.name())=="__seen") continue;
+            if(std::string(a.name())==SeenMark) continue;
             if(attrSeen.count(a.name())==0) aLeft++;
         }
         for(const std::string& n: attrSeen) node.remove_attribute(n.c_str());
@@ -148,9 +156,9 @@ namespace oofem {
         if(aLeft==0) return;
         std::ostringstream oss;
         oss<<"Unprocessed XML attributes:\n";
-        node.remove_attribute("__seen");
+        node_seen_set(node,false);
         node.print(oss,"  ");
-        node.append_attribute("__seen");
+        node_seen_set(node,true);
         OOFEM_WARNING(oss.str().c_str());
     }
 

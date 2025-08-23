@@ -52,8 +52,8 @@ namespace oofem {
         pugi::xml_node output_node=root.child("Output"), description_node=root.child("Description");
         if(!output_node) OOFEM_ERROR("Error reading %s: <Output> node missing in %s.",xmlFile.c_str(),root.name());
         if(!description_node) OOFEM_ERROR("Error reading %s: <Description> node missing.",xmlFile.c_str());
-        output_node.append_attribute("__seen");
-        description_node.append_attribute("__seen");
+        XMLInputRecord::node_seen_set(output_node,true);
+        XMLInputRecord::node_seen_set(description_node,true);
         outputFileName=output_node.text().as_string();
         description=description_node.text().as_string();
     }
@@ -64,8 +64,9 @@ namespace oofem {
 
     int XMLDataReader::giveGroupCount(const std::string& name) {
         if(name.empty()) return giveCurrentGroupCount();
-        DataReader::GroupGuard grp(*this,name);
+        enterGroup(name);
         int ret=this->giveCurrentGroupCount();
+        leaveGroup(name);
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<giveStackPath()<<" // "<<name<<": size is "<<ret);
         return ret;
     }
@@ -85,7 +86,7 @@ namespace oofem {
     void XMLDataReader::enterGroup(const std::string& name) {
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": enter '"<<name<<"'");
         pugi::xml_node grp=stack.back().parent.child(name.c_str());
-        grp.append_attribute("__seen");
+        XMLInputRecord::node_seen_set(grp,true);
         if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; abort(); OOFEM_ERROR("Error reading %s: %s has no child %s",xmlFile.c_str(),giveStackPath().c_str(),name.c_str()); }
         pugi::xml_node ch1=grp.first_child();
         if(!ch1) OOFEM_ERROR("Error reading %s: %s: %s has no child nodes",xmlFile.c_str(),giveStackPath().c_str(),name.c_str());
@@ -118,9 +119,9 @@ namespace oofem {
         // doc.print(std::cerr,"  ");
         if(stack.size()>1) OOFEM_WARNING("XML stack not popped (%d entries)",stack.size());
         pugi::xml_node n;
-        while((n=doc.find_node([](const pugi::xml_node& n)->bool{ return !n.attribute("__seen"); }))){
+        while((n=doc.find_node([](const pugi::xml_node& n)->bool{ return !XMLInputRecord::node_seen_get(n); }))){
             // handle Output and Description nodes (PCDATA), provided the parent tag was __seen (PCDATA node cannot be assigned attribute)
-            if(n.type()==pugi::xml_node_type::node_pcdata && !!n.parent().attribute("__seen")){ n.parent().remove_child(n); continue; }
+            if(n.type()==pugi::xml_node_type::node_pcdata && XMLInputRecord::node_seen_get(n.parent())){ n.parent().remove_child(n); continue; }
             std::ostringstream oss;
             oss<<"Unprocessed XML fragment:\n";
             n.print(oss,"  ");
@@ -153,7 +154,7 @@ namespace oofem {
         _XML_DEBUG("  ==> "<<tip.curr.name());
         tip.seen.insert(tip.curr);
         tip.lastRecord=std::make_unique<XMLInputRecord>(this,tip.curr);
-        _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<(!!tip.curr.attribute("__seen")));
+        _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLDataReader::node_seen_get(tip.curr));
         return *tip.lastRecord;
     }
 } // end namespace oofem
