@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "error.h"
 #include "bctracker.h"
+#include "inputrecord.h"
 
 #ifdef __MPI_PARALLEL_MODE
  #include "entityrenumberingscheme.h"
@@ -429,6 +430,7 @@ public:
      * @see FemComponent::initializeFrom
      */
     int instanciateYourself(DataReader &dr);
+    int instanciateYourself(DataReader &dr, InputRecord& ir);
     void initializeFinish();
     /**
      * Performs post-initialization for all the domain contents (which is called after initializeFrom).

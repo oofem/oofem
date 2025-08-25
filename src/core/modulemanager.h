@@ -62,9 +62,9 @@ protected:
     /// Module list.
     std::vector< std::unique_ptr< M > > moduleList;
     /// Number of modules.
-    int numberOfModules;
+    int numberOfModules = 0;
     /// Associated Engineering model.
-    EngngModel *emodel;
+    EngngModel *emodel = nullptr;
 
 public:
     ModuleManager(EngngModel * emodel) {
@@ -93,30 +93,30 @@ public:
      * @param ir Record for receiver.
      * @return Nonzero if o.k.
      */
-    virtual int instanciateYourself(DataReader &dr, InputRecord &ir)
+    virtual int instanciateYourself(DataReader &dr, const std::unique_ptr<InputRecord>& irPtr, InputFieldType ift, const std::string& name, DataReader::InputRecordType irType)
     {
-        std :: string name;
-
         // read modules
-        moduleList.reserve(numberOfModules);
-        for ( int i = 0; i < numberOfModules; i++ ) {
-            auto &mir = dr.giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
-            mir.giveRecordKeywordField(name);
+        DataReader::GroupRecords modRecs=dr.giveGroupRecords(irPtr,ift,name,irType,/*optional*/true);
+        moduleList.reserve(modRecs.size());
+        int modIndex0=0;
+        for (auto& mir: modRecs){
+            std::string modName;
+            mir.giveRecordKeywordField(modName);
 
             // read type of module
-            std :: unique_ptr< M > module = this->CreateModule(name.c_str(), i, emodel);
+            std :: unique_ptr< M > module = this->CreateModule(modName.c_str(), modIndex0, emodel);
             if ( !module ) {
-                OOFEM_ERROR("unknown module (%s)", name.c_str());
+                OOFEM_ERROR("unknown module (%s)", modName.c_str());
             }
 
             module->initializeFrom(mir);
             registerModule(module);
-//             moduleList.push_back(std :: move(module));
+            modIndex0++;
         }
 
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Instanciated output modules ", numberOfModules)
-#  endif
+        #  ifdef VERBOSE
+            VERBOSE_PRINT0("Instanciated %d modules", numberOfModules);
+        #  endif
         return 1;
     }
 
@@ -130,11 +130,6 @@ public:
     }
     
     
-    /**
-     * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
-     * from corresponding record. Should be called before instanciateYourself.
-     */
-    virtual void initializeFrom(InputRecord &ir) = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const = 0;
 

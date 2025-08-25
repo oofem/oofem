@@ -32,51 +32,53 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef oofemtxtdatareader_h
-#define oofemtxtdatareader_h
+#ifndef xmldatareader_h
+#define xmldatareader_h
 
 #include "datareader.h"
-#include "oofemtxtinputrecord.h"
+#include "xmlinputrecord.h"
+#include <pugixml.hpp>
+#include <set>
 
-#include <fstream>
+
+
 
 namespace oofem {
 /**
- * Class representing the implementation of plain text date reader.
- * It reads a sequence of input records from data file
- * and creates the corresponding input records.
- * There is no check for record type requested, it is assumed that records are
- * written in correct order, which determined by the coded sequence of
- * component initialization and described in input manual.
+ * Class representing the implementation of XML reader.
+ * It reads a sequence of input records from data file and creates the corresponding input records.
  */
-class OOFEM_EXPORT OOFEMTXTDataReader : public DataReader
+class OOFEM_EXPORT XMLDataReader : public DataReader
 {
 protected:
-    std :: string dataSourceName;
-    std :: list< OOFEMTXTInputRecord > recordList;
-
-    /// Keeps track of the current position in the list
-    std :: list< OOFEMTXTInputRecord > :: iterator it;
-
+    std::string xmlFile;
+    pugi::xml_document doc;
+    struct StackItem{
+        pugi::xml_node parent;
+        pugi::xml_node curr;
+        std::unique_ptr<XMLInputRecord> lastRecord;
+        std::set<pugi::xml_node> seen;
+    };
+    std::vector<StackItem> stack;
+    std::string giveStackPath(); // string representation
 public:
-    /// Constructor.
-    OOFEMTXTDataReader(std :: string inputfilename);
-    OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
-    virtual ~OOFEMTXTDataReader();
+    XMLDataReader(const std::string& xmlFile);
+    // XMLDataReader(const XMLDataReader&, pugi::xml_node subRoot);
+    virtual ~XMLDataReader(){};
 
+    //! guess whether given file is XML
+    static bool canRead(const std::string& xmlFile);
     InputRecord &giveInputRecord(InputRecordType, int recordId) override;
-    bool peekNext(const std :: string &keyword) override;
+    bool peekNext(const std :: string &keyword) override { return false; } /* no peeking, it is used for hacks only */
     void finish() override;
-    std :: string giveReferenceName() const override { return dataSourceName; }
+    std::string giveReferenceName() const override { return xmlFile; }
+    void enterGroup(const std::string& name) override;
+    void leaveGroup(const std::string& name) override;
+    void enterRecord(InputRecord*) override;
+    void leaveRecord(InputRecord*) override;
 
-protected:
-    /**
-     * Reads one line from inputStream
-     * Parts within quotations have case preserved.
-     */
-    bool giveLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
-    /// Reads one line from stream.
-    bool giveRawLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
+    int giveGroupCount(const std::string& name) override;
+    int giveCurrentGroupCount();
 };
 } // end namespace oofem
-#endif // oofemtxtdatareader_h
+#endif // xmldatareader_h

@@ -36,6 +36,16 @@
 
 namespace oofem {
 
+InputRecord :: InputRecord(DataReader* r){
+    reader = r;
+}
+
+DataReader*
+InputRecord :: giveReader() const {
+    return reader;
+}
+
+
 void
 InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {
@@ -145,6 +155,7 @@ InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
         } catch ( MissingKeywordInputException & ) { }
     }
 }
+
 
 
 InputException::InputException(const InputRecord& ir, std::string keyword, int number) : 

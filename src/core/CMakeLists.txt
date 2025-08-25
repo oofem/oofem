@@ -10,6 +10,7 @@ set (core_unsorted
     nonlocalbarrier.C
     geotoolbox.C geometry.C
     datastream.C
+    datareader.C
     set.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
@@ -84,6 +85,9 @@ if (USE_SUPERLU_MT)
   list (APPEND core_unsorted superlusolver.C)
 endif ()
 
+if (USE_XML)
+  list (APPEND core_unsorted xmldatareader.C xmlinputrecord.C)
+endif ()
 
 set (core_oofeg oofeggraphiccontext.C)
 

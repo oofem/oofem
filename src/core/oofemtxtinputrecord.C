@@ -87,6 +87,22 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
     return * this;
 }
 
+
+int
+OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name, bool optional){
+    int size=0;
+    if(optional) giveOptionalField(size,id);
+    else giveField(size,id);
+    return size;
+}
+
+bool
+OOFEMTXTInputRecord :: hasChild(InputFieldType id, const std::string& name, bool optional){
+    int count=this->giveGroupCount(id,name,optional);
+    if(count>1) OOFEM_ERROR("Number of '%s' children (%d) must be 0 or 1 (not %d)",name.c_str(),id,count);
+    return count>0;
+}
+
 void
 OOFEMTXTInputRecord :: setRecordString(std :: string newRec)
 {

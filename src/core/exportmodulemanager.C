@@ -44,13 +44,6 @@ ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< 
 ExportModuleManager :: ~ExportModuleManager()
 { }
 
-void
-ExportModuleManager :: initializeFrom(InputRecord &ir)
-{
-    this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, _IFT_ModuleManager_nmodules);
-}
-
 std::unique_ptr<ExportModule> ExportModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
     return classFactory.createExportModule(name, n, emodel);

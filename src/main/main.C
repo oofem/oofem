@@ -51,6 +51,11 @@
 #include "contextioerr.h"
 #include "oofem_terminate.h"
 
+#ifdef _USE_XML
+  #include "xmldatareader.h"
+#endif
+
+
 #ifdef __MPI_PARALLEL_MODE
  #include "dyncombuff.h"
 #endif
@@ -288,9 +293,18 @@ int main(int argc, char *argv[])
         oofem_logger.appendErrorTo( errOutputFileName.str() );
     }
 
-    OOFEMTXTDataReader dr( inputFileName.str() );
-    auto problem = :: InstanciateProblem(dr, _processor, contextFlag, NULL, parallelFlag);
-    dr.finish();
+    std::unique_ptr<DataReader> dr;
+    #ifdef _USE_XML
+        if(XMLDataReader::canRead(inputFileName.str())){
+            dr=std::make_unique<XMLDataReader>(inputFileName.str());
+        } else
+    #endif
+    {
+        dr=std::make_unique<OOFEMTXTDataReader>(inputFileName.str());
+    }
+    auto problem = :: InstanciateProblem(*dr, _processor, contextFlag, NULL, parallelFlag);
+    dr->finish();
+
     if ( !problem ) {
         OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
         exit(EXIT_FAILURE);
