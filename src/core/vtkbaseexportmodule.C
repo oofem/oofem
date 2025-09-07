@@ -758,6 +758,16 @@ VTKBaseExportModule::getCellVariableFromIS(FloatArray &answer, Element *el, Inte
         answer.beColumnOf(rotMat, col);
         break;
     }
+    case IST_VOFFraction:
+    case IST_VolumeFraction:
+    {
+        if (this->emodel->giveField(FieldType::FT_VOF, tStep)) {
+            this->emodel->giveField(FieldType::FT_VOF, tStep)->evaluateAt(answer, el, VM_Total, tStep);
+        } else {
+            answer.at(1) = 0.0;
+        }
+        break;
+    }
 
     // Export cell data as average from ip's as default
     default:

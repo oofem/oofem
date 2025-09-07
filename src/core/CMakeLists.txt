@@ -152,6 +152,8 @@ set (core_ltf
     calculatorfunction.C
     localgaussianrandomfunction.C
     interpolatingfunction.C
+    pulsefunction.C
+    stepfunction.C
     )
 
 set (core_cs

@@ -40,11 +40,22 @@
 #include "error.h"
 
 #include <cstring>
+#include <cmath>
 #if defined ( __GNUC__ ) && defined ( HAVE_EXECINFO_H )
 #include <cxxabi.h>
 #include <execinfo.h>
 #include <cstdio>
 #include <cstdlib>
+#endif
+
+#include <iostream>
+#include <iomanip>
+#ifdef _WIN32
+    #include <io.h>
+    #define isatty _isatty
+    #define fileno _fileno
+#else
+    #include <unistd.h>
 #endif
 
 namespace oofem {
@@ -171,4 +182,23 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
 
     return problem;
 }
+
+void printProgress(double percentage, std::ostream& out) {
+    const int barWidth = 30;
+    int filled = static_cast<int>(barWidth * percentage);
+    out << "Progress: ";
+
+    if (&out == &std::cout && isatty(fileno(stdout))) {
+        for (int i = 0; i < barWidth; ++i) {
+            out << (i < filled ? "█" : "░");
+        }
+        out << " " << std::fixed << std::setprecision(1) << percentage * 100.0 << "%";
+        out << "\r";
+        out.flush();
+    } else {
+        out << (percentage * 100.0) << "%" << std::endl;
+    }
+}
+
+
 } // end namespace oofem

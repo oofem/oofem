@@ -40,6 +40,7 @@
 
 #include <memory>
 #include <cstdio>
+#include <iostream>
 
 namespace oofem {
 class DataReader;
@@ -59,5 +60,13 @@ void print_stacktrace(FILE *out = stderr, int skip = 0, unsigned int max_frames 
  * @param contextFlag When set, turns on context output after each step.
  */
 OOFEM_EXPORT std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
+
+/** Prints the progress of a long-running operation. 
+ *  It is suitable for both terminal and file output.
+ * @param percentage Progress percentage (0.0 to 100.0).
+ * @param out Output stream to print to (default is std::cout).
+*/
+void printProgress(double percentage, std::ostream& out = std::cout);
+
 } // end namespace oofem
 #endif // util_h

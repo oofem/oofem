@@ -541,6 +541,8 @@ FieldPtr TransientTransportProblem::giveField(FieldType key, TimeStep *tStep)
         return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{T_f} );
     } else if ( key == FT_HumidityConcentration ) {
         return std::make_shared<MaskedPrimaryField>( key, this->field.get(), IntArray{C_1} );
+    } else if ( key == FT_VOF ) {
+        return this->giveContext()->giveFieldManager()->giveField(key);
     } else {
         return FieldPtr();
     }

@@ -465,7 +465,7 @@ void Domain :: py_setFunction(int i, Function *obj) { functionList[i-1].reset(ob
 void Domain :: py_setSet(int i, Set *obj) { setList[i-1].reset(obj); }
 
 void Domain :: setDofManager(int i, std::unique_ptr<DofManager> obj) { dofmanGlobal2LocalMap[obj->giveGlobalNumber()] = i; dofManagerList[i-1] = std::move(obj); }
-void Domain :: setElement(int i, std::unique_ptr<Element> obj) { materialNum2ElMap[obj->giveGlobalNumber()] = i; elementList[i-1] = std::move(obj); }
+void Domain :: setElement(int i, std::unique_ptr<Element> obj) { elementGlobal2LocalMap[obj->giveGlobalNumber()] = i; elementList[i-1] = std::move(obj); }
 void Domain :: setCrossSection(int i, std::unique_ptr<CrossSection> obj) { crossSectionList[i-1] = std::move(obj); }
 void Domain :: setMaterial(int i, std::unique_ptr<Material> obj) { materialList[i-1] = std::move(obj); }
 void Domain :: setNonlocalBarrier(int i, std::unique_ptr<NonlocalBarrier> obj) { nonlocalBarrierList[i-1] = std::move(obj); }

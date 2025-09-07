@@ -1,6 +1,7 @@
 set (am_sources
     additivemanufacturingproblem.C
     freeconstantsurfaceload.C
+    depositedheatsource.C
     )
 
 set (tm 

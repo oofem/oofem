@@ -109,7 +109,7 @@ public:
      * @param mode Determines the mode of the requested value.
      * @return Load time function value.
      */
-    double evaluate(TimeStep *tStep, ValueModeType mode);
+    virtual double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
      * Returns the value of the function for given input.

@@ -18,6 +18,7 @@ struct PrintStatistics {
     double distance_moved    = 0; /**< The total distance moved by the printer. */
     double filament_extruded = 0; /**< The total amount of filament extruded by the printer. */
     double time              = 0; /**< The total time taken by the printer to process commands. */
+    int    nunber_of_commands = 0; /**< The total number of commands processed by the printer. */
 };
 
 /**
@@ -132,6 +133,7 @@ public:
         auto it = commandCallbacks.find( command.getCode() );
         if ( it != commandCallbacks.end() ) {
             // Execute the callback associated with the command code
+            this->statistics.nunber_of_commands++;
             it->second( command );
         } else {
             // Handle unknown command
@@ -361,8 +363,13 @@ public:
             if ( dxy > 0 && de > 0 && dz == 0 ) {
                 // Activate grid elements
                 double h   = layer_height_model == LayerHeightModel::Constant ? layer_height : 0.2;
+#if 0                
                 double r   = filament_diameter / 2;
                 double w   = M_PI * r * r * de / ( dxy * h );
+#else
+                double w = extrusion_width;
+#endif
+
                 Model move = get_model( prev_position, position, h, w );
 
                 auto pt  = voxelGrid.get_indices_from_point( { prev_position[0], prev_position[1], prev_position[2] } );
@@ -419,6 +426,7 @@ public:
                 }
             }
         }
+        //printf("[%d] G1: Ts=%.2f, Te=%.2f, dist=%.2f, h=%.2f, E=%.2f\n", this->statistics.nunber_of_commands, statistics.time-move_time, statistics.time, distance, prev_position[2], eValue.value_or(0.0));
     }
 
     /**

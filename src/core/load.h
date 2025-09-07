@@ -36,6 +36,7 @@
 #define load_h
 
 #include "generalboundarycondition.h"
+#include "gausspoint.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "valuemodetype.h"
@@ -125,6 +126,20 @@ public:
      * @param mode Determines response mode.
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) = 0;
+    /**
+     * Computes components values of load at given point - global coordinates (coordinates given).
+     * @param answer Component values at given point and time.
+     * @param tStep Time step representing time.
+     * @param gp Integration point.
+     * @param mode Determines response mode.
+     */
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, GaussPoint* gp, ValueModeType mode) {
+        if (this->giveFormulationType() == FT_Entity) {
+            this->computeValueAt(answer, tStep, gp->giveNaturalCoordinates(), mode);
+        } else {
+            this->computeValueAt(answer, tStep, gp->giveGlobalCoordinates(), mode);
+        }
+    }
     /**
      * Computes components values for specified dof ids. If a dof id is not defined for the load, zero value is inserted.
      * Typically boundary conditions would specify the full, or a subset of the dofids.
