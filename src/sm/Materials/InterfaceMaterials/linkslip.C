@@ -168,7 +168,7 @@ LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeS
 
     if ( f > 0 ) { //plastic response.
         //Reduced stress by increasing plastic strain.
-        traction.at(1) = evaluateBondStress(tempKappa);;
+      traction.at(1) = sgn(traction.at(1)) * evaluateBondStress(tempKappa);
     }
 
     //Compute the lateral stress components
