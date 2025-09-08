@@ -53,7 +53,6 @@ public:
     MonitorManager(EngngModel * emodel);
     virtual ~MonitorManager();
 
-    void initializeFrom(InputRecord &ir) override;
     std::unique_ptr<Monitor> CreateModule(const char *name, int num, EngngModel *emodel) override;
 
     /**

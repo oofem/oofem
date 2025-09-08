@@ -1,0 +1,49 @@
+<oofem>
+  <Output>spring01.out</Output>
+  <Description>Patch test of 1D spring element along x axis</Description>
+  <Analysis type="StaticStructural" nsteps="1">
+    <ExportModules>
+      <errorcheck tolerance="1e-4">
+        <!-- check nodal displacements -->
+        <NODE tStep="1" number="2" dof="1" unknown="d" value="0.5"/>
+        <!-- element stresses and strains -->
+        <!-- <ELEMENT tStep="1" number="1" gp="1" keyword="1" component="1" value="1.0"/> -->
+        <REACTION tStep="1" number="1" dof="1" value="-1"/>
+      </errorcheck>
+    </ExportModules>
+  </Analysis>
+  <Domains>
+    <Domain domain="1dtruss">
+      <OutputManager tstep_all="1" dofman_all="1" element_all="1" />
+      <!-- ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3 -->
+      <DomainComp>
+        <Nodes>
+          <Node id="1" coords="3 0. 0. 0."/>
+          <Node id="2" coords="3 0. 0. 0."/>
+        </Nodes>
+        <Elements>
+          <Spring id="1" nodes="2 1 2" crosssect="1" mode="0" k="2.0"/>
+        </Elements>
+        <CrossSections>
+          <SimpleCS id="1" thick="0.1" width="1.0" material="1" set="1"/>
+        </CrossSections>
+        <Materials>
+          <dummymat id="1"/>
+        </Materials>
+        <BoundaryConditions>
+          <BoundaryCondition id="1" loadtimefunction="1" dofs="1 1" values="1 0.0" set="2"/>
+          <NodalLoad id="2" loadtimefunction="1" dofs="1 1" components="1 1.0" set="3"/>
+        </BoundaryConditions>
+        <InitialConditions/>
+        <LoadTimeFunctions>
+          <ConstantFunction id="1" f_t_="1.0"/>
+        </LoadTimeFunctions>
+        <Sets>
+          <Set id="1" nodes="1 1"/>
+          <Set id="2" nodes="1 1"/>
+          <Set id="3" nodes="1 2"/>
+        </Sets>
+      </DomainComp>
+    </Domain>
+  </Domains>
+</oofem>

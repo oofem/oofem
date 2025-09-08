@@ -44,12 +44,6 @@ MonitorManager :: MonitorManager(EngngModel *emodel) : ModuleManager< Monitor >(
 MonitorManager :: ~MonitorManager()
 { }
 
-void
-MonitorManager :: initializeFrom(InputRecord &ir)
-{
-    this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, "nmonitors");
-}
 
 std::unique_ptr<Monitor> MonitorManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {

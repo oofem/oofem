@@ -584,6 +584,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *interp = this->giveInterpolation();
     std :: unique_ptr< IntegrationRule > iRule( interp->giveIntegrationRule( load->giveApproxOrder() + 1 + interp->giveInterpolationOrder(), this->giveGeometryType()) );
+    iRule->setElement(this);
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
         this->computeVectorOf(dofid, VM_TotalIntrinsic, tStep, unknowns);
@@ -596,14 +597,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
         N.beNMatrixOf(n, unknownsPerNode);
 
         double dV = this->computeVolumeAround(gp);
-
-        if ( load->giveFormulationType() == Load :: FT_Entity ) {
-            load->computeValueAt(val, tStep, lcoords, mode);
-        } else {
-            interp->local2global( gcoords, lcoords, FEIElementGeometryWrapper(this) );
-            load->computeValueAt(val, tStep, gcoords, mode);
-        }
-
+        load->computeValueAt(val, tStep, gp, mode);
         answer.plusProduct(N, val, dV);
     }
 }

@@ -56,6 +56,7 @@
 #include <thread>
 
 #include "engngm.h"
+#include "fieldmanager.h"
 #include "timestep.h"
 #include "function.h"
 #include "metastep.h"
@@ -66,6 +67,9 @@
 #include "verbose.h"
 #include "classfactory.h"
 #include "domain.h"
+#include "stepfunction.h"
+#include "depositedheatsource.h"
+#include "voxelvoffield.h"
 
 #include <stdlib.h>
 
@@ -89,6 +93,7 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
         OOFEM_ERROR( "Couldn't create node %d\n", nodeId );
     }
 
+    // Convert voxelGrid coordinates (in mm) to node coordinates (in m)
     FloatArray coords = { cn.coords[0] / 1000, cn.coords[1] / 1000, cn.coords[2] / 1000 };
 
     dman->setCoordinates( coords );
@@ -201,6 +206,7 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
 
 void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
 {
+    try {
     Domain *d = emodel->giveDomain( 1 );
 
     // Add new element
@@ -275,6 +281,33 @@ void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
         bc->postInitialize();
 
         d->setBoundaryCondition( bcid, std::move( bc ) );
+    }
+
+#if 1
+    // add internal heat source to the element to account for deposited material temperature
+
+    
+    nTFBefore = d->giveNumberOfFunctions();
+    std::unique_ptr<StepFunction> tf2 = std::make_unique<StepFunction>( nTFBefore + 1, d, cn.vofHistory );
+    //printf("Element %d: size of vof history: %d\n", elId, (int) cn.vofHistory.size());
+    d->resizeFunctions( nTFBefore + 1 );
+    d->setFunction( nTFBefore + 1, std::move( tf2 ) );
+
+
+    nBCBefore = d->giveNumberOfBoundaryConditions();
+    std::unique_ptr<DepositedHeatSource> load = std::make_unique<DepositedHeatSource>( nBCBefore+1, d, 0,
+        4200000.0, // power = specificHeat * density // @TODO: this should depend on material
+        235.0, // deposition temperature
+        nTFBefore + 1 // deposited mass fraction function
+    );
+
+
+    d->resizeBoundaryConditions( nBCBefore + 1 );
+    d->setBoundaryCondition( nBCBefore+1, std::move( load ) );
+    d->giveElement( elId )->setBodyLoads({nBCBefore+1});
+#endif
+    } catch (...) {
+        OOFEM_ERROR( "Error when adding element %d\n", cn.id );
     }
 }
 
@@ -585,7 +618,13 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
         pr.addCommandToQueue( commands[i] );
     }
 
-    for ( size_t i = 0; i < commands.size(); i++ ) {
+    std::size_t csize = commands.size();
+#ifdef DEBUG
+    //csize = 500;
+#endif
+    OOFEM_LOG_RELEVANT( "Processing g-code file\n");
+    printProgress(0);
+    for ( size_t i = 0; i < csize; i++ ) {
         size_t j = i + queue_size;
 
         pr.processCommand( commands[i] );
@@ -594,11 +633,23 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
             pr.addCommandToQueue( commands[j] );
 
         pr.popCommandFromQueue();
+        if ( (i+1) % (csize/100) == 0 ) {
+            printProgress((double)(i+1) / (double)csize );
+        }
     }
 
     this->printer = pr;
+    this->voxelVofField = std::make_shared<VoxelVOFField>();
+    this->voxelVofField->setGrid( &this->printer.getGrid() );
+    this->giveContext()->giveFieldManager()->registerField( voxelVofField, FieldType::FT_VOF );
 
     OOFEM_LOG_INFO( "\nFinished G-code parsing\n\n" );
+    PrintStatistics ps = this->printer.getStatistics();
+    OOFEM_LOG_INFO("Total distance moved: %.2f mm\n", ps.distance_moved);
+    OOFEM_LOG_INFO("Total fillament extruded: %.2f mm\n", ps.filament_extruded);
+    OOFEM_LOG_INFO("Total print time (without cooling): %.2f s\n", ps.time);
+
+    pr.getGrid().writeVTK( "voxel_vof.vtk");
 
     IR_GIVE_FIELD( ir, numberOfSteps, _IFT_EngngModel_nsteps );
     if ( numberOfSteps <= 0 ) {

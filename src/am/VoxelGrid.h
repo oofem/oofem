@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "CSG.h"
+#include "field.h"
 
 /**
  * @brief A struct to represent a 3D model.
@@ -22,7 +23,8 @@ struct VoxelNode {
 struct Voxel {
     int id = -1; /**< The OOFEM id of the voxel. */
     std::array<int, 8> nodes; /**< The OOFEM ids of the nodes of the voxel. */
-    std::vector<std::tuple<double, double> > vof_increments; /**< The time of each vof increment and a corresponding vof value. */
+    double timeActivated = 0.0; /**< The time the voxel was activated. */
+    std::vector<std::tuple<double, double> > vofHistory; /**< The time of each vof increment and a corresponding vof value. */
 
     /**
      * @brief Get the time the voxel was activated.
@@ -30,7 +32,7 @@ struct Voxel {
      */
     double time_activated()
     {
-        return std::get<0>( vof_increments.front() );
+        return this->timeActivated;
     }
 
     /**
@@ -39,10 +41,20 @@ struct Voxel {
      */
     double vof()
     {
-        if ( vof_increments.size() == 0 )
+        if ( vofHistory.size() == 0 )
             return 0.0;
 
-        return std::get<1>( vof_increments.back() );
+        return std::get<1>( vofHistory.back() );
+    }
+    double getVofAt(double time) {
+        if (vofHistory.size() == 0)
+            return 0.0;
+        for (int i = vofHistory.size()-1; i>=0; i--) {
+            if (std::get<0>(vofHistory[i]) <= time) {
+                return std::get<1>(vofHistory[i]);
+            }
+        }
+        return 0.0;
     }
 };
 
@@ -166,15 +178,13 @@ public:
     }
 
     /**
-     * @brief Activate a voxel at a given index in a given time and store the corresponding vof value.
-     * @param index The index of the voxel.
+     * @brief Create a Vovel at given index and at given time.
+     * @param index The index of the voxel to activate.
      * @param timeActivated The time the voxel was activated.
-     * @param vofIncrement The volume of fluid increment (new material volume [0-1]) in the voxel.
+     * 
      */
-    Voxel &activate( int index, double timeActivated, double vofIncrement )
+    Voxel &createVoxel( int index, double timeActivated )
     {
-
-
         if ( !is_active( index ) ) {
             // Auto-activate and number nodes
             activateNodes( index, timeActivated );
@@ -190,11 +200,89 @@ public:
             for ( int i = 0; i < 8; i++ ) {
                 m_voxels[index].nodes[i] = m_nodes[ids[i]].id;
             }
+            // Initialize vof history
+            m_voxels[index].vofHistory.push_back( std::make_tuple( 0, 0.0 ) );
+            m_voxels[index].timeActivated = timeActivated;
         }
 
-        double vof_before = m_voxels[index].vof();
-        m_voxels[index].vof_increments.push_back( std::make_tuple( timeActivated, vof_before + vofIncrement ) );
+        return m_voxels[index];
+    }
+    
+    /**
+     * @brief Activate a voxel at a given index in a given time and store the corresponding vof value.
+     * @param index The index of the voxel.
+     * @param timeActivated The time the voxel was activated.
+     * @param vofIncrement The volume of fluid increment (new material volume [0-1]) in the voxel.
+     */
+    Voxel &activate( int index, double timeActivated, double vofIncrement )
+    {
+        this->createVoxel( index, timeActivated );
 
+        double vof_before = m_voxels[index].vof();
+        double vof_after  = vof_before + vofIncrement;
+        if ( vof_after > 1.0 ) {
+            // redistribute the excess material to neighboring voxels
+            double excess = vof_after - 1.0;
+            vof_after     = 1.0;
+            m_voxels[index].vofHistory.push_back( std::make_tuple( timeActivated, vof_after ) );
+            // check neighbors in xy plane
+            auto [x, y, z] = get_indices( index );
+            std::vector<int> neighbor_indices, neighbor_indices_workingset;
+            if ( x > 0 )
+                neighbor_indices.push_back( get_index( x - 1, y, z ) );
+            if ( x < m_sizes[0] - 1 )
+                neighbor_indices.push_back( get_index( x + 1, y, z ) );
+            if ( y > 0 )        
+                neighbor_indices.push_back( get_index( x, y - 1, z ) );
+            if ( y < m_sizes[1] - 1 )
+                neighbor_indices.push_back( get_index( x, y + 1, z ) );
+            if ( x > 0 && y > 0 )
+                neighbor_indices.push_back( get_index( x - 1, y - 1, z ) );
+            if ( x > 0 && y < m_sizes[1] - 1 )
+                neighbor_indices.push_back( get_index( x - 1, y + 1, z ) );
+            if ( x < m_sizes[0] - 1 && y > 0 )
+                neighbor_indices.push_back( get_index( x + 1, y - 1, z ) );
+            if ( x < m_sizes[0] - 1 && y < m_sizes[1] - 1 )
+                neighbor_indices.push_back( get_index( x + 1, y + 1, z ) );
+            
+            double excess_per_neighbor = excess / neighbor_indices.size();
+            std::map<int, double> neighborVof; // to accumulate vof increments per neighbor
+            for ( auto ni : neighbor_indices ) {
+                createVoxel( ni, timeActivated ); // ensure neighbor exists
+                neighborVof[ni] = m_voxels[ni].vof();
+            }
+            neighbor_indices_workingset = neighbor_indices;
+            while ( (excess > 0) && (neighbor_indices_workingset.size() > 0 )) {
+                excess = 0.0;
+                std::vector<int> neighbor_indices2;
+                for ( auto ni : neighbor_indices_workingset ) {
+                    if (neighborVof[ni] < 1.0) {
+                        double vof_after = neighborVof[ni] + excess_per_neighbor;
+                        if (vof_after > 1.0) {
+                            excess += vof_after - 1.0;
+                            vof_after = 1.0;
+                            neighborVof[ni] += excess_per_neighbor;
+                        } else {
+                            neighborVof[ni] = vof_after;
+                            neighbor_indices2.push_back( ni ); // remember voxel with free capacity
+                        }
+                    } else {
+                        excess += excess_per_neighbor;
+                    }
+                }
+                excess_per_neighbor = excess / neighbor_indices2.size();
+                neighbor_indices_workingset = neighbor_indices2;
+            }
+            // update neighbors
+            for ( auto ni : neighbor_indices ) {
+                if (neighborVof[ni] > m_voxels[ni].vof()) {
+                    m_voxels[ni].vofHistory.push_back( std::make_tuple( timeActivated, neighborVof[ni] ) );
+                }
+            }
+        } else {
+            // vof increment fully accomodated
+            m_voxels[index].vofHistory.push_back( std::make_tuple( timeActivated, vof_after ) );
+        }   
 
         return m_voxels[index];
     }
@@ -375,3 +463,4 @@ private:
     std::array<double, 3> m_steps; /**< The step sizes in each dimension. */
     std::array<int, 3> m_sizes; /**< The sizes of the grid in each dimension. */
 };
+

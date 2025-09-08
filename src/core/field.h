@@ -57,7 +57,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FT_HumidityConcentration, 6) \
     ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7) \
     ENUM_ITEM_WITH_VALUE(FT_TemperatureAmbient, 8) \
-    ENUM_ITEM_WITH_VALUE(FT_EigenStrain, 9)
+    ENUM_ITEM_WITH_VALUE(FT_EigenStrain, 9) \
+    ENUM_ITEM_WITH_VALUE(FT_VOF, 10)
 
 /// Physical type of field.
 enum FieldType {
@@ -120,6 +121,8 @@ public:
      */
     virtual int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep) = 0;
+    virtual int evaluateAt(FloatArray &answer, Element *elem,
+                           ValueModeType mode, TimeStep *tStep) { return 1; } 
 
     /// Returns the type of receiver
     FieldType giveType() { return type; }

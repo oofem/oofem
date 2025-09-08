@@ -43,13 +43,6 @@ InitModuleManager :: InitModuleManager(EngngModel *emodel) : ModuleManager< Init
 InitModuleManager :: ~InitModuleManager()
 { }
 
-void
-InitModuleManager :: initializeFrom(InputRecord &ir)
-{
-    this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, "ninitmodules"); ///@todo This is named differently from _IFT_ModuleManager_nmodules . Should we change or keep it?
-}
-
 std::unique_ptr<InitModule> InitModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
     return classFactory.createInitModule(name, n, emodel);

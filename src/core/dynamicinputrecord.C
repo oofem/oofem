@@ -137,6 +137,16 @@ DynamicInputRecord &DynamicInputRecord :: operator = ( const DynamicInputRecord 
     return * this;
 }
 
+
+int DynamicInputRecord::giveGroupCount(InputFieldType id, const std::string& name, bool optional){
+    OOFEM_ERROR("DynamicInputRecord::giveNestedCount: not implemented.");
+}
+
+bool DynamicInputRecord::hasChild(InputFieldType id, const std::string& name, bool optional){
+    OOFEM_ERROR("DynamicInputRecord::hasChild: not implemented.");
+}
+
+
 void DynamicInputRecord :: finish(bool wrn)
 {
     ///@todo Implement warning about unread entries

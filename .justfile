@@ -34,11 +34,11 @@ eigen:
 	cmake -Bbuild-eigen -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_EIGEN=1 -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-eigen/
 	ctest --test-dir build-eigen/ --parallel=16 --output-on-failure
-notshared:
-	mkdir -p build-notshared
-	cmake -Bbuild-notshared -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
-	ninja -C build-notshared/
-	ctest --verbose --test-dir build-notshared/ --parallel=16
+static:
+	mkdir -p build-static
+	cmake -Bbuild-static -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	ninja -C build-static/
+	ctest --verbose --test-dir build-static/ --parallel=16
 nanobind:
 	cmake -Bbuild-nanobind -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_NANOBIND=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-nanobind
@@ -64,4 +64,10 @@ pytest:
 	PYTHONPATH=build:bindings/python python -m pytest bindings/python/tests
 test-ext:
 	# ctest --test-dir build/ -VV --output-on-failure -R test_sm_python_usrdefboundaryload01.in
-	gdb -ex=run -args build/oofem -f tests/sm/python/usrdefboundaryload01.in
+	gdb -ex=run -args build-shared/oofem -f tests/sm/python/usrdefboundaryload01.in
+xml:
+	ninja -C build-static
+	# gdb -ex=run -args
+	# gdb -ex=run -args
+	build-static/oofem -f tests/sm/spring01.in
+	build-static/oofem -f tests/sm/spring01.xml

@@ -1994,6 +1994,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoLE", &isoLE, py::return_value_policy::move);
     m.def("idm1", &idm1, py::return_value_policy::move);
     m.def("isoHeat", &isoHeat, py::return_value_policy::move);
+    m.def("hydratingConcreteMat", &hydratingConcreteMat, py::return_value_policy::move);
     m.def("j2mat", &j2mat, py::return_value_policy::move);
     m.def("steel1", &steel1, py::return_value_policy::move);
     m.def("concreteFcmViscoelastic", &concreteFcmViscoelastic, py::return_value_policy::move);
@@ -2004,6 +2005,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
+    m.def("usrDefFunction", &usrDefFunction, py::return_value_policy::move);
     m.def("vtkxml", &vtkxml, py::return_value_policy::move);
     m.def("vtkmemory", &vtkmemory, py::return_value_policy::move);
     m.def("homExport", &homExport, py::return_value_policy::move);

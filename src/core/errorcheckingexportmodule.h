@@ -93,6 +93,7 @@ protected:
 
 public:
     NodeErrorCheckingRule(const std :: string &line, double tol);
+    NodeErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "NodeErrorCheckingRule"; }
@@ -109,6 +110,7 @@ protected:
 
 public:
     ElementErrorCheckingRule(const std :: string &line, double tol);
+    ElementErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "ElementErrorCheckingRule"; }
@@ -158,6 +160,7 @@ protected:
 
 public:
     ReactionErrorCheckingRule(const std :: string &line, double tol);
+    ReactionErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "ReactionErrorCheckingRule"; }
@@ -217,6 +220,8 @@ protected:
 
     void writeCheck(Domain *domain, TimeStep *tStep);
 
+    void readRulesFromTextFile(InputRecord& ir);
+    void readRulesFromRecords(DataReader& dr, InputRecord& ir);
 public:
     ErrorCheckingExportModule(int n, EngngModel * e);
     ErrorCheckingExportModule(const ErrorCheckingExportModule &) = delete;

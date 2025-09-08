@@ -104,7 +104,7 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 }
 
 bool
-OOFEMTXTDataReader :: peakNext(const std :: string &keyword)
+OOFEMTXTDataReader :: peekNext(const std :: string &keyword)
 {
     std :: string nextKey;
     this->it->giveRecordKeywordField(nextKey);
@@ -117,6 +117,9 @@ OOFEMTXTDataReader :: finish()
     if ( this->it != this->recordList.end() ) {
         OOFEM_WARNING("There are unread lines in the input file\n"
             "The most common cause are missing entries in the domain record, e.g. 'nset'");
+        for(; it!=recordList.end(); it++){
+            std::cerr<<"   "<<it->giveLineNumber()<<": "<<it->giveRecordAsString()<<std::endl;
+        }
     }
     this->recordList.clear();
 }

@@ -40,6 +40,7 @@
 #include "engngm.h"
 #include "inputrecord.h"
 #include "floatarray.h"
+#include "voxelvoffield.h"
 
 ///@name Input fields for AdditiveManufacturingProblem
 //@{
@@ -157,8 +158,10 @@ protected:
     // G-code filepath
     std::string gCodeFilePath = "";
 
+    // voxel vof field
+    std :: shared_ptr< VoxelVOFField > voxelVofField;
 
-public:
+ public:
     /**
      * Constructor. Creates an engineering model with number i belonging to domain d.
      */
@@ -225,6 +228,13 @@ public:
 
     /// Returns list of model number that this model is coupled with. Used for staggered approach.
     void giveCoupledModels( IntArray &answer ) { answer = coupledModels; }
+    FieldPtr giveField (FieldType key, TimeStep *tStep) override {
+        if (key == FieldType::FT_VOF) {
+            return this->voxelVofField;
+        }
+        return FieldPtr();
+    }
+
 
 #ifdef __OOFEG
     void drawYourself( oofegGraphicContext &gc ) override;

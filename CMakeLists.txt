@@ -173,6 +173,7 @@ option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
+OPTION (USE_XML "Reader for XML input format (requires pugixml)")
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -332,6 +333,11 @@ if (USE_LAPACK)
     add_definitions (-D__LAPACK_MODULE)
 endif ()
 
+if (USE_XML)
+    add_definitions(-D_USE_XML)
+    find_package(pugixml REQUIRED)
+    link_libraries(pugixml::pugixml)
+endif()
 
 ## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
 ## Therefore it is assumed that superlu include files

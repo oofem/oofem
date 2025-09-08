@@ -51,6 +51,7 @@ class FloatMatrix;
 class Dictionary;
 class Range;
 class ScalarFunction;
+class DataReader;
 
 /// Identifier of fields in input records.
 typedef const char *InputFieldType;
@@ -61,7 +62,7 @@ typedef const char *InputFieldType;
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_FIELD(__ir, __value, __id) __ir.giveField(__value, __id);
+#define IR_GIVE_FIELD(__ir, __value, __id) (__ir).giveField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -69,7 +70,7 @@ typedef const char *InputFieldType;
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) __ir.giveOptionalField(__value, __id);
+#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) (__ir).giveOptionalField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -77,7 +78,7 @@ typedef const char *InputFieldType;
  * and its number (__value param). Includes also the error reporting.
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
-    __ir.giveRecordKeywordField(__name, __value);
+    (__ir).giveRecordKeywordField(__name, __value);
 
 
 
@@ -92,7 +93,10 @@ typedef const char *InputFieldType;
  */
 class OOFEM_EXPORT InputRecord
 {
+    DataReader* reader = nullptr;
 public:
+    InputRecord() {}
+    InputRecord(DataReader* reader_);
     /// Destructor
     virtual ~InputRecord() = default;
 
@@ -136,6 +140,15 @@ public:
     virtual void giveField(ScalarFunction &function, InputFieldType id) = 0;
     //@}
 
+    /**@name Child reader methods
+     */
+    //@{
+    // return count of nested group; if not optional, the empty group is required
+    virtual int giveGroupCount(InputFieldType id, const std::string& name, bool optional) = 0;
+    // return whether a single child of given type exists
+    virtual bool hasChild(InputFieldType id, const std::string& name, bool optional) = 0;
+    //@}
+
     /**@name Optional field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
@@ -174,6 +187,8 @@ public:
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
+
+    DataReader* giveReader() const;
 };
 
 
