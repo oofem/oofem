@@ -623,6 +623,8 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
     //csize = 500;
 #endif
     OOFEM_LOG_RELEVANT( "Processing g-code file\n");
+
+    double progress = 0;
     printProgress(0);
     for ( size_t i = 0; i < csize; i++ ) {
         size_t j = i + queue_size;
@@ -633,8 +635,11 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
             pr.addCommandToQueue( commands[j] );
 
         pr.popCommandFromQueue();
-        if ( (i+1) % (csize/100) == 0 ) {
-            printProgress((double)(i+1) / (double)csize );
+
+        double p = (double)(i+1) / (double)csize;
+        if ( int(100*p) > int(100*progress) ) {
+            progress = p;
+            printProgress(p);
         }
     }
 
