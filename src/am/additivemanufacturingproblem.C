@@ -174,13 +174,14 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
         d->resizeBoundaryConditions( nBCBefore + 1 );
         int bcId = nBCBefore + 1;
 
+        // add Dirichlet bc for newly added DOFs to restrict them before activation.
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "BoundaryCondition", bcId, d ) );
 
         DynamicInputRecord myInput2 = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
         myInput2.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
         myInput2.setField( nTFBefore + 1, _IFT_GeneralBoundaryCondition_isImposedTimeFunct );
 
-        FloatArray vals = { 235.0 };
+        FloatArray vals = { 235.0 }; // a dummy value
         IntArray dofs   = { T_f };
         myInput2.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
         myInput2.setField( vals, _IFT_BoundaryCondition_values );
