@@ -92,6 +92,12 @@ public:
 
         filament_diameter  = options.filamentDiameter;
 
+        depositionTemperature = options.depositionTemperature; 
+        heatBetTemperature    = options.heatBetTemperature;
+        chamberTemperature    = options.chamberTemperature;
+        heatTransferFilmCoefficient= options.heatTransferFilmCoefficient;
+        depositedMaterialHeatPower = options.depositedMaterialHeatPower;
+
         registerCallbacks();
     }
 
