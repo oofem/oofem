@@ -251,6 +251,13 @@ protected:
 
 protected:
     int instanciateSlaveProblems();
+
+    bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn );
+    void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn );
+    bool add_sm_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn );
+    void add_sm_element_if_not_exists2( EngngModel *emodel, Voxel &cn );
+
+
 };
 } // end namespace oofem
 #endif // AdditiveManufacturingProblem_h

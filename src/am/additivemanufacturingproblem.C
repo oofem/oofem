@@ -83,7 +83,7 @@
 namespace oofem {
 REGISTER_EngngModel( AdditiveManufacturingProblem );
 
-bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
+bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
 {
     Domain *d  = emodel->giveDomain( 1 );
     int nodeId = cn.id;
@@ -122,7 +122,7 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
     DynamicInputRecord icInput           = DynamicInputRecord( _IFT_InitialCondition_Name, ICId );
 
     Dictionary props = Dictionary();
-    props.add( 'u', 235. );
+    props.add( 'u', this->printer.depositionTemperature );
 
     icInput.setField( props, _IFT_InitialCondition_conditions );
     IntArray dofIds = { T_f };
@@ -143,7 +143,7 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
         DynamicInputRecord myInput = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
         myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
 
-        FloatArray vals = { 60.0 };
+        FloatArray vals = { this->printer.heatBetTemperature };
         IntArray dofs   = { T_f };
         myInput.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
         myInput.setField( vals, _IFT_BoundaryCondition_values );
@@ -205,7 +205,7 @@ bool add_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
     return true;
 }
 
-void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
+void AdditiveManufacturingProblem::add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
 {
     try {
     Domain *d = emodel->giveDomain( 1 );
@@ -268,11 +268,11 @@ void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
         myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
         myInput.setField( 3, _IFT_BoundaryLoad_loadtype );
         Dictionary props = Dictionary();
-        props.add( 'a', 10. ); // 97 == 'a'
+        props.add( 'a', this->printer.heatTransferFilmCoefficient ); // 97 == 'a'
         myInput.setField( props, _IFT_BoundaryLoad_properties );
 
         // todo: UNCOMMENT
-        FloatArray comps = { 30. }; // ambient temp
+        FloatArray comps = { this->printer.chamberTemperature }; // ambient temp
         myInput.setField( comps, _IFT_Load_components );
         myInput.setField( setId, _IFT_GeneralBoundaryCondition_set );
 
@@ -297,8 +297,8 @@ void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
 
     nBCBefore = d->giveNumberOfBoundaryConditions();
     std::unique_ptr<DepositedHeatSource> load = std::make_unique<DepositedHeatSource>( nBCBefore+1, d, 0,
-        4200000.0, // power = specificHeat * density // @TODO: this should depend on material
-        235.0, // deposition temperature
+        this->printer.depositedMaterialHeatPower, // power = specificHeat * density // @TODO: this should depend on material
+        this->printer.depositionTemperature, // deposition temperature
         nTFBefore + 1 // deposited mass fraction function
     );
 
@@ -312,7 +312,7 @@ void add_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
     }
 }
 
-bool add_sm_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
+bool AdditiveManufacturingProblem::add_sm_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
 {
     Domain *d = emodel->giveDomain( 1 );
 
@@ -465,7 +465,7 @@ bool add_sm_node_if_not_exists2( EngngModel *emodel, const VoxelNode &cn )
 }
 
 
-void add_sm_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
+void AdditiveManufacturingProblem::add_sm_element_if_not_exists2( EngngModel *emodel, Voxel &cn )
 {
     Domain *d = emodel->giveDomain( 1 );
 
@@ -602,9 +602,14 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
     po.sizes            = { (int)std::ceil( 250.0 / po.steps[0] ),
                    (int)std::ceil( 250.0 / po.steps[1] ),
                    (int)std::ceil( 250.0 / po.steps[2] ) };
-    po.filamentDiameter = 1.75;
     po.layerHeightModel = LayerHeightModel::Constant;
     po.layerHeight      = 0.2;
+    po.extrusionWidth   = 0.4*1.2;
+    po.chamberTemperature = 30.;
+    po.depositionTemperature      = 235.; /** Temperature of deposited material */
+    po.heatBetTemperature         = 60.; /* heat bed temperature */
+    po.heatTransferFilmCoefficient= 10.;  /* film coefficient for heat transfer between deposited material and air*/
+    po.depositedMaterialHeatPower = 4200000.0; /* power = specificHeat * density */
 
     auto pr = Printer( po );
 
