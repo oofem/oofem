@@ -66,7 +66,7 @@ OOFEM_EXPORT std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, prob
  * @param percentage Progress percentage (0.0 to 100.0).
  * @param out Output stream to print to (default is std::cout).
 */
-void printProgress(double percentage, std::ostream& out = std::cout);
+void printProgress(double percentage, const std::string &title = "Progress:", std::ostream& out = std::cout);
 
 } // end namespace oofem
 #endif // util_h
