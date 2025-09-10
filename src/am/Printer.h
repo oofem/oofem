@@ -62,7 +62,7 @@ struct PrinterOptions {
     double layerHeight                = 0.2; /**< The layer height value. */
     double extrusionWidth             = 0.4 * 1.2;
     double depositionTemperature      = 235.; /** Temperature of deposited material */
-    double heatBetTemperature         = 60.; /* heat bed temperature */
+    double heatBedTemperature         = 60.; /* heat bed temperature */
     double chamberTemperature         = 30.; /* air temperature in printer chamber*/
     double heatTransferFilmCoefficient= 10.;  /* film coefficient for heat transfer between deposited material and air*/
     double depositedMaterialHeatPower = 4200000.0; /* power = specificHeat * density */
@@ -93,7 +93,7 @@ public:
         filament_diameter  = options.filamentDiameter;
 
         depositionTemperature = options.depositionTemperature; 
-        heatBetTemperature    = options.heatBetTemperature;
+        heatBedTemperature    = options.heatBedTemperature;
         chamberTemperature    = options.chamberTemperature;
         heatTransferFilmCoefficient= options.heatTransferFilmCoefficient;
         depositedMaterialHeatPower = options.depositedMaterialHeatPower;
@@ -496,7 +496,7 @@ private:
     double extrusion_width              = nozzle_diameter * 1.2; /**< Current extrusion width */
 public:
     double depositionTemperature      = 235.; /** Temperature of deposited material */
-    double heatBetTemperature         = 60.; /* heat bed temperature */
+    double heatBedTemperature         = 60.; /* heat bed temperature */
     double chamberTemperature         = 30.; /* air temperature in printer chamber*/
     double heatTransferFilmCoefficient= 10.;  /* film coefficient for heat transfer between deposited material and air*/
     double depositedMaterialHeatPower = 4200000.0; /* power = specificHeat * density */

@@ -143,7 +143,7 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
         DynamicInputRecord myInput = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
         myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
 
-        FloatArray vals = { this->printer.heatBetTemperature };
+        FloatArray vals = { this->printer.heatBedTemperature };
         IntArray dofs   = { T_f };
         myInput.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
         myInput.setField( vals, _IFT_BoundaryCondition_values );
@@ -596,6 +596,7 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
     IR_GIVE_OPTIONAL_FIELD( ir, this->minVOF, _IFT_AdditiveManufacturingProblem_minvof );
 
     IR_GIVE_OPTIONAL_FIELD( ir, this->skipSM, _IFT_AdditiveManufacturingProblem_skipsm );
+    IR_GIVE_OPTIONAL_FIELD( ir, this->maxPrinterCommands, _IFT_AdditiveManufacturingProblem_maxprintercommands); 
 
     PrinterOptions po;
     po.steps            = { this->stepX, this->stepY, this->stepZ };
@@ -603,14 +604,14 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
                    (int)std::ceil( 250.0 / po.steps[1] ),
                    (int)std::ceil( 250.0 / po.steps[2] ) };
     po.layerHeightModel = LayerHeightModel::Constant;
-    po.layerHeight      = 0.2;
-    po.extrusionWidth   = 0.4*1.2;
-    po.chamberTemperature = 30.;
-    po.depositionTemperature      = 235.; /** Temperature of deposited material */
-    po.heatBetTemperature         = 60.; /* heat bed temperature */
-    po.heatTransferFilmCoefficient= 10.;  /* film coefficient for heat transfer between deposited material and air*/
-    po.depositedMaterialHeatPower = 4200000.0; /* power = specificHeat * density */
-
+    IR_GIVE_OPTIONAL_FIELD( ir, po.layerHeight, _IFT_AdditiveManufacturingProblem_Printer_layerheight );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.extrusionWidth, _IFT_AdditiveManufacturingProblem_Printer_extrusionwidth );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.chamberTemperature, _IFT_AdditiveManufacturingProblem_Printer_chambertemperature );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.depositionTemperature, _IFT_AdditiveManufacturingProblem_Printer_depositiontemperature );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.heatBedTemperature, _IFT_AdditiveManufacturingProblem_Printer_heatbedtemperature );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.heatTransferFilmCoefficient, _IFT_AdditiveManufacturingProblem_Printer_heattransferfilmcoefficient );
+    IR_GIVE_OPTIONAL_FIELD( ir, po.depositedMaterialHeatPower, _IFT_AdditiveManufacturingProblem_Printer_depositedmaterialheatpower );
+    
     auto pr = Printer( po );
 
     OOFEM_LOG_INFO( "\n\nG-code file: %s\n", this->gCodeFilePath.c_str() );
@@ -625,6 +626,10 @@ void AdditiveManufacturingProblem ::initializeFrom( InputRecord &ir )
     }
 
     std::size_t csize = commands.size();
+    if ( this->maxPrinterCommands > 0 && csize > (std::size_t)this->maxPrinterCommands ) {
+        csize = this->maxPrinterCommands;
+        OOFEM_LOG_INFO( "Limiting number of processed commands to %d\n", this->maxPrinterCommands );
+    }
 #ifdef DEBUG
     //csize = 500;
 #endif

@@ -68,6 +68,15 @@
 #define _IFT_AdditiveManufacturingProblem_reqiterations "reqiterations"
 #define _IFT_AdditiveManufacturingProblem_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_AdditiveManufacturingProblem_adaptivestepsince "adaptivestepsince"
+#define _IFT_AdditiveManufacturingProblem_maxprintercommands "maxcommands"
+
+#define _IFT_AdditiveManufacturingProblem_Printer_layerheight "layerheight"
+#define _IFT_AdditiveManufacturingProblem_Printer_extrusionwidth "extrusionwidth"
+#define _IFT_AdditiveManufacturingProblem_Printer_chambertemperature "chambertemperature"
+#define _IFT_AdditiveManufacturingProblem_Printer_depositiontemperature "depositiontemperature"
+#define _IFT_AdditiveManufacturingProblem_Printer_heatbedtemperature "heatbedtemperature"
+#define _IFT_AdditiveManufacturingProblem_Printer_heattransferfilmcoefficient "heattransferfilmcoefficient"
+#define _IFT_AdditiveManufacturingProblem_Printer_depositedmaterialheatpower "depositedmaterialheatpower" 
 //@}
 
 namespace oofem {
@@ -157,6 +166,9 @@ protected:
 
     // G-code filepath
     std::string gCodeFilePath = "";
+
+    // max number of printer commands to be processed (for debugging purposes)
+    int maxPrinterCommands = -1;  // negative value means no limit
 
     // voxel vof field
     std :: shared_ptr< VoxelVOFField > voxelVofField;
