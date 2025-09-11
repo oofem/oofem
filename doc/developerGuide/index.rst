@@ -7,16 +7,16 @@ Developer guide's
 =================================================
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :caption: Content
+   :maxdepth: 2
  
    introduction
-   coding_standards
-   general_structure
-   engng_frame.rst
+   codingstandards
+   generalstructure
+   engngframe.rst
    dofmanagers.rst
-   element_frame.rst
-   material_frame.rst
+   elementframe.rst
+   materialframe.rst
    utilityclasses.rst
    xfem.rst
    iga.rst

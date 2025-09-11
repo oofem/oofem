@@ -37,7 +37,7 @@ equation and the physical meaning of  particular components.
 They are responsible for forming the governing equation for each solution
 step,  usually by summing contributions from particular elements and
 nodes. The underlying discrete problem is solved by suitable instance of `NumericalMethod` class, that can take advantage of efficient sparse store for characteristic matrices, represented here by `SparseMtrx` class.
-This part is described in detail in `Problem representation - Engineering model`_.
+This part is described in detail in `ProblemFrame`_.
 
 Class `Element`, is an abstraction of a finite element. Element manages its DofManagers (nodes), and has its cros section and material models defined by `CrossSection` and `Material` class instances.
 Element manages its Integration rules composed of individual integration points and can also have its internal DOFs.

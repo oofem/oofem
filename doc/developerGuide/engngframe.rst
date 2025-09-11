@@ -1,6 +1,8 @@
+.. _ProblemFrame:
 
-Problem representation - Engineering model
-==========================================
+Problem representation (Engineering model)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 In this section, we introduce in detail how the problems are represented, their discrete form assembled and finally solved.
 
@@ -331,10 +333,10 @@ linear solver type and the sparse matrix type, which can be selected by the user
 Finally, the reference to suitable instance of `SparseLinearSystemNM` class is stored in the `nMethod` attribute.
 
 The following services are declared/implemented:
-- `solveYourselfAt` for solving the solution step, responsible for forming the stiffness matrix and load vector, and calling the numerical method to solve the problem, 
-- `giveUnknownComponent` providing access to problem unknowns (displacements), 
-- context i/o services for serializing and deserializing the state of the problem (`saveContext` and `restoreContext` services), 
-- solver parameter initialization (`initializeFrom`) and  consistency checking (`checkConsistency`).
+  - `solveYourselfAt` for solving the solution step, responsible for forming the stiffness matrix and load vector, and calling the numerical method to solve the problem, 
+  - `giveUnknownComponent` providing access to problem unknowns (displacements), 
+  - context i/o services for serializing and deserializing the state of the problem (`saveContext` and `restoreContext` services), 
+  - solver parameter initialization (`initializeFrom`) and  consistency checking (`checkConsistency`).
 
 
 .. code-block:: cpp
