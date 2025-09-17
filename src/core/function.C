@@ -63,7 +63,7 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
     } else if ( mode == VM_Acceleration ) {
         return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
-        return this->evaluateAtTime( tStep->giveTargetTime() ) - this->evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+        return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
     } else if ((mode == VM_Intermediate) || (mode == VM_TotalIntrinsic)) {
       return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else {
