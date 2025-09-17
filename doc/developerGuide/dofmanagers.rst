@@ -1,5 +1,37 @@
 DofManagers, DOFs, Boundary and Initial conditions
 =========================================================
+..
+  startuml
+  abstract class Dof
+  abstract class BoundaryCondition
+  abstract class InitialCondition
+
+  together {
+  abstract class DofManager
+  class Node
+  class RigidArmNode
+  }
+
+
+  class MasterDof
+  class SlaveDof
+
+  DofManager "1" *-- "0..*" Dof
+  Dof "*" --> "1" BoundaryCondition
+  Dof "*" --> "1" InitialCondition
+
+  DofManager <|-- Node
+  DofManager <|-- RigidArmNode
+  Dof <|-- MasterDof
+  Dof <|-- SlaveDof
+  @enduml
+
+  // https://www.plantuml.com/plantuml/uml/RO_FYi8m48VlUOgGOo5bzxuizS_5Gpte4unDh84qWSbK4FNTRKmb67gR-Nx3p3TD840Q1ylW50YX8zvP285l_Rb4Qpyw1NZRUASC6U_AWPsRCDYSC_Azfej6Vb_OtuA3NYDBOE-Ldik3wOrQuV16JyPct48WZL4izKSBLnrRbfTnyIju9IKNFtLTYNWcfbnCjPJ_CLxuevme7_cwyFUGCjcMC7kdCD6i_K7PlD5EZODz0G00
+
+.. figure:: figs/dofmanframe.png
+    :alt: OOFEM structure for DofManagers & DOFs
+    :name: fig-dofmanframe
+    :width: 70.0%
 
 Degrees of Freedom
 -------------------
