@@ -250,8 +250,8 @@ void FloatArray :: add(double factor, const FloatArray &b)
 void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV)
 // Performs the operation a += b^T . s * dV
 {
-    Index nRows = b.giveNumberOfRows();
-    Index nColumns = b.giveNumberOfColumns();
+    const int nRows = b.giveNumberOfRows();
+    const int nColumns = b.giveNumberOfColumns();
 
     if ( this->isEmpty() ) {
         this->resize( nColumns );
@@ -652,8 +652,8 @@ void FloatArray :: zero()
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
-    Index nColumns = aMatrix.giveNumberOfColumns();
-    Index nRows = aMatrix.giveNumberOfRows();
+    const int nColumns = aMatrix.giveNumberOfColumns();
+    const int nRows = aMatrix.giveNumberOfRows();
 
     _resize_internal(nRows);
 
@@ -684,8 +684,8 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix^T * anArray in to receiver
 {
-    Index nRows = aMatrix.giveNumberOfRows();
-    Index nColumns = aMatrix.giveNumberOfColumns();
+    const int nRows = aMatrix.giveNumberOfRows();
+    const int nColumns = aMatrix.giveNumberOfColumns();
 
 #  ifndef NDEBUG
     if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {

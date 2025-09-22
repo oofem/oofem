@@ -47,7 +47,6 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <numeric>
 
 
 
@@ -125,11 +124,11 @@ FloatMatrix FloatMatrix::fromIniList(std::initializer_list<std::initializer_list
     ret._resize_internal( ( int ) ini.begin()->size(), ( int ) ini.size() );
     Index c=0;
     for (auto col : ini) {
-#if DEBUG
-        if ( ret.rows() != (Index) col.size() ) {
-                OOFEM_ERROR("Initializer list has inconsistent column sizes.");
-        }
-#endif
+        #if DEBUG
+            if ( ret.rows() != (Index) col.size() ) {
+                    OOFEM_ERROR("Initializer list has inconsistent column sizes.");
+            }
+        #endif
         Index r=0;
         for(const double& x: col) ret(r++,c)=x;
         c++;
@@ -143,11 +142,11 @@ FloatMatrix FloatMatrix :: fromCols ( std :: initializer_list< FloatArray >mat )
     FloatMatrix ret( mat.begin()->giveSize(), ( int ) mat.size() );
     Index c=0;
     for ( auto col : mat ) {
-#if DEBUG
-        if ( ret.rows() != (Index) col.size() ) {
+        #if DEBUG
+            if ( ret.rows() != (Index) col.size() ) {
                 OOFEM_ERROR("Columns have inconsistent column sizes.");
-        }
-#endif
+            }
+        #endif
         for(Index r=0; r<col.size(); r++) ret(r,c)=col(r);
         c++;
     }
@@ -174,6 +173,9 @@ void FloatMatrix :: checkBounds(Index i, Index j) const
     }
 }
 
+
+
+#ifndef _USE_EIGEN
 bool FloatMatrix :: isAllFinite() const
 {
     for(Index r=0; r<rows(); r++) for(Index c=0; c<cols(); c++){
@@ -184,6 +186,7 @@ bool FloatMatrix :: isAllFinite() const
 
     return true;
 }
+#endif
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
@@ -283,7 +286,59 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const in
     }
 }
 
+#ifdef _USE_EIGEN
+bool FloatMatrix::isAllFinite() const { return this->array().isFinite().all(); }
+void FloatMatrix :: beTranspositionOf(const FloatMatrix &src) { *this=src.transpose(); }
+void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this=aMatrix*bMatrix; }
+void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this=aMatrix.transpose()*bMatrix; }
+void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this=aMatrix*bMatrix.transpose(); }
+void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this+=aMatrix*bMatrix; }
+void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this+=aMatrix.transpose()*bMatrix; }
+void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2){ *this=vec1*vec2.transpose(); }
 
+void FloatMatrix :: times(double factor) { (*this)*=factor; }
+void FloatMatrix :: negated() { (*this)*=-1; }
+double FloatMatrix :: computeFrobeniusNorm() const { return this->norm(); }
+double FloatMatrix :: computeNorm(char p) const {
+    if(p=='1') return this->lpNorm<1>();
+    OOFEM_ERROR("p == %d not implemented.\n", p);
+}
+void FloatMatrix::setSubMatrix(const FloatMatrix &src, int sr, int sc){ this->block(sr-1,sc-1,src.rows(),src.cols())=src; }
+void FloatMatrix::setTSubMatrix(const FloatMatrix &src, int sr, int sc){ this->block(sr-1,sc-1,src.cols(),src.rows())=src.transpose(); }
+void FloatMatrix :: setColumn(const FloatArray &src, int c){ this->col(c-1)=src; }
+void FloatMatrix :: copyColumn(FloatArray &dest, int c) const { dest=this->col(c-1); }
+
+//void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV){
+//    if(!this->isNotEmpty()){ this->setZero(a.cols(),b.cols()); }
+//}
+void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV){
+  if(!this->isNotEmpty()){ this->setZero(a.size(),a.size()); }
+  this->selfadjointView<Eigen::Upper>().rankUpdate(a,dV);
+}
+void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV){
+    if(!this->isNotEmpty()){ this->setZero(a.cols(),b.cols()); }
+    *this+=a.transpose()*b*dV;
+}
+void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV){
+    if(!this->isNotEmpty()){ this->setZero(a.size(),b.size()); }
+    *this+=a*b.transpose()*dV;
+}
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, Index topRow, Index bottomRow, Index topCol, Index bottomCol){
+    *this=src.block(topRow-1,topCol-1,bottomRow-topRow+1,bottomCol-topCol+1);
+}
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol){ *this=src(indxRow.minusOne(),indxCol.minusOne()); }
+void FloatMatrix::add(const FloatMatrix& a)          { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=a; return; }   *this+=a;   }
+void FloatMatrix::add(double s, const FloatMatrix& a){ if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=s*a; return; } *this+=s*a; }
+void FloatMatrix :: subtract(const FloatMatrix &a)   { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=-a; return; }  *this-=a;   }
+FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed){ if(transposed) return vector.transpose(); return vector; }
+void FloatMatrix :: zero() { this->setZero(); }
+void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
+double FloatMatrix :: giveDeterminant() const { return this->determinant(); }
+void FloatMatrix :: beDiagonal(const FloatArray &diag) { *this=diag.asDiagonal().toDenseMatrix(); }
+double FloatMatrix :: giveTrace() const { return this->trace(); }
+#endif
+
+#ifndef _USE_EIGEN
 void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
@@ -308,11 +363,14 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 #  endif
     _resize_internal(aMatrix.rows(), bMatrix.cols());
 #  ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int aMatrix_nColumns=aMatrix.cols(), aMatrix_nRows=aMatrix.rows();
+    const int bMatrix_nColumns=bMatrix.cols(), bMatrix_nRows=bMatrix.rows();
     double alpha = 1., beta = 0.;
-    dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+    dgemm_("n", "n", & this_nRows, & this_nColumns, & aMatrix_nColumns,
+           & alpha, aMatrix.givePointer(), & aMatrix_nRows, bMatrix.givePointer(), & bMatrix_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           aMatrix_nColumns, bMatrix_nColumns, this_nColumns);
 #  else
     for ( Index i = 1; i <= aMatrix.rows(); i++ ) {
         for ( Index j = 1; j <= bMatrix.cols(); j++ ) {
@@ -339,10 +397,13 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
     _resize_internal(aMatrix.cols(), bMatrix.cols());
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
-    dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows,
-           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int aMatrix_nColumns=aMatrix.cols(), aMatrix_nRows=aMatrix.rows();
+    const int bMatrix_nColumns=bMatrix.cols(), bMatrix_nRows=bMatrix.rows();
+    dgemm_("t", "n", & this_nRows, & this_nColumns, & aMatrix_nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix_nRows, bMatrix.givePointer(), & bMatrix_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           aMatrix_nColumns, bMatrix_nColumns, this_nColumns);
 #  else
     for ( Index i = 1; i <= aMatrix.cols(); i++ ) {
         for (Index j = 1; j <= bMatrix.cols(); j++ ) {
@@ -368,11 +429,14 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 #  endif
     _resize_internal(aMatrix.rows(), bMatrix.rows());
 #  ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int aMatrix_nColumns=aMatrix.cols(), aMatrix_nRows=aMatrix.rows();
+    const int bMatrix_nColumns=bMatrix.cols(), bMatrix_nRows=bMatrix.rows();
     double alpha = 1., beta = 0.;
-    dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+    dgemm_("n", "t", & this_nRows, & this_nColumns, & aMatrix_nColumns,
+           & alpha, aMatrix.givePointer(), & aMatrix_nRows, bMatrix.givePointer(), & bMatrix_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           aMatrix_nColumns, bMatrix_nColumns, this_nColumns);
 #  else
     for (Index i = 1; i <= aMatrix.rows(); i++ ) {
         for (Index j = 1; j <= bMatrix.rows(); j++ ) {
@@ -401,11 +465,14 @@ void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 #  endif
 
 #  ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int aMatrix_nColumns=aMatrix.cols(), aMatrix_nRows=aMatrix.rows();
+    const int bMatrix_nColumns=bMatrix.cols(), bMatrix_nRows=bMatrix.rows();
     double alpha = 1., beta = 1.;
-    dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+    dgemm_("n", "n", & this_nRows, & this_nColumns, & aMatrix_nColumns,
+           & alpha, aMatrix.givePointer(), & aMatrix_nRows, bMatrix.givePointer(), & bMatrix_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           aMatrix_nColumns, bMatrix_nColumns, this_nColumns);
 #  else
     for (Index i = 1; i <= aMatrix.rows(); i++ ) {
         for (Index j = 1; j <= bMatrix.cols(); j++ ) {
@@ -434,10 +501,13 @@ void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix 
 
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 1.;
-    dgemm_("t", "n",  & this->nRows, & this->nColumns, & aMatrix.nRows,
-           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int aMatrix_nColumns=aMatrix.cols(), aMatrix_nRows=aMatrix.rows();
+    const int bMatrix_nColumns=bMatrix.cols(), bMatrix_nRows=bMatrix.rows();
+    dgemm_("t", "n",  & this_nRows, & this_nColumns, & aMatrix_nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix_nRows, bMatrix.givePointer(), & bMatrix_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           aMatrix_nColumns, bMatrix_nColumns, this_nColumns);
 #  else
     for (Index i = 1; i <= aMatrix.cols(); i++ ) {
         for (Index j = 1; j <= bMatrix.cols(); j++ ) {
@@ -465,6 +535,8 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
         }
     }
 }
+#endif
+
 
 void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 {
@@ -475,6 +547,9 @@ void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
         }
     }
 }
+
+
+
 
 void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
 { //normal should be at the first position, easier for interface material models
@@ -517,6 +592,8 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         OOFEM_ERROR("Normal needs 1 to 3 components.");
     }
 }
+
+#ifndef _USE_EIGEN
 
 void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
 {
@@ -566,6 +643,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     }
 }
 
+#endif
 
 
 void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
@@ -607,7 +685,7 @@ void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc)
     }
 }
 
-
+#ifndef _USE_EIGEN
 
 void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
@@ -635,6 +713,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     for(int r=0; r<nr; r++) dest(r)=(*this)(r,c-1);
 }
 
+#endif
 
 void FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
 {
@@ -670,31 +749,34 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
     }
 
 #ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int a_nColumns=a.cols(), a_nRows=a.rows();
+    const int b_nColumns=b.cols(), b_nRows=b.rows();
     double beta = 1.;
     ///@todo We should determine which is the best choice overall. For large systems more block matrix operations is necessary.
     /// For smaller systems the overhead from function calls might be larger, but the overhead might be tiny, or using symmetry at all might be undesireable.
-    if ( this->nRows < 20 ) {
+    if ( this_nRows < 20 ) {
         // Split the matrix into 2 columns, s1 + s2 = n ( = nRows = nColumns ).
-        int s1 = this->nRows / 2;
-        int s2 = this->nRows - s1;
+        int s1 = this_nRows / 2;
+        int s2 = this_nRows - s1;
         // First column block, we only take the first s rows by only taking the first s columns in the matrix a.
-        dgemm_("t", "n", & s1, & s1, & a.nRows, & dV, a.givePointer(), & a.nRows, b.givePointer(), & b.nRows, & beta, this->givePointer(), & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        dgemm_("t", "n", & s1, & s1, & a_nRows, & dV, a.givePointer(), & a_nRows, b.givePointer(), & b_nRows, & beta, this->givePointer(), & this_nRows, a_nColumns, b_nColumns, this_nColumns);
         // Second column block starting a memory position c * nRows
-        dgemm_("t", "n", & this->nRows, & s2, & a.nRows, & dV, a.givePointer(), & a.nRows, & b.givePointer() [ s1 * b.nRows ], & b.nRows, & beta, & this->givePointer() [ s1 * this->nRows ], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        dgemm_("t", "n", & this_nRows, & s2, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ s1 * b_nRows ], & b_nRows, & beta, & this->givePointer() [ s1 * this_nRows ], & this_nRows, a_nColumns, b_nColumns, this_nColumns);
     } else {
         // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
         // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
-        int block = ( this->nRows - 1 ) / ( this->nRows / 10 ) + 1;
+        int block = ( this_nRows - 1 ) / ( this_nRows / 10 ) + 1;
         int start = 0;
         int end = block;
-        while ( start < this->nRows ) {
+        while ( start < this_nRows ) {
             int s = end - start;
-            dgemm_("t", "n", & end, & s, & a.nRows, & dV, a.givePointer(), & a.nRows, & b.givePointer() [ start * b.nRows ], & b.nRows, & beta, & this->givePointer() [ start * this->nRows ],
-                   & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+            dgemm_("t", "n", & end, & s, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ start * b_nRows ], & b_nRows, & beta, & this->givePointer() [ start * this_nRows ],
+                   & this_nRows, a_nColumns, b_nColumns, this_nColumns);
             start = end;
             end += block;
-            if ( end > this->nRows ) {
-                end = this->nRows;
+            if ( end > this_nRows ) {
+                end = this_nRows;
             }
         }
     }
@@ -712,6 +794,7 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 #endif
 }
 
+#ifndef _USE_EIGEN
 
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
@@ -721,9 +804,10 @@ void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 #ifdef __LAPACK_MODULE
     int inc = 1;
     int sizeA = a.giveSize();
+    const int this_nColumns=cols(), this_nRows=rows();
     dsyr_("u", & sizeA, & dV, a.givePointer(), & inc,
-          this->givePointer(), & this->nRows,
-          sizeA, this->nColumns);
+          this->givePointer(), & this_nRows,
+          sizeA, this_nColumns);
 #else
     for (Index i = 1; i <= rows(); i++ ) {
         for (Index j = i; j <= cols(); j++ ) {
@@ -732,6 +816,7 @@ void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
     }
 #endif
 }
+
 
 
 
@@ -744,11 +829,14 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
         this->resize(a.cols(),b.cols());
     }
 #ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int a_nColumns=a.cols(), a_nRows=a.rows();
+    const int b_nColumns=b.cols(), b_nRows=b.rows();
     double beta = 1.;
-    dgemm_("t", "n", & this->nRows, & this->nColumns, & a.nRows,
-           & dV, a.givePointer(), & a.nRows, b.givePointer(), & b.nRows,
-           & beta, this->givePointer(), & this->nRows,
-           a.nColumns, b.nColumns, this->nColumns);
+    dgemm_("t", "n", & this_nRows, & this_nColumns, & a_nRows,
+           & dV, a.givePointer(), & a_nRows, b.givePointer(), & b_nRows,
+           & beta, this->givePointer(), & this_nRows,
+           a_nColumns, b_nColumns, this_nColumns);
 #else
     for (Index i = 1; i <= rows(); i++ ) {
         for (Index j = 1; j <= cols(); j++ ) {
@@ -773,9 +861,10 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
     int inc = 1;
     int sizeA = a.giveSize();
     int sizeB = b.giveSize();
+    const int this_nColumns=cols(), this_nRows=rows();
     dger_(& sizeA, & sizeB, & dV, a.givePointer(), & inc,
-          b.givePointer(), & inc, this->givePointer(), & this->nRows,
-          sizeA, sizeB, this->nColumns);
+          b.givePointer(), & inc, this->givePointer(), & this_nRows,
+          sizeA, sizeB, this_nColumns);
 #else
     for (Index i = 1; i <= rows(); i++ ) {
         for (Index j = 1; j <= cols(); j++ ) {
@@ -785,6 +874,7 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
 #endif
 }
 
+#endif
 
 bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
@@ -837,87 +927,88 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
             return false;
         }
     } else {
-#ifdef __LAPACK_MODULE
-        int n = this->nRows;
-        IntArray ipiv(n);
-        int lwork, info;
-        * this = src;
+        #ifdef __LAPACK_MODULE
+            const int this_nRows=rows();
+            IntArray ipiv(this_nRows);
+            int lwork, info;
+            * this = src;
 
-        // LU-factorization
-        dgetrf_(& n, & n, this->givePointer(), & n, ipiv.givePointer(), & info);
-        if ( info != 0 ) {
-            OOFEM_WARNING("dgetrf error %d", info);
-            return false;
-        }
-
-        // Inverse
-        lwork = n * n;
-        FloatArray work(lwork);
-        dgetri_(& this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), work.givePointer(), & lwork, & info);
-        if ( info > 0 ) {
-            OOFEM_WARNING("Singular at %d", info);
-            return false;
-        } else if ( info < 0 ) {
-            OOFEM_ERROR("Error on input %d", info);
-        }
-#else
-        // size >3 ... gaussian elimination - slow but safe
-        //
-        double piv, linkomb;
-        FloatMatrix tmp = src;
-        // initialize answer to be unity matrix;
-        this->zero();
-        for (Index i = 1; i <= nRows; i++ ) {
-            this->at(i, i) = 1.0;
-        }
-
-        // lower triangle elimination by columns
-        for (Index i = 1; i < nRows; i++ ) {
-            piv = tmp.at(i, i);
-            if ( fabs(piv) < 1.e-30 ) {
-                OOFEM_WARNING("pivot (%d,%d) to close to small (< 1.e-20)", i, i);
+            // LU-factorization
+            dgetrf_(& this_nRows, & this_nRows, this->givePointer(), & this_nRows, ipiv.givePointer(), & info);
+            if ( info != 0 ) {
+                OOFEM_WARNING("dgetrf error %d", info);
                 return false;
             }
 
-            for (Index j = i + 1; j <= nRows; j++ ) {
-                linkomb = tmp.at(j, i) / tmp.at(i, i);
-                for (Index k = i; k <= nRows; k++ ) {
-                    tmp.at(j, k) -= tmp.at(i, k) * linkomb;
+            // Inverse
+            lwork = this_nRows * this_nRows;
+            FloatArray work(lwork);
+            dgetri_(& this_nRows, this->givePointer(), & this_nRows, ipiv.givePointer(), work.givePointer(), & lwork, & info);
+            if ( info > 0 ) {
+                OOFEM_WARNING("Singular at %d", info);
+                return false;
+            } else if ( info < 0 ) {
+                OOFEM_ERROR("Error on input %d", info);
+            }
+        #else
+            // size >3 ... gaussian elimination - slow but safe
+            //
+            double piv, linkomb;
+            FloatMatrix tmp = src;
+            // initialize answer to be unity matrix;
+            this->zero();
+            for (Index i = 1; i <= nRows; i++ ) {
+                this->at(i, i) = 1.0;
+            }
+
+            // lower triangle elimination by columns
+            for (Index i = 1; i < nRows; i++ ) {
+                piv = tmp.at(i, i);
+                if ( fabs(piv) < 1.e-30 ) {
+                    OOFEM_WARNING("pivot (%d,%d) to close to small (< 1.e-20)", i, i);
+                    return false;
                 }
 
-                for (Index k = 1; k <= nRows; k++ ) {
-                    this->at(j, k) -= this->at(i, k) * linkomb;
+                for (Index j = i + 1; j <= nRows; j++ ) {
+                    linkomb = tmp.at(j, i) / tmp.at(i, i);
+                    for (Index k = i; k <= nRows; k++ ) {
+                        tmp.at(j, k) -= tmp.at(i, k) * linkomb;
+                    }
+
+                    for (Index k = 1; k <= nRows; k++ ) {
+                        this->at(j, k) -= this->at(i, k) * linkomb;
+                    }
                 }
             }
-        }
 
-        // upper triangle elimination by columns
-        for ( Index i = nRows; i > 1; i-- ) {
-            piv = tmp.at(i, i);
-            for ( Index j = i - 1; j > 0; j-- ) {
-                linkomb = tmp.at(j, i) / piv;
-                for ( Index k = i; k > 0; k-- ) {
-                    tmp.at(j, k) -= tmp.at(i, k) * linkomb;
-                }
+            // upper triangle elimination by columns
+            for ( Index i = nRows; i > 1; i-- ) {
+                piv = tmp.at(i, i);
+                for ( Index j = i - 1; j > 0; j-- ) {
+                    linkomb = tmp.at(j, i) / piv;
+                    for ( Index k = i; k > 0; k-- ) {
+                        tmp.at(j, k) -= tmp.at(i, k) * linkomb;
+                    }
 
-                for ( Index k = nRows; k > 0; k-- ) {
-                    // tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
-                    this->at(j, k) -= this->at(i, k) * linkomb;
+                    for ( Index k = nRows; k > 0; k-- ) {
+                        // tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
+                        this->at(j, k) -= this->at(i, k) * linkomb;
+                    }
                 }
             }
-        }
 
-        // diagonal scaling
-        for ( Index i = 1; i <= nRows; i++ ) {
-            for ( Index j = 1; j <= nRows; j++ ) {
-                this->at(i, j) /= tmp.at(i, i);
+            // diagonal scaling
+            for ( Index i = 1; i <= nRows; i++ ) {
+                for ( Index j = 1; j <= nRows; j++ ) {
+                    this->at(i, j) /= tmp.at(i, i);
+                }
             }
-        }
+        #endif
         return true;
-#endif
     }
 }
 
+#ifndef _USE_EIGEN
 
 void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
                                   Index topRow, Index bottomRow, Index topCol, Index bottomCol)
@@ -979,7 +1070,9 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, co
         }
     }
 }
+#endif
 
+#ifndef _USE_EIGEN
 void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
@@ -999,7 +1092,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 #     endif
 
 #ifdef __LAPACK_MODULE
-    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int aSize = aMatrix.rows() * aMatrix.cols();
     int inc = 1;
     double s = 1.;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
@@ -1029,13 +1122,14 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
 #     endif
 
 #ifdef __LAPACK_MODULE
-    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int aSize = aMatrix.rows() * aMatrix.cols();
     int inc = 1;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
     _LOOP_MATRIX(r,c){ (*this)(r,c)+=s*aMatrix(r,c); }
 #endif
 }
+
 
 void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
@@ -1053,7 +1147,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 #     endif
 
 #ifdef __LAPACK_MODULE
-    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int aSize = aMatrix.rows() * aMatrix.cols();
     int inc = 1;
     double s = -1.;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
@@ -1062,6 +1156,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 #endif
 }
 
+#endif
 
 bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
@@ -1078,12 +1173,13 @@ bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 
 #ifdef __LAPACK_MODULE
     int info, nrhs = 1;
-    IntArray ipiv(this->nRows);
+    const int this_nRows=rows();
+    IntArray ipiv(this_nRows);
     answer = b;
-    //dgesv_( &this->nRows, &nrhs, this->givePointer(), &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
-    dgetrf_(& this->nRows, & this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), & info);
+    //dgesv_( &this_nRows, &nrhs, this->givePointer(), &this_nRows, ipiv.givePointer(), answer.givePointer(), &this_nRows, &info );
+    dgetrf_(& this_nRows, & this_nRows, this->givePointer(), & this_nRows, ipiv.givePointer(), & info);
     if ( info == 0 ) {
-        dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
+        dgetrs_(transpose ? "Transpose" : "No transpose", & this_nRows, & nrhs, this->givePointer(), & this_nRows, ipiv.givePointer(), answer.givePointer(), & this_nRows, & info);
     }
     if ( info != 0 ) {
         return false;
@@ -1175,11 +1271,13 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 
 #ifdef __LAPACK_MODULE
     int info;
-    IntArray ipiv(this->nRows);
+    const int this_nRows=rows();
+    IntArray ipiv(this_nRows);
     answer = b;
-    dgetrf_(& this->nRows, & this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), & info);
+    const int answer_nColumns=answer.cols();
+    dgetrf_(& this_nRows, & this_nRows, this->givePointer(), & this_nRows, ipiv.givePointer(), & info);
     if ( info == 0 ) {
-        dgetrs_(transpose ? "t" : "n", & this->nRows, & answer.nColumns, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
+        dgetrs_(transpose ? "t" : "n", & this_nRows, & answer_nColumns, this->givePointer(), & this_nRows, ipiv.givePointer(), answer.givePointer(), & this_nRows, & info);
     }
     if ( info != 0 ) {
         return false; //OOFEM_ERROR("error %d", info);
@@ -1253,10 +1351,11 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
             answer.at(i, k) = ( answer.at(i, k) - help ) / mtrx->at(i, i);
         }
     }
-    return true;
 #endif
+    return true;
 }
 
+#ifndef _USE_EIGEN
 
 FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed)
 //
@@ -1295,6 +1394,7 @@ void FloatMatrix :: beUnitMatrix()
         this->at(i, i) = 1.0;
     }
 }
+#endif
 
 
 void FloatMatrix :: bePinvID()
@@ -1309,7 +1409,7 @@ void FloatMatrix :: bePinvID()
 }
 
 
-
+#ifndef _USE_EIGEN
 double FloatMatrix :: giveDeterminant() const
 // Returns the determinant of the receiver.
 {
@@ -1360,6 +1460,7 @@ double FloatMatrix :: giveTrace() const
     return answer;
 }
 
+#endif
 
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
@@ -1496,7 +1597,7 @@ void FloatMatrix :: symmetrized()
     }
 }
 
-
+#ifndef _USE_EIGEN
 void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
@@ -1520,12 +1621,14 @@ double FloatMatrix :: computeFrobeniusNorm() const
     return std::sqrt(ret);
 }
 
+
 double FloatMatrix :: computeNorm(char p) const
 {
 #  ifdef __LAPACK_MODULE
-    FloatArray work( this->giveNumberOfRows() );
-    int lda = max(this->nRows, 1);
-    double norm = dlange_(& p, & this->nRows, & this->nColumns, this->givePointer(), & lda, work.givePointer(), 1);
+    const int this_nRows=rows(), this_nColumns=cols();
+    FloatArray work( this_nRows );
+    int lda = max(this_nRows, 1);
+    double norm = dlange_(& p, & this_nRows, & this_nColumns, this->givePointer(), & lda, work.givePointer(), 1);
     return norm;
 
 #  else
@@ -1550,13 +1653,15 @@ double FloatMatrix :: computeNorm(char p) const
      *  AtA.beTProductOf(*this,this);
      *  Ata.eigenValues(eigs, 1);
      *  return sqrt(eigs(0));
-     * } */else {
+     * } */
+    else {
         OOFEM_ERROR("p == %d not implemented.\n", p);
         // return 0.0;
     }
 #  endif
 }
 
+#endif
 
 
 void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
@@ -1649,7 +1754,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     double anorm = this->computeNorm(p);
 
 #  ifdef __LAPACK_MODULE
-    int n = this->nRows;
+    const int n = this->rows();
     FloatArray work(4 *n);
     IntArray iwork(n);
     int info;
@@ -1661,7 +1766,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
         if ( info < 0 ) {
             OOFEM_ERROR("dgetfr error %d\n", info);
         }
-        dgecon_(& p, & ( this->nRows ), a_cpy.givePointer(), & this->nRows, & anorm, & rcond, work.givePointer(), iwork.givePointer(), & info, 1);
+        dgecon_(& p, & n, a_cpy.givePointer(), & n, & anorm, & rcond, work.givePointer(), iwork.givePointer(), & info, 1);
         if ( info < 0 ) {
             OOFEM_ERROR("dgecon error %d\n", info);
         }
@@ -1714,7 +1819,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
  #ifdef __LAPACK_MODULE
     double abstol = 1.0; ///@todo Find suitable tolerance.
     int lda, n, ldz, info, found, lwork;
-    n = this->nRows;
+    n = this->rows();
     lda = n;
     ldz = n;
     FloatMatrix a;

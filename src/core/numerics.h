@@ -38,6 +38,7 @@
 #ifdef _USE_EIGEN
     #define EIGEN_INITIALIZE_MATRICES_BY_ZERO
     #include<Eigen/Core>
+    #include <Eigen/Dense>
 #endif
 
 namespace oofem{
