@@ -49,6 +49,10 @@
 #include <iomanip>
 
 
+#ifdef _USE_EIGEN
+    #include<Eigen/Eigenvalues>
+#endif
+
 
 
 namespace oofem {
@@ -213,7 +217,22 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
     }
 }
 
-
+#ifdef _USE_EIGEN___BROKEN
+    void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind){
+        /* rowind may contain 0s, which mean that the element is skipped */
+        Eigen::Map<const Eigen::ArrayXi> rr(rowind.givePointer(),rowind.size());
+        Eigen::Map<const Eigen::ArrayXi> cc(rowind.givePointer(),rowind.size());
+        // auto rOk=(rr>0), cOk=(cc>0);
+        Eigen::VectorXi R=Eigen::VectorXi::LinSpaced(rr.size(), 0, rr.size()-1).array();
+        Eigen::VectorXi C=Eigen::VectorXi::LinSpaced(cc.size(), 0, cc.size()-1).array();
+        // Eigen::VectorXi rThis=rr[rr>0];
+        (*this)(rr[rr>0]-1,cc[cc>0]-1)=src(R,C);
+        // auto rOk=(rr>0), cOk=(cc>0);
+        //(*this)((rr-1)(rr!=0),(cc-1)(cOk))+=src(Eigen::seq(0,src.rows()(rOk),cOk);
+        // FloatMatrix src2=src(rowind>0
+        //(*this)(rowind.minusOne(),colind.minusOne())+=src;
+    }
+#else
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
     int ii, jj;
@@ -240,7 +259,13 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
         }
     }
 }
+#endif
 
+#ifdef _USE_EIGEN___BROKEN
+void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind){
+    (*this)(rowind.minusOne(),colind.minusOne())+=src.transpose();
+}
+#else
 void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
     int ii, jj;
@@ -267,26 +292,15 @@ void FloatMatrix :: assembleT(const FloatMatrix &src, const IntArray &rowind, co
         }
     }
 }
+#endif
 
-
-void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
-{
-    int ii, jj;
-    int nr = src.giveNumberOfRows();
-    int nc = src.giveNumberOfColumns();
-
-    for ( int i = 1; i <= nr; i++ ) {
-        if ( ( ii = rowind [ i - 1 ] ) ) {
-            for ( int j = 1; j <= nc; j++ ) {
-                if ( ( jj = colind [ j - 1 ] ) ) {
-                    this->at(ii, jj) += src.at(i, j);
-                }
-            }
-        }
-    }
-}
 
 #ifdef _USE_EIGEN
+// helper routines
+void _zeroedIfEmpty(FloatMatrix& A, Eigen::Index rows, Eigen::Index cols){ if(A.isNotEmpty()) return; A.setZero(rows,cols); }
+void _ensureRowsCols(FloatMatrix& A, Eigen::Index minRows, Eigen::Index minCols){ if(A.rows()>=minRows && A.cols()>=minCols) return; A.resizeWithData(max(A.rows(),minRows),max(A.cols(),minCols)); }
+
+
 bool FloatMatrix::isAllFinite() const { return this->array().isFinite().all(); }
 void FloatMatrix :: beTranspositionOf(const FloatMatrix &src) { *this=src.transpose(); }
 void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this=aMatrix*bMatrix; }
@@ -295,7 +309,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this+=aMatrix*bMatrix; }
 void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix){ *this+=aMatrix.transpose()*bMatrix; }
 void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2){ *this=vec1*vec2.transpose(); }
-
+void FloatMatrix :: symmetrized() { *this = this->selfadjointView<Eigen::Upper>().toDenseMatrix(); }
 void FloatMatrix :: times(double factor) { (*this)*=factor; }
 void FloatMatrix :: negated() { (*this)*=-1; }
 double FloatMatrix :: computeFrobeniusNorm() const { return this->norm(); }
@@ -305,28 +319,23 @@ double FloatMatrix :: computeNorm(char p) const {
 }
 void FloatMatrix::setSubMatrix(const FloatMatrix &src, int sr, int sc){ this->block(sr-1,sc-1,src.rows(),src.cols())=src; }
 void FloatMatrix::setTSubMatrix(const FloatMatrix &src, int sr, int sc){ this->block(sr-1,sc-1,src.cols(),src.rows())=src.transpose(); }
+void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc){ Index sr0=sr-1, sc0=sc-1; _ensureRowsCols(*this,sr0+1,sc0+src.size()+1); row(sr0).segment(sc0,src.size())=src; }
+void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc){ Index sr0=sr-1, sc0=sc-1; _ensureRowsCols(*this,sr0+src.size()+1,sc0+1); col(sc0).segment(sr0,src.size())=src; }
 void FloatMatrix :: setColumn(const FloatArray &src, int c){ this->col(c-1)=src; }
 void FloatMatrix :: copyColumn(FloatArray &dest, int c) const { dest=this->col(c-1); }
-
-//void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV){
-//    if(!this->isNotEmpty()){ this->setZero(a.cols(),b.cols()); }
-//}
-void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV){
-  if(!this->isNotEmpty()){ this->setZero(a.size(),a.size()); }
-  this->selfadjointView<Eigen::Upper>().rankUpdate(a,dV);
+// void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV){ _zeroedIfEmpty(*this,a.cols(),b.cols()); /*...*/ } // not sure who to write this nicely with Eigen
+void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)                             { _zeroedIfEmpty(*this,a.size(),a.size()); this->selfadjointView<Eigen::Upper>().rankUpdate(a,dV); }
+void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV)       { _zeroedIfEmpty(*this,a.cols(),b.cols()); *this+=a.transpose()*b*dV; }
+void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)            { _zeroedIfEmpty(*this,a.size(),b.size()); *this+=a*b.transpose()*dV; }
+bool FloatMatrix :: beInverseOf(const FloatMatrix &src){
+    Eigen::FullPivLU<Eigen::MatrixXd> lu(src);
+    // lu.setThreshold(1e-30); // this is what the original code uses
+    if(!lu.isInvertible()) return false;
+    *this=lu.inverse();
+    return true;
 }
-void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV){
-    if(!this->isNotEmpty()){ this->setZero(a.cols(),b.cols()); }
-    *this+=a.transpose()*b*dV;
-}
-void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV){
-    if(!this->isNotEmpty()){ this->setZero(a.size(),b.size()); }
-    *this+=a*b.transpose()*dV;
-}
-void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, Index topRow, Index bottomRow, Index topCol, Index bottomCol){
-    *this=src.block(topRow-1,topCol-1,bottomRow-topRow+1,bottomCol-topCol+1);
-}
-void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol){ *this=src(indxRow.minusOne(),indxCol.minusOne()); }
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, Index topRow, Index bottomRow, Index topCol, Index bottomCol){ *this=src.block(topRow-1,topCol-1,bottomRow-topRow+1,bottomCol-topCol+1); }
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol)            { *this=src(indxRow.minusOne(),indxCol.minusOne()); }
 void FloatMatrix::add(const FloatMatrix& a)          { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=a; return; }   *this+=a;   }
 void FloatMatrix::add(double s, const FloatMatrix& a){ if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=s*a; return; } *this+=s*a; }
 void FloatMatrix :: subtract(const FloatMatrix &a)   { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=-a; return; }  *this-=a;   }
@@ -560,10 +569,10 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->resize(2, 2);
         this->at(1, 1) = normal(0);
         this->at(1, 2) = normal(1);
-        
+
         this->at(2, 1) = normal(1);
         this->at(2, 2) = -normal(0);
-        
+
     } else if ( normal.giveSize() == 3 ) {
         // Create a permutated vector of n, *always* length 1 and significantly different from n.
         FloatArray b, t = {
@@ -580,11 +589,11 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(1, 1) = normal.at(1);
         this->at(1, 2) = normal.at(2);
         this->at(1, 3) = normal.at(3);
-        
+
         this->at(2, 1) = b.at(1);
         this->at(2, 2) = b.at(2);
         this->at(2, 3) = b.at(3);
-        
+
         this->at(3, 1) = t.at(1);
         this->at(3, 2) = t.at(2);
         this->at(3, 3) = t.at(3);
@@ -643,7 +652,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     }
 }
 
-#endif
+
 
 
 void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
@@ -666,6 +675,8 @@ void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 }
 
 
+
+
 void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc)
 {
     sr--;
@@ -684,8 +695,6 @@ void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc)
         this->at(sr + j, sc) += src.at(j);
     }
 }
-
-#ifndef _USE_EIGEN
 
 void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
@@ -874,7 +883,7 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
 #endif
 }
 
-#endif
+
 
 bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
@@ -1008,7 +1017,6 @@ bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
     }
 }
 
-#ifndef _USE_EIGEN
 
 void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
                                   Index topRow, Index bottomRow, Index topCol, Index bottomCol)
@@ -1070,9 +1078,7 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, co
         }
     }
 }
-#endif
 
-#ifndef _USE_EIGEN
 void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
@@ -1394,8 +1400,8 @@ void FloatMatrix :: beUnitMatrix()
         this->at(i, i) = 1.0;
     }
 }
-#endif
 
+#endif
 
 void FloatMatrix :: bePinvID()
 // this matrix is the product of the 6x6 deviatoric projection matrix ID
@@ -1579,7 +1585,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 }
 
 
-
+#ifndef _USE_EIGEN
 void FloatMatrix :: symmetrized()
 // Initializes the lower half of the receiver to the upper half.
 {
@@ -1597,7 +1603,7 @@ void FloatMatrix :: symmetrized()
     }
 }
 
-#ifndef _USE_EIGEN
+
 void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
@@ -1919,7 +1925,15 @@ FloatMatrix :: givePackSize(DataStream &buff) const
            buff.givePackSizeOfDouble(rows() * cols());
 }
 
-
+#ifdef _USE_EIGEN__BROKEN
+bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf){
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(*this,nf);
+    if(eig.info()!=Eigen::Success) return false;
+    v=eig.eigenvectors();
+    eval=eig.eigenvalues();
+    return true;
+}
+#else
 bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {
     using std::pow, std::sin, std::cos, std::atan2;
@@ -2090,6 +2104,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
     return 0;
 } /* jaco_ */
+#endif
 
 
 std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )

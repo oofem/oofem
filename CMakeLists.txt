@@ -42,6 +42,7 @@ set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
