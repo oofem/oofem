@@ -17,8 +17,8 @@ tr1ht 2 nodes 3 3 4 5 crossSect 2
 SimpleTransportCS 1 thickness 0.15 mat 1
 SimpleTransportCS 2 thickness 0.15 mat 2
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
-HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. maturityT0 20.
-HydratingConcreteMat 2 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 DoH1 0.20 P1 8.0 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. maturityT0 20.
+HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. relmatage 0. maturityT0 20.
+HydratingConcreteMat 2 d 2458. k 1.7 c 870.0 hydrationmodeltype 2 Qpot 509. masscement 400. b1 3.51861e-4 b2 8.0e-6 eta 7.4 DoH1 0.20 P1 8.0 dohinf 0.85 activationenergy 38300 minModelTimeStepIntegrations 30 castingTime 7200. relmatage 0. maturityT0 20.
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 25.0 set 1
 InitialCondition 1 Conditions 1 u 25.0 dofs 1 10 set 1
 ConstantFunction 1 f(t) 1.0
