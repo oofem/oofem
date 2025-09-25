@@ -183,10 +183,10 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
     return problem;
 }
 
-void printProgress(double percentage, std::ostream& out) {
+void printProgress(double percentage, const std::string &title, std::ostream& out) {
     const int barWidth = 30;
     int filled = static_cast<int>(barWidth * percentage);
-    out << "Progress: ";
+    out << title;
 
     if (&out == &std::cout && isatty(fileno(stdout))) {
         for (int i = 0; i < barWidth; ++i) {

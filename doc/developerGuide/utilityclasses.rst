@@ -52,10 +52,10 @@ but have to store also corresponding solution state counter value valid when the
 Then their can easily check for difference between freezed solution state counter for their value with 
 current solution state requested from solution step and recompute the values if necessary.
 
-Load Time Functions
+Functions
 -------------------
-Abstract base class representing load time function. Classes derived from Load class typically 
-describe load from spatial point of view. The purpose of introducing load time function is to express
-variation of some components in time. Load time function typically belongs to domain and is 
-attribute of one or more loads. Generally load time function is real function of time (:math:`y=f(t)`).
+Abstract base class representing user-defined function. For example, classes derived from BoundaryCondition class typically 
+describe boundary condition from spatial point of view. The purpose of introducing time function is to express
+variation of the entity in time, for example. Functions typically belongs to domain and are 
+attribute of one or more entities (such as loads). Generally function is real function of time (:math:`y=f(t)`).
 

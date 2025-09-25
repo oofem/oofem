@@ -5,7 +5,7 @@ Naming Conventions
 ------------------
 
 The names of classes, attributes, services, variables, and functions
-in a program serve as comments of a sort. So don't choose terse names--instead, look for names that give useful information about the meaning of the variable or function. In a OOFEM
+in a program serve as comments of a sort. So don't choose terse names instead, look for names that give useful information about the meaning of the variable or function. In a OOFEM
 program, names should be English, like other comments. 
 
 Local variable names can be shorter, because they are used only within one context, where (presumably) comments explain
@@ -24,8 +24,8 @@ For example, you should use names like ignoreSpaceChangeFlag;
 When you want to define names with constant integer values, use enum rather than `#define`. GDB knows about
 enumeration constants. 
 
-Use descriptive file names. The class declarations should be placed in *.h files
-and class implementation in corresponding *.C files. For each class, create a separate files.
+Use descriptive file names. The class declarations should be placed in \*.h files
+and class implementation in corresponding \*.C files. For each class, create a separate files.
 
 
 Parameters and Return Values

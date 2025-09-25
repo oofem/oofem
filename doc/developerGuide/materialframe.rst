@@ -93,8 +93,7 @@ by output routines to print results in general form). Methods for converting vec
 full and reduced format are provided. If possible, all computations 
 should be performed in reduced space.
 
-::
-
+.. important::
     The convention used to construct reduced strain/stress vectors is as follows:
     If in a particular mode a particular stress component is zero, the corresponding strain is not computed
     and not stored in reduced vector, and in full vector there is zero value on corresponding position.

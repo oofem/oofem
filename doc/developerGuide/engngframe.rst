@@ -1,6 +1,8 @@
+.. _ProblemFrame:
 
-Problem representation - Engineering model
-==========================================
+Problem representation (Engineering model)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 In this section, we introduce in detail how the problems are represented, their discrete form assembled and finally solved.
 
@@ -331,10 +333,10 @@ linear solver type and the sparse matrix type, which can be selected by the user
 Finally, the reference to suitable instance of `SparseLinearSystemNM` class is stored in the `nMethod` attribute.
 
 The following services are declared/implemented:
-- `solveYourselfAt` for solving the solution step, responsible for forming the stiffness matrix and load vector, and calling the numerical method to solve the problem, 
-- `giveUnknownComponent` providing access to problem unknowns (displacements), 
-- context i/o services for serializing and deserializing the state of the problem (`saveContext` and `restoreContext` services), 
-- solver parameter initialization (`initializeFrom`) and  consistency checking (`checkConsistency`).
+  - `solveYourselfAt` for solving the solution step, responsible for forming the stiffness matrix and load vector, and calling the numerical method to solve the problem, 
+  - `giveUnknownComponent` providing access to problem unknowns (displacements), 
+  - context i/o services for serializing and deserializing the state of the problem (`saveContext` and `restoreContext` services), 
+  - solver parameter initialization (`initializeFrom`) and  consistency checking (`checkConsistency`).
 
 
 .. code-block:: cpp
@@ -504,3 +506,70 @@ The method first assembles the stiffness matrix and load vector, and then calls 
     }
 
 Please refer to full source code of the `LinearStatic` class in the OOFEM source code repository for more details: https://github.com/oofem/oofem/blob/master/src/sm/EngineeringModels/linearstatic.C
+
+Problem representation (symbolic mode)
+--------------------------------------
+
+Starting from the version 3.0, OOFEM also supports symbolic mode allowing to define the problem 
+by defining its weak form in terms of variables, terms, and integrals. The variables, terms and integrals are attributes of 
+`EngngModel` class. In symbolic mode the governing equations are assembled from contributions of individual integrals, which 
+are defined over specific domains (e.g. whole domain, boundary, etc.) and are composed of terms. 
+The terms are defined in terms of variables. These variables can represent various physical quantities, 
+such as displacements, temperatures, pressures, etc. In this mode, the elements do not define any physics, they just define the 
+geometry; special family of elements is introduced for this purpose, allowing to parametrize the element geometry with 
+different interpolations.
+
+..
+   @startuml
+   !theme vibrant
+   together{
+   abstract class Variable
+   abstract class Term
+   class Integral
+   }
+
+   abstract class EngngModel
+   class Domain
+
+
+   EngngModel *-- "(1..*)" Domain
+   EngngModel o-- "*" Variable
+   EngngModel o-- "*" Term
+   EngngModel o-- "*" Integral
+   Term "*" --> "(0..*)" Variable
+   Integral "*" --> "1" Term
+   @enduml
+..
+   ////www.plantuml.com/plantuml/png/ROuz3e9048NxESLAfIHBv0A6GWiBEsC_m6GbsPzaTh0ntbr0o1gqcxploxnNHK6MtbdOo9qSgKTNCte12OQ6X9-0THJ6HbHZCKPrG-wmjhJEhyGEFkVP2nb62ozOMoTllBc4bkpi7eF3pWD08YhNMcNRiYZoNRO8NpYCEC_IaZziMlERfscZC2LQ7uQo_LIMNYvUKihvQKM-xPrz0m00
+
+.. figure:: figs/engngmframe_symbolic.png
+    :alt: Symbolic extension
+    :name: fig-elementmaterialframe-symbolic
+    :width: 40.0%
+
+The assembly of the governing equations in symbolic mode by EngngModel is then performed by looping over all integrals, requesting the integral to assemble its contribution to the global system.
+The integrals in turn loop over their terms, requesting the term to assemble its contribution. The term then evaluates its contribution by using the variables it is defined with.
+
+.. code-block:: cpp
+   :linenos:
+
+    // assemble lhs
+    effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+    effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+    if ( this->keepTangent ) {
+        this->effectiveMatrix->zero();
+        // loop over lhs integrals
+        for (auto i: lhsIntegrals) {
+            Integral* integral = this->integralList[i-1].get();
+            integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+        }
+    }
+
+    // assemble rhs
+    FloatArray rhs(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ));
+    // loop over rhs integrals
+    for (auto i: rhsIntegrals) {
+        Integral* integral = this->integralList[i-1].get();
+        integral->assemble_rhs (rhs, EModelDefaultEquationNumbering(), tStep); 
+    }
+

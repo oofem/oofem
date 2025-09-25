@@ -63,8 +63,6 @@ the corresponding material creates unique copy of its material
 status and associates it with that integration point. Because
 the `IntegrationPoint` is a compulsory parameter of all `Material` class methods, the state variables are always accessible.
 
-:: TODO Add a figure of the element-material frame.
-
 ..
     @startuml
     together {
