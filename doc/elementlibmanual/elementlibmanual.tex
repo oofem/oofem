@@ -1836,6 +1836,9 @@ Stabilization through lumped capacity matrix is suggested in transient transport
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{Area}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/line01.in}{tests/tm/line01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/line02.in}{tests/tm/line02.in}
+}
 \end{elementsummary}
 
 \subsubsection{Line1mt element}
@@ -1880,6 +1883,11 @@ anti-clockwise (see fig. (\ref{Tr1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-1.in}{tests/tm/tmpatch43-1.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-2.in}{tests/tm/tmpatch43-2.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-3.in}{tests/tm/tmpatch43-3.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch45-1.in}{tests/tm/tmpatch45-1.in}
+}
 \end{elementsummary}
 
 \subsubsection{Tr1mt element}
@@ -1890,6 +1898,8 @@ Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
 Isoparametric triangular finite element with linear approximations of 
 temperature and moisture. 
 Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/HeMoKunzel\_1.in}{tests/tm/HeMoKunzel\_1.in}
 
 
 \subsubsection{Quad1ht element}
@@ -1930,11 +1940,18 @@ anti-clockwise (see fig. (\ref{Quad1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch01.in}{tests/tm/tmpatch01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch02.in}{tests/tm/tmpatch02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch03.in}{tests/tm/tmpatch03.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch04.in}{tests/tm/tmpatch04.in}
+}
 \end{elementsummary}
 
 \subsubsection{Quad1mt element}
 Isoparametric four-node quadrilateral finite element.
 Other features are the same as for Quad1ht in Section~\ref{Quad1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/nlisomoisture01.in}{tests/tm/nlisomoisture01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/nlisomoisture02.in}{tests/tm/nlisomoisture02.in}
 
 \subsubsection{Quad1hmt element}
 Represents isoparametric four-node quadrilateral finite element for
@@ -1952,6 +1969,8 @@ property is requested form the cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis), see fig.~\ref{qplanstrssfig}. The element has the same features as in Table~\ref{Quad1htsummary}.
 
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qquad01.in}{tests/tm/qquad01.in}
+
 \subsubsection{QQuad1mt element}
 Element for mass transport problems, see the parent element in sec.~\ref{QQuad1ht}. 
 
@@ -1966,11 +1985,15 @@ Isoparametric four-node quadrilateral finite element for
 axisymmetric heat transfer problems. The element description is
 similar to Quad1 element, see section \ref{Quad1ht}.
 
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/quadaxisym01.in}{tests/tm/quadaxisym01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/quadaxisym02.in}{tests/tm/quadaxisym02.in}.
+
 
 \subsubsection{Traxisym1ht element}
 Linear triangular finite element for axisymmetric heat transfer
 problems. The element description is
 similar to Tr1ht element, see section \ref{Tr1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-1.in}{tests/tm/tmpatch44-1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-2.in}{tests/tm/tmpatch44-2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-3.in}{tests/tm/tmpatch44-3.in}.
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1992,6 +2015,10 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch40.in}{tests/tm/tmpatch40.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch41.in}{tests/tm/tmpatch41.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch42.in}{tests/tm/tmpatch42.in}
+}
 \end{elementsummary}
 
 
@@ -2023,6 +2050,11 @@ surface numbering is shown in fig. (\ref{Brick1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch31.in}{tests/tm/tmpatch31.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch32.in}{tests/tm/tmpatch32.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch34.in}{tests/tm/tmpatch34.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch38.in}{tests/tm/tmpatch38.in}
+}
 \end{elementsummary}
 
 \subsubsection{Brick1hmt - hexahedral 3D element}
@@ -2050,6 +2082,10 @@ integration point used can be overloaded using \param{NIP} parameter.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_01.in}{tests/tm/qbrick\_01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_02.in}{tests/tm/qbrick\_02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_03.in}{tests/tm/qbrick\_03.in}
+}
 \end{elementsummary}
 
 \subsubsection{QBrick1mt - quadratic hexahedral 3D element}
