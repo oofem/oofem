@@ -1,0 +1,4 @@
+treefrog.out
+Additive manufacturing - sample analysis of a 20x20x20mm hollow cube
+# note: for full run, delete "maxcommands 10000" as it limits the max g-code commands processed
+AdditiveManufacturingProblem nsteps 1 timedefinedbyprob 1 prob1 "treefrog.in.tm" prob2 "treefrog.in.sm" gcode "treefrog_variable_mini_pla_1h15m.gcode" stepx 1 stepy 1 stepz 1 minvof 0.1 skipsm 1 maxcommands 10000
