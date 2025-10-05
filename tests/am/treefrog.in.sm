@@ -1,0 +1,9 @@
+treefrog.sm.out
+Additive manufacturing - mechanics
+staticstructural nsteps 1 nmodules 0 smtype 4 lstype 1 lsprecond 1 lstol 1e-9
+domain 3d
+OutputManager
+ndofman 0 nelem 0 ncrosssect 1 nmat 1 nbc 0 nic 0 nltf 1 nset 0
+SimpleCS 1 thick 1.0 material 1
+IsoLe 1 d 1250. E 3.5e9 n 0.35 talpha 9.0e-5
+ConstantFunction 1 f(t) 1.0
