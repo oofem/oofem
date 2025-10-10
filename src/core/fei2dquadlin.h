@@ -62,9 +62,9 @@ public:
     static FloatMatrixF<2,4> evaldNdxi(const FloatArrayF<2> &lcoords);
     std::pair<double, FloatMatrixF<2,4>> evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const;
 
-    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 4; }
@@ -97,7 +97,7 @@ class OOFEM_EXPORT FEI2dQuadLinAxi : public FEI2dQuadLin
 public:
     FEI2dQuadLinAxi(int ind1, int ind2) : FEI2dQuadLin(ind1, ind2) { }
 
-    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

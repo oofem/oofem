@@ -46,7 +46,7 @@ FEI3dLineLin :: giveLength(const FEICellGeometry &cellgeo) const
 }
 
 void
-FEI3dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -56,7 +56,7 @@ FEI3dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 }
 
 double
-FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     ///@todo Not clear what this function should return. Just dNds would make sense if the caller defines a local coordinate system.
     FloatArray vec;
@@ -77,7 +77,7 @@ FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI3dLineLin :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer.resize(2, 3); ///@todo Check this part
     answer.zero();
@@ -109,7 +109,7 @@ FEI3dLineLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 
 
 double
-FEI3dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     return 0.5 * this->giveLength(cellgeo);
 }
@@ -193,7 +193,7 @@ FEI3dLineLin :: computeLocalSurfaceMapping(int isurf) const
 
 
 void
-FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     ///@todo Not sure about this matrix

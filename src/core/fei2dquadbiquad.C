@@ -64,7 +64,7 @@ FEI2dQuadBiQuad :: evalN(const FloatArrayF<2> &lcoords)
 }
 
 void
-FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double u, v;
 

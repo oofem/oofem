@@ -41,14 +41,14 @@
 
 namespace oofem {
 void
-FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer.resize(1);
     answer.at(1) = 1.;
 }
 
 double
-FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer.resize(1, 2);
     answer.at(1, 1) = 0.;

@@ -53,7 +53,7 @@ FEI1dLin :: evalN(double ksi)
 }
 
 void
-FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -70,7 +70,7 @@ FEI1dLin :: evaldNdx(const FEICellGeometry &cellgeo) const
 }
 
 double
-FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double l = cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx);
     answer.resize(2, 1);
@@ -103,7 +103,7 @@ FEI1dLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEI
 }
 
 double
-FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     return 0.5 * ( cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx) );
 }

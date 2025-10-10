@@ -37,6 +37,7 @@
 
 #include "feinterpol1d.h"
 #include "classfactory.h"
+#include <utility> // for std::pair
 
 
 namespace oofem {
@@ -62,11 +63,11 @@ public:
     static FloatArrayF<2> evalN(double ksi);
     std::pair<double, FloatMatrixF<1,2>> evaldNdx(const FEICellGeometry &cellgeo) const;
 
-    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override;
 
     int giveNumberOfNodes(Element_Geometry_Type) const override { return 2; }
 

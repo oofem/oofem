@@ -42,13 +42,13 @@
 namespace oofem {
 
 
-void FEI2dLineConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void FEI2dLineConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer.resize(1);
     answer.at(1) = 1.0;
 }
 
-double FEI2dLineConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer.clear();
     return 0.;
@@ -100,7 +100,7 @@ double FEI2dLineConst :: edgeEvalNormal(FloatArray &normal, int iedge, const Flo
     return normal.normalize_giveNorm() * 0.5;
 }
 
-double FEI2dLineConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
     double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);

@@ -49,7 +49,7 @@ FEI2dTrLin :: evalN(const FloatArrayF<2> &lcoords)
 }
 
 void
-FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     answer = {
         lcoords.at(1),
@@ -80,7 +80,7 @@ FEI2dTrLin :: evaldNdx(const FEICellGeometry &cellgeo) const
 
 
 double
-FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double x1, x2, x3, y1, y2, y3, detJ;
 
@@ -169,7 +169,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
 
 double
-FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
     double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
@@ -316,7 +316,7 @@ FEI2dTrLin :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
 // FEI2dTrLinAxi element
 
 double
-FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);

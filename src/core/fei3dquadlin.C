@@ -42,13 +42,13 @@
 
 namespace oofem {
 void
-FEI3dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
 double
-FEI3dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: evaldNdx - Not supported");
     //return 0.;
@@ -83,14 +83,14 @@ FEI3dQuadLin :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 }
 
 double
-FEI3dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatArray normal;
     return this->surfaceEvalNormal(normal, 1, lcoords, cellgeo);
 }
 
 void
-FEI3dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     OOFEM_ERROR("FEI3dQuadLin :: giveJacobianMatrixAt - Not supported");
 }

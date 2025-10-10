@@ -173,7 +173,7 @@ BSplineInterpolation::postInitialize(ParameterManager&pm, int elnum)
         numberOfControlPoints [ n ] = sum - degree [ n ] - 1;
     }
 }
-void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);
@@ -218,7 +218,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
@@ -479,7 +479,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     IntArray span(nsd);

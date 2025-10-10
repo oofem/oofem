@@ -68,7 +68,7 @@ FEI3dWedgeQuad :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double x, y, z;
     answer.resize(15);
@@ -204,7 +204,7 @@ FEI3dWedgeQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry 
 
 
 double
-FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
@@ -326,7 +326,7 @@ double FEI3dWedgeQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo
 
 
 double
-FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatMatrix jacobianMatrix;
 
@@ -336,7 +336,7 @@ FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FE
 
 
 void
-FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;

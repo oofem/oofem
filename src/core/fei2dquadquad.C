@@ -102,7 +102,7 @@ FEI2dQuadQuad :: evalN(const FloatArrayF<2> &lcoords)
 
 
 void
-FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
@@ -200,7 +200,7 @@ FEI2dQuadQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &
 
 
 double
-FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     auto tmp = evaldNdx(lcoords, cellgeo);
@@ -379,7 +379,7 @@ FEI2dQuadQuad :: giveIntegrationRule(int order, Element_Geometry_Type egt) const
  * FEI2dQuadQuadAxi element
  */
 double
-FEI2dQuadQuadAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI2dQuadQuadAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatArray N;
     this->evalN( N, lcoords, cellgeo);

@@ -54,7 +54,7 @@ FEI3dTetLin :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     answer = evalN(lcoords);
@@ -113,7 +113,7 @@ FEI3dTetLin :: evaldNdx(const FEICellGeometry &cellgeo)
 }
 
 double
-FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     auto tmp = evaldNdx(lcoords, cellgeo);
@@ -243,7 +243,7 @@ FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
 
 double
-FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 

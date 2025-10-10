@@ -41,13 +41,13 @@
 
 namespace oofem {
 void
-FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
 double
-FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
     //return 0.;
@@ -178,7 +178,7 @@ FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 
 
 void
-FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     OOFEM_ERROR("Not supported");
 }

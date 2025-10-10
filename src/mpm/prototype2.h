@@ -46,10 +46,10 @@ namespace oofem {
         void giveCellDofMans(IntArray& nodes, IntArray& internalDofMans, Element* elem) const override {
             return this->getCellInterpolation(elem->giveGeometryType())->giveCellDofMans(nodes,internalDofMans, elem );
         }
-        void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->evalN(answer, lcoords, cellgeo);
         }
-        double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->evaldNdx(answer, lcoords, cellgeo);
         }
         void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
@@ -58,10 +58,10 @@ namespace oofem {
         virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->global2local(answer, gcoords, cellgeo);
         }
-        double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->giveTransformationJacobian(lcoords, cellgeo);
         }
-        void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+        void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo );
         }
         std::unique_ptr<IntegrationRule> giveIntegrationRule(int _order, Element_Geometry_Type egt) const override {

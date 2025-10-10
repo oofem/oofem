@@ -46,7 +46,7 @@ FloatArrayF<2> FEI2dLineLin :: evalN(double xi)
     return {( 1. - xi ) * 0.5, ( 1. + xi ) * 0.5};
 }
 
-void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double xi = lcoords(0);
     answer.resize(2);
@@ -54,7 +54,7 @@ void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const 
     answer.at(2) = ( 1. + xi ) * 0.5;
 }
 
-double FEI2dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     // Not meaningful to return anything.
     answer.clear();
@@ -123,7 +123,7 @@ double FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const Float
     return normal.normalize_giveNorm() * 0.5;
 }
 
-double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
     double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);

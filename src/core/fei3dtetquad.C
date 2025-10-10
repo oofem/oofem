@@ -147,7 +147,7 @@ FEI3dTetQuad :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     answer = evalN(lcoords);
@@ -186,7 +186,7 @@ FEI3dTetQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &c
 }
 
 double
-FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     auto tmp = evaldNdx(lcoords, cellgeo);
@@ -385,7 +385,7 @@ FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 
 
 void
-FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     FloatMatrix dNduvw, coords;
     this->evaldNdxi(dNduvw, lcoords, cellgeo);

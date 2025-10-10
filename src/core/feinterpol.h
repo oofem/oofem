@@ -44,6 +44,8 @@
 #include "materialmode.h"
 #include "node.h"
 #include "element.h"
+#include <memory> // for std::unique_ptr
+#include <cstddef> // for std::size_t
 
 namespace oofem {
 class Element;
@@ -143,6 +145,22 @@ public:
 };
 
 /**
+ *  IP interpolation cache.
+ */
+class OOFEM_EXPORT FEInterpolationCache
+{
+    public:
+        bool initialized = false;
+        FloatMatrix invJac;
+        double detJac=0.0;
+    public:
+    FEInterpolationCache() { }
+    ~FEInterpolationCache() { }
+    void clear() { initialized = false; }
+    bool isInitialized() const { return initialized; }
+};
+
+/**
  * Class representing a general abstraction for finite element interpolation class.
  * The boundary functions denote the (numbered) region that have 1 spatial dimension (i.e. edges) or 2 spatial dimensions.
  */
@@ -186,25 +204,28 @@ public:
      * @param answer Contains resulting array of evaluated interpolation functions.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @param cache Optional cache to speed up repeated evaluations at same location. When provided, it will be used to store and retrieve intermediate or complete results.
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const = 0;
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const = 0;
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @param cache Optional cache to speed up repeated evaluations at same location. When provided, it will be used to store and retrieve intermediate or complete results.
      * @return Determinant of the Jacobian.
      */
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const  = 0;
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const  = 0;
     /**
      * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @param cache Optional cache to speed up repeated evaluations at same location. When provided, it will be used to store and retrieve intermediate or complete results.
      */
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const
     {
         OOFEM_ERROR("not implemented");
     }
@@ -247,16 +268,18 @@ public:
      * Evaluates the determinant of the transformation.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @param cache Optional cache to speed up repeated evaluations at same location. When provided, it will be used to store and retrieve intermediate or complete results.
      * @return Determinant of the transformation.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const;
     /**
      * Gives the jacobian matrix at the local coordinates.
      * @param jacobianMatrix The requested matrix.
      * @param lcoords Local coordinates.
      * @param cellgeo Element geometry.
+     * @param cache Optional cache to speed up repeated evaluations at same location. When provided, it will be used to store and retrieve intermediate or complete results.
      */
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const
     { OOFEM_ERROR("Not overloaded."); }
 
     /**
@@ -533,11 +556,11 @@ public:
     DummyFEInterpolation() : FEInterpolation(0) { }
     integrationDomain giveIntegrationDomain(const Element_Geometry_Type) const override {return integrationDomain::_UnknownIntegrationDomain;}
     const Element_Geometry_Type giveGeometryType() const override {return EGT_unknown;}
-    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
         answer.clear();
     }
 
-    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
         answer.clear();
         return 0.;
     }
@@ -551,7 +574,7 @@ public:
         return 0;
     }
 
-    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr) const override {
         return 0.;
     }
 

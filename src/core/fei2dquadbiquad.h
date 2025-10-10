@@ -63,7 +63,7 @@ public:
     static FloatMatrixF<2,9> evaldNdxi(const FloatArrayF<2> &lcoords);
     std::pair<double, FloatMatrixF<2,9>> _evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const;
 
-    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)  const override;
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache = nullptr)  const override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 9; }
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;

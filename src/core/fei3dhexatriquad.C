@@ -86,7 +86,7 @@ FEI3dHexaTriQuad :: evalN(const FloatArrayF<3> &lcoords)
 }
 
 void
-FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
 #if 0
     answer = evalN(lcoords);
@@ -465,7 +465,7 @@ FEI3dHexaTriQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometr
 }
 
 double
-FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     auto tmp = evaldNdx(lcoords, cellgeo);
     answer = transpose(tmp.second);

@@ -39,7 +39,7 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double xi = lcoords(0);
     answer.resize(3);
@@ -48,7 +48,7 @@ void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const
     answer(2) = 1.0 - xi * xi;
 }
 
-double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     // Not meaningful to return anything.
     answer.clear();
@@ -193,7 +193,7 @@ void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->local2global(answer, lcoords, cellgeo);
 }
 
-double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double xi = lcoords(0);
     double a1 = -0.5 + xi;
@@ -210,7 +210,7 @@ double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, co
     return sqrt(es1 * es1 + es2 * es2);
 }
 
-void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo, FEInterpolationCache *cache) const
 {
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;
