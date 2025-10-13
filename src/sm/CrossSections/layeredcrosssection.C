@@ -1389,7 +1389,7 @@ LayeredCrossSection::setupIntegrationPoints(IntegrationRule &irule, int nPointsX
 {
     switch ( element->giveIntegrationDomain() ) {
     case _3dDegShell:
-        return irule.SetUpPointsOn3dDegShellLayers(nPointsXY, nPointsZ, element->giveMaterialMode(), this->layerThicks);
+        return irule.SetUpPointsOn3dDegShellLayers(nPointsXY, max(nPointsZ, this->numberOfIntegrationPoints), element->giveMaterialMode(), this->layerThicks);
 
     default:
         OOFEM_ERROR( "Unknown mode (%d)", element->giveIntegrationDomain() );
