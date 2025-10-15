@@ -47,6 +47,8 @@
 #include "element.h"
 #include "floatarray.h"
 #include "materialmode.h"
+#include "feinterpol.h" // for FEInterpolationCache
+#include <memory> // for std::unique_ptr
 #include <map>
 
 namespace oofem {
@@ -108,6 +110,8 @@ private:
     double weight;
     /// Material mode of receiver.
     MaterialMode materialMode;
+    /// Optional Interpolation cache
+    std::unique_ptr<FEInterpolationCache> interpolationCache;
 
 protected:
     // layer and fibered material support
@@ -174,6 +178,14 @@ public:
         } else {
             globalCoordinates = std::make_unique<FloatArray>(iCoord);
         }
+    }
+
+    inline FEInterpolationCache* getInterpolationCache()
+    {
+        if ( !interpolationCache ) { // create one if not existing (and if needed)
+            interpolationCache = std::make_unique<FEInterpolationCache>();
+        }
+        return interpolationCache.get();
     }
 
     /// Returns  integration weight of receiver.
