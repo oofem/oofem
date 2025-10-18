@@ -224,7 +224,7 @@ Quad1Mindlin::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     ///@todo Other/higher integration for lumped mass matrices perhaps?
     double mass = 0.;
     for ( GaussPoint *gp: * integrationRulesArray [ 0 ] ) {
-        double dV = this->computeVolumeAround(gp);
+        double dV = this->computeVolumeAround(gp)*this->giveCrossSection()->give(CS_Thickness, gp);
         mass += dV * this->giveStructuralCrossSection()->give('d', gp);
     }
 
