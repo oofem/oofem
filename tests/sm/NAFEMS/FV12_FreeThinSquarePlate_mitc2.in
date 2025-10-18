@@ -257,5 +257,5 @@ Set 5 nodes 22 1 111 2 112 3 113 4 114 5 115 6 116 7 117 8 118 9 119 10 120 11 1
 #EIGVAL tStep 1 EigNum 6 value 349.860
 #EIGVAL tStep 1 EigNum 7 value 713.845
 #EIGVAL tStep 1 EigNum 8 value 713.845
-#EIGVAL tStep 1 EigNum 9 value 2394.08 tolerance 2.0
+#EIGVAL tStep 1 EigNum 9 value 2394.08 tolerance 0.1
 #%END_CHECK%
