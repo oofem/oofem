@@ -732,7 +732,7 @@ FloatMatrixF<N,M> dyad(const FloatArrayF<N> &a, const FloatArrayF<M> &b)
 template<std::size_t N, std::size_t M>
 FloatMatrixF<M,M> rotate(FloatMatrixF<N,N> &a, const FloatMatrixF<N,M> &r)
 {
-    return dot(dotT(r, a), r);
+    return dot(Tdot(r, a), r);
 }
 
 /// Computes @f$ a = r \cdot a \cdot r^{\mathrm{T}} @f$
