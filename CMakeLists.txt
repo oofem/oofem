@@ -986,6 +986,11 @@ if (USE_SM)
     foreach (case ${sm_tests})
         add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND bash ${case} ${oofem_cmd})
     endforeach (case)
+
+    file (GLOB sm_nafems_tests RELATIVE "${oofem_TEST_DIR}/sm/NAFEMS" "${oofem_TEST_DIR}/sm/NAFEMS/*.in")
+    foreach (case ${sm_nafems_tests})
+        add_test (NAME "test_sm_NAFEMS_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm/NAFEMS COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif ()
 
 if (USE_FM)
