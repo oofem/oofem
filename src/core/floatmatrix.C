@@ -178,20 +178,6 @@ void FloatMatrix :: checkBounds(Index i, Index j) const
 }
 
 
-
-#ifndef _USE_EIGEN
-bool FloatMatrix :: isAllFinite() const
-{
-    for(Index r=0; r<rows(); r++) for(Index c=0; c<cols(); c++){
-        if ( !std::isfinite((*this)(r,c)) ) {
-            return false;
-        }
-    }
-
-    return true;
-}
-#endif
-
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     std::size_t ii, jj, size = src.rows();
@@ -348,6 +334,19 @@ double FloatMatrix :: giveTrace() const { return this->trace(); }
 #endif
 
 #ifndef _USE_EIGEN
+
+bool FloatMatrix :: isAllFinite() const
+{
+    for(Index r=0; r<rows(); r++) for(Index c=0; c<cols(); c++){
+        if ( !std::isfinite((*this)(r,c)) ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
@@ -544,65 +543,7 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
         }
     }
 }
-#endif
 
-
-void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
-{
-    this->resize(nsd, n.giveSize() * nsd);
-    for ( int i = 0; i < n.giveSize(); ++i ) {
-        for ( int j = 0; j < nsd; ++j ) {
-            ( * this )( j, i * nsd + j ) = n(i);
-        }
-    }
-}
-
-
-
-
-void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
-{ //normal should be at the first position, easier for interface material models
-    if ( normal.giveSize() == 1 ) {
-        this->resize(1, 1);
-        this->at(1, 1) = normal(0);
-    } else if ( normal.giveSize() == 2 ) {
-        this->resize(2, 2);
-        this->at(1, 1) = normal(0);
-        this->at(1, 2) = normal(1);
-
-        this->at(2, 1) = normal(1);
-        this->at(2, 2) = -normal(0);
-
-    } else if ( normal.giveSize() == 3 ) {
-        // Create a permutated vector of n, *always* length 1 and significantly different from n.
-        FloatArray b, t = {
-            normal(1), -normal(2), normal(0)
-        };                                                    // binormal and tangent
-
-        // Construct orthogonal vector
-        double npn = t.dotProduct(normal);
-        t.add(-npn, normal);
-        t.normalize();
-        b.beVectorProductOf(t, normal);
-
-        this->resize(3, 3);
-        this->at(1, 1) = normal.at(1);
-        this->at(1, 2) = normal.at(2);
-        this->at(1, 3) = normal.at(3);
-
-        this->at(2, 1) = b.at(1);
-        this->at(2, 2) = b.at(2);
-        this->at(2, 3) = b.at(3);
-
-        this->at(3, 1) = t.at(1);
-        this->at(3, 2) = t.at(2);
-        this->at(3, 3) = t.at(3);
-    } else {
-        OOFEM_ERROR("Normal needs 1 to 3 components.");
-    }
-}
-
-#ifndef _USE_EIGEN
 
 void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
 {
@@ -721,89 +662,6 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     dest.resize(nr);
     for(int r=0; r<nr; r++) dest(r)=(*this)(r,c-1);
 }
-
-#endif
-
-void FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
-{
-    sc--;
-
-    int srcCols = src.giveSize();
-
-    int nr = sr;
-    int nc = sc + srcCols;
-
-    if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        this->resizeWithData( max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(), nc) );
-    }
-
-    // add sub-matrix
-    for ( int j = 1; j <= srcCols; j++ ) {
-        this->at(sr, sc + j) = src.at(j);
-    }
-}
-
-
-
-void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV)
-// Adds to the receiver the product  a(transposed).b dV .
-// The receiver size is adjusted, if necessary.
-// This method assumes that both the receiver and the product above are
-// symmetric matrices, and therefore computes only the upper half of the
-// receiver ; the lower half is not modified. Other advantage : it does
-// not compute the transposition of matrix a.
-{
-    if ( !this->isNotEmpty() ) {
-        this->resize(a.cols(),b.cols());
-    }
-
-#ifdef __LAPACK_MODULE
-    const int this_nColumns=cols(), this_nRows=rows();
-    const int a_nColumns=a.cols(), a_nRows=a.rows();
-    const int b_nColumns=b.cols(), b_nRows=b.rows();
-    double beta = 1.;
-    ///@todo We should determine which is the best choice overall. For large systems more block matrix operations is necessary.
-    /// For smaller systems the overhead from function calls might be larger, but the overhead might be tiny, or using symmetry at all might be undesireable.
-    if ( this_nRows < 20 ) {
-        // Split the matrix into 2 columns, s1 + s2 = n ( = nRows = nColumns ).
-        int s1 = this_nRows / 2;
-        int s2 = this_nRows - s1;
-        // First column block, we only take the first s rows by only taking the first s columns in the matrix a.
-        dgemm_("t", "n", & s1, & s1, & a_nRows, & dV, a.givePointer(), & a_nRows, b.givePointer(), & b_nRows, & beta, this->givePointer(), & this_nRows, a_nColumns, b_nColumns, this_nColumns);
-        // Second column block starting a memory position c * nRows
-        dgemm_("t", "n", & this_nRows, & s2, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ s1 * b_nRows ], & b_nRows, & beta, & this->givePointer() [ s1 * this_nRows ], & this_nRows, a_nColumns, b_nColumns, this_nColumns);
-    } else {
-        // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
-        // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
-        int block = ( this_nRows - 1 ) / ( this_nRows / 10 ) + 1;
-        int start = 0;
-        int end = block;
-        while ( start < this_nRows ) {
-            int s = end - start;
-            dgemm_("t", "n", & end, & s, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ start * b_nRows ], & b_nRows, & beta, & this->givePointer() [ start * this_nRows ],
-                   & this_nRows, a_nColumns, b_nColumns, this_nColumns);
-            start = end;
-            end += block;
-            if ( end > this_nRows ) {
-                end = this_nRows;
-            }
-        }
-    }
-#else
-    for (Index i = 1; i <= rows(); i++ ) {
-        for (Index j = i; j <= cols(); j++ ) {
-            double summ = 0.;
-            for (Index k = 1; k <= a.rows(); k++ ) {
-                summ += a.at(k, i) * b.at(k, j);
-            }
-
-            this->at(i, j) += summ * dV;
-        }
-    }
-#endif
-}
-
-#ifndef _USE_EIGEN
 
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
@@ -1162,7 +1020,263 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 #endif
 }
 
+
+FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed)
+//
+// constructor : creates (vector->giveSize(),1) FloatMatrix
+// if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
+//
+{
+    FloatMatrix ret;
+    if ( transposed ) {
+        ret.resize(1,vector.size());
+        for(int c=0; c<ret.cols(); c++) ret(0,c)=vector(c);
+    } else {
+        ret.resize(vector.size(),1);
+        for(int r=0; r<ret.rows(); r++) ret(r,0)=vector(r);
+    }
+    return ret;
+}
+
+
+void FloatMatrix :: zero()
+{
+    _LOOP_MATRIX(r,c) (*this)(r,c)=0.;
+}
+
+
+void FloatMatrix :: beUnitMatrix()
+{
+    #ifndef NDEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols());
+    }
+    #endif
+
+    this->zero();
+    for (Index i = 1; i <= rows(); i++ ) {
+        this->at(i, i) = 1.0;
+    }
+}
+
+
+double FloatMatrix :: giveDeterminant() const
+// Returns the determinant of the receiver.
+{
+    #  ifndef NDEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR("cannot compute the determinant of a non-square %d by %d matrix", rows(), cols());
+    }
+    #  endif
+    const FloatMatrix& m(*this);
+    if ( rows() == 1 ) {
+        return m(0,0);
+    } else if ( rows() == 2 ) {
+        // return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
+        return m(0,0)*m(1,1)-m(1,0)*m(0,1);
+        // return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
+    } else if ( rows() == 3 ) {
+        return
+        m(0,0)*m(1,1)*m(2,2)+m(1,0)*m(2,1)*m(0,2)+m(2,0)*m(0,1)*m(1,2)
+        -m(0,2)*m(1,1)*m(2,0)-m(1,2)*m(2,1)*m(0,0)-m(2,2)*m(0,1)*m(1,0);
+    }
+
+    OOFEM_ERROR("sorry, cannot compute the determinant of a matrix larger than 3x3");
+    // return 0.;
+}
+
+
+void FloatMatrix :: beDiagonal(const FloatArray &diag)
+{
+    int n = diag.giveSize();
+    this->resize(n, n);
+    for ( int i = 0; i < n; ++i ) {
+        (*this)(i, i) = diag[i];
+    }
+}
+
+
+double FloatMatrix :: giveTrace() const
+{
+    #  ifndef NDEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", rows(), cols());
+    }
+    #  endif
+    double answer = 0.;
+    for (Index k = 0; k < rows(); k++ ) {
+        answer += (*this)(k,k);;
+    }
+    return answer;
+}
+
+
+
+void FloatMatrix :: symmetrized()
+// Initializes the lower half of the receiver to the upper half.
+{
+    #  ifndef NDEBUG
+    if ( rows() != cols() ) {
+        OOFEM_ERROR("cannot symmetrize a non-square matrix");
+    }
+
+    #   endif
+
+    for (Index i = 2; i <= rows(); i++ ) {
+        for (Index j = 1; j < i; j++ ) {
+            this->at(i, j) = this->at(j, i);
+        }
+    }
+}
+
+
+void FloatMatrix :: times(double factor)
+// Multiplies every coefficient of the receiver by factor. Answers the
+// modified receiver.
+{
+    _LOOP_MATRIX(r,c) (*this)(r,c)*=factor;
+    // dscal_ seemed to be slower for typical usage of this function.
+}
+
+
+void FloatMatrix :: negated()
+{
+    _LOOP_MATRIX(r,c) (*this)(r,c)=-(*this)(r,c);
+}
+
+
+double FloatMatrix :: computeFrobeniusNorm() const
+{
+    // return sqrt( std :: inner_product(this->values.begin(), this->values.end(), this->values.begin(), 0.) );
+    double ret=0;
+    _LOOP_MATRIX(r,c) ret+=(*this)(r,c)*(*this)(r,c);
+    return std::sqrt(ret);
+}
+
+
+double FloatMatrix :: computeNorm(char p) const
+{
+    #  ifdef __LAPACK_MODULE
+    const int this_nRows=rows(), this_nColumns=cols();
+    FloatArray work( this_nRows );
+    int lda = max(this_nRows, 1);
+    double norm = dlange_(& p, & this_nRows, & this_nColumns, this->givePointer(), & lda, work.givePointer(), 1);
+    return norm;
+
+    #  else
+    if ( p == '1' ) { // Maximum absolute column sum.
+        double col_sum, max_col = 0.0;
+        for (Index j = 1; j <= this->cols(); j++ ) {
+            col_sum  = 0.0;
+            for (Index i = 1; i <= this->rows(); i++ ) {
+                col_sum += fabs( this->at(i, j) );
+            }
+            if ( col_sum > max_col ) {
+                max_col = col_sum;
+            }
+        }
+        return max_col;
+    }
+    ///@todo Use this when obtaining eigen values is implemented.
+    /*else if (p == '2') {
+     *  double lambda_max;
+     *  FloatMatrix AtA;
+     *  FloatArray eigs;
+     *  AtA.beTProductOf(*this,this);
+     *  Ata.eigenValues(eigs, 1);
+     *  return sqrt(eigs(0));
+     * } */
+    else {
+        OOFEM_ERROR("p == %d not implemented.\n", p);
+        // return 0.0;
+    }
+    #  endif
+}
+
 #endif
+
+
+
+void FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
+{
+    sc--;
+
+    int srcCols = src.giveSize();
+
+    int nr = sr;
+    int nc = sc + srcCols;
+
+    if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
+        this->resizeWithData( max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(), nc) );
+    }
+
+    // add sub-matrix
+    for ( int j = 1; j <= srcCols; j++ ) {
+        this->at(sr, sc + j) = src.at(j);
+    }
+}
+
+
+
+void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV)
+// Adds to the receiver the product  a(transposed).b dV .
+// The receiver size is adjusted, if necessary.
+// This method assumes that both the receiver and the product above are
+// symmetric matrices, and therefore computes only the upper half of the
+// receiver ; the lower half is not modified. Other advantage : it does
+// not compute the transposition of matrix a.
+{
+    if ( !this->isNotEmpty() ) {
+        this->resize(a.cols(),b.cols());
+    }
+
+    #ifdef __LAPACK_MODULE
+    const int this_nColumns=cols(), this_nRows=rows();
+    const int a_nColumns=a.cols(), a_nRows=a.rows();
+    const int b_nColumns=b.cols(), b_nRows=b.rows();
+    double beta = 1.;
+    ///@todo We should determine which is the best choice overall. For large systems more block matrix operations is necessary.
+    /// For smaller systems the overhead from function calls might be larger, but the overhead might be tiny, or using symmetry at all might be undesireable.
+    if ( this_nRows < 20 ) {
+        // Split the matrix into 2 columns, s1 + s2 = n ( = nRows = nColumns ).
+        int s1 = this_nRows / 2;
+        int s2 = this_nRows - s1;
+        // First column block, we only take the first s rows by only taking the first s columns in the matrix a.
+        dgemm_("t", "n", & s1, & s1, & a_nRows, & dV, a.givePointer(), & a_nRows, b.givePointer(), & b_nRows, & beta, this->givePointer(), & this_nRows, a_nColumns, b_nColumns, this_nColumns);
+        // Second column block starting a memory position c * nRows
+        dgemm_("t", "n", & this_nRows, & s2, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ s1 * b_nRows ], & b_nRows, & beta, & this->givePointer() [ s1 * this_nRows ], & this_nRows, a_nColumns, b_nColumns, this_nColumns);
+    } else {
+        // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
+        // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
+        int block = ( this_nRows - 1 ) / ( this_nRows / 10 ) + 1;
+        int start = 0;
+        int end = block;
+        while ( start < this_nRows ) {
+            int s = end - start;
+            dgemm_("t", "n", & end, & s, & a_nRows, & dV, a.givePointer(), & a_nRows, & b.givePointer() [ start * b_nRows ], & b_nRows, & beta, & this->givePointer() [ start * this_nRows ],
+                   & this_nRows, a_nColumns, b_nColumns, this_nColumns);
+            start = end;
+            end += block;
+            if ( end > this_nRows ) {
+                end = this_nRows;
+            }
+        }
+    }
+    #else
+    for (Index i = 1; i <= rows(); i++ ) {
+        for (Index j = i; j <= cols(); j++ ) {
+            double summ = 0.;
+            for (Index k = 1; k <= a.rows(); k++ ) {
+                summ += a.at(k, i) * b.at(k, j);
+            }
+
+            this->at(i, j) += summ * dV;
+        }
+    }
+    #endif
+}
+
+
 
 bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
@@ -1361,112 +1475,6 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     return true;
 }
 
-#ifndef _USE_EIGEN
-
-FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed)
-//
-// constructor : creates (vector->giveSize(),1) FloatMatrix
-// if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
-//
-{
-    FloatMatrix ret;
-    if ( transposed ) {
-        ret.resize(1,vector.size());
-        for(int c=0; c<ret.cols(); c++) ret(0,c)=vector(c);
-    } else {
-        ret.resize(vector.size(),1);
-        for(int r=0; r<ret.rows(); r++) ret(r,0)=vector(r);
-    }
-    return ret;
-}
-
-
-void FloatMatrix :: zero()
-{
-    _LOOP_MATRIX(r,c) (*this)(r,c)=0.;
-}
-
-
-void FloatMatrix :: beUnitMatrix()
-{
-#ifndef NDEBUG
-    if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols());
-    }
-#endif
-
-    this->zero();
-    for (Index i = 1; i <= rows(); i++ ) {
-        this->at(i, i) = 1.0;
-    }
-}
-
-#endif
-
-void FloatMatrix :: bePinvID()
-// this matrix is the product of the 6x6 deviatoric projection matrix ID
-// and the inverse scaling matrix Pinv
-{
-    FloatMatrix& m(*this);
-    m.resize(6, 6);
-    m(0,0)=m(1,1)=m(2,2)=2/3.;
-    m(0,1)=m(0,2)=m(1,0)=m(2,0)=m(1,2)=m(2,1)=-1/3.;
-    m(3,3)=m(4,4)=m(5,5)=1/2.;
-}
-
-
-#ifndef _USE_EIGEN
-double FloatMatrix :: giveDeterminant() const
-// Returns the determinant of the receiver.
-{
-#  ifndef NDEBUG
-    if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot compute the determinant of a non-square %d by %d matrix", rows(), cols());
-    }
-#  endif
-    const FloatMatrix& m(*this);
-    if ( rows() == 1 ) {
-        return m(0,0);
-    } else if ( rows() == 2 ) {
-        // return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
-        return m(0,0)*m(1,1)-m(1,0)*m(0,1);
-        // return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
-    } else if ( rows() == 3 ) {
-        return
-             m(0,0)*m(1,1)*m(2,2)+m(1,0)*m(2,1)*m(0,2)+m(2,0)*m(0,1)*m(1,2)
-            -m(0,2)*m(1,1)*m(2,0)-m(1,2)*m(2,1)*m(0,0)-m(2,2)*m(0,1)*m(1,0);
-    }
-
-    OOFEM_ERROR("sorry, cannot compute the determinant of a matrix larger than 3x3");
-    // return 0.;
-}
-
-
-void FloatMatrix :: beDiagonal(const FloatArray &diag)
-{
-    int n = diag.giveSize();
-    this->resize(n, n);
-    for ( int i = 0; i < n; ++i ) {
-        (*this)(i, i) = diag[i];
-    }
-}
-
-
-double FloatMatrix :: giveTrace() const
-{
-#  ifndef NDEBUG
-    if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", rows(), cols());
-    }
-#  endif
-    double answer = 0.;
-    for (Index k = 0; k < rows(); k++ ) {
-        answer += (*this)(k,k);;
-    }
-    return answer;
-}
-
-#endif
 
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
@@ -1567,6 +1575,18 @@ void FloatMatrix :: writeCSV(const std :: string &name) const
 }
 
 
+void FloatMatrix :: bePinvID()
+// this matrix is the product of the 6x6 deviatoric projection matrix ID
+// and the inverse scaling matrix Pinv
+{
+    FloatMatrix& m(*this);
+    m.resize(6, 6);
+    m(0,0)=m(1,1)=m(2,2)=2/3.;
+    m(0,1)=m(0,2)=m(1,0)=m(2,0)=m(1,2)=m(2,1)=-1/3.;
+    m(3,3)=m(4,4)=m(5,5)=1/2.;
+}
+
+
 void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
 // The method performs the operation  a = r^T . a . r . or the inverse
@@ -1585,89 +1605,63 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 }
 
 
-#ifndef _USE_EIGEN
-void FloatMatrix :: symmetrized()
-// Initializes the lower half of the receiver to the upper half.
+
+
+
+void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 {
-#  ifndef NDEBUG
-    if ( rows() != cols() ) {
-        OOFEM_ERROR("cannot symmetrize a non-square matrix");
-    }
-
-#   endif
-
-    for (Index i = 2; i <= rows(); i++ ) {
-        for (Index j = 1; j < i; j++ ) {
-            this->at(i, j) = this->at(j, i);
+    this->resize(nsd, n.giveSize() * nsd);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        for ( int j = 0; j < nsd; ++j ) {
+            ( * this )( j, i * nsd + j ) = n(i);
         }
     }
 }
 
 
-void FloatMatrix :: times(double factor)
-// Multiplies every coefficient of the receiver by factor. Answers the
-// modified receiver.
-{
-    _LOOP_MATRIX(r,c) (*this)(r,c)*=factor;
-    // dscal_ seemed to be slower for typical usage of this function.
-}
 
 
-void FloatMatrix :: negated()
-{
-    _LOOP_MATRIX(r,c) (*this)(r,c)=-(*this)(r,c);
-}
+void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
+{ //normal should be at the first position, easier for interface material models
+    if ( normal.giveSize() == 1 ) {
+        this->resize(1, 1);
+        this->at(1, 1) = normal(0);
+    } else if ( normal.giveSize() == 2 ) {
+        this->resize(2, 2);
+        this->at(1, 1) = normal(0);
+        this->at(1, 2) = normal(1);
 
+        this->at(2, 1) = normal(1);
+        this->at(2, 2) = -normal(0);
 
-double FloatMatrix :: computeFrobeniusNorm() const
-{
-    // return sqrt( std :: inner_product(this->values.begin(), this->values.end(), this->values.begin(), 0.) );
-    double ret=0;
-    _LOOP_MATRIX(r,c) ret+=(*this)(r,c)*(*this)(r,c);
-    return std::sqrt(ret);
-}
+    } else if ( normal.giveSize() == 3 ) {
+        // Create a permutated vector of n, *always* length 1 and significantly different from n.
+        FloatArray b, t = {
+            normal(1), -normal(2), normal(0)
+        };                                                    // binormal and tangent
 
+        // Construct orthogonal vector
+        double npn = t.dotProduct(normal);
+        t.add(-npn, normal);
+        t.normalize();
+        b.beVectorProductOf(t, normal);
 
-double FloatMatrix :: computeNorm(char p) const
-{
-#  ifdef __LAPACK_MODULE
-    const int this_nRows=rows(), this_nColumns=cols();
-    FloatArray work( this_nRows );
-    int lda = max(this_nRows, 1);
-    double norm = dlange_(& p, & this_nRows, & this_nColumns, this->givePointer(), & lda, work.givePointer(), 1);
-    return norm;
+        this->resize(3, 3);
+        this->at(1, 1) = normal.at(1);
+        this->at(1, 2) = normal.at(2);
+        this->at(1, 3) = normal.at(3);
 
-#  else
-    if ( p == '1' ) { // Maximum absolute column sum.
-        double col_sum, max_col = 0.0;
-        for (Index j = 1; j <= this->cols(); j++ ) {
-            col_sum  = 0.0;
-            for (Index i = 1; i <= this->rows(); i++ ) {
-                col_sum += fabs( this->at(i, j) );
-            }
-            if ( col_sum > max_col ) {
-                max_col = col_sum;
-            }
-        }
-        return max_col;
+        this->at(2, 1) = b.at(1);
+        this->at(2, 2) = b.at(2);
+        this->at(2, 3) = b.at(3);
+
+        this->at(3, 1) = t.at(1);
+        this->at(3, 2) = t.at(2);
+        this->at(3, 3) = t.at(3);
+    } else {
+        OOFEM_ERROR("Normal needs 1 to 3 components.");
     }
-    ///@todo Use this when obtaining eigen values is implemented.
-    /*else if (p == '2') {
-     *  double lambda_max;
-     *  FloatMatrix AtA;
-     *  FloatArray eigs;
-     *  AtA.beTProductOf(*this,this);
-     *  Ata.eigenValues(eigs, 1);
-     *  return sqrt(eigs(0));
-     * } */
-    else {
-        OOFEM_ERROR("p == %d not implemented.\n", p);
-        // return 0.0;
-    }
-#  endif
 }
-
-#endif
 
 
 void FloatMatrix :: beMatrixForm(const FloatArray &aArray)

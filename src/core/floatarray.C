@@ -154,6 +154,44 @@ FloatArray FloatArray::fromConcatenated(std::initializer_list<FloatArray> ini){
 }
 
 
+
+#ifdef _USE_EIGEN
+bool FloatArray :: isAllFinite() const { return this->array().isFinite().all(); }
+void FloatArray :: beScaled(double s, const FloatArray &b){ *this=b*s; }
+void FloatArray :: add(const FloatArray &b){ if(b.isEmpty()) return; if(this->isEmpty()){ *this=b; return; } *this+=b; }
+void FloatArray :: add(double offset){ this->array()+=offset; }
+void FloatArray :: add(double factor, const FloatArray &b) { if(this->isEmpty()){ *this=factor*b;  return; }  *this+=factor*b; }
+void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV){ if(this->isEmpty()){ *this=b.transpose()*s*dV;  return; } *this+=b.transpose()*s*dV; }
+void FloatArray :: subtract(const FloatArray &src){ if(src.isEmpty()) return; if(this->isEmpty()){ *this=-src; return; } *this-=src; }
+void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b){ if(a.isEmpty()){ *this=b; return; } if(b.isEmpty()){ *this=a; return; } *this=a.array().max(b.array()).matrix(); }
+void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b){  if(a.isEmpty()){ *this=b; return; } if(b.isEmpty()){ *this=a; return; } *this=a.array().min(b.array()).matrix(); }
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b){ *this=a-b; }
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, Index n){ *this=(a-b).head(n); }
+void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx){ *this=src(indx.minusOne()); }
+void FloatArray :: addSubVector(const FloatArray &src, Index si){ /* grow as needed: tests pass without this */{ int req=(si-1)+src.size(); if(this->size()<req) this->resizeWithValues(req); } this->segment(si-1,src.size())=src; }
+void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2){ Eigen::Ref<const Eigen::Vector3d> v1r(v1), v2r(v2); *this=v1r.cross(v2r); }
+int FloatArray :: giveIndexMinElem(){ Eigen::Index ix; this->minCoeff(&ix); return ix+1; }
+int FloatArray :: giveIndexMaxElem(){ Eigen::Index ix; this->maxCoeff(&ix); return ix+1; }
+/* FIXME: this trips test_sm_NAFEMS_FV12_FreeThinSquarePlate_mitc1.in and test_sm_NAFEMS_FV12_FreeThinSquarePlate_mitc2.in because some FP delta is being accumulated. */
+double FloatArray :: dotProduct(const FloatArray &x) const { return this->dot(x); }
+// double FloatArray :: dotProduct(const FloatArray &x) const {  return std::inner_product(this->begin(), this->end(), x.begin(), 0.); /* */  }
+double FloatArray :: dotProduct(const FloatArray &x, Index size) const { return this->head(size).dot(x.head(size)); }
+double FloatArray :: distance_square(const FloatArray &from) const { return (from-(*this)).squaredNorm(); }
+void FloatArray :: checkSizeTowards(const IntArray &loc){ int sz=loc.maximum(); if(this->size()<sz) this->resize(sz); }
+bool FloatArray :: containsOnlyZeroes() const { return (this->array()==0.).all(); }
+void FloatArray :: zero() { this->array()=0.; }
+void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray){ *this=aMatrix*anArray; }
+void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray){ *this=anArray.transpose()*aMatrix; }
+void FloatArray :: negated() { *this*=-1; }
+void FloatArray :: times(double factor){ this->array()*=factor; }
+double FloatArray :: sum() const { return this->array().sum(); }
+double FloatArray :: product() const { return this->array().prod(); }
+void FloatArray :: copySubVector(const FloatArray &src, int si){ this->resizeWithValues(src.size()+si-1); this->tail(src.size())=src; }
+void FloatArray :: power(const double exponent){ *this=this->array().pow(exponent).matrix(); }
+void FloatArray :: beColumnOf(const FloatMatrix &mat, int col){ *this=mat.col(col-1); }
+void FloatArray :: beRowOf(const FloatMatrix &mat, Index row){ *this=mat.row(row-1).transpose(); }
+#else
+
 bool FloatArray :: isAllFinite() const
 {
     for(Index i=0; i<this->size(); i++){
@@ -508,6 +546,7 @@ double FloatArray :: dotProduct(const FloatArray &x, Index size) const
     return std::inner_product(this->begin(), this->begin()+size, x.begin(), 0.);
 }
 
+#endif
 
 double FloatArray :: distance(const FloatArray &x) const
 {
@@ -555,6 +594,7 @@ double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP
     }
 }
 
+#ifndef _USE_EIGEN
 
 double FloatArray :: distance_square(const FloatArray &from) const
 // returns distance between receiver and from from
@@ -569,6 +609,8 @@ double FloatArray :: distance_square(const FloatArray &from) const
 
     return dist;
 }
+
+#endif
 
 
 void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
@@ -612,16 +654,12 @@ void FloatArray :: assembleSquared(const FloatArray &fe, const IntArray &loc)
     }
 }
 
-
+#ifndef _USE_EIGEN
 void FloatArray :: checkSizeTowards(const IntArray &loc)
 // Expands the receiver if loc points to coefficients beyond the size of
 // the receiver.
 {
-    int high = 0;
-    for ( int p : loc ) {
-        high = max( high, p );
-    }
-
+    int high = loc.maximum();
     if ( high > this->giveSize() ) {   // receiver must be expanded
         this->resize(high);
     }
@@ -719,6 +757,8 @@ void FloatArray :: negated()
     }
 }
 
+#endif /* ifndef _USE_EIGEN */
+
 
 void FloatArray :: printYourself() const
 // Prints the receiver on screen.
@@ -790,6 +830,7 @@ void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
     * this = rta;
 }
 
+#ifndef _USE_EIGEN
 
 void FloatArray :: times(double factor)
 // Multiplies every coefficient of the receiver by factor.
@@ -799,6 +840,8 @@ void FloatArray :: times(double factor)
         x *= factor;
     }
 }
+
+#endif
 
 void FloatArray :: normalize(){
     (void) normalize_giveNorm();
@@ -827,6 +870,7 @@ double FloatArray :: computeSquaredNorm() const
     return std::inner_product(this->begin(), this->end(), this->begin(), 0.);
 }
 
+#ifndef _USE_EIGEN
 
 double FloatArray :: sum() const
 {
@@ -846,7 +890,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
     this->resizeWithValues(si + src.giveSize());
     std :: copy( src.begin(), src.end(), this->begin() + si);
 }
-
+#endif
 
 contextIOResultType FloatArray :: storeYourself(DataStream &stream) const
 // writes receiver's binary image into stream
@@ -1117,6 +1161,7 @@ std :: ostream &operator << ( std :: ostream & out, const FloatArray & x )
 //    this->at(6) = ( aMatrix.at(1,2) + aMatrix.at(2,1) );
 //}
 
+#ifndef _USE_EIGEN
 void FloatArray :: power(const double exponent)
 {
     for ( double &x : *this ) {
@@ -1148,6 +1193,6 @@ void FloatArray :: beRowOf(const FloatMatrix &mat, Index row)
         this->at(i) = mat.at(row,i);
     }
 }
-    
+#endif
     
 } // end namespace oofem
