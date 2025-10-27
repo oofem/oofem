@@ -1331,9 +1331,13 @@ LayeredCrossSection::giveMaterial(IntegrationPoint *ip) const
 {
     ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
     if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
-         ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
-         ) {
-        return domain->giveMaterial(layerMaterials.at(1) );
+         ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ||
+         ip->giveIntegrationRule()->giveIntegrationDomain() == _3dDegShell ) {
+        int ngps = ip->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = ip->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = ( gpnum - 1 ) / gpsperlayer + 1;
+        return this->domain->giveMaterial(this->giveLayerMaterial(layer) );
         //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
     }
 
