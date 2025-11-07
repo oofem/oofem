@@ -27,6 +27,7 @@ Running the code
 -c          Forces the creation of context file for each solution step.
 -t int      Determines the number of threads to use (requires OpenMP support compiled)
 -p          Runs in parallel mode using MPI (requires MPI support compiled)
+-m          Shows solution status monitor output, redirecting standard output to files (oofem.stdout, oofem.stderr by default, use `-qo` and `-qe` options to override)
 =========== ================================================================================================================================================================================================================================================================================================================================================
 
 | To execute OOFEM program in parallel MPI mode (indicated by the -p flag), users must know the procedure for executing/scheduling MPI jobs on the particular system(s). For instance, when using the MPICH implementation of MPI and many others, the following command initiates a program that uses eight processors:
