@@ -86,6 +86,9 @@ public:
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
 
+    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const override;
+    void surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const override;
+
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };

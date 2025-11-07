@@ -290,6 +290,16 @@ public:
     /// Zeroes all coefficients of receiver.
     void zero();
     /**
+     * Appends array to reciever.
+     * @param a Values to be appended.
+     */
+    void append(const FloatArray &a);
+    /**
+     * Appends value to reciever.
+     * @param a Value to be appended.
+     */
+    void append(double a);    
+    /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.
      */
@@ -573,6 +583,21 @@ public:
 
 ///@name IML compatibility: functions
 //@{
+/// Vector multiplication by scalar
+OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
+OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
+OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
+  //
+OOFEM_EXPORT FloatArray operator / ( const FloatArray & x, const double & a );
+OOFEM_EXPORT FloatArray operator / ( const double & a, const FloatArray & x );
+  //
+OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+OOFEM_EXPORT FloatArray &operator /= ( FloatArray & x, const double & a );
+
+  
 OOFEM_EXPORT double norm(const FloatArray &x);
 OOFEM_EXPORT double norm_square(const FloatArray &x);
 OOFEM_EXPORT double dot(const FloatArray &x, const FloatArray &y);

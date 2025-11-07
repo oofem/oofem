@@ -785,6 +785,27 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
 #endif
 }
 
+void FloatMatrix :: plus_Nt_a_otimes_b_B(const FloatMatrix &N, const FloatArray &a, const FloatArray &b, const FloatMatrix &B, double dV)
+{
+    if ( !this->isNotEmpty() ) {
+      this->nRows = N.nColumns;
+      this->nColumns = B.nColumns;
+      this->values.assign(this->nRows * this->nColumns, 0.);
+    }
+    auto a_size = a.giveSize();
+    auto b_size = b.giveSize();
+    for (std::size_t i = 1; i <= nRows; i++ ) {
+      for (std::size_t j = 1; j <= nColumns; j++ ) {
+	for (int k = 1; k <= a_size; k++ ) {
+	  for (int l = 1; l <= b_size; l++ ) {
+	    this->at(i, j) += N.at(k,i) * a.at(k) * b.at(l) * B.at(l,j) * dV;
+	  }
+	}
+      }
+    }
+}
+
+
 
 bool FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
@@ -2001,13 +2022,13 @@ std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 }
 
 FloatMatrix &operator *= ( FloatMatrix & x, const double & a ) {x.times(a); return x;}
+FloatMatrix operator * ( const FloatMatrix &x, const double & a ) {FloatMatrix ans(x); ans.times(a); return ans;}
+FloatMatrix operator * ( const double & a, const FloatMatrix &x ) {FloatMatrix ans(x); ans.times(a); return ans;}
 FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans; ans.beProductOf (a,b); return ans;}
 FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) {FloatArray ans; ans.beProductOf (a,b); return ans;}
 FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.add(b); return ans;}
 FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.subtract(b); return ans;}
 FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) {a.add(b); return a;}
 FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) {a.subtract(b); return a;}
-
-
 
 } // end namespace oofem

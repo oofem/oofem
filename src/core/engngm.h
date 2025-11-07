@@ -807,6 +807,7 @@ public:
      */
     std :: string giveDomainFileName(int domainNum, int domainSerNum) const;
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    virtual void initForNewIteration(Domain *d, TimeStep *tStep, int iterationNumber, const FloatArray &solution);
     /**
      * Updates the solution (guess) according to the new values.
      * Callback for nonlinear solvers (e.g. Newton-Raphson), and are called before new internal forces are computed.
@@ -1010,9 +1011,6 @@ public:
 
     void assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
     
-
-    void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
 #ifdef __MPM_MODULE
     /// mpm experimental

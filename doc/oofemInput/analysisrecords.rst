@@ -136,7 +136,18 @@ the length of time step (equal to 1.0 by default). The times
 corresponding to individual solution times can be specified using
 optional parameter ``prescribedtimes``, allowing to input array of
 discrete solution times, the number of solution steps is then equal to
-the size of this array. .
+the size of this array. 
+
+In addition to standard boundary condition types, the ``StaticStructural``
+analysis also supports **contact analysis** through the penalty-based contact
+formulation. Contact interactions can be defined using
+``structuralpenaltycontactbc`` boundary conditions together with
+``StructuralContactElement_*`` elements and
+``StructuralFEContactSurface`` records. This enables simulation of
+frictionless or frictional(currently only experimental and under development) contact between deformable bodies within a static framework. More details on contact elements, surfaces, and boundary
+conditions can be found in the corresponding sections of this manual.
+
+
 
 .. _LinearStatic:
 

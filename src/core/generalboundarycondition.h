@@ -186,6 +186,9 @@ public:
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
+
+    virtual void updateYourself(TimeStep *tStep){;}
+    
 };
 } // end namespace oofem
 #endif // generalbc_h
