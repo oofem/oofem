@@ -37,14 +37,26 @@
 
 #include <string>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include<pugixml.hpp>
 
 
 namespace oofem {
     XMLDataReader::XMLDataReader(const std::string& xmlFile_): xmlFile(xmlFile_) {
+        // trasverse just to get line breaks
+        std::ifstream i(xmlFile.c_str(),std::ifstream::in|std::ios::binary);
+        std::list<size_t> br;
+        size_t pos=0;
+        while(i.good()){ char c=i.get(); pos++; if(c=='\n') br.push_back(pos); }
+        newlines.reserve(br.size());
+        newlines.assign(br.begin(),br.end());
+
+        // read here
         pugi::xml_parse_result result=doc.load_file(xmlFile.c_str());
         if(!result){
-            OOFEM_ERROR("Error parsing %s (byte %d): %s",xmlFile.c_str(),result.offset,result.description());
+            auto [line,col]=offset2lc(result.offset);
+            OOFEM_ERROR("Error parsing %s:%d:%d: %s",xmlFile.c_str(),line,col,result.description());
         }
         stack.push_back(StackItem{doc,doc});
         enterGroup("oofem");
@@ -56,10 +68,25 @@ namespace oofem {
         XMLInputRecord::node_seen_set(description_node,true);
         outputFileName=output_node.text().as_string();
         description=description_node.text().as_string();
+        topRecord=std::unique_ptr<InputRecord>(new XMLInputRecord(this,root,-1));
     }
 
     bool XMLDataReader :: canRead(const std::string& xml){
         return std::filesystem::path(xml).extension() == ".xml";
+    }
+
+    std::tuple<size_t,size_t> XMLDataReader::offset2lc(size_t offset){
+        if(newlines.empty()) return std::make_tuple(0,0);
+        size_t ix=std::distance(newlines.begin(),std::lower_bound(newlines.begin(),newlines.end(),offset));
+        std::cerr<<"offset="<<offset<<",ix="<<ix<<std::endl;
+        return std::make_tuple(ix,offset-(ix==0?0:newlines[ix-1]));
+    }
+    std::string XMLDataReader::loc(){ return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
+    std::string XMLDataReader::loc(const pugi::xml_node& n){
+        std::ostringstream oss;
+        auto [line,col]=offset2lc(n.offset_debug());
+        oss<<xmlFile<<":"<<line<<":"<<col;
+        return oss.str();
     }
 
     int XMLDataReader::giveGroupCount(const std::string& name) {
@@ -87,29 +114,29 @@ namespace oofem {
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": enter '"<<name<<"'");
         pugi::xml_node grp=stack.back().parent.child(name.c_str());
         XMLInputRecord::node_seen_set(grp,true);
-        if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; abort(); OOFEM_ERROR("Error reading %s: %s has no child %s",xmlFile.c_str(),giveStackPath().c_str(),name.c_str()); }
+        if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; abort(); OOFEM_ERROR("Error reading %s: %s has no child %s",loc(grp).c_str(),giveStackPath().c_str(),name.c_str()); }
         pugi::xml_node ch1=grp.first_child();
-        if(!ch1) OOFEM_ERROR("Error reading %s: %s: %s has no child nodes",xmlFile.c_str(),giveStackPath().c_str(),name.c_str());
+        if(!ch1) OOFEM_ERROR("Error reading %s: %s: %s has no child nodes",loc().c_str(),giveStackPath().c_str(),name.c_str());
         stack.push_back(StackItem{grp,ch1});
     }
     void XMLDataReader::leaveGroup(const std::string& name) {
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": leave ");
-        if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",xmlFile.c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
+        if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
         stack.pop_back();
     }
     void XMLDataReader::enterRecord(InputRecord* rec) {
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath());
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
-        if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",xmlFile.c_str());
+        if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   entering '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
         stack.push_back(StackItem{r->node,r->node.first_child()});
     }
     void XMLDataReader::leaveRecord(InputRecord* rec) {
         _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath());
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
-        if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",xmlFile.c_str());
+        if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   leaving '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
-        if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x,request to leave %s @ %x",xmlFile.c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
+        if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x,request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
         // leave "<<std::endl;
         stack.pop_back();
     }
@@ -142,18 +169,18 @@ namespace oofem {
                 _XML_DEBUG("  --- "<<tip.curr.name());
                 tip.curr=tip.curr.next_sibling();
             }
-            if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no more entries to read (arbitrary tag).",xmlFile.c_str(),giveStackPath().c_str());
+            if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no more entries to read (arbitrary tag).",loc().c_str(),giveStackPath().c_str());
         } else {
             tip.curr=tip.parent.first_child();
             while(tip.curr && (tip.curr.name()!=tag || tip.seen.count(tip.curr)>0)){
                 _XML_DEBUG("  --- "<<tip.curr.name());
                 tip.curr=tip.curr.next_sibling();
             }
-            if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no tag %s left.",xmlFile.c_str(),giveStackPath().c_str(),tag.c_str());
+            if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no tag %s left.",loc().c_str(),giveStackPath().c_str(),tag.c_str());
         }
         _XML_DEBUG("  ==> "<<tip.curr.name());
         tip.seen.insert(tip.curr);
-        tip.lastRecord=std::make_unique<XMLInputRecord>(this,tip.curr);
+        tip.lastRecord=std::make_unique<XMLInputRecord>(this,tip.curr,/*tag.empty()?tip.seen.size():-1*/tip.seen.size());
         _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLDataReader::node_seen_get(tip.curr));
         return *tip.lastRecord;
     }

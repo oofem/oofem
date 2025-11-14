@@ -60,9 +60,12 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     pugi::xml_node node;
     friend XMLDataReader;
     std::set<std::string> attrSeen;
-    std::string _attr_traced_read(const char* name);
+    int ordinal=-1;
 public:
-    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_);
+    std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
+    std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);
+
+    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_=-1);
     /// Constructor. Creates an empty input record.
     // XMLInputRecord();
     /// Constructor. Creates the input record corresponding to given string.
@@ -74,6 +77,10 @@ public:
     std::unique_ptr<InputRecord> clone() const override { return std::make_unique<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;
+
+    std::string loc(){ return loc(node); }
+    std::string loc(const pugi::xml_node& node);
+
 
     void giveRecordKeywordField(std :: string &answer, int &value) override;
     void giveRecordKeywordField(std :: string &answer) override;

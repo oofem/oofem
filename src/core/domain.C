@@ -79,6 +79,8 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
+#include "xmlinputrecord.h"
+
 
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
@@ -518,29 +520,13 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         ir.finish();
     }
 
-    // read domain description
-    //{
-        std::unique_ptr<InputRecord> irdPtr(dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
-        InputRecord& ird(*irdPtr);
-        // IR_GIVE_FIELD(ird, nnode, _IFT_Domain_ndofman);
-        // IR_GIVE_FIELD(ird, nelem, _IFT_Domain_nelem);
-        // IR_GIVE_FIELD(ird, ncrossSections, _IFT_Domain_ncrosssect);
-        // IR_GIVE_FIELD(ird, nmat, _IFT_Domain_nmat);
-        // IR_GIVE_FIELD(ird, nload, _IFT_Domain_nbc);
-        // IR_GIVE_FIELD(ird, nic, _IFT_Domain_nic);
-        // IR_GIVE_FIELD(ird, nloadtimefunc, _IFT_Domain_nfunct);
-        // IR_GIVE_OPTIONAL_FIELD(ird, nset, _IFT_Domain_nset);
-        // IR_GIVE_OPTIONAL_FIELD(ird, nxfemman, _IFT_Domain_nxfemman);
-        // IR_GIVE_OPTIONAL_FIELD(ird, ncontactman, _IFT_Domain_ncontactman);
-        IR_GIVE_OPTIONAL_FIELD(ird, topologytype, _IFT_Domain_topology);
-        this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
-        IR_GIVE_OPTIONAL_FIELD(ird, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
-        this->axisymm = ird.hasField(_IFT_Domain_axisymmetric);
-        // IR_GIVE_OPTIONAL_FIELD(ird, nfracman, _IFT_Domain_nfracman);
-        // IR_GIVE_OPTIONAL_FIELD(ird, nbarrier,  _IFT_Domain_nbarrier);
-    //}
+    // XML format (and perhaps others) does not contain DomainComp nested group, rather nests everything under domain directly
+    std::unique_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain.clone():dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
+    IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), topologytype, _IFT_Domain_topology);
+    this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
+    IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), this->nsd, _IFT_Domain_numberOfSpatialDimensions);
+    this->axisymm = irdPtr->hasField(_IFT_Domain_axisymmetric);
 
-    
 
     // read nodes
     DataReader::GroupRecords dofManagerRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ndofman,"Nodes",DataReader::IR_dofmanRec,/*optional*/false);

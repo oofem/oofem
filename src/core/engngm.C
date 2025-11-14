@@ -238,17 +238,19 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         }
 
         {
-            DataReader::RecordGuard scope(dr,irPtr.get());
+            /* This is somewhat messy since we want the XML input format NOT to nest modules under Analysis, keeping them under the top-level <oofem> tag instead */
+            auto irParent=(dr.hasFlattenedStructure()?dr.giveTopInputRecord()->clone():irPtr->clone());
+            DataReader::RecordGuard scope(dr,irParent.get());
             // instanciate initialization module manager
-            initModuleManager.instanciateYourself(dr, irPtr, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);
+            initModuleManager.instanciateYourself(dr, irParent, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);
             // instanciate export module manager
-            exportModuleManager.instanciateYourself(dr, irPtr, "nmodules", "ExportModules",DataReader::IR_expModuleRec);
+            exportModuleManager.instanciateYourself(dr, irParent, "nmodules", "ExportModules",DataReader::IR_expModuleRec);
             // instanciate monitor manager
-            monitorManager.instanciateYourself(dr, irPtr, "nmonitors", "Monitors",DataReader::IR_expModuleRec);
+            monitorManager.instanciateYourself(dr, irParent, "nmonitors", "Monitors",DataReader::IR_expModuleRec);
             this->giveContext()->giveFieldManager()->instanciateYourself(dr, *irPtr);
             #ifdef __MPM_MODULE
                 // instanciate mpm stuff (variables, terms, and integrals)
-                this->instanciateMPM(dr,*irPtr);
+                this->instanciateMPM(dr,*irParent);
             #endif
         }
         this->instanciateDomains(dr);

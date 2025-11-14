@@ -51,7 +51,9 @@ namespace oofem {
 class OOFEM_EXPORT XMLDataReader : public DataReader
 {
 protected:
+    friend XMLInputRecord;
     std::string xmlFile;
+    std::vector<size_t> newlines;
     pugi::xml_document doc;
     struct StackItem{
         pugi::xml_node parent;
@@ -61,14 +63,20 @@ protected:
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation
+    std::tuple<size_t,size_t> offset2lc(size_t offset);
+    std::string loc();
+    std::string loc(const pugi::xml_node&);
+    std::unique_ptr<InputRecord> topRecord;
 public:
     XMLDataReader(const std::string& xmlFile);
     // XMLDataReader(const XMLDataReader&, pugi::xml_node subRoot);
     virtual ~XMLDataReader(){};
+    bool hasFlattenedStructure() override { return true; }
 
     //! guess whether given file is XML
     static bool canRead(const std::string& xmlFile);
     InputRecord &giveInputRecord(InputRecordType, int recordId) override;
+    InputRecord* giveTopInputRecord() override { return topRecord.get(); }
     bool peekNext(const std :: string &keyword) override { return false; } /* no peeking, it is used for hacks only */
     void finish() override;
     std::string giveReferenceName() const override { return xmlFile; }

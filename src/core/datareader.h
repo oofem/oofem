@@ -91,6 +91,10 @@ public:
      * @param recordId Determines the record  number corresponding to component number.
      */
     virtual InputRecord &giveInputRecord(InputRecordType irType, int recordId) = 0;
+    /**
+     * Returns top input record, for readers which support it; others return empty pointer
+     */
+    virtual InputRecord* giveTopInputRecord(){ return nullptr; }
 
     /**
      * Peak in advance into the record list.
@@ -110,6 +114,8 @@ public:
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
 
+    virtual bool hasFlattenedStructure() { return false; }
+
     virtual void enterGroup(const std::string& name) {};
     virtual void leaveGroup(const std::string& name) {};
     virtual void enterRecord(InputRecord* rec) {};
@@ -120,8 +126,8 @@ public:
         DataReader& reader;
         InputRecord* rec;
     public:
-        RecordGuard(DataReader& reader_, InputRecord* rec_): reader(reader_), rec(rec_) { reader.enterRecord(rec); }
-        ~RecordGuard() { reader.leaveRecord(rec); }
+        RecordGuard(DataReader& reader_, InputRecord* rec_): reader(reader_), rec(rec_) { if(rec!=nullptr) reader.enterRecord(rec); }
+        ~RecordGuard() { if(rec!=nullptr) reader.leaveRecord(rec); }
     };
 
     /// Internal range-like class, return type for giveGroupRecords methods
