@@ -74,7 +74,7 @@ public:
     // XMLInputRecord(const OOFEMXMLInputRecord &);
     /// Assignment operator.
     // XMLInputRecord &operator = ( const OOFEMXMLInputRecord & );
-    std::unique_ptr<InputRecord> clone() const override { return std::make_unique<XMLInputRecord>(*this); }
+    std::shared_ptr<InputRecord> clone() const override { return std::make_shared<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;
 

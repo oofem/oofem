@@ -101,7 +101,7 @@ public:
     virtual ~InputRecord() = default;
 
     /** Creates a newly allocated copy of the receiver */
-    virtual std::unique_ptr<InputRecord> clone() const = 0;
+    virtual std::shared_ptr<InputRecord> clone() const = 0;
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;

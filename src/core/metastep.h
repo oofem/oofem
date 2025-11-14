@@ -71,7 +71,7 @@ protected:
     /// Intrinsic time increment.
     double deltaT;
     /// Engineering model attributes.
-    std::unique_ptr<InputRecord> attributes;
+    std::shared_ptr<InputRecord> attributes;
     /// Start solution step number for which receiver is responsible.
     int sindex;
     /// Receiver number.

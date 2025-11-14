@@ -136,7 +136,7 @@ namespace oofem {
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
         if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   leaving '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
-        if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x,request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
+        if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x, request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
         // leave "<<std::endl;
         stack.pop_back();
     }
