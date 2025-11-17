@@ -39,31 +39,42 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include<pugixml.hpp>
+#include <limits>
+#include <pugixml.hpp>
 
 
 namespace oofem {
-    XMLDataReader::XMLDataReader(const std::string& xmlFile_): xmlFile(xmlFile_) {
+    pugi::xml_document& XMLDataReader::loadXml(const std::string& xml){
         // trasverse just to get line breaks
-        std::ifstream i(xmlFile.c_str(),std::ifstream::in|std::ios::binary);
+        std::ifstream i(xml.c_str(),std::ifstream::in|std::ios::binary);
         std::list<size_t> br;
         size_t pos=0;
         while(i.good()){ char c=i.get(); pos++; if(c=='\n') br.push_back(pos); }
-        newlines.reserve(br.size());
-        newlines.assign(br.begin(),br.end());
-
-        // read here
-        pugi::xml_parse_result result=doc.load_file(xmlFile.c_str());
+        std::vector<size_t> nl;
+        nl.reserve(br.size());
+        if(br.size()==std::numeric_limits<size_t>().max()) abort(); // workaround GCC warning: iteration 2305843009213693952 invokes undefined behavior [-Waggressive-loop-optimizations]
+        nl.assign(br.begin(),br.end());
+        docs[xml]=pugi::xml_document();
+        auto& doc=docs[xml];
+        pugi::xml_parse_result result=doc.load_file(xml.c_str());
         if(!result){
-            auto [line,col]=offset2lc(result.offset);
-            OOFEM_ERROR("Error parsing %s:%d:%d: %s",xmlFile.c_str(),line,col,result.description());
+            auto [line,col]=offset2lc(nl,result.offset);
+            OOFEM_ERROR("Error parsing %s:%d:%d: %s",xml.c_str(),line,col,result.description());
         }
+        newlines[doc]=std::move(nl);
+        xmlFiles[doc]=xml;
+        return doc;
+    }
+
+
+    XMLDataReader::XMLDataReader(const std::string& xmlFile_): topXmlFile(xmlFile_) {
+        pugi::xml_document& doc=loadXml(topXmlFile);
         stack.push_back(StackItem{doc,doc});
         enterGroup("oofem");
         pugi::xml_node root=stack.back().parent;
         pugi::xml_node output_node=root.child("Output"), description_node=root.child("Description");
-        if(!output_node) OOFEM_ERROR("Error reading %s: <Output> node missing in %s.",xmlFile.c_str(),root.name());
-        if(!description_node) OOFEM_ERROR("Error reading %s: <Description> node missing.",xmlFile.c_str());
+        if(!output_node) OOFEM_ERROR("Error reading %s: <Output> node missing in %s.",topXmlFile.c_str(),root.name());
+        if(!description_node) OOFEM_ERROR("Error reading %s: <Description> node missing.",topXmlFile.c_str());
         XMLInputRecord::node_seen_set(output_node,true);
         XMLInputRecord::node_seen_set(description_node,true);
         outputFileName=output_node.text().as_string();
@@ -75,17 +86,17 @@ namespace oofem {
         return std::filesystem::path(xml).extension() == ".xml";
     }
 
-    std::tuple<size_t,size_t> XMLDataReader::offset2lc(size_t offset){
-        if(newlines.empty()) return std::make_tuple(0,0);
-        size_t ix=std::distance(newlines.begin(),std::lower_bound(newlines.begin(),newlines.end(),offset));
-        std::cerr<<"offset="<<offset<<",ix="<<ix<<std::endl;
-        return std::make_tuple(ix,offset-(ix==0?0:newlines[ix-1]));
+    std::tuple<size_t,size_t> XMLDataReader::offset2lc(const std::vector<size_t>& nl, size_t offset){
+        if(nl.empty()) return std::make_tuple(0,0);
+        size_t ix=std::distance(nl.begin(),std::lower_bound(nl.begin(),nl.end(),offset));
+        // std::cerr<<"offset="<<offset<<",ix="<<ix<<std::endl;
+        return std::make_tuple(ix,offset-(ix==0?0:nl[ix-1]));
     }
     std::string XMLDataReader::loc(){ return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
     std::string XMLDataReader::loc(const pugi::xml_node& n){
         std::ostringstream oss;
-        auto [line,col]=offset2lc(n.offset_debug());
-        oss<<xmlFile<<":"<<line<<":"<<col;
+        auto [line,col]=offset2lc(newlines[n.root()],n.offset_debug());
+        oss<<xmlFiles[n.root()]<<":"<<line<<":"<<col;
         return oss.str();
     }
 
@@ -146,15 +157,17 @@ namespace oofem {
         // doc.print(std::cerr,"  ");
         if(stack.size()>1) OOFEM_WARNING("XML stack not popped (%d entries)",stack.size());
         pugi::xml_node n;
-        while((n=doc.find_node([](const pugi::xml_node& n)->bool{ return !XMLInputRecord::node_seen_get(n); }))){
-            // handle Output and Description nodes (PCDATA), provided the parent tag was __seen (PCDATA node cannot be assigned attribute)
-            if(n.type()==pugi::xml_node_type::node_pcdata && XMLInputRecord::node_seen_get(n.parent())){ n.parent().remove_child(n); continue; }
-            std::ostringstream oss;
-            oss<<"Unprocessed XML fragment:\n";
-            n.print(oss,"  ");
-            OOFEM_WARNING(oss.str().c_str());
-            n.parent().remove_child(n);
-        }
+        for(const auto& [xml,doc]: docs){
+            while((n=doc.find_node([](const pugi::xml_node& n)->bool{ return !XMLInputRecord::node_seen_get(n); }))){
+                // handle Output and Description nodes (PCDATA), provided the parent tag was __seen (PCDATA node cannot be assigned attribute)
+                if(n.type()==pugi::xml_node_type::node_pcdata && XMLInputRecord::node_seen_get(n.parent())){ n.parent().remove_child(n); continue; }
+                std::ostringstream oss;
+                oss<<"Unprocessed XML fragment "<<loc(n)<<"\n";
+                n.print(oss,"  ");
+                OOFEM_WARNING(oss.str().c_str());
+                n.parent().remove_child(n);
+            }
+}
     }
 
     InputRecord &

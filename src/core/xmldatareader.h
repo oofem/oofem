@@ -39,6 +39,7 @@
 #include "xmlinputrecord.h"
 #include <pugixml.hpp>
 #include <set>
+#include <map>
 
 
 
@@ -52,9 +53,10 @@ class OOFEM_EXPORT XMLDataReader : public DataReader
 {
 protected:
     friend XMLInputRecord;
-    std::string xmlFile;
-    std::vector<size_t> newlines;
-    pugi::xml_document doc;
+    std::string topXmlFile;
+    std::map<pugi::xml_node,std::string> xmlFiles;
+    std::map<pugi::xml_node,std::vector<size_t>> newlines;
+    std::map<std::string,pugi::xml_document> docs;
     struct StackItem{
         pugi::xml_node parent;
         pugi::xml_node curr;
@@ -63,7 +65,8 @@ protected:
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation
-    std::tuple<size_t,size_t> offset2lc(size_t offset);
+    pugi::xml_document& loadXml(const std::string& xml);
+    std::tuple<size_t,size_t> offset2lc(const std::vector<size_t>& nl, size_t offset);
     std::string loc();
     std::string loc(const pugi::xml_node&);
     std::unique_ptr<InputRecord> topRecord;
@@ -79,7 +82,7 @@ public:
     InputRecord* giveTopInputRecord() override { return topRecord.get(); }
     bool peekNext(const std :: string &keyword) override { return false; } /* no peeking, it is used for hacks only */
     void finish() override;
-    std::string giveReferenceName() const override { return xmlFile; }
+    std::string giveReferenceName() const override { return topXmlFile; }
     void enterGroup(const std::string& name) override;
     void leaveGroup(const std::string& name) override;
     void enterRecord(InputRecord*) override;
