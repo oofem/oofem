@@ -46,7 +46,7 @@
 #include <set>
 
 #define _XML_NI std::cerr<<__PRETTY_FUNCTION__<<": not yet implemented."<<std::endl; abort();
-// #define _XML_DEBUG(m) std::cerr<<m<<std::endl;
+// #define _XML_DEBUG(m) std::cerr<<__PRETTY_FUNCTION__<<": "<<m<<std::endl;
 #define _XML_DEBUG(m)
 
 namespace oofem {
@@ -61,6 +61,7 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     friend XMLDataReader;
     std::set<std::string> attrSeen;
     int ordinal=-1;
+    XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
 public:
     std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
     std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);

@@ -40,13 +40,22 @@
 #include <fstream>
 #include <sstream>
 #include <limits>
+#include <cstring>
+#include <filesystem>
 #include <pugixml.hpp>
 
 
 namespace oofem {
-    pugi::xml_document& XMLDataReader::loadXml(const std::string& xml){
+    pugi::xml_document& XMLDataReader::loadXml(pugi::xml_node parent, const std::string& xml_){
+        std::filesystem::path xml=(xml_);
+        if(xml.is_relative() && parent){
+            std::filesystem::path parentXml(xmlFiles[parent.root()]);
+            xml=parentXml.parent_path()/xml;
+            _XML_DEBUG("Relative path "<<xml_<<" resolved to "<<xml<<" (parent is "<<parentXml<<")");
+        }
         // trasverse just to get line breaks
-        std::ifstream i(xml.c_str(),std::ifstream::in|std::ios::binary);
+        std::ifstream i(xml,std::ifstream::in|std::ios::binary);
+        if(!i.is_open()) OOFEM_ERROR("Error opening %s: %s",std::strerror(errno));
         std::list<size_t> br;
         size_t pos=0;
         while(i.good()){ char c=i.get(); pos++; if(c=='\n') br.push_back(pos); }
@@ -54,8 +63,10 @@ namespace oofem {
         nl.reserve(br.size());
         if(br.size()==std::numeric_limits<size_t>().max()) abort(); // workaround GCC warning: iteration 2305843009213693952 invokes undefined behavior [-Waggressive-loop-optimizations]
         nl.assign(br.begin(),br.end());
-        docs[xml]=pugi::xml_document();
-        auto& doc=docs[xml];
+        _XML_DEBUG(xml<<": "<< nl.size()<<" newlines found, about to parse the XML...");
+        docs[parent]=pugi::xml_document();
+        if(parent) XMLInputRecord::node_seen_set(parent,true);
+        auto& doc=docs[parent];
         pugi::xml_parse_result result=doc.load_file(xml.c_str());
         if(!result){
             auto [line,col]=offset2lc(nl,result.offset);
@@ -63,12 +74,41 @@ namespace oofem {
         }
         newlines[doc]=std::move(nl);
         xmlFiles[doc]=xml;
+        size_t nChildren=std::distance(doc.begin(),doc.end());
+        if(nChildren!=1) OOFEM_ERROR("Error reading %s: must have exactly 1 top-level tag (not %d)",xml.c_str(),nChildren);
+        _XML_DEBUG(xml<<": "<<" parsing done, root is '"<<doc.first_child().name()<<"'");
         return doc;
     }
 
+    pugi::xml_node XMLDataReader::resolveXiInclude(const pugi::xml_node& n){
+        if(n.name()!=XiIncludeTag) OOFEM_ERROR("Error resolving %s: must be xi:include (not %s)",loc().c_str(),n.name());
+        if(auto xi=docs.find(n); xi!=docs.end()) return xi->second.first_child();
+        pugi::xml_attribute href=n.attribute("href");
+        if(!href) OOFEM_ERROR("%s: xi:include must have 'href' attribute.",loc().c_str());
+        _XML_DEBUG(loc()<<":"<<giveStackPath()<<": reading xi:include, href='"<<href.value()<<"'");
+        return loadXml(n,href.value()).first_child();
+    }
+
+    pugi::xml_node XMLDataReader::giveNamedChild(const pugi::xml_node& parent, const std::string& name){
+        _XML_DEBUG("finding child named '"<<name<<"'");
+        for(pugi::xml_node c=parent.first_child(); c; c=c.next_sibling()){
+            if(c.name()==name){
+                _XML_DEBUG("returning direct child "<<loc(c));
+                return c;
+            }
+            if(c.name()==XiIncludeTag){
+                pugi::xml_node xi=resolveXiInclude(c);
+                if(xi.name()==name){
+                    _XML_DEBUG("returning xi:include "<<loc(c));
+                    return xi;
+                }
+            }
+        }
+        return pugi::xml_node();
+    }
 
     XMLDataReader::XMLDataReader(const std::string& xmlFile_): topXmlFile(xmlFile_) {
-        pugi::xml_document& doc=loadXml(topXmlFile);
+        pugi::xml_document& doc=loadXml(pugi::xml_node(),topXmlFile);
         stack.push_back(StackItem{doc,doc});
         enterGroup("oofem");
         pugi::xml_node root=stack.back().parent;
@@ -79,7 +119,7 @@ namespace oofem {
         XMLInputRecord::node_seen_set(description_node,true);
         outputFileName=output_node.text().as_string();
         description=description_node.text().as_string();
-        topRecord=std::unique_ptr<InputRecord>(new XMLInputRecord(this,root,-1));
+        topRecord=std::shared_ptr<InputRecord>(new XMLInputRecord(this,root,-1));
     }
 
     bool XMLDataReader :: canRead(const std::string& xml){
@@ -89,7 +129,7 @@ namespace oofem {
     std::tuple<size_t,size_t> XMLDataReader::offset2lc(const std::vector<size_t>& nl, size_t offset){
         if(nl.empty()) return std::make_tuple(0,0);
         size_t ix=std::distance(nl.begin(),std::lower_bound(nl.begin(),nl.end(),offset));
-        // std::cerr<<"offset="<<offset<<",ix="<<ix<<std::endl;
+        // _XML_DEBUG("offset="<<offset<<",ix="<<ix); // comment out so that it does not damage most other _XML_DEBUG messages
         return std::make_tuple(ix,offset-(ix==0?0:nl[ix-1]));
     }
     std::string XMLDataReader::loc(){ return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
@@ -105,14 +145,14 @@ namespace oofem {
         enterGroup(name);
         int ret=this->giveCurrentGroupCount();
         leaveGroup(name);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<giveStackPath()<<" // "<<name<<": size is "<<ret);
+        _XML_DEBUG(giveStackPath()<<" // "<<name<<": size is "<<ret);
         return ret;
     }
 
     int XMLDataReader::giveCurrentGroupCount(){
         int ret=0;
         for([[maybe_unused]] pugi::xml_node n: stack.back().parent.children()) ret++;
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<giveStackPath()<<": size is "<<ret);
+        _XML_DEBUG(giveStackPath()<<": size is "<<ret);
         return ret;
     }
 
@@ -122,8 +162,8 @@ namespace oofem {
         return oss.str();
     }
     void XMLDataReader::enterGroup(const std::string& name) {
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": enter '"<<name<<"'");
-        pugi::xml_node grp=stack.back().parent.child(name.c_str());
+        _XML_DEBUG("::"<<giveStackPath()<<": enter '"<<name<<"'");
+        pugi::xml_node grp=giveNamedChild(stack.back().parent,name);
         XMLInputRecord::node_seen_set(grp,true);
         if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; abort(); OOFEM_ERROR("Error reading %s: %s has no child %s",loc(grp).c_str(),giveStackPath().c_str(),name.c_str()); }
         pugi::xml_node ch1=grp.first_child();
@@ -131,19 +171,19 @@ namespace oofem {
         stack.push_back(StackItem{grp,ch1});
     }
     void XMLDataReader::leaveGroup(const std::string& name) {
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": leave ");
+        _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": leave ");
         if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
         stack.pop_back();
     }
     void XMLDataReader::enterRecord(InputRecord* rec) {
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath());
+        _XML_DEBUG(loc()<<"::"<<giveStackPath());
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
         if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   entering '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
         stack.push_back(StackItem{r->node,r->node.first_child()});
     }
     void XMLDataReader::leaveRecord(InputRecord* rec) {
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath());
+        _XML_DEBUG(loc()<<"::"<<giveStackPath());
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
         if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   leaving '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
@@ -174,10 +214,9 @@ namespace oofem {
     XMLDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     {
         std::string tag=DataReader::InputRecordTags[typeId];
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<xmlFile<<"::"<<giveStackPath()<<": tag '"<<tag<<"'");
+        _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": tag '"<<tag<<"'");
         StackItem& tip(stack.back());
         if(tag.empty()){
-            // tip.curr=tip.curr.next_sibling();
             while(tip.curr && tip.seen.count(tip.curr)>0){
                 _XML_DEBUG("  --- "<<tip.curr.name());
                 tip.curr=tip.curr.next_sibling();
@@ -185,16 +224,21 @@ namespace oofem {
             if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no more entries to read (arbitrary tag).",loc().c_str(),giveStackPath().c_str());
         } else {
             tip.curr=tip.parent.first_child();
-            while(tip.curr && (tip.curr.name()!=tag || tip.seen.count(tip.curr)>0)){
-                _XML_DEBUG("  --- "<<tip.curr.name());
+            while(true){
+                if(!tip.curr) break;
+                if(tip.seen.count(tip.curr)==0){
+                    if(tip.curr.name()==XiIncludeTag && resolveXiInclude(tip.curr).name()==tag) break;
+                    else if(tip.curr.name()==tag) break;
+                }
                 tip.curr=tip.curr.next_sibling();
             }
             if(!tip.curr) OOFEM_ERROR("Error reading %s: %s: no tag %s left.",loc().c_str(),giveStackPath().c_str(),tag.c_str());
         }
         _XML_DEBUG("  ==> "<<tip.curr.name());
         tip.seen.insert(tip.curr);
-        tip.lastRecord=std::make_unique<XMLInputRecord>(this,tip.curr,/*tag.empty()?tip.seen.size():-1*/tip.seen.size());
-        _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLDataReader::node_seen_get(tip.curr));
+        pugi::xml_node n=((tip.curr.name()==XiIncludeTag) ? resolveXiInclude(tip.curr) : tip.curr);
+        tip.lastRecord=std::make_shared<XMLInputRecord>(this,n,/* automatic ordinal */tip.seen.size());
+        _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLInputRecord::node_seen_get(tip.curr));
         return *tip.lastRecord;
     }
 } // end namespace oofem

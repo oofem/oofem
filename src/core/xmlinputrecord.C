@@ -62,7 +62,7 @@ namespace oofem {
     }
 
     std::string XMLInputRecord::loc(const pugi::xml_node& node){
-        return ((XMLDataReader*)this->giveReader())->loc(node);
+        return _reader()->loc(node);
     }
 
     template<typename T>
@@ -103,36 +103,37 @@ namespace oofem {
 
     XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_): InputRecord((DataReader*)reader_), node(node_), ordinal(ordinal_) {
         node_seen_set(node,true);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<loc()<<": node.name()="<<node.name());
+        _XML_DEBUG(loc()<<": node.name()="<<node.name());
     }
 
     int XMLInputRecord::giveGroupCount(InputFieldType id, const std::string& name, bool optional){
-        pugi::xml_node ch=node.child(name.c_str());
+        _XML_DEBUG("id="<<id<<", name="<<name<<", optional="<<optional);
+        _XML_DEBUG(loc(node)<<", node.name()="<<node.name());
+        pugi::xml_node ch=_reader()->giveNamedChild(node,name);
         if(!ch){
-            _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<" has no children (optional="<<optional<<".");
             if(optional) return 0; // return DataReader::NoSuchGroup;
             OOFEM_ERROR("%s: %s has no child node %s.",loc().c_str(),node.name(),name.c_str());
         }
         int ret=0;
         node_seen_set(ch,true);
         for([[maybe_unused]] pugi::xml_node n: ch.children()) ret++;
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<" has "<<ret<<" children.");
+        _XML_DEBUG(node.name()<<" has "<<ret<<" children.");
         return ret;
     }
     bool XMLInputRecord::hasChild(InputFieldType id, const std::string& name, bool optional){
-        bool has=!!node.child(name.c_str());
+        bool has=!!_reader()->giveNamedChild(node,name);
         if(!has && !optional) OOFEM_ERROR("...");
         return has;
     }
 
     void
     XMLInputRecord :: giveRecordKeywordField(std :: string &answer){
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
+        _XML_DEBUG("node.name()="<<node.name());
         if(node.attribute("type")) answer=_attr_traced_read("type");
         else answer=node.name();
     }
     void XMLInputRecord::giveRecordKeywordField(std::string& answer, int& value){
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
+        _XML_DEBUG("node.name()="<<node.name());
         answer=node.name();
         pugi::xml_attribute id=node.attribute("id");
         if(!id){
@@ -158,7 +159,6 @@ namespace oofem {
         if(!att) OOFEM_ERROR("%s: no such attribute: %s",loc().c_str(),n2.c_str());
         std::string ret=att.as_string();
         attrSeen.insert(n2);
-        // node.remove_attribute(att); std::cerr<<" -- <"<<node.name()<<" "<<name<<">: destroyed"<<std::endl;
         return std::make_tuple(ret,node);
     }
 
@@ -182,25 +182,21 @@ namespace oofem {
     void XMLInputRecord::giveField(std::string& answer, InputFieldType id){
         pugi::xml_node node;
         std::tie(answer,node)=_attr_traced_read_with_node(id);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<loc(*node)<<": "<node.name()<<"::"<<id<<"="<<answer);
+        _XML_DEBUG(loc(node)<<": "<<node.name()<<"::"<<id<<"="<<answer);
     }
 
 
     void XMLInputRecord::giveField(FloatArray &answer, InputFieldType id){
         Tokens tt(id,this);
-        size_t len=tt.as<int>(0);
-        tt.assertSize(len+1);
-        answer.resize(len);
-        for(size_t i=0; i<len; i++) answer[i]=tt.as<double>(i+1);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
+        answer.resize(tt.size());
+        for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<double>(i);
+        _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
     }
     void XMLInputRecord::giveField(IntArray &answer, InputFieldType id){
         Tokens tt(id,this);
-        size_t len=tt.as<int>(0);
-        tt.assertSize(len+1);
-        answer.resize(len);
-        for(size_t i=0; i<len; i++) answer[i]=tt.as<int>(i+1);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
+        answer.resize(tt.size());
+        for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<int>(i);
+        _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
     }
     void XMLInputRecord::giveField(double& answer, InputFieldType id){
         std::string s; pugi::xml_node n;
