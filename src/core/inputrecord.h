@@ -91,7 +91,7 @@ typedef const char *InputFieldType;
  * resolve all dependencies. This allows to create a copy of input record instance for later use
  * without the need to re-open input files (used for metasteps).
  */
-class OOFEM_EXPORT InputRecord
+class OOFEM_EXPORT InputRecord: public std::enable_shared_from_this<InputRecord>
 {
     DataReader* reader = nullptr;
 public:
@@ -102,6 +102,7 @@ public:
 
     /** Creates a newly allocated copy of the receiver */
     virtual std::shared_ptr<InputRecord> clone() const = 0;
+    std::shared_ptr<InputRecord> ptr() { return shared_from_this(); }
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
