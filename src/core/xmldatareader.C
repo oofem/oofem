@@ -130,7 +130,7 @@ namespace oofem {
         if(nl.empty()) return std::make_tuple(0,0);
         size_t ix=std::distance(nl.begin(),std::lower_bound(nl.begin(),nl.end(),offset));
         // _XML_DEBUG("offset="<<offset<<",ix="<<ix); // comment out so that it does not damage most other _XML_DEBUG messages
-        return std::make_tuple(ix,offset-(ix==0?0:nl[ix-1]));
+        return std::make_tuple(ix+1,offset-(ix==0?0:nl[ix-1]));
     }
     std::string XMLDataReader::loc(){ return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
     std::string XMLDataReader::loc(const pugi::xml_node& n){
