@@ -1029,13 +1029,14 @@ public:
         integralList[size].reset(obj);
     }
     const Variable* giveVariableByName (std::string name) {
-        // @BP: add better error handling than provided by at()
-        return variableMap.at(name).get();
+        if(variableMap.find(name)==variableMap.end()) OOFEM_ERROR("Unknown MPM variable '%s'",name.c_str());
+        return variableMap[name].get();
         
     }
     const Term* giveTerm (int indx) {
         // @BP: add better error handling than provided by at()
-        return termList.at(indx-1).get();
+        if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,termList.size());
+        return termList[indx-1].get();
     }   
     /// instanciates mpm stuff (variables, terms, and integrals)
     /// returns nonzero if succesfull

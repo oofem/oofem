@@ -411,6 +411,28 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord &ir)
 #ifdef __MPM_MODULE
 int 
 EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
+#if 1
+    std::shared_ptr<InputRecord> irPtr(ir.ptr());
+    std::string name;
+    int num=-1;
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nvariables","MPMVariables",DataReader::IR_mpmVarRec,/*optional*/true)){
+        IR_GIVE_FIELD(mir, name, "name");
+        std::unique_ptr< Variable > var = std :: make_unique< Variable >();
+        var->initializeFrom(mir);
+        variableMap[name] = std::move(var);
+    }
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nterms","MPMTerms",DataReader::IR_mpmTermRec,/*optional*/true)){
+        IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);
+        std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());
+        term->initializeFrom(mir, this);
+        termList.push_back(std::move(term));
+    }
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nintegrals","MPMIntegrals",DataReader::IR_mpmIntegralRec,/*optional*/true)){
+        std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, &dummySet, nullptr);
+        integral->initializeFrom(mir, this);
+        this->addIntegral(std::move(integral));
+    }
+#else
     int nvars=0, nterms=0, nintegrals=0;
     // read number of variables, terms, and integrals
     IR_GIVE_OPTIONAL_FIELD(ir, nvars, "nvariables");
@@ -441,6 +463,7 @@ EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
         integral->initializeFrom(mir, this);
         this->addIntegral(std::move(integral));
     }
+#endif
     return 1;
 }   
 

@@ -78,7 +78,7 @@ public:
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
         "ContactManager","ContactDefinition","Field",
-        "MPMVariable","MPMTerm","MPMIntegral"
+        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral"
     };
 
     DataReader() { }
