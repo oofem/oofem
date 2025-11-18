@@ -75,19 +75,33 @@ namespace oofem {
         OOFEM_ERROR("%s: error parsing %s (from_chars error)",where().c_str(),s.c_str(),typeid(T).name());
     }
 
+    template<>
+    Range string_to(const std::string& s, std::function<std::string()> where){
+        if(std::regex_match(s,std::regex("[0-9]+"))){
+            return Range(std::atoi(s.c_str()));
+        }
+        std::smatch match;
+        if(std::regex_match(s,match,std::regex("\\s*([0-9]+)\\s*(-|[.]{2,3})\\s*([0-9]+)"))){
+            assert(match.size()==4);
+            return Range(std::atoi(match[1].str().c_str()),std::atoi(match[3].str().c_str()));
+        }
+        OOFEM_ERROR("%s: error parsing %s as range (single integer or range between two integers separated with -, .., ...)",where().c_str(),s.c_str());
+    };
+
+
 
     struct Tokens{
         std::string attr;
         std::string str;
         std::vector<std::string> toks;
         std::function<std::string()> loc;
-        Tokens(const std::string& attr_, XMLInputRecord* rec): attr(attr_) {
+        Tokens(const std::string& attr_, XMLInputRecord* rec, const char* sep_regex="\\s+"): attr(attr_) {
             pugi::xml_node node;
             std::tie(str,node)=rec->_attr_traced_read_with_node(attr.c_str());
             //std::cerr<<"attr_="<<attr_<<", attr="<<attr<<", offset="<<node.offset_debug()<<std::endl;
             loc=[rec,node](){ return rec->loc(node); };
-            const std::regex ws_re("\\s+");
-            std::copy(std::sregex_token_iterator(str.begin(), str.end(), ws_re, -1),
+            const std::regex sep_re(sep_regex);
+            std::copy(std::sregex_token_iterator(str.begin(), str.end(), sep_re, -1),
                       std::sregex_token_iterator(),
                       std::back_inserter(toks)
             );
@@ -184,8 +198,6 @@ namespace oofem {
         std::tie(answer,node)=_attr_traced_read_with_node(id);
         _XML_DEBUG(loc(node)<<": "<<node.name()<<"::"<<id<<"="<<answer);
     }
-
-
     void XMLInputRecord::giveField(FloatArray &answer, InputFieldType id){
         Tokens tt(id,this);
         answer.resize(tt.size());
@@ -207,6 +219,17 @@ namespace oofem {
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
         answer=string_to<int>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
+    }
+    void XMLInputRecord::giveField(bool& answer, InputFieldType id){
+        if(!hasField(id)){ answer=false; return; }
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        if(s=="no" || s=="0" || s=="n" || s=="N" || s=="No" || s=="NO") OOFEM_WARNING("%s: %s='%s' is interpreted as TRUE (omit the attribute for false)",loc(n).c_str(),s.c_str());
+        answer=true;
+    }
+    void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
+        Tokens tt(id,this,"\\s*,\\s*");
+        for(size_t i=0; i<tt.size(); i++) answer.push_back(tt.as<Range>(i));
     }
 
 
