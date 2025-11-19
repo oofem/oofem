@@ -174,7 +174,7 @@ option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
-OPTION (USE_XML "Reader for XML input format (requires pugixml)")
+OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
