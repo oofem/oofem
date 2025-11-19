@@ -46,8 +46,6 @@
 #include <set>
 
 #define _XML_NI std::cerr<<__PRETTY_FUNCTION__<<": not yet implemented."<<std::endl; abort();
-// #define _XML_DEBUG(m) std::cerr<<__PRETTY_FUNCTION__<<": "<<m<<std::endl;
-#define _XML_DEBUG(m)
 
 namespace oofem {
 class XMLDataReader;
@@ -67,14 +65,6 @@ public:
     std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);
 
     XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_=-1);
-    /// Constructor. Creates an empty input record.
-    // XMLInputRecord();
-    /// Constructor. Creates the input record corresponding to given string.
-    // XMLInputRecord(int linenumber, std :: string source);
-    /// Copy constructor.
-    // XMLInputRecord(const OOFEMXMLInputRecord &);
-    /// Assignment operator.
-    // XMLInputRecord &operator = ( const OOFEMXMLInputRecord & );
     std::shared_ptr<InputRecord> clone() const override { return std::make_shared<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;

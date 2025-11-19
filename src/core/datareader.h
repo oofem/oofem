@@ -126,8 +126,8 @@ public:
         DataReader& reader;
         InputRecord* rec;
     public:
-        RecordGuard(DataReader& reader_, InputRecord* rec_): reader(reader_), rec(rec_) { if(rec!=nullptr) reader.enterRecord(rec); }
-        ~RecordGuard() { if(rec!=nullptr) reader.leaveRecord(rec); }
+        RecordGuard(DataReader& reader_, InputRecord* rec_): reader(reader_), rec(rec_) { reader.enterRecord(rec); }
+        ~RecordGuard() { reader.leaveRecord(rec); }
     };
 
     /// Internal range-like class, return type for giveGroupRecords methods

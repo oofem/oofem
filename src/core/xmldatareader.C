@@ -44,6 +44,9 @@
 #include <filesystem>
 #include <pugixml.hpp>
 
+// #define _XML_DEBUG(m) std::cerr<<std::string(__FUNCTION__).substr(0,20)<<": "<<m<<std::endl;
+#define _XML_DEBUG(m)
+
 
 namespace oofem {
     pugi::xml_document& XMLDataReader::loadXml(pugi::xml_node parent, const std::string& xml_){
@@ -171,7 +174,7 @@ namespace oofem {
         stack.push_back(StackItem{grp,ch1});
     }
     void XMLDataReader::leaveGroup(const std::string& name) {
-        _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": leave ");
+        _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": leave "<<name);
         if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
         stack.pop_back();
     }

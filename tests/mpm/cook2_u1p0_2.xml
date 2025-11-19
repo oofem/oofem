@@ -1,31 +1,32 @@
 <oofem>
     <Output>cook2_u1p0_2.xml.out</Output>
     <Description>Demo of symbolic mpm problem; Cook membrane benchmark</Description>
-    <Analysis type="mpmsymbolicstationaryproblem" lhsterms="1 2 3 4" rhsterms="5" nsteps="1" maxiter="10" profileopt="1"  />
-    <MPMVariables>
-        <!-- displacement -->
-        <MPMVariable name="u" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
-        <!-- test function -->
-        <MPMVariable name="w" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
-        <!-- pressure -->
-        <MPMVariable name="p" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
-        <!-- test function -->
-        <MPMVariable name="dp" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
-    </MPMVariables>
-    <MPMTerms>
-        <BTSigmaTerm variable="u" testvariable="w" mmode="7" lhsmatmode="29" rhsmatmode="30" />
-        <BTamNTerm variable="p" testvariable="w" mmode="7" atype="28" uvmt="1" />
-        <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="7" atype="28" uvmt="1" />
-        <NTcN variable="p" testvariable="dp" mmode="7" ctype="27" uvmt="1" />
-        <NTfTerm variable="u" testvariable="w" mmode="6" flux="0. 6.25" />
-    </MPMTerms>
-    <MPMIntegrals>
-        <MPMIntegral domain="1" set="1" term="1" />
-        <MPMIntegral domain="1" set="1" term="2" factor="-1" />
-        <MPMIntegral domain="1" set="1" term="3" factor="-1" />
-        <MPMIntegral domain="1" set="1" term="4" factor="-1" />
-        <MPMIntegral domain="1" set="2" term="5" />
-    </MPMIntegrals>
+    <Analysis type="mpmsymbolicstationaryproblem" lhsterms="1 2 3 4" rhsterms="5" nsteps="1" maxiter="10" profileopt="1">
+        <MPMVariables>
+            <!-- displacement -->
+            <MPMVariable name="u" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
+            <!-- test function -->
+            <MPMVariable name="w" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
+            <!-- pressure -->
+            <MPMVariable name="p" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
+            <!-- test function -->
+            <MPMVariable name="dp" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
+        </MPMVariables>
+        <MPMTerms>
+            <BTSigmaTerm variable="u" testvariable="w" mmode="7" lhsmatmode="29" rhsmatmode="30" />
+            <BTamNTerm variable="p" testvariable="w" mmode="7" atype="28" uvmt="1" />
+            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="7" atype="28" uvmt="1" />
+            <NTcN variable="p" testvariable="dp" mmode="7" ctype="27" uvmt="1" />
+            <NTfTerm variable="u" testvariable="w" mmode="6" flux="0. 6.25" />
+        </MPMTerms>
+        <MPMIntegrals>
+            <MPMIntegral domain="1" set="1" term="1" />
+            <MPMIntegral domain="1" set="1" term="2" factor="-1" />
+            <MPMIntegral domain="1" set="1" term="3" factor="-1" />
+            <MPMIntegral domain="1" set="1" term="4" factor="-1" />
+            <MPMIntegral domain="1" set="2" term="5" />
+        </MPMIntegrals>
+    </Analysis>
     <Domains>
         <Domain domain="heattransfer">
             <OutputManager tstep_all="1" dofman_all="1" element_all="1" />

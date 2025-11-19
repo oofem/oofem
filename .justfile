@@ -92,3 +92,12 @@ xml:
 	# gdb -ex=run -args
 	build-static/oofem -f tests/sm/spring01.in
 	build-static/oofem -f tests/sm/spring01.xml
+mpm:
+	ninja -C build-eigen
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.in
+	echo '------------------------------------- XML -------------------------------'
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
+	diff -I '^User time consumed by solution step .*' ./cook2_u1p0_2.out ./cook2_u1p0_2.xml.out && echo "NO DIFFERENCE :)"
+mpm-gdb:
+	ninja -C build-eigen
+	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
