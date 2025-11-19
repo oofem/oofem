@@ -412,7 +412,6 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord &ir)
 #ifdef __MPM_MODULE
 int 
 EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
-#if 1
     std::shared_ptr<InputRecord> irPtr(ir.ptr());
     std::string name;
     int num=-1;
@@ -423,54 +422,22 @@ EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
         var->initializeFrom(mir);
         variableMap[name] = std::move(var);
     }
-    if(variableMap.empty()) OOFEM_ERROR("No MPM Variables defined.");
+    //if(variableMap.empty()) OOFEM_ERROR("No MPM Variables defined.");
     for(auto& mir: dr.giveGroupRecords(irPtr,"nterms","MPMTerms",DataReader::IR_mpmTermRec,/*optional*/true)){
         IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);
         std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());
         term->initializeFrom(mir, this);
         termList.push_back(std::move(term));
     }
-    if(termList.empty()) OOFEM_ERROR("No MPM Terms defined.");
-    for(auto& mir: dr.giveGroupRecords(irPtr,"nintegrals","MPMIntegrals",DataReader::IR_mpmIntegralRec,/*optional*/false)){
+    //if(termList.empty()) OOFEM_ERROR("No MPM Terms defined.");
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nintegrals","MPMIntegrals",DataReader::IR_mpmIntegralRec,/*optional*/true)){
         std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, &dummySet, nullptr);
         integral->initializeFrom(mir, this);
         this->addIntegral(std::move(integral));
     }
-    if(integralList.empty()) OOFEM_ERROR("No MPM Integrals defined.");
-#else
-    int nvars=0, nterms=0, nintegrals=0;
-    // read number of variables, terms, and integrals
-    IR_GIVE_OPTIONAL_FIELD(ir, nvars, "nvariables");
-    IR_GIVE_OPTIONAL_FIELD(ir, nterms, "nterms");
-    IR_GIVE_OPTIONAL_FIELD(ir, nintegrals, "nintegrals");
-    // instanciate variables
-    std :: string name;
-    for ( int i = 0; i < nvars; i++ ) {
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmVarRec, i + 1);
-        IR_GIVE_FIELD(mir, name, "name");
-        std::unique_ptr< Variable > var = std :: make_unique< Variable >();
-        var->initializeFrom(mir);
-        variableMap[name] = std::move(var);
-    }
-    // instanciate terms
-    for ( int i = 0; i < nterms; i++ ) {
-        int num;
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmTermRec, i + 1);
-        IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);
-        std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());  
-        term->initializeFrom(mir, this);
-        termList.push_back(std::move(term));
-    }
-    // instanciate integrals
-    for ( int i = 0; i < nintegrals; i++ ) {
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmIntegralRec, i + 1);
-        std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, &dummySet, nullptr);
-        integral->initializeFrom(mir, this);
-        this->addIntegral(std::move(integral));
-    }
-#endif
+    //if(integralList.empty()) OOFEM_ERROR("No MPM Integrals defined.");
     return 1;
-}   
+}
 
 #endif
 int
