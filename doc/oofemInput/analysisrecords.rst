@@ -113,7 +113,8 @@ Structural Problems
 StaticStructural
 ~~~~~~~~~~~~~~~~
 
-``StaticStructural`` ``nsteps #(in)`` [``deltat #(...)``] [``prescribedtimes #(...)``] [``stiffmode #(...)``] [``nonlocalext #(...)``] [``sparselinsolverparams #(...)``]
+``StaticStructural`` ``nsteps #(in)`` [``deltat #(...)``] [``prescribedtimes #(...)``] [``stiffmode #(...)``] [``nonlocalext #(...)``] [``sparselinsolverparams #(...)``] [``finalt #(...)``]
+    [``treductiontype #(...)``] [``dTmax #(...)``]  [``dTmin #(...)``] [``minrequirediter #(...)``]   [``maxrequirediter #(...)``]
 
 Static structural analysis. Can be used to solve linear and nonlinear
 static structural problems, supporting changes in boundary conditions
@@ -137,6 +138,43 @@ corresponding to individual solution times can be specified using
 optional parameter ``prescribedtimes``, allowing to input array of
 discrete solution times, the number of solution steps is then equal to
 the size of this array. .
+
+    Adaptive Increase/Decrease of Time Step
+---------------------------------------
+Additional parameters related to adaptive time-stepping can be specified to control the increment size during nonlinear
+iterations.
+
+``finalt``
+    Final analysis time.
+
+``deltat``
+    Initial time step used at the beginning of the analysis.
+
+``treductiontype``
+    Strategy used to reduce the timestep when convergence fails.
+    ``"SimpleReduction"`` reduces the timestep using a fixed factor.
+
+``ncrf``
+    No-convergence reduction factor. If a step fails to converge, the
+    timestep is multiplied by this factor.
+
+
+The number of Newton–Raphson iterations required for convergence
+determines whether the current timestep should be enlarged or reduced.
+
+``minrequirediter``
+    Minimum number of Newton iterations that justify keeping the current
+    timestep.
+
+    If convergence occurs in fewer iterations than ``minrequirediter``,
+    → the step was “too easy”, and the timestep will be increased.
+
+``maxrequirediter``
+    Maximum number of Newton iterations allowed for convergence.
+
+    If convergence requires more iterations than ``maxrequirediter``,
+    → the step was too large, and the timestep will be reduced.
+
 
 .. _LinearStatic:
 

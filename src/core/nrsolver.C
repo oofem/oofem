@@ -762,7 +762,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     forceErr = sqrt( dg_forceErr.at(dg) );
                 }
 
-                if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( std::isnan( forceErr ) || forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( forceErr > rtolf.at(1) ) {
@@ -794,7 +794,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     //zeroDNorm = true;
                     dispErr = sqrt( dg_dispErr.at(dg) );
                 }
-                if ( dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( std::isnan( dispErr ) || dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( dispErr > rtold.at(1) ) {
