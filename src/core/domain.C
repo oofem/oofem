@@ -79,8 +79,6 @@
 #include "simpleslavedof.h"
 #include "masterdof.h"
 
-#include "xmlinputrecord.h"
-
 
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
