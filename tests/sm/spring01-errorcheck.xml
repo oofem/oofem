@@ -1,0 +1,7 @@
+<errorcheck tolerance="1e-4">
+    <!-- check nodal displacements -->
+    <NODE tStep="1" number="2" dof="1" unknown="d" value="0.5"/>
+    <!-- element stresses and strains -->
+    <!-- <ELEMENT tStep="1" number="1" gp="1" keyword="1" component="1" value="1.0"/> -->
+    <REACTION tStep="1" number="1" dof="1" value="-1"/>
+</errorcheck>

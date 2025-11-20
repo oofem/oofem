@@ -39,6 +39,7 @@
 #include "xmlinputrecord.h"
 #include <pugixml.hpp>
 #include <set>
+#include <map>
 
 
 
@@ -51,27 +52,42 @@ namespace oofem {
 class OOFEM_EXPORT XMLDataReader : public DataReader
 {
 protected:
-    std::string xmlFile;
-    pugi::xml_document doc;
+    friend XMLInputRecord;
+    std::string topXmlFile;
+    /* map parent xml node (which is either empty for top-level file for xi:include node for included files) to filenames */
+    std::map<pugi::xml_node,std::string> xmlFiles;
+    /* map document node to ordered list of newline offsets (used to compute line:column from offset in messages) */
+    std::map<pugi::xml_node,std::vector<size_t>> newlines;
+    /* map parent xml node (which is either empty for top-level file for xi:include node for included files) to (sub)document */
+    std::map<pugi::xml_node,pugi::xml_document> docs;
     struct StackItem{
         pugi::xml_node parent;
         pugi::xml_node curr;
-        std::unique_ptr<XMLInputRecord> lastRecord;
+        std::shared_ptr<XMLInputRecord> lastRecord;
         std::set<pugi::xml_node> seen;
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation
+    pugi::xml_document& loadXml(pugi::xml_node parent, const std::string& xml);
+    pugi::xml_node resolveXiInclude(const pugi::xml_node& n);
+    std::tuple<size_t,size_t> offset2lc(const std::vector<size_t>& nl, size_t offset);
+    std::string loc();
+    std::string loc(const pugi::xml_node&);
+    std::shared_ptr<InputRecord> topRecord;
+    pugi::xml_node giveNamedChild(const pugi::xml_node& parent, const std::string& name);
+    const std::string XiIncludeTag="xi:include";
 public:
     XMLDataReader(const std::string& xmlFile);
-    // XMLDataReader(const XMLDataReader&, pugi::xml_node subRoot);
     virtual ~XMLDataReader(){};
+    bool hasFlattenedStructure() override { return true; }
 
     //! guess whether given file is XML
     static bool canRead(const std::string& xmlFile);
-    InputRecord &giveInputRecord(InputRecordType, int recordId) override;
+    InputRecord& giveInputRecord(InputRecordType, int recordId) override;
+    InputRecord* giveTopInputRecord() override { return topRecord.get(); }
     bool peekNext(const std :: string &keyword) override { return false; } /* no peeking, it is used for hacks only */
     void finish() override;
-    std::string giveReferenceName() const override { return xmlFile; }
+    std::string giveReferenceName() const override { return topXmlFile; }
     void enterGroup(const std::string& name) override;
     void leaveGroup(const std::string& name) override;
     void enterRecord(InputRecord*) override;

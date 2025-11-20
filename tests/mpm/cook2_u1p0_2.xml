@@ -1,0 +1,80 @@
+<oofem>
+    <Output>cook2_u1p0_2.xml.out</Output>
+    <Description>Demo of symbolic mpm problem; Cook membrane benchmark</Description>
+    <Analysis type="mpmsymbolicstationaryproblem" lhsterms="1 2 3 4" rhsterms="5" nsteps="1" maxiter="10" profileopt="1">
+        <MPMVariables>
+            <!-- displacement -->
+            <MPMVariable name="u" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
+            <!-- test function -->
+            <MPMVariable name="w" interpolation="feilin" type="1" quantity="0" size="2" dofs="1 2" />
+            <!-- pressure -->
+            <MPMVariable name="p" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
+            <!-- test function -->
+            <MPMVariable name="dp" interpolation="feiconst" type="0" quantity="3" size="1" dofs="11" />
+        </MPMVariables>
+        <MPMTerms>
+            <BTSigmaTerm variable="u" testvariable="w" mmode="7" lhsmatmode="29" rhsmatmode="30" />
+            <BTamNTerm variable="p" testvariable="w" mmode="7" atype="28" uvmt="1" />
+            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="7" atype="28" uvmt="1" />
+            <NTcN variable="p" testvariable="dp" mmode="7" ctype="27" uvmt="1" />
+            <NTfTerm variable="u" testvariable="w" mmode="6" flux="0. 6.25" />
+        </MPMTerms>
+        <MPMIntegrals>
+            <MPMIntegral domain="1" set="1" term="1" />
+            <MPMIntegral domain="1" set="1" term="2" factor="-1" />
+            <MPMIntegral domain="1" set="1" term="3" factor="-1" />
+            <MPMIntegral domain="1" set="1" term="4" factor="-1" />
+            <MPMIntegral domain="1" set="2" term="5" />
+        </MPMIntegrals>
+    </Analysis>
+    <Domains>
+        <Domain domain="heattransfer">
+            <OutputManager tstep_all="1" dofman_all="1" element_all="1" />
+            <Nodes>
+                <Node coords="0.0 0.0 0.0" id="1" />
+                <Node coords="24.0 22.0 0.0" />
+                <Node coords="48.0 44.0 0.0" />
+                <Node coords="0.0 22.0 0.0" />
+                <Node coords="24.0 37.0 0.0" />
+                <Node coords="48.0 52.0 0.0" />
+                <Node coords="0.0 44.0 0.0" />
+                <Node coords="24.0 52.0 0.0" />
+                <Node coords="48.0 60.0 0.0" id="9" />
+            </Nodes>
+            <Elements>
+                <q1 nodes="1 2 5 4" mat="1" crosssect="1" />
+                <q1 nodes="2 3 6 5" mat="1" crosssect="1" />
+                <q1 nodes="4 5 8 7" mat="1" crosssect="1" />
+                <q1 nodes="5 6 9 8" mat="1" crosssect="1" />
+                <l1 nodes="3 6" mat="1" crosssect="1" />
+                <l1 nodes="6 9" mat="1" crosssect="1" />
+            </Elements>
+            <CrossSections>
+                <simplecs thick="5.0" />
+            </CrossSections>
+            <Materials>
+                <isole d="1" e="250" n="0.49999" talpha="1." />
+            </Materials>
+            <!-- mandatory, even if empty (FIXME?): -->
+            <InitialConditions />
+            <BoundaryConditions>
+                <BoundaryCondition loadtimefunction="1" set="3" values="0 0" dofs="1 2" />
+            </BoundaryConditions>
+            <LoadTimeFunctions>
+                <ConstantFunction f_t_="1.0" />
+                <PiecewiseLinFunction npoints="4" t="-10. 0. 1. 5." f_t_="0. 0. 1.0 1.0" />
+            </LoadTimeFunctions>
+            <Sets>
+                <Set elementranges="1-4" />
+                <Set elementranges="5-6" />
+                <Set elementedges="1 4 3 4" />
+            </Sets>
+        </Domain>
+    </Domains>
+    <ExportModules>
+        <errorcheck>
+            <NODE tStep="1" number="9" dof="1" unknown="d" value="-3.04792369e+00" tolerance="1e-6" />
+            <NODE tStep="1" number="9" dof="2" unknown="d" value="4.75052676e+00" tolerance="1e-6" />
+        </errorcheck>
+    </ExportModules>
+</oofem>

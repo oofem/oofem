@@ -30,23 +30,23 @@ shared:
 	mkdir -p build-shared
 	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-shared/
-	ctest --test-dir build-shared/ --parallel=16 --output-on-failure
+	ctest --test-dir build-shared/ --parallel 16 --output-on-failure
 eigen:
 	mkdir -p build-eigen
 	cmake -Bbuild-eigen -H. -DUSE_LAPACK=0 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-eigen/
-	ctest --test-dir build-eigen/ --parallel=16 --output-on-failure
+	ctest --test-dir build-eigen/ --parallel 16 --output-on-failure
 openmp:
 	mkdir -p build-openmp
 	cmake -Bbuild-openmp -H. -DUSE_LAPACK=0 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=1 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-openmp/
-	ctest --test-dir build-openmp/ --parallel=16 --output-on-failure
+	ctest --test-dir build-openmp/ --parallel 16 --output-on-failure
 lapack:
 	# those don't work with BLAS (yet): -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_LAPACK=1
 	mkdir -p build-lapack
 	cmake -Bbuild-lapack -H. -DUSE_LAPACK=1 -DUSE_EIGEN=0 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-lapack/
-	ctest --test-dir build-lapack/ --parallel=16 # --verbose --output-on-failure
+	ctest --test-dir build-lapack/ --parallel 16 # --verbose --output-on-failure
 callgrind:
 	valgrind --tool=callgrind --callgrind-out-file=callgrind.lapack build-lapack/oofem -f tests/sm/spring01.in
 	valgrind --tool=callgrind --callgrind-out-file=callgrind.eigen build-eigen/oofem -f tests/sm/spring01.in
@@ -59,7 +59,7 @@ static:
 	mkdir -p build-static
 	cmake -Bbuild-static -H. -DUSE_LAPACK=1 -DUSE_EIGEN=0 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-static/
-	ctest --test-dir build-static/ --parallel=16 # --verbose --output-on-failure
+	ctest --test-dir build-static/ --parallel 16 # --verbose --output-on-failure
 nanobind:
 	cmake -Bbuild-nanobind -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_NANOBIND=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-nanobind
@@ -92,3 +92,12 @@ xml:
 	# gdb -ex=run -args
 	build-static/oofem -f tests/sm/spring01.in
 	build-static/oofem -f tests/sm/spring01.xml
+mpm:
+	ninja -C build-eigen
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.in
+	echo '------------------------------------- XML -------------------------------'
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
+	diff -I '^User time consumed by solution step .*' ./cook2_u1p0_2.out ./cook2_u1p0_2.xml.out && echo "NO DIFFERENCE :)"
+mpm-gdb:
+	ninja -C build-eigen
+	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
