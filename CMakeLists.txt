@@ -82,7 +82,6 @@ if (MSVC)
     # make MSVC a bit more silent (though most of this should be fixed really)
 	 # C4608: don't report unknown pragmas (used e.g. as "#pragma GCC diagnostic push" "#pragma GCC diagnostic ignored "-Woverloaded-virtual" /* ... */ "#pragma GCC diagnostic pop" to locally disable certain harmless warnings from gcc)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101 -wd4068")
-	 C4068
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
