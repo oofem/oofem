@@ -7,13 +7,14 @@ jobs:
     - uses: actions/checkout@v2
       with:
           submodules: recursive
-    - name: Install NSIS
-      run: |
-        iwr -useb get.scoop.sh -outfile 'install.ps1'
-        .\install.ps1 -RunAsAdmin
-        scoop update
-        scoop bucket add extras
-        scoop install nsis
+    - run: choco install makensis
+    #- name: Install NSIS
+    #  run: |
+    #    iwr -useb get.scoop.sh -outfile 'install.ps1'
+    #    .\install.ps1 -RunAsAdmin
+    #    scoop update
+    #    scoop bucket add extras
+    #    scoop install nsis
     - name: CMake
       shell: bash
       run: |
