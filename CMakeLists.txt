@@ -80,7 +80,9 @@ if (MSVC)
     # C4267 size_t to int conversion. Most of these are indices, but many places can be replaced by a for-each loop as well.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
     # make MSVC a bit more silent (though most of this should be fixed really)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101")
+	 # C4608: don't report unknown pragmas (used e.g. as "#pragma GCC diagnostic push" "#pragma GCC diagnostic ignored "-Woverloaded-virtual" /* ... */ "#pragma GCC diagnostic pop" to locally disable certain harmless warnings from gcc)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101 -wd4068")
+	 C4068
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
