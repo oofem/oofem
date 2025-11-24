@@ -38,6 +38,7 @@
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "engngm.h"
+#include "mpmsemodels.h"
 
 namespace oofem {
 void
@@ -51,7 +52,7 @@ Integral::initializeFrom (InputRecord &ir, EngngModel *emodel) {
     this->set = nullptr; // be resolved in initialize
     int ti;
     IR_GIVE_FIELD (ir, ti, "term");
-    this->term = emodel->giveTerm(ti);
+    this->term = ((MPMSProblem_Base*)emodel)->giveTerm(ti);
     
     IR_GIVE_OPTIONAL_FIELD(ir, factor, "factor");
 }

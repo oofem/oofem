@@ -68,7 +68,7 @@ public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
     /// Constructor. Creates the input record corresponding to given string.
-    OOFEMTXTInputRecord(int linenumber, std :: string source);
+    OOFEMTXTInputRecord(DataReader* dr, int linenumber, std :: string source);
     /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
     /// Assignment operator.

@@ -131,7 +131,7 @@ oofem::OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(py::kwargs &kw)
    } 
     transform(rec.begin(), rec.end(), rec.begin(), ::tolower); // convert to lowercase, text probably in "" should not be converted (like filenames)
 //     std::cout << rec << std::endl;
-    oofem::OOFEMTXTInputRecord answer(0, rec) ;
+    oofem::OOFEMTXTInputRecord answer(nullptr, 0, rec) ;
     return answer;
 }
 

@@ -76,7 +76,7 @@
 #include "activebc.h"
 #include "classfactory.h"
 #ifdef __MPM_MODULE
-#include "../mpm/integral.h"
+#include "../mpm/mpmsemodels.h"
 #endif
 
 #include <set>
@@ -221,18 +221,20 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     }
 
 #ifdef __MPM_MODULE
-    IntArray locr, locc;
-    // loop over integrals 
-    for (auto &in: eModel->giveIntegralList()) {
-        // loop over integral domain
-        for (auto &elem: in->set->giveElementList()) {
-            // get code numbers for integral.term on element
-            in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
-            for ( int ii : locr ) {
-                if ( ii ) {
-                    for ( int jj : locc ) {
-                        if ( jj ) {
-                            columns [ jj - 1 ].insert(ii - 1);
+    if(MPMSProblem_Base* mpm=dynamic_cast<MPMSProblem_Base*>(eModel); mpm!=nullptr){
+        IntArray locr, locc;
+        // loop over integrals
+        for (auto &in: mpm->giveIntegralList()) {
+            // loop over integral domain
+            for (auto &elem: in->set->giveElementList()) {
+                // get code numbers for integral.term on element
+                in->getElementTermCodeNumbers (locr, locc, domain->giveElement(elem), *in->term, s) ;
+                for ( int ii : locr ) {
+                    if ( ii ) {
+                        for ( int jj : locc ) {
+                            if ( jj ) {
+                                columns [ jj - 1 ].insert(ii - 1);
+                            }
                         }
                     }
                 }

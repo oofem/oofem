@@ -93,6 +93,7 @@ typedef const char *InputFieldType;
  */
 class OOFEM_EXPORT InputRecord: public std::enable_shared_from_this<InputRecord>
 {
+protected:
     DataReader* reader = nullptr;
 public:
     InputRecord() {}

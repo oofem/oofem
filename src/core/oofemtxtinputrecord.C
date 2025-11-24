@@ -51,7 +51,7 @@ namespace oofem {
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : tokenizer(), record()
 { }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : tokenizer(),
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src.reader), tokenizer(),
     record(src.record), lineNumber(src.lineNumber)
 {
     tokenizer.tokenizeLine( this->record );
@@ -62,7 +62,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : tok
     }
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(int linenumber, std :: string source) : tokenizer(),
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(DataReader* dr, int linenumber, std :: string source) : InputRecord(dr), tokenizer(),
     record(std :: move(source)), lineNumber(linenumber)
 {
     tokenizer.tokenizeLine( this->record );
@@ -77,6 +77,7 @@ OOFEMTXTInputRecord &
 OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
     this->record = src.record;
+    this->reader = src.reader;
     tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);

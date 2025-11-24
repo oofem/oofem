@@ -83,7 +83,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(std :: string inputfilename) : DataRead
     /// (might make debugging faulty input files harder for users as well)
     for ( auto &line: lines ) {
         //printf("line: %s\n", line.second.c_str());
-        this->recordList.emplace_back(line.first, line.second);
+        this->recordList.emplace_back(this, line.first, line.second);
     }
     this->it = this->recordList.begin();
 }

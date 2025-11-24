@@ -2,7 +2,7 @@
 #ifndef prototype2_h
 #define prototype2_h
 
-#include "engngm.h"
+#include "mpmsemodels.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
@@ -25,6 +25,7 @@
 #include "dofmanager.h"
 #include "connectivitytable.h"
 #include "matresponsemode.h"
+
 
 ///@name Input fields for testproblem
 //@{
@@ -535,7 +536,7 @@ namespace oofem {
 
     #define _IFT_NTfTerm_Name "NTfTerm"
 
-    class TestProblem : public EngngModel
+    class TestProblem: public MPMSProblem_Base
     {
     protected:
         SparseMtrxType sparseMtrxType = SMT_Skyline;
@@ -556,10 +557,10 @@ namespace oofem {
         IntArray rhsIntegrals;
 
     public:
-        TestProblem(int i, EngngModel * _master) : EngngModel(i, _master) { ndomains = 1;}
+        TestProblem(int i, EngngModel * _master) : MPMSProblem_Base(i, _master) { }
 
         void initializeFrom(InputRecord &ir) override {
-            EngngModel::initializeFrom(ir);
+            MPMSProblem_Base::initializeFrom(ir);
             IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
             IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
         }

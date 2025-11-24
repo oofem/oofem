@@ -1376,7 +1376,7 @@ IsotropicDamageMaterial1::restoreContext(DataStream &stream, ContextMode mode)
         if ( !stream.read(input) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        OOFEMTXTInputRecord ir(0, input);
+        OOFEMTXTInputRecord ir(nullptr, 0, input);
         this->initializeFrom(ir);
     }
 }

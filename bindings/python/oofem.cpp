@@ -1034,11 +1034,11 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
 
-    py::class_<oofem::InputRecord,std::shared_ptr<InputRecord>>(m, "InputRecord")
+    py::class_<oofem::InputRecord SHARED_PTR_HOLDER(InputRecord)>(m, "InputRecord")
     ;
 
     typedef const char *InputFieldType;
-    py::class_<oofem::DynamicInputRecord, oofem::InputRecord,std::shared_ptr<DynamicInputRecord>>(m, "DynamicInputRecord")
+    py::class_<oofem::DynamicInputRecord, oofem::InputRecord SHARED_PTR_HOLDER(DynamicInputRecord)>(m, "DynamicInputRecord")
         .def(py::init<std::string, int>(), py::arg("answer") = "", py::arg("value")=0)
         .def("finish", &oofem::DynamicInputRecord::finish, py::arg("wrn")=true)
         .def("setRecordKeywordField", &oofem::DynamicInputRecord::setRecordKeywordField)
@@ -1055,9 +1055,9 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setField", (void (oofem::DynamicInputRecord::*)(InputFieldType)) &oofem::DynamicInputRecord::setField)
     ;
 
-    py::class_<oofem::OOFEMTXTInputRecord, oofem::InputRecord, std::shared_ptr<OOFEMTXTInputRecord>>(m, "OOFEMTXTInputRecord")
+    py::class_<oofem::OOFEMTXTInputRecord, oofem::InputRecord SHARED_PTR_HOLDER(oofem::OOFEMTXTInputRecord)>(m, "OOFEMTXTInputRecord")
         .def(py::init<>())
-        .def(py::init<int, std::string>())
+        .def(py::init<oofem::DataReader*, int, std::string>())
         .def("finish", &oofem::OOFEMTXTInputRecord::finish, py::arg("wrn")=true)
         .def("setRecordString", &oofem::OOFEMTXTInputRecord::setRecordString)
     ;
@@ -1142,7 +1142,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
     #ifdef __MPM_MODULE
-        .def("addIntegral", &oofem::EngngModel::py_addIntegral, py::keep_alive<0, 1>())
+        .def("addIntegral", /* &oofem::EngngModel::py_addIntegral */ [](oofem::EngngModel* self, Integral* integral){ ((MPMSProblem_Base*)self)->py_addIntegral(integral); },py::keep_alive<0, 1>())
     #endif
         ;
 

@@ -66,9 +66,9 @@ Term::initializeFrom(InputRecord &ir, EngngModel* problem)
     // read field and test field ids (names)
     std::string name;
     IR_GIVE_FIELD(ir, name, "variable");
-    this->field = problem->giveVariableByName(name);
+    this->field = ((MPMSProblem_Base*)problem)->giveVariableByName(name);
     IR_GIVE_FIELD(ir, name, "testvariable");
-    this->testField = problem->giveVariableByName(name);
+    this->testField = ((MPMSProblem_Base*)problem)->giveVariableByName(name);
     // read material mode
     int val;
     IR_GIVE_FIELD(ir, val, "mmode");

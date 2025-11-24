@@ -981,7 +981,7 @@ Domain::initializeFinish() {
         Set *set = this->giveSet(i);
         std::string elemProps = set->giveElementProperties();
         if (!elemProps.empty()) {
-            OOFEMTXTInputRecord ir (-1, elemProps);
+            OOFEMTXTInputRecord ir (nullptr,-1, elemProps);
             for ( int ielem: set->giveElementList() ) {
                 Element *element = this->giveElement( ielem );
                 element->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)
@@ -989,7 +989,7 @@ Domain::initializeFinish() {
         }
         std::string dofmanProps = set->giveDofManProperties();
         if (!dofmanProps.empty()) {
-            OOFEMTXTInputRecord ir (-1, dofmanProps);
+            OOFEMTXTInputRecord ir (nullptr,-1, dofmanProps);
             for ( int idofman: set->giveNodeList() ) {
                 DofManager *dofman = this->giveDofManager( idofman );
                 dofman->initializeFrom(ir, 1); // initialize with priority 1 (lower than component record priority)

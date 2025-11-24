@@ -59,10 +59,6 @@
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
 #include "monitormanager.h"
-#ifdef __MPM_MODULE
-#include "../mpm/mpm.h"
-#include "../mpm/integral.h"
-#endif
 
 #ifdef __MPI_PARALLEL_MODE
  #include "parallel.h"
@@ -318,17 +314,6 @@ protected:
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
     /// List where parallel contexts are stored.
     std :: vector< ParallelContext > parallelContextList;
-
-
-#ifdef __MPM_MODULE
-    /// experimental mpm symbolic support
-    std :: map< std :: string, std::unique_ptr< Variable > >  variableMap;
-    std :: vector < std :: unique_ptr< Term > > termList;
-    std :: vector < std :: unique_ptr< Integral > > integralList;
-#endif
-
-
-
 
     /// Flag for suppressing output to file.
     bool suppressOutput;
@@ -639,6 +624,8 @@ public:
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.*/
     virtual void initializeFrom(InputRecord &ir);
+    /// problem-specific instanciation, after reading generic items
+    virtual void instanciateSpecific(InputRecord &ir) {} ;
     /// Instanciate problem domains by calling their instanciateYourself() service
     int instanciateDomains(DataReader &dr);
     /// Instanciate problem meta steps by calling their instanciateYourself() service
@@ -1014,35 +1001,6 @@ public:
     void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
-#ifdef __MPM_MODULE
-    /// mpm experimental
-    std :: vector < std :: unique_ptr< Integral > > & giveIntegralList() {
-        return this->integralList;
-    }
-    void addIntegral (std :: unique_ptr< Integral > obj) {
-        integralList.push_back(std::move(obj));
-    }
-    // Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
-    void py_addIntegral(Integral *obj) {
-        std::size_t size = integralList.size();
-        integralList.resize(size+1);
-        integralList[size].reset(obj);
-    }
-    const Variable* giveVariableByName (std::string name) {
-        if(variableMap.find(name)==variableMap.end()) OOFEM_ERROR("Unknown MPM variable '%s'",name.c_str());
-        return variableMap[name].get();
-        
-    }
-    const Term* giveTerm (int indx) {
-        // @BP: add better error handling than provided by at()
-        if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,termList.size());
-        return termList[indx-1].get();
-    }   
-    /// instanciates mpm stuff (variables, terms, and integrals)
-    /// returns nonzero if succesfull
-    int instanciateMPM (DataReader &dr, InputRecord &ir);
-    // end mpm experimental
-#endif
 
 protected:
     /**
