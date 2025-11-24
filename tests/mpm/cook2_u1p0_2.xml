@@ -58,11 +58,11 @@
             <!-- mandatory, even if empty (FIXME?): -->
             <InitialConditions />
             <BoundaryConditions>
-                <BoundaryCondition loadtimefunction="1" set="3" values="0 0" dofs="1 2" />
+                <BoundaryCondition loadtimefunction="1" set="3" dofs="1 2"  values="0 0" />
             </BoundaryConditions>
             <LoadTimeFunctions>
                 <ConstantFunction f_t_="1.0" />
-                <PiecewiseLinFunction npoints="4" t="-10. 0. 1. 5." f_t_="0. 0. 1.0 1.0" />
+                <PiecewiseLinFunction t="-10. 0. 1. 5." f_t_="0. 0. 1.0 1.0" />
             </LoadTimeFunctions>
             <Sets>
                 <Set elementranges="1-4" />

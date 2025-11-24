@@ -1142,7 +1142,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
     #ifdef __MPM_MODULE
-        .def("addIntegral", /* &oofem::EngngModel::py_addIntegral */ [](oofem::EngngModel* self, Integral* integral){ ((MPMSProblem_Base*)self)->py_addIntegral(integral); },py::keep_alive<0, 1>())
+        .def("addIntegral", /* &oofem::EngngModel::py_addIntegral */ [](oofem::EngngModel* self, Integral* integral){ ((MPMSymbolicProblem*)self)->py_addIntegral(integral); },py::keep_alive<0, 1>())
     #endif
         ;
 

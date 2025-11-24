@@ -536,7 +536,7 @@ namespace oofem {
 
     #define _IFT_NTfTerm_Name "NTfTerm"
 
-    class TestProblem: public MPMSProblem_Base
+    class TestProblem: public MPMSymbolicProblem
     {
     protected:
         SparseMtrxType sparseMtrxType = SMT_Skyline;
@@ -557,10 +557,10 @@ namespace oofem {
         IntArray rhsIntegrals;
 
     public:
-        TestProblem(int i, EngngModel * _master) : MPMSProblem_Base(i, _master) { }
+        TestProblem(int i, EngngModel * _master) : MPMSymbolicProblem(i, _master) { }
 
         void initializeFrom(InputRecord &ir) override {
-            MPMSProblem_Base::initializeFrom(ir);
+            MPMSymbolicProblem::initializeFrom(ir);
             IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
             IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
         }

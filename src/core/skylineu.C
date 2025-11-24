@@ -292,7 +292,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
     }
 
 #ifdef __MPM_MODULE
-    if(MPMSProblem_Base* mpm=dynamic_cast<MPMSProblem_Base*>(eModel); mpm!=nullptr){
+    if(MPMSymbolicProblem* mpm=dynamic_cast<MPMSymbolicProblem*>(eModel); mpm!=nullptr){
         IntArray locr, locc;
         // loop over integrals
         for (auto &in: mpm->giveIntegralList()) {

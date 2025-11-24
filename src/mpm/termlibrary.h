@@ -43,7 +43,24 @@ namespace oofem {
 #define _IFT_BTamNTerm_Name "BTamNTerm"
 #define _IFT_NTamTBTerm_Name "NTamTBTerm"
 #define _IFT_NTcN_Name "NTcN"
+#define _IFT_SymTerm_Name "SymTerm"
 
+
+#ifdef _PYBIND_BINDINGS
+    class SymTerm: public Term {
+    protected:
+        std::string expr;
+    public:
+        SymTerm() {};
+        SymTerm (const Variable *testField, const Variable* unknownField, MaterialMode m): Term(testField,unknownField,m) {}
+        void evaluate_lin (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) const override;
+        void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tStep) const override;
+        void getDimensions(Element& cell) const override;
+        void initializeCell(Element& cell) const override;
+        // IntegrationRule* giveElementIntegrationRule(Element* e) const override;
+        void initializeFrom(InputRecord &ir, EngngModel* problem) override;
+    };
+#endif
 
 /**
  * @brief A Linear momentum balance equation term ($B^T\sigma(u)$)
@@ -148,7 +165,7 @@ class BTamNTerm : public MPMSymbolicTerm {
     /**
      * @brief Evaluates Internal forces vector, i.e. $w^T(\grad N)^T f(p)$
      * 
-     * @param cell 
+     * @param cell F
      * @param coords 
      */
     void evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override;

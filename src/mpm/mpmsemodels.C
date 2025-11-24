@@ -5,7 +5,7 @@ namespace oofem {
     REGISTER_EngngModel(StationaryMPMSProblem);
 
     int
-    MPMSProblem_Base:: instanciateMPM (DataReader &dr, InputRecord &ir) {
+    MPMSymbolicProblem:: instanciateMPM (DataReader &dr, InputRecord &ir) {
         std::shared_ptr<InputRecord> irPtr(ir.ptr());
         std::string name;
         int num=-1;

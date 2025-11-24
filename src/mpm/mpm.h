@@ -44,6 +44,7 @@
  * - Element - responsible for defining and performing integration (of terms), assembly of term contributions. 
  */
 
+
 #include "element.h"
 #include "dofmanager.h"
 #include "gausspoint.h"
@@ -130,13 +131,13 @@ class Variable {
  */
 class Term {
     public:
-    const Variable* field;
-    const Variable* testField;
-    MaterialMode mode;
+    const Variable* field=nullptr;
+    const Variable* testField=nullptr;
+    MaterialMode mode=MaterialMode::_Unknown;
 
     public:
-    Term () : field(nullptr), testField(nullptr), mode(MaterialMode::_Unknown) {}
-    Term (const Variable* testField, const Variable* unknownField, MaterialMode m=MaterialMode::_Unknown) : field(unknownField), testField(testField) {mode=m;}
+    Term () {}
+    Term (const Variable* testField, const Variable* unknownField, MaterialMode m=MaterialMode::_Unknown) : field(unknownField), testField(testField), mode(m) { }
     
     // evaluate linearized term contribution to weak form on given cell at given point 
     virtual void evaluate_lin (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) const =0;
@@ -145,10 +146,10 @@ class Term {
     virtual void getDimensions(Element& cell) const =0;
     virtual void initializeCell(Element& cell) const =0;
     virtual IntegrationRule* giveElementIntegrationRule(Element* e) const {return NULL;};
-
     virtual void initializeFrom(InputRecord &ir, EngngModel* problem); // enable instantiation from input record
 
 };
+
 
 
     /**

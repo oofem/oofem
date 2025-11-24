@@ -51,21 +51,18 @@
 
 
 namespace oofem {
-
-    class MPMSProblem_Base: public EngngModel
+    class MPMSymbolicProblem: public EngngModel
     {
     protected:
-        #ifdef __MPM_MODULE
         /// experimental mpm symbolic support
         std :: map< std :: string, std::unique_ptr< Variable > >  variableMap;
         std :: vector < std :: unique_ptr< Term > > termList;
         std :: vector < std :: unique_ptr< Integral > > integralList;
-        #endif
     public:
-        MPMSProblem_Base(int i, EngngModel * _master): EngngModel(i, _master) { ndomains = 1; }
+        MPMSymbolicProblem(int i, EngngModel * _master): EngngModel(i, _master) { ndomains = 1; }
         void instanciateSpecific(InputRecord &ir) override { this->instanciateMPM(*(ir.giveReader()),ir); }
 
-                std :: vector < std :: unique_ptr< Integral > > & giveIntegralList() {
+        std :: vector < std :: unique_ptr< Integral > > & giveIntegralList() {
             return this->integralList;
         }
         void addIntegral (std :: unique_ptr< Integral > obj) {
@@ -80,10 +77,8 @@ namespace oofem {
         const Variable* giveVariableByName (std::string name) {
             if(variableMap.find(name)==variableMap.end()) OOFEM_ERROR("Unknown MPM variable '%s'",name.c_str());
             return variableMap[name].get();
-
         }
         const Term* giveTerm (int indx) {
-            // @BP: add better error handling than provided by at()
             if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,termList.size());
             return termList[indx-1].get();
         }
@@ -91,7 +86,8 @@ namespace oofem {
         int instanciateMPM (DataReader &dr, InputRecord &ir);
     };
 
-    class StationaryMPMSProblem : public MPMSProblem_Base
+
+    class StationaryMPMSProblem: public MPMSymbolicProblem
     {
     protected:
 
@@ -115,10 +111,10 @@ namespace oofem {
         IntArray rhsIntegrals;
 
     public:
-        StationaryMPMSProblem(int i, EngngModel * _master): MPMSProblem_Base(i, _master) { }
+        StationaryMPMSProblem(int i, EngngModel * _master): MPMSymbolicProblem(i, _master) { }
 
         void instanciateSpecific(InputRecord &ir) override {
-            MPMSProblem_Base::instanciateSpecific(ir);
+            MPMSymbolicProblem::instanciateSpecific(ir);
             IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
             IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
             if ( !unknownsField ) { 

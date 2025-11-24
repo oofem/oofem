@@ -39,14 +39,40 @@
 #include "materialmode.h"
 #include "crosssection.h"
 
+#ifdef _USE_PYBIND_BINDINGS
+    #ifdef _USE_NANOBIND
+        #include<nanobind/nanobind.h>
+        // must include converters here so that compiler can pickup template specialization for arrays
+        #include"../../bindings/python/oofemarray-nanobind.h"
+        namespace nb = nanobind;
+    #else
+        #include <pybind11/embed.h>
+        namespace py = pybind11;
+    #endif
+#endif
+
+
 namespace oofem {
 
 REGISTER_Term(BTamNTerm)
 REGISTER_Term(NTamTBTerm)
 REGISTER_Term(NTcN)
 
-
-
+#ifdef _PYBIND_BINDINGS
+    REGISTER_Term(SymTerm)
+    void SymTerm::evaluate_lin (FloatMatrix& , MPElement& cell, GaussPoint* gp, TimeStep* tStep) const {
+    };
+    void SymTerm::evaluate (FloatArray&, MPElement& cell, GaussPoint* gp, TimeStep* tStep) const {
+        // B,D,u,eps,sig,p
+    };
+    void SymTerm::getDimensions(Element& cell) const { /* ?? */ };
+    void SymTerm::initializeCell(Element& cell) const { /* ?? */ };
+    // IntegrationRule* SymTerm::giveElementIntegrationRule(Element* e) const { return nullptr; };
+    void SymTerm::initializeFrom(InputRecord &ir, EngngModel* problem) {
+        Term::initializeFrom(ir,problem);
+        ir.giveField(expr, "expr");
+    };
+#endif
 
 BTSigTerm::BTSigTerm (const Variable *testField, const Variable* unknownField) : Term(testField, unknownField) {}
 

@@ -52,7 +52,7 @@ Integral::initializeFrom (InputRecord &ir, EngngModel *emodel) {
     this->set = nullptr; // be resolved in initialize
     int ti;
     IR_GIVE_FIELD (ir, ti, "term");
-    this->term = ((MPMSProblem_Base*)emodel)->giveTerm(ti);
+    this->term = ((MPMSymbolicProblem*)emodel)->giveTerm(ti);
     
     IR_GIVE_OPTIONAL_FIELD(ir, factor, "factor");
 }
