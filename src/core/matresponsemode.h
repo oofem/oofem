@@ -72,6 +72,7 @@ meta_enum(MatResponseMode,int,
     DeviatoricStress=30
 );
 
-constexpr auto __MatResponseModeToString=MatResponseMode_value_to_string;
+// constexpr auto __MatResponseModeToString=MatResponseMode_value_to_string;
+#define __MatResponseModeToString(v) std::string(MatResponseMode_value_to_string(v)).c_str()
 } // end namespace oofem
 #endif // matesponsemode_h

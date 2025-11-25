@@ -152,7 +152,7 @@ public:
         if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
             int val=std::atoi(s.c_str());
             auto meta=MetaEnumMeta<AnEnum>::meta_from_index(val);
-            if(!meta) OOFEM_ERROR("%s (enum %s): index '%s' out of range (0..%d).",id,Meta::enum_name,val,Meta::members.size()-1);
+            if(!meta) OOFEM_ERROR("%s (enum %s): index '%d' out of range (0..%ld).",id,Meta::enum_name,val,Meta::members.size()-1);
             answer=meta.value().value;
         } else {
             auto meta=Meta::meta_from_name(s);

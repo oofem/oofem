@@ -48,6 +48,7 @@ std::string errorInfo(const char *func)
     return std :: string(func);
 }
 
+
 RuntimeException::RuntimeException(const char * _func, const char * _file, int _line, const char *format, ...)
 {
     char stream [1024];

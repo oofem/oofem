@@ -75,6 +75,7 @@ meta_enum(ValueModeType,int,
     VM_Residual=99
 );
 
-constexpr auto __ValueModeTypeToString=ValueModeType_value_to_string;
+// constexpr auto __ValueModeTypeToString=ValueModeType_value_to_string;
+#define __ValueModeTypeToString(v) std::string(ValueModeType_value_to_string(v)).c_str()
 } // end namespace oofem
 #endif // valuemodetype_h

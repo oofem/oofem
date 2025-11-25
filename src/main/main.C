@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 #endif
 
     // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
+    OOFEM_LOG_FORCED("%s",PRG_HEADER_SM);
 
     //
     // check for options
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 
     if ( outputFileFlag ) {
         oofem_logger.appendLogTo( outputFileName.str() );
-        OOFEM_LOG_FORCED(PRG_HEADER_SM);
+        OOFEM_LOG_FORCED("%s",PRG_HEADER_SM);
     } 
     if ( errOutputFileFlag ) {
         oofem_logger.appendErrorTo( errOutputFileName.str() );

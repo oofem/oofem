@@ -706,7 +706,7 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
     if ( p ) {
         return p;
     } else {
-        OOFEM_ERROR( "Neares particle for point [%d, %d] not found", coords.at(1), coords.at(2) );
+        OOFEM_ERROR( "Neares particle for point [%f, %f] not found", coords.at(1), coords.at(2) );
         return nullptr;
     }
 }

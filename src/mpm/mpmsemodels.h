@@ -79,7 +79,7 @@ namespace oofem {
             return variableMap[name].get();
         }
         const Term* giveTerm (int indx) {
-            if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,termList.size());
+            if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%ld",indx,termList.size());
             return termList[indx-1].get();
         }
         /// instanciates mpm stuff (variables, terms, and integrals); returns nonzero if successful

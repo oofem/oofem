@@ -162,18 +162,18 @@ void FloatMatrix :: checkBounds(Index i, Index j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR("matrix error on rows : %d < 0", i);
+        OOFEM_ERROR("matrix error on rows : %d < 0", (int)i);
     }
     if ( j <= 0 ) {
-        OOFEM_ERROR("matrix error on columns : %d < 0", j);
+        OOFEM_ERROR("matrix error on columns : %d < 0", (int)j);
     }
 
     if ( i > rows() ) {
-        OOFEM_ERROR("matrix error on rows : %d > %d", i, rows());
+        OOFEM_ERROR("matrix error on rows : %d > %d", (int)i, (int)rows());
     }
 
     if ( j > cols() ) {
-        OOFEM_ERROR("matrix error on columns : %d > %d", j, cols());
+        OOFEM_ERROR("matrix error on columns : %d > %d", (int)j, (int)cols());
     }
 }
 

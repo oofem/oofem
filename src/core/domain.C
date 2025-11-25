@@ -551,7 +551,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated nodes & sides ", dofManagerList.size())
+        VERBOSE_PRINT0("Instantiated nodes & sides ", (int)dofManagerList.size())
     #  endif
 
     BuildDofManPlaceInArrayMap();
@@ -612,7 +612,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
     
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated elements ", elementList.size());
+        VERBOSE_PRINT0("Instantiated elements ", (int)elementList.size());
     #  endif
 
     // read cross sections
@@ -644,7 +644,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated cross sections ", crossSectionList.size())
+        VERBOSE_PRINT0("Instantiated cross sections ", (int)crossSectionList.size())
     #  endif
 
     // read materials
@@ -677,7 +677,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated materials ", materialList.size())
+        VERBOSE_PRINT0("Instantiated materials ", (int)materialList.size())
     #  endif
 
     // read barriers
@@ -711,7 +711,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 
     #  ifdef VERBOSE
         if ( !nonlocalBarrierList.empty() ) {
-            VERBOSE_PRINT0("Instantiated barriers ", nonlocalBarrierList.size());
+            VERBOSE_PRINT0("Instantiated barriers ", (int)nonlocalBarrierList.size());
         }
     #  endif
 
@@ -745,7 +745,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated BCs ", bcList.size())
+        VERBOSE_PRINT0("Instantiated BCs ", (int)bcList.size())
     #  endif
 
     // read initial conditions
@@ -778,7 +778,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated ICs ", icList.size())
+        VERBOSE_PRINT0("Instantiated ICs ", (int)icList.size())
     #  endif
 
 
@@ -812,7 +812,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated load-time fncts ", functionList.size())
+        VERBOSE_PRINT0("Instantiated load-time fncts ", (int)functionList.size())
     #  endif
 
     // read sets
@@ -847,7 +847,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 
     #  ifdef VERBOSE
         if ( setList.size() ) {
-            VERBOSE_PRINT0("Instantiated sets ", setList.size());
+            VERBOSE_PRINT0("Instantiated sets ", (int)setList.size());
         }
     #  endif
 
@@ -891,7 +891,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
 
         return this->topology->instanciateYourself(dr);
         #  ifdef VERBOSE
-            VERBOSE_PRINT0("Instantiated topologies ", topologytype.length());
+            VERBOSE_PRINT0("Instantiated topologies ", (int)topologytype.length());
         #  endif
     }
 

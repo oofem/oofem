@@ -173,7 +173,7 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
     } else if ( aProperty == CS_DirectorVectorZ ) {
         * expr = & directorzExpr;
     } else {
-        OOFEM_ERROR("called with unknown ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("VariableCrossSection %d called with unknown ID %d", this->giveNumber(), aProperty);
     }
 }
 

@@ -92,6 +92,7 @@ meta_enum(MaterialMode,int,
     _Warping
 )
 
-constexpr auto __MaterialModeToString=MaterialMode_value_to_string;
+// constexpr auto __MaterialModeToString=MaterialMode_value_to_string;
+#define __MaterialModeToString(v) std::string(MaterialMode_value_to_string(v)).c_str()
 } // end namespace oofem
 #endif // materialmode_h
