@@ -1,0 +1,2 @@
+languageGlobs:
+    cpp: ['*.C','*.cpp','*.h','*.hpp']

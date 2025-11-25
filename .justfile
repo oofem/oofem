@@ -28,7 +28,7 @@ pyodide:
 	cd bindings/python/tests; python -m pytest
 shared:
 	mkdir -p build-shared
-	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-shared/
 	ctest --test-dir build-shared/ --parallel 16 --output-on-failure
 eigen:
@@ -101,3 +101,7 @@ mpm:
 mpm-gdb:
 	ninja -C build-eigen
 	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
+fix:
+	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveField($ANSWER, $ID);' .
+	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_OPTIONAL_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveOptionalField($ANSWER, $ID);' .
+	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_RECORD_KEYWORD_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveRecordKeywordField($ANSWER,$ID);' .
