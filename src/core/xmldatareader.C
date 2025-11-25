@@ -210,7 +210,7 @@ namespace oofem {
                 OOFEM_WARNING(oss.str().c_str());
                 n.parent().remove_child(n);
             }
-}
+        }
     }
 
     InputRecord &

@@ -411,15 +411,8 @@ namespace oofem {
         void getDimensions(Element& cell) const override {}
         void initializeFrom(InputRecord &ir, EngngModel* problem) override {
             MPMSymbolicTerm::initializeFrom(ir, problem);
-            int value;
-            if (ir.hasField("lhsmatmode")) {
-                IR_GIVE_FIELD(ir, value, "lhsmatmode");
-                lhsmatmode = (MatResponseMode) value;
-            }
-            if (ir.hasField("rhsmatmode")) {
-                IR_GIVE_FIELD(ir, value, "rhsmatmode");
-                rhsmatmode = (MatResponseMode) value;
-            }
+            if (ir.hasField("lhsmatmode")) ir.giveField(lhsmatmode,"lhsmatmode");
+            if (ir.hasField("rhsmatmode")) ir.giveField(rhsmatmode,"rhsmatmode");
         }
 
         protected:

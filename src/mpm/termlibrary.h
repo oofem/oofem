@@ -172,9 +172,7 @@ class BTamNTerm : public MPMSymbolicTerm {
     void getDimensions(Element& cell) const override;
     void initializeFrom(InputRecord &ir, EngngModel* problem) override {
         MPMSymbolicTerm::initializeFrom(ir, problem);
-        int value = 0;
-        IR_GIVE_FIELD(ir, value, "atype");
-        aType = static_cast<MatResponseMode>(value);
+        ir.giveField(aType,"atype");
     }
 
 
@@ -221,13 +219,8 @@ class NTamTBTerm : public MPMSymbolicTerm {
     void getDimensions(Element& cell) const override;
     void initializeFrom(InputRecord &ir, EngngModel* problem) override {
         MPMSymbolicTerm::initializeFrom(ir, problem);
-        int value = 0;
-        IR_GIVE_FIELD(ir, value, "atype");
-        aType = static_cast<MatResponseMode>(value);
-
-        value = unknownFieldVMT; // VM_Velocity
-        IR_GIVE_OPTIONAL_FIELD(ir, value, "uvmt" );
-        unknownFieldVMT = static_cast<ValueModeType>(value);
+        ir.giveField(aType,"atype");
+        ir.giveOptionalField(unknownFieldVMT,"uvmt");
     }
     protected:
     /**
@@ -273,13 +266,8 @@ class NTcN : public MPMSymbolicTerm {
     void getDimensions(Element& cell) const override;
     void initializeFrom(InputRecord &ir, EngngModel* problem) override {
         MPMSymbolicTerm::initializeFrom(ir, problem);
-        int value = 0;
-        IR_GIVE_FIELD(ir, value, "ctype");
-        ctype = static_cast<MatResponseMode>(value);
-
-        value = unknownFieldVMT; // VM_Velocity
-        IR_GIVE_OPTIONAL_FIELD(ir, value, "uvmt" );
-        unknownFieldVMT = static_cast<ValueModeType>(value);
+        ir.giveField(ctype,"ctype");
+        ir.giveOptionalField(unknownFieldVMT,"uvmt");
     }
     
 };

@@ -44,6 +44,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <cassert>
 #include <cctype>
 #include <ostream>
 #include <sstream>

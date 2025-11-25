@@ -46,14 +46,11 @@ Variable::initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, name, "interpolation");
     // get corresponding interpolation from catalogue
     this->interpolation = interpolationCatalogue.getInterpolationByName(name);
-    
-    int val;
+
     // read variable type
-    IR_GIVE_FIELD(ir, val, "type");
-    this->type = static_cast<VariableType>(val);
+    ir.giveField(this->type,"type");
     // read quantity
-    IR_GIVE_FIELD(ir, val, "quantity");
-    this->q = static_cast<VariableQuantity>(val);
+    ir.giveField(this->q,"quantity");
     // read variable size
     IR_GIVE_FIELD(ir, this->size, "size");
     // read dofs 
@@ -69,10 +66,7 @@ Term::initializeFrom(InputRecord &ir, EngngModel* problem)
     this->field = ((MPMSymbolicProblem*)problem)->giveVariableByName(name);
     IR_GIVE_FIELD(ir, name, "testvariable");
     this->testField = ((MPMSymbolicProblem*)problem)->giveVariableByName(name);
-    // read material mode
-    int val;
-    IR_GIVE_FIELD(ir, val, "mmode");
-    this->mode = static_cast<MaterialMode>(val);
+    IR_GIVE_FIELD(ir, this->mode, "mmode");
 }
 
 
