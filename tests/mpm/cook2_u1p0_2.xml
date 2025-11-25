@@ -18,7 +18,7 @@
             <BTamNTerm         variable="p" testvariable="w"  mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
             <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
             <NTcN              variable="p" testvariable="dp" mmode="_PlaneStrain"  ctype="ElasticBulkModulusInverse" uvmt="VM_Total" />
-            <NTfTerm           variable="u" testvariable="w"  mmode="_PlaneStresss" flux="0. 6.25" />
+            <NTfTerm           variable="u" testvariable="w"  mmode="_PlaneStress" flux="0. 6.25" />
         </MPMTerms>
         <MPMIntegrals>
             <MPMIntegral domain="1" set="1" term="1" />

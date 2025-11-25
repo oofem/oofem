@@ -4,7 +4,7 @@ Demo of symbolic mpm problem; Cook membrane benchmark
 mpmsymbolicstationaryproblem nsteps 1 nvariables 4 nterms 5 nintegrals 5 lhsterms 4 1 2 3 4 rhsterms 1 5 nmodules 1 profileopt 1 maxiter 10 
 #vtkxml primvars 1 1 tstep_all
 errorcheck
-Variable name "u" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # displacement 
+Variable name "u" interpolation "feilin" type vector quantity 0 size 2 dofs 2 1 2 # displacement 
 Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # test function
 Variable name "p" interpolation "feiconst"  type 0 quantity 3 size 1 dofs 1 11 # pressure 
 Variable name "dp" interpolation "feiconst" type 0 quantity 3 size 1 dofs 1 11 # test function
