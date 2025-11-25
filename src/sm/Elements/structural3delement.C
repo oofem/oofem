@@ -258,7 +258,7 @@ Structural3DElement::computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespons
 
         this->giveMaterialOrientationAt(x, y, z, gp->giveNaturalCoordinates() );
 
-        Q = FloatMatrix({
+        Q = FloatMatrix::fromIniList({
             { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1) },
             { y(0) * y(0), y(1) * y(1), y(2) * y(2), y(1) * y(2), y(0) * y(2), y(0) * y(1) },
             { z(0) * z(0), z(1) * z(1), z(2) * z(2), z(1) * z(2), z(0) * z(2), z(0) * z(1) },
@@ -279,7 +279,7 @@ Structural3DElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatR
         FloatArray x, y, z;
         FloatMatrix Q;
         this->giveMaterialOrientationAt(x, y, z, gp->giveNaturalCoordinates() );
-        Q = FloatMatrix({
+        Q = FloatMatrix::fromIniList({
             { x(0) * x(0), x(1) * x(1), x(2) * x(2), x(1) * x(2), x(0) * x(2), x(0) * x(1), x(2) * x(1), x(2) * x(0), x(1) * x(0) },
             { y(0) * y(0), y(1) * y(1), y(2) * y(2), y(1) * y(2), y(0) * y(2), y(0) * y(1), y(2) * y(1), y(2) * y(0), y(1) * y(0) },
             { z(0) * z(0), z(1) * z(1), z(2) * z(2), z(1) * z(2), z(0) * z(2), z(0) * z(1), z(2) * z(1), z(2) * z(0), z(1) * z(0) },
@@ -289,7 +289,7 @@ Structural3DElement::computeConstitutiveMatrix_dPdF_At(FloatMatrix &answer, MatR
             { z(0) * y(0), z(1) * y(1), z(2) * y(2), z(1) * y(2), z(0) * y(2), z(0) * y(1), z(2) * y(1), z(2) * y(0), z(1) * y(0) },
             { z(0) * x(0), z(1) * x(1), z(2) * x(2), z(1) * x(2), z(0) * x(2), z(0) * x(1), z(2) * x(1), z(2) * x(0), z(1) * x(0) },
             { y(0) * x(0), y(1) * x(1), y(2) * x(2), y(1) * x(2), y(0) * x(2), y(0) * x(1), y(2) * x(1), y(2) * x(0), y(1) * x(0) },
-        };
+        });
         answer.rotatedWith(Q, 't');
     }
 }
