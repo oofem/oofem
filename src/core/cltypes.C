@@ -322,21 +322,10 @@ const char *__domainTypeToString(domainType _value) {
     TO_STRING_BODY(domainType_DEF)
 }
 
-const char *__MaterialModeToString(MaterialMode _value) {
-    TO_STRING_BODY(MaterialMode_DEF)
-}
-
 const char *__Element_Geometry_TypeToString(Element_Geometry_Type _value) {
     TO_STRING_BODY(Element_Geometry_Type_DEF)
 }
 
-const char *__ValueModeTypeToString(ValueModeType _value) {
-    TO_STRING_BODY(ValueModeType_DEF)
-}
-
-const char *__MatResponseModeToString(MatResponseMode _value) {
-    TO_STRING_BODY(MatResponseMode_DEF)
-}
 
 std :: string __DofIDItemToString(DofIDItem _value) {
     if ( _value >= MaxDofID ) {

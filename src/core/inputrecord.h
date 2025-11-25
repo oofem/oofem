@@ -40,9 +40,12 @@
 #include <string>
 #include <memory>
 #include <exception>
+#include <regex>
 
 #include "logger.h" // for missing __func__ in MSC
+#include "error.h"
 #include "oofemenv.h"
+#include "meta_enum.hpp"
 
 namespace oofem {
 class IntArray;
@@ -140,6 +143,31 @@ public:
     virtual void giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     /// Reads the ScalarFunction field value.
     virtual void giveField(ScalarFunction &function, InputFieldType id) = 0;
+    /// Reads enumeration (declared with meta_enum) into integer
+    template<typename AnEnum>
+    void giveField(AnEnum& answer, InputFieldType id){
+        typedef MetaEnumMeta<AnEnum> Meta;
+        std::string s;
+        giveField(s,id);
+        if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
+            int val=std::atoi(s.c_str());
+            auto meta=MetaEnumMeta<AnEnum>::meta_from_index(val);
+            if(!meta) OOFEM_ERROR("%s (enum %s): index '%s' out of range (0..%d).",id,Meta::enum_name,val,Meta::members.size()-1);
+            answer=meta.value().value;
+        } else {
+            auto meta=Meta::meta_from_name(s);
+            if(!meta){
+                std::ostringstream oss;
+                oss<<"; possible names (0.."<<Meta::members.size()-1<<"):";
+                for(const auto& m: Meta::members) oss<<" "<<m.name;
+                oss<<")";
+                OOFEM_ERROR("%s (enum %s): unrecognized named value '%s'%s.",id,Meta::enum_name,s.c_str(),oss.str().c_str());
+            }
+            answer=meta.value().value;
+        }
+    }
+    template<typename T>
+    void giveOptionalField(T& answer, InputFieldType id){ if(hasField(id)) giveField(answer,id); }
     //@}
 
     /**@name Child reader methods

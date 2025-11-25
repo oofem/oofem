@@ -35,54 +35,43 @@
 #ifndef matesponsemode_h
 #define matesponsemode_h
 
-#include "enumitem.h"
+#include "meta_enum.hpp"
 
 namespace oofem {
-#define MatResponseMode_DEF \
-    ENUM_ITEM_WITH_VALUE(TangentStiffness, 0) \
-    ENUM_ITEM_WITH_VALUE(SecantStiffness, 1) \
-    ENUM_ITEM_WITH_VALUE(ElasticStiffness, 2) \
-    ENUM_ITEM_WITH_VALUE(Stress, 3) \
-    ENUM_ITEM_WITH_VALUE(Conductivity, 4)  /* element level conductivity matrix */ \
-    ENUM_ITEM_WITH_VALUE(Conductivity_ww, 5) /* material level conductivity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Conductivity_hh, 6) /* material level conductivity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Conductivity_hw, 7) /* material level conductivity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Conductivity_wh, 8) /* material level conductivity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Capacity, 9)                                                   \
-    ENUM_ITEM_WITH_VALUE(Capacity_ww, 10) /* material level capacity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Capacity_hh, 11) /* material level capacity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Capacity_hw, 12) /* material level capacity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(Capacity_wh, 13) /* material level capacity submatrix */ \
-    ENUM_ITEM_WITH_VALUE(IntSource, 14)                                                  \
-    ENUM_ITEM_WITH_VALUE(IntSource_ww, 15) /* material level internal source submatrix - water source */ \
-    ENUM_ITEM_WITH_VALUE(IntSource_hh, 16) /*  - heat source */ \
-    ENUM_ITEM_WITH_VALUE(IntSource_hw, 17) /*  - heat source dependency on water content change */ \
-    ENUM_ITEM_WITH_VALUE(IntSource_wh, 18) /*  - water source dependency on temperature change */ \
-    ENUM_ITEM_WITH_VALUE(Permeability, 19) \
-    ENUM_ITEM_WITH_VALUE(FluidMassBalancePressureContribution, 20) \
-    ENUM_ITEM_WITH_VALUE(BiotConstant, 21) \
-    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient, 22) \
-    ENUM_ITEM_WITH_VALUE(FluidViscosity, 23) \
-    ENUM_ITEM_WITH_VALUE(Flux, 24) \
-    ENUM_ITEM_WITH_VALUE(DSigmaDT, 25) \
-    ENUM_ITEM_WITH_VALUE(ElasticBulkModulus, 26) \
-    ENUM_ITEM_WITH_VALUE(ElasticBulkModulusInverse, 27) \
-    ENUM_ITEM_WITH_VALUE(MRM_ScalarOne, 28) \
-    ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29) \
-    ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) 
+meta_enum(MatResponseMode,int,
+    TangentStiffness=0,
+    SecantStiffness=1,
+    ElasticStiffness=2,
+    Stress=3,
+    Conductivity=4,  /* element level conductivity matrix */
+    Conductivity_ww=5, /* material level conductivity submatrix */
+    Conductivity_hh=6, /* material level conductivity submatrix */
+    Conductivity_hw=7, /* material level conductivity submatrix */
+    Conductivity_wh=8, /* material level conductivity submatrix */
+    Capacity=9,
+    Capacity_ww=10, /* material level capacity submatrix */
+    Capacity_hh=11, /* material level capacity submatrix */
+    Capacity_hw=12, /* material level capacity submatrix */
+    Capacity_wh=13, /* material level capacity submatrix */
+    IntSource=14,
+    IntSource_ww=15, /* material level internal source submatrix - water source */
+    IntSource_hh=16, /*  - heat source */
+    IntSource_hw=17, /*  - heat source dependency on water content change */
+    IntSource_wh=18, /*  - water source dependency on temperature change */
+    Permeability=19,
+    FluidMassBalancePressureContribution=20,
+    BiotConstant=21,
+    CompressibilityCoefficient=22,
+    FluidViscosity=23,
+    Flux=24,
+    DSigmaDT=25,
+    ElasticBulkModulus=26,
+    ElasticBulkModulusInverse=27,
+    MRM_ScalarOne=28,
+    DeviatoricStiffness=29,
+    DeviatoricStress=30
+);
 
-/**
- * Describes the character of characteristic material matrix.
- */
-enum MatResponseMode {
-    MatResponseMode_DEF
-};
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-
-const char *__MatResponseModeToString(MatResponseMode _value);
+constexpr auto __MatResponseModeToString=MatResponseMode_value_to_string;
 } // end namespace oofem
 #endif // matesponsemode_h
