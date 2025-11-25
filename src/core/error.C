@@ -50,10 +50,10 @@ std::string errorInfo(const char *func)
 
 RuntimeException::RuntimeException(const char * _func, const char * _file, int _line, const char *format, ...)
 {
-    char stream [500];
+    char stream [1024];
     va_list args;
     va_start(args, format);
-    vsprintf(stream, format, args);
+    vsnprintf(stream, sizeof(stream)-1, format, args);
     va_end(args);
     msg = stream;
 
