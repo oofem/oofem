@@ -1,4 +1,4 @@
-testOgden1.out
+ogden1.out
 test of Neo-Hookean Material usign Ogden material with alpha = 2, mu = 20, and K = 0. See thest mooneyrivlin1 for the same case modeled by compressible Mooney-Rivlin with C_2 = 0
 ###########################################
 NonLinearStatic nsteps 1 renumber 1 nmodules 1 controllmode 1 rtolv 1.e-11 stiffMode 0 manrmsteps 1 maxiter 10
