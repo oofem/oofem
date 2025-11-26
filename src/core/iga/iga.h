@@ -91,6 +91,7 @@ class OOFEM_EXPORT IGAElement : public Element
 {
 protected:
 #ifdef __MPI_PARALLEL_MODE
+    static ParamKey IPK_IGAElement_knotSpanParallelMode;
     IntArray knotSpanParallelMode;
 #endif
 public:

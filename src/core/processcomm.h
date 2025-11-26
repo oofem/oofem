@@ -35,6 +35,7 @@
 #ifndef processcomm_h
 #define processcomm_h
 
+#include <cstdint>
 #include "oofemenv.h"
 #include "combuff.h"
 #include "commbufftype.h"

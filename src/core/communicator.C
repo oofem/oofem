@@ -36,6 +36,7 @@
 #include "intarray.h"
 
 #include <cstdarg>
+#include <cstdint>
 
 #ifdef __USE_MPI
  #include <mpi.h>
