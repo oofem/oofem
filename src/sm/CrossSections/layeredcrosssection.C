@@ -98,10 +98,47 @@ LayeredCrossSection::giveRealStress_3d(const FloatArrayF< 6 > &strain, GaussPoin
 
 
 FloatArrayF< 6 >
-LayeredCrossSection::giveRealStress_3dDegeneratedShell(const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
+LayeredCrossSection::giveRealStress_3dDegeneratedShell(const FloatArrayF< 6 > & strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    ///@todo - check-V
-    return zeros< 6 >();
+    IntArray strainControl = { 1, 2, 4, 5, 6 };
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _3dDegShell ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = ( gpnum - 1 ) / gpsperlayer + 1;
+        if ( this->layerRots.at(layer) != 0. ) {
+            double rot = this->layerRots.at(layer);
+            double c = cos(rot * M_PI / 180.);
+            double s = sin(rot * M_PI / 180.);
+
+            FloatArrayF< 6 >rotStrain = {
+                c *c *strain.at(1) - c * s * strain.at(6) + s * s * strain.at(2),
+                c *c *strain.at(2) + c * s * strain.at(6) + s * s * strain.at(1),
+                strain.at(3),
+                c *strain.at(4) + s * strain.at(5),
+                c *strain.at(5) - s * strain.at(4),
+                ( c * c - s * s ) * strain.at(6) + 2 * c * s * ( strain.at(1) - strain.at(2) ),
+            };
+
+            auto rotStress = mat->giveRealStressVector_ShellStressControl(rotStrain, strainControl, gp, tStep);
+
+            return {
+                c *c *rotStress.at(1) + 2 * c * s * rotStress.at(6) + s * s * rotStress.at(2),
+                c *c *rotStress.at(2) - 2 * c * s * rotStress.at(6) + s * s * rotStress.at(1),
+                rotStress.at(3),
+                c *rotStress.at(4) - s * rotStress.at(5),
+                c *rotStress.at(5) + s * rotStress.at(4),
+                ( c * c - s * s ) * rotStress.at(6) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
+            };
+        } else {
+            return mat->giveRealStressVector_ShellStressControl(strain, strainControl, gp, tStep);
+        }
+    } else {
+        OOFEM_ERROR("Only _3dDegShell mode is meaningful for layered shells");
+    }
 }
 
 
@@ -782,8 +819,20 @@ LayeredCrossSection::give3dShellRotStiffMtrx(MatResponseMode rMode, GaussPoint *
 FloatMatrixF< 6, 6 >
 LayeredCrossSection::give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    ///@todo - check-V
-    return FloatMatrixF< 6, 6 >();
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    auto answer = mat->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
+
+    answer.at(1, 1) -= answer.at(1, 3) * answer.at(3, 1) / answer.at(3, 3);
+    answer.at(2, 1) -= answer.at(2, 3) * answer.at(3, 1) / answer.at(3, 3);
+    answer.at(1, 2) -= answer.at(1, 3) * answer.at(3, 2) / answer.at(3, 3);
+    answer.at(2, 2) -= answer.at(2, 3) * answer.at(3, 2) / answer.at(3, 3);
+
+    answer.at(3, 1) = 0.0;
+    answer.at(3, 2) = 0.0;
+    answer.at(3, 3) = 0.0;
+    answer.at(2, 3) = 0.0;
+    answer.at(1, 3) = 0.0;
+    return answer;
 }
 
 
@@ -1282,9 +1331,13 @@ LayeredCrossSection::giveMaterial(IntegrationPoint *ip) const
 {
     ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
     if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
-         ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
-         ) {
-        return domain->giveMaterial(layerMaterials.at(1) );
+         ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ||
+         ip->giveIntegrationRule()->giveIntegrationDomain() == _3dDegShell ) {
+        int ngps = ip->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = ip->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = ( gpnum - 1 ) / gpsperlayer + 1;
+        return this->domain->giveMaterial(this->giveLayerMaterial(layer) );
         //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
     }
 
@@ -1340,7 +1393,7 @@ LayeredCrossSection::setupIntegrationPoints(IntegrationRule &irule, int nPointsX
 {
     switch ( element->giveIntegrationDomain() ) {
     case _3dDegShell:
-        return irule.SetUpPointsOn3dDegShellLayers(nPointsXY, nPointsZ, element->giveMaterialMode(), this->layerThicks);
+        return irule.SetUpPointsOn3dDegShellLayers(nPointsXY, max(nPointsZ, this->numberOfIntegrationPoints), element->giveMaterialMode(), this->layerThicks);
 
     default:
         OOFEM_ERROR( "Unknown mode (%d)", element->giveIntegrationDomain() );

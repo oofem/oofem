@@ -892,7 +892,7 @@ MITC4Shell::givedNdx(const FloatArrayF< 3 > &coords)
 void
 MITC4Shell::setupIRForMassMtrxIntegration(IntegrationRule &iRule)
 {
-    iRule.setUpIntegrationPoints(this->giveIntegrationDomain(), nPointsXY, nPointsZ, this->giveMaterialMode() );
+    this->giveCrossSection()->setupIntegrationPoints(iRule, nPointsXY, nPointsZ, this);
 }
 
 int

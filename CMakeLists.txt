@@ -42,6 +42,7 @@ set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
@@ -79,7 +80,8 @@ if (MSVC)
     # C4267 size_t to int conversion. Most of these are indices, but many places can be replaced by a for-each loop as well.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
     # make MSVC a bit more silent (though most of this should be fixed really)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101")
+	 # C4608: don't report unknown pragmas (used e.g. as "#pragma GCC diagnostic push" "#pragma GCC diagnostic ignored "-Woverloaded-virtual" /* ... */ "#pragma GCC diagnostic pop" to locally disable certain harmless warnings from gcc)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101 -wd4068")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
@@ -173,7 +175,7 @@ option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
-OPTION (USE_XML "Reader for XML input format (requires pugixml)")
+OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -985,6 +987,11 @@ if (USE_SM)
     file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.sh")
     foreach (case ${sm_tests})
         add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND bash ${case} ${oofem_cmd})
+    endforeach (case)
+
+    file (GLOB sm_nafems_tests RELATIVE "${oofem_TEST_DIR}/sm/NAFEMS" "${oofem_TEST_DIR}/sm/NAFEMS/*.in")
+    foreach (case ${sm_nafems_tests})
+        add_test (NAME "test_sm_NAFEMS_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm/NAFEMS COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif ()
 

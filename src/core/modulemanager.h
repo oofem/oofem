@@ -93,7 +93,7 @@ public:
      * @param ir Record for receiver.
      * @return Nonzero if o.k.
      */
-    virtual int instanciateYourself(DataReader &dr, const std::unique_ptr<InputRecord>& irPtr, InputFieldType ift, const std::string& name, DataReader::InputRecordType irType)
+    virtual int instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>& irPtr, InputFieldType ift, const std::string& name, DataReader::InputRecordType irType)
     {
         // read modules
         DataReader::GroupRecords modRecs=dr.giveGroupRecords(irPtr,ift,name,irType,/*optional*/true);

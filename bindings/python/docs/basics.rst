@@ -10,18 +10,7 @@ Installation
 
 Prerequisities
 --------------
-The python bindings require pybind11 (https://pybind11.readthedocs.io/en/stable/). Pybind11 requires **python-dev** or **python3-dev** packages as
-well as **cmake**. The recommended procedure to install pybind11 is to clone pybind11 github repository
-
-.. code-block:: bash
-
-   git clone https://github.com/pybind/pybind11.git 
-   cd pybind11
-   mkdir build
-   cd build
-   cmake ..
-   make check -j 4
-   make install
+The pybind11 library is included as submodule inside oofem repository. To build oofem with python bindings requires **python-dev** or **python3-dev** packages to be installed.
 
 Generate binding code
 ---------------------

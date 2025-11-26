@@ -41,12 +41,13 @@
 
 #include <sstream>      // std::istringstream
 #include <string>       // std::string
+#include <cmath>
 
 namespace oofem {
 REGISTER_ExportModule(SolutionStatusExportModule)
 
 
-SolutionStatusExportModule :: SolutionStatusExportModule(int n, EngngModel *e) : ExportModule(n, e)
+SolutionStatusExportModule :: SolutionStatusExportModule(int n, EngngModel *e, FILE *out) : ExportModule(n, e), outputFile(out)
 {
 }
 
@@ -105,7 +106,10 @@ SolutionStatusExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         }
         fprintf(outputFile, "%10s ", status.c_str());
       } else if (rec == "st") {
-        fprintf(outputFile, "%10.3e ", tStep->solutionTime); 
+        int hours = static_cast<int>(tStep->solutionTime) / 3600;
+        int minutes = (static_cast<int>(tStep->solutionTime) % 3600) / 60;
+        double seconds = fmod(tStep->solutionTime, 60.0); // fractional seconds
+        fprintf(outputFile, "%02d:%02d:%04.1f ", hours, minutes, seconds);
       } else if (rec == "-") {
         fprintf(outputFile, "%10s ", "-");
       }
@@ -116,12 +120,15 @@ SolutionStatusExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 void
 SolutionStatusExportModule::initialize()
 {
-  char filename [100];    
-  sprintf( filename, "%s.m%d", this->emodel->giveOutputBaseFileName().c_str(), this->number);
-  this->outputFile = fopen(filename, "w");
+  if (this->outputFile == nullptr) {
+      char filename [100];
+      sprintf( filename, "%s.m%d", this->emodel->giveOutputBaseFileName().c_str(), this->number);
+      this->outputFile = fopen(filename, "w");
+  }
 
-  fprintf(outputFile,"%s (%s, %s), GitHash: %s\n", PRG_VERSION, HOST_TYPE, MODULE_LIST, OOFEM_GIT_HASH);
+  fprintf(outputFile,"%s (%s, %s)\nGitHash: %s\n", PRG_VERSION, HOST_TYPE, MODULE_LIST, OOFEM_GIT_HASH);
   time_t currtime = time(NULL);
+  fprintf(outputFile,"Job: %s\n", this->emodel->giveReferenceFileName().c_str());
   fprintf(outputFile,"%s\n\n", ctime(& currtime));
   this->printRecsHeader();
 
@@ -130,6 +137,15 @@ SolutionStatusExportModule::initialize()
 void SolutionStatusExportModule::terminate()
 {
   fprintf (outputFile, "\nAnalysis finished\n"); // would be nice to include completion status
+
+  // get overall time consumed
+  int rsec = 0, rmin = 0, rhrs = 0;
+  int usec = 0, umin = 0, uhrs = 0;
+  this->emodel->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
+
+  fprintf(outputFile, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+  fprintf(outputFile, "User time consumed: %03dh:%02dm:%02ds\n\n", uhrs, umin, usec);
+  
   int nw, ne;
   oofem_logger.getNumberOfWarningsAndErrors(nw, ne);
   fprintf (outputFile, "Total %d error(s) and %d warnings reported\n", ne, nw);
@@ -182,6 +198,8 @@ SolutionStatusExportModule :: printRecsHeader()
     fprintf (outputFile, "%10s ", label.c_str());
   }
   fprintf(outputFile, "\n");
+  std::string dashes (this->recs.size() * 11, '-');
+  fprintf(outputFile, "%s\n", dashes.c_str());
 }
 
 } // end namespace oofem

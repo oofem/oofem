@@ -37,6 +37,7 @@
 #include "material.h"
 
 #include <memory>
+#include <algorithm>
 
 namespace oofem {
 //GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
@@ -115,7 +116,7 @@ bool GaussPoint :: hasSlaveGaussPoint()
 
 size_t GaussPoint :: findFirstIndexOfSlaveGaussPoint(GaussPoint *gp)
 {
-    auto it = find( gaussPoints.begin(), gaussPoints.end(), gp );
+    auto it = std::find( gaussPoints.begin(), gaussPoints.end(), gp );
     if ( it != gaussPoints.end() ) {
         return it - gaussPoints.begin();
     } else {

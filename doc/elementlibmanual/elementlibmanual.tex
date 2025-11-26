@@ -190,6 +190,7 @@ specified. The element features are summarized in Table~\ref{truss1dsummary}.
 \elementDescription{Loads}{Body loads are supported. Boundary loads are
 not supported in current implementation}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch011.in}{tests/sm/patch011.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/Mises01.in}{tests/sm/Mises01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/idm01.in}{tests/sm/idm01.in}}
 \end{elementsummary}
 
 
@@ -228,6 +229,7 @@ provided.}
 \elementDescription{Loads}{Edge loads are supported, Edge number should be equal
 to 1}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch010.in}{tests/sm/patch010.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/truss2d\_01.in}{tests/sm/truss2d\_01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/rotated\_01.in}{tests/sm/rotated\_01.in}}
 \end{elementsummary}{truss2d element summary}{truss2dsummary}
 
 
@@ -256,6 +258,7 @@ constitutive support.}
 \elementDescription{CS properties}{cross section area should be
 provided.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/compoDamMat.in}{tests/sm/compoDamMat.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/nldeidynamic1.in}{tests/sm/nldeidynamic1.in}}
 \end{elementsummary}
 
 
@@ -304,6 +307,7 @@ between temperature change of local z+ and local z- surfaces of beam (in local c
 system). Temperature load require that the ``thick'' property of cross
 section model is defined.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam2d\_1.in}{tests/sm/beam2d\_1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam2d\_2.in}{tests/sm/beam2d\_2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam2d\_3.in}{tests/sm/beam2d\_3.in}}
 \end{elementsummary}
 
 \subsubsection{Beam3d element}
@@ -347,6 +351,7 @@ The element features are summarized in Table~\ref{beam3dsummary}.
 \elementDescription{CS properties}{Area, inertia moment along y and z axis (\param{iy} and \param{iz} parameters), torsion inertia moment (\param{ik} parameter) and either cross section area shear correction factor (\param{beamshearcoeff} parameter) or equivalent shear areas (\param{shearareay} and \param{shearareaz} parameters) are required. These cross section properties are assumed to be defined in local coordinate system of element.}
 \elementDescription{Loads}{Constant and linear edge loads are supported. Edge number should be equal to 1. Temperature load is supported, the first coefficient of temperature load represent mid-plane temperature change, the second one represent difference between temperature change of local z+ surface and local z- surface surface of beam and the third one represent difference between temperature change of local y+ surface and  local y- surface of beam. Requires the ``thick'' (measured in direction of local z axis) and ``width'' (measured in direction of local y axis) cross section model properties to be defined.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam3d\_1.in}{tests/sm/beam3d\_1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam3d\_2.in}{tests/sm/beam3d\_2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/beam3d\_3.in}{tests/sm/beam3d\_3.in}}
 \end{elementsummary}
 
 
@@ -373,24 +378,26 @@ The element features are summarized in Table~\ref{lattice2dsummary}.
 \elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
 \elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
 \elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2drandom.in}{tests/sm/lattice2drandom.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticedamagevisco\_mps\_1.in}{tests/sm/latticedamagevisco\_mps\_1.in}}
 \end{elementsummary}
 
 The theory of lattice2d is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
 
-\subsubsection{Lattice2dBoundary element}
+\subsubsection{latticeboundary2D element}
 Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell. It has three components which are displacements, which are produces of the macroscopic (average) strain components and length of the peridodic cell as $aE_{xx}$, $bE_{xx}$  and $bG_{xy}$ and the length of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice2dboundaryfig}). The coordinates $x$ and $y$ of the third node are the lengths $a$ and $b$ of the periodic cell, respectively.  The element is defined in x,y plane. The strain components at the additional node have the meaning of average strains in the periodic cell. The specific input parameters for this element in addition to those used for lattice2d are shown in Table~\ref{lattice2dboundarysummary}. 
 \begin{figure}[htb]
   \centering
   \includegraphics[width=0.4\textwidth]{./lattice2dboundaryfig.pdf}
- \caption{Lattice2dboundary element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
+ \caption{latticeboundary2D element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
  \label{lattice2dboundaryfig}
 \end{figure}
 
-\begin{elementsummary}{lattice2dboundary}{2d lattice boundary element}{\field{location}{in}}{lattice2dboundary element summary}{lattice2dboundarysummary}
+\begin{elementsummary}{latticeboundary2D}{2d lattice boundary element}{\field{location}{in}}{latticeboundary2D element summary}{latticeboundary2D summary}
 
 \elementParam{\param{location}: number between 1 and 8 which specifies the location of the node with respect to the periodic cell.}
 
 \elementDescription{Unknowns}{Nine DOFs are required, which are $u$-displacement, $v$-displacement and $w$-rotation at nodes 1 and 2, and $aE_{xx}$, $bE_{yy}$ and $bG_{xy}$ at node 3.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2dboundary1.in}{tests/sm/lattice2dboundary1.in}}
 \elementDescription{Reference}{\cite{GraJir10}}
 \end{elementsummary}
 
@@ -413,6 +420,7 @@ The input parameters for this element are shown in Table~\ref{lattice3dsummary}.
 \elementParam{\param{pressures}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
 \elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
 \elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d2.in}{tests/sm/lattice3d2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d3.in}{tests/sm/lattice3d3.in}}
 \elementDescription{Reference}{\cite{GraBol16}}
 \end{elementsummary}
 
@@ -434,6 +442,7 @@ Here, $\mathbf{x}^{'}$ and $\mathbf{x}$ are the nodes inside and outside, respec
 \begin{elementsummary}{lattice3dboundary}{3d lattice boundary element}{\field{location}{in}}{lattice3dboundary element summary}{lattice3dboundarysummary}
 \elementParam{\param{location}: array of two numbers between number between 1 and 26, which specifies the location of the two nodes with respect to the 3d periodic cell.}
 \elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each of the first two node. Node 3 requires the 6 quantities to control the periodic cell $aE_{xx}$, $bE_{yy}$, $zE_{zz}$, $cG_{yz}$, $cG_{xz}$ and $bG_{xy}$ }
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}}
 \elementDescription{Reference}{\cite{AthWheGra18}}
 \end{elementsummary}
 
@@ -448,6 +457,7 @@ The input parameters for this element are shown in Table~\ref{latticelink3dsumma
 \elementParam{\param{l\_end}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
 \elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
 \elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticelink1.in}{tests/sm/latticelink1.in}}
 \elementDescription{Reference}{\cite{GraAnt19}}
 \end{elementsummary}
 
@@ -498,6 +508,7 @@ The side numbering is following. Each i-th element side begins in i-th element n
 The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch100.in}{tests/sm/patch100.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch101.in}{tests/sm/patch101.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch103.in}{tests/sm/patch103.in}}
 \end{elementsummary}
 
 \begin{elementsummary}{linquad3dplanestress}{3D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}{linquad3dplanestress element summary}{linquad3dplanestresssummary}
@@ -513,6 +524,7 @@ The side numbering is following. Each i-th element side begins in i-th element n
 The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Basic functionality tested, element loads need further testing.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch303.in}{tests/sm/patch303.in}}
 \end{elementsummary}
 
 \subsubsection{QPlaneStress2d}
@@ -541,6 +553,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 \elementDescription{Loads}{Body and boundary loads are supported.}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Stable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch110.in}{tests/sm/patch110.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/deadweight01.in}{tests/sm/padeadweight01tch111.in}}
 \end{elementsummary}
 
 
@@ -575,6 +588,7 @@ direction, the positive local edge y-axis is rotated 90 degrees
 anti-clockwise (see fig. (\ref{TrPlanestressfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch102.in}{tests/sm/patch102.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch104.in}{tests/sm/patch104.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch130.in}{tests/sm/patch130.in}}
 \end{elementsummary}
 
 
@@ -604,6 +618,7 @@ default) or in 7 points (using \param{NIP} parameter).}
 \elementDescription{Loads}{Boundary loads are supported.}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch140.in}{tests/sm/patch140.in}}
 \end{elementsummary}
 
 
@@ -636,6 +651,7 @@ Integration of strains associated with rotational field integration using 1 poin
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch150.in}{tests/sm/patch150.in}}
 \end{elementsummary}
 
 \begin{elementsummary}{trplanestrrot3d}{3D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}{trplanestrrot3d element summary}{trplanestrrot3dsummary}
@@ -736,6 +752,7 @@ Each i-th element side begins in i-th element node and ends on next element node
 The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Quad1PlaneStrainfig})).}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/DruckerPrager\_01.in}{tests/sm/DruckerPrager\_01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/ogden1.in}{tests/sm/ogden1.in}}
 \end{elementsummary}
 
 
@@ -768,6 +785,7 @@ Each i-th element side begins in i-th element node and ends on next element node
 The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{TrplaneStrain})).}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch107.in}{tests/sm/patch107.in}}
 \end{elementsummary}
 
 
@@ -803,6 +821,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane nor
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_dkt.in}{tests/sm/patch\_dkt.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/dkt\_bending01.in}{tests/sm/dkt\_bending01.in}}
 \elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
 \end{elementsummary}
 
@@ -832,6 +851,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane nor
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_qdtk.in}{tests/sm/patch\_qdtk.in}}
 \elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
 \end{elementsummary}
 
@@ -860,6 +880,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane nor
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_cct.in}{tests/sm/patch\_cct.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_cct\_02.in}{tests/sm/patch\_cct\_02.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch200.in}{tests/sm/patch200.in}}
 \end{elementsummary}
 
 
@@ -888,6 +909,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_cct3d.in}{tests/sm/patch\_cct3d.in}}
 \end{elementsummary}
 
 
@@ -917,6 +939,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_rershell.in}{tests/sm/patch\_rershell.in}}
 \end{elementsummary}
 
 
@@ -952,7 +975,7 @@ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformat
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementDescription{Tests}{sm/trshell11\_1.in}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/trshell11\_1.in}{tests/sm/trshell11\_1.in}}
 \end{elementsummary}
 
 
@@ -980,6 +1003,7 @@ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sig
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
 \elementDescription{Note}{Works only with linear material models, as bending and membrane actions are uncoupled}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/trshell02\_test.in}{tests/sm/trshell02\_test.in}}
 \end{elementsummary}
 
 
@@ -1007,6 +1031,7 @@ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sig
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Reference}{\cite{RobertCook1989}}
 \elementDescription{Status}{Experimental}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_quad1mindlin.in}{tests/sm/patch\_quad1mindlin.in}}
 \end{elementsummary}
 
 
@@ -1029,6 +1054,7 @@ The element features are summarized in Table~\ref{quad1mindlinsummary}.
 \elementDescription{Nlgeo}{Not applicable. The implementation is for large defomrations and hence geometrical nonlinearities will always be present, regardless the value of Nlgeo.}
 \elementDescription{Reference}{\cite{RagnarLarsson2011}}
 \elementDescription{Status}{Experimental}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/staggeredsolver.in}{tests/sm/staggeredsolver.in}}
 \end{elementsummary}
 
 
@@ -1063,6 +1089,10 @@ The shell force ($s_f$), shell momentum ($s_m$), shell strain ($s_s$), and shell
 }
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_mitc4.in}{tests/sm/patch\_mitc4.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch\_mitc4\_02.in}{tests/sm/patch\_mitc4\_02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/scordelis\_mitc4.in}{tests/sm/scordelis\_mitc4.in}
+}
 \end{elementsummary}
 
 
@@ -1081,6 +1111,9 @@ The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
 \elementDescription{Loads}{Surface load support.}
 \elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
 \elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/test\_wp1.in}{tests/sm/test\_wp1.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/test\_wp5.in}{tests/sm/test\_wp5.in}}
+
 \end{elementsummary}
 
 \subsubsection{Tria1PlateSubSoil Element} \label{tria1platesubsoil}
@@ -1096,6 +1129,8 @@ The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
 \elementDescription{Loads}{Surface load support.}
 \elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
 \elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/test\_wp2.in}{tests/sm/test\_wp2.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/test\_wp5.in}{tests/sm/test\_wp5.in}}
 \end{elementsummary}
 
 
@@ -1133,6 +1168,10 @@ The element features are summarized in Table~\ref{axisymm3dsummary}.
 \elementDescription{Loads}{Boundary and body loads are supported.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm04.in}{tests/sm/axisymm04.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm05.in}{tests/sm/axisymm05.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm06.in}{tests/sm/axisymm06.in}
+}
 \end{elementsummary}
 
 \subsubsection{Q4axisymm element}
@@ -1152,6 +1191,7 @@ $\gamma_{rz}$) (Supported values include 1 (default), 4, 9, and 16 integration p
 \elementDescription{Loads}{No boundary and body loads are supported.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -1172,6 +1212,10 @@ $\gamma_{rz}$) are integrated using one point integration formula.}
 \elementDescription{Loads}{Boundary and body loads supported.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm01.in}{tests/sm/axisymm01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm02.in}{tests/sm/axisymm02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/axisymm03.in}{tests/sm/axisymm03.in}
+}
 \end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
@@ -1202,6 +1246,10 @@ finite element. Each node has 3 degrees of freedom. The element features are sum
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch302.in}{tests/sm/patch302.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/compoDamMat.in}{tests/sm/compoDamMat.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/deadweight02.in}{tests/sm/deadweight02.in}
+}
 \end{elementsummary}
 
 
@@ -1233,6 +1281,9 @@ finite element. Each node has 3 degrees of freedom. The element features are sum
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/cantilever\_Qspace.in}{tests/sm/cantilever\_Qspace.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/layered\_cube.in}{tests/sm/layered\_cube.in}
+}
 \end{elementsummary}
 
 
@@ -1265,6 +1316,9 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
 \elementDescription{Loads}{Surface and Edge loadings supported.}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch300.in}{tests/sm/patch300.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/patch301.in}{tests/sm/patch301.in}
+}
 \end{elementsummary}
 
 
@@ -1293,6 +1347,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -1320,6 +1375,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0,1,2.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 \subsubsection{QWedge element}
@@ -1404,6 +1460,10 @@ w-displacement) are required in each node, according to element mode (determined
 \elementDescription{Nlgeo}{0}
 \elementDescription{Status}{Reliable}
 \elementDescription{Note}{Element requires material model with \_1dInterface support.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_Point2D\_01.in}{tests/sm/InterfaceEL\_Point2D\_01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_Point3D\_01.in}{tests/sm/InterfaceEL\_Point3D\_01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/interface01.in}{tests/sm/interface01.in}
+}
 \end{elementsummary}
 
 \subsubsection{IntElLine1, Interface2dlin elements}
@@ -1429,6 +1489,7 @@ The element can be used to tie together two element edges and is defined by four
 \elementDescription{Nlgeo}{0}
 \elementDescription{Status}{Reliable}
 \elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_Line1.in}{tests/sm/InterfaceEL\_Line1.in}}
 \end{elementsummary}
 
 
@@ -1456,6 +1517,7 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Nlgeo}{0}
 \elementDescription{Status}{Reliable}
 \elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 \subsubsection{IntElSurfTr1, Interface3dtrlin elements}
@@ -1482,6 +1544,7 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Nlgeo}{0}
 \elementDescription{Status}{Reliable}
 \elementDescription{Note}{Element requires material model with \_3dInterface support.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_SurfTr1.in}{tests/sm/InterfaceEL\_SurfTr1.in}}
 \end{elementsummary}
 
 \subsubsection{IntElSurfQuad1 element}
@@ -1508,6 +1571,9 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Nlgeo}{0}
 \elementDescription{Status}{Reliable}
 \elementDescription{Note}{Element requires material model with \_3dInterface support.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_SurfQuad1.in}{tests/sm/InterfaceEL\_SurfQuad1.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_SurfQuad2.in}{tests/sm/InterfaceEL\_SurfQuad2.in}
+}
 \end{elementsummary}
 
 
@@ -1528,7 +1594,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 \elementDescription{Loads}{Edge loads corresponding to free warping problem are generated automatically. Additional edge loads are not supported.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
-\elementDescription{Note}{Test case: sm/freewarpingtest2.in}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/freewarpingtest2.in}{tests/sm/freewarpingtest2.in}}
 \end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
@@ -1562,7 +1628,7 @@ into subtriangles.}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{-}
 \elementDescription{Status}{-}
-\elementDescription{Note}{Test case: sm/xFemCrackVal.in}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/xFemCrackVal.in}{tests/sm/xFemCrackVal.in}}
 \end{elementsummary}
 
 
@@ -1589,8 +1655,10 @@ into subtriangles.}
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{-}
 \elementDescription{Status}{-}
-\elementDescription{Note}{Test cases: sm/xFemCrackValBranch.in,
-sm/xfemCohesiveZone1.in, benchmark/xfem01.in}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/xFemCrackValBranch.in}{tests/sm/xFemCrackValBranch.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/xFemCrackValBranchCZ.in}{tests/sm/xFemCrackValBranchCZ.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/xFemIntersectingCracks.in}{tests/sm/xFemIntersectingCracks.in}
+}
 \end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
@@ -1625,8 +1693,12 @@ The supported \entKeyword{IGAElement} values are following:\\
 \descitem{Parameters} None.\\
 \elemkeyword{tsplineplanestresselement}\\
 \descitem{Parameters} \field{localindexknotvectoru}{in} \field{localindexknotvectorv}{in} \field{localindexknotvectorw}{in}\\
-The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.
+The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.\\
 
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/sm/ex-bspline-01.in}{tests/sm/ex-bspline-01.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/ex-bspline-02.in}{tests/sm/ex-bspline-02.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/ex3d-nurbs-01.in}{tests/sm/ex3d-nurbs-01.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/ex3d-nurbs-02.in}{tests/sm/ex3d-nurbs-02.in}.
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1646,6 +1718,7 @@ A different mass and rotary inertia may be assigned to each coordinate direction
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{-}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 \subsubsection{Spring element}
@@ -1658,6 +1731,11 @@ The spring element has no mass associated, the mass can be added using LumpedMas
 \elementParam{\param{orientation}:defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.}
 \elementParam{\param{m}: determines optional mass of the element, zero value assumed by default.}
 \elementDescription{Note}{the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/spring01.in}{tests/sm/spring01.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/spring02.in}{tests/sm/spring02.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/spring05.in}{tests/sm/spring05.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/sm/spring06.in}{tests/sm/spring06.in}
+}
 \end{elementsummary}
 
 \begin{table}
@@ -1758,6 +1836,9 @@ Stabilization through lumped capacity matrix is suggested in transient transport
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{Area}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/line01.in}{tests/tm/line01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/line02.in}{tests/tm/line02.in}
+}
 \end{elementsummary}
 
 \subsubsection{Line1mt element}
@@ -1802,6 +1883,11 @@ anti-clockwise (see fig. (\ref{Tr1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-1.in}{tests/tm/tmpatch43-1.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-2.in}{tests/tm/tmpatch43-2.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch43-3.in}{tests/tm/tmpatch43-3.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch45-1.in}{tests/tm/tmpatch45-1.in}
+}
 \end{elementsummary}
 
 \subsubsection{Tr1mt element}
@@ -1812,6 +1898,8 @@ Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
 Isoparametric triangular finite element with linear approximations of 
 temperature and moisture. 
 Other features are the same as for Tr1ht in Section~\ref{Tr1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/HeMoKunzel\_1.in}{tests/tm/HeMoKunzel\_1.in}
 
 
 \subsubsection{Quad1ht element}
@@ -1852,11 +1940,18 @@ anti-clockwise (see fig. (\ref{Quad1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch01.in}{tests/tm/tmpatch01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch02.in}{tests/tm/tmpatch02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch03.in}{tests/tm/tmpatch03.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch04.in}{tests/tm/tmpatch04.in}
+}
 \end{elementsummary}
 
 \subsubsection{Quad1mt element}
 Isoparametric four-node quadrilateral finite element.
 Other features are the same as for Quad1ht in Section~\ref{Quad1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/nlisomoisture01.in}{tests/tm/nlisomoisture01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/nlisomoisture02.in}{tests/tm/nlisomoisture02.in}
 
 \subsubsection{Quad1hmt element}
 Represents isoparametric four-node quadrilateral finite element for
@@ -1874,6 +1969,8 @@ property is requested form the cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis), see fig.~\ref{qplanstrssfig}. The element has the same features as in Table~\ref{Quad1htsummary}.
 
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qquad01.in}{tests/tm/qquad01.in}
+
 \subsubsection{QQuad1mt element}
 Element for mass transport problems, see the parent element in sec.~\ref{QQuad1ht}. 
 
@@ -1888,11 +1985,15 @@ Isoparametric four-node quadrilateral finite element for
 axisymmetric heat transfer problems. The element description is
 similar to Quad1 element, see section \ref{Quad1ht}.
 
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/quadaxisym01.in}{tests/tm/quadaxisym01.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/quadaxisym02.in}{tests/tm/quadaxisym02.in}.
+
 
 \subsubsection{Traxisym1ht element}
 Linear triangular finite element for axisymmetric heat transfer
 problems. The element description is
 similar to Tr1ht element, see section \ref{Tr1ht}.
+
+Tests/Examples: \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-1.in}{tests/tm/tmpatch44-1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-2.in}{tests/tm/tmpatch44-2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch44-3.in}{tests/tm/tmpatch44-3.in}.
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1914,6 +2015,10 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch40.in}{tests/tm/tmpatch40.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch41.in}{tests/tm/tmpatch41.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch42.in}{tests/tm/tmpatch42.in}
+}
 \end{elementsummary}
 
 
@@ -1945,6 +2050,11 @@ surface numbering is shown in fig. (\ref{Brick1htfig})).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch31.in}{tests/tm/tmpatch31.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch32.in}{tests/tm/tmpatch32.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch34.in}{tests/tm/tmpatch34.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/tmpatch38.in}{tests/tm/tmpatch38.in}
+}
 \end{elementsummary}
 
 \subsubsection{Brick1hmt - hexahedral 3D element}
@@ -1972,6 +2082,10 @@ integration point used can be overloaded using \param{NIP} parameter.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_01.in}{tests/tm/qbrick\_01.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_02.in}{tests/tm/qbrick\_02.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/tm/qbrick\_03.in}{tests/tm/qbrick\_03.in}
+}
 \end{elementsummary}
 
 \subsubsection{QBrick1mt - quadratic hexahedral 3D element}
@@ -2004,6 +2118,9 @@ The element features are summarized in Table~\ref{Tr121Stokessummary}.
 \elementDescription{Integration}{}
 \elementDescription{Features}{-}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/fm/simpleNonlinearStokes.in}{tests/fm/simpleNonlinearStokes.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/fm/weakPeriodicTriangularObstacle.in}{tests/fm/weakPeriodicTriangularObstacle.in}
+}
 \end{elementsummary}
 
 \subsubsection{Tet21Stokes element}
@@ -2016,6 +2133,7 @@ Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, v
 \elementDescription{Integration}{}
 \elementDescription{Features}{-}
 \elementDescription{Status}{Untested}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 \subsubsection{Hexa21Stokes element}
@@ -2038,6 +2156,7 @@ Standard 27 node hexahedral element for stokes flow, with quadratic geometry, ve
 \elementDescription{Integration}{}
 \elementDescription{Features}{-}
 \elementDescription{Status}{Untested}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -2052,6 +2171,7 @@ Should not be used with materials that have memory (which is uncommon for flow p
 \elementDescription{Integration}{}
 \elementDescription{Features}{-}
 \elementDescription{Status}{Untested}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 \subsubsection{Tet1BubbleStokes element}
@@ -2065,6 +2185,7 @@ Should not be used with materials that have memory (which is uncommon for flow p
 \elementDescription{Integration}{}
 \elementDescription{Features}{-}
 \elementDescription{Status}{Untested}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
@@ -2112,6 +2233,10 @@ represented by PrescribedTractionPressureBC. See section on boundary
 conditions in OOFEM input manual.}. Body loads
 representing the self-weight load are supported.}
 \elementDescription{Status}{Untested}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/fm/cbs1.in}{tests/fm/cbs1.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/fm/cbs2.in}{tests/fm/cbs2.in},
+  \href{https://github.com/oofem/oofem/blob/devel/tests/fm/cbs3.in}{tests/fm/cbs3.in}
+}
 \end{elementsummary}
 
 
@@ -2155,6 +2280,8 @@ reference polygon (see corresponding levelset record in oofem input manual).
 The material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/fm/scctest01.in}{tests/fm/scctest01.in}
+}
 \end{elementsummary}
 
 
@@ -2188,6 +2315,7 @@ representing the self-weight load are supported.}
 \elementDescription{Multi-fluid analysis}{The element has no support for solving
 problems with two immiscible fluids in a fixed spatial domain.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -2227,6 +2355,7 @@ filled with reference fluid (some form of source) using parameter
 the material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -2263,6 +2392,7 @@ is used to track the position of interface.
 The material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.}
 \elementDescription{Status}{}
+\elementDescription{Tests/Examples}{-}
 \end{elementsummary}
 
 
@@ -2289,6 +2419,12 @@ Represents 2D  isoparametric quad element. The element geometry in (x,y) plane i
 \elementDescription{CS properties}{As required by individual terms}
 \elementDescription{Loads}{None, need to be defined using terms}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms01.in}{tests/mpm/mpms01.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms02.in}{tests/mpm/mpms02.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms03.in}{tests/mpm/mpms03.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/cook2\_u1p0.in}{tests/mpm/cook2\_u1p0.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/cook2\_u2p1.in}{tests/mpm/cook2\_u2p1.in}
+}
 \end{elementsummary}
 
 \subsubsection{L1 element}
@@ -2305,6 +2441,12 @@ Represents 1D isoparametric line element in 3D space. The element geometry is de
 \elementDescription{CS properties}{As required by individual terms}
 \elementDescription{Loads}{None, need to be defined using terms}
 \elementDescription{Status}{Reliable}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms01.in}{tests/mpm/mpms01.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms02.in}{tests/mpm/mpms02.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/mpms03.in}{tests/mpm/mpms03.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/cook2\_u1p0.in}{tests/mpm/cook2\_u1p0.in},
+\href{https://github.com/oofem/oofem/blob/devel/tests/mpm/cook2\_u2p1.in}{tests/mpm/cook2\_u2p1.in}
+}
 \end{elementsummary}
 
 % References;

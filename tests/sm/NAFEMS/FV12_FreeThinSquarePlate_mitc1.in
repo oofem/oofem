@@ -1,0 +1,260 @@
+FV12_mitc1.out
+Eigen vibration of free thin rectangular plate (10x10x0.05), E=200GPa, nu=0.3
+EigenValueDynamic nroot 12 rtolv 1.e-6 nmodules 1 stype 1
+#StaticStructural nsteps 1 nmodules 1
+#vtkxml 1 tstep_all primvars 1 1
+errorcheck 
+domain 3dshell
+OutputManager tstep_all dofman_all element_all
+ndofman 121 nelem 100 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 5
+#Nodes
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 1.0 0.0 0.0
+node 3 coords 3 2.0 0.0 0.0
+node 4 coords 3 3.0 0.0 0.0
+node 5 coords 3 4.0 0.0 0.0
+node 6 coords 3 5.0 0.0 0.0
+node 7 coords 3 6.0 0.0 0.0
+node 8 coords 3 7.0 0.0 0.0
+node 9 coords 3 8.0 0.0 0.0
+node 10 coords 3 9.0 0.0 0.0
+node 11 coords 3 10.0 0.0 0.0
+node 12 coords 3 0.0 1.0 0.0
+node 13 coords 3 1.0 1.0 0.0
+node 14 coords 3 2.0 1.0 0.0
+node 15 coords 3 3.0 1.0 0.0
+node 16 coords 3 4.0 1.0 0.0
+node 17 coords 3 5.0 1.0 0.0
+node 18 coords 3 6.0 1.0 0.0
+node 19 coords 3 7.0 1.0 0.0
+node 20 coords 3 8.0 1.0 0.0
+node 21 coords 3 9.0 1.0 0.0
+node 22 coords 3 10.0 1.0 0.0
+node 23 coords 3 0.0 2.0 0.0
+node 24 coords 3 1.0 2.0 0.0
+node 25 coords 3 2.0 2.0 0.0
+node 26 coords 3 3.0 2.0 0.0
+node 27 coords 3 4.0 2.0 0.0
+node 28 coords 3 5.0 2.0 0.0
+node 29 coords 3 6.0 2.0 0.0
+node 30 coords 3 7.0 2.0 0.0
+node 31 coords 3 8.0 2.0 0.0
+node 32 coords 3 9.0 2.0 0.0
+node 33 coords 3 10.0 2.0 0.0
+node 34 coords 3 0.0 3.0 0.0
+node 35 coords 3 1.0 3.0 0.0
+node 36 coords 3 2.0 3.0 0.0
+node 37 coords 3 3.0 3.0 0.0
+node 38 coords 3 4.0 3.0 0.0
+node 39 coords 3 5.0 3.0 0.0
+node 40 coords 3 6.0 3.0 0.0
+node 41 coords 3 7.0 3.0 0.0
+node 42 coords 3 8.0 3.0 0.0
+node 43 coords 3 9.0 3.0 0.0
+node 44 coords 3 10.0 3.0 0.0
+node 45 coords 3 0.0 4.0 0.0
+node 46 coords 3 1.0 4.0 0.0
+node 47 coords 3 2.0 4.0 0.0
+node 48 coords 3 3.0 4.0 0.0
+node 49 coords 3 4.0 4.0 0.0
+node 50 coords 3 5.0 4.0 0.0
+node 51 coords 3 6.0 4.0 0.0
+node 52 coords 3 7.0 4.0 0.0
+node 53 coords 3 8.0 4.0 0.0
+node 54 coords 3 9.0 4.0 0.0
+node 55 coords 3 10.0 4.0 0.0
+node 56 coords 3 0.0 5.0 0.0
+node 57 coords 3 1.0 5.0 0.0
+node 58 coords 3 2.0 5.0 0.0
+node 59 coords 3 3.0 5.0 0.0
+node 60 coords 3 4.0 5.0 0.0
+node 61 coords 3 5.0 5.0 0.0
+node 62 coords 3 6.0 5.0 0.0
+node 63 coords 3 7.0 5.0 0.0
+node 64 coords 3 8.0 5.0 0.0
+node 65 coords 3 9.0 5.0 0.0
+node 66 coords 3 10.0 5.0 0.0
+node 67 coords 3 0.0 6.0 0.0
+node 68 coords 3 1.0 6.0 0.0
+node 69 coords 3 2.0 6.0 0.0
+node 70 coords 3 3.0 6.0 0.0
+node 71 coords 3 4.0 6.0 0.0
+node 72 coords 3 5.0 6.0 0.0
+node 73 coords 3 6.0 6.0 0.0
+node 74 coords 3 7.0 6.0 0.0
+node 75 coords 3 8.0 6.0 0.0
+node 76 coords 3 9.0 6.0 0.0
+node 77 coords 3 10.0 6.0 0.0
+node 78 coords 3 0.0 7.0 0.0
+node 79 coords 3 1.0 7.0 0.0
+node 80 coords 3 2.0 7.0 0.0
+node 81 coords 3 3.0 7.0 0.0
+node 82 coords 3 4.0 7.0 0.0
+node 83 coords 3 5.0 7.0 0.0
+node 84 coords 3 6.0 7.0 0.0
+node 85 coords 3 7.0 7.0 0.0
+node 86 coords 3 8.0 7.0 0.0
+node 87 coords 3 9.0 7.0 0.0
+node 88 coords 3 10.0 7.0 0.0
+node 89 coords 3 0.0 8.0 0.0
+node 90 coords 3 1.0 8.0 0.0
+node 91 coords 3 2.0 8.0 0.0
+node 92 coords 3 3.0 8.0 0.0
+node 93 coords 3 4.0 8.0 0.0
+node 94 coords 3 5.0 8.0 0.0
+node 95 coords 3 6.0 8.0 0.0
+node 96 coords 3 7.0 8.0 0.0
+node 97 coords 3 8.0 8.0 0.0
+node 98 coords 3 9.0 8.0 0.0
+node 99 coords 3 10.0 8.0 0.0
+node 100 coords 3 0.0 9.0 0.0
+node 101 coords 3 1.0 9.0 0.0
+node 102 coords 3 2.0 9.0 0.0
+node 103 coords 3 3.0 9.0 0.0
+node 104 coords 3 4.0 9.0 0.0
+node 105 coords 3 5.0 9.0 0.0
+node 106 coords 3 6.0 9.0 0.0
+node 107 coords 3 7.0 9.0 0.0
+node 108 coords 3 8.0 9.0 0.0
+node 109 coords 3 9.0 9.0 0.0
+node 110 coords 3 10.0 9.0 0.0
+node 111 coords 3 0.0 10.0 0.0
+node 112 coords 3 1.0 10.0 0.0
+node 113 coords 3 2.0 10.0 0.0
+node 114 coords 3 3.0 10.0 0.0
+node 115 coords 3 4.0 10.0 0.0
+node 116 coords 3 5.0 10.0 0.0
+node 117 coords 3 6.0 10.0 0.0
+node 118 coords 3 7.0 10.0 0.0
+node 119 coords 3 8.0 10.0 0.0
+node 120 coords 3 9.0 10.0 0.0
+node 121 coords 3 10.0 10.0 0.0
+#Elements
+mitc4shell 1 nodes 4 1 2 13 12 nip 9
+mitc4shell 2 nodes 4 2 3 14 13 nip 9
+mitc4shell 3 nodes 4 3 4 15 14 nip 9
+mitc4shell 4 nodes 4 4 5 16 15 nip 9
+mitc4shell 5 nodes 4 5 6 17 16 nip 9
+mitc4shell 6 nodes 4 6 7 18 17 nip 9
+mitc4shell 7 nodes 4 7 8 19 18 nip 9
+mitc4shell 8 nodes 4 8 9 20 19 nip 9
+mitc4shell 9 nodes 4 9 10 21 20 nip 9
+mitc4shell 10 nodes 4 10 11 22 21 nip 9
+mitc4shell 11 nodes 4 12 13 24 23 nip 9
+mitc4shell 12 nodes 4 13 14 25 24 nip 9
+mitc4shell 13 nodes 4 14 15 26 25 nip 9
+mitc4shell 14 nodes 4 15 16 27 26 nip 9
+mitc4shell 15 nodes 4 16 17 28 27 nip 9
+mitc4shell 16 nodes 4 17 18 29 28 nip 9
+mitc4shell 17 nodes 4 18 19 30 29 nip 9
+mitc4shell 18 nodes 4 19 20 31 30 nip 9
+mitc4shell 19 nodes 4 20 21 32 31 nip 9
+mitc4shell 20 nodes 4 21 22 33 32 nip 9
+mitc4shell 21 nodes 4 23 24 35 34 nip 9
+mitc4shell 22 nodes 4 24 25 36 35 nip 9
+mitc4shell 23 nodes 4 25 26 37 36 nip 9
+mitc4shell 24 nodes 4 26 27 38 37 nip 9
+mitc4shell 25 nodes 4 27 28 39 38 nip 9
+mitc4shell 26 nodes 4 28 29 40 39 nip 9
+mitc4shell 27 nodes 4 29 30 41 40 nip 9
+mitc4shell 28 nodes 4 30 31 42 41 nip 9
+mitc4shell 29 nodes 4 31 32 43 42 nip 9
+mitc4shell 30 nodes 4 32 33 44 43 nip 9
+mitc4shell 31 nodes 4 34 35 46 45 nip 9
+mitc4shell 32 nodes 4 35 36 47 46 nip 9
+mitc4shell 33 nodes 4 36 37 48 47 nip 9
+mitc4shell 34 nodes 4 37 38 49 48 nip 9
+mitc4shell 35 nodes 4 38 39 50 49 nip 9
+mitc4shell 36 nodes 4 39 40 51 50 nip 9
+mitc4shell 37 nodes 4 40 41 52 51 nip 9
+mitc4shell 38 nodes 4 41 42 53 52 nip 9
+mitc4shell 39 nodes 4 42 43 54 53 nip 9
+mitc4shell 40 nodes 4 43 44 55 54 nip 9
+mitc4shell 41 nodes 4 45 46 57 56 nip 9
+mitc4shell 42 nodes 4 46 47 58 57 nip 9
+mitc4shell 43 nodes 4 47 48 59 58 nip 9
+mitc4shell 44 nodes 4 48 49 60 59 nip 9
+mitc4shell 45 nodes 4 49 50 61 60 nip 9
+mitc4shell 46 nodes 4 50 51 62 61 nip 9
+mitc4shell 47 nodes 4 51 52 63 62 nip 9
+mitc4shell 48 nodes 4 52 53 64 63 nip 9
+mitc4shell 49 nodes 4 53 54 65 64 nip 9
+mitc4shell 50 nodes 4 54 55 66 65 nip 9
+mitc4shell 51 nodes 4 56 57 68 67 nip 9
+mitc4shell 52 nodes 4 57 58 69 68 nip 9
+mitc4shell 53 nodes 4 58 59 70 69 nip 9
+mitc4shell 54 nodes 4 59 60 71 70 nip 9
+mitc4shell 55 nodes 4 60 61 72 71 nip 9
+mitc4shell 56 nodes 4 61 62 73 72 nip 9
+mitc4shell 57 nodes 4 62 63 74 73 nip 9
+mitc4shell 58 nodes 4 63 64 75 74 nip 9
+mitc4shell 59 nodes 4 64 65 76 75 nip 9
+mitc4shell 60 nodes 4 65 66 77 76 nip 9
+mitc4shell 61 nodes 4 67 68 79 78 nip 9
+mitc4shell 62 nodes 4 68 69 80 79 nip 9
+mitc4shell 63 nodes 4 69 70 81 80 nip 9
+mitc4shell 64 nodes 4 70 71 82 81 nip 9
+mitc4shell 65 nodes 4 71 72 83 82 nip 9
+mitc4shell 66 nodes 4 72 73 84 83 nip 9
+mitc4shell 67 nodes 4 73 74 85 84 nip 9
+mitc4shell 68 nodes 4 74 75 86 85 nip 9
+mitc4shell 69 nodes 4 75 76 87 86 nip 9
+mitc4shell 70 nodes 4 76 77 88 87 nip 9
+mitc4shell 71 nodes 4 78 79 90 89 nip 9
+mitc4shell 72 nodes 4 79 80 91 90 nip 9
+mitc4shell 73 nodes 4 80 81 92 91 nip 9
+mitc4shell 74 nodes 4 81 82 93 92 nip 9
+mitc4shell 75 nodes 4 82 83 94 93 nip 9
+mitc4shell 76 nodes 4 83 84 95 94 nip 9
+mitc4shell 77 nodes 4 84 85 96 95 nip 9
+mitc4shell 78 nodes 4 85 86 97 96 nip 9
+mitc4shell 79 nodes 4 86 87 98 97 nip 9
+mitc4shell 80 nodes 4 87 88 99 98 nip 9
+mitc4shell 81 nodes 4 89 90 101 100 nip 9
+mitc4shell 82 nodes 4 90 91 102 101 nip 9
+mitc4shell 83 nodes 4 91 92 103 102 nip 9
+mitc4shell 84 nodes 4 92 93 104 103 nip 9
+mitc4shell 85 nodes 4 93 94 105 104 nip 9
+mitc4shell 86 nodes 4 94 95 106 105 nip 9
+mitc4shell 87 nodes 4 95 96 107 106 nip 9
+mitc4shell 88 nodes 4 96 97 108 107 nip 9
+mitc4shell 89 nodes 4 97 98 109 108 nip 9
+mitc4shell 90 nodes 4 98 99 110 109 nip 9
+mitc4shell 91 nodes 4 100 101 112 111 nip 9
+mitc4shell 92 nodes 4 101 102 113 112 nip 9
+mitc4shell 93 nodes 4 102 103 114 113 nip 9
+mitc4shell 94 nodes 4 103 104 115 114 nip 9
+mitc4shell 95 nodes 4 104 105 116 115 nip 9
+mitc4shell 96 nodes 4 105 106 117 116 nip 9
+mitc4shell 97 nodes 4 106 107 118 117 nip 9
+mitc4shell 98 nodes 4 107 108 119 118 nip 9
+mitc4shell 99 nodes 4 108 109 120 119 nip 9
+mitc4shell 100 nodes 4 109 110 121 120 nip 9
+SimpleCS 1 thick 0.05 material 1 set 1
+isole 1 d 8.e3 E 200.e9 n 0.3 talpha 0.0
+Boundarycondition 1 loadtimefunction 1 dofs 3 1 2 6 values 3 0 0 0 set 3
+Constantfunction 1 f(t) 1.0
+Set 1 allElements
+Set 2 nodes 40 1 2 3 4 5 6 7 8 9 10 11 12 22 23 33 34 44 45 55 56 66 67 77 78 88 89 99 100 110 111 112 113 114 115 116 117 118 119 120 121
+Set 3 allnodes
+Set 4 nodes 22 1 11 12 22 23 33 34 44 45 55 56 66 67 77 78 88 89 99 100 110 111 121
+Set 5 nodes 22 1 111 2 112 3 113 4 114 5 115 6 116 7 117 8 118 9 119 10 120 11 121
+#
+#
+#
+# NAFEMS Reference solution eigen frequencies(f): (3x0) RBM, 1.622, 2.360, 2.922, 4.233, 4.233, 7.416
+# corresponding eigen values (omega^2): 3x0, 103.863, 219.879, 337.070, 707.386, 707.386, 2171.197
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-2
+## check eigen values
+#EIGVAL tStep 1 EigNum 1 value 0.0 
+#EIGVAL tStep 1 EigNum 2 value 0.0
+#EIGVAL tStep 1 EigNum 3 value 0.0
+#EIGVAL tStep 1 EigNum 4 value 104.760
+#EIGVAL tStep 1 EigNum 5 value 225.049
+#EIGVAL tStep 1 EigNum 6 value 349.860
+#EIGVAL tStep 1 EigNum 7 value 713.845
+#EIGVAL tStep 1 EigNum 8 value 713.845
+#EIGVAL tStep 1 EigNum 9 value 2394.08 tolerance 0.2
+#%END_CHECK%

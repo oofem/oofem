@@ -33,6 +33,7 @@
  */
 
 #include "xmlinputrecord.h"
+#include "xmldatareader.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -50,6 +51,10 @@
 #include <regex>
 #include <charconv>
 
+// #define _XML_DEBUG(m) std::cerr<<__FUNCTION__<<": "<<m<<std::endl;
+#define _XML_DEBUG(m)
+
+
 namespace oofem {
 
 
@@ -60,73 +65,104 @@ namespace oofem {
         else if(!seen && n.attribute(SeenMark)) n.remove_attribute(SeenMark);
     }
 
+    std::string XMLInputRecord::loc(const pugi::xml_node& node){
+        return _reader()->loc(node);
+    }
 
     template<typename T>
-    T string_to(const char* what, const std::string& s){
+    T string_to(const std::string& s, std::function<std::string()> where){
         T val;
         const char* last=s.data()+s.size();
         auto [p,e]=std::from_chars(s.data(),last,val);
-        if(p!=last) OOFEM_ERROR("%s: error parsing %s as %s (leftover chars)",what,s.c_str(),typeid(T).name());
+        if(p!=last) OOFEM_ERROR("%s: error parsing %s as %s (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
         if(e==std::errc()) return val;
-        OOFEM_ERROR("%s: error parsing %s (from_chars error)",what,s.c_str(),typeid(T).name());
+        OOFEM_ERROR("%s: error parsing %s (from_chars error)",where().c_str(),s.c_str(),typeid(T).name());
     }
+
+    template<>
+    Range string_to(const std::string& s, std::function<std::string()> where){
+        if(std::regex_match(s,std::regex("[0-9]+"))){
+            return Range(std::atoi(s.c_str()));
+        }
+        std::smatch match;
+        if(std::regex_match(s,match,std::regex("\\s*([0-9]+)\\s*(-|[.]{2,3})\\s*([0-9]+)"))){
+            assert(match.size()==4);
+            return Range(std::atoi(match[1].str().c_str()),std::atoi(match[3].str().c_str()));
+        }
+        OOFEM_ERROR("%s: error parsing %s as range (single integer or range between two integers separated with -, .., ...)",where().c_str(),s.c_str());
+    };
+
 
 
     struct Tokens{
-        const char* attr;
+        std::string attr;
         std::string str;
         std::vector<std::string> toks;
-        Tokens(const std::string& attr_, const std::string& s): attr(attr_.c_str()), str(s) {
-            const std::regex ws_re("\\s+");
-            std::copy(std::sregex_token_iterator(s.begin(), s.end(), ws_re, -1),
+        std::function<std::string()> loc;
+        Tokens(const std::string& attr_, XMLInputRecord* rec, const char* sep_regex="\\s+"): attr(attr_) {
+            pugi::xml_node node;
+            std::tie(str,node)=rec->_attr_traced_read_with_node(attr.c_str());
+            //std::cerr<<"attr_="<<attr_<<", attr="<<attr<<", offset="<<node.offset_debug()<<std::endl;
+            loc=[rec,node](){ return rec->loc(node); };
+            const std::regex sep_re(sep_regex);
+            std::copy(std::sregex_token_iterator(str.begin(), str.end(), sep_re, -1),
                       std::sregex_token_iterator(),
                       std::back_inserter(toks)
             );
-            str=s;
         };
         size_t size() { return toks.size(); }
-        void assertSize(size_t req){ if(size()!=req) OOFEM_ERROR("Attribute %s: length mismatch (%d items, %d required)",size(),req); }
+        void assertSize(size_t req){ if(size()!=req) OOFEM_ERROR("%s: attribute %s: length mismatch (%d items, %d required)",loc().c_str(),attr.c_str(),size(),req); }
         template<typename T> T as(size_t ix){
-            if(ix>size()) OOFEM_ERROR("Attribute %s: invalid index %d in sequence of length %d: %s",attr,ix,size(),str.c_str());
+            if(ix>size()) OOFEM_ERROR("%s: attribute %s: invalid index %d in sequence of length %d: %s",loc().c_str(),attr.c_str(),ix,size(),str.c_str());
             const std::string& s(toks[ix]);
-            return string_to<T>((std::string("Attribute ")+attr+" ["+std::to_string(ix)+"]").c_str(),s);
+            return string_to<T>(s,[this,ix](){ return loc()+": attribute "+attr+" ["+std::to_string(ix)+"]"; });
         }
     };
 
-    XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_): InputRecord((DataReader*)reader_), node(node_) {
+    XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_): InputRecord((DataReader*)reader_), node(node_), ordinal(ordinal_) {
         node_seen_set(node,true);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
+        _XML_DEBUG(loc()<<": node.name()="<<node.name());
     }
 
     int XMLInputRecord::giveGroupCount(InputFieldType id, const std::string& name, bool optional){
-        pugi::xml_node ch=node.child(name.c_str());
+        _XML_DEBUG("id="<<id<<", name="<<name<<", optional="<<optional);
+        _XML_DEBUG(loc(node)<<", node.name()="<<node.name());
+        pugi::xml_node ch=_reader()->giveNamedChild(node,name);
         if(!ch){
-            _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<" has no children (optional="<<optional<<".");
             if(optional) return 0; // return DataReader::NoSuchGroup;
-            OOFEM_ERROR("%s has no child node %s.",node.name(),name.c_str());
+            OOFEM_ERROR("%s: %s has no child node %s.",loc().c_str(),node.name(),name.c_str());
         }
         int ret=0;
         node_seen_set(ch,true);
         for([[maybe_unused]] pugi::xml_node n: ch.children()) ret++;
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<" has "<<ret<<" children.");
+        _XML_DEBUG(node.name()<<" has "<<ret<<" children.");
         return ret;
     }
     bool XMLInputRecord::hasChild(InputFieldType id, const std::string& name, bool optional){
-        bool has=!!node.child(name.c_str());
+        bool has=!!_reader()->giveNamedChild(node,name);
         if(!has && !optional) OOFEM_ERROR("...");
         return has;
     }
 
     void
     XMLInputRecord :: giveRecordKeywordField(std :: string &answer){
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
+        _XML_DEBUG("node.name()="<<node.name());
         if(node.attribute("type")) answer=_attr_traced_read("type");
         else answer=node.name();
     }
     void XMLInputRecord::giveRecordKeywordField(std::string& answer, int& value){
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": node.name()="<<node.name());
+        _XML_DEBUG("node.name()="<<node.name());
         answer=node.name();
-        value=string_to<int>("Attribute 'id'",_attr_traced_read("id"));
+        pugi::xml_attribute id=node.attribute("id");
+        if(!id){
+            if(ordinal<0) OOFEM_ERROR("%s: node %s: id='...' not specified (and not tracked automatically).",loc().c_str(),node.name());
+            value=ordinal;
+        } else {
+            std::string val; pugi::xml_node n;
+            std::tie(val,n)=_attr_traced_read_with_node("id");
+            value=string_to<int>(val,[this,n](){ return loc(n)+" attribute 'id'"; });
+            if(ordinal>0 && ordinal!=value) OOFEM_ERROR("%s: node %s: id='%d' but node position is %d",loc(n).c_str(),node.name(),value,ordinal);
+        }
     }
 
     bool XMLInputRecord::hasField(InputFieldType id){
@@ -134,15 +170,14 @@ namespace oofem {
         if(attr){ attrSeen.insert(id); }
         return !!attr;
     }
-    std::string XMLInputRecord::_attr_traced_read(const char* name){
+    std::tuple<std::string,pugi::xml_node> XMLInputRecord::_attr_traced_read_with_node(const char* name){
         std::string n2(name);
         for(size_t i=0; i<n2.size(); i++) if(n2[i]=='(' || n2[i]==')') n2[i]='_';
         pugi::xml_attribute att=node.attribute(n2.c_str());
-        if(!att) OOFEM_ERROR("No such attribute: %s",n2.c_str());
+        if(!att) OOFEM_ERROR("%s: no such attribute: %s",loc().c_str(),n2.c_str());
         std::string ret=att.as_string();
         attrSeen.insert(n2);
-        // node.remove_attribute(att); std::cerr<<" -- <"<<node.name()<<" "<<name<<">: destroyed"<<std::endl;
-        return ret;
+        return std::make_tuple(ret,node);
     }
 
     void XMLInputRecord::finish(bool wrn) {
@@ -163,32 +198,42 @@ namespace oofem {
     }
 
     void XMLInputRecord::giveField(std::string& answer, InputFieldType id){
-        answer=_attr_traced_read(id);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": "<<node.name()<<"::"<<id<<"="<<answer);
+        pugi::xml_node node;
+        std::tie(answer,node)=_attr_traced_read_with_node(id);
+        _XML_DEBUG(loc(node)<<": "<<node.name()<<"::"<<id<<"="<<answer);
     }
-
-
     void XMLInputRecord::giveField(FloatArray &answer, InputFieldType id){
-        Tokens tt(id,_attr_traced_read(id));
-        size_t len=tt.as<int>(0);
-        tt.assertSize(len+1);
-        answer.resize(len);
-        for(size_t i=0; i<len; i++) answer[i]=tt.as<double>(i+1);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": parsed attribute "<<id<<" as "<<answer);
+        Tokens tt(id,this);
+        answer.resize(tt.size());
+        for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<double>(i);
+        _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
     }
     void XMLInputRecord::giveField(IntArray &answer, InputFieldType id){
-        Tokens tt(id,_attr_traced_read(id));
-        size_t len=tt.as<int>(0);
-        tt.assertSize(len+1);
-        answer.resize(len);
-        for(size_t i=0; i<len; i++) answer[i]=tt.as<int>(i+1);
-        _XML_DEBUG(__PRETTY_FUNCTION__<<": parsed attribute "<<id<<" as "<<answer);
+        Tokens tt(id,this);
+        answer.resize(tt.size());
+        for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<int>(i);
+        _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
     }
     void XMLInputRecord::giveField(double& answer, InputFieldType id){
-        answer=string_to<double>((std::string("Attribute ")+id).c_str(),_attr_traced_read(id));
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        answer=string_to<double>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
     }
     void XMLInputRecord::giveField(int& answer, InputFieldType id){
-        answer=string_to<int>((std::string("Attribute ")+id).c_str(),_attr_traced_read(id));
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        answer=string_to<int>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
+    }
+    void XMLInputRecord::giveField(bool& answer, InputFieldType id){
+        if(!hasField(id)){ answer=false; return; }
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        if(s=="no" || s=="0" || s=="n" || s=="N" || s=="No" || s=="NO") OOFEM_WARNING("%s: %s='%s' is interpreted as TRUE (omit the attribute for false)",loc(n).c_str(),s.c_str());
+        answer=true;
+    }
+    void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
+        Tokens tt(id,this,"\\s*,\\s*");
+        for(size_t i=0; i<tt.size(); i++) answer.push_back(tt.as<Range>(i));
     }
 
 

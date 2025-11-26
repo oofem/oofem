@@ -148,19 +148,6 @@ public:
     double *data() { return values.data(); }
 
 #endif
-    /**
-     * Multi-indexing to select sub-vectors,
-     * @param c Position of coefficient in array.
-     */
-    template<std::size_t M>
-    inline FloatArrayF<M> operator[] (std::size_t const (&c)[M]) const
-    {
-        FloatArrayF<M> x;
-        for ( std::size_t i = 0; i < M; ++i ) {
-            x[i] = (*this)[ c[i] ];
-        }
-        return x;
-    }
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -175,23 +162,43 @@ public:
      */
     inline double at(std::size_t i) const { return (*this)[i-1]; }
 
-    /// Assign x into self.
-    template<size_t M>
-    inline void assign(const FloatArrayF<M> &x, int const (&c)[M] )
-    {
-        for ( std::size_t i = 0; i < M; ++i ) {
-            (*this)[c[i]] = x[i];
+    #ifdef _USE_EIGEN
+        template<std::size_t M> inline FloatArrayF<M> operator[] (std::size_t const (&c)[M]) const { return (*this)(c).eval(); }
+        template<size_t M> inline void assign(const FloatArrayF<M> &x, int const (&c)[M] ){ (*this)(c)=x; }
+        template<size_t M> inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] ){ (*this)(c)+=x; }
+    #else
+        /**
+        * Multi-indexing to select sub-vectors,
+        * @param c Position of coefficient in array.
+        */
+        template<std::size_t M>
+        inline FloatArrayF<M> operator[] (std::size_t const (&c)[M]) const
+        {
+            FloatArrayF<M> x;
+            for ( std::size_t i = 0; i < M; ++i ) {
+                x[i] = (*this)[ c[i] ];
+            }
+            return x;
         }
-    }
 
-    /// Assemble x into self.
-    template<size_t M>
-    inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] )
-    {
-        for ( std::size_t i = 0; i < M; ++i ) {
-            (*this)[c[i]] += x[i];
+        /// Assign x into self.
+        template<size_t M>
+        inline void assign(const FloatArrayF<M> &x, int const (&c)[M] )
+        {
+            for ( std::size_t i = 0; i < M; ++i ) {
+                (*this)[c[i]] = x[i];
+            }
         }
-    }
+
+        /// Assemble x into self.
+        template<size_t M>
+        inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] )
+        {
+            for ( std::size_t i = 0; i < M; ++i ) {
+                (*this)[c[i]] += x[i];
+            }
+        }
+    #endif
     /// Returns the size of receiver.
     int giveSize() const { return size(); }
     /**
@@ -238,6 +245,48 @@ public:
 };
 
 
+/// Print to stream
+template<std::size_t N>
+std::ostream & operator << ( std::ostream & out, const FloatArrayF<N> & x )
+{
+    out << x.size();
+    for ( double xi : x ) {
+        out << " " << xi;
+    }
+    return out;
+}
+
+
+#ifdef _USE_EIGEN
+// cast args to VectorNd<N> to avoid the operator calling itself; it also prevents Eigen from returning expression template, which would fail where the result is fed into a function arg (is this a limitation of derived class in Eigen?)
+template<size_t N, size_t M> inline FloatArrayF<N> assemble(const FloatArrayF<M> &x, int const (&c)[M] ){ FloatArrayF<N> out=VectorNd<N>::Zero(); out(c)=x; return out; }
+template<std::size_t N> FloatArrayF<N> operator * ( double a, const FloatArrayF<N> & x ){ return a*(VectorNd<N>)x; }
+template<std::size_t N> FloatArrayF<N> operator * ( const FloatArrayF<N> & x, double a ){ return a*(VectorNd<N>)x; }
+template<std::size_t N> FloatArrayF<N> mult ( const FloatArrayF<N> & x, const FloatArrayF<N> & y ){ return (x.array()*y.array()).matrix(); }
+template<std::size_t N> FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a ){ return ((VectorNd<N>)x)/a; }
+template<std::size_t N> FloatArrayF<N> operator ^ ( const FloatArrayF<N> & x, double a){ return x.array().pow(a); }
+template<std::size_t N> FloatArrayF<N> operator + ( const FloatArrayF<N> & x, const FloatArrayF<N> & y ){ return ((VectorNd<N>)x)+((VectorNd<N>)y); }
+template<std::size_t N> FloatArrayF<N> operator - ( const FloatArrayF<N> & x, const FloatArrayF<N> & y ){ return ((VectorNd<N>)x)-((VectorNd<N>)y); }
+template<std::size_t N> FloatArrayF<N> operator - ( const FloatArrayF<N> & x ){ return -((VectorNd<N>)x); };
+//template<std::size_t N> FloatArrayF<N> &operator += ( FloatArrayF<N> & x, const FloatArrayF<N> & y ){ (VectorNd<N>)x+=y; return x; }
+//template<std::size_t N> FloatArrayF<N> &operator -= ( FloatArrayF<N> & x, const FloatArrayF<N> & y ){ (VectorNd<N>)x-=y; return x; }
+//template<std::size_t N> FloatArrayF<N> &operator *= ( FloatArrayF<N> & x, double a ){ (VectorNd<N>)x*=a; return x; }
+//template<std::size_t N> FloatArrayF<N> &operator /= ( FloatArrayF<N> & x, double a ){ (VectorNd<N>)x/=a; return x; }
+//template<std::size_t N> FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a){ x=x.array().pow(a); return x; }
+template<std::size_t N> bool iszero(const FloatArrayF<N> &x){ return (x.array()==0).all(); }
+template<std::size_t N> bool isfinite( const FloatArrayF<N> &x ){ return x.isfinite().all(); }
+template<std::size_t N> double norm_squared( const FloatArrayF<N> & x ){ return x.squaredNorm(); }
+template<std::size_t N> double norm( const FloatArrayF<N> & x ){ return x.norm(); }
+template<std::size_t N> FloatArrayF<N> normalize( const FloatArrayF<N> & x ){ return x/x.norm(); }
+template<std::size_t N> double sum( const FloatArrayF<N> & x ){ return x.array().sum(); }
+template<std::size_t N> double product( const FloatArrayF<N> & x ){ return x.array().prod(); }
+inline FloatArrayF<3> cross( const FloatArrayF<3> & x, const FloatArrayF<3> & y ){ return x.cross(y); }
+template<std::size_t N> double dot( const FloatArrayF<N> & x, const FloatArrayF<N> & y ){ return x.dot(y); }
+template<std::size_t N> FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b){ return a.array().max(b); }
+template<std::size_t N> FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b){ return a.array().min(b); }
+template<std::size_t N> FloatArrayF<N> zeros() { return FloatArrayF<N>::Zero(); }
+#else
+
 /// Assemble components into zero matrix.
 template<size_t N, size_t M>
 inline FloatArrayF<N> assemble(const FloatArrayF<M> &x, int const (&c)[M] )
@@ -250,16 +299,6 @@ inline FloatArrayF<N> assemble(const FloatArrayF<M> &x, int const (&c)[M] )
 }
 
 
-/// Print to stream
-template<std::size_t N>
-std::ostream & operator << ( std::ostream & out, const FloatArrayF<N> & x )
-{
-    out << x.size();
-    for ( double xi : x ) {
-        out << " " << xi;
-    }
-    return out;
-}
 
 /// Simple math operations
 template<std::size_t N>
@@ -448,20 +487,6 @@ double product( const FloatArrayF<N> & x )
     return std::accumulate(x.begin(), x.end(), 1.0, [](double a, double b) { return a*b; });
 }
 
-/// Computes the norm(a-b)^2
-template<std::size_t N>
-FloatArrayF<N> distance_squared(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
-{
-    return norm_squared(a-b);
-}
-
-/// Computes the norm(a-b)
-template<std::size_t N>
-FloatArrayF<N> distance(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
-{
-    return norm(a-b);
-}
-
 /// Computes @$ x \cross y @$
 inline FloatArrayF<3> cross( const FloatArrayF<3> & x, const FloatArrayF<3> & y )
 {
@@ -481,23 +506,6 @@ double dot( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
         ans += x[i] * y[i];
     }
     return ans;
-}
-
-/**
- * Swaps the fourth and sixth index in the array. This is to reorder the indices
- * from OOFEM's order to Abaqus' and vice versa.
- */
-inline void swap_46(FloatArrayF<6> &t)
-{
-    std::swap( t[3], t[5] );
-}
-
-inline void swap_46(FloatArrayF<9> &t)
-{
-    // OOFEM: 11, 22, 33, 23, 13, 12, 32, 31, 21
-    // UMAT:  11, 22, 33, 12, 13, 23, 32, 21, 31
-    std::swap( t[3], t[5] );
-    std::swap( t[7], t[8] );
 }
 
 template<std::size_t N>
@@ -520,6 +528,51 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
     return out;
 }
 
+/// For more readable code
+template<std::size_t N>
+FloatArrayF<N> zeros() {
+    return FloatArrayF<N>();
+}
+
+
+
+#endif
+
+
+/// Computes the norm(a-b)^2
+template<std::size_t N>
+FloatArrayF<N> distance_squared(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
+{
+    return norm_squared(a-b);
+}
+
+/// Computes the norm(a-b)
+template<std::size_t N>
+FloatArrayF<N> distance(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
+{
+    return norm(a-b);
+}
+
+
+
+/**
+ * Swaps the fourth and sixth index in the array. This is to reorder the indices
+ * from OOFEM's order to Abaqus' and vice versa.
+ */
+inline void swap_46(FloatArrayF<6> &t)
+{
+    std::swap( t[3], t[5] );
+}
+
+inline void swap_46(FloatArrayF<9> &t)
+{
+    // OOFEM: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // UMAT:  11, 22, 33, 12, 13, 23, 32, 21, 31
+    std::swap( t[3], t[5] );
+    std::swap( t[7], t[8] );
+}
+
+
 /// I expressed in Voigt form
 const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
@@ -535,11 +588,6 @@ inline FloatArrayF<6> to_voigt_stress_6(const FloatArrayF<6> &e)
     return {e[0], e[1], e[2], 2*e[3], 2*e[4], 2*e[5]};
 }
 
-/// For more readable code
-template<std::size_t N>
-FloatArrayF<N> zeros() {
-    return FloatArrayF<N>();
-}
 
 } // end namespace oofem
 #endif // floatarrayf_h

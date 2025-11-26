@@ -63,7 +63,7 @@ protected:
     void checkRecs();
     void printRecsHeader();
 public:
-    SolutionStatusExportModule(int n, EngngModel * e);
+    SolutionStatusExportModule(int n, EngngModel * e, FILE* out = nullptr);
     SolutionStatusExportModule(const SolutionStatusExportModule &) = delete;
     SolutionStatusExportModule &operator=(const SolutionStatusExportModule &) = delete;
 

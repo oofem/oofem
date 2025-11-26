@@ -255,14 +255,6 @@ public:
      * @param colind Column localization indices.
      */
     void assembleT(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind);
-    /**
-     * Assembles the contribution using localization array into receiver. The receiver must
-     * have dimensions large enough to localize contribution.
-     * @param src Source to be assembled.
-     * @param rowind Row localization indices.
-     * @param colind Column localization indices.
-     */
-    void assemble(const FloatMatrix &src, const int *rowind, const int *colind);
 
     /**
      * Computes the Frobenius norm of the receiver.
@@ -373,7 +365,7 @@ public:
      * Adds the given matrix as sub-matrix to receiver.
      * The same as setSubMatrix but transposes the source matrix.
      * @param src Sub-matrix to be inserted transposed.
-     * @param sr Determines the row position (receiver's 1-based index) of first src value to be added.
+     * @param sr Determines the row position (receiver's 1-based index) of first src val`ue to be added.
      * @param sc Determines the column position (receiver's 1-based index) of first src value to be added.
      */
     void setTSubMatrix(const FloatMatrix &src, int sr, int sc);
