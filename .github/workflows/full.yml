@@ -1,0 +1,46 @@
+# run "just act-install" (from repo root) and then "just act-full" to test locally
+# adjust .justfile --reuse (remove it for once to re-build the container from scratch)
+name: Linux
+on:
+  workflow_dispatch: {}
+jobs:
+  build-full:
+    name: Full build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          submodules: recursive
+    - name: Install dependencies
+      run: |
+          # agree with MKL license upfront via debconf so that dpkg does not ask
+          debconf-set-selections << EOF
+            debconf         debian/frontend select Noninteractive
+            libmkl-dev      libmkl-rt/use-as-default-blas-lapack    boolean true
+            libmkl-rt       libmkl-rt/exact-so-3-selections multiselect     libblas.so.3, liblapack.so.3, libblas64.so.3, liblapack64.so.3,
+          EOF
+          # for naktos-act (not needed with GitHub CI which has these pre-installed)
+          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
+          # is conditional for naktos-act with --reuse
+          [ -f /usr/include/spooles/SPOOLES.h ] || (sudo apt-get --yes --no-install-recommends install libspooles-dev libtinyxml2-dev libhdf5-dev slepc-dev petsc-dev libparmetis-dev mpi-default-dev libmetis-dev libvtk9-dev liblapack-dev libtriangle-dev intel-mkl-full python3-pytest python3-matplotlib python3-numpy)
+    - name: Configure
+      run: |
+        cmake -GNinja -B ./build -S. -DCMAKE_BUILD_TYPE=Release -DUSE_METIS=1 -DUSE_PARMETIS=1 -DUSE_OPENMP_PARALLEL=1 -DUSE_IML=1 -DUSE_INTEL_MKL_PARDISO=1 -DUSE_TRIANGLE=1 -DUSE_HDF5=1 -DUSE_TINYXML=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_PYBIND_BINDINGS=1 -DUSE_SM=1 -DUSE_FM=1 -DUSE_PFEM=1 -DUSE_TM=1 -DUSE_AM=1 -DUSE_MPM=1 -DUSE_OOFEM_EXE=1 \
+          -DUSE_T3D=0 \
+          -DUSE_SUPERLU_MT=0 \
+          -DUSE_VTK=0 \
+          -DUSE_SPOOLES=0 \
+          -DUSE_PETSC=0 -DUSE_SLEPC=0 \
+          -DUSE_LAPACK=0 \
+          -DUSE_MPI_PARALLEL=0 \
+          -DUSE_CEMHYD=0 \
+          -DSLEPC_DIR=/etc/alternatives/slepc-real -DPETSC_DIR=/etc/alternatives/petsc-real
+        # features disabled:
+        #   T3D: not packaged
+        #   SUPERLU_MT: not packaged, but might be pulled form github https://github.com/xiaoyeli/superlu_mt (as CMake module perhaps)
+        #   VTK: fails in CMake (not finding Qt5?)
+        #   compilation failures (must be fixed in oofem): SPOOLES, PETSC (+SLEPC), LAPACK, INTEL_MKL_PARDISO, MPI_PARALLEL, CEMHYD
+    - name: Build
+      run: cmake --build ./build
+    - name: Test
+      run: ctest --test-dir ./build --timeout 20 --rerun-failed --output-on-failure --parallel
