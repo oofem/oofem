@@ -65,7 +65,6 @@ class Node;
 class Material;
 class IntegrationRule;
 class GaussPoint;
-class FloatMatrix;
 class IntArray;
 class CrossSection;
 class ElementSide;

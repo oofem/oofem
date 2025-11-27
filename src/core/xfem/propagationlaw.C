@@ -101,9 +101,9 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
 
     double angleRad = mAngle * M_PI / 180.0;
-    FloatArray dir = {
+    FloatArray dir = Vec2(
         cos(angleRad), sin(angleRad)
-    };
+    );
 
     oTipProp.mTipIndex = tipInfo.mTipIndex;
     oTipProp.mPropagationDir = dir;

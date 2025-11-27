@@ -52,7 +52,6 @@ class Node;
 class Dof;
 class NodalLoad;
 class TimeStep;
-class FloatArray;
 class IntArray;
 class ParamKey;
 /**

@@ -37,9 +37,9 @@ void PrescribedGradientBCWeakPeriodic :: giveBoundaryCoordVector(FloatArray &oX,
     FloatArray xMinus;
     giveMirroredPointOnGammaMinus(xMinus, iPos);
 
-    oX = {
+    oX = Vec2(
         iPos [ 0 ] - xMinus [ 0 ], iPos [ 1 ] - xMinus [ 1 ]
-    };
+    );
 }
 
 void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const
@@ -52,16 +52,16 @@ void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oD
         oIsCorner = true;
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mUC [ 0 ], mLC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mUC [ 0 ], mUC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
         if ( mTractionInterpOrder == 1 ) {
@@ -69,9 +69,9 @@ void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oD
         }
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mLC [ 0 ], mUC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
     }

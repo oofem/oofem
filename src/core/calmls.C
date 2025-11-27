@@ -217,7 +217,7 @@ restart:
 
         // In case of paralllel analysis:
         FloatArray collected_XXRR;
-        parallel_context->accumulate({ _XX, _RR }, collected_XXRR);
+        parallel_context->accumulate(Vec2(_XX, _RR), collected_XXRR);
         _XX = collected_XXRR(0);
         _RR = collected_XXRR(1);
 
@@ -1039,7 +1039,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
             }
 
             FloatArray col_;
-            parallel_context->accumulate({ _rr, _RR, _a2, _a3 }, col_);
+            parallel_context->accumulate(Vec4(_rr, _RR, _a2, _a3), col_);
             a1 = eta * eta * col_(0) + Psi *Psi *col_(1);
             a2 = col_(1) * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * col_(2);
@@ -1082,7 +1082,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
             // In case of parallel simulations (equiv to no-op on seq sim):
             FloatArray cola;
-            parallel_context->accumulate({ a4, a5 }, cola);
+            parallel_context->accumulate(Vec2(a4, a5), cola);
             a4 = cola(0);
             a5 = cola(1);
         }
@@ -1130,7 +1130,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
         // In case of parallel simulations (equiv to no-op on seq sim):
         FloatArray colv;
-        parallel_context->accumulate({ nom, denom }, colv);
+        parallel_context->accumulate(Vec2(nom, denom), colv);
         nom = colv(0);
         denom = colv(1);
 

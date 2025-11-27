@@ -57,7 +57,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
     this->gaussPoints.resize( nPoints );
 
     for ( int i = 1; i <= nPoints; i++ ) {
-        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, {coords_xi.at(i)}, weights.at ( i ), mode);
+        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, Vec1(coords_xi.at(i)), weights.at ( i ), mode);
     }
 
     this->intdomain = _Line;
@@ -79,7 +79,7 @@ LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             count++;
-            this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, {coords_xi1.at(i), coords_xi2.at(j)}, 
+            this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, Vec2(coords_xi1.at(i), coords_xi2.at(j)), 
                                                              weights1.at ( i ) *weights2.at ( j ), mode);
         }
     }
@@ -106,7 +106,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             for ( int k = 1; k <= nPoints_xi3; k++ ) {
                 count++;
-                this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, {coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)},
+                this->gaussPoints [ count - 1 ] = new GaussPoint(this, count, Vec3(coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)),
                                                                  weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
             }
         }
@@ -157,57 +157,57 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi = FloatArray{0.0};
-        weights = FloatArray{2.0};
+        coords_xi = Vec1(0.0);
+        weights = Vec1(2.0);
         break;
 
     case 2:
-        coords_xi = {-1.0, 1.0};
-        weights = {1.0, 1.0};
+        coords_xi = Vec2(-1.0, 1.0);
+        weights = Vec2(1.0, 1.0);
         break;
 
     case 3:
-        coords_xi = {-1.0, 0.0, 1.0};
-        weights = {0.333333333333333, 1.333333333333333, 0.333333333333333};
+        coords_xi = Vec3(-1.0, 0.0, 1.0);
+        weights = Vec3(0.333333333333333, 1.333333333333333, 0.333333333333333);
         break;
 
     case 4:
-        coords_xi = {-1.0,
+        coords_xi = Vec4(-1.0,
                      -0.447213595499958,
                       0.447213595499958,
-                      1.0};
-        weights = { 0.166666666666667,
+                      1.0);
+        weights = Vec4( 0.166666666666667,
                     0.833333333333333,
                     0.833333333333333,
-                    0.166666666666667};
+                    0.166666666666667);
         break;
 
     case 5:
-        coords_xi = {-1.0,
+        coords_xi = Vec5(-1.0,
                      -0.654653670707977,
                       0.0,
                       0.654653670707977,
-                      1.0};
-        weights = { 0.1,
+                      1.0);
+        weights = Vec5( 0.1,
                     0.544444444444444,
                     0.711111111111111,
                     0.544444444444444,
-                    0.1};
+                    0.1);
         break;
 
     default:
-        coords_xi = {-1.0,
+        coords_xi = Vec6(-1.0,
                      -0.765055323929465,
                      -0.285231516480645,
                       0.285231516480645,
                       0.765055323929465,
-                      1.0};
-        weights = { 0.066666666666667,
+                      1.0);
+        weights = Vec6( 0.066666666666667,
                     0.378474956297847,
                     0.554858377035486,
                     0.554858377035486,
                     0.378474956297847,
-                    0.066666666666667};
+                    0.066666666666667);
         if ( nPoints > 6 ) {
             OOFEM_LOG_WARNING("Unsupported number of IPs (%d) for LobattoIR, using 6 ips instead.", nPoints);
         }

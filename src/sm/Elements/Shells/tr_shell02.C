@@ -384,7 +384,7 @@ TR_SHELL02 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
     const FloatMatrix *GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
 
     // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
-    lt3 = {0., 0., 1.}; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
+    lt3 = Vec3(0., 0., 1.); //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
     // transform it to globa cs
     gt3.beTProductOf(* GtoLRotationMatrix, lt3);
 

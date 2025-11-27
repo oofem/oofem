@@ -69,14 +69,14 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     double l2 = lcoords.at(2);
     double l3 = 1. - l1 - l2;
 
-    answer = {
+    answer = Vec6(
         ( 2. * l1 - 1. ) * l1,
         ( 2. * l2 - 1. ) * l2,
         ( 2. * l3 - 1. ) * l3,
         4. * l1 * l2,
         4. * l2 * l3,
         4. * l3 * l1
-    };
+    );
 #endif
 }
 
@@ -221,7 +221,7 @@ FEI2dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoord
     double ksi = lcoords.at(1);
     double n3 = 1. - ksi * ksi;
 
-    answer = { ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 };
+    answer = Vec3( ( 1. - ksi - n3 ) * 0.5, ( 1. + ksi - n3 ) * 0.5, n3 );
 }
 
 void
@@ -255,11 +255,11 @@ FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
 #endif
     double xi = lcoords.at(1);
     double J = edgeGiveTransformationJacobian(iedge, lcoords, cellgeo);
-    answer = {
+    answer = Vec3(
         ( xi - 0.5 ) / J,
         ( xi + 0.5 ) / J,
         -2 * xi / J
-    };
+    );
 }
 
 double FEI2dTrQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const

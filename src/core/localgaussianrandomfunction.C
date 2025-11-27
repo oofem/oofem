@@ -50,7 +50,7 @@ LocalGaussianRandomFunction :: ~LocalGaussianRandomFunction()
 void
 LocalGaussianRandomFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp, double param)
 {
-    answer = FloatArray{evaluateAtTime(0)};
+    answer = Vec1(evaluateAtTime(0));
 }
 
 double

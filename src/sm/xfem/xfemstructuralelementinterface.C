@@ -184,12 +184,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 // Oops, we got a segment of length zero.
                                 // These Gauss weights will be zero, so we can
                                 // set the tangent to anything reasonable
-                                crackTang = {0.0, 1.0};
+                                crackTang = Vec2(0.0, 1.0);
                             }
 
-                            FloatArray crackNormal = {
+                            FloatArray crackNormal = Vec3(
                                 -crackTang.at(2), crackTang.at(1), 0.
-                            };
+                            );
 
                             mpCZIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
@@ -224,7 +224,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                             if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
                                                 // Rotate 90 degrees (works equally well for periodicity)
-                                                periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                periodicityNormal = Vec2(periodicityNormal(1), -periodicityNormal(0));
                                             }
 
                                             bc->setPeriodicityNormal(periodicityNormal);
@@ -266,7 +266,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                                 if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
                                                     // Rotate 90 degrees (works equally well for periodicity)
-                                                    periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                    periodicityNormal = Vec2(periodicityNormal(1), -periodicityNormal(0));
                                                 }
 
                                                 bc->setPeriodicityNormal(periodicityNormal);
@@ -338,7 +338,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     // Oops, we got a segment of length zero.
                                     // These Gauss weights will be zero, so we can
                                     // set the tangent to anything reasonable
-                                    crackTang = {0.0, 1.0};
+                                    crackTang = Vec2(0.0, 1.0);
                                 }
 
                                 FloatArrayF<3> crackNormal = { -crackTang.at(2), crackTang.at(1), 0.};
@@ -376,7 +376,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                                 if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
                                                     // Rotate 90 degrees (works equally well for periodicity)
-                                                    periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                    periodicityNormal = Vec2(periodicityNormal(1), -periodicityNormal(0));
                                                 }
 
                                                 bc->setPeriodicityNormal(periodicityNormal);
@@ -420,7 +420,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                                     if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
                                                         // Rotate 90 degrees (works equally well for periodicity)
-                                                        periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                        periodicityNormal = Vec2(periodicityNormal(1), -periodicityNormal(0));
                                                     }
 
                                                     bc->setPeriodicityNormal(periodicityNormal);
@@ -712,7 +712,7 @@ double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2Ma
     const FloatArray &n = iFe2Ms->giveNormal();
     double l_box = sqrt( iFe2Ms->giveBC()->domainSize() );
 
-    const FloatArray t = {n(1), -n(0)};
+    const FloatArray t = Vec2(n(1), -n(0));
     double angle = atan2( t(1), t(0) );
 
     if ( angle < 0.25*M_PI ) {
@@ -916,7 +916,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
                     ////////////////////////////////////////////////////////
                     // Construct strain (only consider the smeared jump for now)
-                    FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
+                    FloatArray smearedJumpStrain = Vec6(jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) ));
 
                     FloatArray smearedBulkStrain(6);
                     smearedBulkStrain.zero();
@@ -954,7 +954,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                         smearedBulkStrain.beProductOf(BAvg, solVec);
 
                         if ( smearedBulkStrain.giveSize() == 4 ) {
-                            smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
+                            smearedBulkStrain = Vec6(smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3));
                         }
 
                         FloatArray smearedJumpStrainTemp = smearedJumpStrain;
@@ -973,7 +973,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                     auto stressVec = fe2Mat->giveRealStressVector_3d(smearedJumpStrain, gp, tStep);
                     //printf("stressVec: "); stressVec.printYourself();
 
-                    FloatArray trac = {stressVec[0]*crackNormal[0]+stressVec[5]*crackNormal[1], stressVec[5]*crackNormal[0]+stressVec[1]*crackNormal[1]};
+                    FloatArray trac = Vec2(stressVec[0]*crackNormal[0]+stressVec[5]*crackNormal[1], stressVec[5]*crackNormal[0]+stressVec[1]*crackNormal[1]);
 
                     ////////////////////////////////////////////////////////
                     // Standard part
@@ -992,7 +992,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
                         ////////////////////////////////////////////////////////
                         // Non-standard jump part
-                        FloatArray stressV4 = {stressVec[0]-stressVecBulk[0], stressVec[1]-stressVecBulk[1], stressVec[2]-stressVecBulk[2], stressVec[5]-stressVecBulk[5]};
+                        FloatArray stressV4 = Vec4(stressVec[0]-stressVecBulk[0], stressVec[1]-stressVecBulk[1], stressVec[2]-stressVecBulk[2], stressVec[5]-stressVecBulk[5]);
                         FloatArray BTimesT;
                         BTimesT.beTProductOf(BAvg, stressV4);
                         answer.add(1.0*dA*l_s, BTimesT);
@@ -1033,7 +1033,7 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
 
     auto T = dot(locToGlob, TLoc);
 
-    oT = {T.at(1), T.at(2)};
+    oT = Vec2(T.at(1), T.at(2));
 }
 
 void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
@@ -1064,9 +1064,9 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                     FloatArray jump2D;
                     computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
 
-                    FloatArray jump3D = {
+                    FloatArray jump3D = Vec3(
                         0.0, jump2D.at(1), jump2D.at(2)
-                    };
+                    );
 
                     // Compute traction
                     FloatMatrix F;
@@ -1107,13 +1107,13 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
                         FloatArray crackNormal( ms->giveNormal() );
 
-                        FloatArray crackNormal3D = {
+                        FloatArray crackNormal3D = Vec3(
                             crackNormal.at(1), crackNormal.at(2), 0.0
-                        };
+                        );
 
-                        FloatArray ez = {
+                        FloatArray ez = Vec3(
                             0.0, 0.0, 1.0
-                        };
+                        );
                         FloatArray crackTangent3D;
                         crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 
@@ -1647,9 +1647,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
             for ( int i = 1; i <= 3; i++ ) {
                 if ( type == DisplacementVector ) { // compute displacement
-                    FloatArray u = {
+                    FloatArray u = Vec3(
                         0.0, 0.0, 0.0
-                    };
+                    );
 
 
                     // Fetch global coordinates (in undeformed configuration)
@@ -1754,9 +1754,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     if ( uTemp.giveSize() == 3 ) {
                         u = uTemp;
                     } else   {
-                        u = {
+                        u = Vec3(
                             uTemp [ 0 ], uTemp [ 1 ], 0.0
-                        };
+                        );
                     }
 
 
@@ -1854,9 +1854,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
 
 
-                        FloatArray valueArray = {
+                        FloatArray valueArray = Vec1(
                             levelSet
-                        };
+                        );
                         vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                         double levelSet = 0.0, levelSetInNode = 0.0;
@@ -1870,9 +1870,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
 
 
-                        FloatArray valueArray = {
+                        FloatArray valueArray = Vec1(
                             levelSet
-                        };
+                        );
                         vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                         double nodeEnrMarker = 0.0, nodeEnrMarkerInNode = 0.0;
@@ -1886,9 +1886,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
 
 
-                        FloatArray valueArray = {
+                        FloatArray valueArray = Vec1(
                             nodeEnrMarker
-                        };
+                        );
                         vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     }
                 }

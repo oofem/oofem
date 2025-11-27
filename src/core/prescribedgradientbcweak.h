@@ -348,7 +348,7 @@ public:
         double Ly = mUC [ 1 ] - mLC [ 1 ];
 
         if ( mSideInd == 0 ) {
-            const FloatArray &x = { mUC [ 0 ], mLC [ 1 ] };
+            const FloatArray &x = Vec2( mUC [ 0 ], mLC [ 1 ] );
             return Lx + distance(iPos, x);
         }
 
@@ -357,7 +357,7 @@ public:
         }
 
         if ( mSideInd == 2 ) {
-            const FloatArray &x = { mLC [ 0 ], mUC [ 1 ] };
+            const FloatArray &x = Vec2( mLC [ 0 ], mUC [ 1 ] );
             return Lx + Ly + Lx + distance(iPos, x);
         }
 
@@ -417,7 +417,7 @@ public:
         }
 
         if ( sideInd == 0 ) {
-            const FloatArray &x = { mUC [ 0 ], mLC [ 1 ] };
+            const FloatArray &x = Vec2( mUC [ 0 ], mLC [ 1 ] );
             return Lx + distance(iPos, x);
         }
 
@@ -426,7 +426,7 @@ public:
         }
 
         if ( sideInd == 2 ) {
-            const FloatArray &x = { mLC [ 0 ], mUC [ 1 ] };
+            const FloatArray &x = Vec2( mLC [ 0 ], mUC [ 1 ] );
             return Lx + Ly + Lx + distance(iPos, x);
         }
 

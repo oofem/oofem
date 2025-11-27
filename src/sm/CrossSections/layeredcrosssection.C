@@ -1758,7 +1758,7 @@ LayeredIntegrationRule::SetUpPointsOnWedge(int nPointsTri, int nPointsThickness,
     for ( int i = 1, ind = 0; i <= nPointsThickness; i++ ) {
         for ( int j = 1; j <= nPointsTri; j++ ) {
             this->gaussPoints [ ind ] =
-                new GaussPoint(this, 1, { coords_xi1.at(j), coords_xi2.at(j), coords_xi.at(i) },
+                new GaussPoint(this, 1, Vec3( coords_xi1.at(j), coords_xi2.at(j), coords_xi.at(i) ),
                                weights_tri.at(j) * weights_thickness.at(i), mode);
 
             // store interface points
@@ -1819,27 +1819,27 @@ LayeredCrossSection::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 
             // Determine how to rotate it according to the value type
             if ( valType == ISVT_TENSOR_S3 ) {
-                answer = {
+                answer = Vec6(
                     c *c *rotVal.at(1) + 2 * c * s * rotVal.at(6) + s * s * rotVal.at(2),
                     c *c *rotVal.at(2) - 2 * c * s * rotVal.at(6) + s * s * rotVal.at(1),
                     rotVal.at(3),
                     c *rotVal.at(4) - s * rotVal.at(5),
                     c *rotVal.at(5) + s * rotVal.at(4),
-                    ( c * c - s * s ) * rotVal.at(6) - c * s * ( rotVal.at(1) - rotVal.at(2) ),
-                };
+                    ( c * c - s * s ) * rotVal.at(6) - c * s * ( rotVal.at(1) - rotVal.at(2) )
+                );
             } else if ( valType == ISVT_TENSOR_S3E ) {
-                answer = {
+                answer = Vec6(
                     c *c *rotVal.at(1) + c * s * rotVal.at(6) + s * s * rotVal.at(2),
                     c *c *rotVal.at(2) - c * s * rotVal.at(6) + s * s * rotVal.at(1),
                     rotVal.at(3),
                     c *rotVal.at(4) - s * rotVal.at(5),
                     c *rotVal.at(5) + s * rotVal.at(4),
-                    ( c * c - s * s ) * rotVal.at(6) - 2 * c * s * ( rotVal.at(1) - rotVal.at(2) ),
-                };
+                    ( c * c - s * s ) * rotVal.at(6) - 2 * c * s * ( rotVal.at(1) - rotVal.at(2) )
+                );
             } else if ( valType == ISVT_VECTOR ) {
-                answer = {
+                answer = Vec3(
                     c *rotVal.at(1) - s * rotVal.at(2), s *rotVal.at(1) + c * rotVal.at(2), rotVal.at(3)
-                };
+                );
             } else if ( valType == ISVT_SCALAR ) {
                 answer = rotVal;
             } else {

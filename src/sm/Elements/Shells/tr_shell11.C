@@ -301,12 +301,12 @@ TR_SHELL11 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     FloatArray nx = this->GiveDerivativeUX(gp->giveNaturalCoordinates());
     FloatArray ny = this->GiveDerivativeVY(gp->giveNaturalCoordinates());
 
-    FloatArray center = {0.33333333, 0.33333333};
+    FloatArray center = Vec2(0.33333333, 0.33333333);
     FloatArray nxRed = this->GiveDerivativeVX( center );
     FloatArray nyRed = this->GiveDerivativeUY( center );
     
     // These are the regular shape functions of a linear triangle evaluated at the center
-    FloatArray lc = { center.at(1), center.at(2), 1.0 - center.at(1) - center.at(2) }; // = {0, 0, 1}
+    FloatArray lc = Vec3( center.at(1), center.at(2), 1.0 - center.at(1) - center.at(2) ); // = {0, 0, 1}
     
     double area = this->giveArea();
     double detJ = 1.0 / ( 2.0 * area );
@@ -494,7 +494,7 @@ TR_SHELL11 :: computeVolumeAround(GaussPoint *gp)
 
     FloatArray x, y;
     this->giveNodeCoordinates(x, y);
-    std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
+    std :: vector< FloatArray > lc = {Vec2(x[0], y[0]), Vec2(x[1], y[1]), Vec2(x[2], y[2])};
 
     weight = gp->giveWeight();
     detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, this->giveGeometryType()) ) );
