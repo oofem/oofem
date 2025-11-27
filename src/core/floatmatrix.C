@@ -327,7 +327,7 @@ void FloatMatrix::add(double s, const FloatMatrix& a){ if(!a.isNotEmpty()) retur
 void FloatMatrix :: subtract(const FloatMatrix &a)   { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=-a; return; }  *this-=a;   }
 FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed){ if(transposed) return vector.transpose(); return vector; }
 void FloatMatrix :: zero() { this->setZero(); }
-void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
+void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %ld by %ld matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
 double FloatMatrix :: giveDeterminant() const { return this->determinant(); }
 void FloatMatrix :: beDiagonal(const FloatArray &diag) { *this=diag.asDiagonal().toDenseMatrix(); }
 double FloatMatrix :: giveTrace() const { return this->trace(); }

@@ -101,7 +101,11 @@ mpm:
 mpm-gdb:
 	ninja -C build-eigen
 	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
-fix:
-	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveField($ANSWER, $ID);' .
-	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_OPTIONAL_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveOptionalField($ANSWER, $ID);' .
-	ast-grep run --config .ast-grep-config.yml --pattern 'IR_GIVE_RECORD_KEYWORD_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveRecordKeywordField($ANSWER,$ID);' .
+
+remove-ir-macros:
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_FIELD(* $READER,$ANSWER,$ID);' --rewrite '$READER->giveField($ANSWER, $ID);' .
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveField($ANSWER, $ID);' .
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_OPTIONAL_FIELD(* $READER,$ANSWER,$ID);' --rewrite '$READER->giveOptionalField($ANSWER, $ID);' .
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_OPTIONAL_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveOptionalField($ANSWER, $ID);' .
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_RECORD_KEYWORD_FIELD(* $READER,$ANSWER,$ID);' --rewrite '$READER->giveRecordKeywordField($ANSWER,$ID);' .
+	ast-grep run -U --config .ast-grep-config.yml --pattern 'IR_GIVE_RECORD_KEYWORD_FIELD($READER,$ANSWER,$ID);' --rewrite '$READER.giveRecordKeywordField($ANSWER,$ID);' .

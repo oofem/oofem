@@ -35,7 +35,7 @@
 #ifndef valuemodetype_h
 #define valuemodetype_h
 
-#include "meta_enum.hpp"
+#include "enumitem.h"
 
 namespace oofem {
 //
@@ -54,6 +54,22 @@ namespace oofem {
   VM_TotalIntrinsic: total value evaluated at intrinsic time 
 */
 
+
+#define ValueModeType_DEF \
+    ENUM_ITEM_WITH_VALUE(VM_Unknown, 0) \
+    ENUM_ITEM_WITH_VALUE(VM_Total, 1)              \
+    ENUM_ITEM_WITH_VALUE(VM_Velocity, 2)           \
+    ENUM_ITEM_WITH_VALUE(VM_Acceleration, 3)       \
+    ENUM_ITEM_WITH_VALUE(VM_Incremental, 4)        \
+    ENUM_ITEM_WITH_VALUE(VM_RhsTotal, 5)           \
+    ENUM_ITEM_WITH_VALUE(VM_RhsIncremental, 6)     \
+    ENUM_ITEM_WITH_VALUE(VM_RhsInitial, 7)         \
+    ENUM_ITEM_WITH_VALUE(VM_Intermediate, 8)       \
+    ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)     \
+    ENUM_ITEM_WITH_VALUE(VM_Residual, 99)
+
+      
+
 /**
  * Type representing the mode of UnknownType or CharType, or similar types.
  * Afore mentioned types usually describes the physical meaning of
@@ -61,21 +77,16 @@ namespace oofem {
  * value can be further classified to be total displacement (TotalMode) or  velocity of
  * displacement (VelocityMode) an so on.
  */
-meta_enum(ValueModeType,int,
-    VM_Unknown=0,
-    VM_Total=1,
-    VM_Velocity=2,
-    VM_Acceleration=3,
-    VM_Incremental=4,
-    VM_RhsTotal=5,
-    VM_RhsIncremental=6,
-    VM_RhsInitial=7,
-    VM_Intermediate=8,
-    VM_TotalIntrinsic=9,
-    VM_Residual=99
-);
+enum ValueModeType {
+    ValueModeType_DEF
+};
 
-// constexpr auto __ValueModeTypeToString=ValueModeType_value_to_string;
-#define __ValueModeTypeToString(v) std::string(ValueModeType_value_to_string(v)).c_str()
+
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
+
+const char *__ValueModeTypeToString(ValueModeType _value);
 } // end namespace oofem
 #endif // valuemodetype_h

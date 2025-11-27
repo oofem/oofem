@@ -4,21 +4,21 @@
     <Analysis type="mpmsymbolicstationaryproblem" lhsterms="1 2 3 4" rhsterms="5" nsteps="1" maxiter="10" profileopt="1">
         <MPMVariables>
             <!-- displacement -->
-            <MPMVariable name="u"  interpolation="feilin"   type="vector" quantity="Displacement" size="2" dofs="1 2" />
+            <MPMVariable name="u"  interpolation="feilin"   type="1" quantity="0" size="2" dofs="1 2" />
             <!-- test function -->
-            <MPMVariable name="w"  interpolation="feilin"   type="vector" quantity="Displacement" size="2" dofs="1 2" />
+            <MPMVariable name="w"  interpolation="feilin"   type="1" quantity="0" size="2" dofs="1 2" />
             <!-- pressure -->
-            <MPMVariable name="p"  interpolation="feiconst" type="scalar" quantity="Pressure"     size="1" dofs="11" />
+            <MPMVariable name="p"  interpolation="feiconst" type="0" quantity="3"     size="1" dofs="11" />
             <!-- test function -->
-            <MPMVariable name="dp" interpolation="feiconst" type="scalar" quantity="Pressure"     size="1" dofs="11" />
+            <MPMVariable name="dp" interpolation="feiconst" type="0" quantity="3"     size="1" dofs="11" />
         </MPMVariables>
         <MPMTerms>
             <!-- mmode="7" -->
-            <BTSigmaTerm       variable="u" testvariable="w"  mmode="_PlaneStrain"  lhsmatmode="DeviatoricStiffness" rhsmatmode="DeviatoricStress" />
-            <BTamNTerm         variable="p" testvariable="w"  mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
-            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
-            <NTcN              variable="p" testvariable="dp" mmode="_PlaneStrain"  ctype="ElasticBulkModulusInverse" uvmt="VM_Total" />
-            <NTfTerm           variable="u" testvariable="w"  mmode="_PlaneStress" flux="0. 6.25" />
+            <BTSigmaTerm       variable="u" testvariable="w"  mmode="7"  lhsmatmode="29" rhsmatmode="30" />
+            <BTamNTerm         variable="p" testvariable="w"  mmode="7"  atype="28" uvmt="1" />
+            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="7"  atype="28" uvmt="1" />
+            <NTcN              variable="p" testvariable="dp" mmode="7"  ctype="27" uvmt="1" />
+            <NTfTerm           variable="u" testvariable="w"  mmode="6" flux="0. 6.25" />
         </MPMTerms>
         <MPMIntegrals>
             <MPMIntegral domain="1" set="1" term="1" />

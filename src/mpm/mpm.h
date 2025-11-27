@@ -68,20 +68,6 @@ class EngngModel;
  * interpolation.getCellNodes(cell)
  */
 
-meta_enum_class(VariableType,int,
-          scalar,
-          vector
-);
-
-meta_enum_class(VariableQuantity,int,
-          Displacement,
-          Velocity,
-          Temperature,
-          Pressure,
-          VolumeFraction
-);
-
-
 /**
  * @brief Class representing unknown field (or test field) in a weak solution.
  * The variable has its interpolation, type (scalar, vector), size.
@@ -90,8 +76,8 @@ meta_enum_class(VariableQuantity,int,
  */
 class Variable {
     public:
-    typedef oofem::VariableType VariableType;
-    typedef oofem::VariableQuantity VariableQuantity;
+    enum VariableType{ scalar=0, vector };
+    enum VariableQuantity { Displacement, Velocity, Temperature, Pressure, VolumeFraction };
 
     const FEInterpolation* interpolation;  
     Variable* dualVar; //? or just bool?
