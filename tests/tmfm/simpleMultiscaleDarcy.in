@@ -16,7 +16,8 @@ tr1darcy 2 nodes 3 1 2 5
 tr1darcy 3 nodes 3 2 3 5
 tr1darcy 4 nodes 3 3 4 5
 SimpleTransportCS 1 mat 1 set 1
-rvestokesflow 1 file "simpleRVEStokes.rvein" supressoutput 1
+# unprocessed field on the next line: supressoutput 1
+rvestokesflow 1 file "simpleRVEStokes.rvein"
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 11 values 1 0. set 3
 BoundaryCondition  2 loadTimeFunction 1 dofs 1 11 values 1 1. set 2
 ConstantFunction 1 f(t) 1.0
