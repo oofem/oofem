@@ -46,7 +46,25 @@ def setupDomain (domain, nodes, elems, css, mats, bcs, ics, ltfs, sets):
        
     return
 
-def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0, warpField=None, warpScale=1.0):
+def plot2Dmesh(ax, d, tstep, field=None, fieldValueIndex=0, warpField=None, warpScale=1.0):
+    """ Produces a 2D mesh plot on the given Axes object 
+    
+    Parameters:
+    ax : matplotlib.axes.Axes
+        The Axes object on which to plot the 2D mesh.
+    d : oofem.Domain
+        The domain containing the mesh data.
+    tstep : oofem.TimeStep
+        The time step for which to plot the mesh.
+    field : oofem.Field, optional
+        The field to evaluate and plot on the mesh.
+    fieldValueIndex : int, optional
+        The index of the field value to plot.
+    warpField : oofem.Field, optional
+        The field used to warp the mesh coordinates.
+    warpScale : float, optional
+        The scale factor for warping the mesh coordinates.
+    """
     x=[];
     y=[];
     z=[];
@@ -87,11 +105,6 @@ def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0, warpField=None, warpScal
             
     triangulation = tri.Triangulation(x, y, elements)
     
-    plt.figure(2)
-    ax = plt.subplot()
-    #plt.set_title('3D OOFEM mesh')
-    ax.set_aspect('equal')
-
     if (field):
         levels = np.linspace(int(min(z)-1.0), int(max(z)+1.0), 20)
         plt.tricontourf(triangulation, z, levels=levels, alpha=1.0)
@@ -102,11 +115,36 @@ def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0, warpField=None, warpScal
     return plt
 
 
-def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1.0, label="", nodeLabels=False, elementLabels=False):
+def plot1Dmesh(ax, d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1.0, label="", nodeLabels=False, elementLabels=False):
+    """ Produces a 1D mesh plot on the given Axes object 
+    
+    Parameters:
+    ax : matplotlib.axes.Axes
+        The Axes object on which to plot the 1D mesh.
+    d : oofem.Domain
+        The domain containing the mesh data.
+    tstep : oofem.TimeStep
+        The time step for which to plot the mesh.
+    xind : int, optional
+        The index of the coordinate to use for the x-axis.
+    yind : int, optional
+        The index of the coordinate to use for the y-axis.
+    evals : list or None, optional
+        The values to evaluate and color the mesh elements.
+    warpField : oofem.Field, optional
+        The field used to warp the mesh coordinates.
+    warpScale : float, optional
+        The scale factor for warping the mesh coordinates.
+    label : str, optional
+        The label for the colorbar.
+    nodeLabels : bool, optional
+        Whether to display labels for nodes.
+    elementLabels : bool, optional
+        Whether to display labels for elements.
+    """
     x=[];
     y=[];
     
-    fig, ax = plt.subplots()
     #plt.set_title('3D OOFEM mesh')
     ax.set_aspect('equal')
 
@@ -143,9 +181,9 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
                 y  = (c1[yind], c2[yind])
 
             if (evals):
-                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=2, markersize=4, mfc='red')
+                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=3, markersize=4, mfc='red')
             else:
-                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=2, markersize=4, mfc='red')
+                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=0.5, markersize=4, mfc='red', alpha=0.5)
             if (elementLabels):
                 plt.text((x[0]+x[1])/2, (y[0]+y[1])/2, str(e.giveNumber()), fontsize=8, ha='center', va='center', bbox=ElemBbox)
 
@@ -159,8 +197,8 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
                 coords[xind] += val[xind]*warpScale
                 coords[yind] += val[yind]*warpScale
             plt.text(coords[xind], coords[yind], str(dm.giveNumber()), fontsize=8, ha='center', va='center', bbox=NodeBbox)
-
-    sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm, norm=norm)
-    sm.set_array([])
-    plt.colorbar(sm, label=label, ax=ax, orientation='horizontal')   
+    if evals:
+        sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm, norm=norm)
+        sm.set_array([])
+        plt.colorbar(sm, label=label, ax=ax, orientation='horizontal')   
     return plt
