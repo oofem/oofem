@@ -46,39 +46,58 @@ def setupDomain (domain, nodes, elems, css, mats, bcs, ics, ltfs, sets):
        
     return
 
-def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0):
+def plot2Dmesh(d, tstep, field=None, fieldValueIndex=0, warpField=None, warpScale=1.0):
     x=[];
     y=[];
     z=[];
     elements=[];
     for i in range(1,d.giveNumberOfDofManagers()+1):
-        coords = d.giveDofManager(i).giveCoordinates()
+        dman = d.giveDofManager(i)
+        coords = dman.giveCoordinates()
         coords.resize(2)
-        x.append(coords[0]);
-        y.append(coords[1]);
+        
         if (field):
             val = oofempy.FloatArray(6)
-            field.evaluateAt(val, coords, oofempy.ValueModeType.VM_Total, tstep) 
-            z.append(val[fieldValueIndex])
+            try:
+                field.evaluateAt(val, dman, oofempy.ValueModeType.VM_Total, tstep) 
+                z.append(val[fieldValueIndex])
+            except:
+                print("field querry failed")
+                pass
 
+
+        if (warpField):
+            val = oofempy.FloatArray(6)
+            warpField.evaluateAt(val, dman, oofempy.ValueModeType.VM_Total, tstep) 
+            coords[0] += val[0]*warpScale
+            coords[1] += val[1]*warpScale
+        x.append(coords[0]);
+        y.append(coords[1]);
+
+        
     #print(nodes)
     for i in range(1, d.giveNumberOfElements()+1):
         e=d.giveElement(i)
         gt=e.giveGeometryType()
         if (gt == oofempy.Element_Geometry_Type.EGT_triangle_1):
             elements.append((e.giveDofManager(1).giveNumber()-1, e.giveDofManager(2).giveNumber()-1, e.giveDofManager(3).giveNumber()-1))
+        elif (gt == oofempy.Element_Geometry_Type.EGT_quad_1):
+            elements.append((e.giveDofManager(1).giveNumber()-1, e.giveDofManager(2).giveNumber()-1, e.giveDofManager(3).giveNumber()-1))
+            elements.append((e.giveDofManager(1).giveNumber()-1, e.giveDofManager(3).giveNumber()-1, e.giveDofManager(4).giveNumber()-1))
+            
     triangulation = tri.Triangulation(x, y, elements)
-
-    fig, ax = plt.subplots()
+    
+    plt.figure(2)
+    ax = plt.subplot()
     #plt.set_title('3D OOFEM mesh')
     ax.set_aspect('equal')
 
     if (field):
-        levels = np.linspace(min(z), max(z), 12)
+        levels = np.linspace(int(min(z)-1.0), int(max(z)+1.0), 20)
         plt.tricontourf(triangulation, z, levels=levels, alpha=1.0)
         plt.colorbar(orientation='horizontal')
-    else:
-        plt.triplot(triangulation, linewidth=0.2, color='black', alpha=1.0)
+    
+    plt.triplot(triangulation, linewidth=0.2, color='black', alpha=0.5)
     
     return plt
 
@@ -96,7 +115,7 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
         mmin = min(evals)
         mmax = max(evals)
         norm = plt.Normalize(mmin, mmax)
-        colors = plt.cm.viridis(norm(evals))        
+        colors = plt.cm.coolwarm(norm(evals))        
 
     ElemBbox = dict(boxstyle='round', fc='lavender', ec='blue', alpha=0.5)
     NodeBbox = dict(boxstyle='round', fc='mistyrose', ec='red', alpha=0.5)
@@ -141,7 +160,7 @@ def plot1Dmesh(d, tstep, xind=0, yind=1, evals=None, warpField=None, warpScale=1
                 coords[yind] += val[yind]*warpScale
             plt.text(coords[xind], coords[yind], str(dm.giveNumber()), fontsize=8, ha='center', va='center', bbox=NodeBbox)
 
-    sm = plt.cm.ScalarMappable(cmap=plt.cm.viridis, norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm, norm=norm)
     sm.set_array([])
     plt.colorbar(sm, label=label, ax=ax, orientation='horizontal')   
     return plt
