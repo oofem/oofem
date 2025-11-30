@@ -40,7 +40,11 @@ namespace oofem {
 int InputRecord::giveLevenshteinDist(const std::string& word1, const std::string& word2){
     int size1 = word1.size();
     int size2 = word2.size();
-    int verif[size1 + 1][size2 + 1]; // Verification matrix i.e. 2D array which will store the calculated distance.
+    // Verification matrix i.e. 2D array which will store the calculated distance.
+    // int verif[size1 + 1][size2 + 1];
+    std::vector<std::vector<int>> verif(size1+1);
+    for(int i=0; i<=size1; i++){ verif[i].resize(size2+1); }
+
 
     // If one of the words has zero length, the distance is equal to the size of the other word.
     if (size1 == 0)

@@ -61,7 +61,7 @@ public:
     std::string msg;
 
     RuntimeException(const char* _func, const char* _file, int _line, const char *format, ...)
-        #if defined(__GNUC__) or defined (__clang)
+        #if defined(__GNUC__) || defined (__clang)
             __attribute__((format(printf, 5, 6)))
         #endif
     ;
