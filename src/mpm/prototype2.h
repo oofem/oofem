@@ -552,10 +552,10 @@ namespace oofem {
     public:
         TestProblem(int i, EngngModel * _master) : MPMSymbolicProblem(i, _master) { }
 
-        void initializeFrom(InputRecord &ir) override {
-            MPMSymbolicProblem::initializeFrom(ir);
-            IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
-            IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
+        void instanciateSpecific(InputRecord &ir) override {
+            MPMSymbolicProblem::instanciateSpecific(ir);
+            ir.giveField(lhsIntegrals,"lhsterms");
+            ir.giveField(rhsIntegrals,"rhsterms");
         }
 
         void postInitialize() override {

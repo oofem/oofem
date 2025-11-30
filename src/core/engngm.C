@@ -198,7 +198,7 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
-    std::shared_ptr<InputRecord> irPtr(ir.clone());
+    std::shared_ptr<InputRecord> irPtr(ir.ptr());
     Timer timer;
     timer.startTimer();
 

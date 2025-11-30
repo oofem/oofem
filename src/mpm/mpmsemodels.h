@@ -115,9 +115,9 @@ namespace oofem {
 
         void instanciateSpecific(InputRecord &ir) override {
             MPMSymbolicProblem::instanciateSpecific(ir);
-            IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
-            IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
-            if ( !unknownsField ) { 
+            ir.giveField(lhsIntegrals,"lhsterms");
+            ir.giveField(rhsIntegrals,"rhsterms");
+            if ( !unknownsField ) {
               //unknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_Unknown, 0);
               unknownsField = std::make_unique<PrimaryField>(this, 1, FT_Unknown, 0);
             }
