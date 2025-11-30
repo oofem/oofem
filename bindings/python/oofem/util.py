@@ -1,6 +1,8 @@
 try: from . import oofempy         # when installed
 except ImportError: import oofempy # imported in the build-tree, oofempy being in PYTHONPATH
+
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
@@ -181,9 +183,10 @@ def plot1Dmesh(ax, d, tstep, xind=0, yind=1, evals=None, warpField=None, warpSca
                 y  = (c1[yind], c2[yind])
 
             if (evals):
-                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=3, markersize=4, mfc='red')
+                plt.plot(x,y, color=colors[i-1], marker='s', linestyle='solid', linewidth=3, markersize=4, mec='black', mfc='black', mew=0)
             else:
-                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=0.5, markersize=4, mfc='red', alpha=0.5)
+                # matplotlib>3,8 will support blend_mode='screen' to solve overlapping markers issue
+                plt.plot(x,y, color='black', marker='s', linestyle='solid', linewidth=0.5, markersize=3, mec='black', mfc=matplotlib.colors.to_rgba('black', 0.2), mew=0, alpha=0.3)
             if (elementLabels):
                 plt.text((x[0]+x[1])/2, (y[0]+y[1])/2, str(e.giveNumber()), fontsize=8, ha='center', va='center', bbox=ElemBbox)
 
@@ -197,7 +200,7 @@ def plot1Dmesh(ax, d, tstep, xind=0, yind=1, evals=None, warpField=None, warpSca
                 coords[xind] += val[xind]*warpScale
                 coords[yind] += val[yind]*warpScale
             plt.text(coords[xind], coords[yind], str(dm.giveNumber()), fontsize=8, ha='center', va='center', bbox=NodeBbox)
-    if evals:
+    if (evals):
         sm = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm, norm=norm)
         sm.set_array([])
         plt.colorbar(sm, label=label, ax=ax, orientation='horizontal')   
