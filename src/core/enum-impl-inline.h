@@ -40,9 +40,8 @@ template<> struct EnumTraits<ENUM_TYPE>{
    #undef ENUM_ITEM
 
    static constexpr const char opt_prefix[]=ENUM_PREFIX;
-   static constexpr size_t opt_prefix_len=std::strlen(opt_prefix);
-
-   static constexpr bool _starts_with_prefix(const char* s){ return opt_prefix_len>0 && std::strlen(s)>opt_prefix_len && std::strncmp(s,opt_prefix,opt_prefix_len)==0; }
+   static constexpr size_t opt_prefix_len=sizeof(opt_prefix)-1;
+   static const bool _starts_with_prefix(const char* s){ return opt_prefix_len>0 && std::strlen(s)>opt_prefix_len && std::strncmp(s,opt_prefix,opt_prefix_len)==0; }
 
    static std::optional<const char*> name(ENUM_TYPE v){ for(const auto& vn: EnumTraits<ENUM_TYPE>::value_to_name) if(vn.first==v) return vn.second; return {}; };
    static std::optional<ENUM_TYPE> value(int i){ for(const auto& vn: EnumTraits<ENUM_TYPE>::value_to_name) if((int)vn.first==i) return vn.first; return {}; };
