@@ -5,7 +5,6 @@
   <Domains>
     <Domain domain="1dtruss">
       <OutputManager tstep_all="1" dofman_all="1" element_all="1" />
-      <!-- ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3 -->
       <Nodes>
         <Node id="1" coords="0. 0. 0."  />
         <Node id="2" coords="0. 0. 0."/>
@@ -34,7 +33,7 @@
       </Sets>
     </Domain>
   </Domains>
-  <xi:include href="spring01-exportmodules.xml" />
+  <xi:include href="spring01-exportmodules.xml-frag" />
   <!--
     this is what is indirectly inclueded (as xi:include test)
     <ExportModules>

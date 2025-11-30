@@ -13,12 +13,11 @@
             <MPMVariable name="dp" interpolation="feiconst" type="scalar" quantity="Pressure"     size="1" dofs="11" />
         </MPMVariables>
         <MPMTerms>
-            <!-- mmode="7" -->
-            <BTSigmaTerm       variable="u" testvariable="w"  mmode="_PlaneStrain"  lhsmatmode="DeviatoricStiffness" rhsmatmode="DeviatoricStress" />
-            <BTamNTerm         variable="p" testvariable="w"  mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
-            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="_PlaneStrain"  atype="MRM_ScalarOne" uvmt="VM_Total" />
-            <NTcN              variable="p" testvariable="dp" mmode="_PlaneStrain"  ctype="ElasticBulkModulusInverse" uvmt="1" />
-            <NTfTerm           variable="u" testvariable="w"  mmode="_PlaneStress" flux="0. 6.25" />
+            <BTSigmaTerm       variable="u" testvariable="w"  mmode="PlaneStrain"  lhsmatmode="DeviatoricStiffness" rhsmatmode="DeviatoricStress" />
+            <BTamNTerm         variable="p" testvariable="w"  mmode="PlaneStrain"  atype="MRM_ScalarOne" />
+            <NTamTBTerm id="3" variable="u" testvariable="dp" mmode="PlaneStrain"  atype="MRM_ScalarOne" uvmt="Total" />
+            <NTcN              variable="p" testvariable="dp" mmode="PlaneStrain"  ctype="ElasticBulkModulusInverse" uvmt="Total" />
+            <NTfTerm           variable="u" testvariable="w"  mmode="PlaneStress"  flux="0. 6.25" />
         </MPMTerms>
         <MPMIntegrals>
             <MPMIntegral domain="1" set="1" term="1" />

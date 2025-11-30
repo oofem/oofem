@@ -984,6 +984,13 @@ if (USE_SM)
         add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 
+    if(USE_XML)
+        file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.xml")
+        foreach (case ${sm_tests})
+            add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+
     file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.sh")
     foreach (case ${sm_tests})
         add_test (NAME "test_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND bash ${case} ${oofem_cmd})
@@ -1063,6 +1070,14 @@ if (USE_MPM)
     foreach (case ${mpm_tests})
         add_test (NAME "test_mpm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/mpm COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
+
+    if(USE_XML)
+        file (GLOB mpm_tests RELATIVE "${oofem_TEST_DIR}/mpm" "${oofem_TEST_DIR}/mpm/*.xml")
+        foreach (case ${mpm_tests})
+            add_test (NAME "test_mpm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/mpm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+
 endif()
 
 ######################## Benchmarks ########################################
