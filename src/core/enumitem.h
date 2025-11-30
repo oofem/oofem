@@ -35,6 +35,15 @@
 #ifndef enumitem_h
 #define enumitem_h
 
+// used in enum-impl-inline.h
+#include<optional>
+#include<initializer_list>
+#include<utility>
+#include<cstring>
+#include<iostream>
+#include<vector>
+namespace oofem { template<typename T> struct EnumTraits; }
+
 namespace oofem {
 #ifndef ENUM_ITEM
  #define ENUM_ITEM(element) element,

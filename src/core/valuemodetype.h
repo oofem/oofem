@@ -55,7 +55,17 @@ namespace oofem {
 */
 
 
-#define ValueModeType_DEF \
+/**
+ * Type representing the mode of UnknownType or CharType, or similar types.
+ * Afore mentioned types usually describes the physical meaning of
+ * value and ValueModeType provides the further necessary classification. For example "DisplacementVector"
+ * value can be further classified to be total displacement (TotalMode) or  velocity of
+ * displacement (VelocityMode) an so on.
+ */
+
+#define ENUM_TYPE ValueModeType
+#define ENUM_PREFIX "VM_"
+#define ENUM_DEF \
     ENUM_ITEM_WITH_VALUE(VM_Unknown, 0) \
     ENUM_ITEM_WITH_VALUE(VM_Total, 1)              \
     ENUM_ITEM_WITH_VALUE(VM_Velocity, 2)           \
@@ -68,24 +78,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)     \
     ENUM_ITEM_WITH_VALUE(VM_Residual, 99)
 
-      
-
-/**
- * Type representing the mode of UnknownType or CharType, or similar types.
- * Afore mentioned types usually describes the physical meaning of
- * value and ValueModeType provides the further necessary classification. For example "DisplacementVector"
- * value can be further classified to be total displacement (TotalMode) or  velocity of
- * displacement (VelocityMode) an so on.
- */
-enum ValueModeType {
-    ValueModeType_DEF
-};
-
-
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
+#include "enum-impl-inline.h"
 
 const char *__ValueModeTypeToString(ValueModeType _value);
 } // end namespace oofem
