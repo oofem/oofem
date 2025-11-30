@@ -190,10 +190,11 @@ namespace oofem {
         for(const std::string& n: attrSeen) node.remove_attribute(n.c_str());
         if(!wrn) return;
         if(aLeft==0) return;
+        node.remove_children();
         std::ostringstream oss;
-        oss<<"Unprocessed XML attributes:\n";
+        oss<<" "<<loc()<<": unprocessed XML attributes:\n";
         node_seen_set(node,false);
-        node.print(oss,"  ");
+        node.print(oss,"  ",pugi::format_default,pugi::encoding_auto,1);
         node_seen_set(node,true);
         OOFEM_WARNING("%s",oss.str().c_str());
     }
