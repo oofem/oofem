@@ -42,6 +42,7 @@
 #include <exception>
 #include <regex>
 #include <sstream>
+#include <enum>
 
 #include "oofemenv.h"
 #include "error.h"
