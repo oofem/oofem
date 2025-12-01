@@ -42,10 +42,11 @@
 #include <exception>
 #include <regex>
 #include <sstream>
-#include <enum>
+
 
 #include "oofemenv.h"
 #include "error.h"
+#include "enum.h"
 
 namespace oofem {
 class IntArray;
