@@ -42,6 +42,7 @@
 #include<cstring>
 #include<iostream>
 #include<vector>
+#include<map>
 
 namespace oofem {
    /* including enum-impl.h will define the enum SomeEnum and specialize EnumData<SomeEnum>; EnumTraits<SomeEnum> the accesses EnumData<SomeEnum> to work with the enum itself */
@@ -74,12 +75,12 @@ namespace oofem {
          return {};
       };
       // return all permissible names (with and without opt_prefix, if used)
-      static std::vector<std::string> all_names(){
-         std::vector<std::string> ret;
-         ret.reserve((D::opt_prefix_len==0?1:2)*D::value_to_name.size());
+      static std::map<int,std::vector<std::string>> all_values_to_names(){
+         std::map<int,std::vector<std::string>> ret;
          for(const auto& vn: D::value_to_name){
-            ret.push_back(vn.name);
-            if(_starts_with_prefix(vn.name)) ret.push_back(vn.name+D::opt_prefix_len);
+            auto [I,_]=ret.insert({(int)vn.value,{vn.name,}});
+            // add any aliases for the value here
+            if(_starts_with_prefix(vn.name)) I->second.push_back(vn.name+D::opt_prefix_len);
          }
          return ret;
       }

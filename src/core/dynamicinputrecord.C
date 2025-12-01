@@ -146,6 +146,7 @@ bool DynamicInputRecord::hasChild(InputFieldType id, const std::string& name, bo
     OOFEM_ERROR("DynamicInputRecord::hasChild: not implemented.");
 }
 
+std::string DynamicInputRecord::giveLocation() { return "<unspecified_dynamic_location>"; }
 
 void DynamicInputRecord :: finish(bool wrn)
 {

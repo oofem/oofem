@@ -107,6 +107,7 @@ public:
 
     void setLineNumber(int num) { this->lineNumber = num; }
     int giveLineNumber() const { return lineNumber; }
+    std::string giveLocation() override;
 
 protected:
     int giveKeywordIndx(const char *kwd);

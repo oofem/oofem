@@ -113,6 +113,8 @@ public:
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
 
+    virtual std::string giveLocation() = 0;
+
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
@@ -146,8 +148,8 @@ public:
     /// Reads the ScalarFunction field value.
     virtual void giveField(ScalarFunction &function, InputFieldType id) = 0;
 
-    std::string error_msg_with_hints(const std::string& val, const std::vector<std::string>& all_names);
-    int giveLevenshteinDist(const std::string& word1, const std::string& word2);
+    static std::string error_msg_with_hints(const std::string& val, const std::map<int,std::vector<std::string>>& v2nn);
+    static int giveLevenshteinDist(const std::string& word1, const std::string& word2);
     /// Reads enumeration (must be defined via enum-impl-inline) into integer
     template<typename AnEnum>
     void giveField(AnEnum& answer, InputFieldType id){
@@ -157,14 +159,19 @@ public:
         if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
             int val=std::atoi(s.c_str());
             auto v=Traits::value(val);
-            if(!v) OOFEM_ERROR("%s (enum %s): index '%d' not valid (out of range?).",id,Traits::enum_name,val);
+            if(!v) OOFEM_ERROR("%s: %s (enum %s): invalid index '%d'%s",giveLocation().c_str(),id,Traits::enum_name,val,error_msg_with_hints("",Traits::all_values_to_names()).c_str());
             answer=v.value();
         } else {
             auto v=Traits::value(s.c_str());
-            if(!v){ OOFEM_ERROR("%s (enum %s): %s",id,Traits::enum_name,error_msg_with_hints(s,Traits::all_names()).c_str()); }
+            if(!v){ OOFEM_ERROR("%s: %s (enum %s): unrecognized name '%s'%s",giveLocation().c_str(),id,Traits::enum_name,s.c_str(),error_msg_with_hints(s,Traits::all_values_to_names()).c_str()); }
             answer=v.value();
         }
     }
+    /**@name Optional field extraction methods
+     * Reads the field value identified by keyword
+     * @param answer contains result
+     * @param id field keyword
+     */
     template<typename T>
     void giveOptionalField(T& answer, InputFieldType id){ if(hasField(id)) giveField(answer,id); }
     //@}
@@ -177,12 +184,7 @@ public:
     // return whether a single child of given type exists
     virtual bool hasChild(InputFieldType id, const std::string& name, bool optional) = 0;
     //@}
-
-    /**@name Optional field extraction methods
-     * Reads the field value identified by keyword
-     * @param answer contains result
-     * @param id field keyword
-     */
+#if 1
     //@{
     /// Reads the integer field value.
     void giveOptionalField(int &answer, InputFieldType id);
@@ -207,7 +209,7 @@ public:
     /// Reads the ScalarFunction field value.
     void giveOptionalField(ScalarFunction &function, InputFieldType id);
     //@}
-
+#endif
     /// Returns true if record contains field identified by idString keyword.
     virtual bool hasField(InputFieldType id) = 0;
 

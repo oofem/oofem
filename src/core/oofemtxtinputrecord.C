@@ -39,6 +39,7 @@
 #include "dictionary.h"
 #include "range.h"
 #include "scalarfunction.h"
+#include "oofemtxtdatareader.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -88,6 +89,10 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
     return * this;
 }
 
+
+std::string OOFEMTXTInputRecord::giveLocation(){
+    return (giveReader()?((OOFEMTXTDataReader*)giveReader())->giveReferenceName():"<unknown_file>")+":"+std::to_string(lineNumber);
+}
 
 int
 OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name, bool optional){

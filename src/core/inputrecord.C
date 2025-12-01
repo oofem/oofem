@@ -33,6 +33,7 @@
  */
 
 #include "inputrecord.h"
+#include <iomanip>
 
 namespace oofem {
 
@@ -79,16 +80,22 @@ int InputRecord::giveLevenshteinDist(const std::string& word1, const std::string
     return verif[size1][size2];
 }
 
-std::string InputRecord::error_msg_with_hints(const std::string& val, const std::vector<std::string>& all_names){
+std::string InputRecord::error_msg_with_hints(const std::string& val, const std::map<int,std::vector<std::string>>& v2nn) {
+     //std::string InputRecord::error_msg_with_hints(const std::string& val, const std::vector<std::string>& all_names){
     std::ostringstream oss, oss2;
     std::string minName; int minDist=1000;
-    for(const auto& s: all_names){
-        if(int ld=giveLevenshteinDist(val,s); ld<minDist){ minDist=ld; minName=s; }
-        oss2<<" "<<s;
+    for(const auto& [num,names]: v2nn){
+        oss2<<"  "<<std::setfill(' ')<<std::setw(3)<<num<<":";
+        for(const auto& name: names){
+            oss2<<" "<<name;
+            if(!val.empty()){
+                if(int ld=giveLevenshteinDist(val,name); ld<minDist){ minDist=ld; minName=name; }
+            }
+        }
+        oss2<<"\n";
     }
-    oss<<"unrecognized name '"<<val<<"'";
-    if(minDist<=3) oss<<" (did you mean '"<<minName<<"'?)";
-    oss<<"\nPossible names:"<<oss2.str()<<".";
+    if(minDist<=4) oss<<" (did you mean '"<<minName<<"'?)";
+    oss<<".\nPossible values:\n"<<oss2.str();
     return oss.str();
 }
 
@@ -101,7 +108,7 @@ InputRecord :: giveReader() const {
     return reader;
 }
 
-
+#if 1
 void
 InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {
@@ -211,7 +218,7 @@ InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
         } catch ( MissingKeywordInputException & ) { }
     }
 }
-
+#endif
 
 
 InputException::InputException(const InputRecord& ir, std::string keyword, int number) : 

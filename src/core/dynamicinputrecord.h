@@ -91,6 +91,7 @@ public:
     void finish(bool wrn = true) override;
 
     std :: string giveRecordAsString() const override;
+    std :: string giveLocation() override;
 
     void giveRecordKeywordField(std :: string &answer, int &value) override;
     void giveRecordKeywordField(std :: string &answer) override;

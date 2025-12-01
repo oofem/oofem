@@ -51,7 +51,7 @@ std::string errorInfo(const char *func)
 
 RuntimeException::RuntimeException(const char * _func, const char * _file, int _line, const char *format, ...)
 {
-    char stream [1024];
+    char stream [2048];
     va_list args;
     va_start(args, format);
     vsnprintf(stream, sizeof(stream)-1, format, args);

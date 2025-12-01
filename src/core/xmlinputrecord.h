@@ -69,6 +69,7 @@ public:
 
     void finish(bool wrn = true) override;
 
+    std::string giveLocation() override { return loc(); }
     std::string loc(){ return loc(node); }
     std::string loc(const pugi::xml_node& node);
 
