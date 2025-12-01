@@ -35,7 +35,7 @@
 #ifndef materialmode_h
 #define materialmode_h
 
-#include "enumitem.h"
+#include "enum.h"
 
 namespace oofem {
 #define ENUM_TYPE MaterialMode
@@ -92,7 +92,7 @@ namespace oofem {
     ENUM_ITEM(_3dMTLattice) \
     ENUM_ITEM(_Warping) \
 
-#include "enum-impl-inline.h"
+#include "enum-impl.h"
 
 } // end namespace oofem
 #endif // materialmode_h

@@ -54,6 +54,7 @@
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
+#include "enum.h"
 
 
 namespace oofem {
@@ -78,12 +79,12 @@ class EngngModel;
 #define ENUM_TYPE VariableType
 #define ENUM_DEF ENUM_ITEM(scalar) ENUM_ITEM(vector)
 #define ENUM_CLASS
-#include "enum-impl-inline.h"
+#include "enum-impl.h"
 
 #define ENUM_TYPE VariableQuantity
 #define ENUM_DEF ENUM_ITEM(Displacement) ENUM_ITEM(Velocity) ENUM_ITEM(Temperature) ENUM_ITEM(Pressure) ENUM_ITEM(VolumeFraction)
 #define ENUM_CLASS
-#include "enum-impl-inline.h"
+#include "enum-impl.h"
 
 
 class Variable {

@@ -35,7 +35,7 @@
 #ifndef matesponsemode_h
 #define matesponsemode_h
 
-#include "enumitem.h"
+#include "enum.h"
 
 namespace oofem {
 #define ENUM_TYPE MatResponseMode
@@ -72,7 +72,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29) \
     ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) 
 
-#include "enum-impl-inline.h"
+#include "enum-impl.h"
 
 } // end namespace oofem
 #endif // matesponsemode_h

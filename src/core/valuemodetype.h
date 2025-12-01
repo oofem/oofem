@@ -35,7 +35,7 @@
 #ifndef valuemodetype_h
 #define valuemodetype_h
 
-#include "enumitem.h"
+#include "enum.h"
 
 namespace oofem {
 //
@@ -78,7 +78,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(VM_TotalIntrinsic, 9)     \
     ENUM_ITEM_WITH_VALUE(VM_Residual, 99)
 
-#include "enum-impl-inline.h"
+#include "enum-impl.h"
 
 const char *__ValueModeTypeToString(ValueModeType _value);
 } // end namespace oofem

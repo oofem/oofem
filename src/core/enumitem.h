@@ -42,7 +42,7 @@
 #include<cstring>
 #include<iostream>
 #include<vector>
-namespace oofem { template<typename T> struct EnumTraits; }
+
 
 namespace oofem {
 #ifndef ENUM_ITEM
