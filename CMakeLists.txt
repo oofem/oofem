@@ -807,6 +807,12 @@ if (USE_SHARED_LIB)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
     set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    if (USE_DSS)
+        set_target_properties (dss PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
+            set_target_properties (dss PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+        endif ()
+    endif()
     if (USE_FM)
         set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
