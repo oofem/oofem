@@ -69,7 +69,7 @@ public:
     FEICellGeometry() {}
     virtual ~FEICellGeometry() { }
     virtual int giveNumberOfVertices() const = 0;
-    virtual const FloatArray &giveVertexCoordinates(int i) const = 0;
+    virtual const FloatArray giveVertexCoordinates(int i) const = 0;
     virtual const Element_Geometry_Type giveGeometryType() const = 0;
     virtual const FEInterpolation* getGeometryInterpolation() const {return nullptr;};
 };
@@ -89,7 +89,7 @@ public:
     {
         OOFEM_ERROR("no reference geometry");
     }
-    const FloatArray &giveVertexCoordinates(int i) const override
+    const FloatArray giveVertexCoordinates(int i) const override
     {
         OOFEM_ERROR("no reference geometry");
     }
@@ -113,7 +113,7 @@ public:
         FEICellGeometry(), elem(elem) { }
     virtual ~FEIElementGeometryWrapper() { }
     int giveNumberOfVertices() const override;
-    const FloatArray &giveVertexCoordinates(int i) const override
+    const FloatArray giveVertexCoordinates(int i) const override
     {
         return elem->giveNode(i)->giveCoordinates();
     }
@@ -123,6 +123,31 @@ public:
     const FEInterpolation* getGeometryInterpolation() const override {return elem->getGeometryInterpolation();}
 };
 
+
+/**
+ * Wrapper around element definition to provide deformed FEICellGeometry interface.
+ */
+class OOFEM_EXPORT FEIElementDeformedGeometryWrapper : public FEICellGeometry
+{
+protected:
+    const Element *elem;
+    TimeStep *tStep;
+    double alpha;
+
+public:
+    FEIElementDeformedGeometryWrapper(const Element *elem);
+    FEIElementDeformedGeometryWrapper(const Element *elem, TimeStep *tStep);
+    virtual ~FEIElementDeformedGeometryWrapper() { }
+    int giveNumberOfVertices() const override;
+    const FloatArray giveVertexCoordinates(int i) const override;
+    void setTimeStep(TimeStep *ts) { tStep = ts; }
+    void setAlpha(double val) { this->alpha = val; }
+    const Element_Geometry_Type giveGeometryType() const override {
+      return elem->giveGeometryType();}
+};
+
+
+  
 
 /**
  * Wrapper around cell with vertex coordinates stored in FloatArray**.
@@ -138,7 +163,7 @@ public:
         FEICellGeometry(), coords(coords), gtype(gt) { }
     virtual ~FEIVertexListGeometryWrapper() { }
     int giveNumberOfVertices() const override { return (int)this->coords.size(); }
-    const FloatArray &giveVertexCoordinates(int i) const override { return this->coords [ i - 1 ]; }
+    const FloatArray giveVertexCoordinates(int i) const override { return this->coords [ i - 1 ]; }
     const Element_Geometry_Type giveGeometryType() const override {return gtype;}
 };
 
@@ -467,6 +492,19 @@ public:
      */
     virtual const Element_Geometry_Type giveBoundaryGeometryType(int boundary) const = 0;
     //@}
+
+        /**
+     * Evaluates the matrix of derivatives of surface interpolation functions (shape functions) wrt parametric coordinates at given point.
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param lcoords Array containing (local) coordinates.
+     */
+    virtual void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const {;}
+        /**
+     * Evaluates the matrix of second derivatives of surface interpolation functions (shape functions) wrt parametric coordinates at given point.
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param lcoords Array containing (local) coordinates.
+     */
+    virtual void surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const {;}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */
     //@{

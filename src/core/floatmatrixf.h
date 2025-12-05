@@ -277,6 +277,18 @@ public:
             (*this)(i, c) = src[i];
         }
     }
+
+    /**
+     * Sets the values of the matrix in specified row.
+     * @param src Array to set at row c.
+     * @param r Column to set.
+     */
+    void setRow(const FloatArrayF<M> &src, int r)
+    {
+        for ( std::size_t i = 0; i < M; i++ ) {
+            (*this)(r, i) = src[i];
+        }
+    }
     
     /**
      * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.

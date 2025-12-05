@@ -34,6 +34,7 @@
 
 #include "feinterpol2d.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -199,6 +200,37 @@ double FEInterpolation2d::boundarySurfaceEvalNormal(FloatArray &answer, int isur
     answer = Vec3(0, 0, 1);
     return this->giveTransformationJacobian(lcoords, cellgeo);
 }
+
+
+  FloatArrayF<2> FEInterpolation2d::surfaceEvalBaseVectorsAt(int isurf, const FloatArray & lcoords, const FEICellGeometry & cellgeo) const
+{
+    //Adapted from FEI3dQuadLin
+    // Note: These are not normalized. Returns the two tangent vectors to the surface.
+    FloatMatrix dNdxi;
+    this->surfaceEvaldNdxi(dNdxi, lcoords);
+
+    //Get nodes which correspond to the surface in question
+    auto nodeIndices = this->computeLocalEdgeMapping(isurf);
+    FloatArrayF<2> G1;
+    for (int i = 0; i < nodeIndices.giveSize(); ++i) {
+      G1 += dNdxi(i, 0) * FloatArrayF<2>(cellgeo.giveVertexCoordinates(nodeIndices(i)));
+    }
+    return G1;
+}
+
+void FEInterpolation2d::surfaceEvaldNdxi(FloatMatrix & answer, const FloatArray & lcoords) const
+{
+    OOFEM_ERROR("Not implemented");
+}
+
+void FEInterpolation2d::surfaceEvald2Ndxi2(FloatMatrix & answer, const FloatArray & lcoords) const
+{
+    OOFEM_ERROR("Not implemented");
+}
+
+
+
+  
 
 void FEInterpolation2d::boundarySurfaceLocal2global(FloatArray &answer, int isurf,
                             const FloatArray &lcoords, const FEICellGeometry &cellgeo) const

@@ -264,6 +264,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     nite = 0;
     for ( nite = 0; ; ++nite ) {
         // Compute the residual
+        engngModel->initForNewIteration(domain, tStep, nite, X);
         engngModel->updateComponent(tStep, InternalRhs, domain);
         rhs.beDifferenceOf(RT, F);
 

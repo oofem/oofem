@@ -686,7 +686,6 @@ void FloatArray :: zero()
 }
 
 
-
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
@@ -997,6 +996,12 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     x.subtract(y);
+    return x;
+}
+
+FloatArray &operator /= ( FloatArray & x, const double & a )
+{
+    x.times(1./a);
     return x;
 }
 

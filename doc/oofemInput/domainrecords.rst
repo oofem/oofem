@@ -90,18 +90,22 @@ Components size record
 
 | ``ndofman #(in)`` ``nelem #(in)``
   ``ncrosssect #(in)`` ``nmat #(in)`` ``nbc #(in)``
-  ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``] 
+  ``nic #(in)`` ``nltf #(in)`` [``nset #(in)``] [``ncontactsurf #(in)``] [``nbarrier #(in)``] 
   
 | where ``ndofman`` represents number of dof managers (e.g. nodes) and their
   associated records, ``nelem`` represents number of elements and their
   associated records, ``ncrosssect`` is number of cross sections and
   their records, ``nmatdnMat`` is number of material models and their
   records, ``nbc`` represents number of boundary conditions (including
-  loads) and their records, ``nic`` parameter determines the number of
+  loads and contact conditions) and their records, ``nic`` parameter determines the number of
   initial conditions, and ``nltf`` represents number of time functions
-  and their associated records. The optional parameter ``nbarrier``
+  and their associated records. The optional ``nset`` parameter specifies the
+  number of set records (see :ref:`SetRecords`), and the optional ``ncontactsurf``
+  parameter specifies the number of contact surface records (see
+  :ref:`ContactSurfaceRecords`).The optional parameter ``nbarrier``
   represents the number of nonlocal barriers and their records. If not
-  specified, no barriers are assumed.
+  specified, no optional entities (sets, contact surfaces, or barriers)
+  are assumed.
   
 .. _NodeElementSideRecords:
 
@@ -441,6 +445,68 @@ dof managers in the set. The optional ``elemprops`` parameter is a string, which
 parameters that are subsequently set for all elements in the set. The syntax for setting the individual parameters is the syntax of input file records.
 Note that parameters defined using this mechanism have the lowest priority, i.e. 
 they can be overridden by the parameters defined in the dof manager or element records (see tests/sm/setprops01.in for an example).
+
+
+
+
+.. _ContactSurfaceRecords:
+
+Contact surface records
+-----------------------
+
+Contact surfaces define geometric entities that participate in contact
+interactions. Each surface is formed by a set of contact elements and can
+be assigned the role of *master* or *slave* within a contact boundary
+condition. Contact surfaces provide the link between the geometric
+description of the contacting interfaces and the boundary conditions that
+enforce their interaction.
+
+**Syntax**
+
+``FEContactSurfaceType`` ``#(in)`` ``ce_set #(in)``
+
+**Parameters**
+
+- ``#(in)`` — unique surface identifier.
+- ``ce_set`` — identifier of the element set that contains the contact
+  elements forming this surface (see :ref:`SetRecords`).
+
+**Description**
+
+Each contact surface groups one or more contact elements of type
+``ContactElementType_*`` into a single logical entity. These surfaces
+are referenced by contact boundary conditions (see
+:ref:`ContactBoundaryConditions`) as ``mastersurface`` or ``slavesurface``.
+Both surfaces must exist before defining any contact boundary condition.
+
+**Example**
+
+::
+
+   StructuralFEContactSurface 1 ce_set 3
+   StructuralFEContactSurface 2 ce_set 4
+
+In this example, structural finite element surface 1 is created from contact elements included in set
+3, and surface 2 from structural contact elements in set 4. These surfaces can then be
+paired using a ``structuralpenaltycontactbc`` record to define a contact
+interaction.
+
+**Notes**
+
+- Each contact surface can serve as a master or slave surface depending on
+  the definition in the contact boundary condition.
+- The number of contact surface records is given by ``ncontactsurf`` in the
+  Components size record.
+- Contact surfaces do not introduce new DOFs; they provide only geometric
+  organization for contact evaluation.
+
+
+
+
+
+
+
+
 
 .. _CrossSectionRecords:
 
@@ -944,6 +1010,56 @@ Currently, EntType keyword can be one from
      normal direction of the edge. Array ``coupledparticles`` assign
      PFEMParticles from the fluid part of the problem providing fluid
      pressure.
+     
+          
+     -  Structural penalty contact boundary condition
+
+   ``structuralpenaltycontactbc`` ``loadTimeFunction #(in)`` ``dofs #(ia)``
+   ``pn #(rn)`` ``pt #(rn)`` ``friction #(rn)`` ``mastersurface #(in)``
+   ``slavesurface #(in)`` ``nsd #(in)``
+
+   Represents a penalty-based contact boundary condition used to model
+   contact interactions between deformable bodies. The contact formulation
+   enforces normal and tangential constraints between surfaces defined by
+   ``StructuralFEContactSurface`` records and their underlying
+   ``StructuralContactElement_*`` elements.
+
+   The parameters have the following meaning:
+
+   - ``pn`` — normal penalty stiffness, controlling resistance against
+     penetration between contacting surfaces.
+   - ``pt`` — tangential penalty stiffness, controlling tangential
+     response.
+   - ``friction`` — coefficient of friction (currently experimental and
+     under development). Set to ``0.0`` for frictionless contact.
+   - ``mastersurface`` and ``slavesurface`` — identifiers of the master
+     and slave contact surfaces defined by corresponding
+     ``StructuralFEContactSurface`` records (see :ref:`ContactSurfaceRecords`).
+   - ``dofs`` — list of affected degrees of freedom (typically ``1 2`` in 2D
+     problems or ``1 2 3`` in 3D problems).
+   - ``nsd`` — number of spatial dimensions (2 for plane strain or plane stress, or 3 for
+     3D problems).
+
+   The contact is enforced via the penalty method and contributes to the
+   residual and tangent system of equations at each iteration. This
+   boundary condition supports frictionless contact and a preliminary
+   version of frictional contact, which is currently experimental and
+   under development.
+
+   **Example:**
+
+   ::
+
+      structuralpenaltycontactbc 3 loadTimeFunction 1 dofs 2 1 2 \
+          pn 1.e8 pt 1.e8 friction 0.0 mastersurface 1 slavesurface 2 nsd 2
+
+   This example defines a frictionless penalty contact condition between
+   master surface 1 and slave surface 2 with normal and tangential
+   stiffness equal to 1.e8. The condition acts on degrees of freedom 1 and
+   2 (displacement is X and Y direction) in a 2D plane strain/stress domain.
+
+   For bidirectional contact, two such boundary conditions can be defined
+   with swapped master and slave surfaces.
 
 .. _InitialConditions:
 

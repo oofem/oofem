@@ -208,6 +208,34 @@ FEI3dQuadLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
 
 
 void
+FEI3dQuadLin :: surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const
+{
+
+    answer.resize(4, 3);
+    // d2n/dxidxi
+    answer.at(1, 1) = 0.;
+    answer.at(2, 1) = 0.;
+    answer.at(3, 1) = 0.;
+    answer.at(4, 1) = 0.;
+
+    // d2n/detadeta
+    answer.at(1, 2) = 0.;
+    answer.at(2, 2) = 0.;
+    answer.at(3, 2) = 0.;
+    answer.at(4, 2) = 0.;
+
+    // d2n/dxideta
+    answer.at(1, 3) = 0.25;
+    answer.at(2, 3) = -0.25;
+    answer.at(3, 3) = 0.25;
+    answer.at(4, 3) = -0.25;
+
+
+}
+  
+
+
+void
 FEI3dQuadLin :: surfaceLocal2global(FloatArray &answer, int isurf,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
@@ -286,7 +314,8 @@ IntArray
 FEI3dQuadLin :: computeLocalSurfaceMapping(int isurf) const
 {
     //surfNodes.setValues(3, 1, 2, 3);
-    return computeLocalEdgeMapping(isurf);
+    //return computeLocalEdgeMapping(isurf);
+    return {1,2,3,4};
 
 }
 
