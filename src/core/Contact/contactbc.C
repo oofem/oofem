@@ -73,11 +73,7 @@ ContactBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharTy
 
     //iterate over all pairs of nodes and segments
     const auto& contactPairs = getContactPairs();
-    int i = 0;
     for(auto const &cp : contactPairs) {
-      /*i++;
-      fprintf(stdout, "%d\n", i);
-      */
       if(cp->inContact()) {
 	this->computeTangentFromContact(K, cp.get(), tStep);
 	this->giveLocationArray(loc, r_s, cp.get());

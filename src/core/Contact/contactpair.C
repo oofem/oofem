@@ -204,7 +204,8 @@ ContactPair :: computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &ans
   this->master->computeVectorOf(u, tStep, answer); 
   this->slave->computeVectorOf(u, tStep, s_vec);
   //
-  answer.append(s_vec);
+  int offset = answer.giveSize();
+  answer.copySubVector(s_vec,offset+1);
 
 }
   

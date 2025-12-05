@@ -290,16 +290,6 @@ public:
     /// Zeroes all coefficients of receiver.
     void zero();
     /**
-     * Appends array to reciever.
-     * @param a Values to be appended.
-     */
-    void append(const FloatArray &a);
-    /**
-     * Appends value to reciever.
-     * @param a Value to be appended.
-     */
-    void append(double a);    
-    /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.
      */

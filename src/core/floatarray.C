@@ -648,20 +648,6 @@ void FloatArray :: zero()
 }
 
 
-void FloatArray :: append(const FloatArray &a)
-{
-    this->values.insert(this->end(), a.begin(), a.end());
-}
-
-
-void FloatArray :: append(double a)
-{
-    this->values.push_back(a);
-}
-
-
-
-
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
