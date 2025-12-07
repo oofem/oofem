@@ -48,7 +48,7 @@ void
 FEI3dHexaConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
 
-    answer = {1.0};
+    answer = Vec1(1.0);
 }
 
 double
@@ -204,7 +204,7 @@ FEI3dHexaConst :: global2local(FloatArray &answer, const FloatArray &coords, con
 void
 FEI3dHexaConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = FloatArray{1.};
+    answer = Vec1(1.);
 }
 
 void

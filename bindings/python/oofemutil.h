@@ -207,6 +207,7 @@ py::object staticStructural(py::args args, py::kwargs kw) { return createEngngMo
 py::object transientTransport(py::args args, py::kwargs kw) { return createEngngModelOfType("transienttransport", args, kw); }
 
 py::object dummyProblem(py::args args, py::kwargs kw) { return createEngngModelOfType("dummy", args, kw); }
+py::object mpmProblem(py::args args, py::kwargs kw) { return createEngngModelOfType("mpmproblem", args, kw); }
 
 
 /*****************************************************
@@ -319,7 +320,8 @@ py::object brick1hmt(py::args args, py::kwargs &kw) { return createElementOfType
 py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
 py::object qBrick1mt(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1mt",args,kw); }
 py::object qBrick1hmt(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1mt",args,kw); }
-
+// mpm up
+py::object upQuad11(py::args args, py::kwargs &kw) { return createElementOfType("upquad11",args,kw); }
 // mpm experimental
 py::object q1(py::args args, py::kwargs &kw) { return createElementOfType("q1",args,kw); }
 py::object l1(py::args args, py::kwargs &kw) { return createElementOfType("l1",args,kw); }
@@ -432,6 +434,7 @@ py::object createCrossSectionOfType(const char* type, py::args args, py::kwargs 
 
 py::object simpleCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("simplecs",args,kw); }
 py::object simpleTransportCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("simpletransportcs",args,kw); }
+py::object dummyCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("dummycs",args,kw); }
 
 
 

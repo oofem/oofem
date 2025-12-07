@@ -1,6 +1,8 @@
 #
 # justfile for various local build/test tasks; works on Debian stable
 #
+FAIRLY_COMPLETE_FLAGS := "-DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja"
+
 wheel:
 	python -m build
 wheel-test:
@@ -28,17 +30,36 @@ shared:
 	mkdir -p build-shared
 	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-shared/
-	ctest --test-dir build-shared/ --parallel=16 --output-on-failure
+	ctest --test-dir build-shared/ --parallel 16 --output-on-failure
 eigen:
 	mkdir -p build-eigen
-	cmake -Bbuild-eigen -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_EIGEN=1 -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	cmake -Bbuild-eigen -H. -DUSE_LAPACK=0 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-eigen/
-	ctest --test-dir build-eigen/ --parallel=16 --output-on-failure
+	ctest --test-dir build-eigen/ --parallel 16 --output-on-failure
+openmp:
+	mkdir -p build-openmp
+	cmake -Bbuild-openmp -H. -DUSE_LAPACK=0 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=1 {{FAIRLY_COMPLETE_FLAGS}}
+	ninja -C build-openmp/
+	ctest --test-dir build-openmp/ --parallel 16 --output-on-failure
+lapack:
+	# those don't work with BLAS (yet): -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_LAPACK=1
+	mkdir -p build-lapack
+	cmake -Bbuild-lapack -H. -DUSE_LAPACK=1 -DUSE_EIGEN=0 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
+	ninja -C build-lapack/
+	ctest --test-dir build-lapack/ --parallel 16 # --verbose --output-on-failure
+callgrind:
+	valgrind --tool=callgrind --callgrind-out-file=callgrind.lapack build-lapack/oofem -f tests/sm/spring01.in
+	valgrind --tool=callgrind --callgrind-out-file=callgrind.eigen build-eigen/oofem -f tests/sm/spring01.in
+	valgrind --tool=callgrind --callgrind-out-file=callgrind.openmp build-openmp/oofem -t1 -f tests/sm/spring01.in
+	kcachegrind callgrind.lapack &
+	kcachegrind callgrind.eigen &
+	kcachegrind callgrind.openmp &
 static:
+	# those don't work with BLAS (yet): -DUSE_PYBIND_BINDINGS=0 -DUSE_PYTHON_EXTENSION=0 -DUSE_LAPACK=1
 	mkdir -p build-static
-	cmake -Bbuild-static -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
+	cmake -Bbuild-static -H. -DUSE_LAPACK=1 -DUSE_EIGEN=0 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-static/
-	ctest --verbose --test-dir build-static/ --parallel=16
+	ctest --test-dir build-static/ --parallel 16 # --verbose --output-on-failure
 nanobind:
 	cmake -Bbuild-nanobind -H. -GNinja -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_NANOBIND=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1
 	ninja -C build-nanobind
@@ -48,6 +69,8 @@ act-install:
 	[ -f .cache/nektos-act ] || mkdir -p .cache && wget https://github.com/nektos/act/releases/download/v0.2.76/act_Linux_x86_64.tar.gz && tar xvfz act_Linux_x86_64.tar.gz act && rm act_Linux_x86_64.tar.gz && mv ./act .cache/nektos-act && chmod a+x .cache/nektos-act
 act-linux:
 	.cache/nektos-act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/linux.yml
+act-full:
+	.cache/nektos-act --reuse -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/full.yml
 act-python:
 	.cache/nektos-act --reuse -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/python.yml
 act-cibuildwheel:
@@ -71,3 +94,12 @@ xml:
 	# gdb -ex=run -args
 	build-static/oofem -f tests/sm/spring01.in
 	build-static/oofem -f tests/sm/spring01.xml
+mpm:
+	ninja -C build-eigen
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.in
+	echo '------------------------------------- XML -------------------------------'
+	build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
+	diff -I '^User time consumed by solution step .*' ./cook2_u1p0_2.out ./cook2_u1p0_2.xml.out && echo "NO DIFFERENCE :)"
+mpm-gdb:
+	ninja -C build-eigen
+	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml

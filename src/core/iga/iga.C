@@ -39,6 +39,9 @@
 #include "iga.h"
 #include "gausspoint.h"
 #include "feitspline.h"
+#include "parametermanager.h"
+#include "paramkey.h"
+
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -46,13 +49,21 @@
  #include "sm/Elements/structuralelementevaluator.h"
 #endif
 
-
 namespace oofem {
+
+#ifdef __MPI_PARALLEL_MODE
+ParamKey IGAElement::IPK_IGAElement_knotSpanParallelMode(_IFT_IGAElement_KnotSpanParallelMode);
+#endif
+
+
 void IGAElement :: initializeFrom(InputRecord &ir, int priority)
 {
     ParameterManager &ppm = domain->elementPPM;
     Element :: initializeFrom(ir, priority); // read nodes , material, cross section
     this->giveInterpolation()->initializeFrom(ir, ppm, this->number, priority); // read geometry
+#ifdef __MPI_PARALLEL_MODE
+    PM_UPDATE_PARAMETER(knotSpanParallelMode, ppm, ir, this->number, IPK_IGAElement_knotSpanParallelMode, priority);
+#endif
 }
 
 void
@@ -175,13 +186,13 @@ IGAElement::initializeFinish ()
     }
     
 #ifdef __MPI_PARALLEL_MODE
-    // read optional knot span parallel mode
-    this->knotSpanParallelMode.resize(numberOfKnotSpans);
-    // set Element_local as default
-    for ( int i = 1; i <= numberOfKnotSpans; i++ ) {
-        knotSpanParallelMode.at(i) = Element_local;
+    if (ppm.checkIfSet(this->number, IPK_IGAElement_knotSpanParallelMode.getIndex()) == false) {
+        this->knotSpanParallelMode.resize(numberOfKnotSpans);
+        // set Element_local as default
+        for ( int i = 1; i <= numberOfKnotSpans; i++ ) {
+            knotSpanParallelMode.at(i) = Element_local;
+        }
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, _IFT_IGAElement_KnotSpanParallelMode);
 #endif
 }
 

@@ -56,6 +56,8 @@ protected:
     InternalStateType istType;
     /// Source domain.
     Domain *domain;
+    /// set of elements for recovery
+    Set elemSet;
 
 public:
     /**

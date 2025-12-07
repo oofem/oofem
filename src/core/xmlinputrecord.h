@@ -46,8 +46,6 @@
 #include <set>
 
 #define _XML_NI std::cerr<<__PRETTY_FUNCTION__<<": not yet implemented."<<std::endl; abort();
-// #define _XML_DEBUG(m) std::cerr<<m<<std::endl;
-#define _XML_DEBUG(m)
 
 namespace oofem {
 class XMLDataReader;
@@ -60,33 +58,33 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     pugi::xml_node node;
     friend XMLDataReader;
     std::set<std::string> attrSeen;
-    std::string _attr_traced_read(const char* name);
+    int ordinal=-1;
+    XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
 public:
-    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_);
-    /// Constructor. Creates an empty input record.
-    // XMLInputRecord();
-    /// Constructor. Creates the input record corresponding to given string.
-    // XMLInputRecord(int linenumber, std :: string source);
-    /// Copy constructor.
-    // XMLInputRecord(const OOFEMXMLInputRecord &);
-    /// Assignment operator.
-    // XMLInputRecord &operator = ( const OOFEMXMLInputRecord & );
-    std::unique_ptr<InputRecord> clone() const override { return std::make_unique<XMLInputRecord>(*this); }
+    std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
+    std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);
+
+    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_=-1);
+    std::shared_ptr<InputRecord> clone() const override { return std::make_shared<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;
+
+    std::string loc(){ return loc(node); }
+    std::string loc(const pugi::xml_node& node);
+
 
     void giveRecordKeywordField(std :: string &answer, int &value) override;
     void giveRecordKeywordField(std :: string &answer) override;
     void giveField(int &answer, InputFieldType id) override;
     void giveField(double &answer, InputFieldType id) override;
-    void giveField(bool &answer, InputFieldType id) override { _XML_NI; }
+    void giveField(bool &answer, InputFieldType id) override;
     void giveField(std :: string &answer, InputFieldType id) override;
     void giveField(FloatArray &answer, InputFieldType id) override;
     void giveField(IntArray &answer, InputFieldType id) override;
     void giveField(FloatMatrix &answer, InputFieldType id) override { _XML_NI; }
     void giveField(std :: vector< std :: string > &answer, InputFieldType id) override { _XML_NI; }
     void giveField(Dictionary &answer, InputFieldType id) override { _XML_NI; }
-    void giveField(std :: list< Range > &answer, InputFieldType id) override { _XML_NI; }
+    void giveField(std :: list< Range > &answer, InputFieldType id) override;
     void giveField(ScalarFunction &answer, InputFieldType id) override { _XML_NI; }
 
     int giveGroupCount(InputFieldType id, const std::string& name, bool optional) override;

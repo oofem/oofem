@@ -232,7 +232,7 @@ FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
         //OOFEM_ERROR("no convergence after 10 iterations");
-        answer = {1. / 3., 1. / 3., 1. / 3.};
+        answer = Vec3(1. / 3., 1. / 3., 1. / 3.);
         return false;
     }
 

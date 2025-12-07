@@ -82,7 +82,7 @@ protected:
     /// final time of the metastep
     double finalTime = 0;
     /// Engineering model attributes.
-    std::unique_ptr<InputRecord> attributes;
+    std::shared_ptr<InputRecord> attributes;
     /// Start solution step number for which receiver is responsible.
     int sindex;
     /// Receiver number.

@@ -133,7 +133,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
             FloatArray q;
 //            q.beDifferenceOf(pos, iTipInfo.mGlobalCoord);
 //            printf("q: "); q.printYourself();
-            q = {pos[0]-iTipInfo.mGlobalCoord[0],pos[1]-iTipInfo.mGlobalCoord[1]};
+            q = Vec2(pos[0]-iTipInfo.mGlobalCoord[0],pos[1]-iTipInfo.mGlobalCoord[1]);
 
             gradWeight.beScaled(-1.0/(iRadius*q.computeNorm()),q);
 #endif

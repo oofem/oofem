@@ -51,11 +51,11 @@ FEI2dTrLin :: evalN(const FloatArrayF<2> &lcoords)
 void
 FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = {
+    answer = Vec3(
         lcoords.at(1),
         lcoords.at(2),
         1. - lcoords.at(1) - lcoords.at(2)
-    };
+    );
 }
 
 std::pair<double, FloatMatrixF<2,3>>
@@ -207,7 +207,7 @@ void
 FEI2dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     double ksi = lcoords.at(1);
-    answer = { ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 };
+    answer = Vec2( ( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5 );
 }
 
 void
@@ -217,16 +217,16 @@ FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
-    answer = { -1.0 / l, 1.0 / l };
+    answer = Vec2( -1.0 / l, 1.0 / l );
 }
 
 double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
-    normal = {
+    normal = Vec2(
         cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(yind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(yind),
         cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(xind) - cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(xind)
-    };
+    );
     return normal.normalize_giveNorm() * 0.5;
 }
 

@@ -3,7 +3,8 @@ name: Linux
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-minimal:
+    name: Minimal build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

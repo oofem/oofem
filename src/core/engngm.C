@@ -200,7 +200,7 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
-    std::unique_ptr<InputRecord> irPtr(ir.clone());
+    std::shared_ptr<InputRecord> irPtr(ir.clone());
     Timer timer;
     timer.startTimer();
 
@@ -241,15 +241,18 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
 	  timeStepController->instanciateMetaSteps( dr );
 	}
 
-	{
-            DataReader::RecordGuard scope(dr,irPtr.get());
+        {
+            /* This is somewhat messy since we want the XML input format NOT to nest modules under Analysis, keeping them under the top-level <oofem> tag instead */
+            auto irParent=(dr.hasFlattenedStructure()?dr.giveTopInputRecord()->clone():irPtr->clone());
+            DataReader::RecordGuard scope(dr,irParent.get());
             // instanciate initialization module manager
-            initModuleManager.instanciateYourself(dr, irPtr, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);
+            initModuleManager.instanciateYourself(dr, irParent, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);
             // instanciate export module manager
-            exportModuleManager.instanciateYourself(dr, irPtr, "nmodules", "ExportModules",DataReader::IR_expModuleRec);
+            exportModuleManager.instanciateYourself(dr, irParent, "nmodules", "ExportModules",DataReader::IR_expModuleRec);
             // instanciate monitor manager
-            monitorManager.instanciateYourself(dr, irPtr, "nmonitors", "Monitors",DataReader::IR_expModuleRec);
+            monitorManager.instanciateYourself(dr, irParent, "nmonitors", "Monitors",DataReader::IR_expModuleRec);
             this->giveContext()->giveFieldManager()->instanciateYourself(dr, *irPtr);
+            /* on the other hand, MPM stuff *should* be nested under Analysis, so pass irPtr there */
             #ifdef __MPM_MODULE
                 // instanciate mpm stuff (variables, terms, and integrals)
                 this->instanciateMPM(dr,*irPtr);
@@ -412,38 +415,32 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord &ir)
 #ifdef __MPM_MODULE
 int 
 EngngModel:: instanciateMPM (DataReader &dr, InputRecord &ir) {
-    int nvars=0, nterms=0, nintegrals=0;
-    // read number of variables, terms, and integrals
-    IR_GIVE_OPTIONAL_FIELD(ir, nvars, "nvariables");
-    IR_GIVE_OPTIONAL_FIELD(ir, nterms, "nterms");
-    IR_GIVE_OPTIONAL_FIELD(ir, nintegrals, "nintegrals");
-    // instanciate variables
-    std :: string name;
-    for ( int i = 0; i < nvars; i++ ) {
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmVarRec, i + 1);
+    std::shared_ptr<InputRecord> irPtr(ir.ptr());
+    std::string name;
+    int num=-1;
+    DataReader::RecordGuard scope(dr,irPtr.get());
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nvariables","MPMVariables",DataReader::IR_mpmVarRec,/*optional*/true)){
         IR_GIVE_FIELD(mir, name, "name");
         std::unique_ptr< Variable > var = std :: make_unique< Variable >();
         var->initializeFrom(mir);
         variableMap[name] = std::move(var);
     }
-    // instanciate terms
-    for ( int i = 0; i < nterms; i++ ) {
-        int num;
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmTermRec, i + 1);
+    //if(variableMap.empty()) OOFEM_ERROR("No MPM Variables defined.");
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nterms","MPMTerms",DataReader::IR_mpmTermRec,/*optional*/true)){
         IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);
-        std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());  
+        std::unique_ptr< Term > term = classFactory.createTerm(name.c_str());
         term->initializeFrom(mir, this);
         termList.push_back(std::move(term));
     }
-    // instanciate integrals
-    for ( int i = 0; i < nintegrals; i++ ) {
-        auto &mir = dr.giveInputRecord(DataReader :: IR_mpmIntegralRec, i + 1);
+    //if(termList.empty()) OOFEM_ERROR("No MPM Terms defined.");
+    for(auto& mir: dr.giveGroupRecords(irPtr,"nintegrals","MPMIntegrals",DataReader::IR_mpmIntegralRec,/*optional*/true)){
         std::unique_ptr< Integral > integral = std :: make_unique< Integral >(nullptr, &dummySet, nullptr);
         integral->initializeFrom(mir, this);
         this->addIntegral(std::move(integral));
     }
+    //if(integralList.empty()) OOFEM_ERROR("No MPM Integrals defined.");
     return 1;
-}   
+}
 
 #endif
 int

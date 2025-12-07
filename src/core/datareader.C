@@ -36,13 +36,13 @@
 
 namespace oofem{
 
-InputRecord *DataReader::giveChildRecord( const std::unique_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional )
+InputRecord *DataReader::giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional )
 {
     if ( ir->hasChild( ift, name, optional ) ) return &( this->giveInputRecord( irType, /*recordId*/ 1 ) );
     return nullptr;
 };
 
-DataReader::GroupRecords DataReader::giveGroupRecords( const std::unique_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional )
+DataReader::GroupRecords DataReader::giveGroupRecords( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional )
 {
     return GroupRecords( *this, name, irType, ir->giveGroupCount( ift, name, optional ) );
 }

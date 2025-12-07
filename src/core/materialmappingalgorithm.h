@@ -46,7 +46,6 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
-class FloatArray;
 class GaussPoint;
 class DynamicInputRecord;
 class MaterialStatus;

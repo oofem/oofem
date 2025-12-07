@@ -737,15 +737,15 @@ DKTPlate::computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
 
     FloatArray eps, m;
     FloatArray coords[ 3 ];  // vertex local coordinates
-    coords [ 0 ] = {
+    coords [ 0 ] = Vec2(
         1.0, 0.0
-    };
-    coords [ 1 ] = {
+    );
+    coords [ 1 ] = Vec2(
         0.0, 1.0
-    };
-    coords [ 2 ] = {
+    );
+    coords [ 2 ] = Vec2(
         0.0, 0.0
-    };
+    );
 
     GaussIntegrationRule iRule = GaussIntegrationRule(1, this, 1, 1); // dummy rule used to evaluate B at vertices
     iRule.SetUpPointsOnTriangle(1, _Unknown);

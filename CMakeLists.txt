@@ -42,6 +42,7 @@ set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
@@ -79,7 +80,8 @@ if (MSVC)
     # C4267 size_t to int conversion. Most of these are indices, but many places can be replaced by a for-each loop as well.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W3 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251 -wd4800")
     # make MSVC a bit more silent (though most of this should be fixed really)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101")
+	 # C4608: don't report unknown pragmas (used e.g. as "#pragma GCC diagnostic push" "#pragma GCC diagnostic ignored "-Woverloaded-virtual" /* ... */ "#pragma GCC diagnostic pop" to locally disable certain harmless warnings from gcc)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4275 -wd4267 -wd4458 -wd4456 -wd5205 -wd4244 -wd4101 -wd4068")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
@@ -173,7 +175,7 @@ option (USE_HDF5 "HDF5 support" OFF)
 option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
-OPTION (USE_XML "Reader for XML input format (requires pugixml)")
+OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -339,6 +341,8 @@ if (USE_XML)
     link_libraries(pugixml::pugixml)
 endif()
 
+
+
 ## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
 ## Therefore it is assumed that superlu include files
 ## are included using #include "SUPERLU_MT/include"
@@ -360,9 +364,25 @@ if (USE_SUPERLU_MT)
     if (NOT HAVE_SUPERLU_MT_DDEFS_H)
         message (FATAL_ERROR "Necessary SUPERLU_MT headers not found; refer to CMakeLists.txt for details")
     endif ()
-
-
 endif ()
+
+# perhaps use in the future instead
+#
+#if (USE_SUPERLU_MT)
+#    if(SUPERLU_MT_DIR)
+#        add_subdirectory(${SUPERLLU_MT_DIR})
+#    else()
+#        FetchContent_Declare(
+#            superlu_mt
+#            GIT_REPOSITORY https://github.com/xiaoyeli/superlu_mt.git
+#            GIT_TAG v4.0.1
+#        )
+#        FetchContent_MakeAvailable(superlu_mt)
+#    endif()
+#    # ...
+#endif()
+
+
 
 if (USE_VTK)
     set (CMAKE_LIBRARY_DIR ${VTK_DIR})
@@ -422,15 +442,19 @@ if (USE_PARDISO_ORG)
 endif ()
 
 if (USE_INTEL_MKL_PARDISO)
+    if(INTEL_MKL_PARDISO_DIR)
+        include_directories("${INTEL_MKL_PARDISO_DIR}/mkl/include")
+    else()
+        find_path (MKL_INCLUDE_DIR mkl.h PATHS /usr/include/mkl /opt/intel/composerxe/mkl/include REQUIRED)
+        include_directories("${MKL_INCLUDE_DIR}")
+    endif()
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
         if (INTEL_MKL_PARDISO_DIR)
             find_library (${f}_LIB ${f} PATH "${INTEL_MKL_PARDISO_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("${INTEL_MKL_PARDISO_DIR}/mkl/include")
         else ()
             find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("/opt/intel/composerxe/mkl/include")
         endif ()
         if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
             message (FATAL_ERROR "MKLPARDISO library not found")
@@ -508,17 +532,6 @@ endif ()
 
 
 if (USE_PETSC)
-    if (NOT "${PETSC_DIR}")
-        # setting defaults for typical linux environments:
-        #file (GLOB paths "/usr/lib/petscdir/*.*.*")
-        #list (GET paths 0 PETSC_DIR)
-        #message ("***************** PETSC_DIR: ${PETSC_DIR}")
-    endif ()
-    if (NOT "${PETSC_ARCH}")
-        #file (GLOB children RELATIVE ${PETSC_DIR} "${PETSC_DIR}/*")
-        #list (GET children 0 PETSC_ARCH)
-        #message ("***************** PETSC_ARCH: ${PETSC_ARCH}")
-    endif ()
     find_package (PETSc)
     # find_package(PETSc COMPONENTS CXX)
     include_directories (${PETSC_INCLUDES})
@@ -794,6 +807,12 @@ if (USE_SHARED_LIB)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
     set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    if (USE_DSS)
+        set_target_properties (dss PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
+            set_target_properties (dss PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+        endif ()
+    endif()
     if (USE_FM)
         set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
