@@ -569,7 +569,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         if ( !elem ) {
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
-
         elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
         elementList[elemIndex0] = std :: move(elem);

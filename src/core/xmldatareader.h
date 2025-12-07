@@ -65,6 +65,7 @@ protected:
         pugi::xml_node curr;
         std::shared_ptr<XMLInputRecord> lastRecord;
         std::set<pugi::xml_node> seen;
+        int lastRecId=0;
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation

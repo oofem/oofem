@@ -209,6 +209,21 @@ InternalElementDofManErrorCheckingRule::InternalElementDofManErrorCheckingRule (
     }
 }
 
+InternalElementDofManErrorCheckingRule::InternalElementDofManErrorCheckingRule(InputRecord& ir, double tol): ErrorCheckingRule(tol) {
+    std::string unknown;
+    ir.giveField(tstep,"tStep");
+    ir.giveField(number,"number");
+    ir.giveField(idofman,"dofman");
+    ir.giveField(dofid,"dof");
+    ir.giveField(unknown,"unknown");
+    ir.giveField(value,"value");
+    if(unknown=="d") mode=VM_Total;
+    else if(unknown=="v") mode=VM_Velocity;
+    else if(unknown=="a") mode=VM_Acceleration;
+    else OOFEM_ERROR("Can't recognize unknown '%s' (must be one of: d, v, a)",unknown.c_str());
+}
+
+
 bool
 InternalElementDofManErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
@@ -322,6 +337,7 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 
     FloatArray ipval;
     Element *element = domain->giveGlobalElement(number);
+    // std::cerr<<"Element "<<number<<" @ "<<(void*)element<<std::endl;
     if ( !element ) {
         if ( domain->giveEngngModel()->isParallel() ) {
             return true;
@@ -406,6 +422,18 @@ BeamElementErrorCheckingRule :: BeamElementErrorCheckingRule(const std :: string
         OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
     }
     ist = (BeamElementErrorCheckingRule::BeamElementValueType)istnum;
+}
+
+BeamElementErrorCheckingRule :: BeamElementErrorCheckingRule(InputRecord& ir, double tol): ErrorCheckingRule(tol) {
+    ir.giveField(tstep,"tStep");
+    ir.giveOptionalField(tsubstep,"tStepVer");
+    ir.giveField(number,"number");
+    int istnum;
+    ir.giveField(istnum,"keyword");
+    ist = (BeamElementErrorCheckingRule::BeamElementValueType)istnum;
+    ir.giveField(component,"component");
+    ir.giveField(value,"value");
+    ir.giveOptionalField(tolerance,"tolerance");
 }
 
 bool
@@ -639,6 +667,12 @@ LoadLevelErrorCheckingRule :: LoadLevelErrorCheckingRule(const std :: string &li
     }
 }
 
+LoadLevelErrorCheckingRule :: LoadLevelErrorCheckingRule(InputRecord& ir, double tol): ErrorCheckingRule(tol) {
+    ir.giveField(tstep,"tStep");
+    ir.giveField(value,"value");
+    ir.giveOptionalField(tolerance,"tolerance");
+}
+
 
 bool
 LoadLevelErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
@@ -677,6 +711,13 @@ EigenValueErrorCheckingRule :: EigenValueErrorCheckingRule(const std :: string &
     }
 }
 
+EigenValueErrorCheckingRule :: EigenValueErrorCheckingRule(InputRecord& ir, double tol): ErrorCheckingRule(tol) {
+    ir.giveField(tstep,"tStep");
+    ir.giveField(number,"EigNum");
+    ir.giveField(value,"value");
+    ir.giveOptionalField(tolerance,"tolerance");
+}
+
 bool
 EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
@@ -706,6 +747,8 @@ TimeCheckingRule :: TimeCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
 {
 }
+
+TimeCheckingRule::TimeCheckingRule(InputRecord& ir, double tol): ErrorCheckingRule(tol){ }
 
 bool
 TimeCheckingRule :: check(Domain *domain, TimeStep *tStep)
@@ -795,25 +838,13 @@ void ErrorCheckingExportModule::readRulesFromRecords(DataReader& dr, InputRecord
         if (n=="NODE") { rule=std::make_unique<NodeErrorCheckingRule>(rir,tol); }
         if (n=="ELEMENT") { rule=std::make_unique<ElementErrorCheckingRule>(rir,tol); }
         if (n=="REACTION") { rule=std::make_unique<ReactionErrorCheckingRule>(rir,tol); }
-        // else { std::cerr<<"not yet implemented."<<std::endl; }
-        #if 0
-        } else if ( line.compare(0, 12, "#ELEMENTNODE") == 0 ) {
-            return std::make_unique<InternalElementDofManErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 8, "#ELEMENT") == 0 ) {
-            return std::make_unique<ElementErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 13, "#BEAM_ELEMENT") == 0 ) {
-            return std::make_unique<BeamElementErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 9, "#REACTION") == 0 ) {
-            return std::make_unique<ReactionErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 10, "#LOADLEVEL") == 0 ) {
-            return std::make_unique<LoadLevelErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 7, "#EIGVAL") == 0 ) {
-            return std::make_unique<EigenValueErrorCheckingRule>(line, errorTolerance);
-        } else if ( line.compare(0, 5, "#TIME") == 0 ) {
-            return std::make_unique<TimeCheckingRule>(line, errorTolerance);
-        #endif
+        if (n=="BEAM_ELEMENT") { rule=std::make_unique<BeamElementErrorCheckingRule>(rir,tol); }
+        if (n=="EIGVAL") { rule=std::make_unique<EigenValueErrorCheckingRule>(rir,tol); }
+        if (n=="LOADLEVEL") { rule=std::make_unique<LoadLevelErrorCheckingRule>(rir,tol); }
+        if (n=="TIME") { rule=std::make_unique<TimeCheckingRule>(rir,tol); }
+        if (n=="ELEMENTNODE") { rule=std::make_unique<InternalElementDofManErrorCheckingRule>(rir,tol); }
         if(rule) errorCheckingRules.push_back(std::move(rule));
-        else { std::cerr<<"No rule for "<<n<<" created."<<std::endl; }
+        else { std::cerr<<"No rule for "<<n<<" created (not yet implemented for XML?)."<<std::endl; }
     }
 }
 

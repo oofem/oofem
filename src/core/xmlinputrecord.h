@@ -58,19 +58,20 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     pugi::xml_node node;
     friend XMLDataReader;
     std::set<std::string> attrSeen;
-    int ordinal=-1;
+    int recId=-1;
     XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
 public:
     std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
     std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);
 
-    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_=-1);
+    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_); //, int ordinal_=-1);
     std::shared_ptr<InputRecord> clone() const override { return std::make_shared<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;
 
     std::string loc(){ return loc(node); }
     std::string loc(const pugi::xml_node& node);
+    int setRecId(int lastRecId);
 
 
     void giveRecordKeywordField(std :: string &answer, int &value) override;
@@ -81,11 +82,11 @@ public:
     void giveField(std :: string &answer, InputFieldType id) override;
     void giveField(FloatArray &answer, InputFieldType id) override;
     void giveField(IntArray &answer, InputFieldType id) override;
-    void giveField(FloatMatrix &answer, InputFieldType id) override { _XML_NI; }
+    void giveField(FloatMatrix &answer, InputFieldType id) override;
     void giveField(std :: vector< std :: string > &answer, InputFieldType id) override { _XML_NI; }
     void giveField(Dictionary &answer, InputFieldType id) override { _XML_NI; }
     void giveField(std :: list< Range > &answer, InputFieldType id) override;
-    void giveField(ScalarFunction &answer, InputFieldType id) override { _XML_NI; }
+    void giveField(ScalarFunction &answer, InputFieldType id) override;
 
     int giveGroupCount(InputFieldType id, const std::string& name, bool optional) override;
     bool hasChild(InputFieldType id, const std::string& name, bool optional) override;

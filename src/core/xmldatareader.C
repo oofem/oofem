@@ -122,7 +122,7 @@ namespace oofem {
         XMLInputRecord::node_seen_set(description_node,true);
         outputFileName=output_node.text().as_string();
         description=description_node.text().as_string();
-        topRecord=std::shared_ptr<InputRecord>(new XMLInputRecord(this,root,-1));
+        topRecord=std::shared_ptr<InputRecord>(new XMLInputRecord(this,root));
     }
 
     bool XMLDataReader :: canRead(const std::string& xml){
@@ -240,7 +240,8 @@ namespace oofem {
         _XML_DEBUG("  ==> "<<tip.curr.name());
         tip.seen.insert(tip.curr);
         pugi::xml_node n=((tip.curr.name()==XiIncludeTag) ? resolveXiInclude(tip.curr) : tip.curr);
-        tip.lastRecord=std::make_shared<XMLInputRecord>(this,n,/* automatic ordinal */tip.seen.size());
+        tip.lastRecord=std::make_shared<XMLInputRecord>(this,n);
+        tip.lastRecId=tip.lastRecord->setRecId(tip.lastRecId);
         _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLInputRecord::node_seen_get(tip.curr));
         return *tip.lastRecord;
     }

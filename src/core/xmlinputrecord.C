@@ -51,6 +51,12 @@
 #include <regex>
 #include <charconv>
 #include <cassert>
+#include <string.h>
+
+#ifdef _MSC_VER
+    #define strcasecmp _stricmp
+#endif
+
 
 // #define _XML_DEBUG(m) std::cerr<<__FUNCTION__<<": "<<m<<std::endl;
 #define _XML_DEBUG(m)
@@ -94,17 +100,27 @@ namespace oofem {
     };
 
 
+    // trim string from both sides
+    std::string _lrtrim(std::string &s) { s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {return !std::isspace(c);})); return s; }
 
     struct Tokens{
         std::string attr;
         std::string str;
+        pugi::xml_node node;
         std::vector<std::string> toks;
         std::function<std::string()> loc;
         Tokens(const std::string& attr_, XMLInputRecord* rec, const char* sep_regex="\\s+"): attr(attr_) {
-            pugi::xml_node node;
             std::tie(str,node)=rec->_attr_traced_read_with_node(attr.c_str());
             //std::cerr<<"attr_="<<attr_<<", attr="<<attr<<", offset="<<node.offset_debug()<<std::endl;
-            loc=[rec,node](){ return rec->loc(node); };
+            loc=[rec,this](){ return rec->loc(this->node); };
+            _makeToks(sep_regex);
+        };
+        Tokens(const std::string& attr_, const std::string& str_, std::function<std::string()> loc_, const char* sep_regex="\\s+"): attr(attr_), str(str_), loc(loc_){
+            str=_lrtrim(str);
+            _makeToks(sep_regex);
+        }
+        void _makeToks(const char* sep_regex){
+            if(str.empty()) return; // this would create spurious empty token, stay on zero size instead
             const std::regex sep_re(sep_regex);
             std::copy(std::sregex_token_iterator(str.begin(), str.end(), sep_re, -1),
                       std::sregex_token_iterator(),
@@ -120,10 +136,17 @@ namespace oofem {
         }
     };
 
-    XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_, int ordinal_): InputRecord((DataReader*)reader_), node(node_), ordinal(ordinal_) {
+    XMLInputRecord :: XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_): InputRecord((DataReader*)reader_), node(node_) {
         node_seen_set(node,true);
         _XML_DEBUG(loc()<<": node.name()="<<node.name());
     }
+
+    int XMLInputRecord::setRecId(int lastRecId){
+        this->recId=lastRecId+1;
+        giveOptionalField(this->recId,"id");
+        if(lastRecId>0 && this->recId<=lastRecId) OOFEM_WARNING("%s: descencing ids (previous %d, now %d)",loc().c_str(),lastRecId,recId);
+        return this->recId;
+    };
 
     int XMLInputRecord::giveGroupCount(InputFieldType id, const std::string& name, bool optional){
         _XML_DEBUG("id="<<id<<", name="<<name<<", optional="<<optional);
@@ -154,27 +177,38 @@ namespace oofem {
     void XMLInputRecord::giveRecordKeywordField(std::string& answer, int& value){
         _XML_DEBUG("node.name()="<<node.name());
         answer=node.name();
-        pugi::xml_attribute id=node.attribute("id");
-        if(!id){
-            if(ordinal<0) OOFEM_ERROR("%s: node %s: id='...' not specified (and not tracked automatically).",loc().c_str(),node.name());
-            value=ordinal;
-        } else {
-            std::string val; pugi::xml_node n;
-            std::tie(val,n)=_attr_traced_read_with_node("id");
-            value=string_to<int>(val,[this,n](){ return loc(n)+" attribute 'id'"; });
-            if(ordinal>0 && ordinal!=value) OOFEM_ERROR("%s: node %s: id='%d' but node position is %d",loc(n).c_str(),node.name(),value,ordinal);
-        }
+        value=recId;
     }
 
     bool XMLInputRecord::hasField(InputFieldType id){
-        pugi::xml_attribute attr=node.attribute(id);
-        if(attr){ attrSeen.insert(id); }
-        return !!attr;
+        pugi::xml_attribute att=node.attribute(id);
+        if(!att){            // retry case-insensitive
+            for(att=node.first_attribute(); att; att=att.next_attribute()){
+                if(strcasecmp(att.name(),id)==0){
+                    std::cerr<<"XML: case-insensitive hasField ('"<<att.name()<<"', requested '"<<id<<"')"<<std::endl;
+                    break;
+                }
+            }
+        }
+        if(att){ attrSeen.insert(att.name()); }
+        return !!att;
     }
     std::tuple<std::string,pugi::xml_node> XMLInputRecord::_attr_traced_read_with_node(const char* name){
         std::string n2(name);
-        for(size_t i=0; i<n2.size(); i++) if(n2[i]=='(' || n2[i]==')') n2[i]='_';
+        for(size_t i=0; i<n2.size(); i++) if(n2[i]=='(' || n2[i]==')' || n2[i]=='/') n2[i]='_';
         pugi::xml_attribute att=node.attribute(n2.c_str());
+        if(!att){
+            // retry case-insensitive
+            for (att=node.first_attribute(); att; att=att.next_attribute()){
+                #ifdef _MSC_VER
+                    #define strcasecmp _stricmp
+                #endif
+                if(strcasecmp(att.name(),name)==0){
+                    std::cerr<<"XML: case-insensitive match ('"<<att.name()<<"', requested '"<<name<<"')"<<std::endl;
+                    break;
+                }
+            }
+        }
         if(!att) OOFEM_ERROR("%s: no such attribute: %s",loc().c_str(),n2.c_str());
         std::string ret=att.as_string();
         attrSeen.insert(n2);
@@ -205,12 +239,25 @@ namespace oofem {
     }
     void XMLInputRecord::giveField(FloatArray &answer, InputFieldType id){
         Tokens tt(id,this);
+        // std::cerr<<id<<": FloatArray from '"<<tt.str<<"' ("<<tt.size()<<" items)"<<std::endl;
         answer.resize(tt.size());
         for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<double>(i);
         _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
     }
+    void XMLInputRecord::giveField(FloatMatrix &answer, InputFieldType id){
+        Tokens trows(id,this,"\\s*;\\s*");
+        int rows=trows.size();
+        for(int row=0; row<rows; row++){
+            Tokens tcols(id,trows.toks[row],[this,trows](){ return this->loc(trows.node); },"\\s+");
+            if(row==0){ answer.resize(rows,tcols.size()); }
+            else if((int)answer.cols()!=(int)tcols.size()) OOFEM_ERROR("%s: row %d has inconsistent number of columns (%d != %d)",loc().c_str(),rows,answer.cols(),tcols.size());
+            for(int col=0; col<answer.cols(); col++){ answer(row,col)=tcols.as<double>(col); }
+        }
+        _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
+    }
     void XMLInputRecord::giveField(IntArray &answer, InputFieldType id){
         Tokens tt(id,this);
+        //std::cerr<<id<<": IntArray from '"<<tt.str<<" ("<<tt.size()<<" items"<<std::endl;
         answer.resize(tt.size());
         for(size_t i=0; i<tt.size(); i++) answer[i]=tt.as<int>(i);
         _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
@@ -235,6 +282,14 @@ namespace oofem {
     void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
         Tokens tt(id,this,"\\s*,\\s*");
         for(size_t i=0; i<tt.size(); i++) answer.push_back(tt.as<Range>(i));
+    }
+    void XMLInputRecord::giveField(ScalarFunction& answer, InputFieldType id){
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        auto where=[this,n,id](){ return loc(n)+": attribute '"+id+"'"; };
+        if(s[0]=='@') answer=string_to<int>(s,where);
+        else if(s[0]=='$'){ std::string s2=s.substr(1,s.size()-2); answer.setSimpleExpression(s2); }
+        else answer.setValue(string_to<double>(s.substr(1,s.size()-1),where));
     }
 
 

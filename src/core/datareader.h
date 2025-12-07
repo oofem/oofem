@@ -73,8 +73,8 @@ public:
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
     const std::vector<std::string> InputRecordTags={
         /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
-        "Analysis","MetaStep",/*ExportModule*/"","Node",/*Element*/"",
-        /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
+        "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
+        /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
         "ContactManager","ContactDefinition","Field",
