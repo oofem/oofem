@@ -1006,6 +1006,16 @@ if (USE_SM)
     endforeach (case)
 endif ()
 
+if (USE_XML)
+    if(USE_SM)
+        file (GLOB xml_sm_tests RELATIVE "${oofem_TEST_DIR}/xml/sm" "${oofem_TEST_DIR}/xml/sm/*.xml")
+        foreach (case ${xml_sm_tests})
+            add_test (NAME "test_xml_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/xml/sm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+endif()
+
+
 if (USE_FM)
     file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
     foreach (case ${fm_tests})
