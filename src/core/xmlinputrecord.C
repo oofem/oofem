@@ -182,19 +182,19 @@ namespace oofem {
     }
 
     void XMLInputRecord::finish(bool wrn) {
+        _XML_DEBUG(loc());
+        pugi::xml_document tmp;
+        pugi::xml_node n2=tmp.append_child(node.name());
         int aLeft=0;
         for([[maybe_unused]] const pugi::xml_attribute& a: node.attributes()) {
             if(std::string(a.name())==SeenMark) continue;
-            if(attrSeen.count(a.name())==0) aLeft++;
+            if(attrSeen.count(a.name())==0){ n2.append_attribute(a.name())=a.value(); aLeft++; }
         }
-        for(const std::string& n: attrSeen) node.remove_attribute(n.c_str());
-        if(!wrn) return;
         if(aLeft==0) return;
+        if(!wrn) return;
         std::ostringstream oss;
         oss<<"Unprocessed XML attributes:\n";
-        node_seen_set(node,false);
-        node.print(oss,"  ");
-        node_seen_set(node,true);
+        n2.print(oss,"  ");
         OOFEM_WARNING(oss.str().c_str());
     }
 
