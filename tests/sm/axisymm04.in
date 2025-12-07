@@ -51,7 +51,7 @@ Set 3 elementboundaries 2 1 2
 ##Exact solution for r=4.1 is 2.05e-1
 #ELEMENT tStep 1 number 4 gp 1 keyword 4 component 3  value 1.9670e-01
 #ELEMENT tStep 1 number 4 gp 1 keyword 4 component 6  value -7.8969e-04
-#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value -1.96844953e+00-1.9684e+00
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value -1.96844953e+00
 #ELEMENT tStep 1 number 4 gp 1 keyword 1 component 2  value -5.3546e-02
 ##Exact solution for r=4.1 is sig_theta=205.0
 #ELEMENT tStep 1 number 4 gp 1 keyword 1 component 3  value 1.96700431e+02
