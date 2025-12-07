@@ -291,6 +291,21 @@ namespace oofem {
         else if(s[0]=='$'){ std::string s2=s.substr(1,s.size()-2); answer.setSimpleExpression(s2); }
         else answer.setValue(string_to<double>(s.substr(1,s.size()-1),where));
     }
+    void XMLInputRecord::giveField(Dictionary &answer, InputFieldType id){
+        std::string s; pugi::xml_node n;
+        std::tie(s,n)=_attr_traced_read_with_node(id);
+        Tokens items(id,this,"\\s*;\\s*");
+        for(const std::string& tok: items.toks){
+            Tokens kv(id,tok,[this,items](){ return this->loc(items.node); },/*sep_regex*/"\\s+");
+            if(kv.size()!=2) OOFEM_ERROR("%s: dictionary items must have 2 whitespace-separated fields (%d tokens found)",loc(n).c_str(),kv.size());
+            int key;
+            if(std::regex_match(kv.toks[0],std::regex("[0-9]+"))){ key=std::atoi(kv.toks[0].c_str()); }
+            else if(kv.toks[0].size()==1){ key=(char)kv.toks[0][0]; }
+            else OOFEM_ERROR("%s: dictionary key must be integer or single letter (not '%s')",loc().c_str(),kv.toks[0].c_str());
+            answer.add(key,kv.as<double>(1));
+        }
+
+    }
 
 
 

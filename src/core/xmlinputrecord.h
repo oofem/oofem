@@ -84,7 +84,7 @@ public:
     void giveField(IntArray &answer, InputFieldType id) override;
     void giveField(FloatMatrix &answer, InputFieldType id) override;
     void giveField(std :: vector< std :: string > &answer, InputFieldType id) override { _XML_NI; }
-    void giveField(Dictionary &answer, InputFieldType id) override { _XML_NI; }
+    void giveField(Dictionary &answer, InputFieldType id) override;
     void giveField(std :: list< Range > &answer, InputFieldType id) override;
     void giveField(ScalarFunction &answer, InputFieldType id) override;
 
