@@ -77,6 +77,7 @@ protected:
     std::shared_ptr<InputRecord> topRecord;
     pugi::xml_node giveNamedChild(const pugi::xml_node& parent, const std::string& name);
     const std::string XiIncludeTag="xi:include";
+    int setRecId(int lastRecId);
 public:
     XMLDataReader(const std::string& xmlFile);
     virtual ~XMLDataReader(){};

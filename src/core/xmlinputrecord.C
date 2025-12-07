@@ -81,9 +81,9 @@ namespace oofem {
         T val;
         const char* last=s.data()+s.size();
         auto [p,e]=std::from_chars(s.data(),last,val);
-        if(p!=last) OOFEM_ERROR("%s: error parsing %s as %s (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
+        if(p!=last) OOFEM_ERROR("%s: error parsing '%s' as %s (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
         if(e==std::errc()) return val;
-        OOFEM_ERROR("%s: error parsing %s (from_chars error)",where().c_str(),s.c_str(),typeid(T).name());
+        OOFEM_ERROR("%s: error parsing '%s' as %s (std::from_chars error)",where().c_str(),s.c_str(),typeid(T).name());
     }
 
     template<>
@@ -287,9 +287,9 @@ namespace oofem {
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
         auto where=[this,n,id](){ return loc(n)+": attribute '"+id+"'"; };
-        if(s[0]=='@') answer=string_to<int>(s,where);
+        if(s[0]=='@') answer.setReference(string_to<int>(s.substr(1,s.size()-1),where));
         else if(s[0]=='$'){ std::string s2=s.substr(1,s.size()-2); answer.setSimpleExpression(s2); }
-        else answer.setValue(string_to<double>(s.substr(1,s.size()-1),where));
+        else answer.setValue(string_to<double>(s,where));
     }
     void XMLInputRecord::giveField(Dictionary &answer, InputFieldType id){
         std::string s; pugi::xml_node n;
