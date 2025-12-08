@@ -282,7 +282,11 @@ namespace oofem {
         if(!hasField(id)){ answer=false; return; }
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
-        if(s=="no" || s=="0" || s=="n" || s=="N" || s=="No" || s=="NO") OOFEM_WARNING("%s: %s='%s' is interpreted as TRUE (omit the attribute for false)",loc(n).c_str(),s.c_str());
+        if(s=="no" || s=="0" || s=="n" || s=="N" || s=="No" || s=="NO"){
+            OOFEM_WARNING("%s: %s='%s' is ambiguously interpreted as false (flag attribute should be simply absent for clear false).",loc(n).c_str(),id,s.c_str());
+            answer=false;
+            return;
+        }
         answer=true;
     }
     void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
