@@ -36,7 +36,6 @@
 #define xmlinputrecord_h
 
 #include "inputrecord.h"
-#include "tokenizer.h"
 
 #include <pugixml.hpp>
 
@@ -60,6 +59,7 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     std::set<std::string> attrSeen;
     int recId=-1;
     XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
+    static std::string xmlizeAttrName(const std::string& s);
 public:
     std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
     std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);

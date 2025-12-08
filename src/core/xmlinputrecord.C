@@ -180,11 +180,12 @@ namespace oofem {
         value=recId;
     }
 
-    bool XMLInputRecord::hasField(InputFieldType id){
-        pugi::xml_attribute att=node.attribute(id);
+    bool XMLInputRecord::hasField(InputFieldType id0){
+        std::string id=xmlizeAttrName(id0);
+        pugi::xml_attribute att=node.attribute(id.c_str());
         if(!att){            // retry case-insensitive
             for(att=node.first_attribute(); att; att=att.next_attribute()){
-                if(strcasecmp(att.name(),id)==0){
+                if(strcasecmp(att.name(),id.c_str())==0){
                     std::cerr<<"XML: case-insensitive hasField ('"<<att.name()<<"', requested '"<<id<<"')"<<std::endl;
                     break;
                 }
@@ -193,9 +194,14 @@ namespace oofem {
         if(att){ attrSeen.insert(att.name()); }
         return !!att;
     }
-    std::tuple<std::string,pugi::xml_node> XMLInputRecord::_attr_traced_read_with_node(const char* name){
-        std::string n2(name);
+    std::string XMLInputRecord::xmlizeAttrName(const std::string& s){
+        std::string n2(s);
         for(size_t i=0; i<n2.size(); i++) if(n2[i]=='(' || n2[i]==')' || n2[i]=='/') n2[i]='_';
+        return n2;
+    }
+
+    std::tuple<std::string,pugi::xml_node> XMLInputRecord::_attr_traced_read_with_node(const char* name){
+        std::string n2=xmlizeAttrName(std::string(name));
         pugi::xml_attribute att=node.attribute(n2.c_str());
         if(!att){
             // retry case-insensitive
