@@ -59,19 +59,19 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
     std::set<std::string> attrQueried;
     std::set<std::string> attrRead;
     int recId=-1;
-    XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
+    XMLDataReader* _reader() const { return (XMLDataReader*)(this->giveReader()); }
     static std::string xmlizeAttrName(const std::string& s);
 public:
     std::string _attr_traced_read(const char* name){ return std::get<0>(_attr_traced_read_with_node(name)); }
     std::tuple<std::string,pugi::xml_node> _attr_traced_read_with_node(const char* name);
 
-    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_); //, int ordinal_=-1);
+    XMLInputRecord(XMLDataReader* reader_, const pugi::xml_node& node_);
     std::shared_ptr<InputRecord> clone() const override { return std::make_shared<XMLInputRecord>(*this); }
 
     void finish(bool wrn = true) override;
 
-    std::string loc(){ return loc(node); }
-    std::string loc(const pugi::xml_node& node);
+    std::string loc() const { return loc(node); }
+    std::string loc(const pugi::xml_node& node) const ;
     int setRecId(int lastRecId);
 
 
@@ -95,7 +95,10 @@ public:
     bool hasField(InputFieldType id) override;
     void printYourself() override { _XML_NI; }
 
-    std::string giveRecordAsString() const override { _XML_NI; }
+    std::string giveRecordAsString() const override;
+    std::string giveRecordInTXTFormat() const override;
+    std::string giveLocation() const override { return loc(); }
+
 
     static bool node_seen_get(const pugi::xml_node& n);
     static void node_seen_set(pugi::xml_node& n, bool seen);

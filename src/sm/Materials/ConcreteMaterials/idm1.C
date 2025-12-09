@@ -1360,7 +1360,7 @@ IsotropicDamageMaterial1::saveContext(DataStream &stream, ContextMode mode)
     if ( ( mode & CM_Definition ) ) {
         DynamicInputRecord input;
         this->giveInputRecord(input);
-        if ( !stream.write(input.giveRecordAsString()
+        if ( !stream.write(input.giveRecordInTXTFormat()
                            ) ) {
             THROW_CIOERR(CIO_IOERR);
         }

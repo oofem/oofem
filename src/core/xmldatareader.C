@@ -43,6 +43,7 @@
 #include <cstring>
 #include <filesystem>
 #include <pugixml.hpp>
+#include <bits/stdc++.h>
 
 // #define _XML_DEBUG(m) std::cerr<<std::string(__FUNCTION__).substr(0,20)<<": "<<m<<std::endl;
 #define _XML_DEBUG(m)
@@ -129,17 +130,17 @@ namespace oofem {
         return std::filesystem::path(xml).extension() == ".xml";
     }
 
-    std::tuple<size_t,size_t> XMLDataReader::offset2lc(const std::vector<size_t>& nl, size_t offset){
+    std::tuple<size_t,size_t> XMLDataReader::offset2lc(const std::vector<size_t>& nl, size_t offset) const {
         if(nl.empty()) return std::make_tuple(0,0);
         size_t ix=std::distance(nl.begin(),std::lower_bound(nl.begin(),nl.end(),offset));
         // _XML_DEBUG("offset="<<offset<<",ix="<<ix); // comment out so that it does not damage most other _XML_DEBUG messages
         return std::make_tuple(ix+1,offset-(ix==0?0:nl[ix-1]));
     }
-    std::string XMLDataReader::loc(){ return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
-    std::string XMLDataReader::loc(const pugi::xml_node& n){
+    std::string XMLDataReader::loc() const { return loc(stack.back().curr?stack.back().curr:stack.back().parent); }
+    std::string XMLDataReader::loc(const pugi::xml_node& n) const {
         std::ostringstream oss;
-        auto [line,col]=offset2lc(newlines[n.root()],n.offset_debug());
-        oss<<xmlFiles[n.root()]<<":"<<line<<":"<<col;
+        auto [line,col]=offset2lc(newlines.at(n.root()),n.offset_debug());
+        oss<<xmlFiles.at(n.root())<<":"<<line<<":"<<col;
         return oss.str();
     }
 
@@ -175,7 +176,10 @@ namespace oofem {
     }
     void XMLDataReader::leaveGroup(const std::string& name) {
         _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": leave "<<name);
-        if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
+        // if an exception is being propagated, this error would hide it
+        if(!std::uncaught_exceptions()){
+            if(stack.back().parent.name()!=name) OOFEM_ERROR("Error reading %s: %s: bottom-most group is %s, request to leave %s.",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),name.c_str());
+        }
         stack.pop_back();
     }
     void XMLDataReader::enterRecord(InputRecord* rec) {
@@ -190,8 +194,11 @@ namespace oofem {
         XMLInputRecord* r=dynamic_cast<XMLInputRecord*>(rec);
         if(!r) OOFEM_ERROR("Error reading %s: input record is not a XMLInputRecord?",loc().c_str());
         _XML_DEBUG("   leaving '"<<r->node.name()<<"' @ "<<(void*)(&r->node));
-        if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x, request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
-        // leave "<<std::endl;
+        // if an exception is being propagated, and enterRecord/leaveRecord were not used via RAII-guard (RecordGuard),
+        // our would abort immediately (with misleading error message) and the exception would never make it to the handler
+        if(!std::uncaught_exceptions()){
+            if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x, request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
+        }
         stack.pop_back();
     }
 

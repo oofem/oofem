@@ -106,6 +106,8 @@ public:
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
+    virtual std :: string giveRecordInTXTFormat() const = 0;
+    virtual std :: string giveLocation() const = 0;
 
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword

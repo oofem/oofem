@@ -36,6 +36,9 @@
 
 namespace oofem {
 
+// maximum message length for error messages (otherwise ellipsized)
+constexpr static int maxMsgLen=80;
+
 InputRecord :: InputRecord(DataReader* r){
     reader = r;
 }
@@ -166,25 +169,25 @@ InputException::InputException(const InputRecord& ir, std::string keyword, int n
 MissingKeywordInputException::MissingKeywordInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"")+ "\"";
+    msg = ir.giveLocation()+": missing keyword \"" + keyword + "\"" \
+          "\n  \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"")+ "\"";
 }
 
 
 BadFormatInputException::BadFormatInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Bad format for keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
+    msg = ir.giveLocation()+": bad format for keyword \"" + keyword + "\"" \
+          "\n   \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"") + "\"";
 }
 
 
 ValueInputException::ValueInputException(const InputRecord& ir, std::string kw, const std::string &reason) :
     InputException(ir, std::move(kw), -1)
 {
-    msg = "Value input error for keyword \"" + keyword + "\"" + \
+    msg = ir.giveLocation()+": value input error for keyword \"" + keyword + "\"" + \
           "\nReason: \"" + reason + "\"\n" + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
+          "\n  \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"") + "\"";
 }
 
 
