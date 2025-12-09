@@ -56,7 +56,8 @@ class OOFEM_EXPORT XMLInputRecord : public InputRecord
 {
     pugi::xml_node node;
     friend XMLDataReader;
-    std::set<std::string> attrSeen;
+    std::set<std::string> attrQueried;
+    std::set<std::string> attrRead;
     int recId=-1;
     XMLDataReader* _reader() { return (XMLDataReader*)(this->giveReader()); }
     static std::string xmlizeAttrName(const std::string& s);

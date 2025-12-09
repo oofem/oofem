@@ -64,7 +64,6 @@
 
 namespace oofem {
 
-
     bool XMLInputRecord::node_seen_get(const pugi::xml_node& n){ return !!n.attribute(SeenMark); }
 
     void XMLInputRecord::node_seen_set(pugi::xml_node& n, bool seen){
@@ -83,7 +82,7 @@ namespace oofem {
         auto [p,e]=std::from_chars(s.data(),last,val);
         if(p!=last) OOFEM_ERROR("%s: error parsing '%s' as %s (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
         if(e==std::errc()) return val;
-        OOFEM_ERROR("%s: error parsing '%s' as %s (std::from_chars error)",where().c_str(),s.c_str(),typeid(T).name());
+        OOFEM_ERROR("%s: error parsing '%s' as %s (std::from_chars error).",where().c_str(),s.c_str(),typeid(T).name());
     }
 
     template<>
@@ -96,8 +95,14 @@ namespace oofem {
             assert(match.size()==4);
             return Range(std::atoi(match[1].str().c_str()),std::atoi(match[3].str().c_str()));
         }
-        OOFEM_ERROR("%s: error parsing %s as range (single integer or range between two integers separated with -, .., ...)",where().c_str(),s.c_str());
+        OOFEM_ERROR("%s: error parsing '%s' as range (single integer or range between two integers separated with -, .., ...).",where().c_str(),s.c_str());
     };
+    template<>
+    bool string_to(const std::string& s, std::function<std::string()> where){
+        if(s=="0" || s=="n" || s=="N" || s=="no"  || s=="No"  || s=="NO" ){ return false; }
+        if(s=="1" || s=="y" || s=="Y" || s=="yes" || s=="Yes" || s=="YES"){ return true;  }
+        OOFEM_ERROR("%s: error parsing '%s' as bool (alllowed value: 0, n, N, no, No, NO; 1, y, Y, yes, Yes, YES).")
+    }
 
 
     // trim string from both sides
@@ -191,7 +196,7 @@ namespace oofem {
                 }
             }
         }
-        if(att){ attrSeen.insert(att.name()); }
+        if(att){ attrQueried.insert(att.name()); }
         return !!att;
     }
     std::string XMLInputRecord::xmlizeAttrName(const std::string& s){
@@ -217,24 +222,28 @@ namespace oofem {
         }
         if(!att) OOFEM_ERROR("%s: no such attribute: %s",loc().c_str(),n2.c_str());
         std::string ret=att.as_string();
-        attrSeen.insert(n2);
+        attrRead.insert(n2);
         return std::make_tuple(ret,node);
     }
 
     void XMLInputRecord::finish(bool wrn) {
         _XML_DEBUG(loc());
         pugi::xml_document tmp;
-        pugi::xml_node n2=tmp.append_child(node.name());
-        int aLeft=0;
+        pugi::xml_node xNotseen=tmp.append_child(node.name());
+        pugi::xml_node xNotempty=tmp.append_child(node.name());
+        int nNotseen=0, nNotempty=0;
         for([[maybe_unused]] const pugi::xml_attribute& a: node.attributes()) {
             if(std::string(a.name())==SeenMark) continue;
-            if(attrSeen.count(a.name())==0){ n2.append_attribute(a.name())=a.value(); aLeft++; }
+            bool queried(attrQueried.count(a.name())), read(attrRead.count(a.name())), hasValue=(a.value()[0]!=0);
+            if(read) continue;
+            if(!queried){ xNotseen.append_attribute(a.name())=a.value(); nNotseen++; continue; }
+            if(/* !read && queried && */ hasValue){ xNotempty.append_attribute(a.name())=a.value(); nNotempty++; }
         }
-        if(aLeft==0) return;
+        if(nNotseen==0 && nNotempty==0) return;
         if(!wrn) return;
-        std::ostringstream oss;
-        oss<<"Unprocessed XML attributes:\n";
-        n2.print(oss,"  ");
+        std::ostringstream oss; oss<<loc();
+        if(nNotseen){ oss<<"\n   attribute"<<(nNotseen>1?"s":"")<<" ignored:\n      "; xNotseen.print(oss); }
+        if(nNotempty){ oss<<"\n   attribute"<<(nNotempty>1?"s":"")<<" with ignored non-empty value:\n      "; xNotempty.print(oss); }
         OOFEM_WARNING(oss.str().c_str());
     }
 
@@ -282,12 +291,7 @@ namespace oofem {
         if(!hasField(id)){ answer=false; return; }
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
-        if(s=="no" || s=="0" || s=="n" || s=="N" || s=="No" || s=="NO"){
-            OOFEM_WARNING("%s: %s='%s' is ambiguously interpreted as false (flag attribute should be simply absent for clear false).",loc(n).c_str(),id,s.c_str());
-            answer=false;
-            return;
-        }
-        answer=true;
+        answer=string_to<bool>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
     }
     void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
         Tokens tt(id,this,"\\s*,\\s*");
