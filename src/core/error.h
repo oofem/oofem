@@ -73,7 +73,7 @@ extern bool warningIsError;
 //@{
 #define OOFEM_FATAL(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
 #define OOFEM_ERROR(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
-#define OOFEM_WARNING(...) if(warningIsError){ oofem_logger.writeELogMsg(Logger::LOG_LEVEL_WARNING,errorInfo(__func__).c_str(), __FILE__, __LINE__,"Promoting warning to error."); OOFEM_ERROR(__VA_ARGS__); } oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_WARNING(...) { if(warningIsError){ oofem_logger.writeELogMsg(Logger::LOG_LEVEL_WARNING,errorInfo(__func__).c_str(), __FILE__, __LINE__,"Promoting warning to error."); OOFEM_ERROR(__VA_ARGS__); } oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); }
 #define OOFEM_SERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
 #define OOFEM_SWARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __func__, __FILE__, __LINE__, __VA_ARGS__)
 //@}
