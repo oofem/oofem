@@ -64,7 +64,7 @@ public:
     const char* what() const noexcept override;
 };
 
-extern bool warningIsError;
+OOFEM_EXPORT extern bool warningIsError;
 
 /**
  * Macros for printing errors.
