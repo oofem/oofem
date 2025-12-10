@@ -80,6 +80,7 @@
 #include "contact/contactdefinition.h"
 #include "feinterpol.h"
 #include "../mpm/mpm.h"
+#include "timestepreductionstrategy.h"
 
 
 namespace oofem {
@@ -516,6 +517,18 @@ bool ClassFactory :: registerLoadBalancer(const char *name, std::unique_ptr<Load
     return cf_store(loadBalancerList, name, creator);
 }
 
+
+std::unique_ptr<TimeStepReductionStrategy> ClassFactory :: createTimeStepReductionStrategy(const char *name, int number)
+{
+  return cf_create<TimeStepReductionStrategy>(timeStepReductionStrategyList, name, number);
+}
+
+bool ClassFactory :: registerTimeStepReductionStrategy(const char *name, std::unique_ptr<TimeStepReductionStrategy> ( *creator )(int ) )
+{
+  return cf_store(timeStepReductionStrategyList, name,creator);
+}
+
+  
 
 std::unique_ptr<Term> ClassFactory :: createTerm(const char *name)
 {

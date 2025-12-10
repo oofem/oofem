@@ -307,13 +307,14 @@ TimeStep *NonLinearStatic :: giveNextStep()
 	totalTime = currentStep->giveTargetTime() + deltaTtmp;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mStepNum = currentStep->giveMetaStepNumber();
-	
+	/*
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
             if ( mStepNum > nMetaSteps ) {
                 OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
+	*/
     } else {
         // first step -> generate initial step
         TimeStep *newStep = giveSolutionStepWhenIcApply();

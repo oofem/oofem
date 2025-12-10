@@ -101,6 +101,9 @@ class FailureCriteria;
 class ContactManager;
 class ContactDefinition;
 
+class TimeStepReductionStrategy;
+
+  
 class Term;
 
 #ifdef _GNUC
@@ -172,6 +175,9 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 
 ///@todo What is this? Doesn't seem needed / Mikael
 #define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
+
+
+#define REGISTER_TimeStepReductionStrategy(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTimeStepReductionStrategy(_IFT_ ## class ## _Name, CTOR< TimeStepReductionStrategy, class, int > );
 
 //@}
 
@@ -256,6 +262,9 @@ private:
     /// Associative container containing failure criteria creators
     std :: map < std :: string, std::unique_ptr<FailureCriteria> ( * )(int, FractureManager *) > failureCriteriaList;
     std :: map < std :: string, std::unique_ptr<FailureCriteriaStatus> ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
+
+    /// Associative container containing TimeStepReductionStrategy
+    std :: map < std :: string, std::unique_ptr<TimeStepReductionStrategy> ( * )(int) > timeStepReductionStrategyList;
 
     /// Associative container containing ContactManager creators
     std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
@@ -570,6 +579,13 @@ public:
 
     std::unique_ptr<LoadBalancer> createLoadBalancer(const char *name, Domain *d);
     bool registerLoadBalancer( const char *name, std::unique_ptr<LoadBalancer> ( *creator )( Domain * ) );
+
+
+    std::unique_ptr<TimeStepReductionStrategy> createTimeStepReductionStrategy(const char *name, int number);
+    
+    bool registerTimeStepReductionStrategy( const char *name, std::unique_ptr<TimeStepReductionStrategy> ( *creator )( int ) );
+
+    
 
     std::unique_ptr<Field> createField(const char *name);
     bool registerField( const char *name, std::unique_ptr<Field> ( *creator )() );
