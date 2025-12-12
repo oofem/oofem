@@ -50,6 +50,7 @@
 #include <iostream>
 #include <regex>
 #include <charconv>
+#include <cassert>
 
 // #define _XML_DEBUG(m) std::cerr<<__FUNCTION__<<": "<<m<<std::endl;
 #define _XML_DEBUG(m)

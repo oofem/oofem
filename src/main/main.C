@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
     // print header to redirected output
     OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
+
     //
     // check for options
     //
@@ -236,6 +237,8 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "\nCan't use -t, not compiled with OpenMP support\a\n\n");
                 exit(EXIT_FAILURE);
 #endif
+            } else if ( strcmp(argv [ i ],"-Werror") == 0 ) {
+                oofem::warningIsError = true;
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
                 modulesArgs.push_back(argv [ i ]);
             }
@@ -407,6 +410,7 @@ void oofem_print_help()
     printf("  -m  shows solution status monitor output,\n");
     printf("      redirecting standard output to files,\n");
     printf("      oofem.stdout, oofem.stderr by default, use -qo -qe to override\n");
+    printf("  -Werror  promote warnings to errors\n");
     printf("\n");
     oofem_print_epilog();
 }

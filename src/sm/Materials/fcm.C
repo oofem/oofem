@@ -102,7 +102,6 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     double d_tau_old = 0.;
     bool illinoisFlag = false;
 
-    int iterLimitGlobal = 20;
     int iterLimitGradient = 20;
     int iterLimitNormal = 100;
     int iterLimitShear = 100;
@@ -914,7 +913,7 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
       }
 
       if ( iterG > iterLimitGlobal/3 ) {
-	OOFEM_WARNING("Slowly converning (normal vs. shear interaction)!,  iter %d/ iter limit %d,  max. stress error %f, element %d\n", iterG, iterLimitGlobal, maxErr, gp->giveElement()->giveNumber() );
+	OOFEM_WARNING("Slowly converging (normal vs. shear interaction)!,  iter %d/ iter limit %d,  max. stress error %f, element %d\n", iterG, iterLimitGlobal, maxErr, gp->giveElement()->giveNumber() );
       }      
 
     } // global loop
@@ -1976,6 +1975,8 @@ FCMMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir);
+
+    IR_GIVE_OPTIONAL_FIELD(ir,iterLimitGlobal,"iterlimitglobal");
 
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);

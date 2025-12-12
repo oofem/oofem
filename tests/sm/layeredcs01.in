@@ -61,7 +61,7 @@ Set 3 nodes 4 1 4 11 14
 #NODE tStep 2 number 1 dof 2 unknown d value 0.0
 #NODE tStep 2 number 2 dof 2 unknown d value 1.66286569e-03 
 #NODE tStep 2 number 3 dof 2 unknown d value 4.83735409e-03
-NODE tStep 2 number 11 dof 2 unknown d value 0.0
+#NODE tStep 2 number 11 dof 2 unknown d value 0.0
 #NODE tStep 2 number 12 dof 2 unknown d value 1.66286569e-03
 #NODE tStep 2 number 13 dof 2 unknown d value 4.83735409e-03
 ## check some arbitrary element

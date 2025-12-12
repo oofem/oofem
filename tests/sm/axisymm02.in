@@ -8,7 +8,7 @@ errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 3
+ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 4
 Node 1 coords 2 4.0  0.0
 Node 2 coords 2 4.0  2.0
 Node 3 coords 2 7.0  0.0
