@@ -166,6 +166,12 @@ bool TimeStep :: isTheCurrentTimeStep()
     return this == eModel->giveCurrentStep();
 }
 
+void TimeStep :: setTimeStepReductionFactor(double tsrf)
+{
+  this->eModel->giveCurrentMetaStep()->setTimeStepReductionFactor(tsrf);
+}
+
+
 
 void
 TimeStep :: saveContext(DataStream &stream)

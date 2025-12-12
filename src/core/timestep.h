@@ -148,6 +148,9 @@ public:
     int giveVersion() { return version; }
     /// Returns receiver's meta step number.
     int giveMetaStepNumber() { return mStepNumber; }
+    /// Set meta step number.
+    void setMetaStepNumber(int msn) { mStepNumber = msn; }
+
     /// Returns receiver's substep number.
     int giveSubStepNumber() { return subStepNumber; }
     /**
@@ -192,6 +195,11 @@ public:
      * @returns True if receiver is current step, false otherwise.
      */
     bool isTheCurrentTimeStep();
+     /**
+      * Set the time step reduction factor.
+     */
+    void setTimeStepReductionFactor(double tsrf);
+
     /**
      * Check if receiver is solution step when initial conditions should apply.
      * @return True if ic apply, false otherwise.

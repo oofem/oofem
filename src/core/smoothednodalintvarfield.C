@@ -41,12 +41,13 @@
 #include "set.h"
 
 namespace oofem {
-SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d) : Field(ft)
+SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d) : Field(ft), elemSet(0, d)    
 {
     this->istType = ist;
     this->stype = st;
     this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
     this->domain = d;
+    elemSet.addAllElements();
 }
 
 SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField() { }
@@ -58,10 +59,6 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, const Float
     FloatArray lc, n;
     const FloatArray *nodalValue;
 
-    // use whole domain recovery
-    // create a new set containing all elements
-    Set elemSet(0, this->domain);
-    elemSet.addAllElements();
     this->smoother->recoverValues(elemSet, istType, tStep);
     // request element containing target point
     Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
@@ -95,6 +92,9 @@ int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
     const FloatArray *val;
+
+    this->smoother->recoverValues(elemSet, istType, tStep);
+
     int result = this->smoother->giveNodalVector( val, dman->giveNumber() );
     answer = * val;
     return ( result == 1 );

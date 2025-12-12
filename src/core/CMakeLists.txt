@@ -22,6 +22,10 @@ set (core_unsorted
     contact/contactelement.C
     prescribedmean.C
     bctracker.C
+    # Time Step Controller
+    timestepcontroller.C	
+    timestepreductionstrategy.C
+    convergenceexception.C	
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C

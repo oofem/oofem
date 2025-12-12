@@ -1,0 +1,55 @@
+timestepreduction.out
+test of time step reduction in a case of Neo-Hookean Material usign Ogden material with alpha = 2, mu = 20, and K = 10.
+###########################################
+StaticStructural finalt 0.1 treductiontype "SimpleReduction" deltat 1 rtolf 1e-8 MaxIter 6 dTmax 2 dTmin 0.01 stiffmode 0 manrmsteps 1 ncrf 0.2 nmodules 1
+errorcheck
+###########################################
+Domain 3d
+OutputManager tstep_all dofman_all element_all
+###################################################################
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 3
+#########################---Nodes---###############################
+node    1   coords 2   0.0      0.0
+node    2   coords 2   1.0    	0.0
+node    3   coords 2   1.0    	1.0
+node    4   coords 2   0.0      1.0
+########################---Elements---#############################
+quad1PlaneStrain 1 nodes 4 1 2 3 4 mat 1 crossSect 1 nlgeo 1
+####################---Cross-Sections---###########################
+SimpleCS 1 thick 1.0 set 1 material 1
+#######################---Materials---#############################
+OgdenCompressibleMat 1 d 1  alpha 1 2 mu 1 20  K 10
+#######################---Boundary cond.---########################
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 2 values 1 10.0 set 3
+#######################---Time functions---########################
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 3 t 3 -1 0. 2000. f(t) 3 0. 1 2001.
+###########################---Sets---##############################
+Set 1 elementranges {(1 1)}
+Set 2 nodes 2 1 2
+Set 3 nodes 2 3 4
+###################################################################
+#%BEGIN_CHECK% tolerance 1.e-3
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value  9.4444e+00
+#REACTION tStep 1 number 1 dof 2 value -7.3924e+00 
+#REACTION tStep 1 number 2 dof 1 value -9.4444e+00 
+#REACTION tStep 1 number 2 dof 2 value -7.3924e+00
+#REACTION tStep 1 number 3 dof 2 value  7.3924e+00
+#REACTION tStep 1 number 4 dof 2 value  7.3924e+00 
+###################################################################
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value   3.45508878e+00
+#NODE tStep 1 number 4 dof 1 unknown d value  -3.45508878e+00
+## check element deformation gradient
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 1  value  6.4499e+00 
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 2  value  1.1400e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 6  value  1.9948e+00
+## check element first Piola-Kirchhoff stress
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 1  value  3.6163e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 2  value  1.0878e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 3  value -2.2941e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 6  value  2.2731e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 9  value  6.5330e-01
+#%END_CHECK%

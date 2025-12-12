@@ -1923,6 +1923,8 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("staticStructural", &staticStructural, py::return_value_policy::move);
     m.def("transientTransport", &transientTransport, py::return_value_policy::move);
     m.def("dummyProblem", &dummyProblem, py::return_value_policy::move);
+    m.def("mpmProblem", &mpmProblem, py::return_value_policy::move);
+
     m.def("domain", &domain, py::return_value_policy::move);
     //structural elements
     m.def("truss1d", &truss1d, py::return_value_policy::move);
@@ -2001,6 +2003,8 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("simpleTransportCS", &simpleTransportCS, py::return_value_policy::move);
+    m.def("dummyCS", &dummyCS, py::return_value_policy::move);
+    
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
@@ -2013,6 +2017,7 @@ PYBIND11_MODULE(oofempy, m) {
     // mpm experimental
     m.def("skyline", &skyline, py::return_value_policy::move);
     m.def("ldltfactorization", &ldltFactorization, py::return_value_policy::move);
+    m.def("upquad11", &upQuad11, py::return_value_policy::move);
     m.def("q1", &q1, py::return_value_policy::move);
     m.def("l1", &l1, py::return_value_policy::move);
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -32,46 +32,21 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _SKYLINEMTXLDL_H__
-#define _SKYLINEMTXLDL_H__
+#include "convergenceexception.h"
 
-#include "SkyLineMtx.h"
+namespace oofem {
 
-DSS_NAMESPASE_BEGIN
-
-/**
- * @author: Richard Vondracek
- */
-
-class SkyLineMtxLDL :
-    public SkyLineMtx
+//specialization to material, element, etc... ??
+  ConvergenceException :: ConvergenceException(const std::string &reason)
 {
-public:
-    SkyLineMtxLDL(SparseMatrixF &sm, Ordering *order, MathTracer *eMT);
-    virtual ~SkyLineMtxLDL();
+  //int gpNumber = 1;
+  this->msg = "Convergence Exception Reason: "  + reason;
+}
 
-    void LoadMatrixData(SparseMatrixF &sm);
+const char* ConvergenceException::what() const noexcept
+{ 
+    return msg.c_str();
+}
 
-
-public:
-    virtual void Solve(double *b, double *x) override;
-
-    //ILargeMatrix
-    virtual double &ElementAt(int i, int j) override;
-    virtual void LoadZeros() override;
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm) override;
-    virtual void SolveLV(const LargeVector &b, LargeVector &x) override;
-    virtual void Factorize() override;
-    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) override;
-
-public:
-    virtual void SchurComplementFactorization(int fixed_blocks) override;
-    virtual void SolveA11(double *x, long fixed_blocks) override;
-    virtual void Sub_A21_A11inv(double *x, long fixed_blocks) override;
-    virtual void Sub_A11inv_A12(double *x, long fixed_blocks) override;
-    virtual void WriteCondensedMatrixA22(double *a, Ordering *mcn, IntArrayList *lncn) override;
-}; //class SkyLineMtxLDL
-
-DSS_NAMESPASE_END
-
-#endif // _SKYLINEMTXLDL_H__
+  
+}// end namespace oofem
