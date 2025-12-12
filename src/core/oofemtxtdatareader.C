@@ -36,7 +36,6 @@
 #include "error.h"
 
 #include <string>
-#include <sstream>
 
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(std :: string inputfilename) : DataReader(),
@@ -116,13 +115,11 @@ void
 OOFEMTXTDataReader :: finish()
 {
     if ( this->it != this->recordList.end() ) {
-        std::ostringstream oss;
-        int i=0;
+        OOFEM_WARNING("There are unread lines in the input file\n"
+            "The most common cause are missing entries in the domain record, e.g. 'nset'");
         for(; it!=recordList.end(); it++){
-            oss<<"   "<<it->giveLineNumber()<<": "<<it->giveRecordAsString()<<std::endl;
-            if(i++>10) { oss<<"   ...\n"; break; }
+            std::cerr<<"   "<<it->giveLineNumber()<<": "<<it->giveRecordAsString()<<std::endl;
         }
-        OOFEM_WARNING("There are unread lines in the input file (the most common cause are missing entries in the domain record, e.g. 'nset'):\n%s",oss.str().c_str());
     }
     this->recordList.clear();
 }

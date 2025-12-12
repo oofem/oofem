@@ -1,7 +1,7 @@
 FCSimpleColumn2d04.out
 Test of mpm upbrick11 element
 # final time 500, initial time step 1 
-mpmproblem nsteps 500 deltat 1.0 alpha 0.5 nmodules 1 manrmsteps 0 keeptangent
+mpmproblem nsteps 500 deltat 1.0 alpha 0.5 nmodules 1 manrmsteps 0 keeptangent 0
 #vtkxml tstep_all domain_all primvars 2 1 5
 errorcheck
 domain HeatTransfer

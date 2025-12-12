@@ -231,8 +231,7 @@ mitc4shell 98 nodes 4 107 108 119 118 nip 9
 mitc4shell 99 nodes 4 108 109 120 119 nip 9
 mitc4shell 100 nodes 4 109 110 121 120 nip 9
 #SimpleCS 1 thick 0.05 material 1 set 1
-# unread token on the next line: beamshearcoeffyz 1
-LayeredCS 1 nLayers 2 LayerMaterials 2 1 1 Thicks 2 0.025 0.025 Widths 2 1 1 nintegrationpoints 4 beamshearcoeffxz 1 set 1
+LayeredCS 1 nLayers 2 LayerMaterials 2 1 1 Thicks 2 0.025 0.025 Widths 2 1 1 nintegrationpoints 4 beamshearcoeffxz 1 beamshearcoeffyz 1 set 1
 isole 1 d 8.e3 E 200.e9 n 0.3 talpha 0.0
 Boundarycondition 1 loadtimefunction 1 dofs 3 1 2 6 values 3 0 0 0 set 3
 Constantfunction 1 f(t) 1.0

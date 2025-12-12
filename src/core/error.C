@@ -42,7 +42,6 @@
 namespace oofem {
 
 
-bool warningIsError=false;
 
 std::string errorInfo(const char *func)
 {

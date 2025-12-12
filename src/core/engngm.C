@@ -200,7 +200,7 @@ EngngModel :: Instanciate_init()
 
 int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
-    std::shared_ptr<InputRecord> irPtr(ir.ptr());
+    std::shared_ptr<InputRecord> irPtr(ir.clone());
     Timer timer;
     timer.startTimer();
 
@@ -243,7 +243,7 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
 
         {
             /* This is somewhat messy since we want the XML input format NOT to nest modules under Analysis, keeping them under the top-level <oofem> tag instead */
-            auto irParent=(dr.hasFlattenedStructure()?dr.giveTopInputRecord()->ptr():irPtr->ptr());
+            auto irParent=(dr.hasFlattenedStructure()?dr.giveTopInputRecord()->clone():irPtr->clone());
             DataReader::RecordGuard scope(dr,irParent.get());
             // instanciate initialization module manager
             initModuleManager.instanciateYourself(dr, irParent, "ninitmodules", "InitModules",DataReader::IR_expModuleRec);

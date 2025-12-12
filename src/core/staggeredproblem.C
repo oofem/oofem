@@ -81,6 +81,7 @@ StaggeredProblem :: instanciateYourself(DataReader &dr, InputRecord &ir, const c
 {
     int result;
     result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName, desc);
+    ir.finish();
     // instanciate slave problems
     result &= this->instanciateSlaveProblems();
     return result;
