@@ -68,17 +68,19 @@ public:
         IR_enrichFrontRec, IR_propagationLawRec, IR_crackNucleationRec, IR_fracManRec, IR_failCritRec,
         IR_contactManRec, IR_contactDefRec, IR_fieldRec, 
         // MPM specific
-        IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec
+        IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec,
+        IR_unspecified // internal use only
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
-    const std::vector<std::string> InputRecordTags={
+    static constexpr const char* InputRecordTags[]={
         /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
         "Analysis","MetaStep",/*ExportModule*/"","Node",/*Element*/"",
         /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
         "ContactManager","ContactDefinition","Field",
-        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral"
+        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
+        "UNSPECIFIED"
     };
 
     DataReader() { }

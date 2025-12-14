@@ -36,6 +36,7 @@
 #define oofemtxtinputrecord_h
 
 #include "inputrecord.h"
+#include "datareader.h"
 #include "tokenizer.h"
 
 #include <string>
@@ -61,9 +62,8 @@ protected:
 
     /// Record representation.
     std :: string record;
-
     int lineNumber;
-
+    DataReader::InputRecordType inputRecordType=DataReader::IR_unspecified;
 public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
@@ -107,6 +107,7 @@ public:
 
     void setLineNumber(int num) { this->lineNumber = num; }
     int giveLineNumber() const { return lineNumber; }
+    void setInputRecordType(DataReader::InputRecordType irt){ inputRecordType=irt; }
 
 protected:
     int giveKeywordIndx(const char *kwd);
@@ -133,6 +134,12 @@ protected:
      * @return Nonzero on success.
      */
     int readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
+public:
+    // field access tracing variables, set at startup from main()
+    static bool traceFields;
+    static std::ofstream traceFieldsCSV;
+private:
+    void traceField(InputFieldType id, const char* type);
 };
 } // end namespace oofem
 #endif // oofemtxtinputrecord_h

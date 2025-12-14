@@ -84,6 +84,7 @@
 #include <sstream>
 // For passing PETSc/SLEPc arguments.
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <memory>
 
@@ -319,6 +320,13 @@ int main(int argc, char *argv[])
     #endif
     {
         dr=std::make_unique<OOFEMTXTDataReader>(inputFileName.str());
+        if(const char* csv=getenv("OOFEM_TRACE_FIELDS_CSV")){
+            OOFEMTXTInputRecord::traceFields=true;
+            OOFEMTXTInputRecord::traceFieldsCSV.open(csv,std::ios::app);
+            if(!OOFEMTXTInputRecord::traceFieldsCSV.good()) OOFEM_ERROR("Unable to open '%s' (passed via OOFEM_TRACE_FIELDS_CSV)",csv);
+            OOFEM_LOG_FORCED("Tracing field access (OOFEM_TRACE_FIELDS_CSV=%s)\n.",csv);
+
+        }
     }
 
     auto problem = :: InstanciateProblem(*dr, _processor, contextFlag, NULL, parallelFlag);
