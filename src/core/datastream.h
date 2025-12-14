@@ -179,7 +179,7 @@ public:
     int write(const int *data, std::size_t count) override;
     int write(const unsigned long *data, std::size_t count) override;
 #ifdef _WIN32
-    int write(const std::size_t* data, std::size_t count);
+    int write(const std::size_t* data, std::size_t count) override;
 #endif
     int write(const long *data, std::size_t count) override;
     int write(const double *data, std::size_t count) override;

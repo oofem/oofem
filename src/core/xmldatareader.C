@@ -217,7 +217,7 @@ namespace oofem {
                 OOFEM_WARNING(oss.str().c_str());
                 n.parent().remove_child(n);
             }
-}
+        }
     }
 
     InputRecord &
@@ -227,6 +227,7 @@ namespace oofem {
         _XML_DEBUG(loc()<<"::"<<giveStackPath()<<": tag '"<<tag<<"'");
         StackItem& tip(stack.back());
         if(tag.empty()){
+            tip.curr=tip.parent.first_child();
             while(tip.curr && tip.seen.count(tip.curr)>0){
                 _XML_DEBUG("  --- "<<tip.curr.name());
                 tip.curr=tip.curr.next_sibling();

@@ -363,13 +363,12 @@ EngngModel :: instanciateDomains(DataReader &dr)
     int result = 1;
     // read problem domains
     auto Idomain=domainList.begin();
-    auto drecs=dr.giveGroupRecords("Domains",DataReader::IR_domainRec,domainList.size());
-    for(InputRecord& drec: drecs){
-        result&=(*Idomain)->instanciateYourself(dr,drec);
-        Idomain++;
+    for(size_t i=0; i<domainList.size(); i++){
+        InputRecord& rec=dr.giveInputRecord(DataReader::IR_domainRec,i+1);
+        DataReader::RecordGuard guard(dr,&rec);
+        result&=(*Idomain)->instanciateYourself(dr,rec);
     }
     this->postInitialize();
-
     return result;
 }
 

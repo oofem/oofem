@@ -71,8 +71,8 @@ public:
         IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
-    const std::vector<std::string> InputRecordTags={
-        /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
+    static constexpr const char* InputRecordTags[]={
+        "Domain","OutputManager","DomainComp","Geometry","GBPM",
         "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
         /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
