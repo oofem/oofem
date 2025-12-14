@@ -44,6 +44,12 @@
 #include <filesystem>
 #include <pugixml.hpp>
 #include <bits/stdc++.h>
+#include <string.h>
+
+#ifdef _MSC_VER
+#define strcasecmp _stricmp
+#endif
+
 
 // #define _XML_DEBUG(m) std::cerr<<std::string(__FUNCTION__).substr(0,20)<<": "<<m<<std::endl;
 #define _XML_DEBUG(m)
@@ -240,6 +246,10 @@ namespace oofem {
                 if(tip.seen.count(tip.curr)==0){
                     if(tip.curr.name()==XiIncludeTag && resolveXiInclude(tip.curr).name()==tag) break;
                     else if(tip.curr.name()==tag) break;
+                    else if(strcasecmp(tip.curr.name(),tag.c_str())==0){
+                        std::cerr<<loc(tip.curr)<<": case-insensitive XML tag match ('"<<tip.curr.name()<<"', requested '"<<tag<<"')"<<std::endl;
+                        break;
+                    }
                 }
                 tip.curr=tip.curr.next_sibling();
             }
