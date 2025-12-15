@@ -658,12 +658,6 @@ else()
 endif()
 
 
-if(USE_PYTHON_EXTENSION)
-    add_definitions(-D_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
-endif ()
-
 if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
     MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
 endif()
@@ -672,8 +666,8 @@ if (USE_PYBIND_BINDINGS)
     add_definitions(-D_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
+    find_package(Python COMPONENTS Interpreter Development.Module)
+    link_libraries(Python::Module)
     if(USE_NANOBIND)
         if(0)
             add_subdirectory(extern/nanobind)
@@ -729,9 +723,9 @@ if (USE_PYBIND_BINDINGS)
 endif()
 
 if(USE_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
+    find_package(Python COMPONENTS Interpreter Development.Module)
     add_definitions(-D_PYTHON_EXTENSION)
-    link_libraries(Python::Python)
+    link_libraries(Python::Python) # embedded python
 endif()
 
 #######################################################################
