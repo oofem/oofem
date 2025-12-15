@@ -977,7 +977,7 @@ include (CTest)
 
 if(USE_OOFEM_EXE)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
-set (oofem_cmd  $<TARGET_FILE:oofem>)
+set (oofem_cmd $<TARGET_FILE:oofem> -Werror)
 file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)

@@ -280,6 +280,8 @@ protected:
     /// if true = takes shear compliance of all cracks, false = only dominant crack contribution, default value is false
     bool multipleCrackShear;
 
+    int iterLimitGlobal = 20;
+
     /// comutes tensile strength
     virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const = 0;
 

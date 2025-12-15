@@ -160,8 +160,6 @@ TimeStepController :: initMetaStepAttributes(MetaStep *mStep)
 {
     // update attributes
     eModel->updateAttributes(mStep); // virtual function
-    // finish data acquiring
-    mStep->giveAttributesRecord().finish();
 }
   
 

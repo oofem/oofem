@@ -1,7 +1,8 @@
 idm11.out 
 Test of PlaneStress2d element -> tensile test with subsequent load-unload cycles
 NonLinearStatic nsteps 1 nmsteps 1 nmodules 1 
-nsteps 100 rtolv 1.e-7 MaxIter 9000 steplength 0.000001 controlmode 1 
+# unread on the next line: steplength 0.000001
+nsteps 100 rtolv 1.e-7 MaxIter 9000 controlmode 1
 vtkxml tstep_all vars 3 1 4 13 primvars 1 1 stype 2 
 domain 2dPlaneStress 
 OutputManager tstep_all dofman_all element_all 
