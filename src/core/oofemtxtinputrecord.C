@@ -46,12 +46,9 @@
 #include <cctype>
 #include <ostream>
 #include <sstream>
-#include <fstream>
+
 
 namespace oofem {
-
-bool OOFEMTXTInputRecord::traceFields=false;
-std::ofstream OOFEMTXTInputRecord::traceFieldsCSV;
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : tokenizer(), record()
 { }
@@ -681,11 +678,11 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
     } else {
         return 0;
     }
-
 }
 
-void OOFEMTXTInputRecord::traceField(InputFieldType id, const char* type){
-    if(!traceFields) return;
+#if _USE_TRACE_FIELDS
+void OOFEMTXTInputRecord::traceField(InputFieldType id, const char* type) {
+    if(!DataReader::TraceFields::active) return;
     std::string tag;
     /* synthetic tags for records which have no leading tag (only data) */
     if(inputRecordType==DataReader::IR_outManRec) tag="~OutputManager~";
@@ -693,7 +690,8 @@ void OOFEMTXTInputRecord::traceField(InputFieldType id, const char* type){
     else if(inputRecordType==DataReader::IR_mstepRec) tag="~MetaStep~";
     else if(inputRecordType==DataReader::IR_unspecified) tag="?UNSPECIFIED?";
     else this->giveRecordKeywordField(tag);
-    traceFieldsCSV<<tag<<","<<id<<","<<type<<std::endl;
+    DataReader::TraceFields::write(tag+";"+id+";"+type);
 }
+#endif
 
 } // end namespace oofem

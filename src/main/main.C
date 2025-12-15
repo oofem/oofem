@@ -321,10 +321,14 @@ int main(int argc, char *argv[])
     {
         dr=std::make_unique<OOFEMTXTDataReader>(inputFileName.str());
         if(const char* csv=getenv("OOFEM_TRACE_FIELDS_CSV")){
-            OOFEMTXTInputRecord::traceFields=true;
-            OOFEMTXTInputRecord::traceFieldsCSV.open(csv,std::ios::app);
-            if(!OOFEMTXTInputRecord::traceFieldsCSV.good()) OOFEM_ERROR("Unable to open '%s' (passed via OOFEM_TRACE_FIELDS_CSV)",csv);
-            OOFEM_LOG_FORCED("Tracing field access (OOFEM_TRACE_FIELDS_CSV=%s)\n.",csv);
+            #ifdef _USE_TRACE_FIELDS
+                DataReader::TraceFields::active=true;
+                DataReader::TraceFields::out.open(csv,std::ios::app);
+                if(!DataReader::TraceFields::out.good()) OOFEM_ERROR("Unable to open '%s' (passed via OOFEM_TRACE_FIELDS_CSV)",csv);
+                OOFEM_LOG_FORCED("Tracing field access (OOFEM_TRACE_FIELDS_CSV=%s)\n.",csv);
+            #else
+                OOFEM_ERROR("Oofem must be compiled with -DUSE_TRACE_FIELDS so that OOFEM_TRACE_FIELDS_CSV='%s' passed is effective.",csv);
+            #endif
 
         }
     }

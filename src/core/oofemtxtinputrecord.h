@@ -134,12 +134,12 @@ protected:
      * @return Nonzero on success.
      */
     int readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
-public:
-    // field access tracing variables, set at startup from main()
-    static bool traceFields;
-    static std::ofstream traceFieldsCSV;
 private:
-    void traceField(InputFieldType id, const char* type);
+    #ifdef _USE_TRACE_FIELDS
+        void traceField(InputFieldType id, const char* type);
+    #else
+        void traceField(InputFieldType id, const char* type) const { };
+    #endif
 };
 } // end namespace oofem
 #endif // oofemtxtinputrecord_h

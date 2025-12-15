@@ -40,6 +40,7 @@
 #include "error.h"
 
 #include<iostream>
+#include<fstream>
 
 namespace oofem {
 /**
@@ -81,6 +82,18 @@ public:
         "ContactManager","ContactDefinition","Field",
         "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
         "UNSPECIFIED"
+    };
+    /* text identifier of the input record type */
+    static constexpr const char* InputRecordTypeStr[]={
+        "domain", "outputmanager", "domaincomp", "geometry", "gbpm",
+        "analysis","metastep","exportmodule","node","element",
+        "crossection","material","nonlocalbarrier","boundarycondition","initialcondition","timefunction","set",
+        "xfemmanager","enrichmentfunctinon","geometry","enrichmentitem",
+        "enrichmentfromt","propagationlaw","cracknucleation","fracturemanager","failcriterion",
+        "contactmanager","contactdefinition","field",
+        // MPM specific
+        "mpmvariable","mpmterm","mpmintegral",
+        "unspecified" // internal use only
     };
 
     DataReader() { }
@@ -191,6 +204,18 @@ public:
     GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1);
     /// Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
     InputRecord *giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
+
+
+public:
+    #if _USE_TRACE_FIELDS
+        // field access tracing variables, set at startup from main()
+        struct TraceFields {
+            static bool active;
+            static std::ofstream out;
+            static void write(const std::string& s);
+        };
+    #endif
+
 };
 } // end namespace oofem
 #endif // datareader_h
