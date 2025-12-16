@@ -258,6 +258,7 @@ namespace oofem {
         _XML_DEBUG("  ==> "<<tip.curr.name());
         tip.seen.insert(tip.curr);
         pugi::xml_node n=((tip.curr.name()==XiIncludeTag) ? resolveXiInclude(tip.curr) : tip.curr);
+        if(tip.lastRecord) tip.lastRecord->finish(); //for checking everything has been read before moving onto the next one
         tip.lastRecord=std::make_shared<XMLInputRecord>(this,n);
         tip.lastRecId=tip.lastRecord->setRecId(tip.lastRecId);
         _XML_DEBUG("   tip.curr="<<tip.curr.name()<<": "<<XMLInputRecord::node_seen_get(tip.curr));
