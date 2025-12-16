@@ -82,7 +82,7 @@ MetaStep :: initializeFrom(InputRecord &ir)
 	  } 
 	} else {
 	  //@todo: how to get dt
-	  finalTime = numberOfSteps * deltaT;
+	  finalTime = numberOfSteps * deltaT + this->previousMetaStepFinalTime;
 	}
       }
     } 

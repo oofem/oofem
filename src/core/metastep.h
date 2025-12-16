@@ -101,6 +101,8 @@ protected:
     double minDeltaT;
     /// Maximal value of the time step
     double maxDeltaT;
+    /// final time of the previous meta step
+    double previousMetaStepFinalTime = 0;
     
 public:
     /**
@@ -138,13 +140,15 @@ public:
     int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
-
+    /// Returns true if last step
+    bool isLastStep(TimeStep *tStep) { return ( tStep->giveTargetTime() == finalTime); }
+    
     int giveNumberOfMaxTimeStepReductions(){return timeStepReductionStrategy->giveNumberOfMaxTimeStepReductions();}
     /// Returns final time of the meta step
     double giveFinalTime(){return finalTime;}
     void setFinalTime(double ft){finalTime = ft;}
     void recomputeFinalTime(int nSteps) {finalTime =  nSteps * deltaT;}
-
+    void setPreviousMetaStepFinalTime(double ft){previousMetaStepFinalTime = ft;}
     
     /** 
      * Returns time function for time step increment.

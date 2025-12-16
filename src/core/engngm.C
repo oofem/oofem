@@ -2076,11 +2076,7 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
-    // set meta step bounds
-    int istep = this->giveNumberOfFirstStep(true);
-    for ( auto &metaStep: metaStepList ) {
-        istep = metaStep.setStepBounds(istep);
-    }
+    timeStepController->postInitialize();
 
     for ( auto &domain: domainList ) {
         domain->postInitialize();
