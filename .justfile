@@ -12,15 +12,24 @@ wheel-test:
 	cd .cache/venv; uv pip install `ls ../../dist/oofem-*.whl |tail -n1`; . bin/activate; cd ../../bindings/python/tests; python -m pytest
 pyodide:
 	#!/bin/bash
-	pip3 install pyodide-build
-	[ -d .cache/emsdk ] || git clone https://github.com/emscripten-core/emsdk.git build/emsdk
+	set -e -x
+	uv --version || $( curl -LsSf https://astral.sh/uv/install.sh | sh )
+	# create venv
+	uv venv --python 3.12 .cache/pyodide-venv
+	source .cache/pyodide-venv/bin/activate
+	# install pyodide-build and pip
+	uv pip install pyodide-build pip
+	# install emscripten SDK
+	[ -d .cache/emsdk ] || git clone https://github.com/emscripten-core/emsdk.git .cache/emsdk
 	cd .cache/emsdk/
 	export PYODIDE_EMSCRIPTEN_VERSION=$(pyodide config get emscripten_version)
 	./emsdk install ${PYODIDE_EMSCRIPTEN_VERSION}
+	# activate emscripten SDK
 	./emsdk activate ${PYODIDE_EMSCRIPTEN_VERSION}
 	source emsdk_env.sh
 	cd ../..
 	pyodide build
+	# create & activate runtime venv (≠ pyodide-build venv)
 	[ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
 	source build/venv-pyodide/bin/activate
 	pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
@@ -77,7 +86,7 @@ act-cibuildwheel:
 	.cache/nektos-act --reuse -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-24.04 --workflows ./.github/workflows/cibuildhweel.yml
 msvc:
 	#!/bin/bash
-	[ -d /opt/msvc ] || ( git clone https://github.com/mstorsjo/msvc-wine.git && cd msvc-wine && ./vsdownload.py --accept-license --dest /opt/msvc && ./install.sh )
+	[ -d /opt/msvc ] || ( git clone https://github.com/mstorsjo/msvc-wine.git && cd msvc-wine && ./vsdownload.py --accept-license --dest /opt/msvc && ./install.sh /opt/msvc )
 	export PATH=/opt/msvc/bin/x64:$PATH
 	rm -rf build-msvc
 	cmake -Bbuild-msvc -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
