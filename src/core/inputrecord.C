@@ -112,7 +112,7 @@ InputRecord :: giveReader() const {
     return reader;
 }
 
-#if 1
+#ifdef _INPUTRECORD_OPTIONAL_OLD
 void
 InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {

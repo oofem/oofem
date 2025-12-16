@@ -83,6 +83,7 @@ typedef const char *InputFieldType;
     (__ir).giveRecordKeywordField(__name, __value);
 
 
+// #define _INPUTRECORD_OPTIONAL_OLD
 
 /**
  * Class representing the general Input Record. The input record consists of several fields.
@@ -180,7 +181,7 @@ public:
     // return whether a single child of given type exists
     virtual bool hasChild(InputFieldType id, const std::string& name, bool optional) = 0;
     //@}
-#if 1
+#ifdef _INPUTRECORD_OPTIONAL_OLD
     //@{
     /// Reads the integer field value.
     void giveOptionalField(int &answer, InputFieldType id);
