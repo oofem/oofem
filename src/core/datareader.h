@@ -70,7 +70,7 @@ public:
         IR_contactManRec, IR_contactDefRec, IR_fieldRec, 
         // MPM specific
         IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec,
-        IR_unspecified // internal use only
+        IR_unspecified // internal use only, signifies error in setting record type
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
     static constexpr const char* InputRecordTags[]={
@@ -82,18 +82,6 @@ public:
         "ContactManager","ContactDefinition","Field",
         "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
         "UNSPECIFIED"
-    };
-    /* text identifier of the input record type */
-    static constexpr const char* InputRecordTypeStr[]={
-        "domain", "outputmanager", "domaincomp", "geometry", "gbpm",
-        "analysis","metastep","exportmodule","node","element",
-        "crossection","material","nonlocalbarrier","boundarycondition","initialcondition","timefunction","set",
-        "xfemmanager","enrichmentfunctinon","geometry","enrichmentitem",
-        "enrichmentfromt","propagationlaw","cracknucleation","fracturemanager","failcriterion",
-        "contactmanager","contactdefinition","field",
-        // MPM specific
-        "mpmvariable","mpmterm","mpmintegral",
-        "unspecified" // internal use only
     };
 
     DataReader() { }
