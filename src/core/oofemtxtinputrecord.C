@@ -99,7 +99,7 @@ OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name
 bool
 OOFEMTXTInputRecord :: hasChild(InputFieldType id, const std::string& name, bool optional){
     int count=this->giveGroupCount(id,name,optional);
-    if(count>1) OOFEM_ERROR("Number of '%s' children (%d) must be 0 or 1 (not %d)",name.c_str(),id,count);
+    if(count>1) OOFEM_ERROR("Number of '%s' children (%s) must be 0 or 1 (not %d)",id,name.c_str(),count);
     return count>0;
 }
 
@@ -555,7 +555,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 
     if ( wf ) {
-        OOFEM_WARNING( buff.str().c_str() );
+        OOFEM_WARNING("%s", buff.str().c_str() );
     }
 }
 

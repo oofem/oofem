@@ -1073,7 +1073,7 @@ public:
     }
     const Term* giveTerm (int indx) {
         // @BP: add better error handling than provided by at()
-        if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,termList.size());
+        if(indx<1 || (int)termList.size()<indx) OOFEM_ERROR("MPM term number %d outside of valid range 1..%d",indx,(int)termList.size());
         return termList[indx-1].get();
     }   
     /// instanciates mpm stuff (variables, terms, and integrals)

@@ -275,7 +275,7 @@ void PythonExpression::readFile2String(const std::string &path, std::string &con
         content = buffer.str();
         file.close();
     } else {
-        OOFEM_ERROR("Could not open file %s", path);
+        OOFEM_ERROR("Could not open file %s", path.c_str());
     }
 }
 

@@ -137,7 +137,7 @@ ScalarFunction :: eval(const std :: map< std :: string, FunctionArgument >valDic
         FloatArray val;
         d->giveFunction(this->fReference)->evaluate(val, valDict, gp, param);
         if ( val.giveSize() != 1 ) {
-            OOFEM_ERROR( "Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize() );
+            OOFEM_ERROR( "Function %d did not return a scalar (size = %d)", this->fReference, (int)val.giveSize() );
         }
         return val.at(1);
     }
