@@ -334,8 +334,8 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
         //OOFEM_ERROR("anisotropic homog. is not inmplemented yet");
         mat = classFactory.createMaterial("AnisoLE", nmat, d);
         FloatArray stiff;
-        FloatArray alpha(6);
-        alpha.zero();
+        //FloatArray alpha(6);
+        //alpha.zero();
         if ( nDimensions == 2 ) {
             stiff = VecX({
                 Diso.at(1, 1), Diso.at(1, 2), 0, 0, 0, Diso.at(1, 6), \
@@ -354,7 +354,7 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
             OOFEM_ERROR("Invalid number of dimensions. Only 2d and 3d domains are supported in QC simulation. \n");
         }
         irMat.setField(stiff, _IFT_AnisotropicLinearElasticMaterial_stiff);
-        irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
+        //irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
         irMat.setField(0.0, _IFT_Material_density);
     } else {
         OOFEM_ERROR("Invalid homMtrxType");
@@ -560,7 +560,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             nmat++;
             auto mat = classFactory.createMaterial("AnisoLE", nmat, d);
             FloatArray stiff;
-            FloatArray alpha(6);
+            // FloatArray alpha(6);
             if ( nDimensions == 2 ) {
                 stiff = VecX({
                     Da.at(1, 1), Da.at(1, 2), 0, 0, 0, Da.at(1, 6), \
@@ -579,7 +579,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
                 OOFEM_ERROR("Invalid number of dimensions. Only 2d and 3d domains are supported in QC simulation. \n");
             }
             irMat.setField(stiff, _IFT_AnisotropicLinearElasticMaterial_stiff);
-            irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
+            // irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
             mat->initializeFrom(irMat);
