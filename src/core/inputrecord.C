@@ -33,6 +33,7 @@
  */
 
 #include "inputrecord.h"
+#include "error.h"
 
 namespace oofem {
 
@@ -46,6 +47,16 @@ InputRecord :: InputRecord(DataReader* r){
 DataReader*
 InputRecord :: giveReader() const {
     return reader;
+}
+
+std::shared_ptr<InputRecord>
+InputRecord::ptr() {
+    // we could just return this->shared_from_this, but it throws std::bad_weak_ptr (with no backtrace)
+    // so we do essentially the same, but provide a nice message and abort immediately
+    auto weak=this->weak_from_this();
+    std::shared_ptr<InputRecord> ret=weak.lock();
+    if(!ret) OOFEM_ERROR("shared_ptr<InputRecord>::ptr(): object lifetime expired (programming error)");
+    return ret;
 }
 
 

@@ -102,7 +102,7 @@ public:
 
     /** Creates a newly allocated copy of the receiver */
     virtual std::shared_ptr<InputRecord> clone() const = 0;
-    std::shared_ptr<InputRecord> ptr() { return shared_from_this(); }
+    std::shared_ptr<InputRecord> ptr();
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
