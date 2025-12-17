@@ -155,7 +155,7 @@ oofem::OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(py::kwargs k
 }
 
 
-#define OOFEM_RAISE(msg) { oofem::OOFEM_LOG_ERROR(msg); throw std::runtime_error(msg); }
+#define OOFEM_RAISE(msg) { oofem::OOFEM_LOG_ERROR("%s",msg); throw std::runtime_error(msg); }
 
 
 /*****************************************************

@@ -1,7 +1,7 @@
 #
 # justfile for various local build/test tasks; works on Debian stable
 #
-FAIRLY_COMPLETE_FLAGS := "-DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja"
+FAIRLY_COMPLETE_FLAGS := "-DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1 -DUSE_TRACE_FIELDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja"
 
 wheel:
 	python -m build

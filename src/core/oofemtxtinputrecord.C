@@ -47,12 +47,14 @@
 #include <ostream>
 #include <sstream>
 
+
 namespace oofem {
+
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : tokenizer(), record()
 { }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : tokenizer(),
-    record(src.record), lineNumber(src.lineNumber)
+    record(src.record), lineNumber(src.lineNumber), inputRecordType(src.inputRecordType)
 {
     tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
@@ -77,6 +79,7 @@ OOFEMTXTInputRecord &
 OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
     this->record = src.record;
+    this->inputRecordType = src.inputRecordType;
     tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
@@ -99,7 +102,7 @@ OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name
 bool
 OOFEMTXTInputRecord :: hasChild(InputFieldType id, const std::string& name, bool optional){
     int count=this->giveGroupCount(id,name,optional);
-    if(count>1) OOFEM_ERROR("Number of '%s' children (%d) must be 0 or 1 (not %d)",name.c_str(),id,count);
+    if(count>1) OOFEM_ERROR("Number of '%s' children (%s) must be 0 or 1 (not %d)",id,name.c_str(),count);
     return count>0;
 }
 
@@ -145,6 +148,7 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
 void
 OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
 {
+    traceField(id,"int");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         auto ptr = scanInteger(tokenizer.giveToken(indx + 1), answer);
@@ -162,6 +166,7 @@ OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 {
+    traceField(id,"double");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         auto ptr = scanDouble(tokenizer.giveToken(indx + 1), answer);
@@ -179,6 +184,7 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 {
+    traceField(id,"bool");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int val;
@@ -198,6 +204,7 @@ OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
 {
+    traceField(id,"std::string");
     int indx = 0;
     if ( id ) {
         if ( ( indx = this->giveKeywordIndx(id) ) == 0 ) {
@@ -223,6 +230,7 @@ OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
+    traceField(id,"IntArray");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int size;
@@ -254,6 +262,7 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
+    traceField(id,"FloatArray");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int size;
@@ -285,6 +294,7 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
+    traceField(id,"FloatMatrix");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int nrows, ncols;
@@ -316,6 +326,7 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
+    traceField(id,"std::vector<std::string>");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int size;
@@ -339,6 +350,7 @@ OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFi
 void
 OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
+    traceField(id,"Dictionary");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
@@ -377,6 +389,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 {
+    traceField(id,"std::list<Range>");
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         int li, hi;
@@ -415,6 +428,7 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 void
 OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
 {
+    traceField(id,"ScalarFunction");
     const char *rec;
     int indx = this->giveKeywordIndx(id);
 
@@ -457,6 +471,7 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
 bool
 OOFEMTXTInputRecord :: hasField(InputFieldType id)
 {
+    traceField(id,"flag");
     //returns nonzero if id is present in source
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
@@ -555,7 +570,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 
     if ( wf ) {
-        OOFEM_WARNING( buff.str().c_str() );
+        OOFEM_WARNING("%s", buff.str().c_str() );
     }
 }
 
@@ -663,7 +678,20 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
     } else {
         return 0;
     }
-
 }
+
+#if _USE_TRACE_FIELDS
+void OOFEMTXTInputRecord::traceField(InputFieldType id, const char* type) {
+    if(!DataReader::TraceFields::active) return;
+    std::string tag;
+    /* synthetic tags for records which have no leading tag (only data) */
+    if(inputRecordType==DataReader::IR_outManRec) tag="~OutputManager~";
+    else if(inputRecordType==DataReader::IR_domainCompRec) tag="~DomainCompRec~";
+    else if(inputRecordType==DataReader::IR_mstepRec) tag="~MetaStep~";
+    else if(inputRecordType==DataReader::IR_unspecified) tag="?UNSPECIFIED?";
+    else this->giveRecordKeywordField(tag);
+    DataReader::TraceFields::write(tag+";"+id+";"+type);
+}
+#endif
 
 } // end namespace oofem

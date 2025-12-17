@@ -84,6 +84,7 @@
 #include <sstream>
 // For passing PETSc/SLEPc arguments.
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <memory>
 
@@ -154,8 +155,7 @@ int main(int argc, char *argv[])
 #endif
 
     // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
-
+    OOFEM_LOG_FORCED("%s",PRG_HEADER_SM);
 
     //
     // check for options
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 
     if ( outputFileFlag ) {
         oofem_logger.appendLogTo( outputFileName.str() );
-        OOFEM_LOG_FORCED(PRG_HEADER_SM);
+        OOFEM_LOG_FORCED("%s", PRG_HEADER_SM);
     } 
     if ( errOutputFileFlag ) {
         oofem_logger.appendErrorTo( errOutputFileName.str() );
@@ -319,6 +319,17 @@ int main(int argc, char *argv[])
     #endif
     {
         dr=std::make_unique<OOFEMTXTDataReader>(inputFileName.str());
+        if(const char* csv=getenv("OOFEM_TRACE_FIELDS_CSV")){
+            #ifdef _USE_TRACE_FIELDS
+                DataReader::TraceFields::active=true;
+                DataReader::TraceFields::out.open(csv,std::ios::app);
+                if(!DataReader::TraceFields::out.good()) OOFEM_ERROR("Unable to open '%s' (passed via OOFEM_TRACE_FIELDS_CSV)",csv);
+                OOFEM_LOG_FORCED("Tracing field access (OOFEM_TRACE_FIELDS_CSV=%s)\n.",csv);
+            #else
+                OOFEM_ERROR("Oofem must be compiled with -DUSE_TRACE_FIELDS so that OOFEM_TRACE_FIELDS_CSV='%s' passed is effective.",csv);
+            #endif
+
+        }
     }
 
     auto problem = :: InstanciateProblem(*dr, _processor, contextFlag, NULL, parallelFlag);

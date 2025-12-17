@@ -52,7 +52,7 @@ StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
     if ( StructuralMaterial :: giveSizeOfVoigtSymVector(m) != src.giveSize() ) {
-        OOFEM_ERROR( "The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
+        OOFEM_ERROR( "The source has size %d and a new MaterialMode %s has reduced size %d", (int)src.giveSize(), __MaterialModeToString(m), (int)StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
     }
 
     this->mode = m;
