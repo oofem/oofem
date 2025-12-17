@@ -723,7 +723,7 @@ if (USE_PYBIND_BINDINGS)
 endif()
 
 if(USE_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development.Module)
+    find_package(Python COMPONENTS Interpreter Development.Module Development.Embed)
     add_definitions(-D_PYTHON_EXTENSION)
     link_libraries(Python::Python) # embedded python
 endif()
