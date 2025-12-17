@@ -232,14 +232,16 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         // instanciate receiver
         this->initializeFrom(*irPtr);
 
-	// initialize the time step controller, its metasptes, and its associated time reuction strategy
-	timeStepController->initializeFrom( ir );
-	if ( timeStepController->giveNumberOfMetaSteps() == 0 ) {
-	  inputReaderFinish = false;
-	  timeStepController->instanciateDefaultMetaStep( ir );
-	} else {
-	  timeStepController->instanciateMetaSteps( dr );
-	}
+        // initialize the time step controller, its metasptes, and its associated time reduction strategy
+        timeStepController->initializeFrom( ir );
+        if ( timeStepController->giveNumberOfMetaSteps() == 0 ) {
+            inputReaderFinish = false;
+            timeStepController->instanciateDefaultMetaStep( ir );
+        } else {
+            // records for metasteps are under this one (no-op for text reader)
+            DataReader::RecordGuard guard(dr,&ir);
+            timeStepController->instanciateMetaSteps( dr );
+        }
 
         {
             /* This is somewhat messy since we want the XML input format NOT to nest modules under Analysis, keeping them under the top-level <oofem> tag instead */
@@ -305,8 +307,10 @@ EngngModel :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, _IFT_EngngModel_renumberFlag);
     profileOpt = false;
     IR_GIVE_OPTIONAL_FIELD(ir, profileOpt, _IFT_EngngModel_profileOpt);
-    nMetaSteps   = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, _IFT_EngngModel_nmsteps);
+
+    // get explicit nmsteps param (text), or size of the <Metasteps> sub-group (xml)
+    nMetaSteps = ir.giveReader()->giveGroupRecords(ir.ptr(),_IFT_EngngModel_nmsteps,"Metasteps",DataReader::IR_mstepRec,/*optional*/true).size();
+
     int _val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_nonLinFormulation);
     nonLinFormulation = ( fMode ) _val;
@@ -385,9 +389,10 @@ EngngModel :: instanciateMetaSteps(DataReader &dr)
     }
 
     // read problem domains
-    for ( int i = 1; i <= this->nMetaSteps; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
-        metaStepList[i-1].initializeFrom(ir);
+    auto mrecs=dr.giveGroupRecords("Metasteps",DataReader::IR_mstepRec,nMetaSteps);
+    int i=0;
+    for(InputRecord& mrec: mrecs){
+        metaStepList[i++].initializeFrom(mrec);
     }
 
     this->numberOfSteps = metaStepList.size();

@@ -53,8 +53,7 @@ void
 TimeStepController :: initializeFrom(InputRecord &ir)
 {
 
-  numberOfMetaSteps   = 0;
-  IR_GIVE_OPTIONAL_FIELD(ir, numberOfMetaSteps, _IFT_TimeStepController_nmsteps);
+  numberOfMetaSteps = ir.giveReader()->giveGroupRecords(ir.ptr(),_IFT_EngngModel_nmsteps,"Metasteps",DataReader::IR_mstepRec,/*optional*/true).size();
   IR_GIVE_OPTIONAL_FIELD(ir, this->alpha, _IFT_TimeStepController_alpha);
 
 }
@@ -106,7 +105,7 @@ TimeStepController :: giveNextStep()
 int
 TimeStepController :: instanciateMetaSteps(DataReader &dr)
 {
-    double totalNumberOfSteps;
+    int totalNumberOfSteps=0;
     // create meta steps
     metaStepList.clear();
     metaStepList.reserve(this->numberOfMetaSteps);
@@ -116,10 +115,12 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
     }
 
     // read problem domains
-    for ( int i = 1; i <= this->numberOfMetaSteps; i++ ) {
-        auto &ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
-        metaStepList[i-1].initializeFrom(ir);
-	totalNumberOfSteps += metaStepList[i-1].giveNumberOfSteps();
+    auto mrecs=dr.giveGroupRecords("Metasteps",DataReader::IR_mstepRec,this->numberOfMetaSteps);
+    int i=0;
+    for(InputRecord& mrec: mrecs){
+        metaStepList[i].initializeFrom(mrec);
+        totalNumberOfSteps += metaStepList[i].giveNumberOfSteps();
+        i++;
     }
 
     //this->numberOfSteps = metaStepList.size();
