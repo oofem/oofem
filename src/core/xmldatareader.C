@@ -65,7 +65,7 @@ namespace oofem {
         }
         // trasverse just to get line breaks
         std::ifstream i(xml,std::ifstream::in|std::ios::binary);
-        if(!i.is_open()) OOFEM_ERROR("Error opening %s: %s",std::strerror(errno));
+        if(!i.is_open()) OOFEM_ERROR("Error opening %s: %s",xml.c_str(),std::strerror(errno));
         std::list<size_t> br;
         size_t pos=0;
         while(i.good()){ char c=i.get(); pos++; if(c=='\n') br.push_back(pos); }
@@ -80,12 +80,12 @@ namespace oofem {
         pugi::xml_parse_result result=doc.load_file(xml.c_str());
         if(!result){
             auto [line,col]=offset2lc(nl,result.offset);
-            OOFEM_ERROR("Error parsing %s:%d:%d: %s",xml.c_str(),line,col,result.description());
+            OOFEM_ERROR("Error parsing %s:%ld:%ld: %s",xml.c_str(),line,col,result.description());
         }
         newlines[doc]=std::move(nl);
         xmlFiles[doc]=xml;
         size_t nChildren=std::distance(doc.begin(),doc.end());
-        if(nChildren!=1) OOFEM_ERROR("Error reading %s: must have exactly 1 top-level tag (not %d)",xml.c_str(),nChildren);
+        if(nChildren!=1) OOFEM_ERROR("Error reading %s: must have exactly 1 top-level tag (not %ld)",xml.c_str(),nChildren);
         _XML_DEBUG(xml<<": "<<" parsing done, root is '"<<doc.first_child().name()<<"'");
         return doc;
     }
@@ -211,7 +211,7 @@ namespace oofem {
     void XMLDataReader::finish(){
         leaveGroup("oofem");
         // doc.print(std::cerr,"  ");
-        if(stack.size()>1) OOFEM_WARNING("XML stack not popped (%d entries)",stack.size());
+        if(stack.size()>1) OOFEM_WARNING("XML stack not popped (%ld entries)",stack.size());
         pugi::xml_node n;
         for(const auto& [xml,doc]: docs){
             while((n=doc.find_node([](const pugi::xml_node& n)->bool{ return !XMLInputRecord::node_seen_get(n); }))){
@@ -220,7 +220,7 @@ namespace oofem {
                 std::ostringstream oss;
                 oss<<"Unprocessed XML fragment "<<loc(n)<<"\n";
                 n.print(oss,"  ");
-                OOFEM_WARNING(oss.str().c_str());
+                OOFEM_WARNING("%s",oss.str().c_str());
                 n.parent().remove_child(n);
             }
         }

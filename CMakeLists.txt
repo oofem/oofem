@@ -176,6 +176,7 @@ option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
 OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
+OPTION (USE_TRACE_FIELDS "Allow tracing field access by setting OOFEM_TRACE_FIELDS_CSV env var" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -339,6 +340,10 @@ if (USE_XML)
     add_definitions(-D_USE_XML)
     find_package(pugixml REQUIRED)
     link_libraries(pugixml::pugixml)
+endif()
+
+if (USE_TRACE_FIELDS)
+    add_definitions(-D_USE_TRACE_FIELDS)
 endif()
 
 
@@ -723,7 +728,7 @@ if (USE_PYBIND_BINDINGS)
 endif()
 
 if(USE_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development.Module)
+    find_package(Python COMPONENTS Interpreter Development.Module Development.Embed)
     add_definitions(-D_PYTHON_EXTENSION)
     link_libraries(Python::Python) # embedded python
 endif()

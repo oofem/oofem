@@ -80,9 +80,9 @@ namespace oofem {
         T val;
         const char* last=s.data()+s.size();
         auto [p,e]=std::from_chars(s.data(),last,val);
-        if(p!=last) OOFEM_ERROR("%s: error parsing '%s' as %s (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
+        if(p!=last) OOFEM_ERROR("%s: error parsing '%s' as typeid '%s' (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
         if(e==std::errc()) return val;
-        OOFEM_ERROR("%s: error parsing '%s' as %s (std::from_chars error).",where().c_str(),s.c_str(),typeid(T).name());
+        OOFEM_ERROR("%s: error parsing '%s' as typeid '%s' (std::from_chars error).",where().c_str(),s.c_str(),typeid(T).name());
     }
 
     template<>
@@ -133,9 +133,9 @@ namespace oofem {
             );
         };
         size_t size() { return toks.size(); }
-        void assertSize(size_t req){ if(size()!=req) OOFEM_ERROR("%s: attribute %s: length mismatch (%d items, %d required)",loc().c_str(),attr.c_str(),size(),req); }
+        void assertSize(size_t req){ if(size()!=req) OOFEM_ERROR("%s: attribute %s: length mismatch (%d items, %d required)",loc().c_str(),attr.c_str(),(int)size(),(int)req); }
         template<typename T> T as(size_t ix){
-            if(ix>size()) OOFEM_ERROR("%s: attribute %s: invalid index %d in sequence of length %d: %s",loc().c_str(),attr.c_str(),ix,size(),str.c_str());
+            if(ix>size()) OOFEM_ERROR("%s: attribute %s: invalid index %d in sequence of length %d: %s",loc().c_str(),attr.c_str(),(int)ix,(int)size(),str.c_str());
             const std::string& s(toks[ix]);
             return string_to<T>(s,[this,ix](){ return loc()+": attribute "+attr+" ["+std::to_string(ix)+"]"; });
         }

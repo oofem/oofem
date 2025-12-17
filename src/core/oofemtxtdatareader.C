@@ -101,6 +101,7 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     if ( this->it == this->recordList.end() ) {
         OOFEM_ERROR("Out of input records, file contents must be missing");
     }
+    this->it->setInputRecordType(typeId);
     return *this->it++;
 }
 
