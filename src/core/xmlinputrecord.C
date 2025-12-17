@@ -101,7 +101,7 @@ namespace oofem {
     bool string_to(const std::string& s, std::function<std::string()> where){
         if(s=="0" || s=="n" || s=="N" || s=="no"  || s=="No"  || s=="NO" ){ return false; }
         if(s=="1" || s=="y" || s=="Y" || s=="yes" || s=="Yes" || s=="YES"){ return true;  }
-        OOFEM_ERROR("%s: error parsing '%s' as bool (alllowed value: 0, n, N, no, No, NO; 1, y, Y, yes, Yes, YES).")
+        OOFEM_ERROR("%s: error parsing '%s' as bool (alllowed values: 0, n, N, no, No, NO; 1, y, Y, yes, Yes, YES).",where().c_str(),s.c_str())
     }
 
 
@@ -244,7 +244,7 @@ namespace oofem {
         std::ostringstream oss; oss<<loc();
         if(nNotseen){ oss<<"\n   attribute"<<(nNotseen>1?"s":"")<<" ignored:\n      "; xNotseen.print(oss); }
         if(nNotempty){ oss<<"\n   attribute"<<(nNotempty>1?"s":"")<<" with ignored non-empty value:\n      "; xNotempty.print(oss); }
-        OOFEM_WARNING(oss.str().c_str());
+        OOFEM_WARNING("%s",oss.str().c_str());
     }
     std::string XMLInputRecord::giveRecordAsString() const {
         pugi::xml_document tmp;
@@ -278,7 +278,7 @@ namespace oofem {
         for(int row=0; row<rows; row++){
             Tokens tcols(id,trows.toks[row],[this,trows](){ return this->loc(trows.node); },"\\s+");
             if(row==0){ answer.resize(rows,tcols.size()); }
-            else if((int)answer.cols()!=(int)tcols.size()) OOFEM_ERROR("%s: row %d has inconsistent number of columns (%d != %d)",loc().c_str(),rows,answer.cols(),tcols.size());
+            else if((int)answer.cols()!=(int)tcols.size()) OOFEM_ERROR("%s: row %d has inconsistent number of columns (%d != %d)",loc().c_str(),rows,(int)answer.cols(),(int)tcols.size());
             for(int col=0; col<answer.cols(); col++){ answer(row,col)=tcols.as<double>(col); }
         }
         _XML_DEBUG(tt.loc()<<": parsed attribute "<<id<<" as "<<answer);
@@ -324,7 +324,7 @@ namespace oofem {
         Tokens items(id,this,"\\s*;\\s*");
         for(const std::string& tok: items.toks){
             Tokens kv(id,tok,[this,items](){ return this->loc(items.node); },/*sep_regex*/"\\s+");
-            if(kv.size()!=2) OOFEM_ERROR("%s: dictionary items must have 2 whitespace-separated fields (%d tokens found)",loc(n).c_str(),kv.size());
+            if(kv.size()!=2) OOFEM_ERROR("%s: dictionary items must have 2 whitespace-separated fields (%d tokens found)",loc(n).c_str(),(int)kv.size());
             int key;
             if(std::regex_match(kv.toks[0],std::regex("[0-9]+"))){ key=std::atoi(kv.toks[0].c_str()); }
             else if(kv.toks[0].size()==1){ key=(char)kv.toks[0][0]; }

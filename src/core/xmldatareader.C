@@ -203,7 +203,7 @@ namespace oofem {
         // if an exception is being propagated, and enterRecord/leaveRecord were not used via RAII-guard (RecordGuard),
         // our would abort immediately (with misleading error message) and the exception would never make it to the handler
         if(!std::uncaught_exceptions()){
-            if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %x, request to leave %s @ %x",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
+            if(r->node!=stack.back().parent) OOFEM_ERROR("Error reading %s: %s: bottom-most node is %s @ %p, request to leave %s @ %p",loc().c_str(),giveStackPath().c_str(),stack.back().parent.name(),(void*)&(stack.back().parent),r->node.name(),(void*)&(r->node));
         }
         stack.pop_back();
     }
