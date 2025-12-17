@@ -71,8 +71,10 @@ namespace oofem {
         while(i.good()){ char c=i.get(); pos++; if(c=='\n') br.push_back(pos); }
         std::vector<size_t> nl;
         nl.reserve(br.size());
-        if(br.size()==std::numeric_limits<size_t>().max()) abort(); // workaround GCC warning: iteration 2305843009213693952 invokes undefined behavior [-Waggressive-loop-optimizations]
-        nl.assign(br.begin(),br.end());
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Waggressive-loop-optimizations"
+            nl.assign(br.begin(),br.end());
+        #pragma GCC diagnostic pop
         _XML_DEBUG(xml<<": "<< nl.size()<<" newlines found, about to parse the XML...");
         docs[parent]=pugi::xml_document();
         if(parent) XMLInputRecord::node_seen_set(parent,true);

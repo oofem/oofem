@@ -3,7 +3,7 @@
   <Description>Patch test of 1D spring element along x axis</Description>
   <Analysis type="StaticStructural" nsteps="1" />
   <Domain domain="1dtruss">
-    <OutputManager tstep_all="1" dofman_all="1" element_all="1" />
+    <OutputManager tstep_all="" dofman_all="" element_all="" />
     <Nodes>
       <Node id="1" coords="0. 0. 0."  />
       <Node id="2" coords="0. 0. 0."/>
