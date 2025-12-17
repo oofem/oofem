@@ -209,7 +209,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
             answer.add(vec);
 	  }
         } else {
-            OOFEM_ERROR("Unsupported body load: %d", load);
+            OOFEM_ERROR("Unsupported body load: %d", i);
         }
     }
 }
