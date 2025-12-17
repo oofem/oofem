@@ -33,6 +33,7 @@
  */
 
 #include "inputrecord.h"
+#include "datareader.h"
 #include <iomanip>
 
 namespace oofem {
@@ -101,6 +102,26 @@ std::string InputRecord::error_msg_with_hints(const std::string& val, const std:
     oss<<".\nPossible values:\n"<<oss2.str();
     return oss.str();
 }
+
+
+#ifdef _USE_TRACE_FIELDS
+    void InputRecord::traceEnum(const std::string& name, const std::map<int,std::vector<std::string>>& val2names){
+        if(!DataReader::TraceFields::active) return;
+        std::ostringstream rec;
+        // write as tag;id;json
+        rec<<"~Enum~;"<<name<<";{";
+        int i=0;
+        for(const auto& kvv: val2names){
+            rec<<(i++==0?'{':',')<<kvv.first<<':';
+            int j=0;
+            for(const auto& v: kvv.second) rec<<(j++==0?'[':',')<<v;
+            rec<<']';
+        }
+        rec<<'}';
+        DataReader::TraceFields::write(rec.str());
+    }
+#endif
+
 
 
 InputRecord :: InputRecord(DataReader* r){

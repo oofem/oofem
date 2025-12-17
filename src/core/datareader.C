@@ -98,6 +98,7 @@ DataReader::GroupRecords::GroupRecords( DataReader &dr_, const std::string &grou
     bool DataReader::TraceFields::active=false;
     std::ofstream DataReader::TraceFields::out;
     void DataReader::TraceFields::write(const std::string& s){
+        if(!DataReader::TraceFields::active) return;
         size_t hash=std::hash<std::string>{}(s);
         static std::set<size_t> written;
         if(written.count(hash)>0) return;

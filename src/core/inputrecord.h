@@ -153,6 +153,9 @@ public:
         typedef EnumTraits<AnEnum> Traits;
         std::string s;
         giveField(s,id);
+        #ifdef _USE_TRACE_FIELDS
+            InputRecord::traceEnum(Traits::enum_name,Traits::all_values_to_names());
+        #endif
         if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
             int val=std::atoi(s.c_str());
             auto v=Traits::value(val);
@@ -164,6 +167,9 @@ public:
             answer=v.value();
         }
     }
+    #ifdef _USE_TRACE_FIELDS
+        static void traceEnum(const std::string& name, const std::map<int,std::vector<std::string>>& val2names);
+    #endif
     /**@name Optional field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
