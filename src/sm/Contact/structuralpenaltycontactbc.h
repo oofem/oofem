@@ -71,7 +71,8 @@ class FloatMatrix;
  *
  * Tasks:
  * calculating contact contributions to the stiffness matrix and to the force vector
-
+ * Currently, only normal contact is working
+ * Frictional contact is under development
  */
 
 

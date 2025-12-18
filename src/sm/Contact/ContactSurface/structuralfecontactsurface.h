@@ -46,6 +46,14 @@
 
 namespace oofem {
 class StructuralFEContactSurface : public FEContactSurface
+
+/**
+ * Structural Contact Surface made of Finite Elements
+ *
+ * Tasks:
+ * keep the set of contact elements
+ */
+
 {
 protected:
 int sce_set;

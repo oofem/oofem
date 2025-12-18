@@ -48,7 +48,8 @@
 namespace oofem {
 
 /**
- * General structural contact element.
+ * Structural contact elements.
+ * 
  */
 class StructuralContactElement : public ContactElement
 {

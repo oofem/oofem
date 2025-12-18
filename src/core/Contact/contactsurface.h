@@ -40,19 +40,15 @@
 
 namespace oofem {
 class IntArray;
-
 /**
- * Abstract base class for all contact finite elements. Derived classes should be  base
- * classes for specific analysis type (for example base class for structural analysis,
- * thermal analysis or magnetostatics one). These derived classes then declare
- * analysis-specific part of interface and they provide default implementation
- * for these methods.
- * This abstract class declares (and possibly implements) general data and methods
- * common to all element types. General methods for obtaining characteristic vectors,
- * matrices and values are introduced and should be used instead of calling directly
- * specific member functions (these must be overloaded by derived analysis-specific
- * classes in order to invoke proper method according to type of component requested).
+ * @brief Abstract base class for all contact surfaces.
+ *
+ * This class defines a common interface for all types of contact surfaces.
+ * A contact surface may be composed of finite elements (see FEContactSurface),
+ * but it may also represent rigid contact surfaces or other generalized
+ * surface descriptions used in contact mechanics formulations.
  */
+
 class OOFEM_EXPORT ContactSurface : public FEMComponent
 {
 protected:

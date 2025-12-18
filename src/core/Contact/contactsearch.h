@@ -44,19 +44,26 @@ class ContactPair;
 class FEContactSurface;
 class Domain;
 class TimeStep;
-/**
- * Abstract base class for all contact finite elements. Derived classes should be  base
- * classes for specific analysis type (for example base class for structural analysis,
- * thermal analysis or magnetostatics one). These derived classes then declare
- * analysis-specific part of interface and they provide default implementation
- * for these methods.
- * This abstract class declares (and possibly implements) general data and methods
- * common to all element types. General methods for obtaining characteristic vectors,
- * matrices and values are introduced and should be used instead of calling directly
- * specific member functions (these must be overloaded by derived analysis-specific
- * classes in order to invoke proper method according to type of component requested).
- */
 
+/**
+ * @brief Abstract base class for contact search algorithms.
+ *
+ * The ContactSearch class defines a common interface for algorithms responsible
+ * for detecting potential contact interactions between contact surfaces.
+ * It provides the functionality required to identify candidate contact pairs
+ * based on geometric proximity, bounding-box intersection, or other search
+ * strategies.
+ *
+ * Concrete implementations may employ different search techniques, such as
+ * brute-force search, spatial partitioning, hierarchical bounding volumes,
+ * or grid-based methods. The output of a contact search is typically a set of
+ * potential contact pairs that can be further processed by contact enforcement
+ * algorithms.
+ *
+ * This class focuses solely on contact detection and does not prescribe any
+ * particular contact formulation or constraint enforcement method.
+ */
+  
 class ContactSearchAlgorithm
 {
 protected:
@@ -66,9 +73,30 @@ protected:
 public:
   ContactSearchAlgorithm(Domain *d) {domain = d;}
   ~ContactSearchAlgorithm(){;}
+  /**
+   * @brief Creates initial contact pairs based on the current configuration.
+   *
+   * Performs broad-phase (and possibly narrow-phase) detection to produce a set
+   * of candidate contact pairs used by the contact boundary condition.
+   */
   virtual void createContactPairs() = 0;
+  /**
+   * @brief Updates previously created contact pairs for the current time step.
+   *
+   * Typical responsibilities include re-projection, pair filtering, and updating
+   * kinematic measures (gap, normals, tangents) as the configuration changes.
+   *
+   * @param tStep Current time step.
+   */
   virtual void updateContactPairs(TimeStep *tStep) = 0;
+  /**
+   * @brief Returns the internally stored list of contact pairs.
+   *
+   */
   std::vector<std::unique_ptr<ContactPair>>& getContactPairs() { return contactPairs; }
+  /**
+   * @brief Returns the internally stored list of contact pairs (const overload).
+   */
   const std::vector<std::unique_ptr<ContactPair>>& getContactPairs() const { return contactPairs; }
 };
 
