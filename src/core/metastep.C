@@ -64,6 +64,9 @@ MetaStep :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_MetaStep_deltaT);
     prescribedTimes.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, finalTime, _IFT_MetaStep_finalT);
+    // compute minDeltaT as min of deltaT and mindeltaT form timeStepReudctionStrategy
+    minDeltaT = std::min(deltaT, timeStepReductionStrategy->giveMinDeltaT());
+    
     if ( finalTime < 0 ) {
       OOFEM_ERROR("Final time of the analysis can't be negative");
     } else if(finalTime == 0) {

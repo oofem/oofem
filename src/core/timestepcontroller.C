@@ -124,9 +124,6 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
         metaStepList[i-1].initializeFrom(ir);
 	totalNumberOfSteps += metaStepList[i-1].giveNumberOfSteps();
     }
-
-    //this->numberOfSteps = metaStepList.size();
-    //this->recomputeFinalTime(totalNumberOfSteps);
     return 1;
 }
 

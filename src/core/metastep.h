@@ -99,8 +99,6 @@ protected:
     std :: unique_ptr<TimeStepReductionStrategy> timeStepReductionStrategy;
     /// Minimal value of the time step
     double minDeltaT;
-    /// Maximal value of the time step
-    double maxDeltaT;
     /// final time of the previous meta step
     double previousMetaStepFinalTime = 0;
     
@@ -140,15 +138,15 @@ public:
     int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
-    /// Returns true if last step
-    bool isLastStep(TimeStep *tStep) { return ( tStep->giveTargetTime() == finalTime); }
-    
+    /// Return maximal number of time step reductions
     int giveNumberOfMaxTimeStepReductions(){return timeStepReductionStrategy->giveNumberOfMaxTimeStepReductions();}
     /// Returns final time of the meta step
     double giveFinalTime(){return finalTime;}
     void setFinalTime(double ft){finalTime = ft;}
     void recomputeFinalTime(int nSteps) {finalTime =  nSteps * deltaT;}
     void setPreviousMetaStepFinalTime(double ft){previousMetaStepFinalTime = ft;}
+
+
     
     /** 
      * Returns time function for time step increment.
@@ -161,8 +159,14 @@ public:
     /// Returns the time step length.
     double giveDeltaT(){return this->deltaT;}
     double giveDeltaT(int n, std::unique_ptr<TimeStep> &previousStep);
+   
     /// Set the time step length.
     void setDeltaT(double dT){this->deltaT = dT;}
+
+    
+    /// Return the minimal time step length set be the user
+    double giveMinDeltaT(){return this->minDeltaT;}
+    
     /**
      * Returns time for time step number n (array discreteTimes must be specified)
      */
