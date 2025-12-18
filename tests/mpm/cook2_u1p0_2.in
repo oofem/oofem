@@ -9,7 +9,7 @@ Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # t
 Variable name "p" interpolation "feiconst"  type 0 quantity 3 size 1 dofs 1 11 # pressure 
 Variable name "dp" interpolation "feiconst" type 0 quantity 3 size 1 dofs 1 11 # test function
 BTSigmaTerm 1 variable "u"  testvariable "w" mmode 7 lhsmatmode 29 rhsmatmode 30
-BTamNTerm 2 variable "p" testvariable "w" mmode 7 atype 28 uvmt 1
+BTamNTerm 2 variable "p" testvariable "w" mmode 7 atype 28
 NTamTBTerm 3 variable "u" testvariable "dp" mmode 7 atype 28 uvmt 1
 NTcN 4 variable "p" testvariable "dp" mmode 7 ctype 27 uvmt 1
 NTfTerm 5 variable "u" testvariable "w" mmode 6 flux 2 0. 6.25
