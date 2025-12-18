@@ -35,6 +35,7 @@
 #include "inputrecord.h"
 #include "datareader.h"
 #include <iomanip>
+#include <set>
 
 namespace oofem {
 
@@ -105,20 +106,31 @@ std::string InputRecord::error_msg_with_hints(const std::string& val, const std:
 
 
 #ifdef _USE_TRACE_FIELDS
+    bool InputRecord::TraceFields::active=false;
+    std::ofstream InputRecord::TraceFields::out;
+    void InputRecord::TraceFields::write(const std::string& s){
+        if(!InputRecord::TraceFields::active) return;
+        size_t hash=std::hash<std::string>{}(s);
+        static std::set<size_t> written;
+        if(written.count(hash)>0) return;
+        written.insert(hash);
+        InputRecord::TraceFields::out<<s<<std::endl;
+    }
+
     void InputRecord::traceEnum(const std::string& name, const std::map<int,std::vector<std::string>>& val2names){
-        if(!DataReader::TraceFields::active) return;
+        if(!InputRecord::TraceFields::active) return;
         std::ostringstream rec;
         // write as tag;id;json
-        rec<<"~Enum~;"<<name<<";{";
+        rec<<"~Enum~;"<<name<<";";
         int i=0;
         for(const auto& kvv: val2names){
-            rec<<(i++==0?'{':',')<<kvv.first<<':';
+            rec<<(i++==0?'{':',')<<'"'<<kvv.first<<"\":";
             int j=0;
-            for(const auto& v: kvv.second) rec<<(j++==0?'[':',')<<v;
+            for(const auto& v: kvv.second) rec<<(j++==0?'[':',')<<'"'<<v<<'"';
             rec<<']';
         }
         rec<<'}';
-        DataReader::TraceFields::write(rec.str());
+        InputRecord::TraceFields::write(rec.str());
     }
 #endif
 

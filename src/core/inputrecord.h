@@ -98,6 +98,7 @@ class OOFEM_EXPORT InputRecord: public std::enable_shared_from_this<InputRecord>
 {
     DataReader* reader = nullptr;
 public:
+
     InputRecord() {}
     InputRecord(DataReader* reader_);
     /// Destructor
@@ -154,7 +155,10 @@ public:
         std::string s;
         giveField(s,id);
         #ifdef _USE_TRACE_FIELDS
-            InputRecord::traceEnum(Traits::enum_name,Traits::all_values_to_names());
+            if(InputRecord::TraceFields::active){
+                traceEnum(Traits::enum_name,Traits::all_values_to_names());
+                traceField(id,(std::string("enum:")+Traits::enum_name).c_str());
+            }
         #endif
         if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
             int val=std::atoi(s.c_str());
@@ -168,7 +172,16 @@ public:
         }
     }
     #ifdef _USE_TRACE_FIELDS
+        // field access tracing variables, set at startup from main()
+        struct TraceFields {
+            static bool active;
+            static std::ofstream out;
+            static void write(const std::string& s);
+        };
         static void traceEnum(const std::string& name, const std::map<int,std::vector<std::string>>& val2names);
+        virtual void traceField(InputFieldType id, const char* type) {};
+    #else
+        void traceField(InputFieldType id, const char* type) const { };
     #endif
     /**@name Optional field extraction methods
      * Reads the field value identified by keyword

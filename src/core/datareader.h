@@ -194,16 +194,6 @@ public:
     InputRecord *giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
 
 
-public:
-    #if _USE_TRACE_FIELDS
-        // field access tracing variables, set at startup from main()
-        struct TraceFields {
-            static bool active;
-            static std::ofstream out;
-            static void write(const std::string& s);
-        };
-    #endif
-
 };
 } // end namespace oofem
 #endif // datareader_h
