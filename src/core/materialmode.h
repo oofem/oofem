@@ -35,10 +35,12 @@
 #ifndef materialmode_h
 #define materialmode_h
 
-#include "enumitem.h"
+#include "enum.h"
 
 namespace oofem {
-#define MaterialMode_DEF \
+#define ENUM_TYPE MaterialMode
+#define ENUM_PREFIX "_"
+#define ENUM_DEF \
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
     ENUM_ITEM(_3dMatGrad)  /* 3d model with gradient of internal variable */ \
@@ -90,18 +92,7 @@ namespace oofem {
     ENUM_ITEM(_3dMTLattice) \
     ENUM_ITEM(_Warping) \
 
-/**
- * Type representing material mode of integration point.
- */
-enum MaterialMode {
-    MaterialMode_DEF
-};
+#include "enum-impl.h"
 
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-
-const char *__MaterialModeToString(MaterialMode _value);
 } // end namespace oofem
 #endif // materialmode_h

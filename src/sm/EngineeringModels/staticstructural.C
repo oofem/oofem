@@ -117,7 +117,6 @@ StaticStructural :: initializeFrom(InputRecord &ir)
     } else {
         this->deltaT = 1.0;
         IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StaticStructural_deltat);
-        IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     }
 
     this->solverType = "nrsolver";
@@ -167,14 +166,6 @@ StaticStructural :: updateAttributes(MetaStep *mStep)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     prescribedTimes.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, prescribedTimes, _IFT_StaticStructural_prescribedTimes);
-    if ( prescribedTimes.giveSize() > 0 ) {
-        numberOfSteps = prescribedTimes.giveSize();
-    } else {
-        this->deltaT = 1.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StaticStructural_deltat);
-        IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
-    }
 
     std :: string s = "nrsolver";
     IR_GIVE_OPTIONAL_FIELD(ir, s, _IFT_StaticStructural_solvertype);
@@ -196,25 +187,6 @@ StaticStructural :: updateAttributes(MetaStep *mStep)
     EngngModel :: updateAttributes(mStep1);
 }
 
-
-TimeStep *StaticStructural :: giveNextStep()
-{
-    if ( !currentStep ) {
-        // first step -> generate initial step
-        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
-        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0);
-    }
-    previousStep = std :: move(currentStep);
-    double dt;
-    if ( this->prescribedTimes.giveSize() > 0 ) {
-        dt = this->prescribedTimes.at(previousStep->giveNumber() + 1) - previousStep->giveTargetTime();
-    } else {
-        dt = this->deltaT;
-    }
-    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
-
-    return currentStep.get();
-}
 
 
 double StaticStructural :: giveEndOfTimeOfInterest()
@@ -258,6 +230,8 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
     // contact
     this->initForNewIteration(this->giveDomain(1),tStep,0, {});
+    //
+    this->solution_old = this->solution;
     //
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
@@ -346,7 +320,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     }
 
     if ( this->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("\nStaticStructural :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
+      OOFEM_LOG_INFO("\nStaticStructural :: solveYourselfAt - Solving Metastep %d,  Step %d, Starting Time %e, Time Increment %e, Final Time %e,  (neq = %d)\n",tStep->giveMetaStepNumber(), tStep->giveNumber(), tStep->giveIntrinsicTime() - tStep->giveTimeIncrement(), tStep->giveTimeIncrement(), tStep->giveIntrinsicTime(), neq);
     }
 
     int currentIterations;
@@ -396,6 +370,14 @@ void StaticStructural :: terminate(TimeStep *tStep)
     }
 }
 
+
+void StaticStructural :: restartYourself(TimeStep *tStep)
+{
+    this->solution = this->solution_old;
+    this->field->update(VM_Total, tStep, this->solution_old, EModelDefaultEquationNumbering());
+}
+
+  
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     if (mode == VM_Residual) {

@@ -1147,7 +1147,7 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
     for ( std::size_t  i = 1; i < N; i++ ) {
         double piv = tmp.at(i, i);
         if ( std::abs(piv) <= zeropiv ) {
-            OOFEM_ERROR("pivot (%d,%d) to close to small", i, i);
+            OOFEM_ERROR("pivot (%d,%d) to close to small", (int)i, (int)i);
         }
         for ( std::size_t j = i + 1; j <= N; j++ ) {
             double linkomb = tmp.at(j, i) / tmp.at(i, i);

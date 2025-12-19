@@ -176,6 +176,7 @@ option (USE_MPM "Enable experimental multiphysics module" OFF)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
 OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
+OPTION (USE_TRACE_FIELDS "Allow tracing field access by setting OOFEM_TRACE_FIELDS_CSV env var" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -339,6 +340,10 @@ if (USE_XML)
     add_definitions(-D_USE_XML)
     find_package(pugixml REQUIRED)
     link_libraries(pugixml::pugixml)
+endif()
+
+if (USE_TRACE_FIELDS)
+    add_definitions(-D_USE_TRACE_FIELDS)
 endif()
 
 
@@ -658,12 +663,6 @@ else()
 endif()
 
 
-if(USE_PYTHON_EXTENSION)
-    add_definitions(-D_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
-endif ()
-
 if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
     MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
 endif()
@@ -672,8 +671,8 @@ if (USE_PYBIND_BINDINGS)
     add_definitions(-D_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
+    find_package(Python COMPONENTS Interpreter Development.Module)
+    link_libraries(Python::Module)
     if(USE_NANOBIND)
         if(0)
             add_subdirectory(extern/nanobind)
@@ -729,9 +728,9 @@ if (USE_PYBIND_BINDINGS)
 endif()
 
 if(USE_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
+    find_package(Python COMPONENTS Interpreter Development.Module Development.Embed)
     add_definitions(-D_PYTHON_EXTENSION)
-    link_libraries(Python::Python)
+    link_libraries(Python::Python) # embedded python
 endif()
 
 #######################################################################
@@ -977,7 +976,7 @@ include (CTest)
 
 if(USE_OOFEM_EXE)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
-set (oofem_cmd  $<TARGET_FILE:oofem>)
+set (oofem_cmd $<TARGET_FILE:oofem> -Werror)
 file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)

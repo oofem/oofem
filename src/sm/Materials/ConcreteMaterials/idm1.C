@@ -934,7 +934,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
             OOFEM_WARNING("damage parameter is %f, which is greater than 1, snap-back problems", omega);
             omega = maxOmega;
             if ( checkSnapBack ) {
-                OOFEM_ERROR("");
+                OOFEM_ERROR("x");
             }
         }
 
@@ -942,7 +942,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, Gau
             OOFEM_WARNING("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
             omega = 0.0;
             if ( checkSnapBack ) {
-                OOFEM_ERROR("");
+                OOFEM_ERROR("x");
             }
         }
     }
@@ -1304,17 +1304,17 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
             OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
             if ( checkSnapBack ) {
-                OOFEM_ERROR("");
+                OOFEM_ERROR("x");
             }
         } else if ( wf == 0. && e0 >= ef ) {
             OOFEM_WARNING( "Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR("");
+                OOFEM_ERROR("x");
             }
         } else if ( ef == 0. && e0 * le >= wf ) {
             OOFEM_WARNING( "Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR("");
+                OOFEM_ERROR("x");
             }
         }
     }

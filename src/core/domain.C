@@ -550,7 +550,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated nodes & sides ", dofManagerList.size())
+        VERBOSE_PRINT0("Instantiated nodes & sides ", (int)dofManagerList.size())
     #  endif
 
     BuildDofManPlaceInArrayMap();

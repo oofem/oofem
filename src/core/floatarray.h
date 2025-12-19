@@ -228,9 +228,9 @@ public:
     void checkBounds(Index i) const
     {
         if ( i <= 0 ) {
-            OOFEM_ERROR("array error on index : %d <= 0", i);
+            OOFEM_ERROR("array error on index : %d <= 0", (int)i);
         } else if ( i > size()) {
-            OOFEM_ERROR("array error on index : %d > %d", i, this->size());
+            OOFEM_ERROR("array error on index : %d > %d", (int)i, (int)this->size());
         }
     }
     /**

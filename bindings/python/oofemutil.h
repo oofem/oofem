@@ -155,7 +155,7 @@ oofem::OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(py::kwargs k
 }
 
 
-#define OOFEM_RAISE(msg) { oofem::OOFEM_LOG_ERROR(msg); throw std::runtime_error(msg); }
+#define OOFEM_RAISE(msg) { oofem::OOFEM_LOG_ERROR("%s",msg); throw std::runtime_error(msg); }
 
 
 /*****************************************************
@@ -186,8 +186,8 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
         OOFEM_RAISE("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
-        engngm->instanciateDefaultMetaStep(ir);
-        //engngm->giveTimeStepController()->instanciateDefaultMetaStep(ir);
+      //engngm->instanciateDefaultMetaStep(ir);
+        engngm->giveTimeStepController()->instanciateDefaultMetaStep(ir);
     }
 
     engngm->Instanciate_init();

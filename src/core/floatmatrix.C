@@ -162,18 +162,18 @@ void FloatMatrix :: checkBounds(Index i, Index j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR("matrix error on rows : %d < 0", i);
+        OOFEM_ERROR("matrix error on rows : %d < 0", (int)i);
     }
     if ( j <= 0 ) {
-        OOFEM_ERROR("matrix error on columns : %d < 0", j);
+        OOFEM_ERROR("matrix error on columns : %d < 0", (int)j);
     }
 
     if ( i > rows() ) {
-        OOFEM_ERROR("matrix error on rows : %d > %d", i, rows());
+        OOFEM_ERROR("matrix error on rows : %d > %d", (int)i, (int)rows());
     }
 
     if ( j > cols() ) {
-        OOFEM_ERROR("matrix error on columns : %d > %d", j, cols());
+        OOFEM_ERROR("matrix error on columns : %d > %d", (int)j, (int)cols());
     }
 }
 
@@ -327,7 +327,7 @@ void FloatMatrix::add(double s, const FloatMatrix& a){ if(!a.isNotEmpty()) retur
 void FloatMatrix :: subtract(const FloatMatrix &a)   { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=-a; return; }  *this-=a;   }
 FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed){ if(transposed) return vector.transpose(); return vector; }
 void FloatMatrix :: zero() { this->setZero(); }
-void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
+void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %ld by %ld matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
 double FloatMatrix :: giveDeterminant() const { return this->determinant(); }
 void FloatMatrix :: beDiagonal(const FloatArray &diag) { *this=diag.asDiagonal().toDenseMatrix(); }
 double FloatMatrix :: giveTrace() const { return this->trace(); }

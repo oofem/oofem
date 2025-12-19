@@ -48,7 +48,7 @@ frcfcm 1 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 
 #
 frcfcm 2 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 fDamType 0 FiberType 2 crackSpacing 0.025
 #
-frcfcm 3 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 FiberType 2 crackSpacing 0.025 fDamType 2 gammaCrack 0.5
+frcfcm 3 d 0. talpha 0. E 20000. n 0.2 Gf 100.e-6 ft 2.0 softtype 2 sheartype 1 multiplecrackshear beta 0.01 Vf 0.02 Lf 12.e-3 Df 0.04e-3 Ef 20000. Gfib 1000. tau_0 1. f 0.7 kfib 0.9 FSStype 0 FiberType 2 crackSpacing 0.025 fDamType 2 gammaCrack 0.5 iterLimitGlobal 50
 #
 # horizontal restraint
 BoundaryCondition  1 loadTimeFunction 1 dofs 1 1 values 1 0. set 1

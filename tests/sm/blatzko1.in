@@ -65,8 +65,8 @@ Set 4 nodes 4 5 6 7 8
 #ELEMENT tStep 1 number 1 gp 1 keyword 91 component 8  value  0.0000e+00
 #ELEMENT tStep 1 number 1 gp 1 keyword 91 component 9  value  0.0000e+00
 ## check element first Piola-Kirchhoff stress
-#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 1  value  0.00000+00
-#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 2  value  0.00000+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 1  value  0.00000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 2  value  0.00000e+00
 #ELEMENT tStep 1 number 1 gp 1 keyword 92 component 3  value  2.02147788e-01
 #ELEMENT tStep 1 number 1 gp 1 keyword 92 component 4  value  0.0000e+00
 #ELEMENT tStep 1 number 1 gp 1 keyword 92 component 5  value  0.0000e+00

@@ -51,7 +51,7 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
     FloatArray stiffness;
     IR_GIVE_FIELD(ir, stiffness, _IFT_AnisotropicLinearElasticMaterial_stiff);
     if ( stiffness.giveSize() != 21 ) {
-        OOFEM_ERROR( "Incorrect size of stiff - should be 21, is %d\n", stiffness.giveSize() );
+        OOFEM_ERROR( "Incorrect size of stiff - should be 21, is %d\n", (int)stiffness.giveSize() );
     }
 
     // put the stiffness coefficients into a 6x6 matrix
@@ -64,9 +64,9 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
     this->computesSubTangents();
 
     FloatArray alpha_input(6);
-    IR_GIVE_FIELD(ir, alpha_input, _IFT_AnisotropicLinearElasticMaterial_talpha);
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha_input, _IFT_AnisotropicLinearElasticMaterial_talpha);
     if ( alpha_input.giveSize() != 6 ) {
-        OOFEM_ERROR( "Incorrect size of talpha - should be 6, is %d\n", alpha.giveSize() );
+        OOFEM_ERROR( "Incorrect size of talpha - should be 6, is %d\n", (int)alpha.giveSize() );
     }
     alpha = alpha_input;
 }

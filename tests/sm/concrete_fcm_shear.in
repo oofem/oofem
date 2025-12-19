@@ -243,10 +243,10 @@ set 21 elementranges {11}
 # 
 #ELEMENT tStep  8 number 10 gp 1 keyword 1 component 6  value 1.333333e+00 tolerance 5.e-5
 #ELEMENT tStep 11 number 10 gp 1 keyword 1 component 6  value 2.000000e+00 tolerance 5.e-5
-#ELEMENT tStep 23 number 10 gp 1 keyword 1 component 6  value 1.111111+00 tolerance 5.e-5
+#ELEMENT tStep 23 number 10 gp 1 keyword 1 component 6  value 1.111111e+00 tolerance 5.e-5
 #ELEMENT tStep 26 number 10 gp 1 keyword 1 component 6  value 2.000000e+00 tolerance 5.e-5
 # 
-#ELEMENT tStep  8 number 11 gp 1 keyword 1 component 6  value 2.133333+00 tolerance 5.e-5
+#ELEMENT tStep  8 number 11 gp 1 keyword 1 component 6  value 2.133333e+00 tolerance 5.e-5
 #ELEMENT tStep 11 number 11 gp 1 keyword 1 component 6  value 3.074988e+00 tolerance 5.e-5
 #ELEMENT tStep 23 number 11 gp 1 keyword 1 component 6  value 1.777778e+00 tolerance 5.e-5
 #ELEMENT tStep 26 number 11 gp 1 keyword 1 component 6  value 2.967257e+00 tolerance 5.e-5
