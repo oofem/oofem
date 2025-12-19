@@ -97,20 +97,13 @@ FieldManager :: giveRegisteredKeys()
 
 int FieldManager::instanciateYourself(DataReader &dr, InputRecord &ir)
 {
-  int externalFieldsCount = 0;
-  std :: string fname;
-
-  IR_GIVE_OPTIONAL_FIELD (ir, externalFieldsCount, "nfields");
-  // instantiate and initialize external fields
-  for (int i = 1; i <= externalFieldsCount; i++) {
-    InputRecord &fieldRecord = dr.giveInputRecord(DataReader::IR_fieldRec, i);
+  for(auto& fieldRecord: dr.giveGroupRecords(ir.ptr(),"nfields","Fields",DataReader::IR_fieldRec,/*optional*/true)){
+    std :: string fname;
     fieldRecord.giveRecordKeywordField(fname);
-
     std :: shared_ptr< Field > fieldPtr = classFactory.createField(fname.c_str());
     if ( !fieldPtr ) {
-        OOFEM_ERROR("unknown field name (%s)", fname.c_str());
+      OOFEM_ERROR("unknown field name (%s)", fname.c_str());
     }
-
     fieldPtr->initializeFrom(fieldRecord);
     registerField(fieldPtr, fieldPtr->giveType());
   }

@@ -53,6 +53,7 @@
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
+#include "enum.h"
 
 
 namespace oofem {
@@ -73,20 +74,22 @@ class EngngModel;
  * When test (dual) field, it keeps reference to its primary (unknown) variable.
  * @todo The history parameter determines how many time steps to remember. 
  */
+
+#define ENUM_TYPE VariableType
+#define ENUM_DEF ENUM_ITEM(scalar) ENUM_ITEM(vector)
+#define ENUM_CLASS
+#include "enum-impl.h"
+
+#define ENUM_TYPE VariableQuantity
+#define ENUM_DEF ENUM_ITEM(Displacement) ENUM_ITEM(Velocity) ENUM_ITEM(Temperature) ENUM_ITEM(Pressure) ENUM_ITEM(VolumeFraction)
+#define ENUM_CLASS
+#include "enum-impl.h"
+
+
 class Variable {
     public:
-    enum VariableType {
-        scalar,
-        vector
-    };
-
-    enum VariableQuantity {
-        Displacement,
-        Velocity,
-        Temperature,
-        Pressure,
-        VolumeFraction
-    };
+    typedef oofem::VariableType VariableType;
+    typedef oofem::VariableQuantity VariableQuantity;
 
     const FEInterpolation* interpolation;  
     Variable* dualVar; //? or just bool?
