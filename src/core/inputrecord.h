@@ -40,9 +40,11 @@
 #include <string>
 #include <memory>
 #include <exception>
+#include <regex>
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemenv.h"
+#include "enum.h"
 
 namespace oofem {
 class IntArray;
@@ -81,6 +83,7 @@ typedef const char *InputFieldType;
     (__ir).giveRecordKeywordField(__name, __value);
 
 
+// #define _INPUTRECORD_OPTIONAL_OLD
 
 /**
  * Class representing the general Input Record. The input record consists of several fields.
@@ -95,6 +98,7 @@ class OOFEM_EXPORT InputRecord: public std::enable_shared_from_this<InputRecord>
 {
     DataReader* reader = nullptr;
 public:
+
     InputRecord() {}
     InputRecord(DataReader* reader_);
     /// Destructor
@@ -141,6 +145,53 @@ public:
     virtual void giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     /// Reads the ScalarFunction field value.
     virtual void giveField(ScalarFunction &function, InputFieldType id) = 0;
+
+    static std::string error_msg_with_hints(const std::string& val, const std::map<int,std::vector<std::string>>& v2nn);
+    static int giveLevenshteinDist(const std::string& word1, const std::string& word2);
+    virtual std::string giveLocation() const { return "<?not yet implemented?>"; } // this will disappear once other PRs are merged
+
+    /// Reads enumeration (must be defined via enum-impl.hpp) directly
+    template<typename AnEnum>
+    void giveField(AnEnum& answer, InputFieldType id){
+        typedef EnumTraits<AnEnum> Traits;
+        std::string s;
+        giveField(s,id);
+        #ifdef _USE_TRACE_FIELDS
+            if(InputRecord::TraceFields::active){
+                traceEnum(Traits::enum_name,Traits::all_values_to_names());
+                traceField(id,(std::string("enum:")+Traits::enum_name).c_str());
+            }
+        #endif
+        if(std::regex_match(s,std::regex("\\s*[0-9]+\\s*"))){
+            int val=std::atoi(s.c_str());
+            auto v=Traits::value(val);
+            if(!v) OOFEM_ERROR("%s: %s (enum %s): invalid index '%d'%s",giveLocation().c_str(),id,Traits::enum_name,val,error_msg_with_hints("",Traits::all_values_to_names()).c_str());
+            answer=v.value();
+        } else {
+            auto v=Traits::value(s.c_str());
+            if(!v){ OOFEM_ERROR("%s: %s (enum %s): unrecognized name '%s'%s",giveLocation().c_str(),id,Traits::enum_name,s.c_str(),error_msg_with_hints(s,Traits::all_values_to_names()).c_str()); }
+            answer=v.value();
+        }
+    }
+    #ifdef _USE_TRACE_FIELDS
+        // field access tracing variables, set at startup from main()
+        struct TraceFields {
+            static bool active;
+            static std::ofstream out;
+            static void write(const std::string& s);
+        };
+        static void traceEnum(const std::string& name, const std::map<int,std::vector<std::string>>& val2names);
+        virtual void traceField(InputFieldType id, const char* type) {};
+    #else
+        void traceField(InputFieldType id, const char* type) const { };
+    #endif
+    /**@name Optional field extraction methods
+     * Reads the field value identified by keyword
+     * @param answer contains result
+     * @param id field keyword
+     */
+    template<typename T>
+    void giveOptionalField(T& answer, InputFieldType id){ if(hasField(id)) giveField(answer,id); }
     //@}
 
     /**@name Child reader methods
@@ -151,12 +202,7 @@ public:
     // return whether a single child of given type exists
     virtual bool hasChild(InputFieldType id, const std::string& name, bool optional) = 0;
     //@}
-
-    /**@name Optional field extraction methods
-     * Reads the field value identified by keyword
-     * @param answer contains result
-     * @param id field keyword
-     */
+#ifdef _INPUTRECORD_OPTIONAL_OLD
     //@{
     /// Reads the integer field value.
     void giveOptionalField(int &answer, InputFieldType id);
@@ -181,7 +227,7 @@ public:
     /// Reads the ScalarFunction field value.
     void giveOptionalField(ScalarFunction &function, InputFieldType id);
     //@}
-
+#endif
     /// Returns true if record contains field identified by idString keyword.
     virtual bool hasField(InputFieldType id) = 0;
 

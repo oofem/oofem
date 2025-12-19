@@ -33,7 +33,6 @@
  */
 
 #include "datareader.h"
-#include <set>
 
 
 namespace oofem{
@@ -93,18 +92,6 @@ DataReader::GroupRecords::Iterator &DataReader::GroupRecords::Iterator::operator
 
 DataReader::GroupRecords::GroupRecords( DataReader &dr_, const std::string &group_, InputRecordType irType_, int size ) :
     dr( dr_ ), group( group_ ), irType( irType_ ), size_( size ){};
-
-#ifdef _USE_TRACE_FIELDS
-    bool DataReader::TraceFields::active=false;
-    std::ofstream DataReader::TraceFields::out;
-    void DataReader::TraceFields::write(const std::string& s){
-        size_t hash=std::hash<std::string>{}(s);
-        static std::set<size_t> written;
-        if(written.count(hash)>0) return;
-        written.insert(hash);
-        DataReader::TraceFields::out<<s<<std::endl;
-    }
-#endif
 
 
 

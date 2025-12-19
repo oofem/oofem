@@ -35,10 +35,11 @@
 #ifndef matesponsemode_h
 #define matesponsemode_h
 
-#include "enumitem.h"
+#include "enum.h"
 
 namespace oofem {
-#define MatResponseMode_DEF \
+#define ENUM_TYPE MatResponseMode
+#define ENUM_DEF \
     ENUM_ITEM_WITH_VALUE(TangentStiffness, 0) \
     ENUM_ITEM_WITH_VALUE(SecantStiffness, 1) \
     ENUM_ITEM_WITH_VALUE(ElasticStiffness, 2) \
@@ -71,18 +72,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29) \
     ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) 
 
-/**
- * Describes the character of characteristic material matrix.
- */
-enum MatResponseMode {
-    MatResponseMode_DEF
-};
+#include "enum-impl.h"
 
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-
-const char *__MatResponseModeToString(MatResponseMode _value);
 } // end namespace oofem
 #endif // matesponsemode_h

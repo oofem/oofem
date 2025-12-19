@@ -119,12 +119,12 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
     int i=0;
     for(InputRecord& mrec: mrecs){
         metaStepList[i].initializeFrom(mrec);
+        if(i > 0) {
+            metaStepList[i].setPreviousMetaStepFinalTime(metaStepList[i-1].giveFinalTime());
+        }
         totalNumberOfSteps += metaStepList[i].giveNumberOfSteps();
         i++;
     }
-
-    //this->numberOfSteps = metaStepList.size();
-    //this->recomputeFinalTime(totalNumberOfSteps);
     return 1;
 }
 

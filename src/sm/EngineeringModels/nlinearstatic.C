@@ -396,8 +396,8 @@ void
 NonLinearStatic :: updateLoadVectors(TimeStep *tStep)
 {
     MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
-    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
-
+    double msFinalTime = mstep->giveFinalTime() - this->giveInitialTime();
+    bool isLastMetaStep = (fabs(tStep->giveTargetTime() - msFinalTime) <= 1.e-6 * mstep->giveMinDeltaT());
     if ( controlMode == nls_indirectControl ) {
         //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) &&ir.hasField("fixload")) {
         if ( isLastMetaStep ) {

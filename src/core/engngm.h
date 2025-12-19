@@ -745,19 +745,6 @@ public:
     }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return this->timeStepController->giveNextStep(); }
-    /** Generate new time step (and associate metastep).
-     *  The advantage of this method is that the associated metasteps 
-     *  are generated on the fly, which is not the case of giveNextStep method, 
-     *  which should only be called from solveYoursef, as it generate metasteps. 
-     *
-     *  This method in general allows to get external processing of individual
-     *  solution steps (using solveYourselfAt) from outside, othervise the only
-     *  way how to generate valid sequence is solveYorself method, 
-     *  but it method does not allow to get processing for individual steps.
-     *  
-     *  @return representation of next solution step 
-     */
-    TimeStep* generateNextStep();
     /// Does a pre-initialization of the next time step (implement if necessarry)
     virtual void preInitializeNextStep() {}
     /** Returns the solution step when Initial Conditions (IC) apply.

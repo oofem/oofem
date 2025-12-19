@@ -64,7 +64,7 @@ AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
     this->computesSubTangents();
 
     FloatArray alpha_input(6);
-    IR_GIVE_FIELD(ir, alpha_input, _IFT_AnisotropicLinearElasticMaterial_talpha);
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha_input, _IFT_AnisotropicLinearElasticMaterial_talpha);
     if ( alpha_input.giveSize() != 6 ) {
         OOFEM_ERROR( "Incorrect size of talpha - should be 6, is %d\n", (int)alpha.giveSize() );
     }
