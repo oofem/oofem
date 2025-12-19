@@ -34,6 +34,7 @@
 
 #include "inputrecord.h"
 #include "datareader.h"
+#include <sstream>
 #include <iomanip>
 #include <set>
 
