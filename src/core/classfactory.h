@@ -261,6 +261,9 @@ private:
     /// Associative container containing failure criteria creators
     std :: map < std :: string, std::unique_ptr<FailureCriteria> ( * )(int, FractureManager *) > failureCriteriaList;
     std :: map < std :: string, std::unique_ptr<FailureCriteriaStatus> ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
+ 
+    /// Associative container containing TimeStepReductionStrategy
+    std :: map < std :: string, std::unique_ptr<TimeStepReductionStrategy> ( * )(int) > timeStepReductionStrategyList;
 
     /// Associative container containing contact surface creators with name as key.
     std::map< std::string, std::unique_ptr< ContactSurface >( * )( int, Domain * ) >contactSurfaceList;
