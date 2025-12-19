@@ -112,7 +112,7 @@ public:
                 return this->cell->giveNumberOfVertices();
             }
 
-            const FloatArray &giveVertexCoordinates(int i) const override
+            const FloatArray giveVertexCoordinates(int i) const override
             {
                 return ( ( cell->getVertex(i) )->getCoordinates() );
             }

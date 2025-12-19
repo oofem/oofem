@@ -67,7 +67,7 @@ public:
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_funcRec, IR_setRec,
         IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec,
         IR_enrichFrontRec, IR_propagationLawRec, IR_crackNucleationRec, IR_fracManRec, IR_failCritRec,
-        IR_contactManRec, IR_contactDefRec, IR_fieldRec, 
+        IR_contactSurfaceRec, IR_fieldRec, 
         // MPM specific
         IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec,
         IR_unspecified // internal use only, signifies error in setting record type
@@ -79,8 +79,8 @@ public:
         /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
-        "ContactManager","ContactDefinition",/*Field*/"",
-        "Variable",/*"MPMTerm"*/"","Integral",
+        "ContactSurface","Field",
+        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
         "UNSPECIFIED"
     };
 

@@ -53,6 +53,7 @@
 #include "dofmanager.h"
 #include "node.h"
 #include "activebc.h"
+#include "Contact/contactbc.h"
 #include "timestep.h"
 #include "verbose.h"
 #include "datastream.h"
@@ -69,7 +70,6 @@
 #include "xfem/xfemmanager.h"
 #include "parallelcontext.h"
 #include "unknownnumberingscheme.h"
-#include "contact/contactmanager.h"
 #include "smoothednodalintvarfield.h"
 #include "nodalrecoverymodel.h"
 #include "convergenceexception.h"
@@ -719,12 +719,17 @@ EngngModel :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
-    }
 
-    // if there is an error estimator, it should be updated so that values can be exported.
-    if ( this->defaultErrEstimator ) {
-        this->defaultErrEstimator->estimateError(equilibratedEM, tStep);
-    }
+      for ( auto &bc : domain->giveBcs() ) {
+	  bc->updateYourself(tStep);
+      }
+#  ifdef VERBOSE
+        VERBOSE_PRINT0("Updated BCs ", domain->giveNumberOfBoundaryConditions())
+#  endif
+  }
+ 
+ 
+    
 }
 
 void
@@ -1020,11 +1025,6 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         }
     }
 
-    if ( domain->hasContactManager() ) {
-        OOFEM_ERROR("Contact problems temporarily deactivated");
-        //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
-    }
-
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer.assembleBegin();
@@ -1089,11 +1089,6 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
             ma.assembleFromActiveBC(answer, *bc, tStep, rs, cs);
 #endif
         }
-    }
-
-    if ( domain->hasContactManager() ) {
-        OOFEM_ERROR("Contant problems temporarily deactivated");
-        //domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, rs, cs);
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1668,14 +1663,6 @@ EngngModel :: assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
 
-void
-EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
-{
-    if( domain->hasContactManager()) {
-        domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
-    }
-}
 
 
 void
@@ -1729,6 +1716,28 @@ EngngModel :: initStepIncrements()
         }
     }
 }
+
+
+
+void
+EngngModel :: initForNewIteration(Domain *d, TimeStep *tStep, int niter, const FloatArray &solutionVector)
+//
+// init the data before new iteration
+// needed by contact implementation
+{
+  auto s = solutionVector;
+  if(s.giveSize()) {
+    this->updateSolution(s, tStep, d);
+  }
+  for ( int i = 1; i <= d->giveNumberOfBoundaryConditions(); ++i ) {
+    ContactBoundaryCondition *contact_bc = dynamic_cast< ContactBoundaryCondition * >( d->giveBc(i) );
+    if(contact_bc) {
+      contact_bc->initForNewIteration(tStep, niter);
+    }
+  }
+
+}
+
 
 
 void

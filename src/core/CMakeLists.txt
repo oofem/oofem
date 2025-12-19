@@ -17,9 +17,6 @@ set (core_unsorted
     fracturemanager.C
     neumannmomentload.C
     parallelcontext.C
-    contact/contactmanager.C
-    contact/contactdefinition.C
-    contact/contactelement.C
     prescribedmean.C
     bctracker.C
     # Time Step Controller
@@ -341,6 +338,19 @@ set (core_bc
     linearconstraintbc.C
     )
 
+set (core_contact
+    Contact/contactelement.C
+    Contact/contactsurface.C
+    Contact/fecontactsurface.C
+    Contact/contactpair.C
+    Contact/contactbc.C
+    Contact/contactpoint.C
+    Contact/aabb.C
+    Contact/contactsearch.C	
+    Contact/contactsearchsweepandprune.C
+    )
+
+
 if (USE_PYTHON_EXTENSION)
     list (APPEND core_bc userdefdirichletbc.C usrdefboundaryload.C)
     list (APPEND core_unsorted pythonexpression.C)
@@ -390,6 +400,7 @@ set (core
     ${core_iga}
     ${core_mesher}
     ${core_mapping}
+    ${core_contact}
     )
 
 if (USE_MPI_PARALLEL)

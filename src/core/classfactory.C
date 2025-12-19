@@ -76,8 +76,7 @@
 #include "topologydescription.h"
 #include "geometry.h"
 #include "fracturemanager.h"
-#include "contact/contactmanager.h"
-#include "contact/contactdefinition.h"
+#include "Contact/contactsurface.h"
 #include "feinterpol.h"
 #include "../mpm/mpm.h"
 #include "timestepreductionstrategy.h"
@@ -227,6 +226,19 @@ bool ClassFactory :: registerBoundaryCondition( const char *name, std::unique_pt
     return cf_store(bcList, name, creator);
 }
 
+std::unique_ptr< ContactSurface >ClassFactory::createContactSurface(const char *name, int number, Domain *domain)
+{
+    return cf_create< ContactSurface >(contactSurfaceList, name, number, domain);
+}
+
+
+bool ClassFactory::registerContactSurface(const char *name, std::unique_ptr< ContactSurface >( * creator )(int, Domain *) )
+{
+    return cf_store(contactSurfaceList, name, creator);
+}
+
+
+  
 std::unique_ptr<CrossSection> ClassFactory :: createCrossSection(const char *name, int number, Domain *domain)
 {
     return cf_create<CrossSection>(csList, name, number, domain);
@@ -435,26 +447,6 @@ bool ClassFactory :: registerFailureCriteriaStatus(const char *name, std::unique
 }
 
 
-std::unique_ptr<ContactManager> ClassFactory :: createContactManager(const char *name, Domain *domain)
-{
-    return cf_create<ContactManager>(contactManList, name, domain);
-}
-
-bool ClassFactory :: registerContactManager(const char *name, std::unique_ptr<ContactManager> ( *creator )( Domain * ) )
-{
-    return cf_store(contactManList, name, creator);
-}
-
-
-std::unique_ptr<ContactDefinition> ClassFactory :: createContactDefinition(const char *name, ContactManager *cMan)
-{
-    return cf_create<ContactDefinition>(contactDefList, name, cMan);
-}
-
-bool ClassFactory :: registerContactDefinition( const char *name, std::unique_ptr<ContactDefinition> ( *creator )( ContactManager * ) )
-{
-    return cf_store(contactDefList, name, creator);
-}
 
 std::unique_ptr<SparseGeneralEigenValueSystemNM> ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType name, Domain *domain, EngngModel *emodel)
 {
@@ -580,8 +572,7 @@ std::map<std::string,std::list<std::string>> ClassFactory :: getRegisteredNames 
        N(XfemManager,xManList);
        N(FailureCriteria,failureCriteriaList);
        N(FailureCrititeriaStatus,failureCriteriaStatusList);
-       N(ContactManager,contactManList);
-       N(ContactDefinition,contactDefList);
+       N(ContactSurface,contactSurfaceList);
        E(GeneratlizedEigenValueSolver,generalizedEigenValueSolverList);
        E(MaterialMappingAlgorithm,materialMappingList);
        E(MesherInterface,mesherInterfaceList);

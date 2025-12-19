@@ -36,6 +36,7 @@
 #include "sm/Elements/structuralelement.h"
 #include "sm/Elements/structuralelementevaluator.h"
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
+#include "sm/Contact/ContactElement/structuralcontactelement.h"
 #include "dofmanager.h"
 #include "dof.h"
 #include "element.h"
@@ -248,8 +249,8 @@ StructuralEngngModel :: checkConsistency()
         StructuralElement *sePtr = dynamic_cast< StructuralElement * >( elem.get() );
         StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >( elem.get() );
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >( elem.get() );
-
-        if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
+        StructuralContactElement *sce = dynamic_cast< StructuralContactElement * >( elem.get() );
+        if ( sePtr == NULL && see == NULL && siePtr == NULL  && sce == NULL ) {
             OOFEM_WARNING("Element %d has no structural support", elem->giveLabel());
             return 0;
         }

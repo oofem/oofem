@@ -70,7 +70,7 @@ public:
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords) const;
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords) const ;
     void giveLocalNodeCoords(FloatMatrix &answer, const Element_Geometry_Type) const override;
-    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const ;
+    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const override;
 
     // Edge
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
@@ -98,6 +98,8 @@ public:
 
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 6; }
 
+
+    
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
     double computeVolume(const FEICellGeometry &cellgeo) const;

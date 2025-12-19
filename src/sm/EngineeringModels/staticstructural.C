@@ -228,6 +228,8 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     this->field->advanceSolution(tStep);
     this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
+    // contact
+    this->initForNewIteration(this->giveDomain(1),tStep,0, {});
     //
     this->solution_old = this->solution;
     //
@@ -289,6 +291,9 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
             this->solution.add(incrementOfSolution);
             this->updateSolution(solution, tStep, this->giveDomain(di));
+	    // needed in contact
+	    this->initForNewIteration(this->giveDomain(di), tStep, 0, this->solution);
+
         }
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);

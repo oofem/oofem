@@ -472,6 +472,16 @@ public:
     void plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV);
 
     /**
+     * Adds to the receiver the product @f$Nt a \otimes b B \mathrm{d}V@f$. If the receiver has zero size, it is expanded.
+     * @param N matrix N in equation.
+     * @param a Array a in equation.
+     * @param b Array b in equation.
+     * @param B matrix N in equation.
+     * @param dV Scaling factor.
+     */
+    void plus_Nt_a_otimes_b_B(const FloatMatrix &N, const FloatArray &a, const FloatArray &b, const FloatMatrix &B, double dV = 1);
+
+    /**
      * Adds matrix to the receiver.
      * If receiver has zero size, size is accordingly adjusted.
      * @param a Matrix to be added.
@@ -599,6 +609,8 @@ public:
     //@{
     /// Vector multiplication by scalar
     OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
+    OOFEM_EXPORT FloatMatrix operator * ( const FloatMatrix & x, const double & a );
+    OOFEM_EXPORT FloatMatrix operator * ( const double & a, const FloatMatrix & x);
     OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
     OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
     OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
