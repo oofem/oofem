@@ -659,25 +659,6 @@ EngngModel :: solveYourself()
     }
 }
 
-TimeStep* EngngModel :: generateNextStep()
-{
-    int smstep = 1, sjstep = 1;
-    if ( this->currentStep ) {
-        smstep = this->currentStep->giveMetaStepNumber();
-        sjstep = timeStepController->giveMetaStep( smstep )->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
-    }
-    // test if sjstep still valid for MetaStep
-    if ( sjstep > timeStepController->giveMetaStep( smstep )->giveNumberOfSteps() )
-      smstep++;
-    if ( smstep > timeStepController->giveNumberOfMetaSteps() ) return NULL; // no more metasteps
-    
-    timeStepController->initMetaStepAttributes( timeStepController->giveMetaStep( smstep ) );
-    
-    this->preInitializeNextStep();
-    return this->giveNextStep();
-}
-
-
 
 void
 EngngModel :: updateAttributes(MetaStep *mStep)
@@ -2076,11 +2057,7 @@ EngngModel :: checkProblemConsistency()
 void
 EngngModel :: postInitialize()
 {
-    // set meta step bounds
-    int istep = this->giveNumberOfFirstStep(true);
-    for ( auto &metaStep: metaStepList ) {
-        istep = metaStep.setStepBounds(istep);
-    }
+    timeStepController->postInitialize();
 
     for ( auto &domain: domainList ) {
         domain->postInitialize();

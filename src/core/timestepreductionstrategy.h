@@ -81,9 +81,8 @@ public:
    virtual double giveNoConvergenceTimeIncrementReductionFactor() = 0;
    virtual int giveNumberOfMaxTimeStepReductions() = 0;
    virtual void setTimeStepIncrementAdaptationFactor(double tsrf) =  0;
-   /*virtual double giveDeltaTmax(){return deltaTmax;}
-   virtual double giveDeltaTmin(){return deltaTmin;}
-   */
+   virtual double giveMinDeltaT(){return deltaTmin;}
+   
    int giveNumberOfMinRequiredIterations(){return nMinRequiredIterations;}
    int giveNumberOfMaxRequiredIterations(){return nMaxRequiredIterations;}
    virtual double give_dTmin(){return deltaTmin;}

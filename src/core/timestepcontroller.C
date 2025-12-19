@@ -118,12 +118,12 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
     // read problem domains
     for ( int i = 1; i <= this->numberOfMetaSteps; i++ ) {
         auto &ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
+	if(i > 1) {
+	  metaStepList[i-1].setPreviousMetaStepFinalTime(metaStepList[i-2].giveFinalTime());
+	}
         metaStepList[i-1].initializeFrom(ir);
 	totalNumberOfSteps += metaStepList[i-1].giveNumberOfSteps();
     }
-
-    //this->numberOfSteps = metaStepList.size();
-    //this->recomputeFinalTime(totalNumberOfSteps);
     return 1;
 }
 
