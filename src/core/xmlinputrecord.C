@@ -222,7 +222,7 @@ namespace oofem {
         }
         if(!att) OOFEM_ERROR("%s: no such attribute: %s",loc().c_str(),n2.c_str());
         std::string ret=att.as_string();
-        attrRead.insert(n2);
+        attrRead.insert(att.name());
         return std::make_tuple(ret,node);
     }
 

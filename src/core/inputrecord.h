@@ -148,7 +148,6 @@ public:
 
     static std::string error_msg_with_hints(const std::string& val, const std::map<int,std::vector<std::string>>& v2nn);
     static int giveLevenshteinDist(const std::string& word1, const std::string& word2);
-    virtual std::string giveLocation() const { return "<?not yet implemented?>"; } // this will disappear once other PRs are merged
 
     /// Reads enumeration (must be defined via enum-impl.hpp) directly
     template<typename AnEnum>
