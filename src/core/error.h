@@ -55,7 +55,7 @@ namespace oofem {
     exit(code);
 
 
-class RuntimeException : public std::exception
+class OOFEM_EXPORT RuntimeException : public std::exception
 {
 public:
     std::string msg;
