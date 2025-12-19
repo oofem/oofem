@@ -94,7 +94,7 @@ DynamicDataReader :: writeToFile(const char *fileName)
     fout << this->outputFileName << '\n';
     fout << this->description << '\n';
     for ( auto &rec: this->recordList ) {
-        fout << rec->giveRecordAsString() << "\n";
+        fout << rec->giveRecordInTXTFormat() << "\n";
     }
     fout.close();
 }

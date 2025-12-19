@@ -74,9 +74,9 @@ public:
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
     static constexpr const char* InputRecordTags[]={
-        /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
-        "Analysis","MetaStep",/*ExportModule*/"","Node",/*Element*/"",
-        /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
+        "Domain","OutputManager","DomainComp","Geometry","GBPM",
+        "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
+        /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
         "ContactSurface","Field",

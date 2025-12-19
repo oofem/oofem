@@ -81,6 +81,8 @@ public:
     void setRecordString(std :: string newStr);
     /// Returns record string.
     std :: string giveRecordAsString() const override { return this->record; }
+    std :: string giveRecordInTXTFormat() const override { return this->record; }
+    std :: string giveLocation() const override;
 
     void finish(bool wrn = true) override;
 

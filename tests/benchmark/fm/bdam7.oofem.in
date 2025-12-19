@@ -1606,6 +1606,6 @@ Set 4 noderanges {1 2 7 (10 37)}
 #%BEGIN_CHECK%
 ##Solution time at step 4
 #NODE tStep 4 number 1 dof 11 unknown d value 3.79e2 tolerance 1.5
-#NODE tStep 4 number 2 dof 7 unknown d value  0.414e tolerance 1e-3
+#NODE tStep 4 number 2 dof 7 unknown d value  0.414e0 tolerance 1e-3
 #NODE tStep 4 number 4 dof 8 unknown d value -9.5e-02 tolerance 1e-3 
 #%END_CHECK%

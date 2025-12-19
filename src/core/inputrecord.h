@@ -106,10 +106,12 @@ public:
 
     /** Creates a newly allocated copy of the receiver */
     virtual std::shared_ptr<InputRecord> clone() const = 0;
-    std::shared_ptr<InputRecord> ptr() { return shared_from_this(); }
+    std::shared_ptr<InputRecord> ptr();
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;
+    virtual std :: string giveRecordInTXTFormat() const = 0;
+    virtual std :: string giveLocation() const = 0;
 
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword
@@ -146,7 +148,6 @@ public:
 
     static std::string error_msg_with_hints(const std::string& val, const std::map<int,std::vector<std::string>>& v2nn);
     static int giveLevenshteinDist(const std::string& word1, const std::string& word2);
-    virtual std::string giveLocation() const { return "<?not yet implemented?>"; } // this will disappear once other PRs are merged
 
     /// Reads enumeration (must be defined via enum-impl.hpp) directly
     template<typename AnEnum>

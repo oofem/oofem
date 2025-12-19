@@ -518,7 +518,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     // XML format (and perhaps others) does not contain DomainComp nested group, rather nests everything under domain directly
-    std::shared_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain.clone():dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
+    std::shared_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain.ptr():dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
     IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), this->nsd, _IFT_Domain_numberOfSpatialDimensions);
@@ -568,7 +568,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         if ( !elem ) {
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
-
         elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
         elementList[elemIndex0] = std :: move(elem);

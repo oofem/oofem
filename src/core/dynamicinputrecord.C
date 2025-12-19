@@ -382,7 +382,9 @@ void DynamicInputRecord :: unsetField(InputFieldType id)
         rec << " " << x.first << " " << x.second; \
     }
 
-std :: string DynamicInputRecord :: giveRecordAsString() const
+
+std :: string DynamicInputRecord :: giveLocation() const { return "<DynamicInputRecord>"; }
+std :: string DynamicInputRecord :: giveRecordInTXTFormat() const
 {
     std :: ostringstream rec;
     rec << this->recordKeyword;

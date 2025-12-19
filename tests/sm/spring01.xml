@@ -2,38 +2,35 @@
   <Output>spring01.out</Output>
   <Description>Patch test of 1D spring element along x axis</Description>
   <Analysis type="StaticStructural" nsteps="1" />
-  <Domains>
-    <Domain domain="1dtruss">
-      <OutputManager tstep_all="1" dofman_all="1" element_all="1" />
-      <!-- ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3 -->
-      <Nodes>
-        <Node id="1" coords="0. 0. 0."  />
-        <Node id="2" coords="0. 0. 0."/>
-      </Nodes>
-      <Elements>
-        <Spring nodes="2 1 2" crosssect="1" mode="0" k="2.0"/>
-      </Elements>
-      <CrossSections>
-        <SimpleCS thick="0.1" width="1.0" material="1" set="1"/>
-      </CrossSections>
-      <Materials>
-        <dummymat />
-      </Materials>
-      <BoundaryConditions>
-        <BoundaryCondition id="1" loadtimefunction="1" dofs="1" values="0.0" set="2"/>
-        <NodalLoad id="2" loadtimefunction="1" dofs="1" components="1.0" set="3"/>
-      </BoundaryConditions>
-      <InitialConditions/>
-      <LoadTimeFunctions>
-        <ConstantFunction f_t_="1.0"/>
-      </LoadTimeFunctions>
-      <Sets>
-        <Set nodes="1"/>
-        <Set nodes="1"/>
-        <Set id="3" nodes="2"/>
-      </Sets>
-    </Domain>
-  </Domains>
+  <Domain domain="1dtruss">
+    <OutputManager tstep_all="" dofman_all="" element_all="" />
+    <Nodes>
+      <Node id="1" coords="0. 0. 0."  />
+      <Node id="2" coords="0. 0. 0."/>
+    </Nodes>
+    <Elements>
+      <Spring nodes="2 1 2" crosssect="1" mode="0" k="2.0"/>
+    </Elements>
+    <CrossSections>
+      <SimpleCS thick="0.1" width="1.0" material="1" set="1"/>
+    </CrossSections>
+    <Materials>
+      <dummymat />
+    </Materials>
+    <BoundaryConditions>
+      <BoundaryCondition id="1" loadtimefunction="1" dofs="1" values="0.0" set="2"/>
+      <NodalLoad id="2" loadtimefunction="1" dofs="1" components="1.0" set="3"/>
+    </BoundaryConditions>
+    <InitialConditions/>
+    <LoadTimeFunctions>
+      <ConstantFunction f_t_="1.0"/>
+    </LoadTimeFunctions>
+    <Sets>
+      <Set nodes="1"/>
+      <Set nodes="1"/>
+      <Set id="3" nodes="2"/>
+    </Sets>
+  </Domain>
   <xi:include href="spring01-exportmodules.xml" />
   <!--
     this is what is indirectly inclueded (as xi:include test)

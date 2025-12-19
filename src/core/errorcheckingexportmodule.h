@@ -126,6 +126,7 @@ protected:
 
 public:
     InternalElementDofManErrorCheckingRule(const std :: string &line, double tol);
+    InternalElementDofManErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "InternalElementDofManErrorCheckingRule"; }
@@ -146,6 +147,7 @@ protected:
 
 public:
     BeamElementErrorCheckingRule(const std :: string &line, double tol);
+    BeamElementErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override; 
     const char *giveClassName() const override { return "BeamElementErrorCheckingRule"; }
@@ -171,6 +173,7 @@ class OOFEM_EXPORT LoadLevelErrorCheckingRule : public ErrorCheckingRule
 {
 public:
     LoadLevelErrorCheckingRule(const std :: string &line, double tol);
+    LoadLevelErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "LoadLevelErrorCheckingRule"; }
@@ -181,6 +184,7 @@ class OOFEM_EXPORT EigenValueErrorCheckingRule : public ErrorCheckingRule
 {
 public:
     EigenValueErrorCheckingRule(const std :: string &line, double tol);
+    EigenValueErrorCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "EigenValueErrorCheckingRule"; }
@@ -191,6 +195,7 @@ class OOFEM_EXPORT TimeCheckingRule : public ErrorCheckingRule
 {
 public:
     TimeCheckingRule(const std :: string &line, double tol);
+    TimeCheckingRule(InputRecord& ir, double tol);
     bool check(Domain *domain, TimeStep *tStep) override;
     bool getValue(double& value, Domain* domain, TimeStep *tStep) override;
     const char *giveClassName() const override { return "TimeCheckingRule"; }

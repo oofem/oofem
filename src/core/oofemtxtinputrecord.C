@@ -39,6 +39,7 @@
 #include "dictionary.h"
 #include "range.h"
 #include "scalarfunction.h"
+#include "datareader.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -91,6 +92,11 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 }
 
 
+std :: string
+OOFEMTXTInputRecord::giveLocation() const {
+    return std::string(giveReader()?giveReader()->giveReferenceName():"<?reader_NULL?>")+":"+std::to_string(giveLineNumber());
+}
+
 int
 OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name, bool optional){
     int size=0;
@@ -102,7 +108,7 @@ OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name
 bool
 OOFEMTXTInputRecord :: hasChild(InputFieldType id, const std::string& name, bool optional){
     int count=this->giveGroupCount(id,name,optional);
-    if(count>1) OOFEM_ERROR("Number of '%s' children (%s) must be 0 or 1 (not %d)",id,name.c_str(),count);
+    if(count>1) OOFEM_ERROR("Number of '%s' children (%s) must be 0 or 1 (not %d)",name.c_str(),id,count);
     return count>0;
 }
 

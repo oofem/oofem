@@ -33,10 +33,12 @@
  */
 
 #include "inputrecord.h"
+#include "error.h"
 #include "datareader.h"
 #include <sstream>
 #include <iomanip>
 #include <set>
+
 
 namespace oofem {
 
@@ -135,8 +137,6 @@ std::string InputRecord::error_msg_with_hints(const std::string& val, const std:
     }
 #endif
 
-
-
 InputRecord :: InputRecord(DataReader* r){
     reader = r;
 }
@@ -145,6 +145,17 @@ DataReader*
 InputRecord :: giveReader() const {
     return reader;
 }
+
+std::shared_ptr<InputRecord>
+InputRecord::ptr() {
+    // we could just return this->shared_from_this, but it throws std::bad_weak_ptr (with no backtrace)
+    // so we do essentially the same, but provide a nice message and abort immediately
+    auto weak=this->weak_from_this();
+    std::shared_ptr<InputRecord> ret=weak.lock();
+    if(!ret) OOFEM_ERROR("shared_ptr<InputRecord>::ptr(): object lifetime expired (programming error)");
+    return ret;
+}
+
 
 #ifdef _INPUTRECORD_OPTIONAL_OLD
 void
@@ -267,25 +278,25 @@ InputException::InputException(const InputRecord& ir, std::string keyword, int n
 MissingKeywordInputException::MissingKeywordInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"")+ "\"";
+    msg = ir.giveLocation()+": missing keyword \"" + keyword + "\"" \
+          "\n  \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"")+ "\"";
 }
 
 
 BadFormatInputException::BadFormatInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Bad format for keyword \"" + keyword + "\" on input " + std::to_string(number) + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
+    msg = ir.giveLocation()+": bad format for keyword \"" + keyword + "\"" \
+          "\n   \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"") + "\"";
 }
 
 
 ValueInputException::ValueInputException(const InputRecord& ir, std::string kw, const std::string &reason) :
     InputException(ir, std::move(kw), -1)
 {
-    msg = "Value input error for keyword \"" + keyword + "\"" + \
+    msg = ir.giveLocation()+": value input error for keyword \"" + keyword + "\"" + \
           "\nReason: \"" + reason + "\"\n" + \
-          "\nRecord: \"" + record.substr(0, 50) + (record.size()>50?"...":"") + "\"";
+          "\n  \"" + record.substr(0, maxMsgLen) + (record.size()>maxMsgLen?"...":"") + "\"";
 }
 
 

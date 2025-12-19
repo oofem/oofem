@@ -65,17 +65,19 @@ protected:
         pugi::xml_node curr;
         std::shared_ptr<XMLInputRecord> lastRecord;
         std::set<pugi::xml_node> seen;
+        int lastRecId=0;
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation
     pugi::xml_document& loadXml(pugi::xml_node parent, const std::string& xml);
     pugi::xml_node resolveXiInclude(const pugi::xml_node& n);
-    std::tuple<size_t,size_t> offset2lc(const std::vector<size_t>& nl, size_t offset);
-    std::string loc();
-    std::string loc(const pugi::xml_node&);
+    std::tuple<size_t,size_t> offset2lc(const std::vector<size_t>& nl, size_t offset) const;
+    std::string loc() const ;
+    std::string loc(const pugi::xml_node&) const;
     std::shared_ptr<InputRecord> topRecord;
     pugi::xml_node giveNamedChild(const pugi::xml_node& parent, const std::string& name);
     const std::string XiIncludeTag="xi:include";
+    int setRecId(int lastRecId);
 public:
     XMLDataReader(const std::string& xmlFile);
     virtual ~XMLDataReader(){};
