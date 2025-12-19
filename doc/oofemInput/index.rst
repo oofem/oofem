@@ -1,6 +1,12 @@
 
 Input Manual
 ==================
+
+Authors: |author|
+
+Version: |version|
+
+
 .. toctree::
     :caption: Content
     :maxdepth: 2

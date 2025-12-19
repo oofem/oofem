@@ -6,6 +6,11 @@
 User Manual
 ===============================================
 
+Authors: |author|
+
+Version: |version|
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
