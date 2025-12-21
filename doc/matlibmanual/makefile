@@ -3,7 +3,9 @@ BACKUP_FILES = *.tex makefile
 RCP = scp
 
 html: ps
-	latex2html -style "/oofeml2h.css" -local_icons -dir html -mkdir matlibmanual -init_file "latex2html-init"
+	# latex2html -local_icons -dir html -mkdir matlibmanual -init_file "latex2html-init"
+	htlatex matlibmanual.tex "matlibmanual.cfg,xhtml,index=2,3,next" "" "-dhtml/"
+	#make4ht -d html matlibmanual.tex
 
 ps:
 	rm -f *.toc *.lot *.aux
