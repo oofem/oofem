@@ -4,6 +4,7 @@ RCP = scp
 
 html: ps
 	# latex2html -local_icons -dir html -mkdir matlibmanual -init_file "latex2html-init"
+	mkdir html
 	htlatex matlibmanual.tex "matlibmanual.cfg,xhtml,index=2,3,next" "" "-dhtml/"
 	#make4ht -d html matlibmanual.tex
 
