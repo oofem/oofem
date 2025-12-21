@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -123,7 +123,7 @@ IntElSurfTr1 :: computeAreaAround(IntegrationPoint *ip)
     this->computeCovarBaseVectorsAt(ip, G1, G2);
     double weight  = ip->giveWeight();
     G3.beVectorProductOf(G1, G2);
-    return 0.5 * G3.computeNorm() * weight;
+    return G3.computeNorm() * weight;
 }
 
 void
