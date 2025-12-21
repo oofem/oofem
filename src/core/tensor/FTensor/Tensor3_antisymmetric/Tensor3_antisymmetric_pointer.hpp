@@ -87,8 +87,8 @@ namespace FTensor
       return N2 < N3
                ? data[N1][N3 - 1 + (N2 * (2 * (Tensor_Dim12 - 1) - N2 - 1)) / 2]
                : (N2 > N3
-                    ? -data[N1][N2 - 1
-                                + (N3 * (2 * (Tensor_Dim12 - 1) - N3 - 1)) / 2]
+                    ? -1*(data[N1][N2 - 1
+                                + (N3 * (2 * (Tensor_Dim12 - 1) - N3 - 1)) / 2])
                     : 0);
     }
 
