@@ -12,7 +12,7 @@ html:
 	cd matlibmanual; make html
 	cd developperGuide; make html
 	cd refman; make html
-	cd theorymanual; make html
+	cd theorymanual2; make html
 	cd usermanual; make html
 
 ps:
@@ -20,7 +20,7 @@ ps:
 	cd paper-actap; make ps
 	cd extractorInput; make ps
 	cd matlibmanual; make ps
-	cd theorymanual; make ps
+	cd theorymanual2; make ps
 
 pdf:
 	cd elementlibmanual; make pdf
@@ -29,7 +29,7 @@ pdf:
 	cd extractorInput; make pdf
 	cd matlibmanual; make pdf
 	cd developperGuide; make latexpdf
-	cd theorymanual; make pdf
+	cd theorymanual2; make pdf
 	cd usermanual; make latexpdf
 
 www-install:
