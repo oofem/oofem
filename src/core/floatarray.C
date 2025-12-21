@@ -104,7 +104,7 @@ namespace oofem {
     {
     #ifndef NDEBUG
         if ( allocChunk < 0 ) {
-            OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
+            OOFEM_FATAL("allocChunk must be non-negative; %ld", allocChunk);
         }
 
     #endif
@@ -426,7 +426,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, Inde
 {
 #ifndef NDEBUG
     if ( a.size() < n || b.size() < n ) {
-        OOFEM_ERROR("wrong size ", a.giveSize(), b.giveSize());
+        OOFEM_ERROR("wrong size %d vs %d", a.giveSize(), b.giveSize());
     }
 
 #endif
