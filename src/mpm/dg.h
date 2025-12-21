@@ -233,7 +233,7 @@ public:
     fMode giveFormulation() override { return TL; }
 
   
-  double giveFinalTime() //override
+  double giveFinalTime() override
   {
     if(prescribedTimes.giveSize()) {
       return prescribedTimes.at(prescribedTimes.giveSize());

@@ -303,7 +303,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     _dss->LoadZeros();
     delete[] mcn;
 
-    OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %d\n", neq, nz_);
+    OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %ld\n", neq, nz_);
 
     // increment version
     this->version++;

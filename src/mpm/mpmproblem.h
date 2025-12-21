@@ -199,7 +199,7 @@ public:
 
   /** nlinear statics number starts simulation at time = 0
    */
-  double giveFinalTime() //override
+  double giveFinalTime() override
   {
     if(prescribedTimes.giveSize()) {
       return prescribedTimes.at(prescribedTimes.giveSize());
