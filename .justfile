@@ -16,7 +16,7 @@ pyodide:
 	# remove old wheels
 	rm -f dist/oofem-*-pyodide_*_wasm32.whl 
 	uv --version || $( curl -LsSf https://astral.sh/uv/install.sh | sh )
-	# create venv
+	# create venv (use uv since we can easily specify python version which is not installed locally)
 	UV_VENV_CLEAR=1 uv venv --python 3.13 .cache/pyodide-venv
 	source .cache/pyodide-venv/bin/activate
 	# install pyodide-build and pip
@@ -31,13 +31,16 @@ pyodide:
 	source emsdk_env.sh
 	cd ../..
 	pyodide build
-	deactivate
 	# create & activate runtime venv (≠ pyodide-build venv)
-	# [ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
-	# source build/venv-pyodide/bin/activate
-	# pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
-	# python -c"import asyncio, micropip; asyncio.run(micropip.install(\"$(ls dist/oofem-*-pyodide_*_wasm32.whl)\"))"
-	# cd bindings/python/tests; python -m pytest
+	# this must be done inside the .cache/pyodide-venv venv, since that's where pyodide command lives
+	[ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
+	# exit .cache/pyodide-venv before proceeding
+	deactivate
+	# enter the wasm32 venv
+	source build/venv-pyodide/bin/activate
+	python -m pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
+	cd bindings/python/tests; python -m pytest
+	deactivate # exit the wasm32 venv
 shared:
 	mkdir -p build-shared
 	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1 -DUSE_XML=1
