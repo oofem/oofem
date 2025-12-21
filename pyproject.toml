@@ -7,7 +7,7 @@ dynamic=['version']
 ## not sure why packaging==24.2 is needed, but without it pyodide env has packaging==25.0
 ## and the installation then fails with FileNotFoundError (packaging-24.2.dist-info/METADATA)
 ## see also  https://github.com/pyodide/pyodide/discussions/4632 for discussion
-dependencies = [ 'pytest', 'numpy', 'matplotlib', 'packaging==24.2' ]
+dependencies = [ 'pytest', 'numpy', 'matplotlib' ]
 description='oofem etc' 
 
 [build-system]

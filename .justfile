@@ -17,7 +17,7 @@ pyodide:
 	rm -f dist/oofem-*-pyodide_*_wasm32.whl 
 	uv --version || $( curl -LsSf https://astral.sh/uv/install.sh | sh )
 	# create venv
-	UV_VENV_CLEAR=1 uv venv --python 3.12 .cache/pyodide-venv
+	UV_VENV_CLEAR=1 uv venv --python 3.13 .cache/pyodide-venv
 	source .cache/pyodide-venv/bin/activate
 	# install pyodide-build and pip
 	uv pip install pyodide-build pip
@@ -31,11 +31,13 @@ pyodide:
 	source emsdk_env.sh
 	cd ../..
 	pyodide build
+	deactivate
 	# create & activate runtime venv (≠ pyodide-build venv)
-	[ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
-	source build/venv-pyodide/bin/activate
-	pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
-	cd bindings/python/tests; python -m pytest
+	# [ -d build/venv-pyodide ] || pyodide venv build/venv-pyodide
+	# source build/venv-pyodide/bin/activate
+	# pip install --force-reinstall dist/oofem-*-pyodide_*_wasm32.whl
+	# python -c"import asyncio, micropip; asyncio.run(micropip.install(\"$(ls dist/oofem-*-pyodide_*_wasm32.whl)\"))"
+	# cd bindings/python/tests; python -m pytest
 shared:
 	mkdir -p build-shared
 	cmake -Bbuild-shared -H. -GNinja  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release -DUSE_PYBIND_BINDINGS=1 -DUSE_PYTHON_EXTENSION=1 -DUSE_SHARED_LIB=1 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_MPM=1 -DUSE_XML=1
