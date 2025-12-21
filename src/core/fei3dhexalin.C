@@ -565,6 +565,31 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
     return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
 }
 
+void
+FEI3dHexaLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const
+{
+    // Returns matrix with derivatives wrt local coordinates
+    answer.resize(4, 2);
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
+    
+    for ( int i = 1; i <= 3; ++i ) {
+        answer.at(1,1) =  0.25 * ( 1. + eta );
+        answer.at(2,1) = -0.25 * ( 1. + eta );
+        answer.at(3,1) = -0.25 * ( 1. - eta );
+        answer.at(4,1) =  0.25 * ( 1. - eta );
+
+        answer.at(1,2) =  0.25 * ( 1. + ksi );
+        answer.at(2,2) =  0.25 * ( 1. - ksi );
+        answer.at(3,2) = -0.25 * ( 1. - ksi );
+        answer.at(4,2) = -0.25 * ( 1. + ksi );
+    }
+}
+
+
+
+
+
 IntArray
 FEI3dHexaLin :: computeLocalSurfaceMapping(int isurf) const
 {

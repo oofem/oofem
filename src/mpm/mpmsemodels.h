@@ -184,6 +184,9 @@ namespace oofem {
             }
         }
 
+        void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override
+        {}
+
 
         TimeStep* giveNextStep() override
         {
