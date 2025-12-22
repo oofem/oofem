@@ -63,7 +63,7 @@ Set 6 nodes 2 1 4
 #
 #
 #
-#%BEGIN_CHECK% tolerance 2.e-4
+#%BEGIN_CHECK% 
 ##
 ##
 ## check reactions 
