@@ -310,7 +310,7 @@ StructuralPenaltyContactBoundaryCondition::computeInternalForcesFromContact (Flo
       ContactProcess mode = ContactProcess::None;
       this->computeTractions(normalTraction, tangentialTraction, tangentialTractionTrial, mode, contactPair, tStep);
       // traction in global coordinate system
-      auto tractionVector = normalTraction * normal;
+      FloatArray tractionVector = normalTraction * normal;
       if (frictionShouldBeConsidered(friction, tStep)) {
 		const auto tangentVectors = contactPair->giveTangentVectors();
 		FloatMatrix contravariant_metric = this->computeContravariantMetric(tangentVectors);
