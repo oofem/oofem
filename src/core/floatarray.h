@@ -573,19 +573,21 @@ public:
 
 ///@name IML compatibility: functions
 //@{
-/// Vector multiplication by scalar
-OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
-OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
-OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
-  //
-OOFEM_EXPORT FloatArray operator / ( const FloatArray & x, const double & a );
-OOFEM_EXPORT FloatArray operator / ( const double & a, const FloatArray & x );
-  //
-OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
-OOFEM_EXPORT FloatArray &operator /= ( FloatArray & x, const double & a );
+#ifndef _USE_EIGEN
+    /// Vector multiplication by scalar
+    OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
+    OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
+    //
+    OOFEM_EXPORT FloatArray operator / ( const FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator / ( const double & a, const FloatArray & x );
+    //
+    OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator /= ( FloatArray & x, const double & a );
+#endif
 
   
 OOFEM_EXPORT double norm(const FloatArray &x);
