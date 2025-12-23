@@ -3,12 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-User Manual
+OOFEM User Manual
 ===============================================
 
 Authors: |author|
 
-Version: |version|
+Version: |version|, Date: |today|
 
 
 .. toctree::

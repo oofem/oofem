@@ -1,11 +1,10 @@
 
-Input Manual
+OOFEM Input Manual
 ==================
 
 Authors: |author|
 
-Version: |version|
-
+Version: |version|, Date: |today|
 
 .. toctree::
     :caption: Content
