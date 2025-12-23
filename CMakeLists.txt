@@ -36,7 +36,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
 project (oofem CXX C)
 set (OOFEM_HOMEPAGE "http://www.oofem.org")
-set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
+set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/~bp/bp.html")
 string(TIMESTAMP YEAR "%Y")
 set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
@@ -958,7 +958,9 @@ endif (DOXYGEN_FOUND)
 
 configure_file (
     "${oofem_SOURCE_DIR}/doc/include.tex.in"
-    "${oofem_BINARY_DIR}")
+    "${oofem_SOURCE_DIR}/doc/include/include.tex"
+    )
+message (STATUS "Generating include.tex for manuals")
 
 # TODO: Manuals not done yet
 add_custom_target (
