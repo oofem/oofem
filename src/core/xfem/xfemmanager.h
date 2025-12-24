@@ -110,6 +110,7 @@ class OOFEM_EXPORT XfemManager
 {
 protected:
     Domain *domain;
+    std::shared_ptr<InputRecord> thisIr;
     /// Enrichment item list.
     std :: vector< std :: unique_ptr< EnrichmentItem > >enrichmentItemList;
 

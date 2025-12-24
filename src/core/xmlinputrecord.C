@@ -169,7 +169,7 @@ namespace oofem {
     }
     bool XMLInputRecord::hasChild(InputFieldType id, const std::string& name, bool optional){
         bool has=!!_reader()->giveNamedChild(node,name);
-        if(!has && !optional) OOFEM_ERROR("...");
+        if(!has && !optional) OOFEM_ERROR("%s: %s has no no child node '%s' (required).",loc().c_str(),node.name(),name.c_str());
         return has;
     }
 

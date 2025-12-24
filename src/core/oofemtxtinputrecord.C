@@ -107,6 +107,7 @@ OOFEMTXTInputRecord :: giveGroupCount(InputFieldType id, const std::string& name
 
 bool
 OOFEMTXTInputRecord :: hasChild(InputFieldType id, const std::string& name, bool optional){
+    if(id[0]=='\0') return true;
     int count=this->giveGroupCount(id,name,optional);
     if(count>1) OOFEM_ERROR("Number of '%s' children (%s) must be 0 or 1 (not %d)",name.c_str(),id,count);
     return count>0;

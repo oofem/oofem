@@ -881,8 +881,9 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         }
     #  endif
 
-    InputRecord* xfmIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nxfemman,"XFEMManager",DataReader::IR_xfemManRec,/*optional*/true);
+    InputRecord* xfmIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nxfemman,DataReader::InputRecordTags[DataReader::IR_xfemManRec],DataReader::IR_xfemManRec,/*optional*/true);
     if(xfmIr){
+        DataReader::RecordGuard scope(dr,xfmIr);
         IR_GIVE_RECORD_KEYWORD_FIELD(*xfmIr, name, num);
         xfemManager = classFactory.createXfemManager(name.c_str(), this);
         if ( !xfemManager ) {
