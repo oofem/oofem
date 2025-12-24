@@ -85,7 +85,7 @@ void EnrichmentItem :: initializeFrom(InputRecord &ir)
 {
     thisIr=ir.clone();
     mEnrFrontIndex = ir.giveGroupCount(_IFT_EnrichmentItem_front,"EnrichmentFront",/*optional*/true);
-    mPropLawIndex = ir.giveGroupCount(_IFT_EnrichmentItem_propagationlaw,"PropagationLaw",/*optional*/true);
+    mPropLawIndex = ir.hasChild(_IFT_EnrichmentItem_propagationlaw,"PropagationLaw",/*optional*/true);
 
     if ( ir.hasField(_IFT_EnrichmentItem_inheritbc) ) {
         mInheritBoundaryConditions = true;
