@@ -7,6 +7,7 @@ html: ps
 	mkdir html
 	htlatex matlibmanual.tex "matlibmanual.cfg,xhtml,index=2,3,next" "" "-dhtml/"
 	#make4ht -d html matlibmanual.tex
+	rm *.html
 
 ps:
 	rm -f *.toc *.lot *.aux
