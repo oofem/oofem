@@ -147,7 +147,7 @@ option (USE_PARMETIS "Enable Parmetis support" OFF)
 option (USE_OPENMP_PARALLEL "Enable OpenMP, shared memory parallelism" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
-option (USE_IML "Enable iml++ solvers" OFF) # or this
+option (USE_IML "Enable iml++ solvers" ON) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
 option (USE_INTEL_MKL_PARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_ONEAPI "Enable OneMKL solver support via OneAPI" OFF)
