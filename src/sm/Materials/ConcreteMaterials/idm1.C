@@ -1223,7 +1223,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 
         // Use orientation of the worst inclusion for Griffith criterion in compression.
         if ( this->equivStrainType == EST_Griffith ) {
-            FloatArray stress, fullStress, principalStress, crackV(3), crackPlaneN(3);
+            FloatArray stress, fullStress, principalStress, crackV(3); // , crackPlaneN(3);
             FloatMatrix de;
             LinearElasticMaterial *lmat = this->linearElasticMaterial;
             lmat->giveStiffnessMatrix( de, SecantStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
@@ -1247,7 +1247,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
                 double psi = acos(twoPsi) / 2.;
                 for ( int i = 1; i <= 3; i++ ) {
                     crackV.at(i) = principalDir.at(i, indexMin);
-                    crackPlaneN = principalDir.at(i, indexMax);
+                    // crackPlaneN = principalDir.at(i, indexMax);
                 }
 
                 //rotate around indexMid axis

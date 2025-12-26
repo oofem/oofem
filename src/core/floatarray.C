@@ -945,6 +945,8 @@ int FloatArray :: givePackSize(DataStream &buff) const
     return buff.givePackSizeOfSizet(1) + buff.givePackSizeOfDouble(this->giveSize());
 }
 
+
+#ifndef _USE_EIGEN
 // IML compat
 
 FloatArray &FloatArray :: operator = ( const double & val )
@@ -1004,6 +1006,7 @@ FloatArray &operator /= ( FloatArray & x, const double & a )
     x.times(1./a);
     return x;
 }
+#endif
 
 double dot(const FloatArray &x, const FloatArray &y)
 {
