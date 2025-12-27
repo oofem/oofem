@@ -43,7 +43,6 @@
 #define _IFT_HydratingConcreteMat_Name "hydratingconcretemat"
 #define _IFT_HydratingConcreteMat_referenceTemperature "referencetemperature"
 #define _IFT_HydratingConcreteMat_relMatAge "relmatage"
-#define _IFT_HydratingConcreteMat_castAt "castat"
 #define _IFT_HydratingConcreteMat_hydrationModelType "hydrationmodeltype"
 #define _IFT_HydratingConcreteMat_maxModelIntegrationTime "maxmodelintegrationtime"
 #define _IFT_HydratingConcreteMat_minModelTimeStepIntegrations "minmodeltimestepintegrations"
