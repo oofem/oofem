@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -393,9 +393,9 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 
 void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent)
 {
-    FloatArray q = {
+    FloatArray q = Vec2(
         iPos.at(1) - iOrigin.at(1), iPos.at(2) - iOrigin.at(2)
-    };
+    );
 
     const double tol = 1.0e-20;
 

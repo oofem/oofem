@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -60,7 +60,7 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
     this->gaussPoints.resize( nPoints );
 
     for ( int i = 1; i <= nPoints; i++ ) {
-        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, {coords_xi.at(i)}, weights.at ( i ), mode);
+        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, Vec1(coords_xi.at(i)), weights.at ( i ), mode);
     }
 
     this->intdomain = _Line;
@@ -77,15 +77,15 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
     for ( int i = 1; i <= nPoints; i++ ) {
         double x = ( coords_xi.at(i) + 1.0 ) * 0.5;
-        FloatArray subpatchCoord = {x};
+        FloatArray subpatchCoord = Vec1(x);
 
         this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, weights.at ( i ), mode);
 
         this->gaussPoints [ i - 1 ]->setSubPatchCoordinates(subpatchCoord);
 
-        FloatArray globalCoord = { 
+        FloatArray globalCoord = Vec2( 
             ( 1. - x ) * coord0.at(1) + x * coord1.at(1),
-            ( 1. - x ) * coord0.at(2) + x * coord1.at(2) };
+            ( 1. - x ) * coord0.at(2) + x * coord1.at(2) );
         this->gaussPoints [ i - 1 ]->setGlobalCoordinates(globalCoord);
 
         FloatArray naturalCoord;
@@ -111,7 +111,7 @@ GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
     int count = 0;
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
-            this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j)},
+            this->gaussPoints [ count ] = new GaussPoint(this, count + 1, Vec2(coords_xi1.at(i), coords_xi2.at(j)),
                                                          weights1.at ( i ) *weights2.at ( j ), mode);
             count++;
         }
@@ -138,7 +138,7 @@ GaussIntegrationRule :: SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, Mat
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             for ( int k = 1; k <= nPoints_xi3; k++ ) {
-                this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)},
+                this->gaussPoints [ count ] = new GaussPoint(this, count + 1, Vec3(coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)),
                                                              weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
                 count++;
             }
@@ -173,7 +173,7 @@ GaussIntegrationRule :: SetUpPointsOn3dDegShellLayers(int nPointsXY, int nPoints
         for ( int i = 1; i <= nPoints_xi1; i++ ) {
             for ( int j = 1; j <= nPoints_xi2; j++ ) {
                 for ( int k = 1; k <= nPoints_xi3; k++ ) {
-                    this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom},
+                    this->gaussPoints [ count ] = new GaussPoint(this, count + 1, Vec3(coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom),
                                                                 weights1.at(i)*weights2.at(j)*weights3.at(k)*scaledThickness, mode);
                     count++;
                 }
@@ -202,7 +202,7 @@ GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             for ( int k = 1; k <= nPoints_xi3; k++ ) {
-                this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)},
+                this->gaussPoints [ count ] = new GaussPoint(this, count + 1, Vec3(coords_xi1.at(i), coords_xi2.at(j), coords_xi3.at(k)),
                                                              weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
                 count++;
             }
@@ -235,7 +235,7 @@ int GaussIntegrationRule :: SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, 
             for ( int j = 1; j <= nPoints2; j++ ) {
                 for ( int k = 1; k <= nPointsDepth; k++ ) {
                     this->gaussPoints [ count ] = new GaussPoint(this, count + 1, 
-                                        {coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom},
+                                        Vec3(coords_xi1.at(i), coords_xi2.at(j), ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom),
                                         weights1.at(i)*weights2.at(j)*weights3.at(k)*scaledThickness, mode);
                     count++;
                 }
@@ -257,7 +257,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     this->gaussPoints.resize( nPoints );
 
     for ( int i = 1; i <= nPoints; i++ ) {
-        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, {coords_xi1.at(i), coords_xi2.at(i)}, weights.at ( i ), mode);
+        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, Vec2(coords_xi1.at(i), coords_xi2.at(i)), weights.at ( i ), mode);
     }
 
     this->intdomain = _Triangle;
@@ -274,7 +274,7 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode)
 
     for ( int i = 1; i <= nPoints; i++ ) {
         this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, 
-                                {coords_xi1.at(i), coords_xi2.at(i), coords_xi3.at(i)}, weights.at ( i ), mode);
+                                Vec3(coords_xi1.at(i), coords_xi2.at(i), coords_xi3.at(i)), weights.at ( i ), mode);
     }
 
     this->intdomain = _Tetrahedra;
@@ -293,7 +293,7 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     int count = 0;
     for ( int i = 1; i <= nPointsTri; i++ ) {
         for ( int j = 1; j <= nPointsDepth; j++ ) {
-            this->gaussPoints [ count ] = new GaussPoint(this, count + 1, {coords_xi1.at(i), coords_xi2.at(i), coords_xi3.at(j)},
+            this->gaussPoints [ count ] = new GaussPoint(this, count + 1, Vec3(coords_xi1.at(i), coords_xi2.at(i), coords_xi3.at(j)),
                                                          weightsTri.at ( i ) *weightsDepth.at ( j ), mode);
             count++;
         }
@@ -323,7 +323,7 @@ GaussIntegrationRule :: SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDept
         for ( int i = 1; i <= nPointsTri; i++ ) {
             for ( int j = 1; j <= nPointsDepth; j++ ) {
                 this->gaussPoints [ count ] = new GaussPoint(this, count + 1, 
-                                {coords_xi1.at(i), coords_xi2.at(i), ( coords_xi3.at(j) + 1. ) * scaledThickness + bottom},
+                                Vec3(coords_xi1.at(i), coords_xi2.at(i), ( coords_xi3.at(j) + 1. ) * scaledThickness + bottom),
                                 weightsTri.at ( i ) * ( weightsDepth.at ( j ) *scaledThickness ), mode);
                 count++;
             }
@@ -1022,80 +1022,80 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi1 = FloatArray{0.333333333333};
-        coords_xi2 = FloatArray{0.333333333333};
-        weights = FloatArray{0.5};
+        coords_xi1 = Vec1(0.333333333333);
+        coords_xi2 = Vec1(0.333333333333);
+        weights = Vec1(0.5);
         break;
 
     case 3:
-        coords_xi1 = {
+        coords_xi1 = Vec3(
             0.166666666666667,
             0.666666666666667,
             0.166666666666667
-        };
-        coords_xi2 = {
+        );
+        coords_xi2 = Vec3(
             0.166666666666667,
             0.166666666666667,
             0.666666666666667
-        };
-        weights = {
+        );
+        weights = Vec3(
             0.166666666666666,
             0.166666666666666,
             0.166666666666666
-        };
+        );
         break;
 
     case 4:
 
-        coords_xi1 = {
+        coords_xi1 = Vec4(
             0.333333333333333,
             0.200000000000000,
             0.200000000000000,
             0.600000000000000
-        };
-        coords_xi2 = {
+        );
+        coords_xi2 = Vec4(
             0.333333333333333,
             0.600000000000000,
             0.200000000000000,
             0.200000000000000
-        };
-        weights = {
+        );
+        weights = Vec4(
             -0.281250000000000,
             0.260416666666667,
             0.260416666666667,
             0.260416666666667
-        };
+        );
         break;
 
     case 6:
-        coords_xi1 = {
+        coords_xi1 = Vec6(
             0.445948490915965,
             0.445948490915965,
             0.108103018168070,
             0.091576213509771,
             0.091576213509771,
             0.816847572980459
-        };
-        coords_xi2 = {
+        );
+        coords_xi2 = Vec6(
             0.108103018168070,
             0.445948490915965,
             0.445948490915965,
             0.816847572980459,
             0.091576213509771,
             0.091576213509771
-        };
-        weights = {
+        );
+        weights = Vec6(
             0.111690794839006,
             0.111690794839006,
             0.111690794839006,
             0.054975871827661,
             0.054975871827661,
             0.054975871827661
-        };
+        );
         break;
 
     case 7:
-        coords_xi1 = {
+        coords_xi1 = Vec7(
             0.333333333333333,
             0.470142064105115,
             0.470142064105115,
@@ -1103,8 +1103,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.101286507323456,
             0.101286507323456,
             0.797426985353087
-        };
-        coords_xi2 = {
+        );
+        coords_xi2 = Vec7(
             0.333333333333333,
             0.059715871789770,
             0.470142064105115,
@@ -1112,8 +1112,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.797426985353087,
             0.101286507323456,
             0.101286507323456
-        };
-        weights = {
+        );
+        weights = Vec7(
             0.112500000000000,
             0.066197076394253,
             0.066197076394253,
@@ -1121,11 +1121,11 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.062969590272414,
             0.062969590272414,
             0.062969590272414
-        };
+        );
         break;
 
     case 12:
-        coords_xi1 = {
+        coords_xi1 = VecX({
             0.249286745170910,
             0.249286745170910,
             0.501426509658179,
@@ -1138,8 +1138,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.636502499121399,
             0.310352451033784,
             0.053145049844817
-        };
-        coords_xi2 = {
+        });
+        coords_xi2 = VecX({
             0.501426509658179,
             0.249286745170910,
             0.249286745170910,
@@ -1152,8 +1152,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.053145049844817,
             0.636502499121399,
             0.310352451033784
-        };
-        weights = {
+        });
+        weights = VecX({
             0.058393137863189,
             0.058393137863189,
             0.058393137863189,
@@ -1166,11 +1166,11 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.041425537809187,
             0.041425537809187,
             0.041425537809187
-        };
+        });
         break;
 
     case 13:
-        coords_xi1 = {
+        coords_xi1 = VecX({
             0.333333333333333,
             0.260345966079040,
             0.260345966079040,
@@ -1184,8 +1184,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.638444188569810,
             0.312865496004874,
             0.048690315425316
-        };
-        coords_xi2 = {
+        });
+        coords_xi2 = VecX({
             0.333333333333333,
             0.479308067841920,
             0.260345966079040,
@@ -1199,8 +1199,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.048690315425316,
             0.638444188569810,
             0.312865496004874
-        };
-        weights = {
+        });
+        weights = VecX({
             -0.074785022233841,
             0.087807628716604,
             0.087807628716604,
@@ -1214,11 +1214,11 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.038556880445128,
             0.038556880445128,
             0.038556880445128
-        };
+        });
         break;
 
     case 16:
-        coords_xi1 = {
+        coords_xi1 = VecX({
             0.333333333333333,
             0.459292588292723,
             0.459292588292723,
@@ -1235,8 +1235,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.728492392955404,
             0.263112829634638,
             0.008394777409958
-        };
-        coords_xi2 = {
+        });
+        coords_xi2 = VecX({
             0.333333333333333,
             0.081414823414554,
             0.459292588292723,
@@ -1253,8 +1253,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.008394777409958,
             0.728492392955404,
             0.263112829634638
-        };
-        weights = {
+        });
+        weights = VecX({
             0.072157803838894,
             0.047545817133642,
             0.047545817133642,
@@ -1271,12 +1271,12 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.013615157087218,
             0.013615157087218,
             0.013615157087218
-        };
+        });
         break;
 
 
     case 19:
-        coords_xi1 = {
+        coords_xi1 = VecX({
             0.333333333333333,
             0.489682519198738,
             0.489682519198738,
@@ -1296,8 +1296,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.741198598784498,
             0.221962989160766,
             0.036838412054736
-        };
-        coords_xi2 = {
+        });
+        coords_xi2 = VecX({
             0.333333333333333,
             0.020634961602525,
             0.489682519198738,
@@ -1317,8 +1317,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.036838412054736,
             0.741198598784498,
             0.221962989160766
-        };
-        weights = {
+        });
+        weights = VecX({
             0.048567898141400,
             0.015667350113570,
             0.015667350113570,
@@ -1338,11 +1338,11 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.021641769688645,
             0.021641769688645,
             0.021641769688645
-        };
+        });
         break;
 
     case 25:
-        coords_xi1 = {
+        coords_xi1 = VecX({
             0.333333333333333,
             0.485577633383657,
             0.485577633383657,
@@ -1368,8 +1368,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.923655933587500,
             0.066803251012200,
             0.009540815400299
-        };
-        coords_xi2 = {
+        });
+        coords_xi2 = VecX({
             0.333333333333333,
             0.028844733232685,
             0.485577633383657,
@@ -1395,8 +1395,8 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.009540815400299,
             0.923655933587500,
             0.066803251012200
-        };
-        weights = {
+        });
+        weights = VecX({
             0.045408995191377,
             0.018362978878233,
             0.018362978878233,
@@ -1422,7 +1422,7 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
             0.004710833481867,
             0.004710833481867,
             0.004710833481867
-        };
+        });
         break;
 
     default:
@@ -1442,81 +1442,81 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         weights = FloatArray{};
         break;
     case 1:
-        coords_xi = FloatArray{0.0};
-        weights = FloatArray{2.0};
+        coords_xi = Vec1(0.0);
+        weights = Vec1(2.0);
         break;
 
     case 2:
-        coords_xi = {-0.577350269189626, 0.577350269189626};
-        weights = {1.0, 1.0};
+        coords_xi = Vec2(-0.577350269189626, 0.577350269189626);
+        weights = Vec2(1.0, 1.0);
         break;
 
     case 3:
-        coords_xi = {
+        coords_xi = Vec3(
             -0.774596669241483,
             0.0,
             0.774596669241483
-        };
-        weights = {
+        );
+        weights = Vec3(
             0.555555555555555,
             0.888888888888888,
             0.555555555555555
-        };
+        );
         break;
 
     case 4:
-        coords_xi = {
+        coords_xi = Vec4(
             -0.861136311594053,
             -0.339981043584856,
             0.339981043584856,
             0.861136311594053
-        };
-        weights = {
+        );
+        weights = Vec4(
             0.347854845137454,
             0.652145154862546,
             0.652145154862546,
             0.347854845137454
-        };
+        );
         break;
 
     case 5:
-        coords_xi = {
+        coords_xi = Vec5(
             -0.9061798459386639927976269,
             -0.5384693101056830910363144,
             0.0,
             0.5384693101056830910363144,
             0.9061798459386639927976269
-        };
-        weights = {
+        );
+        weights = Vec5(
             0.2369268850561890875142640,
             0.4786286704993664680412915,
             0.5688888888888888888888889,
             0.4786286704993664680412915,
             0.2369268850561890875142640
-        };
+        );
         break;
 
     case 6:
-        coords_xi = {
+        coords_xi = Vec6(
             -0.2386191860831969086305017,
             -0.6612093864662645136613996,
             -0.9324695142031520278123016,
             0.9324695142031520278123016,
             0.6612093864662645136613996,
             0.2386191860831969086305017
-        };
-        weights = {
+        );
+        weights = Vec6(
             0.4679139345726910473898703,
             0.3607615730481386075698335,
             0.1713244923791703450402961,
             0.1713244923791703450402961,
             0.3607615730481386075698335,
             0.4679139345726910473898703
-        };
+        );
         break;
 
     case 7:
-        coords_xi = {
+        coords_xi = Vec7(
             -0.9491079123427585245261897,
             -0.7415311855993944398638648,
             -0.4058451513773971669066064,
@@ -1524,8 +1524,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.4058451513773971669066064,
             0.7415311855993944398638648,
             0.9491079123427585245261897
-        };
-        weights = {
+        );
+        weights = Vec7(
             0.1294849661688696932706114,
             0.2797053914892766679014678,
             0.3818300505051189449503698,
@@ -1533,11 +1533,11 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.3818300505051189449503698,
             0.2797053914892766679014678,
             0.1294849661688696932706114
-        };
+        );
         break;
 
     case 8:
-        coords_xi = {
+        coords_xi = Vec8(
             -0.960289856497536,
             -0.796666477413627,
             -0.525532409916329,
@@ -1546,8 +1546,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.525532409916329,
             0.796666477413627,
             0.960289856497536
-        };
-        weights = {
+        );
+        weights = Vec8(
             0.101228536290375,
             0.222381034453374,
             0.313706645877887,
@@ -1556,12 +1556,12 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.313706645877887,
             0.222381034453374,
             0.101228536290375
-        };
+        );
         break;
 
 
     case 16:
-        coords_xi = {
+        coords_xi = VecX({
             -0.989400934991650,
             -0.944575023073233,
             -0.865631202387832,
@@ -1578,8 +1578,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.865631202387832,
             0.944575023073233,
             0.989400934991650
-        };
-        weights = {
+        });
+        weights = VecX({
             0.027152459411753,
             0.062253523938647,
             0.095158511682492,
@@ -1596,11 +1596,11 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.095158511682492,
             0.062253523938647,
             0.027152459411753
-        };
+        });
         break;
 
     case 24:
-        coords_xi = {
+        coords_xi = VecX({
             -0.995187219997021,
             -0.974728555971309,
             -0.938274552002733,
@@ -1625,8 +1625,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.938274552002733,
             0.974728555971309,
             0.995187219997021
-        };
-        weights = {
+        });
+        weights = VecX({
             0.012341229799991,
             0.028531388628934,
             0.044277438817419,
@@ -1651,11 +1651,11 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.044277438817419,
             0.028531388628934,
             0.012341229799991
-        };
+        });
         break;
 
     case 32:
-        coords_xi = {
+        coords_xi = VecX({
             -0.997263861849482,
             -0.985611511545268,
             -0.964762255587506,
@@ -1688,8 +1688,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.964762255587506,
             0.985611511545268,
             0.997263861849482
-        };
-        weights = {
+        });
+        weights = VecX({
             0.007018610009469,
             0.016274394730905,
             0.025392065309263,
@@ -1722,11 +1722,11 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.025392065309263,
             0.016274394730905,
             0.007018610009469
-        };
+        });
         break;
 
     case 64:
-        coords_xi = {
+        coords_xi = VecX({
             -0.999305041735772,
             -0.996340116771955,
             -0.991013371476744,
@@ -1791,8 +1791,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.991013371476744,
             0.996340116771955,
             0.999305041735772
-        };
-        weights = {
+        });
+        weights = VecX({
             0.001783280721693,
             0.004147033260559,
             0.006504457968980,
@@ -1857,7 +1857,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
             0.006504457968980,
             0.004147033260559,
             0.001783280721693
-        };
+        });
         break;
 
     default:

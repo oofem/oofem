@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -98,9 +98,11 @@ class FractureManager;
 class FailureCriteriaStatus;
 class FailureCriteria;
 
-class ContactManager;
-class ContactDefinition;
+class ContactSurface;
 
+class TimeStepReductionStrategy;
+
+  
 class Term;
 
 #ifdef _GNUC
@@ -164,14 +166,17 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 #define REGISTER_FailureCriteria(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, CTOR< FailureCriteria, class, int, FractureManager* > );
 #define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, CTOR< FailureCriteriaStatus, class, FailureCriteria* > );
 
-#define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, CTOR< ContactManager, class, Domain* > );
-#define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, CTOR< ContactDefinition, class, ContactManager* > );
+#define REGISTER_ContactSurface(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactSurface(_IFT_ ## class ## _Name, CTOR< ContactSurface, class, int, Domain * >);
+
 #define REGISTER_Field(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerField(_IFT_ ## class ## _Name, CTOR< Field, class > );
 // mpm stuff
 #define REGISTER_Term(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTerm(_IFT_ ## class ## _Name, CTOR< Term, class > );
 
 ///@todo What is this? Doesn't seem needed / Mikael
 #define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
+
+
+#define REGISTER_TimeStepReductionStrategy(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTimeStepReductionStrategy(_IFT_ ## class ## _Name, CTOR< TimeStepReductionStrategy, class, int > );
 
 //@}
 
@@ -256,10 +261,13 @@ private:
     /// Associative container containing failure criteria creators
     std :: map < std :: string, std::unique_ptr<FailureCriteria> ( * )(int, FractureManager *) > failureCriteriaList;
     std :: map < std :: string, std::unique_ptr<FailureCriteriaStatus> ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
+ 
+    /// Associative container containing TimeStepReductionStrategy
+    std :: map < std :: string, std::unique_ptr<TimeStepReductionStrategy> ( * )(int) > timeStepReductionStrategyList;
 
-    /// Associative container containing ContactManager creators
-    std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
-    std :: map < std :: string, std::unique_ptr<ContactDefinition> ( * )(ContactManager *) > contactDefList;
+    /// Associative container containing contact surface creators with name as key.
+    std::map< std::string, std::unique_ptr< ContactSurface >( * )( int, Domain * ) >contactSurfaceList;
+
     /// Associative container containing Field creators
     std :: map < std :: string, std::unique_ptr<Field> ( * )() > fieldList; 
 
@@ -536,12 +544,8 @@ public:
     std::unique_ptr<XfemManager> createXfemManager(const char *name, Domain *domain);
     bool registerXfemManager( const char *name, std::unique_ptr<XfemManager> ( *creator )( Domain * ) );
 
-
-    std::unique_ptr<ContactManager> createContactManager(const char *name, Domain *domain);
-    bool registerContactManager( const char *name, std::unique_ptr<ContactManager> ( *creator )( Domain * ) );
-
-    std::unique_ptr<ContactDefinition> createContactDefinition(const char *name, ContactManager *cMan);
-    bool registerContactDefinition( const char *name, std::unique_ptr<ContactDefinition> ( *creator )( ContactManager * ) );
+    std::unique_ptr< ContactSurface >createContactSurface(const char *name, int num, Domain *domain);
+    bool registerContactSurface(const char *name, std::unique_ptr< ContactSurface >( * creator )(int, Domain *) );
 
     // MPM stuff
     std::unique_ptr<Term> createTerm(const char *name);
@@ -570,6 +574,13 @@ public:
 
     std::unique_ptr<LoadBalancer> createLoadBalancer(const char *name, Domain *d);
     bool registerLoadBalancer( const char *name, std::unique_ptr<LoadBalancer> ( *creator )( Domain * ) );
+
+
+    std::unique_ptr<TimeStepReductionStrategy> createTimeStepReductionStrategy(const char *name, int number);
+    
+    bool registerTimeStepReductionStrategy( const char *name, std::unique_ptr<TimeStepReductionStrategy> ( *creator )( int ) );
+
+    
 
     std::unique_ptr<Field> createField(const char *name);
     bool registerField( const char *name, std::unique_ptr<Field> ( *creator )() );

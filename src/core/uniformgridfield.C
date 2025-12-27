@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -152,7 +152,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
     }
     // any other is unsupported
     else {
-        OOFEM_ERROR((std::string("UniformGridField::evaluateAt: erroneous dimension of input coordinates (")+std::to_string(coords.giveSize())+", must be 2 or 3).").c_str());
+        OOFEM_ERROR("%s",(std::string("UniformGridField::evaluateAt: erroneous dimension of input coordinates (")+std::to_string(coords.giveSize())+", must be 2 or 3).").c_str());
         return 1;
     }
     answer = ret;

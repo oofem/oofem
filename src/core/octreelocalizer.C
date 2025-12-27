@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -128,11 +128,11 @@ OctantRec :: divideLocally(int level, const IntArray &mask)
         for ( int i = 0; i <= mask.at(1); i++ ) {
             for ( int j = 0; j <= mask.at(2); j++ ) {
                 for ( int k = 0; k <= mask.at(3); k++ ) {
-                    FloatArray childOrigin = {
+                    FloatArray childOrigin = Vec3(
                         this->origin.at(1) + ( i - 0.5 ) * this->halfWidth * mask.at(1),
                         this->origin.at(2) + ( j - 0.5 ) * this->halfWidth * mask.at(2),
                         this->origin.at(3) + ( k - 0.5 ) * this->halfWidth * mask.at(3)
-                    };
+                    );
                     this->child [ i ] [ j ] [ k ] = std::make_unique<OctantRec>(this, std::move(childOrigin), this->halfWidth * 0.5);
                 }
             }

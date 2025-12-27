@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -168,7 +168,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if (status != CR_CONVERGED ) {
-        OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
+        OOFEM_ERROR("No success in solving problem at time step %d", tStep->giveNumber());
     }
     tStep->numberOfIterations = currentIterations;
     tStep->convergedReason = status;

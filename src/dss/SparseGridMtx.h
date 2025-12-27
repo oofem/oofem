@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -88,8 +88,8 @@ protected:
     long no_multiplications;
 
 public:
-    long N() const { return n; }
-    long Nonzeros() const { return ( long ) columns_data_length; }
+    long N() const override { return n; }
+    long Nonzeros() const override { return ( long ) columns_data_length; }
 
     // Number of nonempty blocks in whole matrix
     long Blocks()   { return blocks; }
@@ -99,7 +99,7 @@ public:
     long N_blocks() { return n_blocks; }
 
     // How many block multipication have been done during the factorization
-    long No_Multiplications()       { return no_multiplications; }
+    long No_Multiplications()  override { return no_multiplications; }
 
     // This data is used in the Sealed state
     long columns_data_length;
@@ -112,13 +112,13 @@ public:
 
 
     //ILargeMatrix
-    void WriteStatistics(long no_init_blocks, long no_nonzeros);
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm) = 0;
-    virtual void SolveLV(const LargeVector &b, LargeVector &x) = 0;
-    virtual void Solve(double *b, double *x) = 0;
-    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
+    void WriteStatistics(long no_init_blocks, long no_nonzeros) override;
+    virtual void LoadMatrixNumbers(SparseMatrixF &sm) override= 0;
+    virtual void SolveLV(const LargeVector &b, LargeVector &x) override= 0;
+    virtual void Solve(double *b, double *x) override = 0;
+    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) override;
     virtual void times(double x);
-    virtual void Factorize() = 0;
+    virtual void Factorize() override= 0;
 
 public:
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -215,7 +215,6 @@ public:
 
     EngngModel *giveSlaveProblem(int i) override;
     int giveNumberOfSlaveProblems() override { return (int)inputStreamNames.size(); }
-    int instanciateDefaultMetaStep(InputRecord &ir) override;
 
 protected:
     int instanciateSlaveProblems();

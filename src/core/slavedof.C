@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -58,7 +58,7 @@ SlaveDof :: initialize(const IntArray &masterNodes, const IntArray &mstrDofID, c
     if ( mstrDofID.isEmpty() ) {
         idSame = true;
     } else if ( mstrDofID.giveSize() != mstrContribution.giveSize() ) {
-        OOFEM_ERROR("mstrDofID.giveSize %d != mstrContribution.giveSize %d", mstrDofID.giveSize(), mstrContribution.giveSize());
+        OOFEM_ERROR("mstrDofID.giveSize %d != mstrContribution.giveSize %d", (int)mstrDofID.giveSize(), (int)mstrContribution.giveSize());
     }
 
 

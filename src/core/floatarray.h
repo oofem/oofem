@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -228,9 +228,9 @@ public:
     void checkBounds(Index i) const
     {
         if ( i <= 0 ) {
-            OOFEM_ERROR("array error on index : %d <= 0", i);
+            OOFEM_ERROR("array error on index : %d <= 0", (int)i);
         } else if ( i > size()) {
-            OOFEM_ERROR("array error on index : %d > %d", i, this->size());
+            OOFEM_ERROR("array error on index : %d > %d", (int)i, (int)this->size());
         }
     }
     /**
@@ -573,6 +573,23 @@ public:
 
 ///@name IML compatibility: functions
 //@{
+#ifndef _USE_EIGEN
+    /// Vector multiplication by scalar
+    OOFEM_EXPORT FloatArray &operator *= ( FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator *( const double & a, const FloatArray & x );
+    OOFEM_EXPORT FloatArray operator *( const FloatArray & x, const double & a );
+    //
+    OOFEM_EXPORT FloatArray operator / ( const FloatArray & x, const double & a );
+    OOFEM_EXPORT FloatArray operator / ( const double & a, const FloatArray & x );
+    //
+    OOFEM_EXPORT FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
+    OOFEM_EXPORT FloatArray &operator /= ( FloatArray & x, const double & a );
+#endif
+
+  
 OOFEM_EXPORT double norm(const FloatArray &x);
 OOFEM_EXPORT double norm_square(const FloatArray &x);
 OOFEM_EXPORT double dot(const FloatArray &x, const FloatArray &y);

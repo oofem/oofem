@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -48,6 +48,7 @@
 #include "engngm.h"
 #include "parallelcontext.h"
 #include "unknownnumberingscheme.h"
+#include "convergenceexception.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
@@ -135,9 +136,9 @@ NRSolver :: initializeFrom(InputRecord &ir)
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
     rtold.resize(1);
-    rtold = FloatArray {
+    rtold = Vec1(
         0.0
-    };                       // Default off (0.0 or negative values mean that residual is ignored)
+    );                       // Default off (0.0 or negative values mean that residual is ignored)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
 
@@ -264,6 +265,7 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
     nite = 0;
     for ( nite = 0; ; ++nite ) {
         // Compute the residual
+        engngModel->initForNewIteration(domain, tStep, nite, X);
         engngModel->updateComponent(tStep, InternalRhs, domain);
         rhs.beDifferenceOf(RT, F);
 
@@ -276,14 +278,15 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
 
         if ( errorOutOfRangeFlag ) {
             status = CR_DIVERGED_TOL;
-            OOFEM_WARNING("Divergence reached after %d iterations", nite);
+	    throw ConvergenceException( "Divergence reached after iterations" );
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
             status = CR_CONVERGED;
             break;
-        } else if ( nite >= nsmax ) {
-            OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
+        } else if ( nite >= nsmax ) {	  
             status = CR_DIVERGED_ITS;
+	    throw ConvergenceException( "Maximum number of iterations reached without convergence" );
+
             break;
         }
 
@@ -760,7 +763,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     forceErr = sqrt( dg_forceErr.at(dg) );
                 }
 
-                if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( std::isnan( forceErr ) || forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( forceErr > rtolf.at(1) ) {
@@ -792,7 +795,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     //zeroDNorm = true;
                     dispErr = sqrt( dg_dispErr.at(dg) );
                 }
-                if ( dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( std::isnan( dispErr ) || dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( dispErr > rtold.at(1) ) {

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -159,9 +159,9 @@ public:
     void checkBounds(std::size_t i) const
     {
         if ( i <= 0 ) {
-            OOFEM_ERROR("array error on index : %d <= 0", i);
+            OOFEM_ERROR("array error on index : %ld <= 0", i);
         } else if ( i > values.size()) {
-            OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
+            OOFEM_ERROR("array error on index : %ld > %d", i, this->giveSize());
         }
     }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -43,9 +43,6 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
-#include "contact/contactmanager.h"
-#include "contact/contactdefinition.h"
-#include "contact/contactelement.h"
 #include "unknownnumberingscheme.h"
 #ifdef __MPM_MODULE
 #include "../mpm/integral.h"
@@ -400,30 +397,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     }
 #endif
 
-    if ( domain->hasContactManager() ) {
-        ContactManager *cMan = domain->giveContactManager();
-
-        for ( int i = 1; i <= cMan->giveNumberOfContactDefinitions(); i++ ) {
-            ContactDefinition *cDef = cMan->giveContactDefinition(i);
-            for ( int k = 1; k <= cDef->giveNumbertOfContactElements(); k++ ) {
-                ContactElement *cEl = cDef->giveContactElement(k);
-                cEl->giveLocationArray(loc, s);
-
-                maxle = INT_MAX;
-                for ( int ieq : loc ) {
-                    if ( ieq != 0 ) {
-                        maxle = min(maxle, ieq);
-                    }
-                }
-
-                for ( int ieq : loc ) {
-                    if ( ieq != 0 ) {
-                        mht.at(ieq) = min( maxle, mht.at(ieq) );
-                    }
-                }
-            }
-        }
-    }
+    
 
     // NOTE
     // add there call to eModel if any possible additional equation added by

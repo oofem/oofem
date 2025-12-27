@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -96,21 +96,21 @@ void PrescribedGradientHomogenization :: giveGradientVoigt(FloatArray &oGradient
     int numRows = mGradient.giveNumberOfRows();
     switch ( numRows ) {
     case 1:
-        oGradient = FloatArray {
+        oGradient = Vec1(
             mGradient.at(1, 1)
-        };
+        );
         break;
     case 2:
         // Do not assume symmetry
-        oGradient = {
+        oGradient = Vec4(
             mGradient.at(1, 1), mGradient.at(2, 2), mGradient.at(1, 2), mGradient.at(2, 1)
-        };
+        );
         break;
     case 3:
         // TODO: Fix this properly.
-        oGradient = {
+        oGradient = Vec4(
             mGradient.at(1, 1), mGradient.at(2, 2), mGradient.at(1, 2), mGradient.at(2, 1)
-        };
+        );
 //        OOFEM_ERROR("PrescribedGradientHomogenization :: giveGradientVoigt() not implemented for 3 rows.\n")
         break;
     }

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -116,9 +116,9 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     const IntArray &elNodes = iEl.giveDofManArray();
 
     // Compute global coordinates of Gauss point
-    FloatArray globalCoord = {
+    FloatArray globalCoord = Vec2(
         0.0, 0.0
-    };
+    );
 
     for ( int i = 1; i <= nDofMan; i++ ) {
         const Node *node = iEl.giveNode(i);

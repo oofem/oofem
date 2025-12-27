@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -40,6 +40,7 @@
 #include "error.h"
 
 #include<iostream>
+#include<fstream>
 
 namespace oofem {
 /**
@@ -66,19 +67,21 @@ public:
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_funcRec, IR_setRec,
         IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec,
         IR_enrichFrontRec, IR_propagationLawRec, IR_crackNucleationRec, IR_fracManRec, IR_failCritRec,
-        IR_contactManRec, IR_contactDefRec, IR_fieldRec, 
+        IR_contactSurfaceRec, IR_fieldRec, 
         // MPM specific
-        IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec
+        IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec,
+        IR_unspecified // internal use only, signifies error in setting record type
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
-    const std::vector<std::string> InputRecordTags={
-        /*Domain*/"","OutputManager","DomainComp","Geometry","GBPM",
-        "Analysis","MetaStep",/*ExportModule*/"","Node",/*Element*/"",
-        /*CrossSection*/"",/*Material*/"","NonlocalBarrier",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
+    static constexpr const char* InputRecordTags[]={
+        "Domain","OutputManager","DomainComp","Geometry","GBPM",
+        "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
+        /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
         "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
         "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
-        "ContactManager","ContactDefinition","Field",
-        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral"
+        /*ContactSurface*/"","Field",
+        "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
+        "UNSPECIFIED"
     };
 
     DataReader() { }
@@ -189,6 +192,8 @@ public:
     GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1);
     /// Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
     InputRecord *giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
+
+
 };
 } // end namespace oofem
 #endif // datareader_h

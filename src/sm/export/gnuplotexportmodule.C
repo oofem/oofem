@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -403,7 +403,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 			    	double trac_n = trac(0)*n(0) + trac(1)*n(1);
 					normalTractions.push_back(trac_n);
 
-					const FloatArray t = {-n(1), n(0)};
+					const FloatArray t = Vec2(-n(1), n(0));
 			    	double trac_t = trac(0)*t(0) + trac(1)*t(1);
 					tangTractions.push_back(trac_t);
 
@@ -468,7 +468,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
                 matForcesStart.push_back(matForceStart);
             }
             else {
-                matForcesStart.push_back({0.0,0.0});
+                matForcesStart.push_back(Vec2(0.0,0.0));
             }
 
 
@@ -482,7 +482,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
                 matForcesEnd.push_back(matForceEnd);
             }
             else {
-                matForcesEnd.push_back({0.0,0.0});
+                matForcesEnd.push_back(Vec2(0.0,0.0));
             }
 
         }
@@ -727,8 +727,8 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
             std::vector<FloatArray> arcPos;
             double xiS = 0.0, xiE = 0.0;
             iBC.giveTractionElArcPos(i, xiS, xiE);
-            arcPos.push_back( FloatArray{xiS} );
-            arcPos.push_back( FloatArray{xiE} );
+            arcPos.push_back( Vec1(xiS) );
+            arcPos.push_back( Vec1(xiE) );
 
             arcPosArray.push_back(arcPos);
         }
@@ -754,11 +754,11 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
             double tSn = tS.dotProduct(n,2);
             double tSt = tS.dotProduct(t,2);
-            tractions.push_back( {tSn ,tSt} );
+            tractions.push_back(Vec2(tSn ,tSt));
 
             double tEn = tE.dotProduct(n,2);
             double tEt = tE.dotProduct(t,2);
-            tractions.push_back( {tEn, tEt} );
+            tractions.push_back(Vec2(tEn, tEt));
             nodeTractionNTArray.push_back(tractions);
         }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -190,7 +190,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 {
     FloatMatrix b(1, 9);
     FloatMatrix dnx;
-    FloatArray lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
+    FloatArray lec = Vec3(0.333333333333, 0.333333333333, 0.333333333333); // element center in local coordinates
     std::vector< FloatArray > lxy; 
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d

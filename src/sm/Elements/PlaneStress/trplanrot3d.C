@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -81,7 +81,7 @@ TrPlaneStrRot3d :: computeVolumeAround(GaussPoint *gp)
 
     FloatArray x, y;
     this->giveNodeCoordinates(x, y);
-    std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
+    std :: vector< FloatArray > lc = {Vec2(x[0], y[0]), Vec2(x[1], y[1]), Vec2(x[2], y[2])};
 
     weight = gp->giveWeight();
     detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc, this->interp.giveGeometryType()) ) );

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -71,7 +71,7 @@
 #include "xfem/nucleationcriterion.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
-#include "contact/contactmanager.h"
+#include "Contact/contactsurface.h"
 #include "bctracker.h"
 
 #include "boundarycondition.h"
@@ -140,8 +140,8 @@ Domain :: clear()
     crossSectionList.clear();
     nonlocalBarrierList.clear();
     setList.clear();
+    contactSurfaceList.clear();
     xfemManager = nullptr;
-    contactManager = nullptr;
     if ( connectivityTable ) {
         connectivityTable->reset();
     }
@@ -392,23 +392,6 @@ Domain :: hasXfemManager()
 }
 
 
-ContactManager *
-Domain :: giveContactManager()
-{
-#ifdef DEBUG
-    if ( !contactManager ) {
-        OOFEM_ERROR("undefined contact manager");
-    }
-#endif
-    return contactManager.get();
-}
-
-bool
-Domain :: hasContactManager()
-{
-    return contactManager.get() != NULL;
-}
-
 bool
 Domain :: hasFractureManager()
 {
@@ -444,6 +427,21 @@ Domain :: giveEngngModel()
     return engineeringModel;
 }
 
+
+ContactSurface *
+Domain::giveContactSurface(int n)
+{
+#ifdef DEBUG
+    if ( n < 1 || n > ( int ) contactSurfaceList.size() ) {
+        OOFEM_ERROR("undefined contact surface (%d)", n);
+    }
+#endif
+    return this->contactSurfaceList [ n - 1 ].get();
+}
+
+
+
+
 void Domain :: resizeDofManagers(int _newSize) { dofManagerList.resize(_newSize); }
 void Domain :: resizeElements(int _newSize) { elementList.resize(_newSize); }
 void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList.resize(_newSize); }
@@ -453,6 +451,7 @@ void Domain :: resizeBoundaryConditions(int _newSize) { bcList.resize(_newSize);
 void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); }
 void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
+void Domain :: resizeContactSurfaces(int _newSize) { contactSurfaceList.resize(_newSize); }
 
 void Domain :: py_setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); dofmanGlobal2LocalMap[obj->giveGlobalNumber()] = i;}
 void Domain :: py_setElement(int i, Element *obj) { elementList[i-1].reset(obj); elementGlobal2LocalMap[obj->giveGlobalNumber()] = i;}
@@ -519,7 +518,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     // XML format (and perhaps others) does not contain DomainComp nested group, rather nests everything under domain directly
-    std::shared_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain.clone():dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
+    std::shared_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain.ptr():dr.giveInputRecord(DataReader :: IR_domainCompRec, 1).clone());
     IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(*irdPtr.get(), this->nsd, _IFT_Domain_numberOfSpatialDimensions);
@@ -551,7 +550,7 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     }
 
     #  ifdef VERBOSE
-        VERBOSE_PRINT0("Instantiated nodes & sides ", dofManagerList.size())
+        VERBOSE_PRINT0("Instantiated nodes & sides ", (int)dofManagerList.size())
     #  endif
 
     BuildDofManPlaceInArrayMap();
@@ -569,7 +568,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         if ( !elem ) {
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
-
         elem->initializeFrom(ir, componentRecPriority);
         elem->setGlobalNumber(num);
         elementList[elemIndex0] = std :: move(elem);
@@ -614,6 +612,38 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
     #  ifdef VERBOSE
         VERBOSE_PRINT0("Instantiated elements ", elementList.size());
     #  endif
+
+	// read contact surfaces
+	DataReader::GroupRecords contactSurfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncontactsurf,"ContactSurfaces",DataReader::IR_contactSurfaceRec,/*optional*/true);
+        contactSurfaceList.clear();
+	contactSurfaceList.resize(contactSurfRecs.size());
+
+	for(InputRecord& ir: contactSurfRecs){
+	  // read type of contact surface
+	  IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+	  
+	  std::unique_ptr< ContactSurface >surface(classFactory.createContactSurface(name.c_str(), num, this) );
+	  if ( !surface ) {
+            OOFEM_ERROR( "Couldn't create contact surface: %s", name.c_str() );
+	  }
+	  
+	  surface->initializeFrom(ir);
+	  
+	  // check number
+	  if ( num < 1 || num > (int)contactSurfRecs.size() ) {
+            OOFEM_ERROR("Invalid contact surface number (num=%d)", num);
+	  }
+	  
+	  if ( !contactSurfaceList [ num - 1 ] ) {
+            contactSurfaceList [ num - 1 ] = std::move(surface);
+	  } else {
+            OOFEM_ERROR("Contact surface entry already exist (num=%d)", num);
+	  }
+	  
+	  ir.finish();
+	}
+	
+
 
     // read cross sections
     DataReader::GroupRecords csRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncrosssect,"CrossSections",DataReader::IR_crosssectRec,/*optional*/false);
@@ -866,21 +896,6 @@ Domain :: instanciateYourself(DataReader &dr, InputRecord& irDomain)
         #  endif
     }
 
-    InputRecord* cmanIr=dr.giveChildRecord(irdPtr,_IFT_Domain_ncontactman,"ContactManager",DataReader::IR_contactManRec,/*optional*/true);
-    if (cmanIr) {
-        IR_GIVE_RECORD_KEYWORD_FIELD(*cmanIr, name, num);
-        contactManager = classFactory.createContactManager(name.c_str(), this);
-        if ( !contactManager ) {
-            OOFEM_ERROR("Couldn't create contact manager: %s", name.c_str());
-        }
-
-        contactManager->initializeFrom(*cmanIr);
-        contactManager->instanciateYourself(dr);
-        #  ifdef VERBOSE
-            VERBOSE_PRINT0("Instantiated contact manager ", 1);
-        #  endif
-    }
-
 
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
@@ -1032,6 +1047,11 @@ Domain :: postInitialize()
     }
     //@TODO clear parameterPriorityManager
 
+    for ( auto &cs: contactSurfaceList ) {
+      cs->postInitialize();
+    }
+
+    
     for ( auto &bc: bcList ) {
         bc->postInitialize();
     }
@@ -1432,9 +1452,6 @@ Domain :: createDofs()
         xfemManager->createEnrichedDofs();
     }
 
-    if ( this->hasContactManager() ) {
-        contactManager->createContactDofs();
-    }
 }
 
 

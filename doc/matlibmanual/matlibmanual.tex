@@ -1,9 +1,29 @@
 \documentclass[a4paper]{article}
-\usepackage{html}
 \usepackage{graphicx}
 %\usepackage{hyperref}
-\usepackage{amssymb,amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{longtable}
+\usepackage{ifluatex}
+
+\ifluatex
+ \usepackage{fontspec}
+  %\setmainfont[Ligatures=TeX]{xits}
+  %\setmathfont[math-style=ISO]{xits-math}
+ \setmainfont[Ligatures=TeX]{Latin Modern Roman}
+ \fontspec[SmallCapsFeatures={Letters=SmallCaps}]{Latin Modern Roman}
+ \usepackage{unicode-math}
+ \setmathfont[math-style=ISO]{latinmodernmath-regular.otf}
+ %\setmathfont[math-style=ISO]{xits-math.otf}
+\else
+ \usepackage[utf8]{inputenc}
+\fi
+
+\usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
+\usepackage{html}
+\usepackage{ifthen}
+
+
 \input{../include/include.tex}
 
 \renewcommand{\topfraction}{0.99}    % 99% of page top can be a float
@@ -76,29 +96,27 @@
 \begin{document}
 
 
-%begin{latexonly}
-\title{
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
-Material Model Library Manual}
-\author{\bp \\ \\
-Czech Technical University\\
-Faculty of Civil Engineering\\
-Department of Structural Mechanics\\
-Th\'akurova 7, 166 29 Prague, Czech Republic
+\title{OOFEM Material Library}
+\author{
+  Bořek Patzák\textsuperscript{1},
+  Martin Horák\textsuperscript{2},
+  Mikael Öhman\textsuperscript{2},
+  Milan Jirásek\textsuperscript{1},
+  Vít Šmilauer\textsuperscript{1},
+  Peter Grassl\textsuperscript{3},\\
+  Petr Havlásek\textsuperscript{1},
+  Edita Dvořáková\textsuperscript{1},
+  Jim Brouzoulis\textsuperscript{2},
+  Carl Sandström\textsuperscript{2}.\\ \\
+  \textsuperscript{1}Czech Technical University in Prague, Czech Republic\\
+  \textsuperscript{2}Chalmers University of Technology, Sweden\\
+  \textsuperscript{3}University of Glasgow, United Kingdom 
 }
+
 \maketitle
-%end{latexonly}
-\begin{htmlonly}
 \begin{center}
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
-{\Large Material Model Library Manual}\\ \\
-{\bp \\
-Czech Technical University\\
-Faculty of Civil Engineering\\
-Department of Structural Mechanics\\
-Th\'akurova 7, 166 29 Prague, Czech Republic
-}
-\end{htmlonly}
+  Version: \version
+\end{center}
 
 \newpage
 \tableofcontents
@@ -1127,14 +1145,9 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots \cite{Rots}. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(\ref{compyieldsurffig})). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices.
 
 \begin{figure}[!htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
-\end{htmlonly}
-%begin{latexonly}
- \centerline{\includegraphics[width=0.7\textwidth]{constmodel}}
-%end{latexonly}
-  \caption{Composite yield surface model for masonry}
-  \label{compyieldsurffig}
+\centerline{\includegraphics[width=0.8\textwidth]{constmodel}}
+\caption{Composite yield surface model for masonry}
+\label{compyieldsurffig}
 \end{figure}
 
 
@@ -1827,9 +1840,10 @@ $$
 {\bf Extended smooth stress-strain law} is a special formulation used
 by Grassl and Jir\'{a}sek \cite{GraJir10}. The damage law has a rather complicated form:
 \begin{equation} \label{eq:damageEvol}
-\omega = \left \{ \begin{array}{ll} 
+\omega = \left\{ \begin{array}{ll} 
 1-\exp\left(-\displaystyle\frac{1}{m}\left(\dfrac{\eps}{\varepsilon_{\rm p}}\right)^m\right) & \mbox{if $\eps \leq \varepsilon_1$}\\[2mm]
-1- \dfrac{\varepsilon_3}{\eps} \exp \left(- \dfrac{\eps- \varepsilon_1}{\varepsilon_{\rm f} \left[1+ \left(\frac{\eps-\varepsilon_1}{\varepsilon_2}\right)^n\right]}\right) & \mbox{if $\eps > \varepsilon_1$} \end{array} \right.
+1- \dfrac{\varepsilon_3}{\eps} \exp \left(- \dfrac{\eps- \varepsilon_1}{\varepsilon_{\rm f} \left[1+ \left(\frac{\eps-\varepsilon_1}{\varepsilon_2}\right)^n\right]}\right) & \mbox{if $\eps > \varepsilon_1$} \end{array} 
+\right\}
 \end{equation}
 The primary model parameters are the uniaxial tensile strength $f_{\rm t}$,
 the strain at peak stress (under uniaxial tension) $\varepsilon_{\rm p}$, and additional parameters
@@ -1851,7 +1865,7 @@ In order to adapt the original formulation to the \texttt{idm1}, which uses dama
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=\textwidth]{trilinear_diagram_sigmaVSw_and_sigmaVSepsilon.eps}
+	\includegraphics[width=\textwidth]{trilinear_diagram_sigmaVSw_and_sigmaVSepsilon}
 	\caption{Trilinear softening diagram expressed in terms of the crack opening ($w$) and expressed in terms of strain.}
 	\label{fig:diagram_sigmaVSw_and_sigmaVSepsilon}
 \end{figure}
@@ -3104,10 +3118,10 @@ equation
 \end{equation}
 where $h$ is the relative pore humidity, $T$ is the absolute temperature [K], $T_0 = 298$ K is the room temperature, and parameter $p = 2$. Parameter $k_T$ is different for monotonically increasing and for cyclic temperature, and is defined as
 \begin{equation}
-\kappa_T = \left \{ \begin{array}{ll}
+\kappa_T = \left\{ \begin{array}{ll}
 k_{Tm} & \quad \mathrm{if} \; T = T_{max} \; \mathrm{and} \; \dot{T} > 0 \\
 k_{Tc} & \quad \mathrm{if} \; T < T_{max} \; \mathrm{or} \; \dot{T} \leq 0 
-\end{array} \right.
+\end{array} \right\}
 \label{eq:mps_temperature}
 \end{equation}
 in which  $k_{Tm}$ [-] and $k_{Tc}$ [-] are new parameters and $T_{\max}$ is the
@@ -4277,15 +4291,15 @@ dimensionless strain-like hardening variable, $\kappa_p$.
 The {\bf hardening laws} read
 \begin{eqnarray} \nonumber
 q_{\rm h1}(\kappa_{\rm p}) &=& 
-\left \{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
+\left\{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
 1 & \mbox{if $\kappa_{\rm p} \ge 1$}
 \end{array}
-\right.
+\right\}
 \\ \label{eq:hardeningLawOne} \\ 
-q_{\rm h2}(\kappa_{\rm p}) &=& \left \{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
+q_{\rm h2}(\kappa_{\rm p}) &=& \left\{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
 1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
 \end{array}
-\right.
+\right\}
 \label{eq:hardeningLawTwo}
 \end{eqnarray}
 During the initial stage of
@@ -4433,7 +4447,7 @@ For instance, bilinear softening is obtained with
     \dfrac{E\kappa_{dt}(\varepsilon_f-\varepsilon_{f1})+\sigma_1(\kappa_{dt1}-\varepsilon_f)}{E\kappa_{dt}(\varepsilon_f-\varepsilon_{f1})-\sigma_1\kappa_{dt2}} & \hskip 10mm \mbox{ if } \varepsilon_{f1}<\kappa_{dt1}+\omega_t\kappa_{dt2}\le\varepsilon_{f}
     \\[3mm]
     0 & \hskip 10mm \mbox{ if } \varepsilon_{f}<\kappa_{dt1}+\omega_t\kappa_{dt2}
-  \end{array}\right.
+  \end{array}\right\}
 \end{equation}
 where $\varepsilon_{f1}$ and $\sigma_1$ is the strain and stress at the knee point
 of the softening diagram (where the two linear segments meet), and $\varepsilon_{f}$
@@ -4471,7 +4485,7 @@ Two other auxiliary internal variables that affect compressive damage are define
 \displaystyle\frac{\alpha_c\beta_c\vert\dot{\boldsymbol\varepsilon}_p\vert}{x_s} & \hskip 10mm \mbox{if } \dot\kappa_{dt}>0\;\mbox{ and }\; \kappa_{dt}\ge \varepsilon_0
 \\[3mm]
 0 & \hskip 10mm \mbox{if } \dot\kappa_{dt}=0\;\mbox{ or }\; \kappa_{dt}< \varepsilon_0
-\end{array}\right.
+\end{array}\right\}
 \\
 \dot\kappa_{dc2} &=&  \frac{\dot\kappa_{dc}}{x_s}
 \end{eqnarray}
@@ -5659,10 +5673,9 @@ Supported modes& \_1dInterface\\
 \end{figure}
 
 \subsubsection{Bond-slip model for reinforced concrete - BondCEB}
-
 The complex steel/concrete interaction can be modelled with a bond-slip relation, which describes the bond stress (tangential interface traction), $\tau$, in terms of the relative reinforcement slip (tangential interface jump), $s$. This interface material model is based on the local bond--slip relationship for reinforced concrete under good bond conditions outlined in the the \textit{fib} Model Code for Concrete Structures 2010 \cite{fib:2010}.
-In general, the model is formulated in terms of the interface traction vector \mbf{t} and the interface jump vector \mbf{\delta}.
-In the model, the interface is assumed to have only elastic stiffness $k_\text{n}$ in the normal direction. The normal interface traction is then evaluated elastically from the normal interface jump, i.e. $t_\text{n} =  k_\text{n} \delta_\text{n}$. The tangential traction $t_\text{t} = \tau$ is evaluated from the user-specified function $\tau (s)$, see Figure~\ref{BondCEB}:
+In general, the model is formulated in terms of the interface traction vector $\mbf{t}$ and the interface jump vector $\mbf{\delta}$. 
+In the model, the interface is assumed to have only elastic stiffness $k_{\text{n}}$ in the normal direction. The normal interface traction is then evaluated elastically from the normal interface jump, i.e. $t_{\text{n}} =  k_{\text{n}} \delta_{\text{n}}$. The tangential traction $t_{\text{t}} = \tau$ is evaluated from the user-specified function $\tau (s)$, see Figure~\ref{BondCEB}:
 
 \begin{equation}
 \tau (s) = \begin{cases}
@@ -5673,7 +5686,7 @@ In the model, the interface is assumed to have only elastic stiffness $k_\text{n
 	\end{cases}
 \end{equation}
 
-\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_\text{s}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. Should the provided stiffness be smaller than $k_\text{n} = \dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
+\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_{\text{s}}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. Should the provided stiffness be smaller than $k_n = \dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
 \begin{equation}
 \dfrac{\partial \mbf{t}}{\partial \mbf{\delta}}= \left[ \begin{array}{cc}
 \dfrac{\partial t_\text{n}}{\partial \delta_\text{n}} &
@@ -5819,7 +5832,7 @@ The plasticity part is based on the effective stresses and uses only a subset of
 %
 \begin{figure}[htb]
   \centering
-  \includegraphics[width=0.6\textwidth]{./plastdamyieldfig.pdf}
+  \includegraphics[width=0.6\textwidth]{./plastdamyieldfig}
  \caption{Latticeplastdam yield surface, which is composed of ellipse with a smooth transition.}
  \label{plastdamyieldfig}
 \end{figure}

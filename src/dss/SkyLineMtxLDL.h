@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -54,22 +54,22 @@ public:
 
 
 public:
-    virtual void Solve(double *b, double *x);
+    virtual void Solve(double *b, double *x) override;
 
     //ILargeMatrix
-    virtual double &ElementAt(int i, int j);
-    virtual void LoadZeros();
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm);
-    virtual void SolveLV(const LargeVector &b, LargeVector &x);
-    virtual void Factorize();
-    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
+    virtual double &ElementAt(int i, int j) override;
+    virtual void LoadZeros() override;
+    virtual void LoadMatrixNumbers(SparseMatrixF &sm) override;
+    virtual void SolveLV(const LargeVector &b, LargeVector &x) override;
+    virtual void Factorize() override;
+    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) override;
 
 public:
-    virtual void SchurComplementFactorization(int fixed_blocks);
-    virtual void SolveA11(double *x, long fixed_blocks);
-    virtual void Sub_A21_A11inv(double *x, long fixed_blocks);
-    virtual void Sub_A11inv_A12(double *x, long fixed_blocks);
-    virtual void WriteCondensedMatrixA22(double *a, Ordering *mcn, IntArrayList *lncn);
+    virtual void SchurComplementFactorization(int fixed_blocks) override;
+    virtual void SolveA11(double *x, long fixed_blocks) override;
+    virtual void Sub_A21_A11inv(double *x, long fixed_blocks) override;
+    virtual void Sub_A11inv_A12(double *x, long fixed_blocks) override;
+    virtual void WriteCondensedMatrixA22(double *a, Ordering *mcn, IntArrayList *lncn) override;
 }; //class SkyLineMtxLDL
 
 DSS_NAMESPASE_END

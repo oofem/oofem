@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -303,7 +303,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     _dss->LoadZeros();
     delete[] mcn;
 
-    OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %d\n", neq, nz_);
+    OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %ld\n", neq, nz_);
 
     // increment version
     this->version++;

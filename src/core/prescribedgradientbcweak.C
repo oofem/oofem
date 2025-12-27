@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -103,7 +103,7 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mSpringNodeInd1(-1),
     mSpringNodeInd2(-1),
     mSpringPenaltyStiffness(1.0e-3),
-    mPeriodicityNormal({0.0, 1.0}),
+    mPeriodicityNormal(Vec2(0.0, 1.0)),
     mDomainSize(0.0),
     mMirrorFunction(0)
 {
@@ -195,7 +195,7 @@ void PrescribedGradientBCWeak :: initializeFrom(InputRecord &ir)
 //    printf("mMirrorFunction: %d\n", mMirrorFunction );
 
     if ( mMirrorFunction == 0 ) {
-        mPeriodicityNormal = {0.0, 1.0};
+        mPeriodicityNormal = Vec2(0.0, 1.0);
     }
 }
 
@@ -343,7 +343,7 @@ void PrescribedGradientBCWeak :: computeExtForceElContrib(FloatArray &oContrib, 
 
 
         // For now, assume piecewise constant approx
-        FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
+        FloatArray Ntrac = Vec1 ( 1.0*mTracDofScaling );
 
         // N-matrix
         FloatMatrix Nmat;
@@ -742,7 +742,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_1(FloatMatrix &o_x_times_N)
             FloatMatrix contrib(2,3);
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
+            FloatArray Ntrac = Vec1( 1.0*mTracDofScaling );
 
             // N-matrix
             FloatMatrix Nmat;
@@ -830,7 +830,7 @@ void PrescribedGradientBCWeak :: compute_x_times_N_2(FloatMatrix &o_x_times_N)
         	FloatMatrix contrib(4,2);
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
+            FloatArray Ntrac = Vec1( 1.0*mTracDofScaling );
 
             // N-matrix
             FloatMatrix Nmat;
@@ -905,7 +905,7 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
         for ( auto &gp : *el.mIntRule ) {
 
             // For now, assume piecewise constant approx
-            FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
+            FloatArray Ntrac = Vec1( 1.0*mTracDofScaling );
 
             // N-matrix
             FloatMatrix Nmat;
@@ -942,9 +942,9 @@ void PrescribedGradientBCWeak :: computeField(FloatArray &sigma, TimeStep *tStep
     }
 
     if ( dim == 2 ) {
-        sigma = {
+        sigma = Vec6(
             stressMatrix(0, 0), stressMatrix(1, 1), 0.0, 0.0, 0.0, 0.5*(stressMatrix(0, 1) + stressMatrix(1, 0))
-        };
+        );
     } else {
         sigma.beVectorForm(stressMatrix);
     }
@@ -1128,9 +1128,9 @@ void PrescribedGradientBCWeak :: giveTractionElNormal(size_t iElInd, FloatArray 
     oTangent.beDifferenceOf(xE, xS);
     oTangent.normalize();
 
-    oNormal = {
+    oNormal = Vec2(
         oTangent [ 1 ], -oTangent [ 0 ]
-    };
+    );
 }
 
 void PrescribedGradientBCWeak :: giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const
@@ -1183,14 +1183,14 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     findHoleCoord(holeCoordUnsorted, allCoordUnsorted);
 
     // Add corner points
-    holeCoordUnsorted.push_back( {mUC[0], mLC[1]} );
-    allCoordUnsorted.push_back( {mUC[0], mLC[1]} );
+    holeCoordUnsorted.push_back( Vec2(mUC[0], mLC[1]) );
+    allCoordUnsorted.push_back( Vec2(mUC[0], mLC[1]) );
 
-    holeCoordUnsorted.push_back( {mUC[0], mUC[1]} );
-    allCoordUnsorted.push_back( {mUC[0], mUC[1]} );
+    holeCoordUnsorted.push_back( Vec2(mUC[0], mUC[1]) );
+    allCoordUnsorted.push_back( Vec2(mUC[0], mUC[1]) );
 
-    holeCoordUnsorted.push_back( {mLC[0], mUC[1]} );
-    allCoordUnsorted.push_back( {mLC[0], mUC[1]} );
+    holeCoordUnsorted.push_back( Vec2(mLC[0], mUC[1]) );
+    allCoordUnsorted.push_back( Vec2(mLC[0], mUC[1]) );
 
 
     // Add crack-boundary intersections
@@ -1239,7 +1239,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
         xS.resizeWithValues(2);
         FloatArray xE = holeCoordUnsorted[i];
         xE.resizeWithValues(2);
-        const FloatArray xC = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
+        const FloatArray xC = Vec2(0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1]));
 
         if ( arcPosFunc.calcArcPos(xC) < 2.*l_s ) {
             tracElNew0[0].mInteriorSegments.emplace_back(xS, xE);
@@ -1333,16 +1333,16 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
     mSpringNodeInd1 = node1->giveGlobalNumber();
 //    printf("mSpringNodeInd1: %d\n", mSpringNodeInd1 );
 
-    FloatArray x2 = {mUC.at(1), mLC.at(2)};
-//    FloatArray x2 = {mUC.at(1), mUC.at(2)};
+    FloatArray x2 = Vec2(mUC.at(1), mLC.at(2));
+//    FloatArray x2 = Vec2(mUC.at(1), mUC.at(2));
 //    printf("x2: "); x2.printYourself();
     Node *node2 = localizer->giveNodeClosestToPoint(x2, maxDist);
     mSpringNodeInd2 = node2->giveGlobalNumber();
 //    printf("mSpringNodeInd2: %d\n", mSpringNodeInd2 );
 
 
-    FloatArray x3 = {mLC.at(1), mUC.at(2)};
-//    FloatArray x2 = {mUC.at(1), mUC.at(2)};
+    FloatArray x3 = Vec2(mLC.at(1), mUC.at(2));
+//    FloatArray x2 = Vec2(mUC.at(1), mUC.at(2));
 //    printf("x3: "); x3.printYourself();
     Node *node3 = localizer->giveNodeClosestToPoint(x3, maxDist);
     mSpringNodeInd3 = node3->giveGlobalNumber();
@@ -1498,7 +1498,7 @@ void PrescribedGradientBCWeak :: assembleTangentGPContributionNew(FloatMatrix &o
     //////////////////////////////////
     // Compute traction N-matrix
     // For now, assume piecewise constant approx
-    FloatArray Ntrac = FloatArray { 1.0*mTracDofScaling };
+    FloatArray Ntrac = Vec1( 1.0*mTracDofScaling );
     FloatMatrix NtracMat;
     NtracMat.beNMatrixOf(Ntrac, dim);
 
@@ -1584,7 +1584,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 //        bool mappingPerformed = false;
 
         FloatArray n = mPeriodicityNormal;
-        FloatArray t = {n(1),-n(0)};
+        FloatArray t = Vec2(n(1),-n(0));
         t.normalize();
 
         double l_s = mUC[0] - mLC[0];
@@ -1611,7 +1611,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 
             if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
                 // Gamma_1_plus
-                oPosMinus = {0.0, iPosPlus[1]};
+                oPosMinus = Vec2(0.0, iPosPlus[1]);
                 return;
             }
 
@@ -1619,10 +1619,10 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
                 // Gamma_2_plus
 
                 if ( iPosPlus[0] < a ) {
-                    oPosMinus = {l_s - a + iPosPlus[0], 0.0};
+                    oPosMinus = Vec2(l_s - a + iPosPlus[0], 0.0);
                     return;
                 } else {
-                    oPosMinus = {iPosPlus[0] - a, 0.0};
+                    oPosMinus = Vec2(iPosPlus[0] - a, 0.0);
                     return;
                 }
 
@@ -1635,10 +1635,10 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
             if ( iPosPlus [ 0 ] > mUC [ 0 ] - distTol ) {
                 // Gamma_1_plus
                 if ( iPosPlus[1] < a ) {
-                    oPosMinus = {0.0, l_s - a + iPosPlus[1]};
+                    oPosMinus = Vec2(0.0, l_s - a + iPosPlus[1]);
                     return;
                 } else {
-                    oPosMinus = {0.0, iPosPlus[1] - a};
+                    oPosMinus = Vec2(0.0, iPosPlus[1] - a);
                     return;
                 }
 
@@ -1647,7 +1647,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
             if ( iPosPlus [ 1 ] > mUC [ 1 ] - distTol ) {
                 // Gamma_2_plus
 
-                oPosMinus = {iPosPlus[0], 0.0};
+                oPosMinus = Vec2(iPosPlus[0], 0.0);
                 return;
             }
 
@@ -1694,7 +1694,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
         const double distTol = 1.0e-12;
 
         FloatArray n = mPeriodicityNormal;
-        FloatArray t = {n(1),-n(0)};
+        FloatArray t = Vec2(n(1),-n(0));
         t.normalize();
 
         double l_s = mUC[0] - mLC[0];
@@ -1723,7 +1723,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
 
             if ( iPosMinus [ 0 ] < mLC [ 0 ] + distTol ) {
                 // Gamma_1_minus
-                oPosPlus = {l_s, iPosMinus[1]};
+                oPosPlus = Vec2(l_s, iPosMinus[1]);
                 return;
             }
 
@@ -1731,11 +1731,11 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
                 // Gamma_2_minus
 
                 if ( iPosMinus[0] < l_s - a) {
-                    oPosPlus = {iPosMinus[0] + a, l_s};
+                    oPosPlus = Vec2(iPosMinus[0] + a, l_s);
                     return;
                 }
                 else {
-                    oPosPlus = {iPosMinus[0] - (l_s - a), l_s};
+                    oPosPlus = Vec2(iPosMinus[0] - (l_s - a), l_s);
                     return;
                 }
 
@@ -1748,10 +1748,10 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
                 // Gamma_1_minus
 
                 if ( iPosMinus[1] < l_s - a ) {
-                    oPosPlus = {l_s, iPosMinus[1] + a};
+                    oPosPlus = Vec2(l_s, iPosMinus[1] + a);
                     return;
                 } else {
-                    oPosPlus = {l_s, iPosMinus[1] - (l_s - a) };
+                    oPosPlus = Vec2(l_s, iPosMinus[1] - (l_s - a) );
                     return;
                 }
             }
@@ -1759,7 +1759,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
             if ( iPosMinus [ 1 ] < mLC [ 1 ] + distTol ) {
                 // Gamma_2_minus
 
-                oPosPlus = {iPosMinus[0], l_s};
+                oPosPlus = Vec2(iPosMinus[0], l_s);
                 return;
 
             }
@@ -1941,7 +1941,7 @@ void PrescribedGradientBCWeak :: findPeriodicityCoord(std::vector<FloatArray> &o
     const double l_s = mUC[0] - mLC[0];
 
     FloatArray n = mPeriodicityNormal;
-    FloatArray t = {n(1),-n(0)};
+    FloatArray t = Vec2(n(1),-n(0));
 
     if ( mMirrorFunction == 1 || mMirrorFunction == 2 ) {
 
@@ -1949,7 +1949,7 @@ void PrescribedGradientBCWeak :: findPeriodicityCoord(std::vector<FloatArray> &o
             // a <= l_s/2
             double a = 0.5*l_s*( 1.0 +  n(1)/n(0) );
 
-            FloatArray p1 = {2.0*a, 0.0};
+            FloatArray p1 = Vec2(2.0*a, 0.0);
             FloatArray p1Plus;
             giveMirroredPointOnGammaPlus(p1Plus, p1);
             oHoleCoordUnsorted.push_back(std::move(p1Plus));
@@ -1957,10 +1957,10 @@ void PrescribedGradientBCWeak :: findPeriodicityCoord(std::vector<FloatArray> &o
             // a > l_s/2
             double c = l_s - 0.5*l_s*( 1.0 + t(1)/t(0) );
 
-            FloatArray p1 = {l_s, l_s-2.0*c};
+            FloatArray p1 = Vec2(l_s, l_s-2.0*c);
             oHoleCoordUnsorted.push_back(std::move(p1));
 
-            FloatArray p2 = {0, 2.0*c};
+            FloatArray p2 = Vec2(0, 2.0*c);
             FloatArray p2Plus;
             giveMirroredPointOnGammaPlus(p2Plus, p2);
             oHoleCoordUnsorted.push_back(std::move(p2Plus));
@@ -2005,7 +2005,7 @@ void PrescribedGradientBCWeak :: removeSegOverHoles(TracSegArray &ioTSeg, const 
     for ( auto &l : ioTSeg.mInteriorSegments ) {
         const auto &xS = l.giveVertex(1);
         const auto &xE = l.giveVertex(2);
-        FloatArray xPlus = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
+        FloatArray xPlus = Vec2(0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1]));
 
         FloatArray lcoordsPlus, closestPlus;
         localizer->giveElementClosestToPoint(lcoordsPlus, closestPlus, xPlus);

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -357,10 +357,10 @@ Node :: checkConsistency()
                 // compare coordinate systems
                 masterNode = dynamic_cast< Node * >( domain->giveDofManager(master) );
                 if ( !masterNode ) {
-                    OOFEM_WARNING("master dofManager is not compatible", 1);
+                    OOFEM_WARNING("master dofManager is not compatible");
                     result = 0;
                 } else if ( !this->hasSameLCS(masterNode) ) {
-                    OOFEM_WARNING("different lcs for master/slave nodes", 1);
+                    OOFEM_WARNING("different lcs for master/slave nodes");
                     result = 0;
                 }
             }

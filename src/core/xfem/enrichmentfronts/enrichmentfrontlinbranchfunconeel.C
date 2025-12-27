@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -65,13 +65,13 @@ int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan)
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
-    FloatArray xTip = {
+    FloatArray xTip = Vec2(
         mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2)
-    };
+    );
 
-    FloatArray pos = {
+    FloatArray pos = Vec2(
         iEfInput.mPos.at(1), iEfInput.mPos.at(2)
-    };
+    );
 
     // Crack tangent and normal
     FloatArray t, n;

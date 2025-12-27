@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -173,7 +173,7 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
     } else if ( aProperty == CS_DirectorVectorZ ) {
         * expr = & directorzExpr;
     } else {
-        OOFEM_ERROR("called with unknown ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("%d: called with unknown ID %d", this->giveNumber(), aProperty);
     }
 }
 

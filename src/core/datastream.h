@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -179,7 +179,7 @@ public:
     int write(const int *data, std::size_t count) override;
     int write(const unsigned long *data, std::size_t count) override;
 #ifdef _WIN32
-    int write(const std::size_t* data, std::size_t count);
+    int write(const std::size_t* data, std::size_t count) override;
 #endif
     int write(const long *data, std::size_t count) override;
     int write(const double *data, std::size_t count) override;

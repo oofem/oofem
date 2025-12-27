@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -124,7 +124,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
             gp = new GaussPoint(this, pointsPassed + 1,
-                                {coords_xi1.at(j + 1), coords_xi2.at(j + 1)},
+                                Vec2(coords_xi1.at(j + 1), coords_xi2.at(j + 1)),
                                 weights.at(j + 1), mode);
 
 
@@ -242,7 +242,7 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
                 double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea;
 
                 GaussPoint *gp = new GaussPoint(this, count + 1, 
-                                                {coords_xi1.at(k), coords_xi2.at(k), coords_xi3.at(m)},
+                                                Vec3(coords_xi1.at(k), coords_xi2.at(k), coords_xi3.at(m)),
                                                 newWeight, mode);
                 this->gaussPoints [ count ] = gp;
                 count++;

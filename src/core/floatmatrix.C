@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -162,18 +162,18 @@ void FloatMatrix :: checkBounds(Index i, Index j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR("matrix error on rows : %d < 0", i);
+        OOFEM_ERROR("matrix error on rows : %d < 0", (int)i);
     }
     if ( j <= 0 ) {
-        OOFEM_ERROR("matrix error on columns : %d < 0", j);
+        OOFEM_ERROR("matrix error on columns : %d < 0", (int)j);
     }
 
     if ( i > rows() ) {
-        OOFEM_ERROR("matrix error on rows : %d > %d", i, rows());
+        OOFEM_ERROR("matrix error on rows : %d > %d", (int)i, (int)rows());
     }
 
     if ( j > cols() ) {
-        OOFEM_ERROR("matrix error on columns : %d > %d", j, cols());
+        OOFEM_ERROR("matrix error on columns : %d > %d", (int)j, (int)cols());
     }
 }
 
@@ -313,6 +313,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const { dest=this->col(c
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)                             { _zeroedIfEmpty(*this,a.size(),a.size()); this->selfadjointView<Eigen::Upper>().rankUpdate(a,dV); }
 void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV)       { _zeroedIfEmpty(*this,a.cols(),b.cols()); *this+=a.transpose()*b*dV; }
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)            { _zeroedIfEmpty(*this,a.size(),b.size()); *this+=a*b.transpose()*dV; }
+void FloatMatrix :: plus_Nt_a_otimes_b_B(const FloatMatrix &N, const FloatArray &a, const FloatArray &b, const FloatMatrix &B, double dV){ _zeroedIfEmpty(*this,N.cols(),B.cols()); *this=dV*((N*a)*(b.transpose()*B).transpose()); }
 bool FloatMatrix :: beInverseOf(const FloatMatrix &src){
     Eigen::FullPivLU<Eigen::MatrixXd> lu(src);
     // lu.setThreshold(1e-30); // this is what the original code uses
@@ -327,7 +328,7 @@ void FloatMatrix::add(double s, const FloatMatrix& a){ if(!a.isNotEmpty()) retur
 void FloatMatrix :: subtract(const FloatMatrix &a)   { if(!a.isNotEmpty()) return; if(!isNotEmpty()){ *this=-a; return; }  *this-=a;   }
 FloatMatrix FloatMatrix :: fromArray(const FloatArray &vector, bool transposed){ if(transposed) return vector.transpose(); return vector; }
 void FloatMatrix :: zero() { this->setZero(); }
-void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
+void FloatMatrix :: beUnitMatrix(){ if(!this->isSquare()) OOFEM_ERROR("cannot make unit matrix of %ld by %ld matrix", rows(), cols()); *this=Eigen::MatrixXd::setIdentity(); }
 double FloatMatrix :: giveDeterminant() const { return this->determinant(); }
 void FloatMatrix :: beDiagonal(const FloatArray &diag) { *this=diag.asDiagonal().toDenseMatrix(); }
 double FloatMatrix :: giveTrace() const { return this->trace(); }
@@ -740,6 +741,27 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
     }
 #endif
 }
+
+void FloatMatrix :: plus_Nt_a_otimes_b_B(const FloatMatrix &N, const FloatArray &a, const FloatArray &b, const FloatMatrix &B, double dV)
+{
+    if ( !this->isNotEmpty() ) {
+      this->nRows = N.nColumns;
+      this->nColumns = B.nColumns;
+      this->values.assign(this->nRows * this->nColumns, 0.);
+    }
+    auto a_size = a.giveSize();
+    auto b_size = b.giveSize();
+    for (std::size_t i = 1; i <= nRows; i++ ) {
+      for (std::size_t j = 1; j <= nColumns; j++ ) {
+	for (int k = 1; k <= a_size; k++ ) {
+	  for (int l = 1; l <= b_size; l++ ) {
+	    this->at(i, j) += N.at(k,i) * a.at(k) * b.at(l) * B.at(l,j) * dV;
+	  }
+	}
+      }
+    }
+}
+
 
 
 
@@ -2115,13 +2137,13 @@ std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 }
 
 FloatMatrix &operator *= ( FloatMatrix & x, const double & a ) {x.times(a); return x;}
+FloatMatrix operator * ( const FloatMatrix &x, const double & a ) {FloatMatrix ans(x); ans.times(a); return ans;}
+FloatMatrix operator * ( const double & a, const FloatMatrix &x ) {FloatMatrix ans(x); ans.times(a); return ans;}
 FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans; ans.beProductOf (a,b); return ans;}
 FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) {FloatArray ans; ans.beProductOf (a,b); return ans;}
 FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.add(b); return ans;}
 FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.subtract(b); return ans;}
 FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) {a.add(b); return a;}
 FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) {a.subtract(b); return a;}
-
-
 
 } // end namespace oofem

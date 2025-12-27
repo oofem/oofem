@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -96,12 +96,12 @@ Function :: evaluate(FloatArray &answer, const std :: map< std :: string, Functi
         {
             OOFEM_ERROR("Missing necessary argument \"t\"");
         }else{
-            answer = FloatArray{this->evaluateAtTime(it->second.val0)};
+            answer = Vec1(this->evaluateAtTime(it->second.val0));
         }
     }
     else if(this->parameterType==1)
     {
-        answer = FloatArray{this->evaluateAtTime(param)};
+        answer = Vec1(this->evaluateAtTime(param));
     }
     else
         OOFEM_ERROR("Unknown parameter type %d",parameterType);

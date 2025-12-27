@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -55,15 +55,20 @@ namespace oofem {
     exit(code);
 
 
-class RuntimeException : public std::exception
+class OOFEM_EXPORT RuntimeException : public std::exception
 {
 public:
     std::string msg;
 
-    RuntimeException(const char* _func, const char* _file, int _line, const char *format, ...);
+    RuntimeException(const char* _func, const char* _file, int _line, const char *format, ...)
+        #if defined(__GNUC__) || defined (__clang)
+            __attribute__((format(printf, 5, 6)))
+        #endif
+    ;
     const char* what() const noexcept override;
 };
 
+OOFEM_EXPORT extern bool warningIsError;
 
 /**
  * Macros for printing errors.
@@ -72,7 +77,7 @@ public:
 //@{
 #define OOFEM_FATAL(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
 #define OOFEM_ERROR(...) { throw RuntimeException(__func__, __FILE__, __LINE__, __VA_ARGS__);}
-#define OOFEM_WARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_WARNING(...) { if(warningIsError){ oofem_logger.writeELogMsg(Logger::LOG_LEVEL_WARNING,errorInfo(__func__).c_str(), __FILE__, __LINE__,"Promoting warning to error."); OOFEM_ERROR(__VA_ARGS__); } oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, errorInfo(__func__).c_str(), __FILE__, __LINE__, __VA_ARGS__); }
 #define OOFEM_SERROR(...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__); OOFEM_EXIT(1); }
 #define OOFEM_SWARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __func__, __FILE__, __LINE__, __VA_ARGS__)
 //@}

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -38,6 +38,7 @@
 #include "oofemenv.h"
 #include "interface.h"
 #include "valuemodetype.h"
+#include "floatarray.h"
 
 #include <string>
 
@@ -45,7 +46,6 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
-class FloatArray;
 class IntArray;
 
 /**

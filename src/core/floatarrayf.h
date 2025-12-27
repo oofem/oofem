@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -102,7 +102,7 @@ public:
     {
 #ifndef NDEBUG
         if ( x.giveSize() != N ) {
-            OOFEM_ERROR("Can't convert dynamic float array of size %d to fixed size %d\n", x.giveSize(), N);
+            OOFEM_ERROR("Can't convert dynamic float array of size %d to fixed size %ld\n", x.giveSize(), N);
         }
 #endif
         std::copy_n(x.begin(), N, values.begin());

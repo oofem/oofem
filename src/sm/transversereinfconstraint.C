@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2021   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -98,7 +98,7 @@ void TransverseReinfConstraint :: assembleVector(FloatArray &answer, TimeStep *t
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for lambda, the load is simply zero.
-        FloatArray stressLoad = {0};
+        FloatArray stressLoad = Vec1(0);
         answer.assemble(stressLoad, lambda_loc);
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Klam;

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -103,6 +103,31 @@ public:
     void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     IntArray boundarySurfaceGiveNodes(int boundary, const Element_Geometry_Type, bool includeHierarchical=false) const override;
+    /**
+     * Evaluates the tangent vectors of the surface at given point.
+     * @param isurf Determines the surface number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @return Surface mapping jacobian .
+     * @return tangent vector
+     */
+    virtual FloatArrayF<2> surfaceEvalBaseVectorsAt(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const;
+    /**
+     * Evaluates the matrix of derivatives of surface interpolation functions (shape functions) wrt parametric coordinates at given point.
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param lcoords Array containing (local) coordinates.
+     */
+    virtual void surfaceEvaldNdxi(FloatMatrix & answer, const FloatArray & lcoords) const override;
+    /**
+     * Evaluates the matrix of second derivatives of surface interpolation functions (shape functions) wrt parametric coordinates at given point.
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi.
+     * @param lcoords Array containing (local) coordinates.
+     */    
+    virtual void surfaceEvald2Ndxi2(FloatMatrix & answer, const FloatArray & lcoords) const override;
+
+
+
+    
     //@}
 
     /**@name Edge interpolation services. */

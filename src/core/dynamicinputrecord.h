@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -90,7 +90,10 @@ public:
     std::shared_ptr<InputRecord> clone() const override { return std::make_shared<DynamicInputRecord>(*this); }
     void finish(bool wrn = true) override;
 
-    std :: string giveRecordAsString() const override;
+    std :: string giveRecordAsString() const override { return giveRecordInTXTFormat(); }
+    std :: string giveRecordInTXTFormat() const override;
+    std :: string giveLocation() const override;
+
 
     void giveRecordKeywordField(std :: string &answer, int &value) override;
     void giveRecordKeywordField(std :: string &answer) override;

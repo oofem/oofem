@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -165,6 +165,12 @@ bool TimeStep :: isTheCurrentTimeStep()
 {
     return this == eModel->giveCurrentStep();
 }
+
+void TimeStep :: setTimeStepReductionFactor(double tsrf)
+{
+  this->eModel->giveCurrentMetaStep()->setTimeStepReductionFactor(tsrf);
+}
+
 
 
 void

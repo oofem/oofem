@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -77,15 +77,15 @@ public:
         }
     }
 
-    void Solve(double *b, double *x);
+    void Solve(double *b, double *x) override;
 
     //ILargeMatrix
-    virtual double &ElementAt(int i, int j);
-    virtual void LoadZeros();
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm);
-    virtual void SolveLV(const LargeVector &b, LargeVector &x);
-    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
-    virtual void Factorize();
+    virtual double &ElementAt(int i, int j) override;
+    virtual void LoadZeros() override;
+    virtual void LoadMatrixNumbers(SparseMatrixF &sm) override;
+    virtual void SolveLV(const LargeVector &b, LargeVector &x) override;
+    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) override;
+    virtual void Factorize() override;
 
     void BackSubstU(double *x, long fixed_blocks);
     void ForwardSubstL(double *x, long fixed_blocks);
@@ -98,11 +98,11 @@ public:
 
 public:
     // Schur complement solution methods
-    virtual void SchurComplementFactorization(int fixed_blocks);
-    virtual void SolveA11(double *x, long fixed_blocks);
-    virtual void Sub_A21_A11inv(double *x, long fixed_blocks);
-    virtual void Sub_A11inv_A12(double *x, long fixed_blocks);
-    virtual void WriteCondensedMatrixA22(double *a, Ordering *mcn, IntArrayList *lncn);
+    virtual void SchurComplementFactorization(int fixed_blocks) override;
+    virtual void SolveA11(double *x, long fixed_blocks) override;
+    virtual void Sub_A21_A11inv(double *x, long fixed_blocks) override;
+    virtual void Sub_A11inv_A12(double *x, long fixed_blocks) override;
+    virtual void WriteCondensedMatrixA22(double *a, Ordering *mcn, IntArrayList *lncn) override;
 }; //class SparseGridMtx
 
 DSS_NAMESPASE_END

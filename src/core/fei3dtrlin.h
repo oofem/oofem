@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -80,7 +80,8 @@ public:
     // Surface
     void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const ;
+    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const override;
+    void surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const override;
 
     double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void surfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;

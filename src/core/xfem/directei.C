@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -62,8 +62,8 @@ void DirectEI :: evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatAr
     FloatArray tangent;
     mpBasicGeometry->giveTangent(tangent, arcPos);
 
-    oGradLevelSet = {
+    oGradLevelSet = Vec2(
         -tangent [ 1 ], tangent [ 0 ]
-    };
+    );
 }
 } /* namespace oofem */

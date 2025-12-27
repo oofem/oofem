@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -133,7 +133,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
             FloatArray q;
 //            q.beDifferenceOf(pos, iTipInfo.mGlobalCoord);
 //            printf("q: "); q.printYourself();
-            q = {pos[0]-iTipInfo.mGlobalCoord[0],pos[1]-iTipInfo.mGlobalCoord[1]};
+            q = Vec2(pos[0]-iTipInfo.mGlobalCoord[0],pos[1]-iTipInfo.mGlobalCoord[1]);
 
             gradWeight.beScaled(-1.0/(iRadius*q.computeNorm()),q);
 #endif

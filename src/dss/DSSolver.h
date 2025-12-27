@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -230,63 +230,63 @@ public:
     DSSolver(MathTracer *pMT = NULL);
 
     virtual ~DSSolver();
-    virtual long Initialize(unsigned char run_code, eDSSolverType solverType = eDSSFactorizationLDLT, eDSMatrixType matrixType  = eDSSparseMatrix);
-    virtual void SetMT(MathTracer *pMT);
-    virtual void Dispose();
+    virtual long Initialize(unsigned char run_code, eDSSolverType solverType = eDSSFactorizationLDLT, eDSMatrixType matrixType  = eDSSparseMatrix) override;
+    virtual void SetMT(MathTracer *pMT) override;
+    virtual void Dispose() override;
 
-    virtual bool SetOrderingType(Ordering :: Type otype);
-    virtual bool LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr);
-    virtual bool LoadMatrix(SparseMatrixF *smt, unsigned char block_size);
-    virtual bool SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size);
+    virtual bool SetOrderingType(Ordering :: Type otype) override;
+    virtual bool LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr) override;
+    virtual bool LoadMatrix(SparseMatrixF *smt, unsigned char block_size) override;
+    virtual bool SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size) override;
 
-    virtual bool decomp();
-    virtual void changedecomp();
-    virtual bool IsFactorized();
+    virtual bool decomp() override;
+    virtual void changedecomp() override;
+    virtual bool IsFactorized() override;
 
     //multiply by a scalar
     virtual void times(double x);
     
-    virtual bool Factorize();
-    virtual bool PreFactorize();
+    virtual bool Factorize() override;
+    virtual bool PreFactorize() override;
 
     virtual void LoadZeros();
-    virtual bool LoadNumbers(SparseMatrixF *sm);
+    virtual bool LoadNumbers(SparseMatrixF *sm) override;
     virtual double &ElementAt(int i, int j);
 
-    virtual bool ReFactorize();
+    virtual bool ReFactorize() override;
 
-    virtual bool Solve(double *r, double *f);
-    virtual long Close();
+    virtual bool Solve(double *r, double *f) override;
+    virtual long Close() override;
 
     void StartSolverWriteInfo();
     void EndSolverWriteInfo();
     bool StartSolver();
 
     void SetSM(SparseMatrixF *sm);
-    virtual double GetFactorizationError();
+    virtual double GetFactorizationError() override;
 
     // Loads the "MatrixCodeNumbers" vector[n_blocks*block_size]
     // each entry in the vector[i] can be :
     // vector[i] >=  0  normal unknown      (means the corresponding row in SparseMatrixF)
     // vector[i] == -1  this entry is not used  (no corresponding row in SparseMatrixF)
-    virtual bool LoadMCN(unsigned long n_blocks, unsigned char block_size, long *mcn);
+    virtual bool LoadMCN(unsigned long n_blocks, unsigned char block_size, long *mcn) override;
 
     virtual bool LoadMCN(IntArrayList &mcn);
 
     IntArrayList *GetFixedBlocks() { return this->fixed; }
     IntArrayList *GetFixedDOFs()   { return this->lncn; }
 
-    virtual void condense(double *a, double *lhs, double *rhs, long tc);
+    virtual void condense(double *a, double *lhs, double *rhs, long tc) override;
 
-    void GetA12block(double *pA12);
+    void GetA12block(double *pA12) override;
 
     // c = A * b
-    void MulMatrixByVector(double *b, double *c);
+    void MulMatrixByVector(double *b, double *c) override;
 
-    int PreCG(double *b, double *x, double epsilon, int max_iter);
+    int PreCG(double *b, double *x, double epsilon, int max_iter) override;
 
     // Copute x by Conjugate gradient method
-    int CG(double *b, double *x, double epsilon, int max_iter);
+    int CG(double *b, double *x, double epsilon, int max_iter) override;
 
 private:
     bool LoadMCN_int(IntArrayList *mcn_order);

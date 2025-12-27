@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -61,22 +61,22 @@ int EnrFrontIntersection :: giveNumEnrichments(const DofManager &iDMan) const
 
 void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
-    FloatArray xTip = {
+    FloatArray xTip = Vec2(
         mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2)
-    };
+    );
 
-    FloatArray pos = {
+    FloatArray pos = Vec2(
         iEfInput.mPos.at(1), iEfInput.mPos.at(2)
-    };
+    );
 
     // Crack tip normal and use defined tangent
     // Note that mTangent is not necessarily equal to mTipInfo.mTangDir!
     const FloatArray &t = mTangent;
     const FloatArray &n = mTipInfo.mNormalDir;
 
-    FloatArray tipToPos = {
+    FloatArray tipToPos = Vec2(
         iEfInput.mPos(0) - xTip(0), iEfInput.mPos(1) - xTip(1)
-    };
+    );
 
     // Heaviside in normal direction
     double Hn = 0.0;
@@ -95,9 +95,9 @@ void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc
 
 void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const
 {
-    FloatArray enrFuncDeriv = {
+    FloatArray enrFuncDeriv = Vec2(
         0.0, 0.0
-    };
+    );
     oEnrFuncDeriv.push_back(enrFuncDeriv);
 }
 

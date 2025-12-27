@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -207,6 +207,29 @@ FEI3dTrLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) c
     }
 }
 
+void
+FEI3dTrLin :: surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const
+{
+
+    answer.resize(3, 3);
+    // d2n/dxidxi
+    answer.at(1, 1) = 0.;
+    answer.at(2, 1) = 0.;
+    answer.at(3, 1) = 0.;
+ 
+    // d2n/detadeta
+    answer.at(1, 2) = 0.;
+    answer.at(2, 2) = 0.;
+    answer.at(3, 2) = 0.;
+ 
+    // d2n/dxideta
+    answer.at(1, 3) = 0.;
+    answer.at(2, 3) = 0.;
+    answer.at(3, 3) = 0.;
+ 
+}
+
+  
 
 
 void

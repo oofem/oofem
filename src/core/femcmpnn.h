@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -47,6 +47,7 @@
 #include "interfacetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "floatarray.h"
 
 namespace oofem {
 class DataStream;
@@ -57,9 +58,6 @@ class InputRecord;
 class DynamicInputRecord;
 class oofegGraphicContext;
 class EntityRenumberingFunctor;
-class FloatArray;
-class IntArray;
-class FloatMatrix;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.

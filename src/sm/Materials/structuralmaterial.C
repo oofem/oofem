@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -2188,7 +2188,7 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) ) {
-        OOFEM_ERROR("Number of given eigenstrain components %d is different than required %d by element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(gp->giveMaterialMode() ), elem->giveNumber() );
+        OOFEM_ERROR("Number of given eigenstrain components %d is different than required %d by element %d", (int)eigenstrain.giveSize(), giveSizeOfVoigtSymVector(gp->giveMaterialMode() ), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -2227,7 +2227,7 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
     if ( answer.giveSize() ) {
         if ( eigenstrain.giveSize() ) {
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", (int)answer.giveSize(), (int)eigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(eigenstrain);
@@ -2249,7 +2249,7 @@ StructuralMaterial::computeStressIndependentStrainVector(GaussPoint *gp, TimeSte
         if ( answer.giveSize() ) {
             if ( eigStrain.giveSize() ) {
                 if ( answer.giveSize() != eigStrain.giveSize() ) {
-                    OOFEM_ERROR("Vector of eigen strain field has the size %d which is different with the size of eigStrain vector %d, element %d", answer.giveSize(), eigStrain.giveSize(), elem->giveNumber() );
+                    OOFEM_ERROR("Vector of eigen strain field has the size %d which is different with the size of eigStrain vector %d, element %d", (int)answer.giveSize(), (int)eigStrain.giveSize(), elem->giveNumber() );
                 }
                 answer.add(eigStrain);
             }

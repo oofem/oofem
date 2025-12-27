@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -41,7 +41,6 @@
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
-class FloatArray;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse

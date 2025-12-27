@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -163,40 +163,40 @@ class DenseMatrixArithmetics1x1 : public DenseMatrixArithmetics
 public:
     DenseMatrixArithmetics1x1(long n) : DenseMatrixArithmetics(n) {}
 
-    void SubATBproduct(double *pC, double *pA, double *pB);
-    void GetInversion(double *pC, double *pA);
-    virtual void FactorizeBlock(double *A);
-    virtual void SubstSolveBlock(double *A, double *B);
-    virtual void SubstSolve(double *A, double *b);
+    void SubATBproduct(double *pC, double *pA, double *pB) override;
+    void GetInversion(double *pC, double *pA) override;
+    virtual void FactorizeBlock(double *A) override;
+    virtual void SubstSolveBlock(double *A, double *B) override;
+    virtual void SubstSolve(double *A, double *b) override;
 };
 
 class DenseMatrixArithmetics2x2 : public DenseMatrixArithmetics
 {
 public:
     DenseMatrixArithmetics2x2(long n) : DenseMatrixArithmetics(n) {}
-    void SubATBproduct(double *pC, double *pa, double *pb);
-    void GetInversion(double *C, double *pA);
+    void SubATBproduct(double *pC, double *pa, double *pb) override;
+    void GetInversion(double *C, double *pA) override;
 };
 
 class DenseMatrixArithmetics3x3 : public DenseMatrixArithmetics
 {
 public:
     DenseMatrixArithmetics3x3(long n) : DenseMatrixArithmetics(n) {}
-    void SubATBproduct(double *pC, double *pa, double *pb);
+    void SubATBproduct(double *pC, double *pa, double *pb) override;
 };
 
 class DenseMatrixArithmetics4x4 : public DenseMatrixArithmetics
 {
 public:
     DenseMatrixArithmetics4x4(long n) : DenseMatrixArithmetics(n)     {}
-    void SubATBproduct(double *pC, double *pa, double *pb);
+    void SubATBproduct(double *pC, double *pa, double *pb) override;
 };
 
 class DenseMatrixArithmetics5x5 : public DenseMatrixArithmetics
 {
 public:
     DenseMatrixArithmetics5x5(long n) : DenseMatrixArithmetics(n)     {}
-    void SubATBproduct(double *pC, double *pA, double *pB);
+    void SubATBproduct(double *pC, double *pA, double *pB) override;
 };
 
 class DenseMatrixArithmetics6x6 : public DenseMatrixArithmetics
@@ -204,14 +204,14 @@ class DenseMatrixArithmetics6x6 : public DenseMatrixArithmetics
 public:
     DenseMatrixArithmetics6x6(long n) : DenseMatrixArithmetics(n) {}
 
-    void SubATBproduct(double *pC, double *pA, double *pB);
+    void SubATBproduct(double *pC, double *pA, double *pB) override;
 };
 
 class DenseMatrixArithmetics_Fake : public DenseMatrixArithmetics
 {
 public:
     DenseMatrixArithmetics_Fake(long n) : DenseMatrixArithmetics(n) {}
-    void SubATBproduct(double *C, double *blockA, double *blockB);
+    void SubATBproduct(double *C, double *blockA, double *blockB) override;
 };
 
 DSS_NAMESPASE_END

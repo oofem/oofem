@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -275,6 +275,18 @@ public:
     {
         for ( std::size_t i = 0; i < N; i++ ) {
             (*this)(i, c) = src[i];
+        }
+    }
+
+    /**
+     * Sets the values of the matrix in specified row.
+     * @param src Array to set at row c.
+     * @param r Column to set.
+     */
+    void setRow(const FloatArrayF<M> &src, int r)
+    {
+        for ( std::size_t i = 0; i < M; i++ ) {
+            (*this)(r, i) = src[i];
         }
     }
     
@@ -1135,7 +1147,7 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
     for ( std::size_t  i = 1; i < N; i++ ) {
         double piv = tmp.at(i, i);
         if ( std::abs(piv) <= zeropiv ) {
-            OOFEM_ERROR("pivot (%d,%d) to close to small", i, i);
+            OOFEM_ERROR("pivot (%d,%d) to close to small", (int)i, (int)i);
         }
         for ( std::size_t j = i + 1; j <= N; j++ ) {
             double linkomb = tmp.at(j, i) / tmp.at(i, i);

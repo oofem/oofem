@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -363,9 +363,9 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             double J = fei->boundaryEvalNormal( n, side, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
 
             // [I - n(x)n]  in voigt form:
-            surfProj = {1. - n(0)*n(0), 1. - n(1)*n(1), 1. - n(2)*n(2),
-                        - n(1)*n(2), - n(0)*n(2), - n(0)*n(1),
-            };
+            surfProj = Vec6(1. - n(0)*n(0), 1. - n(1)*n(1), 1. - n(2)*n(2),
+                        - n(1)*n(2), - n(0)*n(2), - n(0)*n(1)
+            );
 
             // Construct B matrix of the surface nodes
             B.resize(6, 3 * dNdx.giveNumberOfRows());

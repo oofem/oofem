@@ -36,7 +36,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
 project (oofem CXX C)
 set (OOFEM_HOMEPAGE "http://www.oofem.org")
-set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
+set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/~bp/bp.html")
 string(TIMESTAMP YEAR "%Y")
 set (OOFEM_COPYRIGHT "Copyright (C) 1994-${YEAR} Borek Patzak")
 set (OOFEM_EMAIL "oofem@fsv.cvut.cz")
@@ -147,7 +147,7 @@ option (USE_PARMETIS "Enable Parmetis support" OFF)
 option (USE_OPENMP_PARALLEL "Enable OpenMP, shared memory parallelism" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
-option (USE_IML "Enable iml++ solvers" OFF) # or this
+option (USE_IML "Enable iml++ solvers" ON) # or this
 option (USE_SPOOLES "Enable SPOOLES-solver" OFF) # or this
 option (USE_INTEL_MKL_PARDISO "Enable MKLPARDISO solver support" OFF)
 option (USE_ONEAPI "Enable OneMKL solver support via OneAPI" OFF)
@@ -172,10 +172,11 @@ option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable fro
 option (USE_NANOBIND "Use nanobind instead of pybind; requires USE_PYBIND_BINDINGS" OFF)
 option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
-option (USE_MPM "Enable experimental multiphysics module" OFF)
+option (USE_MPM "Enable experimental multiphysics module" ON)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
 OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
+OPTION (USE_TRACE_FIELDS "Allow tracing field access by setting OOFEM_TRACE_FIELDS_CSV env var" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -341,6 +342,12 @@ if (USE_XML)
     link_libraries(pugixml::pugixml)
 endif()
 
+if (USE_TRACE_FIELDS)
+    add_definitions(-D_USE_TRACE_FIELDS)
+endif()
+
+
+
 ## There is a conflict on set.h as defined by libstdc and superlu_mt 3.1
 ## Therefore it is assumed that superlu include files
 ## are included using #include "SUPERLU_MT/include"
@@ -362,9 +369,25 @@ if (USE_SUPERLU_MT)
     if (NOT HAVE_SUPERLU_MT_DDEFS_H)
         message (FATAL_ERROR "Necessary SUPERLU_MT headers not found; refer to CMakeLists.txt for details")
     endif ()
-
-
 endif ()
+
+# perhaps use in the future instead
+#
+#if (USE_SUPERLU_MT)
+#    if(SUPERLU_MT_DIR)
+#        add_subdirectory(${SUPERLLU_MT_DIR})
+#    else()
+#        FetchContent_Declare(
+#            superlu_mt
+#            GIT_REPOSITORY https://github.com/xiaoyeli/superlu_mt.git
+#            GIT_TAG v4.0.1
+#        )
+#        FetchContent_MakeAvailable(superlu_mt)
+#    endif()
+#    # ...
+#endif()
+
+
 
 if (USE_VTK)
     set (CMAKE_LIBRARY_DIR ${VTK_DIR})
@@ -424,15 +447,19 @@ if (USE_PARDISO_ORG)
 endif ()
 
 if (USE_INTEL_MKL_PARDISO)
+    if(INTEL_MKL_PARDISO_DIR)
+        include_directories("${INTEL_MKL_PARDISO_DIR}/mkl/include")
+    else()
+        find_path (MKL_INCLUDE_DIR mkl.h PATHS /usr/include/mkl /opt/intel/composerxe/mkl/include REQUIRED)
+        include_directories("${MKL_INCLUDE_DIR}")
+    endif()
     # Find the actual libraries:
     list(APPEND MKL_LIBS "mkl_core" "mkl_gf_lp64" "mkl_gnu_thread" "pthread")
     foreach (f ${MKL_LIBS})
         if (INTEL_MKL_PARDISO_DIR)
             find_library (${f}_LIB ${f} PATH "${INTEL_MKL_PARDISO_DIR}/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("${INTEL_MKL_PARDISO_DIR}/mkl/include")
         else ()
             find_library (${f}_LIB ${f} HINTS "/opt/intel/composerxe/mkl/lib/intel64/" DOC "MKLPARDISO (library)")
-            include_directories ("/opt/intel/composerxe/mkl/include")
         endif ()
         if (${${f}_LIB} STREQUAL "${f}_LIB-NOTFOUND")
             message (FATAL_ERROR "MKLPARDISO library not found")
@@ -510,17 +537,6 @@ endif ()
 
 
 if (USE_PETSC)
-    if (NOT "${PETSC_DIR}")
-        # setting defaults for typical linux environments:
-        #file (GLOB paths "/usr/lib/petscdir/*.*.*")
-        #list (GET paths 0 PETSC_DIR)
-        #message ("***************** PETSC_DIR: ${PETSC_DIR}")
-    endif ()
-    if (NOT "${PETSC_ARCH}")
-        #file (GLOB children RELATIVE ${PETSC_DIR} "${PETSC_DIR}/*")
-        #list (GET children 0 PETSC_ARCH)
-        #message ("***************** PETSC_ARCH: ${PETSC_ARCH}")
-    endif ()
     find_package (PETSc)
     # find_package(PETSc COMPONENTS CXX)
     include_directories (${PETSC_INCLUDES})
@@ -647,12 +663,6 @@ else()
 endif()
 
 
-if(USE_PYTHON_EXTENSION)
-    add_definitions(-D_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
-endif ()
-
 if(USE_NANOBIND AND NOT USE_PYBIND_BINDINGS)
     MESSAGE(FATAL_ERROR "USE_NANOBIND requires simultaneous USE_PYBIND_BINDINGS")
 endif()
@@ -661,8 +671,8 @@ if (USE_PYBIND_BINDINGS)
     add_definitions(-D_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
-    find_package(Python COMPONENTS Interpreter Development)
-    link_libraries(Python::Python)
+    find_package(Python COMPONENTS Interpreter Development.Module)
+    link_libraries(Python::Module)
     if(USE_NANOBIND)
         if(0)
             add_subdirectory(extern/nanobind)
@@ -718,9 +728,9 @@ if (USE_PYBIND_BINDINGS)
 endif()
 
 if(USE_PYTHON_EXTENSION)
-    find_package(Python COMPONENTS Interpreter Development)
+    find_package(Python COMPONENTS Interpreter Development.Module Development.Embed)
     add_definitions(-D_PYTHON_EXTENSION)
-    link_libraries(Python::Python)
+    link_libraries(Python::Python) # embedded python
 endif()
 
 #######################################################################
@@ -796,6 +806,12 @@ if (USE_SHARED_LIB)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
     set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    if (USE_DSS)
+        set_target_properties (dss PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+        if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
+            set_target_properties (dss PROPERTIES COMPILE_FLAGS ${LIBOOFEM_EXPORT_CFLAGS})
+        endif ()
+    endif()
     if (USE_FM)
         set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
         if (NOT "${LIBOOFEM_EXPORT_CFLAGS}" STREQUAL "")
@@ -942,7 +958,9 @@ endif (DOXYGEN_FOUND)
 
 configure_file (
     "${oofem_SOURCE_DIR}/doc/include.tex.in"
-    "${oofem_BINARY_DIR}")
+    "${oofem_SOURCE_DIR}/doc/include/include.tex"
+    )
+message (STATUS "Generating include.tex for manuals")
 
 # TODO: Manuals not done yet
 add_custom_target (
@@ -960,7 +978,7 @@ include (CTest)
 
 if(USE_OOFEM_EXE)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
-set (oofem_cmd  $<TARGET_FILE:oofem>)
+set (oofem_cmd $<TARGET_FILE:oofem> -Werror)
 file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
 
 #set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
@@ -994,6 +1012,28 @@ if (USE_SM)
         add_test (NAME "test_sm_NAFEMS_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm/NAFEMS COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
 endif ()
+
+if (USE_XML)
+    if(USE_SM)
+        file (GLOB xml_sm_tests RELATIVE "${oofem_TEST_DIR}/xml/sm" "${oofem_TEST_DIR}/xml/sm/*.xml")
+        foreach (case ${xml_sm_tests})
+            add_test (NAME "test_xml_sm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/xml/sm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+    if(USE_TM)
+            file (GLOB xml_tm_tests RELATIVE "${oofem_TEST_DIR}/xml/tm" "${oofem_TEST_DIR}/xml/tm/*.xml")
+        foreach (case ${xml_tm_tests})
+            add_test (NAME "test_xml_tm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/xml/tm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+    if(USE_FM)
+            file (GLOB xml_fm_tests RELATIVE "${oofem_TEST_DIR}/xml/fm" "${oofem_TEST_DIR}/xml/fm/*.xml")
+        foreach (case ${xml_fm_tests})
+            add_test (NAME "test_xml_fm_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/xml/fm COMMAND ${oofem_cmd} "-f" ${case})
+        endforeach (case)
+    endif()
+endif()
+
 
 if (USE_FM)
     file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -96,9 +96,17 @@ public:
 #endif
 
     /// Writes the normal log message.
-    void writeLogMsg(logLevelType level, const char *format, ...);
+    void writeLogMsg(logLevelType level, const char *format, ...)
+        #if defined(__GNUC__) || defined (__clang)
+            __attribute__((format(printf, 3, 4)))
+    #endif
+    ;
     /// Writes extended log message with file and line info.
-    void writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...);
+    void writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...)
+        #if defined(__GNUC__) || defined (__clang)
+            __attribute__((format(printf, 6, 7)))
+        #endif
+    ;
     /// Flushes the log stream.
     void flush() { fflush(logStream); fflush(errStream); }
 

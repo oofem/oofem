@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -68,7 +68,7 @@
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
-#define _IFT_Domain_ncontactman "ncontactman" /// [in,optional] Specifies if there is a contact manager.
+#define _IFT_Domain_ncontactsurf "ncontactsurf"
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
 #define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
 #define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
@@ -97,10 +97,11 @@ class XfemManager;
 class TopologyDescription;
 class DataReader;
 class Set;
+class ContactSurface;
 class FractureManager;
 class oofegGraphicContext;
 class ProcessCommunicator;
-class ContactManager;
+
 
 /**
  * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
@@ -143,6 +144,8 @@ private:
     std :: vector< std :: unique_ptr< Function > > functionList;
     /// Set list.
     std :: vector< std :: unique_ptr< Set > > setList;
+    /// Contact surface list.
+    std::vector< std::unique_ptr< ContactSurface > >contactSurfaceList;
     /// Nonlocal barrier list.
     std :: vector< std :: unique_ptr< NonlocalBarrier > > nonlocalBarrierList;
 
@@ -203,8 +206,7 @@ private:
     /// Fracture Manager
     std :: unique_ptr< FractureManager > fracManager;
 
-    /// Contact Manager
-    std :: unique_ptr< ContactManager > contactManager;
+
 
     /// BC tracker (keeps track of BCs applied wia sets to components)
     BCTracker bcTracker;
@@ -313,6 +315,18 @@ public:
      * given material number.
      */
     const IntArray &giveElementsWithMaterialNum(int iMaterialNum) const;
+
+    /**
+     * Service for accessing particular domain contact surface
+     * Generates error if no such contact surface is defined.
+     * @param n Pointer to n-th contact surface is returned.
+     */
+    ContactSurface *giveContactSurface(int n);
+    std::vector< std::unique_ptr< ContactSurface > > &giveContactSurface() { return this->contactSurfaceList; }
+
+
+
+    
     /**
      * Returns engineering model to which receiver is associated.
      */
@@ -463,6 +477,8 @@ public:
     int giveNumberOfNonlocalBarriers() const { return (int)nonlocalBarrierList.size(); }
     /// Returns number of sets
     int giveNumberOfSets() const { return (int)setList.size(); }
+    /// Returns number of contact surfaces
+    int giveNumberOfContactSurfaces() const { return ( int ) contactSurfaceList.size(); }
 
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -490,6 +506,8 @@ public:
     void resizeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize sets.
     void resizeSets(int _newSize);
+    /// Resizes the internal data structure to accommodate space for _newSize sets.
+    void resizeContactSurfaces(int _newSize);
 
     ///@note Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
     //@{
@@ -528,10 +546,7 @@ public:
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
-
-    ContactManager *giveContactManager();
-    bool hasContactManager();
-    
+   
     FractureManager *giveFractureManager();
     bool hasFractureManager();
 

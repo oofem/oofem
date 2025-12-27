@@ -36,7 +36,7 @@ SimpleCS 1 thick 1.0 width 1.0 material 1
 #
 # MATERIAL
 #
-EC2CreepMat 1 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge 7. t0 7. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 0 begOfTimeOfInterest 10. endOfTimeOfInterest 10. spectrum castingTime 10. preCastingTimeMat 2
+EC2CreepMat 1 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge 7. t0 7. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 0 begOfTimeOfInterest 1. endOfTimeOfInterest 10. spectrum castingTime 10. preCastingTimeMat 2
 #
 IsoLE 2 d 0. n 0.2 E 1.e-6 talpha 0.
 #

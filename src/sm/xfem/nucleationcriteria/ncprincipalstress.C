@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -124,14 +124,14 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 								crackNormal.beColumnOf(principalDirs, 1);
 		//						printf("crackNormal: "); crackNormal.printYourself();
 
-								FloatArray crackTangent = {-crackNormal(1), crackNormal(0)};
+								FloatArray crackTangent = Vec2(-crackNormal(1), crackNormal(0));
 								crackTangent.normalize();
 		//						printf("crackTangent: "); crackTangent.printYourself();
 
 
 
 								// Create geometry
-								FloatArray pc = {gp->giveGlobalCoordinates()(0), gp->giveGlobalCoordinates()(1)};
+								FloatArray pc = Vec2(gp->giveGlobalCoordinates()(0), gp->giveGlobalCoordinates()(1));
 		//						printf("Global coord: "); pc.printYourself();
 
 
@@ -172,7 +172,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 									}
 								}
 
-								FloatArray points = {ps(0), ps(1), pc(0), pc(1), pe(0), pe(1)};
+								FloatArray points = Vec6(ps(0), ps(1), pc(0), pc(1), pe(0), pe(1));
 
 		//						double diffX = 0.5*(ps(0) + pe(0)) - pc(0);
 		//						printf("diffX: %e\n", diffX);

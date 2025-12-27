@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -209,7 +209,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
             answer.add(vec);
 	  }
         } else {
-            OOFEM_ERROR("Unsupported body load: %d", load);
+            OOFEM_ERROR("Unsupported body load: %d", i);
         }
     }
 }

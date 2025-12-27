@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -120,7 +120,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     FloatArray N, NRed, redCoord;
     if ( numberOfFiAndShGaussPoints == 1 ) { // Reduced integration
-        redCoord  = {0.0, 0.0}; // eval in centroid
+        redCoord  = Vec2(0.0, 0.0); // eval in centroid
     } else {
         redCoord = gp->giveNaturalCoordinates();
     }

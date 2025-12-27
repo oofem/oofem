@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -101,9 +101,9 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
 
     double angleRad = mAngle * M_PI / 180.0;
-    FloatArray dir = {
+    FloatArray dir = Vec2(
         cos(angleRad), sin(angleRad)
-    };
+    );
 
     oTipProp.mTipIndex = tipInfo.mTipIndex;
     oTipProp.mPropagationDir = dir;

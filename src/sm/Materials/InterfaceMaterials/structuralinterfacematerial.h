@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -41,6 +41,7 @@
 #include "matconst.h"
 #include "matstatus.h"
 #include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for StructuralInterfaceMaterial
 //@{
@@ -135,7 +136,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual FloatArray giveInterfaceStrength() { return {0}; }
+    virtual FloatArray giveInterfaceStrength() { return Vec1(0); }
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

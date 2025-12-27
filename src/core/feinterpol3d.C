@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -34,6 +34,8 @@
 
 #include "feinterpol3d.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -127,11 +129,6 @@ void FEInterpolation3d :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const 
     OOFEM_ERROR("Not implemented");
 }
 
-double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
-{
-    OOFEM_ERROR("Not implemented");
-}
-
 double FEInterpolation3d :: edgeEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
@@ -141,5 +138,89 @@ IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary, Element_Geome
 {
     return this->computeLocalSurfaceMapping(boundary);
 }
+
+
+double FEInterpolation3d::surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+    auto [G1, G2] = this->surfaceEvalBaseVectorsAt(isurf, lcoords, cellgeo);
+    auto normal = cross(G1, G2);
+    double J = norm(normal);
+    answer = normal;
+    return J;
+}
+
+std::tuple<double, FloatArrayF<3>>
+FEInterpolation3d :: surfaceEvalUnitNormal(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+    auto [G1, G2] = this->surfaceEvalBaseVectorsAt(isurf, lcoords, cellgeo);
+    auto normal = cross(G1, G2);
+    double J = norm(normal);
+    return std::make_tuple(J, normal/J);
+}
+
+
+void FEInterpolation3d::surfaceEvaldNdxi(FloatMatrix & answer, const FloatArray & lcoords) const
+{
+    OOFEM_ERROR("Not implemented");
+}
+
+void FEInterpolation3d::surfaceEvald2Ndxi2(FloatMatrix & answer, const FloatArray & lcoords) const
+{
+    OOFEM_ERROR("Not implemented");
+}
+  
+
+
+  std::tuple<FloatArrayF<3>, FloatArrayF<3>> FEInterpolation3d::surfaceEvalBaseVectorsAt(int isurf, const FloatArray & lcoords, const FEICellGeometry & cellgeo) const
+{
+    //Adapted from FEI3dQuadLin
+    // Note: These are not normalized. Returns the two tangent vectors to the surface.
+    FloatMatrix dNdxi;
+    this->surfaceEvaldNdxi(dNdxi, lcoords);
+    //Get nodes which correspond to the surface in question
+    auto nodeIndices = this->computeLocalSurfaceMapping(isurf);
+    FloatArrayF<3> G1, G2;
+    for (int i = 0; i < nodeIndices.giveSize(); ++i) {
+      G1 += dNdxi(i, 0) * FloatArrayF<3>(cellgeo.giveVertexCoordinates(nodeIndices(i)));
+      G2 += dNdxi(i, 1) * FloatArrayF<3>(cellgeo.giveVertexCoordinates(nodeIndices(i)));
+    }
+    return std::make_tuple(G1, G2);
+}
+
+FloatMatrixF<3,3>
+FEInterpolation3d :: surfaceGiveJacobianMatrixAt(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+    // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
+    // Note! The base vectors are not normalized except the third (normal)
+    auto [G1, G2] = this->surfaceEvalBaseVectorsAt(isurf, lcoords, cellgeo);
+    auto G3 = cross(G1, G2);
+    FloatMatrixF<3,3> jacobianMatrix;
+    jacobianMatrix.setColumn(G1,0);
+    jacobianMatrix.setColumn(G2,1);
+    jacobianMatrix.setColumn(G3,2);
+    return jacobianMatrix;
+}
+
+
+
+double
+FEInterpolation3d :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+                                                  const FEICellGeometry &cellgeo) const
+{
+    auto [J, N] =  surfaceEvalUnitNormal(isurf, lcoords, cellgeo);
+    return J;
+}
+  
+
+
+
+  
+double FEInterpolation3d:: boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+{
+  auto [J, N] = surfaceEvalUnitNormal(isurf, lcoords, cellgeo);
+  answer = N;
+  return  J;
+}
+  
   
 } // end namespace oofem

@@ -38,9 +38,9 @@ void PrescribedGradientBCWeakDirichlet :: postInitialize()
 
 void PrescribedGradientBCWeakDirichlet :: giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const
 {
-    oX = {
+    oX = Vec2(
         iPos [ 0 ] - mCenterCoord [ 0 ], iPos [ 1 ] - mCenterCoord [ 1 ]
-    };
+    );
 }
 
 void PrescribedGradientBCWeakDirichlet :: checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const
@@ -54,25 +54,25 @@ void PrescribedGradientBCWeakDirichlet :: checkIfCorner(bool &oIsCorner, bool &o
         oDuplicatable = true;
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mUC [ 0 ], mLC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
         oDuplicatable = true;
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mUC [ 0 ], mUC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
         oDuplicatable = true;
     }
 
-    cornerPos = {
+    cornerPos = Vec2(
         mLC [ 0 ], mUC [ 1 ]
-    };
+    );
     if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
         oDuplicatable = true;

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -78,8 +78,8 @@ void EnrichmentFront :: computeCrackTangent(FloatArray &oTangent, FloatArray &oN
         oFlipTangent = false;
     }
 
-    oNormal = {
+    oNormal = Vec2(
         -oTangent.at(2), oTangent.at(1)
-    };
+    );
 }
 } // end namespace oofem

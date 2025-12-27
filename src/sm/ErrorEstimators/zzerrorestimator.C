@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -134,7 +134,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     FloatArray gnorms;
     ParallelContext *parallel_context = this->domain->giveEngngModel()->giveParallelContext(this->domain->giveNumber());
-    parallel_context->accumulate({this->globalENorm, this->globalSNorm}, gnorms);
+    parallel_context->accumulate(Vec2(this->globalENorm, this->globalSNorm), gnorms);
     this->globalENorm = gnorms [ 0 ];
     this->globalSNorm = gnorms [ 1 ];
     

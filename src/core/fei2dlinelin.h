@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -85,6 +85,9 @@ public:
     int giveNumberOfNodes(const Element_Geometry_Type) const override { return 2; }
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;
+
+    void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const override;
+    void surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const override;
 
 protected:
     double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;

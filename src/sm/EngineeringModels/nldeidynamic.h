@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -178,6 +178,8 @@ protected:
      */
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
+
+    double giveInitialTime() override {return 1;}
 
 public:
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -59,8 +59,8 @@ public:
     long nonzeros;
 
 public:
-    long N() const { return n; }
-    long Nonzeros() const { return nonzeros; }
+    long N() const override{ return n; }
+    long Nonzeros() const override { return nonzeros; }
 
 public:
 
@@ -94,9 +94,9 @@ public:
 
     Ordering *GetOrdering(Ordering :: Type ord);
 
-    IntArrayList *GetIndexesAboveDiagonalInColumn(long j);
+    IntArrayList *GetIndexesAboveDiagonalInColumn(long j) override;
 
-    IntArrayList *DetachIndexesAboveDiagonalInColumn(long j);
+    IntArrayList *DetachIndexesAboveDiagonalInColumn(long j) override;
 
     Ordering *GetPermutationAndPattern(Ordering :: Type ord, IntArrayList *fixed = NULL);
 };

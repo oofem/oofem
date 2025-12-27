@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -104,7 +104,7 @@ namespace oofem {
     {
     #ifndef NDEBUG
         if ( allocChunk < 0 ) {
-            OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
+            OOFEM_FATAL("allocChunk must be non-negative; %ld", allocChunk);
         }
 
     #endif
@@ -426,7 +426,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, Inde
 {
 #ifndef NDEBUG
     if ( a.size() < n || b.size() < n ) {
-        OOFEM_ERROR("wrong size ", a.giveSize(), b.giveSize());
+        OOFEM_ERROR("wrong size %d vs %d", a.giveSize(), b.giveSize());
     }
 
 #endif
@@ -684,7 +684,6 @@ void FloatArray :: zero()
 {
     std::fill(this->begin(), this->end(), 0.);
 }
-
 
 
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
@@ -946,6 +945,8 @@ int FloatArray :: givePackSize(DataStream &buff) const
     return buff.givePackSizeOfSizet(1) + buff.givePackSizeOfDouble(this->giveSize());
 }
 
+
+#ifndef _USE_EIGEN
 // IML compat
 
 FloatArray &FloatArray :: operator = ( const double & val )
@@ -999,6 +1000,13 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
     x.subtract(y);
     return x;
 }
+
+FloatArray &operator /= ( FloatArray & x, const double & a )
+{
+    x.times(1./a);
+    return x;
+}
+#endif
 
 double dot(const FloatArray &x, const FloatArray &y)
 {

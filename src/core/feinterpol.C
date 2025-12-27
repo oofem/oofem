@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -39,6 +39,44 @@
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
 
+
+FEIElementDeformedGeometryWrapper::FEIElementDeformedGeometryWrapper(const Element *elem) : FEICellGeometry() {
+    this->elem = elem;
+    this->alpha = 1;
+    this->tStep = NULL;
+}
+
+FEIElementDeformedGeometryWrapper::FEIElementDeformedGeometryWrapper(const Element *elem, TimeStep *tStep) : FEICellGeometry() {
+    this->elem = elem;
+    this->alpha = 1;
+    this->tStep = tStep;
+}
+
+
+
+int
+FEIElementDeformedGeometryWrapper::giveNumberOfVertices() const
+{
+    return elem->giveNumberOfNodes();
+}
+
+
+const FloatArray 
+FEIElementDeformedGeometryWrapper::giveVertexCoordinates(int i) const
+{
+    FloatArray actualCoords = elem->giveNode(i)->giveCoordinates();
+    if ( tStep != NULL ) {
+        FloatArray u;
+        elem->giveNode(i)->giveUnknownVector(u, { D_u, D_v, D_w }, VM_Total, tStep);
+        u.times(alpha);
+        actualCoords.add(u);
+    }
+    return actualCoords;
+}
+
+
+
+  
 double
 FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {

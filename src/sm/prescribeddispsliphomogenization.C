@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2021   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -127,7 +127,7 @@ void PrescribedDispSlipHomogenization::giveDispField( FloatArray &oField ) const
 {
     int size = dispField.giveSize();
     if ( size == 2 ) {
-        oField = { dispField.at(1), dispField.at(2) };
+        oField = Vec2( dispField.at(1), dispField.at(2) );
     } else {
         OOFEM_ERROR("PrescribedDispSlipHomogenization :: giveDispField not implemented for 3D.\n");
     }
@@ -138,7 +138,7 @@ void PrescribedDispSlipHomogenization::giveSlipField( FloatArray &oField ) const
 {
     int size = slipField.giveSize();
     if ( size == 2 ) {
-        oField = { slipField.at(1), slipField.at(2) };
+        oField = Vec2( slipField.at(1), slipField.at(2) );
     } else {
         OOFEM_ERROR("PrescribedDispSlipHomogenization :: giveSlipField not implemented for 3D.\n");
     }
@@ -149,7 +149,7 @@ void PrescribedDispSlipHomogenization::giveDispGradient( FloatArray &oGradient )
 {
     int numRows = dispGradient.giveNumberOfRows();
     if ( numRows == 2 ) {
-        oGradient = { dispGradient.at(1, 1), dispGradient.at(2, 2), dispGradient.at(1, 2), dispGradient.at(2, 1) };
+        oGradient = Vec4( dispGradient.at(1, 1), dispGradient.at(2, 2), dispGradient.at(1, 2), dispGradient.at(2, 1) );
     } else {
         OOFEM_ERROR("PrescribedDispSlipHomogenization :: giveDispGradient not implemented for 3D.\n");
     }
@@ -160,7 +160,7 @@ void PrescribedDispSlipHomogenization::giveSlipGradient( FloatArray &oGradient )
 {
     int numRows = slipGradient.giveNumberOfRows();
     if ( numRows == 2 ) {
-        oGradient = { slipGradient.at(1, 1), slipGradient.at(2, 2), slipGradient.at(1, 2), slipGradient.at(2, 1) };
+        oGradient = Vec4( slipGradient.at(1, 1), slipGradient.at(2, 2), slipGradient.at(1, 2), slipGradient.at(2, 1) );
     } else {
         OOFEM_ERROR("PrescribedDispSlipHomogenization :: giveSlipGradient not implemented for 3D.\n");
     }

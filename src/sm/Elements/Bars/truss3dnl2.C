@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -224,7 +224,7 @@ FloatMatrixF<6,6>
 Truss3dnl2 :: giveAmatrix()
 {
   FloatMatrix A;
-  A = {{1, 0, 0, -1, 0, 0}, {0, 1, 0, 0, -1, 0}, {0, 0, 1, 0, 0, -1}, {-1, 0, 0, 1, 0, 0}, {0, -1, 0, 0, 1, 0}, {0, 0, -1, 0, 0, 1}};
+  A = FloatMatrix({{1, 0, 0, -1, 0, 0}, {0, 1, 0, 0, -1, 0}, {0, 0, 1, 0, 0, -1}, {-1, 0, 0, 1, 0, 0}, {0, -1, 0, 0, 1, 0}, {0, 0, -1, 0, 0, 1}});
   return A;
 }
 
@@ -232,7 +232,7 @@ FloatMatrixF<3,6>
 Truss3dnl2 :: givePmatrix()
 {
   FloatMatrix P;
-  P = {{1,0,0},{0,1,0},{0,0,1},{-1,0,0},{0,-1,0},{0,0,-1}};
+  P = FloatMatrix({{1,0,0},{0,1,0},{0,0,1},{-1,0,0},{0,-1,0},{0,0,-1}});
   return P;
 }
 

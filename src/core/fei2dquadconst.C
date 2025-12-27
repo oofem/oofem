@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -91,7 +91,7 @@ bool FEI2dQuadConst :: inside(const FloatArray &lcoords) const
 void
 FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    answer = FloatArray{1.};
+    answer = Vec1(1.);
 }
 
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -96,7 +96,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
+    this->interpolation.evaldNdx( dnx, Vec2(0., 0.), *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -125,7 +125,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    this->interpolation.evaldNdx( dnx, {0., 0.}, *this->giveCellGeometryWrapper() );
+    this->interpolation.evaldNdx( dnx, Vec2(0., 0.), *this->giveCellGeometryWrapper() );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {

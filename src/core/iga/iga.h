@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -63,7 +63,7 @@ public:
     FEIIGAElementGeometryWrapper(Element *elem, const IntArray *knotSpan=nullptr) : FEICellGeometry(), knotSpan(knotSpan), elem(elem) { }
 
     int giveNumberOfVertices() const override { return elem->giveNumberOfNodes(); }
-    const FloatArray &giveVertexCoordinates(int i) const override { return elem->giveNode(i)->giveCoordinates(); }
+    const FloatArray giveVertexCoordinates(int i) const override { return elem->giveNode(i)->giveCoordinates(); }
     const Element_Geometry_Type giveGeometryType() const override {return elem->giveGeometryType();}
 };
 
@@ -91,6 +91,7 @@ class OOFEM_EXPORT IGAElement : public Element
 {
 protected:
 #ifdef __MPI_PARALLEL_MODE
+    static ParamKey IPK_IGAElement_knotSpanParallelMode;
     IntArray knotSpanParallelMode;
 #endif
 public:

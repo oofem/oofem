@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -183,6 +183,9 @@ namespace oofem {
                 OOFEM_ERROR("Unknown component");
             }
         }
+
+        void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override
+        {}
 
 
         TimeStep* giveNextStep() override

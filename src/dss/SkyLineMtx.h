@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -67,23 +67,23 @@ protected:
     void AllocateMemory(IConectMatrix *spm, int neq);
 
 public:
-    long N() const { return n; }
-    long Nonzeros() const { return ( long ) columns_data_length; }
+    long N() const override{ return n; }
+    long Nonzeros() const override { return ( long ) columns_data_length; }
 
     // This data is used in the Sealed state
     long columns_data_length;
 
     //ILargeMatrix
-    virtual void WriteStatistics(long no_init_blocks, long no_nonzeros);
-    virtual long No_Multiplications() { return 0; }
+    virtual void WriteStatistics(long no_init_blocks, long no_nonzeros) override;
+    virtual long No_Multiplications() override { return 0; }
 
-    virtual void Solve(double *b, double *x) = 0;
+    virtual void Solve(double *b, double *x) override = 0;
 
     //ILargeMatrix
     //virtual void LoadZeros();
     //virtual void LoadMatrixNumbers(SparseMatrixF& sm) = 0;
     //virtual void SolveLV(const LargeVector& b, LargeVector& x) = 0;
-    virtual void Factorize() = 0;
+    virtual void Factorize() override = 0;
     //virtual void MultiplyByVector(const LargeVectorAttach& x, LargeVectorAttach& y) = 0;
 
 public:

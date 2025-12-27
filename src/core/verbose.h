@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -53,7 +53,7 @@ namespace oofem {
 #define VERBOSE             // please activate or de-activate this line
 
 #define VERBOSE_PRINTS(str, str1) OOFEM_LOG_INFO("%-30s %6s\n", str, str1);
-#define VERBOSE_PRINT0(str, number) OOFEM_LOG_DEBUG("%-30s %6d\n", str, number);
+#define VERBOSE_PRINT0(str, number) OOFEM_LOG_DEBUG("%-30s %6d\n", str, (int)number);
 
 #define TIME_REPORT        // please activate or de-activate this line
 

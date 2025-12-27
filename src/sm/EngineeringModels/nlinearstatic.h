@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -157,9 +157,8 @@ public:
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
     void initializeFrom(InputRecord &ir) override;
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
-    TimeStep *giveNextStep() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
-
+    TimeStep *giveNextStep() override;
     double giveLoadLevel() override { return cumulatedLoadLevel + loadLevel; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -199,6 +198,8 @@ protected:
 
     void packMigratingData(TimeStep *tStep) override;
     void unpackMigratingData(TimeStep *tStep) override;
+    double giveInitialTime() override {return 1;}
+
 };
 } // end namespace oofem
 #endif // nlinearstatic_h

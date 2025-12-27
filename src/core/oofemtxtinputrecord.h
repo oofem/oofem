@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -36,6 +36,7 @@
 #define oofemtxtinputrecord_h
 
 #include "inputrecord.h"
+#include "datareader.h"
 #include "tokenizer.h"
 
 #include <string>
@@ -61,9 +62,8 @@ protected:
 
     /// Record representation.
     std :: string record;
-
     int lineNumber;
-
+    DataReader::InputRecordType inputRecordType=DataReader::IR_unspecified;
 public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
@@ -81,6 +81,8 @@ public:
     void setRecordString(std :: string newStr);
     /// Returns record string.
     std :: string giveRecordAsString() const override { return this->record; }
+    std :: string giveRecordInTXTFormat() const override { return this->record; }
+    std :: string giveLocation() const override;
 
     void finish(bool wrn = true) override;
 
@@ -107,6 +109,7 @@ public:
 
     void setLineNumber(int num) { this->lineNumber = num; }
     int giveLineNumber() const { return lineNumber; }
+    void setInputRecordType(DataReader::InputRecordType irt){ inputRecordType=irt; }
 
 protected:
     int giveKeywordIndx(const char *kwd);
@@ -133,6 +136,10 @@ protected:
      * @return Nonzero on success.
      */
     int readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
+private:
+    #ifdef _USE_TRACE_FIELDS
+        void traceField(InputFieldType id, const char* type) override;
+    #endif
 };
 } // end namespace oofem
 #endif // oofemtxtinputrecord_h

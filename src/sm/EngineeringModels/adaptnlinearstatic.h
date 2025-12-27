@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -130,7 +130,7 @@ public:
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
-
+    double giveInitialTime() override {return 1;}
     void updateDomainLinks() override;
 
     const char *giveClassName() const override { return "AdaptiveNonLinearStatic"; }

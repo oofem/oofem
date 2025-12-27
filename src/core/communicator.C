@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -36,6 +36,7 @@
 #include "intarray.h"
 
 #include <cstdarg>
+#include <cstdint>
 
 #ifdef __USE_MPI
  #include <mpi.h>

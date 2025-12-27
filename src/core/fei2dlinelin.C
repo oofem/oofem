@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -176,4 +176,22 @@ std::unique_ptr<IntegrationRule> FEI2dLineLin :: giveIntegrationRule(int order, 
     iRule->SetUpPointsOnLine(points, _Unknown);
     return std::move(iRule);
 }
+
+void
+FEI2dLineLin :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords) const 
+{
+  answer.resize(2, 1);
+  answer(0, 0) = -0.5;
+  answer(1, 0) =  0.5;
+}
+
+void
+FEI2dLineLin :: surfaceEvald2Ndxi2(FloatMatrix &answer, const FloatArray &lcoords) const
+{
+  answer.resize(2, 1);
+  answer(0, 0) = 0;
+  answer(1, 0) = 0;
+}
+
+  
 } // end namespace oofem

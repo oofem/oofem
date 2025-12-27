@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -275,7 +275,7 @@ void PythonExpression::readFile2String(const std::string &path, std::string &con
         content = buffer.str();
         file.close();
     } else {
-        OOFEM_ERROR("Could not open file %s", path);
+        OOFEM_ERROR("Could not open file %s", path.c_str());
     }
 }
 

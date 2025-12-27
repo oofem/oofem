@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -94,7 +94,7 @@ DynamicDataReader :: writeToFile(const char *fileName)
     fout << this->outputFileName << '\n';
     fout << this->description << '\n';
     for ( auto &rec: this->recordList ) {
-        fout << rec->giveRecordAsString() << "\n";
+        fout << rec->giveRecordInTXTFormat() << "\n";
     }
     fout.close();
 }

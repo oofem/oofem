@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -483,34 +483,34 @@ FEI3dHexaQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArra
     ///@note Nodal, surface, edge ordering on this class is a mess. No consistency or rules. Have to convert surface->volume coords manually:
 #if 1
     if ( isurf == 1 ) { // surface 1 - nodes 1 4 3 2
-        lcoords_hex = {-lcoords.at(1), -lcoords.at(2), 1};
+        lcoords_hex = Vec3(-lcoords.at(1), -lcoords.at(2), 1);
     } else if ( isurf == 2 ) { // surface 2 - nodes 5 6 7 8
-        lcoords_hex = {-lcoords.at(2), -lcoords.at(1), -1};
+        lcoords_hex = Vec3(-lcoords.at(2), -lcoords.at(1), -1);
     } else if ( isurf == 3 ) { // surface 3 - nodes 1 2 6 5
-        lcoords_hex = {-1, -lcoords.at(1), lcoords.at(2)};
+        lcoords_hex = Vec3(-1, -lcoords.at(1), lcoords.at(2));
     } else if ( isurf == 4 ) { // surface 4 - nodes 2 3 7 6
-        lcoords_hex = {-lcoords.at(1), 1, lcoords.at(2)};
+        lcoords_hex = Vec3(-lcoords.at(1), 1, lcoords.at(2));
     } else if ( isurf == 5 ) { // surface 5 - nodes 3 4 8 7
-        lcoords_hex = {1, lcoords.at(1), lcoords.at(2)};
+        lcoords_hex = Vec3(1, lcoords.at(1), lcoords.at(2));
     } else if ( isurf == 6 ) { // surface 6 - nodes 4 1 5 8
-        lcoords_hex = {lcoords.at(1), -1, lcoords.at(2)};
+        lcoords_hex = Vec3(lcoords.at(1), -1, lcoords.at(2));
     } else {
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 #else
     ///@note This would be somewhat consistent at least.
     if ( isurf == 1 ) { // surface 1 - nodes 3 4 8 7
-        lcoords_hex = {-1, lcoords.at(1), lcoords.at(2)};
+        lcoords_hex = Vec3(-1, lcoords.at(1), lcoords.at(2));
     } else if ( isurf == 2 ) { // surface 2 - nodes 2 1 5 6
-        lcoords_hex = {1, lcoords.at(1), lcoords.at(2)};
+        lcoords_hex = Vec3(1, lcoords.at(1), lcoords.at(2));
     } else if ( isurf == 3 ) { // surface 3 - nodes 3 7 6 2
-        lcoords_hex = {lcoords.at(1), -1, lcoords.at(2)};
+        lcoords_hex = Vec3(lcoords.at(1), -1, lcoords.at(2));
     } else if ( isurf == 4 ) { // surface 4 - nodes 4 8 5 1
-        lcoords_hex = {lcoords.at(1), 1, lcoords.at(2)};
+        lcoords_hex = Vec3(lcoords.at(1), 1, lcoords.at(2));
     } else if ( isurf == 5 ) { // surface 5 - nodes 3 2 1 4
-        lcoords_hex = {lcoords.at(1), lcoords.at(2), -1};
+        lcoords_hex = Vec3(lcoords.at(1), lcoords.at(2), -1);
     } else if ( isurf == 6 ) { // surface 6 - nodes 7 6 5 8
-        lcoords_hex = {lcoords.at(1), lcoords.at(2), 1};
+        lcoords_hex = Vec3(lcoords.at(1), lcoords.at(2), 1);
     } else {
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }

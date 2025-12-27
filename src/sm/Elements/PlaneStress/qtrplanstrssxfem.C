@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -310,7 +310,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
 
                 if ( type == DisplacementVector ) { // compute displacement
 
-                        FloatArray u = {0.0, 0.0, 0.0};
+                        FloatArray u = Vec3(0.0, 0.0, 0.0);
 
                         // Fetch global coordinates (in undeformed configuration)
                         const FloatArray &x = nodeCoords[nodeInd-1];
@@ -331,7 +331,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
                             u = uTemp;
                         }
                         else {
-                            u = {uTemp[0], uTemp[1], 0.0};
+                            u = Vec3(uTemp[0], uTemp[1], 0.0);
                         }
 
                         vtkPieces[0].setPrimaryVarInNode(type, nodeInd, u);
@@ -360,7 +360,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
             std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
             if(average.giveSize() == 0) {
-            	average = {0., 0., 0., 0., 0., 0.};
+            	average = Vec6(0., 0., 0., 0., 0., 0.);
             }
 
             if(average.giveSize() == 1) {
@@ -418,7 +418,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
                             }
 
 
-                            FloatArray valueArray = {levelSet};
+                            FloatArray valueArray = Vec1(levelSet);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
@@ -432,7 +432,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
                             }
 
 
-                            FloatArray valueArray = {levelSet};
+                            FloatArray valueArray = Vec1(levelSet);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
@@ -446,7 +446,7 @@ QTrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< ExportRegion > &vtk
                             }
 
 
-                            FloatArray valueArray = {nodeEnrMarker};
+                            FloatArray valueArray = Vec1(nodeEnrMarker);
                             vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                         }
 

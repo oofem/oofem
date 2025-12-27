@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -81,24 +81,9 @@ StaggeredProblem :: instanciateYourself(DataReader &dr, InputRecord &ir, const c
 {
     int result;
     result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName, desc);
-    ir.finish();
     // instanciate slave problems
     result &= this->instanciateSlaveProblems();
     return result;
-}
-
-int
-StaggeredProblem :: instanciateDefaultMetaStep(InputRecord &ir)
-{
-    if ( timeDefinedByProb ) {
-        /* just set a nonzero number of steps;
-         * needed for instanciateDefaultMetaStep to pass; overall has no effect as time stepping is deteremined by slave
-         */
-        this->numberOfSteps = 1;
-    }
-    EngngModel :: instanciateDefaultMetaStep(ir);
-    //there are no slave problems initiated so far, the overall metaStep will defined in a slave problem instantiation
-    return 1;
 }
 
 int
@@ -180,7 +165,9 @@ StaggeredProblem :: initializeFrom(InputRecord &ir)
     
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);
-    IR_GIVE_OPTIONAL_FIELD(ir, inputStreamNames [ 2 ], _IFT_StaggeredProblem_prob3);
+    if ( ir.hasField(_IFT_StaggeredProblem_prob3) ){
+        IR_GIVE_OPTIONAL_FIELD(ir, inputStreamNames [ 2 ], _IFT_StaggeredProblem_prob3);
+    }
     
     
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.

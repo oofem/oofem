@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -255,7 +255,7 @@ bool PLPrincipalStrain :: propagateInterface(Domain &iDomain, EnrichmentFront &i
 			FloatArray propNormal;
 			propNormal.beColumnOf(principalDirs, 1);
 
-			FloatArray propTangent = {-propNormal(1), propNormal(0)};
+			FloatArray propTangent = Vec2(-propNormal(1), propNormal(0));
 
 			if( propTangent.dotProduct(t) < 0.0 ) {
 				propTangent.times(-1.0);

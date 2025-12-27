@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -92,8 +92,8 @@ Tr2Shell7XFEM :: giveOrderingEdgeNodes() const
 void 
 Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
 {
-    nodeLocalXiCoords = {1., 0., 0., .5, 0., .5};  // corner nodes then midnodes, uncertain of node numbering
-    nodeLocalEtaCoords = {0., 1., 0., .5, .5, 0.};
+    nodeLocalXiCoords = Vec6(1., 0., 0., .5, 0., .5);  // corner nodes then midnodes, uncertain of node numbering
+    nodeLocalEtaCoords = Vec6(0., 1., 0., .5, .5, 0.);
 }
 
 

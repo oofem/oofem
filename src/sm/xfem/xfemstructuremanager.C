@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -348,7 +348,7 @@ void XfemStructureManager :: removeShortCracks()
                 PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( crack->giveGeometry() );
                 polygonLine->clear();
                 //FloatArray tmp = {0.0, 0.0, 0.0};
-                FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+                FloatArray tmp = Vec3(-1.0e3, -1.0e3, -1.0e3);
                 polygonLine->insertVertexBack(tmp);
 
             }
@@ -437,7 +437,7 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             polygonLine_j->clear();
                             //FloatArray tmp = { 0.0, 0.0, 0.0};
-                            FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+                            FloatArray tmp = Vec3(-1.0e3, -1.0e3, -1.0e3);
                             polygonLine_j->insertVertexBack(tmp);
 
                             // Fix tips
@@ -472,7 +472,7 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             polygonLine_j->clear();
                             //FloatArray tmp = {0.0, 0.0, 0.0};
-                            FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+                            FloatArray tmp = Vec3(-1.0e3, -1.0e3, -1.0e3);
                             polygonLine_j->insertVertexBack(tmp);
 
                             // Fix tips
@@ -507,7 +507,7 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             polygonLine_j->clear();
                             //FloatArray tmp = {0.0, 0.0, 0.0};
-                            FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+                            FloatArray tmp = Vec3(-1.0e3, -1.0e3, -1.0e3);
                             polygonLine_j->insertVertexBack(tmp);
 
 
@@ -539,7 +539,7 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             polygonLine_j->clear();
                             //FloatArray tmp = {0.0, 0.0, 0.0};
-                            FloatArray tmp = {-1.0e3, -1.0e3, -1.0e3};
+                            FloatArray tmp = Vec3(-1.0e3, -1.0e3, -1.0e3);
                             polygonLine_j->insertVertexBack(tmp);
 
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2025   Borek Patzak
  *
  *
  *
@@ -112,7 +112,7 @@ public:
                 return this->cell->giveNumberOfVertices();
             }
 
-            const FloatArray &giveVertexCoordinates(int i) const override
+            const FloatArray giveVertexCoordinates(int i) const override
             {
                 return ( ( cell->getVertex(i) )->getCoordinates() );
             }

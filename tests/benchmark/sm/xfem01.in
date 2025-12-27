@@ -862,11 +862,11 @@ Set 3 nodes 1 1
 Set 4 noderanges {(1 21)}
 Set 5 noderanges {(421 441)}
 XfemManager 1 numberofenrichmentitems 1 
-Inclusion 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 crosssection 2
+Inclusion 1 enrichmentfront 1 crosssection 2
 RampFunction 1
 Circle 1 center 2 30.0 30.0 radius 12.5
-EnrFrontExtend 1
-EnrFrontExtend 1
+EnrFrontExtend
+EnrFrontExtend
 #%BEGIN_CHECK% tolerance 1.e-3
 ##NODE tStep 1 number 304 dof 1 unknown d value -3.78917387e-03
 #NODE tStep 1 number 304 dof 2 unknown d value  9.53932214e-03
