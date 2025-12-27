@@ -77,8 +77,8 @@ public:
         "Domain","OutputManager","DomainComp","Geometry","GBPM",
         "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
         /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
-        "XFemManager","EnrichmentFunction","Geometry","EnrichmentItem",
-        "EnrichmentFront","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
+        "XFemManager","EnrichmentFunction","EnrichmentGeometry",/*EnrichmentItem*/"",
+        /*EnrichmentFront*/"","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
         /*ContactSurface*/"","Field",
         "MPMVariable",/*"MPMTerm"*/"","MPMIntegral",
         "UNSPECIFIED"

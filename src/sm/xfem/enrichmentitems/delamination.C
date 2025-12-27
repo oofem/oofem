@@ -46,6 +46,7 @@
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
 #include "sm/Elements/Shells/shell7basexfem.h"
 #include "spatiallocalizer.h"
+#include <cassert>
 
 namespace oofem {
 REGISTER_EnrichmentItem(Delamination)
@@ -75,12 +76,12 @@ int Delamination :: instanciateYourself(DataReader &dr)
 
     // Instantiate enrichment function
     {
-        auto &mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
-        mir.giveRecordKeywordField(name);
+        auto mir = dr.giveChildRecord(thisIr,"",DataReader::InputRecordTags[DataReader::IR_enrichFuncRec],DataReader::IR_enrichFuncRec,/*optional*/false);
+        mir->giveRecordKeywordField(name);
 
         mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
         if ( mpEnrichmentFunc ) {
-            mpEnrichmentFunc->initializeFrom(mir);
+            mpEnrichmentFunc->initializeFrom(*mir);
         } else {
             OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
         }
@@ -99,7 +100,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
         }
 
         std :: sort( dofManList.begin(), this->dofManList.end() );
-        //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
+        // IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
     }
 
     // Instantiate EnrichmentFront
@@ -107,28 +108,19 @@ int Delamination :: instanciateYourself(DataReader &dr)
         mpEnrichmentFrontStart = std::make_unique<EnrFrontDoNothing>(this->giveNumber());
         mpEnrichmentFrontEnd = std::make_unique<EnrFrontDoNothing>(this->giveNumber());
     } else {
-        std :: string enrFrontNameStart, enrFrontNameEnd;
-
-        auto &enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        enrFrontStartIr.giveRecordKeywordField(enrFrontNameStart);
-
-        mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
-        if ( mpEnrichmentFrontStart ) {
-            mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
-            //printf("EnrichmentFrontStart : %s \n", mpEnrichmentFrontStart->giveClassName()); 
-        } else {
-            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
-        }
-
-        auto &enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        enrFrontEndIr.giveRecordKeywordField(enrFrontNameEnd);
-
-        mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
-        if ( mpEnrichmentFrontEnd ) {
-            mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
-            //printf("EnrichmentFrontEnd   : %s \n", mpEnrichmentFrontEnd->giveClassName()); 
-        } else {
-            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameEnd.c_str() );
+        int i=0;
+        for(InputRecord& efIr: dr.giveGroupRecords("EnrichmentFront",DataReader :: IR_enrichFrontRec,/*numRequired*/2)){
+            std::string enrFrontName;
+            efIr.giveRecordKeywordField(enrFrontName);
+            auto ef = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+            if ( ef ) {
+                assert(i==0 || i==1);
+                ef->initializeFrom(efIr);
+                (i==0?mpEnrichmentFrontStart:mpEnrichmentFrontEnd)=std::move(ef);
+            } else {
+                OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            }
+            i++;
         }
     }
 
@@ -139,12 +131,12 @@ int Delamination :: instanciateYourself(DataReader &dr)
     } else {
         std :: string propLawName;
 
-        auto &propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-        propLawir.giveRecordKeywordField(propLawName);
+        auto propLawir = dr.giveChildRecord(thisIr,"",DataReader::InputRecordTags[DataReader::IR_propagationLawRec],DataReader :: IR_propagationLawRec,/*optional*/false);
+        propLawir->giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if ( mpPropagationLaw ) {
-            mpPropagationLaw->initializeFrom(propLawir);
+            mpPropagationLaw->initializeFrom(*propLawir);
         } else {
             OOFEM_ERROR( "Failed to create propagation law (%s)", propLawName.c_str() );
         }

@@ -108,6 +108,10 @@ namespace oofem {
                 _XML_DEBUG("returning direct child "<<loc(c));
                 return c;
             }
+            if(strcasecmp(c.name(),name.c_str())==0){
+                std::cerr<<loc(parent)<<": case-insensitive XML tag match ('"<<c.name()<<"', requested '"<<name<<"')"<<std::endl;
+                break;
+            }
             if(c.name()==XiIncludeTag){
                 pugi::xml_node xi=resolveXiInclude(c);
                 if(xi.name()==name){
@@ -177,7 +181,8 @@ namespace oofem {
         _XML_DEBUG("::"<<giveStackPath()<<": enter '"<<name<<"'");
         pugi::xml_node grp=giveNamedChild(stack.back().parent,name);
         XMLInputRecord::node_seen_set(grp,true);
-        if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; abort(); OOFEM_ERROR("Error reading %s: %s has no child %s",loc(grp).c_str(),giveStackPath().c_str(),name.c_str()); }
+        if(!grp){ std::cerr<<"No "<<giveStackPath()<<" // "<<name<<std::endl; OOFEM_ERROR("Error reading %s: %s has no child %s",loc(grp).c_str(),giveStackPath().c_str(),name.c_str()); }
+        // stack.back().seen.insert(grp);
         pugi::xml_node ch1=grp.first_child();
         if(!ch1) OOFEM_ERROR("Error reading %s: %s: %s has no child nodes",loc().c_str(),giveStackPath().c_str(),name.c_str());
         stack.push_back(StackItem{grp,ch1});
