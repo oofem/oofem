@@ -409,6 +409,7 @@ py::object createMaterialOfType(const char* type, py::args args, py::kwargs kw)
 py::object isoLE(py::args args, py::kwargs kw) { return createMaterialOfType("isole",args,kw); }
 py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm1",args,kw); }
 py::object isoHeat(py::args args, py::kwargs kw) { return createMaterialOfType("isoheat",args,kw); }
+py::object hydratingConcreteMat(py::args args, py::kwargs kw) { return createMaterialOfType("hydratingconcretemat",args,kw); }
 py::object j2mat(py::args args, py::kwargs kw) { return createMaterialOfType("j2mat",args,kw); }
 py::object steel1(py::args args, py::kwargs kw) { return createMaterialOfType("steel1",args,kw); }
 py::object concreteFcmViscoelastic(py::args args, py::kwargs kw) { return createMaterialOfType("concretefcmviscoelastic",args,kw); }
@@ -457,6 +458,10 @@ py::object peakFunction(py::args args, py::kwargs kw) { return createLoadTimeFun
 py::object constantFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("constantfunction",args,kw); }
 
 py::object piecewiseLinFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("piecewiselinfunction",args,kw); }
+
+py::object usrDefFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("usrdefltf",args,kw); }
+
+
 
 
 /*****************************************************

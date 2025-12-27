@@ -174,7 +174,7 @@ include_re = re.compile (r"""
 
 # returns the value corresponding to given keyword and record
 def getKeywordValue (infilename, record, kwd, optional = None):
-    match = re.search (kwd+'\s+\"*([\\\.\+\-,:\w]+)\"*', record)
+    match = re.search (kwd+r'\s+\"*([\\\.\+\-,:\w]+)\"*', record)
     if match:
         #print('\nFOUND', kwd, 'WITH', match.group(1))
         return match.group(1)
@@ -322,10 +322,10 @@ def check_element_rec (context, kwd, line):
             (context.recirule==rec[3]) and (context.recgpnum == rec[4])):
             #print ( "Found er: looking for ",rec[5],"in ", line )
 
-            match=re.search(rec[5]+'\s*((([+-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
+            match=re.search(rec[5]+r'\s*((([+-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
             if match:
                 # print ( "match: ",match.group(1) )
-                context.recVal[irec]=re.split('\s+',match.group(1))[rec[6]-1]
+                context.recVal[irec]=re.split(r'\s+',match.group(1))[rec[6]-1]
                 #print ( "found: ",context.recVal[irec] )
 
 
@@ -337,9 +337,9 @@ def check_beam_rec (context, kwd, line):
 
         if ((rec[0]=='ber') and timeflag and (context.recnumber == rec[2])):
 #            print ( "Found ber: looking for ",rec[3],"in ", line )
-            match=re.search(rec[3]+'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
+            match=re.search(rec[3]+r'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
             if match:
-                context.recVal[irec]=re.split('\s+',match.group(0))[rec[4]]
+                context.recVal[irec]=re.split(r'\s+',match.group(0))[rec[4]]
 #                print ( "found\n" )
 
 #extract reaction record
@@ -687,11 +687,11 @@ def process_file (infilename, parentfilename):
             match = begin_re.search(line)
             if match:
                 begin=1
-                match=re.search("tolerance\s+(\d+\.\d*(e[+-]\d+)*)", line)
+                match=re.search(r"tolerance\s+(\d+\.\d*(e[+-]\d+)*)", line)
                 if match:
                     tolerance = match.group(1)
                     if debug: print ( "Tolerance = ", tolerance )
-                match=re.search("error_when_missing\s+(\d+)", line)
+                match=re.search(r"error_when_missing\s+(\d+)", line)
                 if match:
                     val = int(match.group(1))
                     if (val == 0):

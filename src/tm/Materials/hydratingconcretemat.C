@@ -71,7 +71,7 @@ HydratingConcreteMat :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
         IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
         IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
-    } else if ( hydrationModelType == 3 ) { //Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
+    } else if ( hydrationModelType == 3 ) { //Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A. Still unfinished.
         referenceTemperature = 20.;//according to the authors
         IR_GIVE_FIELD(ir, wc, _IFT_HydratingConcreteMat_wc);
         IR_GIVE_FIELD(ir, ac, _IFT_HydratingConcreteMat_ac);
@@ -127,6 +127,9 @@ HydratingConcreteMat :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, _IFT_HydratingConcreteMat_minModelTimeStepIntegrations);
     
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
+    
+    relMatAge = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, relMatAge, _IFT_HydratingConcreteMat_relMatAge);
     
     conductivityType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, _IFT_HydratingConcreteMat_conductivitytype);
@@ -299,6 +302,10 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
         return ms->power;
     }
 
+    if(ms->firstCall && (this->relMatAge !=0.)){
+        ms->lastEquivalentTime = this->relMatAge;
+    }
+    
     if ( this->hydrationModelType == 1 ) { //exponential affinity hydration model, need to keep equivalent time
         ms->equivalentTime = ms->lastEquivalentTime + ( evalTime - ms->lastEvalTime ) * scaleTemperature(gp);
         if ( ms->equivalentTime != 0. ) {
@@ -306,10 +313,29 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
             //printf("%f %f %f %f\n", equivalentTime, this->lastEquivalentTime, evalTime, lastEvalTime);
         }
     } else if ( this->hydrationModelType == 2 ) { //affinity hydration model inspired by Miguel Cervera et al.
-        //determine dTime for integration
         double alphaTrialOld, alphaTrialNew = 0.0;
-        double time = ms->lastEvalTime;
-        double dTime = ( evalTime - time ) / this->minModelTimeStepIntegrations;
+        double time, dTime;
+        //calculate first degree of hydration which corresponds to relMatAge. Then proceed normally further.
+        if(ms->firstCall && (this->relMatAge !=0.)){ 
+            dTime = this->relMatAge / this->minModelTimeStepIntegrations;
+            time = 0.;
+            ms->degreeOfHydration = ms->lastDegreeOfHydration;
+            while ( time <= this->relMatAge ) {
+                time += dTime;
+                alphaTrialOld = ms->degreeOfHydration + scaleTemperature(gp) * affinity25(ms->degreeOfHydration) * dTime; //predictor
+                for ( int i = 0; i < 4; i++ ) {
+                    alphaTrialNew = ms->degreeOfHydration + scaleTemperature(gp) * dTime / 2. * ( affinity25(ms->degreeOfHydration) + affinity25(alphaTrialOld) );
+                    alphaTrialOld = alphaTrialNew;
+                }
+                ms->degreeOfHydration = alphaTrialNew;
+            }
+            ms->lastDegreeOfHydration = ms->degreeOfHydration;
+        }
+        
+        //Integrate after castingTime, determine dTime for integration
+        alphaTrialNew = 0.0;
+        time = ms->lastEvalTime;
+        dTime = ( evalTime - time ) / this->minModelTimeStepIntegrations;
         if ( dTime > this->maxModelIntegrationTime ) {
             dTime = this->maxModelIntegrationTime;
         }
@@ -428,7 +454,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
 
     ms->power = this->Qpot * ( ms->degreeOfHydration - ms->lastDegreeOfHydration ) / ( evalTime - ms->lastEvalTime );
     ms->power *= 1000 * this->massCement; // W/m3 of concrete
-
+    ms->firstCall = false;
     //internal variables are updated in HydratingConcreteMatStatus :: updateYourself()
     return ms->power;
 }
@@ -454,11 +480,11 @@ double HydratingConcreteMat :: affinity25(double DoH) const
     return result;
 }
 
+
 double HydratingConcreteMatStatus :: giveDoHActual() const
 {
     return degreeOfHydration;
 }
-
 
 void
 HydratingConcreteMatStatus :: updateYourself(TimeStep *tStep)
@@ -471,7 +497,7 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *tStep)
     this->lastACement = this->aCement;
     this->lastVCem = this->VCem;
     this->lastVGel = this->VGel;
-    this->lastVCH = this->VCH; 
+    this->lastVCH = this->VCH;
     
     //average from last and current temperatures, in C*hour
     if ( !tStep->isIcApply() && mat->giveCastingTime() < tStep->giveIntrinsicTime() ) {
@@ -487,7 +513,7 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");
-    fprintf( file, "EvaluatingTime %e  DoH %f HeatPower %f [W/m3 of concrete] Temperature %f conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->giveDoHActual(), this->power, this->giveTempField(), mat->giveIsotropicConductivity(this->gp, tStep), mat->giveConcreteCapacity(this->gp, tStep), mat->giveConcreteDensity(this->gp, tStep) );
+    fprintf( file, "EvaluatingTime %e EquivalentTime %e DoH %f HeatPower %f [W/m3 of concrete] Temperature %f conductivity %f  capacity %f  density %f", tStep->giveIntrinsicTime(), this->lastEquivalentTime, this->giveDoHActual(), this->power, this->giveTempField(), mat->giveIsotropicConductivity(this->gp, tStep), mat->giveConcreteCapacity(this->gp, tStep), mat->giveConcreteDensity(this->gp, tStep) );
     fprintf(file, "}\n");
 }
 } // end namespace oofem

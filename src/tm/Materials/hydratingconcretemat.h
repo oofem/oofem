@@ -42,7 +42,7 @@
 //@{
 #define _IFT_HydratingConcreteMat_Name "hydratingconcretemat"
 #define _IFT_HydratingConcreteMat_referenceTemperature "referencetemperature"
-#define _IFT_HydratingConcreteMat_castAt "castat"
+#define _IFT_HydratingConcreteMat_relMatAge "relmatage"
 #define _IFT_HydratingConcreteMat_hydrationModelType "hydrationmodeltype"
 #define _IFT_HydratingConcreteMat_maxModelIntegrationTime "maxmodelintegrationtime"
 #define _IFT_HydratingConcreteMat_minModelTimeStepIntegrations "minmodeltimestepintegrations"
@@ -121,6 +121,9 @@ public:
      * Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
      * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
      */
+    ///Relative material age (as "equivalent time") at the time of casting (castingTime), optional parameter
+    double relMatAge = 0.;
+    
     double tau = 0., beta = 0.;
 
     /**
@@ -187,13 +190,16 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
     double power = 0.;
     double lastEvalTime = -1.e20;
-    double lastEquivalentTime = 0., equivalentTime = 0., degreeOfHydration = 0., lastDegreeOfHydration = 0.;
+    double equivalentTime = 0.;
+    double lastEquivalentTime = 0., degreeOfHydration = 0., lastDegreeOfHydration = 0.;
     /// Radius of the equivalent contact-free C-S-H shells
     double zShell = 0., lastZShell = 0.;
     // Radius of cement particle
     double aCement = 0., lastACement = 0.;
     // Volume fractions of cement, gel, CH;
     double VCem = 0., lastVCem = 0., VGel = 0., lastVGel = 0., VCH = 0., lastVCH = 0.;
+    // When the hydration model is called the first time - imposing relMatAge;
+    bool firstCall = true;
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h

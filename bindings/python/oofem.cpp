@@ -1087,6 +1087,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
         .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
         .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
+        .def("giveMetaStepNumber", &oofem::TimeStep::giveMetaStepNumber)      
         .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
         .def("setTime", &oofem::TimeStep::setTime)
         .def("setTargetTime", &oofem::TimeStep::setTargetTime)
@@ -1138,6 +1139,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
         .def("forceEquationNumbering", py::overload_cast<int>(&oofem::EngngModel::forceEquationNumbering))
         .def("forceEquationNumbering", py::overload_cast<>(&oofem::EngngModel::forceEquationNumbering))
+        .def("requiresEquationRenumbering", &oofem::EngngModel::requiresEquationRenumbering)
         .def("giveNumberOfDomainEquations", &oofem::EngngModel::giveNumberOfDomainEquations)
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
@@ -1996,6 +1998,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoLE", &isoLE, py::return_value_policy::move);
     m.def("idm1", &idm1, py::return_value_policy::move);
     m.def("isoHeat", &isoHeat, py::return_value_policy::move);
+    m.def("hydratingConcreteMat", &hydratingConcreteMat, py::return_value_policy::move);
     m.def("j2mat", &j2mat, py::return_value_policy::move);
     m.def("steel1", &steel1, py::return_value_policy::move);
     m.def("concreteFcmViscoelastic", &concreteFcmViscoelastic, py::return_value_policy::move);
@@ -2008,6 +2011,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
+    m.def("usrDefFunction", &usrDefFunction, py::return_value_policy::move);
     m.def("vtkxml", &vtkxml, py::return_value_policy::move);
     m.def("vtkmemory", &vtkmemory, py::return_value_policy::move);
     m.def("homExport", &homExport, py::return_value_policy::move);
