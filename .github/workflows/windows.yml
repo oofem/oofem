@@ -7,6 +7,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
           submodules: recursive
+          fetch-depth: 0
     - run: choco install nsis
     #- name: Install NSIS
     #  run: |
