@@ -1,3 +1,29 @@
+2025-12-28 Borek Patzak <Borek.Patzak@fsv.cvut.cz>
+	* OOFEM 3.0 Released
+    * Code base modernized (const, override, std shared pointers, )
+    * Improved and updated documentation (Input manual, Element and Material library manuals) 
+    * OOFEM Python bindings available (Pybind11 or nanobind based)
+    * Improved parallel performance when using OpenMP
+    * Implemented xml based input file reader
+    * New Multi-physics module (mpm), symbolic mode allows to define problem by specifying the weak form
+    * Optionally use Eigen for vector/matrix operations via _USE_EIGEN 
+    * Enabling setting all nodal and element parameters via sets (initialization with priorities)
+    * Added github Continuous Integration (Win, Linux)
+	* Added support for Pyodide WebAssembly (WASM) builds
+    * Added 2D and 3D Consolidation problems (MPM based)
+    * Added 2D and 3D Scalar Advection problems (Discrete Galerkin formulation, MPM based)
+    * Added new vtkhdf5 export module
+    * Added Additive Manufacturing module (g-Code emulator, thermal & mechanical analysis)
+    * Adding SolutionStatusExportModule
+    * Implemented LayeredCrossSection support for large strain analysis
+    * Added OneAPI support
+    * Added p-delta analysis, approximate second order structural analysis
+    * Added interface to MFront Library
+    * Integration of FTensor library, new hyper elastic materials and improvements of large-strain code
+    * Added support for Monitors, user defined components that can be updated at specific events during solution
+	* New time step controller, enabling automatic adjustment of the time increment based on user selected strategy
+	* New generic contact mechanics framework, penalty method implementation
+
 2017-12-30 Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 	* OOFEM 2.5 released
 	* Added support for other sparse matrix storage schemes in nlinear dynamic problem
