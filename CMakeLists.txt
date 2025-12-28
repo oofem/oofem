@@ -1176,9 +1176,9 @@ endif()
 ######################## Packing ######################################
 #######################################################################
 ### versions
-set (CPACK_PACKAGE_VERSION_MAJOR ${oofem_VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${oofem_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${oofem_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION_MAJOR ${OOFEM_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${OOFEM_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${OOFEM_VERSION_PATCH})
 set (CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
 
 ### general settings
