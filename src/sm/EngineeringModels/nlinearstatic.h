@@ -46,6 +46,7 @@
 #define _IFT_NonLinearStatic_deltat "deltat"
 #define _IFT_NonLinearStatic_deltatfunction "deltatfunction"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"
+#define _IFT_NonLinearStatic_maxIterNum "maxiter"
 #define _IFT_NonLinearStatic_refloadmode "refloadmode"
 #define _IFT_NonLinearStatic_keepll "keepll"
 #define _IFT_NonLinearStatic_donotfixload "donotfixload"
@@ -120,6 +121,8 @@ protected:
     NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
+    /// maximum number of iterations
+    int maxIterNum;
     /// Associated time function for time step increment.
     int dtFunction;
 
