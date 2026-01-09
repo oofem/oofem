@@ -326,7 +326,7 @@ public:
      */
     virtual void printSingleOutputAt(FILE *file, TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
     #ifdef _USE_JSON
-        virtual json jsonSingleOutputAt(TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
+        virtual void jsonSingleOutputAt(const JsonContext& ctx, TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
     #endif
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).

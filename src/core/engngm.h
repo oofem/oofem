@@ -1146,7 +1146,7 @@ public:
      */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     #ifdef _USE_JSON
-        json jsonDofOutputAt(Dof *iDof, TimeStep *tStep);
+        virtual void jsonDofOutputAt(const JsonContext& ctx, Dof *iDof, TimeStep *tStep);
     #endif
 
 

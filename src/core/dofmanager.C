@@ -517,7 +517,7 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
     void DofManager::jsonOutputAt(const JsonContext& ctx,TimeStep *tStep){
         EngngModel *emodel = this->giveDomain()->giveEngngModel();
         auto ctx2=ctx.append({{"type",this->giveClassName()},{"label",this->giveLabel()},{"number",this->giveNumber()}});
-        for(Dof* dof: *this){ ctx2.print(emodel->jsonDofOutputAt(dof,tStep)); }
+        for(Dof* dof: *this){ emodel->jsonDofOutputAt(ctx2,dof,tStep); }
     }
 #endif
 

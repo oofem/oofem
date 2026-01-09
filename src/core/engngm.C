@@ -902,9 +902,9 @@ void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 #ifdef _USE_JSON
-    json EngngModel :: jsonDofOutputAt(Dof *iDof, TimeStep *tStep)
+    void EngngModel :: jsonDofOutputAt(const JsonContext& ctx, Dof *iDof, TimeStep *tStep)
     {
-        return iDof->jsonSingleOutputAt(tStep, 'd', VM_Total);
+        iDof->jsonSingleOutputAt(ctx, tStep, 'd', VM_Total);
     }
 #endif
 
