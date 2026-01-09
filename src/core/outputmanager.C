@@ -70,6 +70,21 @@ OutputManager :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, element_except, _IFT_OutputManager_elementexcept);
 }
 
+#ifdef _USE_JSON
+    /* the loops are somewhat simplified here */
+    void OutputManager::doDofManOutput_json(const JsonContext& ctx, TimeStep *tStep){
+        int ndofman = domain->giveNumberOfDofManagers();
+        for ( int i = 1; i <= ndofman; i++ ) {
+            domain->giveDofManager(i)->jsonOutputAt(ctx,tStep);
+        }
+    };
+
+    void OutputManager :: doElementOutput_json(const JsonContext& ctx, TimeStep *tStep)
+    {
+        for ( auto &elem : domain->giveElements() ) elem->jsonOutputAt(ctx,tStep);
+    }
+#endif
+
 void
 OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 {

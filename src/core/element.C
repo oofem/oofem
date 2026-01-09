@@ -799,6 +799,13 @@ Element :: postInitialize()
     this->computeGaussPoints();
 }
 
+#ifdef _USE_JSON
+    void Element::jsonOutputAt(const JsonContext& ctx, TimeStep *tStep){ ctx.prepend({{"WARNING","Element::jsonOutputAt not overridden"}}).print(jsonCommon()); }
+
+    ordered_json Element::jsonCommon(){
+        return {{"number",this->giveNumber()},{"label",this->giveLabel()},{"type",this->giveInputRecordName()}};
+    }
+#endif
 
 void
 Element :: printOutputAt(FILE *file, TimeStep *tStep)

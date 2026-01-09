@@ -187,4 +187,10 @@ void SpringElement :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "  spring force or moment %.4e", this->computeSpringInternalForce(tStep) );
     fprintf(File, "\n");
 }
+#ifdef _USE_JSON
+    void SpringElement :: jsonOutputAt(const JsonContext& ctx, TimeStep *tStep)
+    {
+        ctx.append(Element::jsonCommon()).print({{"force-or-moment",this->computeSpringInternalForce(tStep)}});
+    }
+#endif
 } // end namespace oofem

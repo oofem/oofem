@@ -45,6 +45,9 @@
 #include "activebc.h"
 #include "assemblercallback.h"
 #include "unknownnumberingscheme.h"
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
 
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/CrossSections/structuralcrosssection.h"
@@ -134,6 +137,20 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di, FILE *out)
                     domain->giveDofManager( dofManMap.at(i) )->giveDofWithID( dofidMap.at(i) )->giveBcId() );
         }
     }
+    #ifdef _USE_JSON
+        JsonContext ctx(out,{{"what","reactions"},{"timestep",tStep->giveNumber()}});
+        for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
+            if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
+                ctx.print({
+                    {"node",domain->giveDofManager( dofManMap.at(i) )->giveLabel()},
+                        {"iDof",dofidMap.at(i)},
+                        {"reaction",reactions.at( eqnMap.at(i))},
+                        {"bc-id",domain->giveDofManager( dofManMap.at(i) )->giveDofWithID( dofidMap.at(i) )->giveBcId()}
+                });
+            }
+        }
+    #endif
+
 }
 
 void StructuralEngngModel :: terminate(TimeStep *tStep){

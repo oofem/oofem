@@ -61,6 +61,10 @@
 #include "monitormanager.h"
 #include "timestepcontroller.h"
 
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
 #ifdef __MPM_MODULE
 #include "../mpm/mpm.h"
 #include "../mpm/integral.h"
@@ -1141,6 +1145,9 @@ public:
      * @param tStep solution step
      */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    #ifdef _USE_JSON
+        json jsonDofOutputAt(Dof *iDof, TimeStep *tStep);
+    #endif
 
 
     // identification

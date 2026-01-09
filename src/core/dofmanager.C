@@ -513,7 +513,13 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
         emodel->printDofOutputAt(stream, dof, tStep);
     }
 }
-
+#ifdef _USE_JSON
+    void DofManager::jsonOutputAt(const JsonContext& ctx,TimeStep *tStep){
+        EngngModel *emodel = this->giveDomain()->giveEngngModel();
+        auto ctx2=ctx.append({{"type",this->giveClassName()},{"label",this->giveLabel()},{"number",this->giveNumber()}});
+        for(Dof* dof: *this){ ctx2.print(emodel->jsonDofOutputAt(dof,tStep)); }
+    }
+#endif
 
 void DofManager :: printYourself()
 // Prints the receiver on screen.

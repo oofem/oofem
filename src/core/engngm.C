@@ -74,6 +74,10 @@
 #include "nodalrecoverymodel.h"
 #include "convergenceexception.h"
 
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
 
 #ifdef __MPI_PARALLEL_MODE
  #include "problemcomm.h"
@@ -791,14 +795,24 @@ EngngModel :: printOutputAt(FILE *file, TimeStep *tStep)
         return;              // do not print even Solution step header
     }
 
+    #ifdef _USE_JSON
+        JsonContext ctx(file,{{"time",tStep->giveTargetTime() * this->giveVariableScale(VST_Time)}});
+    #endif
+
     fprintf(file, "\n==============================================================");
     fprintf(file, "\nOutput for time %.8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(file, "\n==============================================================\n");
     for ( auto &domain: domainList ) {
         fprintf( file, "Output for domain %3d\n", domain->giveNumber() );
 
+
         domain->giveOutputManager()->doDofManOutput(file, tStep);
         domain->giveOutputManager()->doElementOutput(file, tStep);
+        #ifdef _USE_JSON
+            JsonContext ctx2=ctx.append({{"domain",domain->giveNumber()}});
+            domain->giveOutputManager()->doDofManOutput_json(ctx2.prepend({{"what","dofs"}}),tStep);
+            domain->giveOutputManager()->doElementOutput_json(ctx2.prepend({{"what","elements"}}),tStep);
+        #endif
     }
 }
 
@@ -886,6 +900,13 @@ void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
+
+#ifdef _USE_JSON
+    json EngngModel :: jsonDofOutputAt(Dof *iDof, TimeStep *tStep)
+    {
+        return iDof->jsonSingleOutputAt(tStep, 'd', VM_Total);
+    }
+#endif
 
 void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
                             const UnknownNumberingScheme &s, Domain *domain)
