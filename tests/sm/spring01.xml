@@ -1,7 +1,6 @@
-<oofem>
-  <Output>spring01.out</Output>
+<oofem version="2">
   <Description>Patch test of 1D spring element along x axis</Description>
-  <Analysis type="StaticStructural" nsteps="1" />
+  <Analysis _="StaticStructural" nsteps="1" />
   <Domain domain="1dtruss">
     <OutputManager tstep_all="" dofman_all="" element_all="" />
     <Nodes>
@@ -33,7 +32,7 @@
   </Domain>
   <xi:include href="spring01-exportmodules.xml" />
   <!--
-    this is what is indirectly inclueded (as xi:include test)
+    this is what is indirectly included (as xi:include test)
     <ExportModules>
       <errorcheck tolerance="1e-4">
         <NODE tStep="1" number="2" dof="1" unknown="d" value="0.5"/>

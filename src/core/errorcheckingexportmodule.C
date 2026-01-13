@@ -829,7 +829,7 @@ void ErrorCheckingExportModule::readRulesFromTextFile(const std::shared_ptr<Inpu
 void ErrorCheckingExportModule::readRulesFromRecords(DataReader& dr, const std::shared_ptr<InputRecord>& ir){
     double tol=1e-6;
     ir->giveOptionalField(tol,"tolerance");
-    DataReader::GroupRecords ruleRecs=dr.giveGroupRecords("",/*whatever*/DataReader::IR_elemRec,-1);
+    DataReader::GroupRecords ruleRecs=dr.giveGroupRecords(DataReader::IR_errorcheckRec,-1);
     for(auto rir: ruleRecs){
         std::string n;
         rir->giveRecordKeywordField(n);
@@ -844,7 +844,7 @@ void ErrorCheckingExportModule::readRulesFromRecords(DataReader& dr, const std::
         if (n=="TIME") { rule=std::make_unique<TimeCheckingRule>(rir,tol); }
         if (n=="ELEMENTNODE") { rule=std::make_unique<InternalElementDofManErrorCheckingRule>(rir,tol); }
         if(rule) errorCheckingRules.push_back(std::move(rule));
-        else { std::cerr<<"No rule for "<<n<<" created (not yet implemented for XML?)."<<std::endl; }
+        else { OOFEM_ERROR("%s: unknown error checking rule '%s'",rir->giveLocation().c_str(),n.c_str()); }
     }
 }
 

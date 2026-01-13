@@ -85,7 +85,7 @@ public:
      */
     void setDescription(const std :: string &description) { this->description = description; }
 
-    std::shared_ptr<InputRecord> giveInputRecord(InputRecordType, int recordId) override;
+    std::shared_ptr<InputRecord> giveNextInputRecord(InputRecordType) override;
     bool peekNext(const std :: string &keyword) override;
     void finish() override;
     std :: string giveReferenceName() const override { return name; }

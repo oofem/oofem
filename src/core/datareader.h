@@ -60,28 +60,37 @@ protected:
     std :: string description;
 
 public:
+    enum class FormatFeature {
+        NoDomainCompRec,
+        DomainUnderTop,
+        OutputAndDescriptionOptional
+    };
+    virtual bool hasFeature(FormatFeature f){ return false; }
     /// Determines the type of input record.
     enum InputRecordType {
         IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
-        IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
+        IR_emodelRec, IR_mstepRec, IR_initModuleRec, IR_expModuleRec, IR_monitorRec, IR_dofmanRec, IR_elemRec,
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_funcRec, IR_setRec,
         IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec,
         IR_enrichFrontRec, IR_propagationLawRec, IR_crackNucleationRec, IR_fracManRec, IR_failCritRec,
         IR_contactSurfaceRec, IR_fieldRec, 
         // MPM specific
         IR_mpmVarRec, IR_mpmTermRec, IR_mpmIntegralRec,
+        IR_errorcheckRec,
         IR_unspecified // internal use only, signifies error in setting record type
     };
     /* XML tags corresponding to record types; those with "" are just enumeration group where arbitrary tags may be used */
-    static constexpr const char* InputRecordTags[]={
-        "Domain","OutputManager","DomainComp","Geometry","GBPM",
-        "Analysis","Metastep",/*ExportModule*/"",/*Node*/"",/*Element*/"",
-        /*CrossSection*/"",/*Material*/"",/*"NonlocalBarrier"*/"",/*BoundaryCondition*/"","InitialCondition",/*TimeFunction*/"","Set",
-        "XFemManager","EnrichmentFunction","EnrichmentGeometry",/*EnrichmentItem*/"",
-        /*EnrichmentFront*/"","PropagationLaw","CrackNucleation","FractureManager","FailCriterion",
-        /*ContactSurface*/"",/*Field*/"",
-        "Variable",/*"MPMTerm"*/"","Integral",
-        "UNSPECIFIED"
+    struct TagGroup { const char* tag; const char* group; };
+    static constexpr TagGroup InputRecordTags[]={
+        {"Domain",""},{"OutputManager",""},{"DomainComp",""},{"Geometry",""},{"GBPM",""},
+        {"Analysis",""},{"Metastep","Metasteps"},{"","InitModules"},{"","ExportModules"},{"","Monitors"},{"","Nodes"},{"","Elements"},
+        {"","CrossSections"},{"","Materials"},{"","NonlocalBarriers"},{"","BoundaryConditions"},{"","InitialConditions"},{"","LoadTimeFunctions"},{"Set","Sets"},
+        {"XFemManager",""},{"EnrichmentFunction",""},{"EnrichmentGeometry",""},{"","EnrichmentItems"},
+        {"","EnrichmentFront"},{"PropagationLaw",""},{"CrackNucleation","NucleationCriteria"},{"FractureManager",""},{"FailCriterion",""},
+        {"","ContactSurfaces"},{"","Fields"},
+        {"Variable","MPMVariables"},{"","MPMTerms"},{"Integral","MPMIntegrals"},
+        {/*errorcheck: both empty*/"",""},
+        {"UNSPECIFIED",""}
     };
 
     DataReader() { }
@@ -95,7 +104,7 @@ public:
      * @param irType Determines type of record to be returned.
      * @param recordId Determines the record  number corresponding to component number.
      */
-    virtual std::shared_ptr<InputRecord> giveInputRecord(InputRecordType irType, int recordId) = 0;
+    virtual std::shared_ptr<InputRecord> giveNextInputRecord(InputRecordType irType) = 0;
     /**
      * Returns top input record, for readers which support it; others return empty pointer
      */
@@ -118,8 +127,6 @@ public:
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
-
-    virtual bool hasFlattenedStructure() { return false; }
 
     virtual void enterGroup(const std::string& name) {};
     virtual void leaveGroup(const std::string& name) {};
@@ -183,7 +190,7 @@ public:
      * @param optional If not optional and the number of records is not given, fail with error. Otherwise assume 0-sized subgroup.
      * @return Object providing begin(), end() iterators and size().
      */
-    GroupRecords giveGroupRecords(const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
+    GroupRecords giveGroupRecords(const std::shared_ptr<InputRecord> &ir, InputFieldType ift, InputRecordType irType, bool optional );
     /**
      * Give range to iterate over records within a named group
      * @param name Subgroup name; if not given, give records within the current group
@@ -191,9 +198,9 @@ public:
      * @param numRequired if non-negative, this number is checked against number of records present (for readers which can determine that), and mismatch error is thrown when they are different
      * @return Object providing being(), end() iterators and size().
      */
-    GroupRecords giveGroupRecords(const std::string& name, InputRecordType irType, int numRequired=-1);
+    GroupRecords giveGroupRecords(InputRecordType irType, int numRequired=-1);
     /// Return pointer to subrecord of given type (must be exactly one); if not present, returns nullptr.
-    std::shared_ptr<InputRecord> giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, const std::string &name, InputRecordType irType, bool optional );
+    std::shared_ptr<InputRecord> giveChildRecord( const std::shared_ptr<InputRecord> &ir, InputFieldType ift, InputRecordType irType, bool optional );
 
 
 };

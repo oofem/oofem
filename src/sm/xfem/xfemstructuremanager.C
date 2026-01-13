@@ -201,7 +201,7 @@ void XfemStructureManager :: splitCracks()
                                 //                        EnrichmentItem *newEI_1 = new Crack(n1, this, this->giveDomain() );
                                 auto newCrack = std::make_unique<Crack>( n1, this, this->giveDomain() );
 
-                                auto ir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+                                auto ir = dataReader.giveNextInputRecord(DataReader :: IR_enrichItemRec);
                                 newCrack->initializeFrom(ir);
                                 newCrack->instanciateYourself(dataReader);
 

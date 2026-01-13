@@ -14,5 +14,6 @@ Version: |version|, Date: |today|
     analysisrecords
     domainrecords
     apendices
+    xml
     examples
     about

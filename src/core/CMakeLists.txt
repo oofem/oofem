@@ -87,7 +87,7 @@ if (USE_SUPERLU_MT)
 endif ()
 
 if (USE_XML)
-  list (APPEND core_unsorted xmldatareader.C xmlinputrecord.C)
+  list (APPEND core_unsorted xmldatareader.C xmlinputrecord.C xmlutil.C)
 endif ()
 
 set (core_oofeg oofeggraphiccontext.C)

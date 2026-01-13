@@ -50,6 +50,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <charconv>
 
 //#include "tm/Materials/cemhyd/cemhydmat.h"
 #include "cemhydmat.h"
@@ -500,8 +501,8 @@ CemhydMatStatus :: CemhydMatStatus(GaussPoint *gp, CemhydMatStatus *CemStat, Cem
     ConnNumbers = NULL;
     faces = NULL;
 
- #ifdef TINYXML
-    xmlFile = NULL;
+ #ifdef PUGIXML
+    xmlFile.reset();
  #endif
 
     headant = NULL;
@@ -913,11 +914,6 @@ CemhydMatStatus :: ~CemhydMatStatus()
 #ifdef CMLFILE
     delete F; //delete cmlfile
 #endif
-#ifdef TINYXML
-    if ( xmlFile != NULL ) {
-        delete xmlFile;
-    }
-#endif
 
     delete [] CSH_vicinity;
     delete [] molarvcsh;
@@ -1122,117 +1118,39 @@ void CemhydMatStatus :: dealloc_double_3D(double ***( &mic ), long SYSIZE)
     }
 }
 
-#ifdef TINYXML
+#ifdef PUGIXML
+
 //functions to read int, double and string with error checking
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val)
+void CemhydMatStatus :: QueryNumAttributeExt(const char *elementName, int position, int &val)
 {
-    int success;
-    char key [ 256 ];
-    XMLHandle docHandle = XMLHandle(xmlFile);
-    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
-    if ( elemSelected == NULL ) {
-        printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-
-    sprintf(key, "key%d", position);
-    success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != XML_SUCCESS ) {
-        printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
-        exit(0);
-    }
+    val=xmlFile.walk_get<int>({"cemhyd",elementName},("key"+std::to_string(position)).c_str());
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val)
+void CemhydMatStatus :: QueryNumAttributeExt(const char *elementName, int position, long int &val)
 {
-    int temp;
-    QueryNumAttributeExt(xmlFile, elementName, position, temp);
-    val = static_cast< long int >(temp);
+    val=xmlFile.walk_get<long int>({"cemhyd",elementName},("key"+std::to_string(position)).c_str());
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val)
+void CemhydMatStatus :: QueryNumAttributeExt(const char *elementName, const char *key, int &val)
 {
-    int success;
-    XMLHandle docHandle = XMLHandle(xmlFile);
-    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
-    if ( elemSelected == NULL ) {
-        printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-
-    success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != XML_SUCCESS ) {
-        printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
-        exit(0);
-    }
+    val=xmlFile.walk_get<long int>({"cemhyd",elementName},key);
 }
 
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val)
+void CemhydMatStatus :: QueryNumAttributeExt(const char *elementName, int position, double &val)
 {
-    int success;
-    char key [ 256 ];
-    XMLHandle docHandle = XMLHandle(xmlFile);
-    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
-    if ( elemSelected == NULL ) {
-        printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-
-    sprintf(key, "key%d", position);
-    success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != XML_SUCCESS ) {
-        printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
-        exit(0);
-    }
+    val=xmlFile.walk_get<double>({"cemhyd",elementName},("key"+std::to_string(position)).c_str());
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val)
+void CemhydMatStatus :: QueryNumAttributeExt(const char *elementName, const char *key, double &val)
 {
-    int success;
-    XMLHandle docHandle = XMLHandle(xmlFile);
-    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
-    if ( elemSelected == NULL ) {
-        printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-
-    success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != XML_SUCCESS ) {
-        printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
-        exit(0);
-    }
+    val=xmlFile.walk_get<double>({"cemhyd",elementName},key);
 }
 
-void CemhydMatStatus :: QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars)
+void CemhydMatStatus :: QueryStringAttributeExt(const char *elementName, int position, char *chars)
 {
-    int success;
-    char key [ 256 ];
-    XMLHandle docHandle = XMLHandle(xmlFile);
-    std :: string str1;
-    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
-    if ( elemSelected == NULL ) {
-        printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-
-    sprintf(key, "key%d", position);
-    //success = elemSelected->QueryStringAttribute(key, & str1);
-    // Since ubuntu/debian is still stuck at 2.5.3, lacking QueryStringAttribute.
-    // Change with above whenever packages are updated.
-    const char *cstr = elemSelected->Attribute(key);
-    if ( cstr ) {
-        success = XML_SUCCESS;
-    } else {
-        success = XML_NO_ATTRIBUTE;
-    }
-    if ( success != XML_SUCCESS ) {
-        printf("Cannot read string value or key %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
-        exit(0);
-    }
-    str1 = std :: string(cstr);
-
-    strcpy( chars, str1.c_str() );
+    std::string s=xmlFile.walk_get<std::string>({"cemhyd",elementName},("key"+std::to_string(position)).c_str());
+    strcpy( chars, s.c_str());
 }
 #endif
 
@@ -1366,18 +1284,11 @@ int CemhydMatStatus :: readInputFileAndInitialize(const char *inp, bool generate
 
     F->get_value(0, ( long & )iseed);
 #endif
-#ifdef TINYXML
-    xmlFile = new XMLDocument();
-    countKey = 0;
-    int errorId = xmlFile->LoadFile(inp);
-    if ( errorId != XML_SUCCESS ) {
-        printf("\nError reading XML file %s or nonletter symbols used, error id = %d\n", inp, errorId);
-        exit(0);
-    }
-
-    QueryNumAttributeExt(xmlFile, "Rand_seed_num", 0, iseed);
-    QueryNumAttributeExt(xmlFile, "Microstructure_size", 0, SYSSIZE);
-    QueryNumAttributeExt(xmlFile, "Given_microstructure", 0, read_micr);
+#ifdef PUGIXML
+    xmlFile=xmlutil::XmlDoc(inp);
+    QueryNumAttributeExt("Rand_seed_num", 0, iseed);
+    QueryNumAttributeExt("Microstructure_size", 0, SYSSIZE);
+    QueryNumAttributeExt("Given_microstructure", 0, read_micr);
 #endif
 
     nseed = iseed;
@@ -1497,8 +1408,8 @@ void CemhydMatStatus :: addagg()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )aggsize);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, aggsize);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, aggsize);
 #endif
 
         //fscanf(in, "%d",&aggsize);
@@ -1742,8 +1653,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )numsize);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, numsize);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, numsize);
 #endif
         //fscanf(in, "%d",&numsize);
 #ifdef PRINTF
@@ -1759,8 +1670,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )dispdist);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, dispdist);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, dispdist);
 #endif
         //fscanf(in, "%d",&dispdist);
 #ifdef PRINTF
@@ -1775,8 +1686,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, probgyp);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", "dihydrate", probgyp);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", "dihydrate", probgyp);
 #endif
         //fscanf(in, "%f",&probgyp);
 #ifdef PRINTF
@@ -1792,9 +1703,9 @@ int CemhydMatStatus :: create()
         F->get_next_line_in_section(0, probhem);
         F->get_next_line_in_section(0, probanh);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", "hemihydrate", probhem);
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", "anhydrite", probanh);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", "hemihydrate", probhem);
+        QueryNumAttributeExt("Generate_microstructure", "anhydrite", probanh);
 #endif
         //fscanf(in, "%f %f",&probhem,&probanh);
 #ifdef PRINTF
@@ -1815,8 +1726,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
             F->get_next_line_in_section(0, inval1);
 #endif
-#ifdef TINYXML
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, inval1);
+#ifdef PUGIXML
+            QueryNumAttributeExt("Generate_microstructure", countKey++, inval1);
             //inval1 = static_cast<long int>(inval);
 #endif
             //fscanf(in, "%ld",&inval1);
@@ -1833,8 +1744,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
             F->get_next_line_in_section(0, ( long & )inval);
 #endif
-#ifdef TINYXML
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, inval);
+#ifdef PUGIXML
+            QueryNumAttributeExt("Generate_microstructure", countKey++, inval);
 #endif
             //fscanf(in, "%d",&inval);
             if ( inval > ( SYSSIZE / 3 ) ) {
@@ -1855,8 +1766,8 @@ int CemhydMatStatus :: create()
 #ifdef CMLFILE
                 F->get_next_line_in_section(0, ( long & )inval);
 #endif
-#ifdef TINYXML
-                QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, inval);
+#ifdef PUGIXML
+                QueryNumAttributeExt("Generate_microstructure", countKey++, inval);
 #endif
                 //fscanf(in, "%d",&inval);
 #ifdef PRINTF
@@ -2046,8 +1957,8 @@ void CemhydMatStatus :: makefloc()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )numfloc);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, numfloc);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, numfloc);
 #endif
         //fscanf(in, "%d",&numfloc);
 #ifdef PRINTF
@@ -2323,8 +2234,8 @@ void CemhydMatStatus :: connect()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )npix);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, npix);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, npix);
 #endif
         //fscanf(in, "%d",&npix);
         printf("%d \n", npix);
@@ -2469,8 +2380,8 @@ void CemhydMatStatus :: outmic()
 #ifdef CMLFILE
     F->get_next_line_in_section(0, filen);
 #endif
-#ifdef TINYXML
-    QueryStringAttributeExt(xmlFile, "Generate_microstructure", countKey++, filen);
+#ifdef PUGIXML
+    QueryStringAttributeExt("Generate_microstructure", countKey++, filen);
 #endif
     //fscanf(in, "%s",filen);
     printf("%s\n", filen);
@@ -2483,8 +2394,8 @@ void CemhydMatStatus :: outmic()
 #ifdef CMLFILE
     F->get_next_line_in_section(0, filepart);
 #endif
-#ifdef TINYXML
-    QueryStringAttributeExt(xmlFile, "Generate_microstructure", countKey++, filepart);
+#ifdef PUGIXML
+    QueryStringAttributeExt("Generate_microstructure", countKey++, filepart);
 #endif
     //fscanf(in, "%s",filepart);
 #ifdef PRINTF
@@ -2608,8 +2519,8 @@ int CemhydMatStatus :: genpartnew()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, ( long & )userc);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, userc);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, userc);
 #endif
         //fscanf(in, "%d",&userc);
         //printf("%d \n",userc);
@@ -3423,8 +3334,8 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt)
     F->get_next_line_in_section(0, ( long & )ido);
 #endif
     //fscanf(in,"%d",&ido);
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, ido);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Generate_microstructure", countKey++, ido);
 #endif
 
 #ifdef PRINTF
@@ -3436,9 +3347,9 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt)
         F->get_next_line_in_section(0, tempstr);
         sscanf(tempstr, "%d %f", & valin, & val2);
 #endif
-#ifdef TINYXML
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, valin);
-        QueryNumAttributeExt(xmlFile, "Generate_microstructure", countKey++, val2);
+#ifdef PUGIXML
+        QueryNumAttributeExt("Generate_microstructure", countKey++, valin);
+        QueryNumAttributeExt("Generate_microstructure", countKey++, val2);
 #endif
         //fscanf(in,"%d %f",&valin,&val2);
         r [ i ] = valin;
@@ -3662,21 +3573,21 @@ void CemhydMatStatus :: distrib3d()
 #ifdef CMLFILE
         F->get_next_line_in_section(0, volin);
 #endif
-#ifdef TINYXML
+#ifdef PUGIXML
         if ( i == 1 ) {
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", "C3S_unit_frac", volin);
+            QueryNumAttributeExt("Generate_microstructure", "C3S_unit_frac", volin);
         }
 
         if ( i == 2 ) {
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", "C2S_unit_frac", volin);
+            QueryNumAttributeExt("Generate_microstructure", "C2S_unit_frac", volin);
         }
 
         if ( i == 3 ) {
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", "C3A_unit_frac", volin);
+            QueryNumAttributeExt("Generate_microstructure", "C3A_unit_frac", volin);
         }
 
         if ( i == 4 ) {
-            QueryNumAttributeExt(xmlFile, "Generate_microstructure", "C4AF_unit_frac", volin);
+            QueryNumAttributeExt("Generate_microstructure", "C4AF_unit_frac", volin);
         }
 
 #endif
@@ -3817,8 +3728,8 @@ void CemhydMatStatus :: distrib3d()
 #ifdef CMLFILE
     F->get_value(14, ( long & )output_img);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Output_initial_microstructure", 0, output_img);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Output_initial_microstructure", 0, output_img);
 #endif
 
 
@@ -3826,8 +3737,8 @@ void CemhydMatStatus :: distrib3d()
 #ifdef CMLFILE
         F->get_value(15, filen);
 #endif
-#ifdef TINYXML
-        QueryStringAttributeExt(xmlFile, "Output_initial_microstructure_img_file", 0, filen);
+#ifdef PUGIXML
+        QueryStringAttributeExt("Output_initial_microstructure_img_file", 0, filen);
 #endif
         if ( ( outfile_img = fopen(filen, "w") ) == NULL ) {
             printf("Output img file %s can not be created (file %s, line %d)\n", filen, __FILE__, __LINE__);
@@ -3837,8 +3748,8 @@ void CemhydMatStatus :: distrib3d()
 #ifdef CMLFILE
         F->get_value(16, filen);
 #endif
-#ifdef TINYXML
-        QueryStringAttributeExt(xmlFile, "Output_initial_microstructure_id_file", 0, filen);
+#ifdef PUGIXML
+        QueryStringAttributeExt("Output_initial_microstructure_id_file", 0, filen);
 #endif
         if ( ( outfile_id = fopen(filen, "w") ) == NULL ) {
             printf("Output id file %s can not be created (file %s, line %d)\n", filen, __FILE__, __LINE__);
@@ -4195,11 +4106,11 @@ void CemhydMatStatus :: init()
     F->get_value(21, rssodium);
     F->get_value(22, rspotassium);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Total_sodium", 0, totsodium);
-    QueryNumAttributeExt(xmlFile, "Total_potassium", 0, totpotassium);
-    QueryNumAttributeExt(xmlFile, "Readily_soluble_sodium", 0, rssodium);
-    QueryNumAttributeExt(xmlFile, "Readily_soluble_potassium", 0, rspotassium);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Total_sodium", 0, totsodium);
+    QueryNumAttributeExt("Total_potassium", 0, totpotassium);
+    QueryNumAttributeExt("Readily_soluble_sodium", 0, rssodium);
+    QueryNumAttributeExt("Readily_soluble_potassium", 0, rspotassium);
 #endif
 
     /*fscanf(alkalifile,"%f",&totsodium);
@@ -6435,8 +6346,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(13, ( long & )read_micr);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Given_microstructure", 0, read_micr);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Given_microstructure", 0, read_micr);
 #endif
 
     /* Open file and read in original cement particle microstructure if required*/
@@ -6447,8 +6358,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
         F->get_value(1, filei);
 #endif
-#ifdef TINYXML
-        QueryStringAttributeExt(xmlFile, "Input_img_file", 0, filei);
+#ifdef PUGIXML
+        QueryStringAttributeExt("Input_img_file", 0, filei);
 #endif
         //fscanf(in, "%s",filei);
 
@@ -6552,8 +6463,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
         F->get_value(2, filei);
 #endif
-#ifdef TINYXML
-        QueryStringAttributeExt(xmlFile, "Input_id_file", 0, filei);
+#ifdef PUGIXML
+        QueryStringAttributeExt("Input_id_file", 0, filei);
 #endif
         //fscanf(in, "%s",filei);
 
@@ -6660,8 +6571,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(3, ( long & )sealed);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Saturated_sealed", 0, sealed);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Saturated_sealed", 0, sealed);
 #endif
     //fscanf(in, "%d",&sealed);
     //printf("%d \n",sealed);
@@ -6670,8 +6581,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(23, ( long & )ntimes);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Diffusion_steps_per_cycle", 0, ntimes);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Diffusion_steps_per_cycle", 0, ntimes);
 #endif
     //ntimes=500;
     //printf("%d \n",ntimes);
@@ -6681,9 +6592,9 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(24, pnucch);
     F->get_value(25, pscalech);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "CH_nucleation_probability", 0, pnucch);
-    QueryNumAttributeExt(xmlFile, "CH_scale_factor", 0, pscalech);
+#ifdef PUGIXML
+    QueryNumAttributeExt("CH_nucleation_probability", 0, pnucch);
+    QueryNumAttributeExt("CH_scale_factor", 0, pscalech);
 #endif
     //pnucch=0.0001;
     //pscalech=9000.;
@@ -6694,9 +6605,9 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(26, pnucgyp);
     F->get_value(27, pscalegyp);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Gypsum_nucleation_probability", 0, pnucgyp);
-    QueryNumAttributeExt(xmlFile, "Gypsum_scale_factor", 0, pscalegyp);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Gypsum_nucleation_probability", 0, pnucgyp);
+    QueryNumAttributeExt("Gypsum_scale_factor", 0, pscalegyp);
 #endif
     //pnucgyp=0.01;
     //pscalegyp=9000.;
@@ -6707,9 +6618,9 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(28, pnuchg);
     F->get_value(29, pscalehg);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "C3AH6_nucleation_probability", 0, pnuchg);
-    QueryNumAttributeExt(xmlFile, "C3AH6_scale_factor", 0, pscalehg);
+#ifdef PUGIXML
+    QueryNumAttributeExt("C3AH6_nucleation_probability", 0, pnuchg);
+    QueryNumAttributeExt("C3AH6_scale_factor", 0, pscalehg);
 #endif
     //pnuchg=0.00002;
     //pscalehg=10000.;
@@ -6720,9 +6631,9 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(30, pnucfh3);
     F->get_value(31, pscalefh3);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "FH3_nucleation_probability", 0, pnucfh3);
-    QueryNumAttributeExt(xmlFile, "FH3_scale_factor", 0, pscalefh3);
+#ifdef PUGIXML
+    QueryNumAttributeExt("FH3_nucleation_probability", 0, pnucfh3);
+    QueryNumAttributeExt("FH3_scale_factor", 0, pscalefh3);
 #endif
     //pnucfh3=0.002;
     //pscalefh3=2500.;
@@ -6733,9 +6644,9 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(17, ( long & )burnfreq);
     F->get_value(33, adiabatic_curing);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Cycle_freq_perc_pore", 0, burnfreq);
-    QueryNumAttributeExt(xmlFile, "Adiabatic_conditions", 0, adiabatic_curing);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Cycle_freq_perc_pore", 0, burnfreq);
+    QueryNumAttributeExt("Adiabatic_conditions", 0, adiabatic_curing);
 #endif
 
 #ifdef __TM_MODULE //OOFEM transport module
@@ -6751,8 +6662,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(18, ( long & )setfreq);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Cycle_freq_perc_sol", 0, setfreq);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Cycle_freq_perc_sol", 0, setfreq);
 #endif
     //setfreq=50000;
 #ifdef PRINTF
@@ -6770,8 +6681,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(4, ind_time);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Induction_time", 0, ind_time);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Induction_time", 0, ind_time);
 #endif
     //fscanf(in, "%lf",&ind_time);
     //printf("%f \n",ind_time);
@@ -6785,8 +6696,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(5, E_act);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Ea_cement", 0, E_act);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Ea_cement", 0, E_act);
 #endif
     //fscanf(in, "%lf",&E_act);
 #ifdef PRINTF
@@ -6796,8 +6707,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(6, E_act_pozz);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Ea_pozz", 0, E_act_pozz);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Ea_pozz", 0, E_act_pozz);
 #endif
     //fscanf(in, "%f",&E_act_pozz);
 #ifdef PRINTF
@@ -6807,8 +6718,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(7, E_act_slag);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Ea_slag", 0, E_act_slag);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Ea_slag", 0, E_act_slag);
 #endif
     //fscanf(in, "%f",&E_act_slag);
 #ifdef PRINTF
@@ -6818,8 +6729,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(8, beta);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Beta", 0, beta);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Beta", 0, beta);
 #endif
     //fscanf(in, "%lf",&beta);
 #ifdef PRINTF
@@ -6829,8 +6740,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(9, mass_agg);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Mass_SCM_FA_CA_inert_frac", 0, mass_agg);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Mass_SCM_FA_CA_inert_frac", 0, mass_agg);
 #endif
     //fscanf(in, "%f",&mass_agg);
 #ifdef PRINTF
@@ -6840,8 +6751,8 @@ void CemhydMatStatus :: readhydrparam()
 #ifdef CMLFILE
     F->get_value(10, Mass_cement_concrete);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Mass_cement_concrete", 0, Mass_cement_concrete);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Mass_cement_concrete", 0, Mass_cement_concrete);
 #endif
     //fscanf(in, "%f",&Mass_cement_concrete);
 #ifdef PRINTF
@@ -6852,8 +6763,8 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(11, Cp_agg);
     Cp_agg /= 1000.; //scale to J/g/K
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Cp_SCM_FA_CA_inert", 0, Cp_agg);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Cp_SCM_FA_CA_inert", 0, Cp_agg);
     Cp_agg /= 1000.; //scale to J/g/K
 #endif
     //fscanf(in, "%f",&Cp_agg);
@@ -6865,8 +6776,8 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(12, Cp_cement);
     Cp_cement /= 1000.; //scale to J/g/K
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Cp_cem", 0, Cp_cement);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Cp_cem", 0, Cp_cement);
     Cp_cement /= 1000.; //scale to J/g/K
 #endif
     //fscanf(in, "%f",&Cp_cement);
@@ -6925,39 +6836,39 @@ void CemhydMatStatus :: readhydrparam()
     F->get_value(52, Poisson_inert);
     F->get_value(53, Calculate_elastic_homogenization);
 #endif
-#ifdef TINYXML
-    QueryNumAttributeExt(xmlFile, "Vol_cement_clinker_gypsum", 0, Vol_cement_clinker_gypsum);
-    QueryNumAttributeExt(xmlFile, "Vol_cement_SCM", 0, Vol_cement_SCM);
-    QueryNumAttributeExt(xmlFile, "Vol_water", 0, Vol_water);
-    QueryNumAttributeExt(xmlFile, "Vol_FA", 0, Vol_FA);
-    QueryNumAttributeExt(xmlFile, "Vol_CA", 0, Vol_CA);
-    QueryNumAttributeExt(xmlFile, "Vol_inert_filler", 0, Vol_inert_filler);
-    QueryNumAttributeExt(xmlFile, "Vol_entrained_entrapped_air", 0, Vol_entrained_entrapped_air);
-    QueryNumAttributeExt(xmlFile, "Grain_average_FA", 0, Grain_average_FA);
-    QueryNumAttributeExt(xmlFile, "Grain_average_CA", 0, Grain_average_CA);
-    QueryNumAttributeExt(xmlFile, "ITZ_thickness", 0, ITZ_thickness);
-    QueryNumAttributeExt(xmlFile, "ITZ_Young_red", 0, ITZ_Young_red);
-    QueryNumAttributeExt(xmlFile, "Young_SCM", 0, Young_SCM);
-    QueryNumAttributeExt(xmlFile, "Poisson_SCM", 0, Poisson_SCM);
-    QueryNumAttributeExt(xmlFile, "Young_FA", 0, Young_FA);
-    QueryNumAttributeExt(xmlFile, "Poisson_FA", 0, Poisson_FA);
-    QueryNumAttributeExt(xmlFile, "Young_CA", 0, Young_CA);
-    QueryNumAttributeExt(xmlFile, "Poisson_CA", 0, Poisson_CA);
-    QueryNumAttributeExt(xmlFile, "Young_inert", 0, Young_inert);
-    QueryNumAttributeExt(xmlFile, "Poisson_inert", 0, Poisson_inert);
-    QueryNumAttributeExt(xmlFile, "Calculate_elastic_homogenization", 0, Calculate_elastic_homogenization);
+#ifdef PUGIXML
+    QueryNumAttributeExt("Vol_cement_clinker_gypsum", 0, Vol_cement_clinker_gypsum);
+    QueryNumAttributeExt("Vol_cement_SCM", 0, Vol_cement_SCM);
+    QueryNumAttributeExt("Vol_water", 0, Vol_water);
+    QueryNumAttributeExt("Vol_FA", 0, Vol_FA);
+    QueryNumAttributeExt("Vol_CA", 0, Vol_CA);
+    QueryNumAttributeExt("Vol_inert_filler", 0, Vol_inert_filler);
+    QueryNumAttributeExt("Vol_entrained_entrapped_air", 0, Vol_entrained_entrapped_air);
+    QueryNumAttributeExt("Grain_average_FA", 0, Grain_average_FA);
+    QueryNumAttributeExt("Grain_average_CA", 0, Grain_average_CA);
+    QueryNumAttributeExt("ITZ_thickness", 0, ITZ_thickness);
+    QueryNumAttributeExt("ITZ_Young_red", 0, ITZ_Young_red);
+    QueryNumAttributeExt("Young_SCM", 0, Young_SCM);
+    QueryNumAttributeExt("Poisson_SCM", 0, Poisson_SCM);
+    QueryNumAttributeExt("Young_FA", 0, Young_FA);
+    QueryNumAttributeExt("Poisson_FA", 0, Poisson_FA);
+    QueryNumAttributeExt("Young_CA", 0, Young_CA);
+    QueryNumAttributeExt("Poisson_CA", 0, Poisson_CA);
+    QueryNumAttributeExt("Young_inert", 0, Young_inert);
+    QueryNumAttributeExt("Poisson_inert", 0, Poisson_inert);
+    QueryNumAttributeExt("Calculate_elastic_homogenization", 0, Calculate_elastic_homogenization);
     //needed in OOFEM for conductivity and capacity calculations
-    QueryNumAttributeExt(xmlFile, "Mass_tot_concrete", 0, Mass_tot_concrete);
-    QueryNumAttributeExt(xmlFile, "Cp_SCM", 0, Cp_SCM);
-    QueryNumAttributeExt(xmlFile, "Cp_FA", 0, Cp_FA);
-    QueryNumAttributeExt(xmlFile, "Cp_CA", 0, Cp_CA);
-    QueryNumAttributeExt(xmlFile, "Cp_inert", 0, Cp_inert);
-    QueryNumAttributeExt(xmlFile, "Mass_SCM_frac", 0, Mass_SCM_frac);
-    QueryNumAttributeExt(xmlFile, "Mass_FA_frac", 0, Mass_FA_frac);
-    QueryNumAttributeExt(xmlFile, "Mass_CA_frac", 0, Mass_CA_frac);
-    QueryNumAttributeExt(xmlFile, "Mass_inert_frac", 0, Mass_inert_frac);
-    QueryNumAttributeExt(xmlFile, "Concrete_thermal_conductivity", 0, Concrete_thermal_conductivity); //[W/m/K]
-    QueryNumAttributeExt(xmlFile, "Concrete_bulk_density", 0, Concrete_bulk_density); //[kg/m3]
+    QueryNumAttributeExt("Mass_tot_concrete", 0, Mass_tot_concrete);
+    QueryNumAttributeExt("Cp_SCM", 0, Cp_SCM);
+    QueryNumAttributeExt("Cp_FA", 0, Cp_FA);
+    QueryNumAttributeExt("Cp_CA", 0, Cp_CA);
+    QueryNumAttributeExt("Cp_inert", 0, Cp_inert);
+    QueryNumAttributeExt("Mass_SCM_frac", 0, Mass_SCM_frac);
+    QueryNumAttributeExt("Mass_FA_frac", 0, Mass_FA_frac);
+    QueryNumAttributeExt("Mass_CA_frac", 0, Mass_CA_frac);
+    QueryNumAttributeExt("Mass_inert_frac", 0, Mass_inert_frac);
+    QueryNumAttributeExt("Concrete_thermal_conductivity", 0, Concrete_thermal_conductivity); //[W/m/K]
+    QueryNumAttributeExt("Concrete_bulk_density", 0, Concrete_bulk_density); //[kg/m3]
 #endif
 }
 

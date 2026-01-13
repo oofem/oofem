@@ -34,6 +34,7 @@
 
 #include "xmlinputrecord.h"
 #include "xmldatareader.h"
+#include "xmlutil.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -75,36 +76,6 @@ namespace oofem {
         return reader->loc(node);
     }
 
-    template<typename T>
-    T string_to(const std::string& s, std::function<std::string()> where){
-        T val;
-        const char* last=s.data()+s.size();
-        auto [p,e]=std::from_chars(s.data(),last,val);
-        if(p!=last) OOFEM_ERROR("%s: error parsing '%s' as typeid '%s' (leftover chars)",where().c_str(),s.c_str(),typeid(T).name());
-        if(e==std::errc()) return val;
-        OOFEM_ERROR("%s: error parsing '%s' as typeid '%s' (std::from_chars error).",where().c_str(),s.c_str(),typeid(T).name());
-    }
-
-    template<>
-    Range string_to(const std::string& s, std::function<std::string()> where){
-        if(std::regex_match(s,std::regex("[0-9]+"))){
-            return Range(std::atoi(s.c_str()));
-        }
-        std::smatch match;
-        if(std::regex_match(s,match,std::regex("\\s*([0-9]+)\\s*(-|[.]{2,3})\\s*([0-9]+)"))){
-            assert(match.size()==4);
-            return Range(std::atoi(match[1].str().c_str()),std::atoi(match[3].str().c_str()));
-        }
-        OOFEM_ERROR("%s: error parsing '%s' as range (single integer or range between two integers separated with -, .., ...).",where().c_str(),s.c_str());
-    };
-    template<>
-    bool string_to(const std::string& s, std::function<std::string()> where){
-        if(s=="0" || s=="n" || s=="N" || s=="no"  || s=="No"  || s=="NO" ){ return false; }
-        if(s=="1" || s=="y" || s=="Y" || s=="yes" || s=="Yes" || s=="YES"){ return true;  }
-        OOFEM_ERROR("%s: error parsing '%s' as bool (alllowed values: 0, n, N, no, No, NO; 1, y, Y, yes, Yes, YES).",where().c_str(),s.c_str())
-    }
-
-
     // trim string from both sides
     std::string _lrtrim(std::string &s) { s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {return !std::isspace(c);})); return s; }
 
@@ -137,7 +108,7 @@ namespace oofem {
         template<typename T> T as(size_t ix){
             if(ix>size()) OOFEM_ERROR("%s: attribute %s: invalid index %d in sequence of length %d: %s",loc().c_str(),attr.c_str(),(int)ix,(int)size(),str.c_str());
             const std::string& s(toks[ix]);
-            return string_to<T>(s,[this,ix](){ return loc()+": attribute "+attr+" ["+std::to_string(ix)+"]"; });
+            return xmlutil::string_to<T>(s,[this,ix](){ return loc()+": attribute "+attr+" ["+std::to_string(ix)+"]"; });
         }
     };
 
@@ -294,18 +265,18 @@ namespace oofem {
     void XMLInputRecord::giveField(double& answer, InputFieldType id){
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
-        answer=string_to<double>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
+        answer=xmlutil::string_to<double>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
     }
     void XMLInputRecord::giveField(int& answer, InputFieldType id){
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
-        answer=string_to<int>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
+        answer=xmlutil::string_to<int>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
     }
     void XMLInputRecord::giveField(bool& answer, InputFieldType id){
         if(!hasField(id)){ answer=false; return; }
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
-        answer=string_to<bool>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
+        answer=xmlutil::string_to<bool>(s,[this,n,id](){ return loc(n)+": attribute '"+id+"'"; });
     }
     void XMLInputRecord::giveField(std::list<Range>& answer, InputFieldType id){
         Tokens tt(id,this,"\\s*,\\s*");
@@ -315,9 +286,9 @@ namespace oofem {
         std::string s; pugi::xml_node n;
         std::tie(s,n)=_attr_traced_read_with_node(id);
         auto where=[this,n,id](){ return loc(n)+": attribute '"+id+"'"; };
-        if(s[0]=='@') answer.setReference(string_to<int>(s.substr(1,s.size()-1),where));
+        if(s[0]=='@') answer.setReference(xmlutil::string_to<int>(s.substr(1,s.size()-1),where));
         else if(s[0]=='$'){ std::string s2=s.substr(1,s.size()-2); answer.setSimpleExpression(s2); }
-        else answer.setValue(string_to<double>(s,where));
+        else answer.setValue(xmlutil::string_to<double>(s,where));
     }
     void XMLInputRecord::giveField(Dictionary &answer, InputFieldType id){
         std::string s; pugi::xml_node n;

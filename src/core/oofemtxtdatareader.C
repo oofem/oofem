@@ -96,7 +96,7 @@ OOFEMTXTDataReader :: ~OOFEMTXTDataReader()
 }
 
 std::shared_ptr<InputRecord>
-OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
+OOFEMTXTDataReader :: giveNextInputRecord(InputRecordType typeId)
 {
     if ( this->it == this->recordList.end() ) {
         OOFEM_ERROR("Out of input records, file contents must be missing");

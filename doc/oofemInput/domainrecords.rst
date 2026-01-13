@@ -311,7 +311,7 @@ Supported DofManagerType keywords are
    | Represents an abstraction for element side, which holds some
      unknowns.
 
-.. _pfemparticles:  
+.. _pfemparticles:
 
 -  PFEMParticle
 

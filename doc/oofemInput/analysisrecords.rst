@@ -150,8 +150,9 @@ conditions can be found in the corresponding sections of this manual.
 
 
 
-    Adaptive Increase/Decrease of Time Step
----------------------------------------
+Adaptive Increase/Decrease of Time Step
+----------------------------------------
+
 Additional parameters related to adaptive time-stepping can be specified to control the increment size during nonlinear
 iterations.
 
@@ -1242,6 +1243,6 @@ DummyEngngModel
 
 ``Dummy``  ``nnmodules #(in)`` 
 
-Represents a dummy model, whch is not capable to perform any analysis. 
+Represents a dummy model, which is not capable to perform any analysis.
 Its intended use is to invoke the configured export modules, 
 so that the problem geometry can be exported without requiring to actually solve the problem.

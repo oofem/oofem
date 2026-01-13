@@ -207,7 +207,7 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 int XfemManager :: instanciateYourself(DataReader &dr)
 {
     std :: string name;
-    DataReader::GroupRecords enrichRecs=dr.giveGroupRecords(thisIr,_IFT_XfemManager_numberOfEnrichmentItems,"EnrichmentItems",DataReader::IR_enrichItemRec,/*optional*/false);
+    DataReader::GroupRecords enrichRecs=dr.giveGroupRecords(thisIr,_IFT_XfemManager_numberOfEnrichmentItems,DataReader::IR_enrichItemRec,/*optional*/false);
     numberOfEnrichmentItems=enrichRecs.size();
     enrichmentItemList.resize(numberOfEnrichmentItems);
     int i=1;
@@ -225,7 +225,7 @@ int XfemManager :: instanciateYourself(DataReader &dr)
         i++;
     }
 
-    DataReader::GroupRecords nuclRecs=dr.giveGroupRecords(thisIr,_IFT_XfemManager_numberOfNucleationCriteria,"NucleationCriteria",DataReader::IR_crackNucleationRec,/*optional*/true);
+    DataReader::GroupRecords nuclRecs=dr.giveGroupRecords(thisIr,_IFT_XfemManager_numberOfNucleationCriteria,DataReader::IR_crackNucleationRec,/*optional*/true);
     numberOfNucleationCriteria=nuclRecs.size();
     mNucleationCriteria.resize(numberOfNucleationCriteria);
 

@@ -37,6 +37,7 @@
 
 #include "datareader.h"
 #include "xmlinputrecord.h"
+#include "xmlutil.h"
 #include <pugixml.hpp>
 #include <set>
 #include <map>
@@ -54,12 +55,10 @@ class OOFEM_EXPORT XMLDataReader : public DataReader
 protected:
     friend XMLInputRecord;
     std::string topXmlFile;
-    /* map parent xml node (which is either empty for top-level file for xi:include node for included files) to filenames */
-    std::map<pugi::xml_node,std::string> xmlFiles;
-    /* map document node to ordered list of newline offsets (used to compute line:column from offset in messages) */
-    std::map<pugi::xml_node,std::vector<size_t>> newlines;
-    /* map parent xml node (which is either empty for top-level file for xi:include node for included files) to (sub)document */
-    std::map<pugi::xml_node,pugi::xml_document> docs;
+    static constexpr int FormatLowest=1;
+    static constexpr int FormatHighest=2;
+    int formatVersion=FormatLowest;
+    std::map<pugi::xml_node,std::shared_ptr<xmlutil::XmlDoc>> docs;
     struct StackItem{
         pugi::xml_node parent;
         pugi::xml_node curr;
@@ -69,10 +68,9 @@ protected:
     };
     std::vector<StackItem> stack;
     std::string giveStackPath(); // string representation
-    pugi::xml_document& loadXml(pugi::xml_node parent, const std::string& xml);
-    pugi::xml_node resolveXiInclude(const pugi::xml_node& n);
+    xmlutil::XmlDoc& loadXml(pugi::xml_node parent, const std::string& xml);
+    pugi::xml_node resolveXiInclude(pugi::xml_node& n);
 
-    std::tuple<size_t,size_t> offset2lc(const std::vector<size_t>& nl, size_t offset) const;
     std::string loc() const ;
     std::string loc(const pugi::xml_node&) const;
     std::shared_ptr<InputRecord> topRecord;
@@ -82,11 +80,11 @@ protected:
 public:
     XMLDataReader(const std::string& xmlFile);
     virtual ~XMLDataReader(){};
-    bool hasFlattenedStructure() override { return true; }
+    bool hasFeature(FormatFeature f) override;
 
     //! guess whether given file is XML
     static bool canRead(const std::string& xmlFile);
-    std::shared_ptr<InputRecord> giveInputRecord(InputRecordType, int recordId) override;
+    std::shared_ptr<InputRecord> giveNextInputRecord(InputRecordType) override;
     std::shared_ptr<InputRecord> giveTopInputRecord() override;
     bool peekNext(const std :: string &keyword) override { return false; } /* no peeking, it is used for hacks only */
     void finish() override;

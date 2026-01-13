@@ -478,7 +478,7 @@ void Domain :: clearBoundaryConditions() { bcList.clear(); }
 void Domain :: clearElements() { elementList.clear(); }
 
 int Domain::instanciateYourself(DataReader& dr){
-    auto ir = dr.giveInputRecord(DataReader :: IR_domainRec, 1);
+    auto ir = dr.giveNextInputRecord(DataReader :: IR_domainRec);
     return this->instanciateYourself(dr,ir);
 }
 int
@@ -508,7 +508,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     // read output manager record
     {
         std :: string tmp;
-        auto ir = dr.giveInputRecord(DataReader :: IR_outManRec, 1);
+        auto ir = dr.giveNextInputRecord(DataReader :: IR_outManRec);
         ir->giveRecordKeywordField(tmp);
 
         if ( !giveEngngModel()->giveSuppressOutput() ) {
@@ -519,7 +519,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
 
     // XML format (and perhaps others) does not contain DomainComp nested group, rather nests everything under domain directly
 
-    std::shared_ptr<InputRecord> irdPtr(dr.hasFlattenedStructure()?irDomain:dr.giveInputRecord(DataReader :: IR_domainCompRec, 1));
+    std::shared_ptr<InputRecord> irdPtr=(dr.hasFeature(DataReader::FormatFeature::NoDomainCompRec)?irDomain:dr.giveNextInputRecord(DataReader :: IR_domainCompRec));
     IR_GIVE_OPTIONAL_FIELD(irdPtr, topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(irdPtr, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
@@ -527,7 +527,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
 
 
     // read nodes
-    DataReader::GroupRecords dofManagerRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ndofman,"Nodes",DataReader::IR_dofmanRec,/*optional*/false);
+    DataReader::GroupRecords dofManagerRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ndofman,DataReader::IR_dofmanRec,/*optional*/false);
     DataReader::RecordGuard scope(dr,irdPtr); // till the end of the scope
     dofManagerList.clear();
     dofManagerList.resize(dofManagerRecs.size());
@@ -557,7 +557,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     BuildDofManPlaceInArrayMap();
 
     // read elements
-    DataReader::GroupRecords elemRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nelem,"Elements",DataReader::IR_elemRec,/*optional*/false);
+    DataReader::GroupRecords elemRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nelem,DataReader::IR_elemRec,/*optional*/false);
     elementList.clear();
     elementList.resize(elemRecs.size());
     int elemIndex0=0;
@@ -582,7 +582,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     // Support sets defined directly after the elements (special hack for backwards compatibility).
     setList.clear();
     if ( dr.peekNext("set") ) {
-        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,"Sets",DataReader::IR_setRec,/*optional*/true);
+        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,DataReader::IR_setRec,/*optional*/true);
         setList.resize(setRecs.size());
         for(const std::shared_ptr<InputRecord> ir: setRecs){
             // read type of set
@@ -615,7 +615,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     #  endif
 
 	// read contact surfaces
-	DataReader::GroupRecords contactSurfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncontactsurf,"ContactSurfaces",DataReader::IR_contactSurfaceRec,/*optional*/true);
+	DataReader::GroupRecords contactSurfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncontactsurf,DataReader::IR_contactSurfaceRec,/*optional*/true);
         contactSurfaceList.clear();
 	contactSurfaceList.resize(contactSurfRecs.size());
 
@@ -647,7 +647,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
 
 
     // read cross sections
-    DataReader::GroupRecords csRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncrosssect,"CrossSections",DataReader::IR_crosssectRec,/*optional*/false);
+    DataReader::GroupRecords csRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_ncrosssect,DataReader::IR_crosssectRec,/*optional*/false);
     crossSectionList.clear();
     crossSectionList.resize(csRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: csRecs){
@@ -679,7 +679,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     #  endif
 
     // read materials
-    DataReader::GroupRecords matRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nmat,"Materials",DataReader::IR_matRec,/*optional*/false);
+    DataReader::GroupRecords matRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nmat,DataReader::IR_matRec,/*optional*/false);
     materialList.clear();
     materialList.resize(matRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: matRecs){
@@ -712,7 +712,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     #  endif
 
     // read barriers
-    DataReader::GroupRecords barrRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbarrier,"NonlocalBarriers",DataReader::IR_nlocBarRec,/*optional*/true);
+    DataReader::GroupRecords barrRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbarrier,DataReader::IR_nlocBarRec,/*optional*/true);
     nonlocalBarrierList.clear();
     nonlocalBarrierList.resize(barrRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: barrRecs){
@@ -747,7 +747,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     #  endif
 
     // read boundary conditions
-    DataReader::GroupRecords bcRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbc,"BoundaryConditions",DataReader::IR_bcRec,/*optional*/false);
+    DataReader::GroupRecords bcRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nbc,DataReader::IR_bcRec,/*optional*/false);
     bcList.clear();
     bcList.resize(bcRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: bcRecs){
@@ -780,7 +780,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
     #  endif
 
     // read initial conditions
-    DataReader::GroupRecords icRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nic,"InitialConditions",DataReader::IR_icRec,/*optional*/false);
+    DataReader::GroupRecords icRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nic,DataReader::IR_icRec,/*optional*/true);
     icList.clear();
     icList.resize(icRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: icRecs){
@@ -814,7 +814,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
 
 
     // read load time functions
-    DataReader::GroupRecords ltfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nfunct,"LoadTimeFunctions",DataReader::IR_funcRec,/*optional*/false);
+    DataReader::GroupRecords ltfRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nfunct,DataReader::IR_funcRec,/*optional*/false);
     functionList.clear();
     functionList.resize(ltfRecs.size());
     for(const std::shared_ptr<InputRecord>& ir: ltfRecs){
@@ -848,7 +848,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
 
     // read sets
     if ( setList.size() == 0 ) {
-        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,"Sets",DataReader::IR_setRec,/*optional*/true);
+        DataReader::GroupRecords setRecs=dr.giveGroupRecords(irdPtr,_IFT_Domain_nset,DataReader::IR_setRec,/*optional*/true);
         setList.resize(setRecs.size());
         for(const std::shared_ptr<InputRecord>& ir: setRecs){
             // read type of set
@@ -882,7 +882,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
         }
     #  endif
 
-    const std::shared_ptr<InputRecord> xfmIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nxfemman,DataReader::InputRecordTags[DataReader::IR_xfemManRec],DataReader::IR_xfemManRec,/*optional*/true);
+    const std::shared_ptr<InputRecord> xfmIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nxfemman,DataReader::IR_xfemManRec,/*optional*/true);
     if(xfmIr){
         DataReader::RecordGuard scope(dr,xfmIr);
         IR_GIVE_RECORD_KEYWORD_FIELD(xfmIr, name, num);
@@ -912,7 +912,7 @@ Domain :: instanciateYourself(DataReader &dr, const std::shared_ptr<InputRecord>
         #  endif
     }
 
-    const std::shared_ptr<InputRecord> fmanIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nfracman,"FractureManager",DataReader::IR_fracManRec,/*optional*/true);
+    const std::shared_ptr<InputRecord> fmanIr=dr.giveChildRecord(irdPtr,_IFT_Domain_nfracman,DataReader::IR_fracManRec,/*optional*/true);
     if (fmanIr) {
         fracManager = std::make_unique<FractureManager>(this);
         fracManager->initializeFrom(fmanIr);

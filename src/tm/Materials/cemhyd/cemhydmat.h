@@ -43,11 +43,9 @@
 #include <string>
 #include <cstring>
 
-#include <tinyxml2.h>
+#include "xmlutil.h"
 
-using namespace tinyxml2;
-
-#define TINYXML //read CEMHYD3D input file through tinyXML library
+#define PUGIXML //read CEMHYD3D input file through pugiXML library
 
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"
@@ -459,14 +457,14 @@ private:
     //+distrib3d
     char ***mic; //char mic [SYSIZE] [SYSIZE] [SYSIZE];
 
-#ifdef TINYXML
-    XMLDocument *xmlFile;
-    void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val);
-    void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val);
-    void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val);
-    void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val);
-    void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val);
-    void QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars);
+#ifdef PUGIXML
+    xmlutil::XmlDoc xmlFile;
+    void QueryNumAttributeExt(const char *elementName, int position, int &val);
+    void QueryNumAttributeExt(const char *elementName, int position, long int &val);
+    void QueryNumAttributeExt(const char *elementName, const char *key, int &val);
+    void QueryNumAttributeExt(const char *elementName, int position, double &val);
+    void QueryNumAttributeExt(const char *elementName, const char *key, double &val);
+    void QueryStringAttributeExt(const char *elementName, int position, char *chars);
     int countKey; //counter for many keys in the XML element
 #elif CMLFILE
     cmlfile *F;

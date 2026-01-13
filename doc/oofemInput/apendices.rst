@@ -456,7 +456,7 @@ Export modules
 | Export modules allow to export computed data into external software
   for post-processing. The number of export module records is specified
   in analysis record using ``nmodules`` parameter (see the initial part
-  of section AnalysisRecord_. The general format is the
+  of section :ref:`AnalysisRecord`. The general format is the
   following:
 | ``EntType`` [``tstep_all``] [``tstep_step #(in)``] [``tsteps_out #(rl)``]
   [``subtsteps_out #(in)``] [``domain_all``]

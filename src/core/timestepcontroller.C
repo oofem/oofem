@@ -53,7 +53,7 @@ void
 TimeStepController :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
 {
 
-  numberOfMetaSteps = ir->giveReader()->giveGroupRecords(ir,_IFT_EngngModel_nmsteps,"Metasteps",DataReader::IR_mstepRec,/*optional*/true).size();
+  numberOfMetaSteps = ir->giveReader()->giveGroupRecords(ir,_IFT_EngngModel_nmsteps,DataReader::IR_mstepRec,/*optional*/true).size();
   IR_GIVE_OPTIONAL_FIELD(ir, this->alpha, _IFT_TimeStepController_alpha);
 
 }
@@ -115,7 +115,7 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
     }
 
     // read problem domains
-    auto mrecs=dr.giveGroupRecords("Metasteps",DataReader::IR_mstepRec,this->numberOfMetaSteps);
+    auto mrecs=dr.giveGroupRecords(DataReader::IR_mstepRec,this->numberOfMetaSteps);
     int i=0;
     for(const std::shared_ptr<InputRecord>& mrec: mrecs){
         metaStepList[i].initializeFrom(mrec);

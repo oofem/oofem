@@ -501,7 +501,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
                 ext_ei->appendInputRecords(dataReader);
 
 
-                auto mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+                auto mir = dataReader.giveNextInputRecord(DataReader :: IR_enrichItemRec);
                 std :: string name;
                 mir->giveRecordKeywordField(name);
 
