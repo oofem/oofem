@@ -665,7 +665,7 @@ if (USE_PYBIND_BINDINGS)
     add_definitions(-D_PYBIND_BINDINGS)
     # workaround for emscripten: https://github.com/pyodide/pyodide/issues/5054
     set(PYBIND11_FINDPYTHON ON)
-    find_package(Python COMPONENTS Interpreter Development.Module)
+    find_package(Python COMPONENTS Interpreter Development)
     link_libraries(Python::Module)
     if(USE_NANOBIND)
         if(0)
