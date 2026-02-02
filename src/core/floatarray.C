@@ -161,7 +161,11 @@ void FloatArray :: beScaled(double s, const FloatArray &b){ *this=b*s; }
 void FloatArray :: add(const FloatArray &b){ if(b.isEmpty()) return; if(this->isEmpty()){ *this=b; return; } *this+=b; }
 void FloatArray :: add(double offset){ this->array()+=offset; }
 void FloatArray :: add(double factor, const FloatArray &b) { if(this->isEmpty()){ *this=factor*b;  return; }  *this+=factor*b; }
-void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV){ if(this->isEmpty()){ *this=b.transpose()*s*dV;  return; } *this+=b.transpose()*s*dV; }
+void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV){
+    // std::cerr<<"plusProduct: this["<<this->size()<<"], b["<<b.rows()<<"r,"<<b.cols()<<"c], s["<<s.size()<<"]"<<std::endl;
+    // the s.head(b.rows()) clips s in case it is longer, some (broken) code relies on this
+    if(this->isEmpty()){ *this=b.transpose()*s.head(b.rows())*dV;  return; } *this+=b.transpose()*s.head(b.rows())*dV;
+}
 void FloatArray :: subtract(const FloatArray &src){ if(src.isEmpty()) return; if(this->isEmpty()){ *this=-src; return; } *this-=src; }
 void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b){ if(a.isEmpty()){ *this=b; return; } if(b.isEmpty()){ *this=a; return; } *this=a.array().max(b.array()).matrix(); }
 void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b){  if(a.isEmpty()){ *this=b; return; } if(b.isEmpty()){ *this=a; return; } *this=a.array().min(b.array()).matrix(); }
@@ -300,11 +304,12 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
     if ( this->isEmpty() ) {
         this->resize( nColumns );
     }
-
 #  ifndef NDEBUG
     if ( this->giveSize() != b.giveNumberOfColumns() ) {
         OOFEM_ERROR( "dimension mismatch in a[%d] and b[%d, *]", this->giveSize(), b.giveNumberOfColumns() );
     }
+    // this should be checked, but some code actually passes s which is longer
+    // if (b.rows() != s.size()) OOFEM_ERROR("dimension mismatch in b[%dr,*c] and s[%d]",(int)b.rows(),(int)s.size());
 #  endif
 
 #ifdef __LAPACK_MODULE
