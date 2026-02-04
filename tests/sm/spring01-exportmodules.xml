@@ -1,4 +1,5 @@
 <ExportModules>
     <xi:include href="spring01-errorcheck.xml" />
-    <jsonoutput tstep_all=""/>
+    <!-- this would fail without JSON being compiled in -->
+    <!-- <jsonoutput tstep_all=""/> -->
 </ExportModules>
