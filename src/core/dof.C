@@ -82,7 +82,7 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeT
 }
 
 #ifdef _USE_JSON
-    void Dof :: jsonSingleOutputAt(const JsonContext& ctx, TimeStep *tStep, char ch, ValueModeType mode, double scale)
+    void Dof :: printSingleOutputAt_json(const JsonContext& ctx, TimeStep *tStep, char ch, ValueModeType mode, double scale)
     {
         double x = scale * this->giveUnknown(mode, tStep);
         ctx.print({{"dof",dofID},{"unknown",std::string{ch}},{"value",x}});

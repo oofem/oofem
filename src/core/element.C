@@ -800,7 +800,7 @@ Element :: postInitialize()
 }
 
 #ifdef _USE_JSON
-    void Element::jsonOutputAt(const JsonContext& ctx, TimeStep *tStep){ ctx.prepend({{"WARNING","Element::jsonOutputAt not overridden"}}).print(jsonCommon()); }
+    void Element::printOutputAt_json(const JsonContext& ctx, TimeStep *tStep){ ctx.prepend({{"WARNING","Element::jsonOutputAt not overridden"}}).print(jsonCommon()); }
 
     ordered_json Element::jsonCommon(){
         return {{"number",this->giveNumber()},{"label",this->giveLabel()},{"type",this->giveInputRecordName()}};

@@ -1132,6 +1132,12 @@ public:
      */
     void outputElements(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
 
+    #ifdef _USE_JSON
+        virtual void printOutputAt_json(JsonContext& ctx, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
+        void outputNodes_json(JsonContext& ctx, Domain &domain, TimeStep *tStep, int setNum);
+        void outputElements_json(JsonContext& ctx, Domain &domain, TimeStep *tStep, int setNum);
+    #endif
+
     // input / output
     /// Prints state of receiver. Useful for debugging.
     void printYourself();
@@ -1146,7 +1152,7 @@ public:
      */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     #ifdef _USE_JSON
-        virtual void jsonDofOutputAt(const JsonContext& ctx, Dof *iDof, TimeStep *tStep);
+        virtual void printDofOutputAt_json(const JsonContext& ctx, Dof *iDof, TimeStep *tStep);
     #endif
 
 

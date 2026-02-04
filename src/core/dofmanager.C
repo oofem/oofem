@@ -514,10 +514,10 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
     }
 }
 #ifdef _USE_JSON
-    void DofManager::jsonOutputAt(const JsonContext& ctx,TimeStep *tStep){
+    void DofManager::printOutputAt_json(const JsonContext& ctx,TimeStep *tStep){
         EngngModel *emodel = this->giveDomain()->giveEngngModel();
         auto ctx2=ctx.append({{"type",this->giveClassName()},{"label",this->giveLabel()},{"number",this->giveNumber()}});
-        for(Dof* dof: *this){ emodel->jsonDofOutputAt(ctx2,dof,tStep); }
+        for(Dof* dof: *this){ emodel->printDofOutputAt_json(ctx2,dof,tStep); }
     }
 #endif
 

@@ -63,9 +63,11 @@ OutputExportModule :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
 
     auto *file = giveOutputStream();
 
-    fprintf(file, "%s", PRG_HEADER);
-    fprintf(file, "\nStarting analysis on: %s\n", ctime(& emodel->giveStartTime()) );
-    fprintf(file, "%s\n", emodel->giveDescription().c_str());
+    if(!initializeSilent){
+        fprintf(file, "%s", PRG_HEADER);
+        fprintf(file, "\nStarting analysis on: %s\n", ctime(& emodel->giveStartTime()) );
+        fprintf(file, "%s\n", emodel->giveDescription().c_str());
+    }
 }
 
 FILE *

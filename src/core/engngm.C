@@ -795,10 +795,6 @@ EngngModel :: printOutputAt(FILE *file, TimeStep *tStep)
         return;              // do not print even Solution step header
     }
 
-    #ifdef _USE_JSON
-        JsonContext ctx(file,{{"time",tStep->giveTargetTime() * this->giveVariableScale(VST_Time)}});
-    #endif
-
     fprintf(file, "\n==============================================================");
     fprintf(file, "\nOutput for time %.8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(file, "\n==============================================================\n");
@@ -808,11 +804,6 @@ EngngModel :: printOutputAt(FILE *file, TimeStep *tStep)
 
         domain->giveOutputManager()->doDofManOutput(file, tStep);
         domain->giveOutputManager()->doElementOutput(file, tStep);
-        #ifdef _USE_JSON
-            JsonContext ctx2=ctx.append({{"domain",domain->giveNumber()}});
-            domain->giveOutputManager()->doDofManOutput_json(ctx2.prepend({{"what","dofs"}}),tStep);
-            domain->giveOutputManager()->doElementOutput_json(ctx2.prepend({{"what","elements"}}),tStep);
-        #endif
     }
 }
 
@@ -834,6 +825,7 @@ EngngModel :: printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSet
 #endif
     }
 }
+
 
 
 void
@@ -888,6 +880,40 @@ EngngModel :: outputElements(FILE *file, Domain &domain, TimeStep *tStep, int se
     fprintf(file, "\n\n");
 }
 
+#ifdef _USE_JSON
+void
+EngngModel :: printOutputAt_json(JsonContext& ctx, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets)
+{
+    auto ctx2=ctx.append({{"time",tStep->giveTargetTime() * this->giveVariableScale(VST_Time)}});
+    for ( auto &domain: domainList ) {
+        int dnum = domain->giveNumber();
+        auto ctx3=ctx2.append({{"domain",domain->giveNumber()}});
+        int nset = nodeSets.giveSize() < dnum ? 0 : nodeSets.at(dnum);
+        int eset = elementSets.giveSize() < dnum ? 0 : elementSets.at(dnum);
+        this->outputNodes_json(ctx3, *domain, tStep, nset);
+        this->outputElements_json(ctx3, *domain, tStep, eset);
+    }
+}
+void
+EngngModel :: outputNodes_json(JsonContext& ctx, Domain &domain, TimeStep *tStep, int setNum){
+    auto out=[&ctx,&tStep](DofManager* dman){
+        if ( dman->giveParallelMode() == DofManager_null ) return;
+        dman->printOutputAt_json(ctx.prepend({{"what","dofs"}}), tStep);
+    };
+    if(setNum==0){ for ( auto &dman : domain.giveDofManagers()) out(dman.get()); }
+    else { for ( int inode : domain.giveSet(setNum)->giveNodeList() ) out(domain.giveDofManager(inode)); }
+}
+void
+EngngModel :: outputElements_json(JsonContext &ctx, Domain &domain, TimeStep *tStep, int setNum)
+{
+    auto out=[&ctx,&tStep](Element* elem){
+        if ( elem->giveParallelMode() == Element_remote ) return;
+        elem->printOutputAt_json(ctx.prepend({{"what","elements"}}), tStep);
+    };
+    if(setNum==0){ for ( auto &elem : domain.giveElements()) out(elem.get());
+    } else { for ( int ielem : domain.giveSet(setNum)->giveElementList() ) out(domain.giveElement(ielem)); }
+};
+#endif /* _USE_JSON */
 
 void EngngModel :: printYourself()
 {
@@ -902,9 +928,9 @@ void EngngModel :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 #ifdef _USE_JSON
-    void EngngModel :: jsonDofOutputAt(const JsonContext& ctx, Dof *iDof, TimeStep *tStep)
+    void EngngModel :: printDofOutputAt_json(const JsonContext& ctx, Dof *iDof, TimeStep *tStep)
     {
-        iDof->jsonSingleOutputAt(ctx, tStep, 'd', VM_Total);
+        iDof->printSingleOutputAt_json(ctx, tStep, 'd', VM_Total);
     }
 #endif
 

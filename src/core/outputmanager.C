@@ -75,13 +75,13 @@ OutputManager :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     void OutputManager::doDofManOutput_json(const JsonContext& ctx, TimeStep *tStep){
         int ndofman = domain->giveNumberOfDofManagers();
         for ( int i = 1; i <= ndofman; i++ ) {
-            domain->giveDofManager(i)->jsonOutputAt(ctx,tStep);
+            domain->giveDofManager(i)->printOutputAt_json(ctx,tStep);
         }
     };
 
     void OutputManager :: doElementOutput_json(const JsonContext& ctx, TimeStep *tStep)
     {
-        for ( auto &elem : domain->giveElements() ) elem->jsonOutputAt(ctx,tStep);
+        for ( auto &elem : domain->giveElements() ) elem->printOutputAt_json(ctx,tStep);
     }
 #endif
 

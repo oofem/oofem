@@ -32,57 +32,55 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef outputexportmodule_h_
-#define outputexportmodule_h_
 
-#include <vector>
-
-#include "exportmodule.h"
-
-///@name Input fields for OutputExportModule
-//@{
-#define _IFT_OutputExportModule_Name "output"
-#define _IFT_OutputExportModule_nodeSets "node_sets"
-#define _IFT_OutputExportModule_elementSets "element_sets"
-//@}
+#include "jsonexportmodule.h"
+#include "engngm.h"
+#include "domain.h"
+#include "node.h"
+#include "element.h"
+#include "timestep.h"
+#include "classfactory.h"
 
 namespace oofem {
-class Domain;
-class Element;
-class DofManager;
 
-/**
- * Standard output for OOFEM. Most available data is written in plain text.
- * Implementation simply relies on EngngModel::printOutputAt
- *
- * @author Mikael Öhman
- */
-class OOFEM_EXPORT OutputExportModule : public ExportModule
+REGISTER_ExportModule(JsonExportModule)
+
+#define _TR
+
+JsonExportModule :: JsonExportModule(int n, EngngModel *e) : OutputExportModule(n, e)
 {
-protected:
-    FILE *outputStream;
+    _TR;
+}
 
-    /// Set which contains nodes which should be exported
-    IntArray nodeSets;
+void
+JsonExportModule :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
+{
+    _TR;
+    this->initializeSilent=true;
+    OutputExportModule::initializeFrom(ir);
+    ctx=std::make_unique<JsonContext>(giveOutputStream(),ordered_json{});
+    ctx->print({{"what","GLOBAL"},{"startTime",ctime(& emodel->giveStartTime())},{"description",emodel->giveDescription()}});
+}
 
-    /// Set which contains elements which should be exported
-    IntArray elementSets;
 
-    /// don't write anything in initializeFrom
-    bool initializeSilent=false;
+void
+JsonExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
+{
+    _TR;
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) return;
+    _TR;
+    emodel->printOutputAt_json(*ctx, tStep, nodeSets, elementSets);
+    ctx->print({{"what","GLOBAL"},{"step",tStep->giveNumber()},{"duration",emodel->giveSolutionStepTime()}});
+}
 
-public:
-    OutputExportModule(int n, EngngModel * e);
-    virtual ~OutputExportModule() {}
+void
+JsonExportModule :: terminate()
+{
+    _TR;
+    int rhrs, rmin, rsec, uhrs, umin, usec;
+    time_t endTime = time(NULL);
+    emodel->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
+    ctx->print({{"what","GLOBAL"},{"endTime",ctime(& endTime)},{"realTime",{{"hrs",rhrs},{"min",rmin},{"sec",rsec}}},{"userTime",{{"hrs",uhrs},{"min",umin},{"sec",usec}}}});
+}
 
-    void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
-    FILE *giveOutputStream();
-
-    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
-    void terminate() override;
-
-    const char *giveClassName() const override { return "OutputExportModule"; }
-    const char *giveInputRecordName() const { return _IFT_OutputExportModule_Name; }
-};
 } // end namespace oofem
-#endif // outputexportmodule_h_

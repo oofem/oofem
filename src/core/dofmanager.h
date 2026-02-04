@@ -434,7 +434,7 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     #ifdef _USE_JSON
-        void jsonOutputAt(const JsonContext& ctx, TimeStep *tStep) override;
+        void printOutputAt_json(const JsonContext& ctx, TimeStep *tStep) override;
     #endif
     /**
      * Updates receiver after equilibrium in time step has been reached.

@@ -179,7 +179,7 @@ public:
      */
     virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
     #ifdef _USE_JSON
-        virtual void jsonOutputAt(const JsonContext& ctx, TimeStep *tStep) { }
+        virtual void printOutputAt_json(const JsonContext& ctx, TimeStep *tStep) { }
     #endif
     /// Prints receiver state on stdout. Useful for debugging.
     virtual void printYourself() { }
