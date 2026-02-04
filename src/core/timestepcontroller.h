@@ -138,7 +138,7 @@ public:
     int instanciateDefaultMetaStep(const std::shared_ptr<InputRecord> &ir);
     int instanciateMetaSteps(DataReader &dr);
     void initMetaStepAttributes(MetaStep *mStep);
-    int giveMetaStepNumber(){return 1;}
+    int giveMetaStepNumber(double time);
     void postInitialize();
     void reduceTimeStep();
     void adaptTimeStep(int nIter);
@@ -146,7 +146,7 @@ public:
     int giveNumberOfSteps(){return this->giveCurrentMetaStep()->giveNumberOfSteps();}
 
     
-    int giveFinalTime(){return 0;}
+    int giveFinalTime(){return metaStepList.back().giveFinalTime();}
     double giveDeltaT(){return this->giveCurrentMetaStep()->giveDeltaT();}
     double giveMinDeltaT(){return this->giveCurrentMetaStep()->giveMinDeltaT();}
     void setDeltaT(double dT){return this->giveCurrentMetaStep()->setDeltaT(dT);}

@@ -48,7 +48,7 @@ shared:
 	ctest --test-dir build-shared/ --parallel 16 --output-on-failure
 eigen:
 	mkdir -p build-eigen
-	cmake -Bbuild-eigen -H. -DUSE_LAPACK=0 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
+	cmake -Bbuild-eigen -H. -DUSE_LAPACK=0 -DUSE_AM=1 -DUSE_EIGEN=1 -DUSE_OPENMP_PARALLEL=0 {{FAIRLY_COMPLETE_FLAGS}}
 	ninja -C build-eigen/
 	ctest --test-dir build-eigen/ --parallel 16 --output-on-failure
 openmp:

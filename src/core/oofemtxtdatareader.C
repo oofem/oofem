@@ -39,7 +39,7 @@
 #include <sstream>
 
 namespace oofem {
-OOFEMTXTDataReader :: OOFEMTXTDataReader(std :: string inputfilename) : DataReader(),
+  OOFEMTXTDataReader :: OOFEMTXTDataReader(std :: string inputfilename, bool skipHeader) : DataReader(),
     dataSourceName(std :: move(inputfilename)), recordList()
 {
     std :: list< std :: pair< int, std :: string > >lines;
@@ -53,9 +53,11 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(std :: string inputfilename) : DataRead
         int lineNumber = 0;
         std :: string line;
 
-        this->giveRawLineFromInput(inputStream, lineNumber, outputFileName);
-        this->giveRawLineFromInput(inputStream, lineNumber, description);
-
+        if (!skipHeader) {
+          this->giveRawLineFromInput(inputStream, lineNumber, outputFileName);
+          this->giveRawLineFromInput(inputStream, lineNumber, description);
+        }
+        
         while (this->giveLineFromInput(inputStream, lineNumber, line)) {
             lines.emplace_back(make_pair(lineNumber, line));
         }

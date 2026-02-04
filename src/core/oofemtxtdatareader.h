@@ -60,7 +60,7 @@ protected:
 
 public:
     /// Constructor.
-    OOFEMTXTDataReader(std :: string inputfilename);
+    OOFEMTXTDataReader(std :: string inputfilename, bool skipHeader=false);
     OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
     virtual ~OOFEMTXTDataReader();
 

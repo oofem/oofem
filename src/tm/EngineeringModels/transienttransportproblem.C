@@ -51,6 +51,8 @@
 #include "boundarycondition.h"
 #include "activebc.h"
 #include "outputmanager.h"
+//
+#include "Contact/ContactElements//thermalcontactelement.h"
 
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
@@ -193,6 +195,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     if ( tStep->isTheFirstStep() ) {
         this->applyIC();
+	this->initForNewIteration(this->giveDomain(1),tStep,0, {});
     }
 
     field->advanceSolution(tStep);
@@ -510,7 +513,7 @@ TransientTransportProblem :: checkConsistency()
 {
     // check for proper element type
     for ( auto &elem : this->giveDomain(1)->giveElements() ) {
-        if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
+      if ( ( !dynamic_cast< TransportElement * >( elem.get() ) ) && !dynamic_cast<ThermalContactElement *> (elem.get()) ) {
             OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
         }

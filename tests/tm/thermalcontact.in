@@ -1,0 +1,84 @@
+thermalcontact.out
+Simulation Description
+###
+TransientTransport nsteps 5 deltat 50 alpha 0.5 nmodules 1 profileopt 1 lumped dt 1.0 
+errorcheck
+###
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 16 nelem 4 ncrosssect 3 nmat 3 nbc 2 nic 1 nltf 2 nset 4 ncontactsurf 2
+###
+### NODES
+###
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 1.0 0.0 0.0
+node 3 coords 3 1.0 1.0 0.0
+node 4 coords 3 0.0 1.0 0.0
+##
+node 5 coords 3 0.0 0.0 1.0
+node 6 coords 3 1.0 0.0 1.0
+node 7 coords 3 1.0 1.0 1.0
+node 8 coords 3 0.0 1.0 1.0
+##
+node  9 coords 3 0.0 0.0 1.05
+node 10 coords 3 1.0 0.0 1.05
+node 11 coords 3 1.0 1.0 1.05
+node 12 coords 3 0.0 1.0 1.05
+##
+node 13 coords 3 0.0 0.0 2.05
+node 14 coords 3 1.0 0.0 2.05
+node 15 coords 3 1.0 1.0 2.05
+node 16 coords 3 0.0 1.0 2.05
+###
+### ELEMENTS
+###
+brick1ht 1 nodes 8 1  2  3  4  5  6  7  8
+brick1ht 2 nodes 8 9 10 11 12 13 14 15 16
+##
+ThermalContactElement_QuadLin 3 nodes 4 5  6  7  8
+ThermalContactElement_QuadLin 4 nodes 4 9 10 11 12
+###
+### CONTACT SURFACES
+###
+ThermalFEContactSurface 1 ce_set 2
+ThermalFEContactSurface 2 ce_set 3
+###
+### MATERIAL ASSIGNMENTS
+###
+SimpleTransportCs 1 mat 1 set 1
+##
+SimpleTransportCs 2 mat 2 Set 2
+SimpleTransportCs 3 mat 3 Set 3
+###
+### MATERIALS
+###
+IsoHeat  1 d 1000 c 10 k 100
+dummymat 2
+dummymat 3
+###
+### BC'S
+###
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 40 set 4
+S2SThermalContact 2 loadTimeFunction 1 dofs 1 10 mastersurface 1 slavesurface 2 gapConductivityFunction 2
+
+###
+### INITIAL CONDITIONS
+###
+InitialCondition 1 Conditions 1 u 20.0 dofs 1 10 set 1
+###
+### FUNCTIONS
+###
+ConstantFunction 1 f(t) 1
+PiecewiseLinFunction 2 npoints 2 t 2 0 0.1 f(t) 2 10000 0
+###
+### SETS
+###
+Set 1 elements 2 1 2
+Set 2 elements 1 3
+Set 3 elements 1 4 
+Set 4 nodes 4 1 2 3 4
+#%BEGIN_CHECK%
+#NODE tStep 5 number  5 dof 10 unknown d value 3.54212665e+01
+#NODE tStep 5 number  9 dof 10 unknown d value 3.53452302e+01
+#NODE tStep 5 number 16 dof 10 unknown d value 3.34443218e+01
+#%END_CHECK%

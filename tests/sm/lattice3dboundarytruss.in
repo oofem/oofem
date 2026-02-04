@@ -41,11 +41,10 @@ ConstantFunction 1 f(t) 1.
 #REACTION tStep 1 number 6 dof 31 value 6.8942e-04
 #%END_CHECK%
 
-
-#%BEGIN_CHECK%
-#NODE number 6 dof 31 unknown d
-#REACTION number 6 dof 31 
-#LOADLEVEL
-#TIME
-#%END_CHECK%
+##%BEGIN_CHECK%
+##NODE number 6 dof 31 unknown d
+##REACTION number 6 dof 31
+##LOADLEVEL
+##TIME
+##%END_CHECK%
 

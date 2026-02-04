@@ -51,6 +51,7 @@
 #include "logger.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
+#include "progressbar.h"
 
 
 #ifdef __MPI_PARALLEL_MODE

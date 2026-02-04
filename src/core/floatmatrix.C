@@ -1305,7 +1305,7 @@ bool FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 {
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot solve a %d by %d matrix", rows(), cols());
+        OOFEM_ERROR("cannot solve a %d by %d matrix", (int)rows(), (int)cols());
     }
 
     if ( rows() != b.size() ) {
@@ -1403,7 +1403,7 @@ bool FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 {
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot solve a %d by %d matrix", rows(), cols());
+        OOFEM_ERROR("cannot solve a %d by %d matrix", (int)rows(), (int)cols());
     }
 
     if ( rows() != b.rows() ) {
@@ -1770,7 +1770,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 {
 #  ifndef NDEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR("receiver must be square (is %d by %d)", this->rows(), this->cols());
+        OOFEM_ERROR("receiver must be square (is %d by %d)", (int)this->rows(), (int)this->cols());
     }
 #  endif
     double anorm = this->computeNorm(p);

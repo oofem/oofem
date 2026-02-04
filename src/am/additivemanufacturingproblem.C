@@ -62,7 +62,7 @@
 #include "metastep.h"
 #include "exportmodulemanager.h"
 #include "mathfem.h"
-#include "oofemtxtdatareader.h"
+#include "datareader.h"
 #include "util.h"
 #include "verbose.h"
 #include "classfactory.h"
@@ -94,7 +94,7 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
     }
 
     // Convert voxelGrid coordinates (in mm) to node coordinates (in m)
-    FloatArray coords = { cn.coords[0] / 1000, cn.coords[1] / 1000, cn.coords[2] / 1000 };
+    FloatArray coords = Vec3(cn.coords[0] / 1000, cn.coords[1] / 1000, cn.coords[2] / 1000 );
 
     dman->setCoordinates( coords );
     dman->setGlobalNumber( nodeId );
@@ -119,15 +119,15 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
     int ICId      = nICBefore + 1;
     d->resizeInitialConditions( ICId );
     std::unique_ptr<InitialCondition> ic = std::make_unique<InitialCondition>( ICId, d );
-    DynamicInputRecord icInput           = DynamicInputRecord( _IFT_InitialCondition_Name, ICId );
+    auto icInput           = std::make_shared<DynamicInputRecord>( _IFT_InitialCondition_Name, ICId );
 
     Dictionary props = Dictionary();
     props.add( 'u', this->printer.depositionTemperature );
 
-    icInput.setField( props, _IFT_InitialCondition_conditions );
+    icInput->setField( props, _IFT_InitialCondition_conditions );
     IntArray dofIds = { T_f };
-    icInput.setField( dofIds, _IFT_InitialCondition_dofs );
-    icInput.setField( setId, _IFT_InitialCondition_set );
+    icInput->setField( dofIds, _IFT_InitialCondition_dofs );
+    icInput->setField( setId, _IFT_InitialCondition_set );
     ic->initializeFrom( icInput );
 
     d->setInitialCondition( ICId, std::move( ic ) );
@@ -140,14 +140,14 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
 
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "BoundaryCondition", bcId, d ) );
 
-        DynamicInputRecord myInput = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
-        myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
+        auto myInput = std::make_shared<DynamicInputRecord>( _IFT_BoundaryCondition_Name, bcId );
+        myInput->setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
 
-        FloatArray vals = { this->printer.heatBedTemperature };
+        FloatArray vals = Vec1( this->printer.heatBedTemperature );
         IntArray dofs   = { T_f };
-        myInput.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
-        myInput.setField( vals, _IFT_BoundaryCondition_values );
-        myInput.setField( setId, _IFT_GeneralBoundaryCondition_set );
+        myInput->setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
+        myInput->setField( vals, _IFT_BoundaryCondition_values );
+        myInput->setField( setId, _IFT_GeneralBoundaryCondition_set );
 
         bc->initializeFrom( myInput );
 
@@ -164,8 +164,8 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
         d->resizeFunctions( nTFBefore + 1 );
         std::unique_ptr<CalculatorFunction> tf = std::make_unique<CalculatorFunction>( nTFBefore + 1, d );
 
-        DynamicInputRecord myInput = DynamicInputRecord( _IFT_CalculatorFunction_Name, nTFBefore + 1 );
-        myInput.setField( "1-h(" + std::to_string( cn.timeActivated ) + ")", _IFT_CalculatorFunction_f );
+        auto myInput = std::make_shared<DynamicInputRecord>( _IFT_CalculatorFunction_Name, nTFBefore + 1 );
+        myInput->setField( "1-h(" + std::to_string( cn.timeActivated ) + ")", _IFT_CalculatorFunction_f );
         tf->initializeFrom( myInput );
 
         d->setFunction( nTFBefore + 1, std::move( tf ) );
@@ -177,15 +177,15 @@ bool AdditiveManufacturingProblem::add_node_if_not_exists2( EngngModel *emodel, 
         // add Dirichlet bc for newly added DOFs to restrict them before activation.
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "BoundaryCondition", bcId, d ) );
 
-        DynamicInputRecord myInput2 = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
-        myInput2.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
-        myInput2.setField( nTFBefore + 1, _IFT_GeneralBoundaryCondition_isImposedTimeFunct );
+        auto myInput2 = std::make_shared<DynamicInputRecord>( _IFT_BoundaryCondition_Name, bcId );
+        myInput2->setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
+        myInput2->setField( nTFBefore + 1, _IFT_GeneralBoundaryCondition_isImposedTimeFunct );
 
-        FloatArray vals = { 235.0 }; // a dummy value
+        FloatArray vals = Vec1( 235.0 ); // a dummy value
         IntArray dofs   = { T_f };
-        myInput2.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
-        myInput2.setField( vals, _IFT_BoundaryCondition_values );
-        myInput2.setField( setId, _IFT_GeneralBoundaryCondition_set );
+        myInput2->setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
+        myInput2->setField( vals, _IFT_BoundaryCondition_values );
+        myInput2->setField( setId, _IFT_GeneralBoundaryCondition_set );
 
         bc->initializeFrom( myInput2 );
 
@@ -233,9 +233,9 @@ void AdditiveManufacturingProblem::add_element_if_not_exists2( EngngModel *emode
     d->resizeFunctions( nTFBefore + 1 );
     std::unique_ptr<HeavisideTimeFunction> tf = std::make_unique<HeavisideTimeFunction>( nTFBefore + 1, d );
 
-    DynamicInputRecord myInput = DynamicInputRecord( _IFT_HeavisideTimeFunction_Name, nTFBefore + 1 );
-    myInput.setField( cn.time_activated(), _IFT_HeavisideTimeFunction_origin );
-    myInput.setField( 1.0, _IFT_HeavisideTimeFunction_value );
+    auto myInput = std::make_shared<DynamicInputRecord>( _IFT_HeavisideTimeFunction_Name, nTFBefore + 1 );
+    myInput->setField( cn.time_activated(), _IFT_HeavisideTimeFunction_origin );
+    myInput->setField( 1.0, _IFT_HeavisideTimeFunction_value );
     tf->initializeFrom( myInput );
     elem->setActivityTimeFunctionNumber( nTFBefore + 1 );
 
@@ -264,17 +264,17 @@ void AdditiveManufacturingProblem::add_element_if_not_exists2( EngngModel *emode
         int bcid = nBCBefore + 1 + i;
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "freeconstantsurfaceload", bcid, d ) );
 
-        DynamicInputRecord myInput = DynamicInputRecord( _IFT_FreeConstantSurfaceLoad_Name, bcid );
-        myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
-        myInput.setField( 3, _IFT_BoundaryLoad_loadtype );
+        auto myInput = std::make_shared<DynamicInputRecord>( _IFT_FreeConstantSurfaceLoad_Name, bcid );
+        myInput->setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
+        myInput->setField( 3, _IFT_BoundaryLoad_loadtype );
         Dictionary props = Dictionary();
         props.add( 'a', this->printer.heatTransferFilmCoefficient ); // 97 == 'a'
-        myInput.setField( props, _IFT_BoundaryLoad_properties );
+        myInput->setField( props, _IFT_BoundaryLoad_properties );
 
         // todo: UNCOMMENT
-        FloatArray comps = { this->printer.chamberTemperature }; // ambient temp
-        myInput.setField( comps, _IFT_Load_components );
-        myInput.setField( setId, _IFT_GeneralBoundaryCondition_set );
+        FloatArray comps = Vec1( this->printer.chamberTemperature ); // ambient temp
+        myInput->setField( comps, _IFT_Load_components );
+        myInput->setField( setId, _IFT_GeneralBoundaryCondition_set );
 
         bc->initializeFrom( myInput );
 
@@ -326,7 +326,7 @@ bool AdditiveManufacturingProblem::add_sm_node_if_not_exists2( EngngModel *emode
         OOFEM_ERROR( "Couldn't create node %d\n", nodeId );
     }
 
-    FloatArray coords = { cn.coords[0] / 1000, cn.coords[1] / 1000, cn.coords[2] / 1000 };
+    FloatArray coords = Vec3( cn.coords[0] / 1000, cn.coords[1] / 1000, cn.coords[2] / 1000 );
 
     /*DynamicInputRecord myInput = DynamicInputRecord(_IFT_Node_Name, nodeId);
     IntArray mBCs = {1,1,1};
@@ -377,14 +377,14 @@ bool AdditiveManufacturingProblem::add_sm_node_if_not_exists2( EngngModel *emode
 
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "BoundaryCondition", bcId, d ) );
 
-        DynamicInputRecord myInput = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
-        myInput.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
+        auto myInput = std::make_shared<DynamicInputRecord>( _IFT_BoundaryCondition_Name, bcId );
+        myInput->setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
 
-        FloatArray vals = { 0.0, 0.0, 0.0 };
+        FloatArray vals = Vec3( 0.0, 0.0, 0.0 );
         IntArray dofs   = { D_u, D_v, D_w };
-        myInput.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
-        myInput.setField( vals, _IFT_BoundaryCondition_values );
-        myInput.setField( setId, _IFT_GeneralBoundaryCondition_set );
+        myInput->setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
+        myInput->setField( vals, _IFT_BoundaryCondition_values );
+        myInput->setField( setId, _IFT_GeneralBoundaryCondition_set );
 
         bc->initializeFrom( myInput );
 
@@ -417,8 +417,8 @@ bool AdditiveManufacturingProblem::add_sm_node_if_not_exists2( EngngModel *emode
         d->resizeFunctions( nTFBefore + 1 );
         std::unique_ptr<CalculatorFunction> tf = std::make_unique<CalculatorFunction>( nTFBefore + 1, d );
 
-        DynamicInputRecord myInput = DynamicInputRecord( _IFT_CalculatorFunction_Name, nTFBefore + 1 );
-        myInput.setField( "1-h(" + std::to_string( cn.timeActivated ) + ")", _IFT_CalculatorFunction_f );
+        auto myInput = std::make_shared<DynamicInputRecord>( _IFT_CalculatorFunction_Name, nTFBefore + 1 );
+        myInput->setField( "1-h(" + std::to_string( cn.timeActivated ) + ")", _IFT_CalculatorFunction_f );
         // myInput.setField("0", _IFT_CalculatorFunction_f);
         // std::cout << "Node " <<nodeId << " activated at " << cn.activatedAt << std::endl;
         // myInput.setField(1.0, _IFT_HeavisideTimeFunction_value);
@@ -433,15 +433,15 @@ bool AdditiveManufacturingProblem::add_sm_node_if_not_exists2( EngngModel *emode
 
         std::unique_ptr<GeneralBoundaryCondition> bc( classFactory.createBoundaryCondition( "BoundaryCondition", bcId, d ) );
 
-        DynamicInputRecord myInput2 = DynamicInputRecord( _IFT_BoundaryCondition_Name, bcId );
-        myInput2.setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
-        myInput2.setField( nTFBefore + 1, _IFT_GeneralBoundaryCondition_isImposedTimeFunct );
+        auto myInput2 = std::make_shared<DynamicInputRecord>( _IFT_BoundaryCondition_Name, bcId );
+        myInput2->setField( 1, _IFT_GeneralBoundaryCondition_timeFunct );
+        myInput2->setField( nTFBefore + 1, _IFT_GeneralBoundaryCondition_isImposedTimeFunct );
 
-        FloatArray vals = { 0.0, 0.0, 0.0 };
+        FloatArray vals = Vec3( 0.0, 0.0, 0.0 );
         IntArray dofs   = { D_u, D_v, D_w };
-        myInput2.setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
-        myInput2.setField( vals, _IFT_BoundaryCondition_values );
-        myInput2.setField( setId, _IFT_GeneralBoundaryCondition_set );
+        myInput2->setField( dofs, _IFT_GeneralBoundaryCondition_dofs );
+        myInput2->setField( vals, _IFT_BoundaryCondition_values );
+        myInput2->setField( setId, _IFT_GeneralBoundaryCondition_set );
 
         bc->initializeFrom( myInput2 );
 
@@ -489,9 +489,9 @@ void AdditiveManufacturingProblem::add_sm_element_if_not_exists2( EngngModel *em
     d->resizeFunctions( nTFBefore + 1 );
     std::unique_ptr<HeavisideTimeFunction> tf = std::make_unique<HeavisideTimeFunction>( nTFBefore + 1, d );
 
-    DynamicInputRecord myInput = DynamicInputRecord( _IFT_HeavisideTimeFunction_Name, nTFBefore + 1 );
-    myInput.setField( cn.time_activated(), _IFT_HeavisideTimeFunction_origin );
-    myInput.setField( 1.0, _IFT_HeavisideTimeFunction_value );
+    auto myInput = std::make_shared<DynamicInputRecord>( _IFT_HeavisideTimeFunction_Name, nTFBefore + 1 );
+    myInput->setField( cn.time_activated(), _IFT_HeavisideTimeFunction_origin );
+    myInput->setField( 1.0, _IFT_HeavisideTimeFunction_value );
     tf->initializeFrom( myInput );
     elem->setActivityTimeFunctionNumber( nTFBefore + 1 );
 
@@ -538,7 +538,7 @@ int AdditiveManufacturingProblem ::instanciateYourself( DataReader &dr, const st
 {
     int result;
     result = EngngModel ::instanciateYourself( dr, ir, dataOutputFileName, desc );
-    ir.finish();
+    ir->finish();
     // instanciate slave problems
     result &= this->instanciateSlaveProblems();
     return result;
@@ -563,8 +563,8 @@ int AdditiveManufacturingProblem ::instanciateSlaveProblems()
     // EngngModel *timeDefProb = NULL;
     emodelList.resize( inputStreamNames.size() );
     if ( timeDefinedByProb ) {
-        OOFEMTXTDataReader dr( inputStreamNames[timeDefinedByProb - 1] );
-        std ::unique_ptr<EngngModel> prob( InstanciateProblem( dr, this->pMode, this->contextOutputMode, this ) );
+        auto dr=DataReader::makeFromFilename( inputStreamNames[timeDefinedByProb - 1] );
+        std ::unique_ptr<EngngModel> prob( InstanciateProblem( *dr, this->pMode, this->contextOutputMode, this ) );
         // timeDefProb = prob.get();
         emodelList[timeDefinedByProb - 1] = std ::move( prob );
     }
@@ -574,9 +574,9 @@ int AdditiveManufacturingProblem ::instanciateSlaveProblems()
             continue;
         }
 
-        OOFEMTXTDataReader dr( inputStreamNames[i - 1] );
+        auto dr=DataReader::makeFromFilename( inputStreamNames[i - 1] );
         // the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
-        std ::unique_ptr<EngngModel> prob( InstanciateProblem( dr, this->pMode, this->contextOutputMode, this ) );
+        std ::unique_ptr<EngngModel> prob( InstanciateProblem( *dr, this->pMode, this->contextOutputMode, this ) );
         emodelList[i - 1] = std ::move( prob );
     }
 

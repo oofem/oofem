@@ -128,23 +128,6 @@ public:
         return * this;
     }
 
-    /**
-     * Checks size of receiver towards requested bounds.
-     * @param i Required number of rows.
-     * @param j Required number of columns.
-     */
-    void checkBounds(std::size_t i, std::size_t j) const
-    {
-        if ( i <= 0 ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " <= 0");
-        } else if ( j <= 0 ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " <= 0");
-        } else if ( i > N ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " < " + std::to_string(N));
-        } else if ( j > M ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " < " + std::to_string(M));
-        }
-    }
 
     /// Returns number of rows of receiver.
     std::size_t rows() const { return N; }
@@ -215,6 +198,19 @@ public:
         return x;
     }
 #endif
+    /**
+    * Checks size of receiver towards requested bounds.
+    * @param i Required number of rows.
+    * @param j Required number of columns.
+    */
+    void checkBounds(std::size_t i, std::size_t j) const
+    {
+        if ( i <= 0 ) OOFEM_ERROR("matrix error on rows : %d <= 0",(int)i);
+        if ( j <= 0 ) OOFEM_ERROR("matrix error on cols : %d <= 0",(int)j);
+        if ( i > N )  OOFEM_ERROR("matrix error on rows : %d < %d",(int)i,(int)N);
+        if ( j > M )  OOFEM_ERROR("matrix error on rows : %d < %d",(int)j,(int)M);
+    }
+
     /**
     * Coefficient access function. Returns value of coefficient at given
     * position of the receiver. Implements 1-based indexing.

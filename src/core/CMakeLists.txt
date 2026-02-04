@@ -48,6 +48,7 @@ set (core_unsorted
     interpolationcatalogue.C
     #
     oofemcfg.C
+    progressbar.C
     )
 
 #oofegutils

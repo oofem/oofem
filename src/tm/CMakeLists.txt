@@ -62,6 +62,15 @@ set (tm_material
     Materials/twophasemat.C
     )
 
+
+set (tm_contact
+     Contact/thermalcontactbc.C
+     Contact/surface2surfacethermalcontactbc.C
+     Contact/ContactSurface/thermalfecontactsurface.C
+     Contact/ContactElements/thermalcontactelement.C
+     )
+
+
 set (tm
     ${tm_emodel}
     ${tm_element}
@@ -71,6 +80,7 @@ set (tm
     ${tm_cemhyd}
     ${tm_hydram}
     ${tm_boundary}
+    ${tm_contact}	
     )
 
 add_library (tm

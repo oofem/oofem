@@ -129,6 +129,18 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
 }
 
 
+int
+TimeStepController :: giveMetaStepNumber (double time) {
+  for (int i=1; i<=this->numberOfMetaSteps; i++ ) {
+    if (time <= this->giveMetaStep(i)->giveFinalTime()) {
+      return i;
+    }
+  }
+  OOFEM_ERROR("time beyond the final simulation time");
+}
+
+
+  
 MetaStep *
 TimeStepController :: giveMetaStep(int i)
 {

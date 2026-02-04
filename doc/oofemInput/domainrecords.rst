@@ -1061,6 +1061,55 @@ Currently, EntType keyword can be one from
    For bidirectional contact, two such boundary conditions can be defined
    with swapped master and slave surfaces.
 
+
+   -  Thermal surface-to-surface contact boundary condition
+
+      ``S2SThermalContact`` ``loadTimeFunction #(in)`` ``dofs #(ia)``
+      ``mastersurface #(in)`` ``slavesurface #(in)`` ``gapConductivityFunction #(in)``
+
+      Represents a surface-to-surface thermal contact boundary condition used
+      to model heat transfer across an interface between two bodies. The
+      contact couples temperature degrees of freedom on surfaces defined by
+      corresponding thermal contact surface records and contributes to the
+      residual vector and tangent matrix of the thermal problem.
+
+      The parameters have the following meaning:
+
+  - ``loadTimeFunction`` — identifier of the time/load scaling function
+    applied to the thermal contact contribution.
+  - ``dofs`` — list of affected degrees of freedom. In a standard thermal
+    analysis this typically contains a single degree of freedom
+    representing temperature,
+  - ``mastersurface`` and ``slavesurface`` — identifiers of the master and
+    slave thermal contact surfaces.
+  - ``gapConductivityFunction`` — identifier of a function defining the
+    effective interface conductivity (or conductance) as a function of
+    the gap
+
+  **Example:**
+
+  ::
+
+     S2SThermalContact 2 loadTimeFunction 1 dofs 1 10 \
+         mastersurface 1 slavesurface 2 gapConductivityFunction 2
+
+  This example defines a thermal surface-to-surface contact condition
+  between master surface 1 and slave surface 2. The boundary condition
+  acts on the temperature degree of freedom (numbered ``10``) and
+  uses ``gapConductivityFunction 2`` to prescribe a gap-dependent thermal
+  conductivity across the interface.
+  An example of definition of gap conductivity function is
+  PiecewiseLinFunction 2 npoints 2 \
+         t 2 0 0.1 \
+         f(t) 2 10000 0
+
+  In this definition, the variable ``t`` represents the distance (gap)
+  between the master and slave surfaces, and ``f(t)`` defines the
+  gap-dependent thermal conductivity. In the above example, a high
+  conductivity is prescribed for zero gap (perfect contact), which
+  linearly decreases to zero as the gap increases to ``0.1``.
+
+   
 .. _InitialConditions:
 
 Initial conditions

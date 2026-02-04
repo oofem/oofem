@@ -9,6 +9,7 @@
 #endif
 
 OOFEM_EXPORT extern const char* PRG_VERSION;
+OOFEM_EXPORT extern const char* PRG_VERSION_SHORT;
 OOFEM_EXPORT extern const char* OOFEG_VERSION;
 OOFEM_EXPORT extern const char* OOFEM_COPYRIGHT;
 OOFEM_EXPORT extern const char* PRG_HEADER;
