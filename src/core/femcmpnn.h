@@ -43,12 +43,18 @@
 
 #include <string>
 
+
+
 #include "oofemenv.h"
 #include "interfacetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "floatarray.h"
 #include "inputrecord.h"
+
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
 
 namespace oofem {
 class DataStream;
@@ -172,6 +178,9 @@ public:
      * @param tStep Time step to write for.
      */
     virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
+    #ifdef _USE_JSON
+        virtual void printOutputAt_json(const JsonContext& ctx, TimeStep *tStep) { }
+    #endif
     /// Prints receiver state on stdout. Useful for debugging.
     virtual void printYourself() { }
     /**

@@ -45,6 +45,11 @@
 #include "dofiditem.h"
 #include "doftype.h"
 #include "contextioresulttype.h"
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
+
 
 namespace oofem {
 class DataStream;
@@ -320,6 +325,9 @@ public:
      * Called from corresponding e-model.
      */
     virtual void printSingleOutputAt(FILE *file, TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
+    #ifdef _USE_JSON
+        virtual void printSingleOutputAt_json(const JsonContext& ctx, TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
+    #endif
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
      * The format of output depends on analysis type.

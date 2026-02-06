@@ -175,7 +175,8 @@ option (USE_MPM "Enable experimental multiphysics module" ON)
 option (USE_OOFEM_EXE "Build oofem executable" ON)
 OPTION (USE_EIGEN "Use Eigen instead of home-made array classes (experimental)" OFF)
 OPTION (USE_XML "Reader for XML input format (requires pugixml)" OFF)
-OPTION (USE_TRACE_FIELDS "Allow tracing field access by setting OOFEM_TRACE_FIELDS_CSV env var" OFF)
+OPTION (USE_TRACE_FIELDS "Allow tracing field access by setting OOFEM_TRACE_FIELDS_OUT env var" OFF)
+OPTION (USE_JSON "Write machine-readable output in json (pulls nlohmann/json from github repo)" OFF)
 
 if (USE_MPI_PARALLEL)
     add_definitions (-D__MPI_PARALLEL_MODE)
@@ -321,6 +322,7 @@ endif ()
 ######################## External libraries ###########################
 #######################################################################
 
+
 if (USE_EIGEN)
     add_definitions(-D_USE_EIGEN)
     find_package(Eigen3 REQUIRED NO_MODULE)
@@ -339,6 +341,13 @@ if (USE_XML)
     add_definitions(-D_USE_XML)
     add_git_submodule(extern/pugixml)
     link_libraries(pugixml::static)
+endif()
+
+if (USE_JSON)
+    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+    FetchContent_MakeAvailable(json)
+    link_libraries(nlohmann_json::nlohmann_json)
+    add_definitions(-D_USE_JSON)
 endif()
 
 if (USE_TRACE_FIELDS)

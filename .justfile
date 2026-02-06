@@ -1,7 +1,7 @@
 #
 # justfile for various local build/test tasks; works on Debian stable
 #
-FAIRLY_COMPLETE_FLAGS := "-DUSE_XML=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_FM=1 -DUSE_CEMHYD=1 -DUSE_MPM=1 -DUSE_IML=1 -DUSE_PFEM=1 -DUSE_TRACE_FIELDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja"
+FAIRLY_COMPLETE_FLAGS := "-DUSE_XML=1 -DUSE_JSON=1 -DUSE_SHARED_LIB=0 -DUSE_OOFEM_EXE=1 -DUSE_SM=1 -DUSE_TM=1 -DUSE_FM=1 -DUSE_CEMHYD=1 -DUSE_MPM=1 -DUSE_IML=1 -DUSE_PFEM=1 -DUSE_TRACE_FIELDS=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja"
 
 wheel:
 	python -m build
@@ -118,3 +118,6 @@ mpm:
 mpm-gdb:
 	ninja -C build-eigen
 	DEBUGINFOD_URLS= gdb -ex=run -args build-eigen/oofem -f tests/mpm/cook2_u1p0_2.xml
+json:
+	build-eigen/oofem -f tests/sm/spring01.in
+	jq -R 'fromjson?' spring01.out

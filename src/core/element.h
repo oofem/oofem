@@ -1222,6 +1222,10 @@ public:
     const char *giveClassName() const override { return "Element"; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
+    #ifdef _USE_JSON
+        void printOutputAt_json(const JsonContext& ctx, TimeStep *tStep) override;
+        ordered_json jsonCommon();
+    #endif
 
     virtual const IntArray giveLocation() {IntArray answer(0); return answer;}
     virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}

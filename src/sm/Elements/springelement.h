@@ -107,6 +107,9 @@ public:
     void updateYourself(TimeStep *tStep) override { }
     int checkConsistency() override { return 1; }
     void printOutputAt(FILE *file, TimeStep *tStep) override;
+    #ifdef _USE_JSON
+        void printOutputAt_json(const JsonContext& ctx,TimeStep *tStep) override;
+    #endif
     bool isCast(TimeStep *tStep) override { return true; }
 
 #ifdef __OOFEG

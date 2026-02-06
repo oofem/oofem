@@ -91,6 +91,12 @@ if (USE_XML)
   list (APPEND core_unsorted xmldatareader.C xmlinputrecord.C xmlutil.C)
 endif ()
 
+if (USE_JSON)
+  list (APPEND core_unsorted jsonexportmodule.C)
+endif()
+
+
+
 set (core_oofeg oofeggraphiccontext.C)
 
 set (core_nodalrecovery

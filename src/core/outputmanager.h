@@ -40,6 +40,10 @@
 #include "range.h"
 #include "inputrecord.h"
 
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
 #include <list>
 
 ///@name Input fields for OutputManager
@@ -121,6 +125,11 @@ public:
      * All selected elements are requested for doing their output using printOutputAt service.
      */
     void doElementOutput(FILE *, TimeStep *);
+
+    #ifdef _USE_JSON
+        void doElementOutput_json(const JsonContext& ctx, TimeStep *);
+        void doDofManOutput_json(const JsonContext& ctx, TimeStep *);
+    #endif
 
     /**
      * Tests if given dof manager is required to do its output for given time step.

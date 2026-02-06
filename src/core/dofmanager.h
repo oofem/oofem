@@ -49,6 +49,11 @@
 #include "chartype.h"
 #include "paramkey.h"
 
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
+
 namespace oofem {
 class DataStream;
 class Dof;
@@ -428,6 +433,9 @@ public:
     //@}
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
+    #ifdef _USE_JSON
+        void printOutputAt_json(const JsonContext& ctx, TimeStep *tStep) override;
+    #endif
     /**
      * Updates receiver after equilibrium in time step has been reached.
      * @param tStep Active time step.

@@ -81,6 +81,15 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeT
     fprintf(File, "  dof %-3d %c % .8e\n", dofID, ch, x);
 }
 
+#ifdef _USE_JSON
+    void Dof :: printSingleOutputAt_json(const JsonContext& ctx, TimeStep *tStep, char ch, ValueModeType mode, double scale)
+    {
+        double x = scale * this->giveUnknown(mode, tStep);
+        ctx.print({{"dof",dofID},{"unknown",std::string{ch}},{"value",x}});
+    }
+#endif
+
+
 void Dof :: printSingleOutputWithAdditionAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double addend)
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at tStep.

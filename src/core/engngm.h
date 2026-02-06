@@ -61,6 +61,10 @@
 #include "monitormanager.h"
 #include "timestepcontroller.h"
 
+#ifdef _USE_JSON
+    #include "json.h"
+#endif
+
 #ifdef __MPM_MODULE
 #include "../mpm/mpm.h"
 #include "../mpm/integral.h"
@@ -1128,6 +1132,12 @@ public:
      */
     void outputElements(FILE *file, Domain &domain, TimeStep *tStep, int setNum);
 
+    #ifdef _USE_JSON
+        virtual void printOutputAt_json(JsonContext& ctx, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
+        void outputNodes_json(JsonContext& ctx, Domain &domain, TimeStep *tStep, int setNum);
+        void outputElements_json(JsonContext& ctx, Domain &domain, TimeStep *tStep, int setNum);
+    #endif
+
     // input / output
     /// Prints state of receiver. Useful for debugging.
     void printYourself();
@@ -1141,6 +1151,9 @@ public:
      * @param tStep solution step
      */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    #ifdef _USE_JSON
+        virtual void printDofOutputAt_json(const JsonContext& ctx, Dof *iDof, TimeStep *tStep);
+    #endif
 
 
     // identification
