@@ -69,6 +69,7 @@ def test_7():
     assert (round (t1-55.37908, 4) == 0), "Temperature at node 2, check failed"
     
     problem.terminateAnalysis()
+    problem.getLogger().printStatistics()
     print("\nProblem solved")
 
 if __name__ == "__main__":

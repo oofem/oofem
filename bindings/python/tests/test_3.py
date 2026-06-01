@@ -104,15 +104,17 @@ def test_3():
     problem.init()
     problem.postInitialize()
     print("\nSolving problem")
-    #problem.setRenumberFlag()
+    # problem.setRenumberFlag()
     problem.solveYourself()
     print("\nProblem solved")
 
     #check solution
     u2 = problem.giveUnknownComponent (oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(2).giveDofWithID(oofempy.DofIDItem.D_u))
     assert (round (u2+2.5, 8) == 0), "Node 2 dof 1 displacement check failed"
-
+    
+    
     problem.terminateAnalysis()
+    problem.getLogger().printStatistics()
     print("\nProblem solved")
 
 

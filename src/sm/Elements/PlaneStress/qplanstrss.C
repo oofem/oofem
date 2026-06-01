@@ -53,7 +53,7 @@ REGISTER_Element(QPlaneStress2d);
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(), SpatialLocalizerInterface(this)
+    PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(), SpatialLocalizerInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -65,6 +65,8 @@ QPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
@@ -435,6 +437,64 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
         answer.add(contrib);
         answer.times(0.5);
     }
+}
+
+void
+QPlaneStress2d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+{
+    pap.resize(8);
+    for ( int i = 1; i <= 8; i++ ) {
+        pap.at(i) = this->giveNode(i)->giveNumber();
+    }
+}
+
+void
+QPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+{
+    answer.resize(3);
+    answer.at(1) = pap;
+    
+    if ( pap == this->giveNode(1)->giveNumber()){ //get closest points and use linear patch only
+        answer.at(2) = this->giveNode(5)->giveNumber();
+        answer.at(3) = this->giveNode(8)->giveNumber();
+    } else if ( pap == this->giveNode(2)->giveNumber()){
+        answer.at(2) = this->giveNode(6)->giveNumber();
+        answer.at(3) = this->giveNode(5)->giveNumber();
+    } else if ( pap == this->giveNode(3)->giveNumber()){
+        answer.at(2) = this->giveNode(7)->giveNumber();
+        answer.at(3) = this->giveNode(6)->giveNumber();
+    } else if ( pap == this->giveNode(4)->giveNumber()){
+        answer.at(2) = this->giveNode(8)->giveNumber();
+        answer.at(3) = this->giveNode(7)->giveNumber();
+    } else if ( pap == this->giveNode(5)->giveNumber()){
+        answer.at(2) = this->giveNode(2)->giveNumber();
+        answer.at(3) = this->giveNode(1)->giveNumber();
+    } else if ( pap == this->giveNode(6)->giveNumber()){
+        answer.at(2) = this->giveNode(3)->giveNumber();
+        answer.at(3) = this->giveNode(2)->giveNumber();
+    } else if ( pap == this->giveNode(7)->giveNumber()){
+        answer.at(2) = this->giveNode(4)->giveNumber();
+        answer.at(3) = this->giveNode(3)->giveNumber();
+    } else if ( pap == this->giveNode(8)->giveNumber()){
+        answer.at(2) = this->giveNode(1)->giveNumber();
+        answer.at(3) = this->giveNode(4)->giveNumber();
+    } else {
+        OOFEM_ERROR("node unknown");
+    }    
+}
+
+
+int
+QPlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
+{
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+}
+
+
+SPRPatchType
+QPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
+{
+    return SPRPatchType_2dxy;
 }
 
 

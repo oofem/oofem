@@ -38,6 +38,7 @@ protected:
 
 #include "sm/Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 
@@ -50,7 +51,7 @@ class FEI2dQuadQuad;
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface
+class QPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface
 {
 protected:
     static FEI2dQuadQuad interpolation;
@@ -67,6 +68,11 @@ public:
     Element_Geometry_Type giveGeometryType() const override { return EGT_quad_2; }
     Interface *giveInterface(InterfaceType it) override;
 
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
+    
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep) override;
 
