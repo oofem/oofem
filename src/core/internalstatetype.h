@@ -124,7 +124,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_VolumetricPlasticStrain, 74) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrain, 75) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStress, 76) \
-    ENUM_ITEM_WITH_VALUE(IST_Viscosity, 77)                     \
+    ENUM_ITEM_WITH_VALUE(IST_Viscosity, 77) \
     ENUM_ITEM_WITH_VALUE(IST_CharacteristicLength, 78)  \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrainMeasure, 79) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStressMeasure, 80) \

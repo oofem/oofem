@@ -5686,7 +5686,7 @@ In the model, the interface is assumed to have only elastic stiffness $k_{\text{
 	\end{cases}
 \end{equation}
 
-\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_{\text{s}}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. Should the provided stiffness be smaller than $k_n = \dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
+\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_{\text{s}}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. If the provided stiffness $k_s$ is smaller than $\dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted up to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
 \begin{equation}
 \dfrac{\partial \mbf{t}}{\partial \mbf{\delta}}= \left[ \begin{array}{cc}
 \dfrac{\partial t_\text{n}}{\partial \delta_\text{n}} &

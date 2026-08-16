@@ -118,6 +118,7 @@
 #include "valuemodetype.h"
 #include "dofiditem.h"
 #include "timer.h"
+#include "logger.h"
 
 #include "classfactory.h"
 
@@ -1123,7 +1124,10 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::OOFEMTXTDataReader, oofem::DataReader  SHARED_PTR_HOLDER(oofem::OOFEMTXTDataReader)>(m, "OOFEMTXTDataReader")
         .def(py::init<std::string>())
     ;
-
+    
+    py::class_<oofem::Logger  SHARED_PTR_HOLDER(oofem::Logger)>(m, "Logger")
+        .def("printStatistics", &oofem::Logger::printStatistics)
+    ;
 
     py::class_<oofem::InputRecord  SHARED_PTR_HOLDER(InputRecord)>(m, "InputRecord")
     ;
@@ -1233,6 +1237,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("requiresEquationRenumbering", &oofem::EngngModel::requiresEquationRenumbering)
         .def("giveNumberOfDomainEquations", &oofem::EngngModel::giveNumberOfDomainEquations)
         .def("Instanciate_init", &oofem::EngngModel::Instanciate_init)
+        .def("getLogger", [](oofem::EngngModel &) -> oofem::Logger& { return oofem::oofem_logger;}, py::return_value_policy::reference)
         .def_property("ndomains", &oofem::EngngModel::getNumberOfDomains, &oofem::EngngModel::setNumberOfDomains)
     #ifdef __MPM_MODULE
         .def("addIntegral", &oofem::EngngModel::py_addIntegral, py::keep_alive<0, 1>())
