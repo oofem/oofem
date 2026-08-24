@@ -274,6 +274,26 @@ Supported DofManagerType keywords are
    Values of array ``dofType`` can have following values: 0-primary DOF,
    2-linked DOF.
 
+   Rotational DOFs (``R_u``, ``R_v``, ``R_w``) declared as linked
+   (``dofType`` 2) are handled specially: instead of being interpolated
+   like the translations, they are constrained to the infinitesimal
+   rotation of the master element, omega = 1/2 curl(u), evaluated from its
+   shape-function gradients. This is currently implemented for the linear
+   tetrahedron. It allows a beam or frame node to be embedded in a solid
+   mesh so that its rotations follow the local continuum rotation. All three
+   rotations, including the torsional one about the beam axis, are then
+   determined automatically: no torsional restraint has to be applied and
+   the result does not depend on the frame element node ordering. This is a
+   rigid rotational bond that transfers moments and torsion, not a pinned
+   connection.
+
+   If the rotational DOFs are instead left as primary (``dofType`` 0) or are
+   fixed, they are not touched. This supports the alternative where only the
+   translations are bonded to the matrix and the frame element itself
+   carries the rotations; in that case the torsional DOF about the beam axis
+   has to be restrained separately. Linked rotational DOFs on a
+   non-tetrahedral master element are not supported and raise an error.
+
    The value of ``masterElement`` specifies the element number to which
    the hanging node is attached. The node can be attached to any
    arbitrary coordinate within the master element. The element must

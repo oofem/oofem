@@ -35,8 +35,10 @@
 #include "hangingnode.h"
 #include "slavedof.h"
 #include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "element.h"
+#include "elementgeometrytype.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
 #include "classfactory.h"
@@ -44,6 +46,21 @@
 
 namespace oofem {
 REGISTER_DofManager(HangingNode);
+
+// Adds one master-DOF contribution to a rotational slave-DOF constraint.
+// Master nodes that do not carry the required translational DOF are skipped.
+static void
+addRotationTerm(FloatArray &coeffs, IntArray &masterNodes, IntArray &masterDofIDs,
+                double coeff, Node *masterNode, DofIDItem masterDofID)
+{
+    if ( !masterNode->hasDofID(masterDofID) ) {
+        return;
+    }
+    coeffs.resizeWithValues( coeffs.giveSize() + 1 );
+    coeffs.at( coeffs.giveSize() ) = coeff;
+    masterNodes.followedBy( masterNode->giveNumber() );
+    masterDofIDs.followedBy( (int) masterDofID );
+}
 
 ParamKey HangingNode::IPK_HangingNode_masterElement("masterelement");
 ParamKey HangingNode::IPK_HangingNode_masterRegion("masterregion");
@@ -171,6 +188,69 @@ void HangingNode :: postInitialize()
             fei->evalN( masterContribution, lcoords, FEIElementGeometryWrapper(e) );
             sdof->initialize(masterNodes, IntArray(), masterContribution);
 #endif
+        }
+    }
+
+    // Rotational DOFs (R_u, R_v, R_w) that are defined as SLAVE DOFs are constrained to the
+    // infinitesimal rotation omega = 1/2 curl(u) of the host continuum, so a beam/frame node
+    // embedded in a solid mesh inherits the local element rotation and the frame element node
+    // order no longer has to match the continuum. Only slaved rotational DOFs are treated here:
+    // if the rotational DOFs are free (master) or fixed - e.g. a frame node whose torsion is
+    // fixed and whose bending rotations are carried by the beam element itself - they are left
+    // untouched, so that modelling option remains available. Implemented for the linear
+    // tetrahedron, whose constant shape-function gradients give a constant rotation.
+    SlaveDof *rotU = this->hasDofID(R_u) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_u) ) : nullptr;
+    SlaveDof *rotV = this->hasDofID(R_v) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_v) ) : nullptr;
+    SlaveDof *rotW = this->hasDofID(R_w) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_w) ) : nullptr;
+
+    if ( rotU || rotV || rotW ) {
+        if ( e->giveGeometryType() != EGT_tetra_1 ) {
+            OOFEM_ERROR("Hanging node %d has slaved rotational DOFs, but master element %d is not a "
+                        "linear tetrahedron (EGT_tetra_1); the continuum rotational constraint is only "
+                        "implemented for linear tetrahedra. Declare the rotational DOFs as free (master) "
+                        "or fixed to embed a frame node without this constraint.",
+                        this->giveNumber(), this->masterElement);
+        }
+
+        FEInterpolation *feiRot = e->giveInterpolation();
+        FloatMatrix dNdX;
+        feiRot->evaldNdx(dNdX, lcoords, FEIElementGeometryWrapper(e));
+        const int nnodes = e->giveNumberOfNodes();
+
+        // theta_x = 1/2 (du_z/dy - du_y/dz)
+        if ( rotU ) {
+            FloatArray coeffs;
+            IntArray masterNodeIDs, masterDofIDs;
+            for ( int i = 1; i <= nnodes; ++i ) {
+                Node *masterNode = e->giveNode(i);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs,  0.5 * dNdX.at(i, 2), masterNode, D_w);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs, -0.5 * dNdX.at(i, 3), masterNode, D_v);
+            }
+            rotU->initialize(masterNodeIDs, masterDofIDs, coeffs);
+        }
+
+        // theta_y = 1/2 (du_x/dz - du_z/dx)
+        if ( rotV ) {
+            FloatArray coeffs;
+            IntArray masterNodeIDs, masterDofIDs;
+            for ( int i = 1; i <= nnodes; ++i ) {
+                Node *masterNode = e->giveNode(i);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs,  0.5 * dNdX.at(i, 3), masterNode, D_u);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs, -0.5 * dNdX.at(i, 1), masterNode, D_w);
+            }
+            rotV->initialize(masterNodeIDs, masterDofIDs, coeffs);
+        }
+
+        // theta_z = 1/2 (du_y/dx - du_x/dy)
+        if ( rotW ) {
+            FloatArray coeffs;
+            IntArray masterNodeIDs, masterDofIDs;
+            for ( int i = 1; i <= nnodes; ++i ) {
+                Node *masterNode = e->giveNode(i);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs,  0.5 * dNdX.at(i, 1), masterNode, D_v);
+                addRotationTerm(coeffs, masterNodeIDs, masterDofIDs, -0.5 * dNdX.at(i, 2), masterNode, D_u);
+            }
+            rotW->initialize(masterNodeIDs, masterDofIDs, coeffs);
         }
     }
 }
