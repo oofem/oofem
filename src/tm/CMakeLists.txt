@@ -28,6 +28,7 @@ set (tm_element
     Elements/LatticeElements/latticetransportelement.C
     Elements/LatticeElements/lattice2d_mt.C
     Elements/LatticeElements/lattice3d_mt.C
+    Elements/LatticeElements/lattice3dboundary_mt.C
     )
 
 set (tm_boundary

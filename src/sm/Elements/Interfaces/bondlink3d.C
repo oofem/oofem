@@ -277,8 +277,8 @@ BondLink3d :: postInitialize()
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_length);
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_diameter);
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_dirvector);
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_BondLink3d_length_end);
-    if ( this->bondEndLength < this->bondLength ) {
+    // length_end is an optional end-length hook; only cap bondLength when it is actually given (> 0).
+    if ( this->bondEndLength > 0. && this->bondEndLength < this->bondLength ) {
         this->bondLength = this->bondEndLength;
     }
 }

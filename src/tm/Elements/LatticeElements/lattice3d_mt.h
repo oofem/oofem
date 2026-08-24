@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -49,11 +49,11 @@
 #define _IFT_Lattice3DMT_area "area"
 #define _IFT_Lattice3DMT_ranarea "ranarea"
 #define _IFT_Lattice3DMT_mlength "mlength"
+#define _IFT_Lattice3DMT_lumpedcapacity "lumpedcapacity"
 //@}
 
 
 namespace oofem {
-class ParamKey;
 /**
  * This class implements a 3-dimensional lattice mass transport element
  */
@@ -62,14 +62,14 @@ class Lattice3d_mt : public LatticeTransportElement
 {
 protected:
 
-    double minLength = 0.;
+    double minLength = 1.e-20;
     double length = 0.;
     double I1 = 0., I2 = 0., Ip = 0.;
     FloatArray polygonCoords;
     int numberOfPolygonVertices;
     FloatMatrix localCoordinateSystem;
     double eccS = 0., eccT = 0., area = 0.;
-    Coordinates midPoint, centroid, globalCentroid;
+    FloatArray midPoint, centroid, globalCentroid;
     int geometryFlag = 0;
     FloatArray normal;
 
@@ -78,16 +78,11 @@ protected:
     FloatArray crackWidths;
     FloatArray crackLengths;
 
-    double dimension = 0.;
+    double dimension = 3.;
 
-    static ParamKey IPK_Lattice3d_mt_polycoords;
-    static ParamKey IPK_Lattice3d_mt_crackwidths;
-    static ParamKey IPK_Lattice3d_mt_couplingflag;
-    static ParamKey IPK_Lattice3d_mt_couplingnumber;
-    static ParamKey IPK_Lattice3d_mt_dim;
-    static ParamKey IPK_Lattice3d_mt_area;
-    static ParamKey IPK_Lattice3d_mt_ranarea;
-    static ParamKey IPK_Lattice3d_mt_mlength;
+    /// 0 = consistent (coupled) capacity matrix; 1 = diagonal lumped form.
+    /// Lumping gives TPFA-style monotone behaviour for nonlinear c(p).
+    int lumpedCapacity = 0;
 
 public:
     Lattice3d_mt(int, Domain *, ElementMode em = HeatTransferEM);
@@ -118,6 +113,16 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &) const override;
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     void postInitialize() override;
+
+    static ParamKey IPK_Lattice3d_mt_mlength;
+    static ParamKey IPK_Lattice3d_mt_dim;
+    static ParamKey IPK_Lattice3d_mt_area;
+    static ParamKey IPK_Lattice3d_mt_polycoords;
+    static ParamKey IPK_Lattice3d_mt_crackwidths;
+    static ParamKey IPK_Lattice3d_mt_couplingflag;
+    static ParamKey IPK_Lattice3d_mt_couplingnumber;
+    static ParamKey IPK_Lattice3d_mt_lumpedcapacity;
+
     void updateInternalState(TimeStep *tStep) override;
 
     double giveLength() override;

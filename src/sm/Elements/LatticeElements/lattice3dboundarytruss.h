@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-class ParamKey;
 /**
  * This class implements a 3-dimensional lattice element for the boundaries of a periodic cell representing a truss.
  * The first two nodes have each 6 degrees of freedom (3 translation and 3 rotations).
@@ -60,7 +59,6 @@ class Lattice3dBoundaryTruss : public Lattice3dBoundary
 {
 protected:
     IntArray location;
-    static ParamKey IPK_Lattice3dBoundaryTruss_location;
 
 public:
     Lattice3dBoundaryTruss(int n, Domain *);
@@ -80,11 +78,12 @@ public:
     void  giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0) override;
     void computeGeometryProperties() override;
 
-    void giveGPCoordinates(FloatArray &coords) override { coords = this->globalCentroid; }
     const char *giveInputRecordName() const override { return _IFT_Lattice3dBoundaryTruss_Name; }
     const char *giveClassName() const override { return "Lattice3dBoundaryTruss"; }
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     void postInitialize() override;
+
+    static ParamKey IPK_Lattice3dBoundaryTruss_location;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
     void saveContext(DataStream &stream, ContextMode mode) override;
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -37,6 +37,7 @@
 #define lattice2dboundary_h
 
 #include "../sm/Elements/LatticeElements/lattice2d.h"
+#include "../sm/Elements/LatticeElements/lattice2d.h"
 
 ///@name Input fields for Lattice2dboundary
 //@{
@@ -47,7 +48,6 @@
 #define TOL 1.e-8
 
 namespace oofem {
-class ParamKey;
 class Lattice2dBoundary : public Lattice2d
 {
     /*
@@ -64,7 +64,6 @@ class Lattice2dBoundary : public Lattice2d
      */
 protected:
     int location;
-    static ParamKey IPK_Lattice2dBoundary_location;
 
 public:
     Lattice2dBoundary(int, Domain *);                     // constructor
@@ -86,6 +85,8 @@ public:
     const char *giveClassName() const override { return "Lattice2dBoundary"; }
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     void postInitialize() override;
+
+    static ParamKey IPK_Lattice2dBoundary_location;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

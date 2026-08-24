@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -119,10 +119,10 @@ protected:
     double density = 0.;
 
     /// Type of conductivity and capcity laws.
-    int conType = 0;
+    int conType = 0.;
 
     /// Type of conductivity and capcity laws.
-    int capacity = 0;
+    double capacity = 0.;
 
     /// Relative saturated water content
     double thetaS = 0.;

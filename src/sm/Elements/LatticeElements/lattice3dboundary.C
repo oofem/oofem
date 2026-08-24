@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -46,12 +46,12 @@
 #include "latticestructuralelement.h"
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "crosssection.h"
 #include "dof.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,9 +59,10 @@
 
 namespace oofem {
 REGISTER_Element(Lattice3dBoundary);
+
 ParamKey Lattice3dBoundary::IPK_Lattice3dBoundary_location("location");
 
-Lattice3dBoundary :: Lattice3dBoundary(int n, Domain *aDomain) : Lattice3d(n, aDomain), location(2)
+Lattice3dBoundary :: Lattice3dBoundary(int n, Domain *aDomain) : Lattice3d(n, aDomain)
 {
     numberOfDofMans = 3;
     geometryFlag = 0;
@@ -136,14 +137,14 @@ Lattice3dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     answer.at(4, 1) = 0.;
     answer.at(4, 2) = 0;
     answer.at(4, 3) = 0.;
-    answer.at(4, 4) = -sqrt(Ip / this->area);
+    answer.at(4, 4) = -1.;
     answer.at(4, 5) = 0.;
     answer.at(4, 6) = 0.;
     //Second node
     answer.at(4, 7) = 0.;
     answer.at(4, 8) = 0.;
     answer.at(4, 9) = 0.;
-    answer.at(4, 10) = sqrt(Ip / this->area);
+    answer.at(4, 10) = 1.;
     answer.at(4, 11) = 0.;
     answer.at(4, 12) = 0.;
 
@@ -153,14 +154,14 @@ Lattice3dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     answer.at(5, 2) = 0.;
     answer.at(5, 3) = 0.;
     answer.at(5, 4) = 0.;
-    answer.at(5, 5) = -sqrt(I1 / this->area);
+    answer.at(5, 5) = -1.;
     answer.at(5, 6) = 0.;
     //Second node
     answer.at(5, 7) = 0.;
     answer.at(5, 8) = 0.;
     answer.at(5, 9) =  0.;
     answer.at(5, 10) = 0.;
-    answer.at(5, 11) = sqrt(I1 / this->area);
+    answer.at(5, 11) = 1.;
     answer.at(5, 12) = 0.;
 
     //Rotation around z-axis
@@ -170,16 +171,14 @@ Lattice3dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     answer.at(6, 3) = 0.;
     answer.at(6, 4) = 0.;
     answer.at(6, 5) = 0.;
-    answer.at(6, 6) = -sqrt(I2 / this->area);
+    answer.at(6, 6) = -1.;
     //Second node
     answer.at(6, 7) = 0.;
     answer.at(6, 8) = 0.;
     answer.at(6, 9) =  0.;
     answer.at(6, 10) = 0.;
     answer.at(6, 11) = 0.;
-    answer.at(6, 12) = sqrt(I2 / this->area);
-
-    answer.times(1. / this->length);
+    answer.at(6, 12) = 1.;
 
     return;
 }
@@ -189,32 +188,30 @@ Lattice3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                                             TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    //    double dV;
-    FloatMatrix d, bi, bj, dbj, dij, bjt;
+    FloatMatrix d, ds, b, db, bt;
     FloatMatrix t(12, 18), tt;
     FloatMatrix answerTemp(12, 12), answerHelp, ttk(18, 12);
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answerTemp.zero();
     answerHelp.zero();
     t.zero();
-
+    double length = this->giveLength();
 
 
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
     }
 
-    double volume = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-
-    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
+    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), b);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    for ( int i = 1; i <= 6; i++ ) {
-        d.at(i, i) *= volume;
-    }
+    convertTangentToResultantTangent3d(ds, d, integrationRulesArray [ 0 ]->getIntegrationPoint(0));
 
-    dbj.beProductOf(d, bj);
-    bjt.beTranspositionOf(bj);
-    answerTemp.beProductOf(bjt, dbj);
+
+
+    db.beProductOf(ds, b);
+    bt.beTranspositionOf(b);
+    answerTemp.beProductOf(bt, db);
+    answerTemp.times(1./length);
 
     answer.resize(computeNumberOfDofs(), computeNumberOfDofs() );
     answer.zero();
@@ -292,18 +289,6 @@ Lattice3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     return;
 }
 
-
-
-double
-Lattice3dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
-{
-    if ( geometryFlag == 0 ) {
-        computeGeometryProperties();
-    }
-
-    return this->area * this->length;
-}
-
 void
 Lattice3dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) {
     coords.resize(3);
@@ -346,7 +331,7 @@ Lattice3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatMatrix b;
     FloatArray u;
-
+    double length = this->giveLength();
 
     //Compute strain vector
     //Get the 18 components of the displacement vector of this element
@@ -399,6 +384,7 @@ Lattice3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     }
 
     answer.beProductOf(b, uTemp);
+    answer.times(1./length);
 }
 
 bool
@@ -469,10 +455,12 @@ Lattice3dBoundary :: postInitialize()
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_Lattice3dBoundary_location) ;
 }
 
+
+
 void
 Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    Material *mat = this->giveMaterial();
+    Material *mat = this->giveCrossSection()->giveMaterial(integrationRulesArray [ 0 ]->getIntegrationPoint(0));
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
@@ -503,9 +491,11 @@ Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
     this->computeStressVector(TotalStressVector, strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    bs.beProductOf(bt, TotalStressVector);
-    bs.times(dV);
+    //Stress is now converted to sectional forces
+    FloatArray s;
+    convertStressToResultants3d(s,TotalStressVector, integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+
+    bs.beProductOf(bt, s);
 
     for ( int m = 1; m <= 12; m++ ) {
         answer.at(m) = bs.at(m);
@@ -748,7 +738,6 @@ Lattice3dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tSt
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    //  EASValsSetColor(gc.getNodeColor());
     EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
 
     for ( int i = 0; i < numberOfPolygonVertices; i++ ) {
@@ -778,8 +767,8 @@ Lattice3dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tSt
 
 void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
-    //That seems to be wrong. The strain field should be ordered exx, eyy, ezz, gyz, gzx, gyx
-    //Therefore, the x displacement should include 5th and 6th strain components.
+    //The strain field should be ordered exx, eyy, ezz, gyz, gzx, gyx
+    //Therefore, the x displacement includes 5th and 6th strain components.
     GraphicObj *go;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -836,7 +825,6 @@ void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     }
 
     //Modify dispOne and dispTwo
-    //Seems to be wrong. Should be
     dispOne.at(1) = dispOne.at(1) + projectionComponentNodeOne.at(1) * dispThree.at(1) + projectionComponentNodeOne.at(3) * dispThree.at(5) + projectionComponentNodeOne.at(2) * dispThree.at(6);
     dispOne.at(2) = dispOne.at(2) + projectionComponentNodeOne.at(2) * dispThree.at(2) + projectionComponentNodeOne.at(3) * dispThree.at(4);
     dispOne.at(3) = dispOne.at(3) + projectionComponentNodeOne.at(3) * dispThree.at(3);

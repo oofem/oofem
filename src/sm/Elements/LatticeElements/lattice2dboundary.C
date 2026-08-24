@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -45,29 +45,30 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "datastream.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dof.h"
 #include "../sm/Materials/structuralmaterial.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
+#include "crosssection.h"
+
 namespace oofem {
 REGISTER_Element(Lattice2dBoundary);
+
 ParamKey Lattice2dBoundary::IPK_Lattice2dBoundary_location("location");
 
 Lattice2dBoundary :: Lattice2dBoundary(int n, Domain *aDomain) : Lattice2d(n, aDomain)
     // Constructor.
 {
     numberOfDofMans     = 3;
-
-    kappa = -1; // set kappa to undef value (should be always > 0.)
-
-    pitch               = 10.;  // a dummy value
+    kappa = -1;
+    pitch               = 10.;
 }
 
 Lattice2dBoundary :: ~Lattice2dBoundary()
@@ -128,14 +129,11 @@ Lattice2dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
 
     answer.at(3, 1) = 0.;
     answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -this->width / sqrt(12.);
+    answer.at(3, 3) = -1.;
 
     answer.at(3, 4) = 0.;
     answer.at(3, 5) = 0.;
-    answer.at(3, 6) = this->width / sqrt(12.);
-
-
-    answer.times(1. / length);
+    answer.at(3, 6) = 1.;
 
     return;
 }
@@ -199,18 +197,22 @@ void
 Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    double dV;
-    FloatMatrix d, bi, bj, dbj, dij;
+  double length = this->giveLength();
+    FloatMatrix d, ds, b, db, bt;
 
     FloatMatrix answerTemp(6, 6);
     answerTemp.zero();
 
 
-    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
+    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), b);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    dV = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    dbj.beProductOf(d, bj);
-    answerTemp.plusProductUnsym(bj, dbj, dV);
+
+    convertTangentToResultantTangent2d(ds, d, integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+
+    db.beProductOf(ds, b);
+    bt.beTranspositionOf(b);
+    answerTemp.beProductOf(bt, db);
+    answerTemp.times(1./length);
 
     answer.resize(computeNumberOfDofs(), computeNumberOfDofs() );
     answer.zero();
@@ -300,6 +302,7 @@ Lattice2dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatMatrix b;
     FloatArray u;
+    double length = this->giveLength();
 
     //Compute strain vector
     //Get the 9 components of the displacement vector of this element
@@ -334,6 +337,7 @@ Lattice2dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     }
 
     answer.beProductOf(b, uTemp);
+    answer.times(1./length);
 }
 
 
@@ -457,10 +461,11 @@ Lattice2dBoundary :: postInitialize()
 
 
 
+
 void
 Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    Material *mat = this->giveMaterial();
+    auto *mat = static_cast<LatticeStructuralMaterial*>(this->giveCrossSection()->giveMaterial(integrationRulesArray [ 0 ]->getIntegrationPoint(0)));
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
@@ -480,7 +485,6 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), b);
 
     bt.beTranspositionOf(b);
-    // TotalStressVector = gp->giveStressVector() ;
     if ( useUpdatedGpRecord == 1 ) {
         TotalStressVector = ( ( LatticeMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
                             ->giveLatticeStress();
@@ -491,15 +495,13 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     }
     this->computeStrainVector(strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    //    strain.beProductOf(b, u);
-
     this->computeStressVector(TotalStressVector, strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    //
-    // compute nodal representation of internal forces using f = B^T*Sigma dV
-    //
-    dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    bs.beProductOf(bt, TotalStressVector);
-    bs.times(dV);
+
+    // compute nodal internal forces f = B^T * s
+    FloatArray s;
+    convertStressToResultants2d(s,TotalStressVector,integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+
+    bs.beProductOf(bt, s);
 
     for ( int m = 1; m <= 6; m++ ) {
         answer.at(m) = bs.at(m);
@@ -632,8 +634,6 @@ void Lattice2dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep
 
     specimenDimension.at(1) =  this->giveNode(3)->giveCoordinate(1);
     specimenDimension.at(2) =  this->giveNode(3)->giveCoordinate(2);
-
-    // double width = cs->give(WIDTH);
 
     double x1, y1, x2, y2;
     x1 = this->giveNode(1)->giveCoordinate(1);

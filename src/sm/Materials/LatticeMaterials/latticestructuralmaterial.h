@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -45,8 +45,7 @@
 
 ///@name Input fields for LatticeStructuralMaterial
 //@{
-#define _IFT_LatticeStructuralMaterial_referencetemperature "referencetemperature"
-#define _IFT_LatticeStructuralMaterial_talpha "talpha"
+#define _IFT_LatticeStructuralMaterial_tcrit "tcrit"
 //@}
 
 namespace oofem {
@@ -67,8 +66,10 @@ class GaussPoint;
 class LatticeStructuralMaterial : public StructuralMaterial
 {
 protected:
-    /// Reference temperature (temperature, when material has been built into structure).
-    double referenceTemperature = 0.;
+
+  //tempeature threshold used to compute reduction
+  double tCrit = 0.;
+
 
 public:
 
@@ -84,7 +85,19 @@ public:
                              GaussPoint *gp,
                              TimeStep *tStep) const override;
 
+  void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
+
     virtual bool hasAnalyticalTangentStiffness() const { return true; }
+
+    enum LatticeResponseType {
+        LRT_StressBased,
+        LRT_ResultantBased
+    };
+
+    virtual LatticeResponseType giveLatticeResponseType() const
+    {
+        return LRT_StressBased;
+    }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "LatticeStructuralMaterial"; }
@@ -95,9 +108,16 @@ public:
 
     virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep);
 
+    virtual FloatArrayF< 6 >giveFrameForces3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep);
+
     virtual FloatMatrixF< 1, 1 >give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+
+    virtual FloatMatrixF< 6, 6 >give3dFrameStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+
+    double computeTemperatureReductionFactor(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
+
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 };

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,12 +44,12 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "load.h"
 #include "classfactory.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,23 +59,19 @@
 namespace oofem {
 REGISTER_Element(Lattice3d_mt);
 
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_mlength("mlength");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_dim("dim");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_area("area");
 ParamKey Lattice3d_mt::IPK_Lattice3d_mt_polycoords("polycoords");
 ParamKey Lattice3d_mt::IPK_Lattice3d_mt_crackwidths("crackwidths");
 ParamKey Lattice3d_mt::IPK_Lattice3d_mt_couplingflag("couplingflag");
 ParamKey Lattice3d_mt::IPK_Lattice3d_mt_couplingnumber("couplingnumber");
-ParamKey Lattice3d_mt::IPK_Lattice3d_mt_dim("dim");
-ParamKey Lattice3d_mt::IPK_Lattice3d_mt_area("area");
-ParamKey Lattice3d_mt::IPK_Lattice3d_mt_ranarea("ranarea");
-ParamKey Lattice3d_mt::IPK_Lattice3d_mt_mlength("mlength");
+ParamKey Lattice3d_mt::IPK_Lattice3d_mt_lumpedcapacity("lumpedcapacity");
 
 Lattice3d_mt :: Lattice3d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
 {
     this->numberOfDofMans  = 2;
-    numberOfGaussPoints = 1;
-    minLength = 1.e-20;
-    dimension = 3.;
-    couplingFlag = 0;
 }
 
 double Lattice3d_mt :: giveLength()
@@ -179,19 +175,22 @@ Lattice3d_mt ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Lattice3d_mt :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority)
 {
-    this->Element :: initializeFrom(ir, priority);
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
+    this->Element :: initializeFrom(ir, priority);
+
     PM_UPDATE_PARAMETER(minLength, ppm, ir, this->number, IPK_Lattice3d_mt_mlength, priority) ;
     PM_UPDATE_PARAMETER(dimension, ppm, ir, this->number, IPK_Lattice3d_mt_dim, priority) ;
     PM_UPDATE_PARAMETER(area, ppm, ir, this->number, IPK_Lattice3d_mt_area, priority) ;
     PM_UPDATE_PARAMETER(polygonCoords, ppm, ir, this->number, IPK_Lattice3d_mt_polycoords, priority) ;
+    numberOfPolygonVertices = (int) ( polygonCoords.giveSize() / 3. );
     PM_UPDATE_PARAMETER(crackWidths, ppm, ir, this->number, IPK_Lattice3d_mt_crackwidths, priority) ;
     PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice3d_mt_couplingflag, priority) ;
+    PM_UPDATE_PARAMETER(lumpedCapacity, ppm, ir, this->number, IPK_Lattice3d_mt_lumpedcapacity, priority);
     PM_UPDATE_PARAMETER(couplingNumbers, ppm, ir, this->number, IPK_Lattice3d_mt_couplingnumber, priority) ;
-
 }
 
-void Lattice3d_mt :: postInitialize()
+void
+Lattice3d_mt :: postInitialize()
 {
     this->LatticeTransportElement :: postInitialize();
     numberOfGaussPoints = 1;
@@ -199,7 +198,6 @@ void Lattice3d_mt :: postInitialize()
     crackWidths.resizeWithValues(numberOfPolygonVertices);
     this->computeGaussPoints();
 }
-
 
 void
 Lattice3d_mt :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
@@ -260,7 +258,7 @@ Lattice3d_mt :: computeGeometryProperties()
     }
 
     // Compute midpoint
-    // this->midPoint.resize(3);
+    this->midPoint.resize(3);
     for ( int i = 0; i < 3; i++ ) {
         this->midPoint.at(i + 1) = 0.5 * ( coordsB.at(i + 1) + coordsA.at(i + 1) );
     }
@@ -337,32 +335,6 @@ Lattice3d_mt :: computeSpecialCrossSectionProperties()
 
     return;
 }
-
-
-
-// void
-// Lattice3d_mt :: computeHomogenisedInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, FloatArray &unknowns)
-// {
-//     IntArray dofids;
-//     FloatArray tmp;
-
-//     FloatMatrix s;
-//     this->giveElementDofIDMask(dofids);
-
-//     ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
-//     this->computeConductivityMatrix(s, Conductivity, tStep);
-//     answer.beProductOf(s, unknowns);
-
-//     this->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
-//     answer.subtract(tmp);
-
-//     FloatMatrix bc_tangent;
-//     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
-//     if ( bc_tangent.isNotEmpty() ) {
-//         tmp.beProductOf(bc_tangent, unknowns);
-//         answer.add(tmp);
-//     }
-// }
 
 
 void
@@ -460,8 +432,7 @@ Lattice3d_mt :: computeCrossSectionProperties() {
     }
 
     //Calculate centroids
-    //centroid.resize(3);
-    centroid.zero();
+    centroid.resize(3);
     for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
         if ( k < numberOfPolygonVertices - 1 ) {
             centroid.at(2) += ( lpc(3 * k + 1) + lpc(3 * ( k + 1 ) + 1) ) * ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) );
@@ -472,14 +443,14 @@ Lattice3d_mt :: computeCrossSectionProperties() {
         }
     }
 
-    centroid*=(1. / ( 6. * this->area ) );
+    centroid.times(1. / ( 6. * this->area ) );
 
     centroid.at(1) = lpc.at(1); //The first component of all lpcs should be the same
 
     //Shift coordinates to centroi
     for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
         for ( int l = 0; l < 3; l++ ) {
-            lpc(3 * k + l) -= centroid[l];
+            lpc(3 * k + l) -= centroid(l);
         }
     }
 
@@ -572,7 +543,7 @@ Lattice3d_mt :: computeCrossSectionProperties() {
         }
     }
 
-    centroid*=(1. / ( 6. * area ) );
+    centroid.times(1. / ( 6. * area ) );
 
     centroid.at(1) = lpc.at(1); //The first component of all lpcs should be the same
 
@@ -589,7 +560,7 @@ Lattice3d_mt :: computeCrossSectionProperties() {
     FloatMatrix transposeLCS;
     transposeLCS.beTranspositionOf(this->localCoordinateSystem);
 
-    globalCentroid = transposeLCS * centroid;
+    globalCentroid.beProductOf(transposeLCS, centroid);
 
     crackLengths.resize(numberOfPolygonVertices);
     double crackPointOne, crackPointTwo;
@@ -636,13 +607,22 @@ Lattice3d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *gp =  integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     answer.resize(2, 2);
     answer.zero();
+    double c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
+    if ( this->lumpedCapacity ) {
+        // diagonal (row-sum-preserving) form — TPFA-compatible, monotone for nonlinear c(p)
+        answer.at(1, 1) = 1.;
+        answer.at(2, 2) = 1.;
+        double dV = this->computeVolumeAround(gp) / ( 2.0 * this->dimension );
+        answer.times(c * dV);
+    } else {
+        // consistent (coupled) form
     answer.at(1, 1) = 2.;
     answer.at(1, 2) = 1.;
     answer.at(2, 1) = 1.;
     answer.at(2, 2) = 2.;
-    double c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
     double dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
     answer.times(c * dV);
+}
 }
 
 
@@ -717,7 +697,6 @@ Lattice3d_mt :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &
         computeGeometryProperties();
     }
 
-    //answer.resize(3);
     answer = midPoint;
 
     return 1;

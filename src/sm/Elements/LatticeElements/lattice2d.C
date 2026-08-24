@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -48,10 +48,10 @@
 #include "floatarrayf.h"
 #include "mathfem.h"
 #include "datastream.h"
-#include "contextioerr.h"
-#include "classfactory.h"
 #include "parametermanager.h"
 #include "paramkey.h"
+#include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -60,19 +60,20 @@
 
 namespace oofem {
 REGISTER_Element(Lattice2d);
+
 ParamKey Lattice2d::IPK_Lattice2d_thick("thick");
 ParamKey Lattice2d::IPK_Lattice2d_width("width");
 ParamKey Lattice2d::IPK_Lattice2d_gpcoords("gpcoords");
 ParamKey Lattice2d::IPK_Lattice2d_couplingflag("couplingflag");
 ParamKey Lattice2d::IPK_Lattice2d_couplingnumber("couplingnumber");
 
-Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain), couplingNumbers(1)
+Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
     numberOfDofMans = 2;
 
     length = 0.;
-    pitch = 10.;  // a dummy value
-    couplingFlag = 0;
+    pitch = 10.;
+    couplingNumbers.zero();
 }
 
 Lattice2d :: ~Lattice2d()
@@ -156,12 +157,10 @@ Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     answer.at(3, 1) = 0.;
     answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -this->width / sqrt(12.);
+    answer.at(3, 3) = -1.;
     answer.at(3, 4) = 0.;
     answer.at(3, 5) = 0.;
-    answer.at(3, 6) = this->width / sqrt(12.);
-
-    answer.times(1. / l);
+    answer.at(3, 6) = 1.;
 }
 
 void
@@ -176,27 +175,32 @@ Lattice2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, G
     answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress2d(strain, gp, tStep);
 }
 
+
+
 void
 Lattice2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                     TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    double dV;
-    FloatMatrix d, bj, dbj;
+    FloatMatrix d, ds, b, db, bt;
     answer.resize(6, 6);
     answer.zero();
-    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
+    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), b);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    dV = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    dbj.beProductOf(d, bj);
-    answer.plusProductUnsym(bj, dbj, dV);
+
+    convertTangentToResultantTangent2d(ds, d, integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+
+    db.beProductOf(ds, b);
+    bt.beTranspositionOf(b);
+    answer.beProductOf(bt,db);
+    answer.times(1./length);
 }
 
 void
 Lattice2d :: giveInternalForcesVector(FloatArray &answer,
 				      TimeStep *tStep, int useUpdatedGpRecord)
 {
-    FloatMatrix b;
+  FloatMatrix b,bt;
     FloatArray u, stress(3), strain;
 
     this->computeVectorOf(VM_Total, tStep, u);
@@ -225,6 +229,7 @@ Lattice2d :: giveInternalForcesVector(FloatArray &answer,
 	      strain.zero();
             }
             strain.beProductOf(b, u);
+            strain.times(1. / this->giveLength());
             this->computeStressVector(stress, strain, gp, tStep);
         }
 
@@ -232,10 +237,11 @@ Lattice2d :: giveInternalForcesVector(FloatArray &answer,
             break;
         }
 
-        // compute nodal representation of internal forces using f = B^T*Sigma dV
-        double dV = this->computeVolumeAround(gp);
-        answer.plusProduct(b, stress, dV);
+        FloatArray s;
+        convertStressToResultants2d(s,stress,gp);
 
+        bt.beTranspositionOf(b);
+        answer.beProductOf(bt, s);
     }
 
     // if inactive update state, but no contribution to global system
@@ -349,6 +355,18 @@ Lattice2d :: giveNormalStress()
     return normalStress;
 }
 
+double
+Lattice2d :: giveTempNormalStress()
+{
+    LatticeMaterialStatus *status;
+
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+
+    return status->giveTempNormalLatticeStress();
+}
+
 int
 Lattice2d :: hasBeenUpdated()
 {
@@ -366,9 +384,6 @@ Lattice2d :: hasBeenUpdated()
 
 int
 Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
-//
-// returns a unit vectors of local coordinate system at element
-// stored rowwise (mainly used by some materials with ortho and anisotrophy)
 //
 {
     double sine, cosine;
@@ -398,6 +413,9 @@ Lattice2d :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority
     PM_UPDATE_PARAMETER(width, ppm, ir, this->number, IPK_Lattice2d_width, priority);
     PM_UPDATE_PARAMETER(gpCoords, ppm, ir, this->number, IPK_Lattice2d_gpcoords, priority);
     PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice2d_couplingflag, priority);
+
+    couplingNumbers.resize(1);
+    couplingNumbers.zero();
     PM_UPDATE_PARAMETER(couplingNumbers.at(1), ppm, ir, this->number, IPK_Lattice2d_couplingnumber, priority);
 }
 
@@ -405,17 +423,15 @@ Lattice2d :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority
 int
 Lattice2d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords)
 {
-    //answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);
     answer.at(2) = this->gpCoords.at(2);
-    answer.at(3) = 0.;
     
     return 1;
 }
 
 
 void
-Lattice2d :: giveGpCoordinates(FloatArray &answer)
+Lattice2d :: giveGpCoordinates(FloatArray &answer, GaussPoint *gp)
 {
     answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);

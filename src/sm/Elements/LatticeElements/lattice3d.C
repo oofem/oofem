@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -46,12 +46,12 @@
 #include "floatarrayf.h"
 #include "mathfem.h"
 #include "latticestructuralelement.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
 #include "sm/CrossSections/latticecrosssection.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -66,6 +66,9 @@ ParamKey Lattice3d::IPK_Lattice3d_polycoords("polycoords");
 ParamKey Lattice3d::IPK_Lattice3d_couplingflag("couplingflag");
 ParamKey Lattice3d::IPK_Lattice3d_couplingnumber("couplingnumber");
 ParamKey Lattice3d::IPK_Lattice3d_pressures("pressures");
+ParamKey Lattice3d::IPK_Lattice3d_shellnormal("shellnormal");
+ParamKey Lattice3d::IPK_Lattice3d_zaxis("zaxis");
+ParamKey Lattice3d::IPK_Lattice3d_s("s");
 
 Lattice3d :: Lattice3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
@@ -73,9 +76,6 @@ Lattice3d :: Lattice3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDo
     geometryFlag = 0;
     this->eccS = 0.;
     this->eccT = 0.;
-    minLength = 1.e-20;
-    couplingFlag = 0;
-
 }
 
 Lattice3d :: ~Lattice3d()
@@ -94,67 +94,69 @@ Lattice3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     answer.resize(6, 12);
     answer.zero();
 
+    // Rigid arms node-1 -> CP and CP -> node-2; eccS/eccT centroid offsets,
+    // gpY/gpZ per-IP offsets from natural coords (zero for centroid-only IP).
+    double gpY = 0.0, gpZ = 0.0;
+    if ( aGaussPoint != nullptr ) {
+        const FloatArray &nc = aGaussPoint->giveNaturalCoordinates();
+        if ( nc.giveSize() >= 3 ) {
+            gpY = nc.at(2);
+            gpZ = nc.at(3);
+        }
+    }
+
+    FloatArray l1(3), l2(3);
+    l1.at(1) =  this->length / 2.;
+    l1.at(2) =  this->eccS + gpY;
+    l1.at(3) =  this->eccT + gpZ;
+
+    l2.at(1) =  this->length / 2.;
+    l2.at(2) = -this->eccS - gpY;
+    l2.at(3) = -this->eccT - gpZ;
+
     //Normal displacement jump in x-direction
     //First node
     answer.at(1, 1) = -1.;
-    answer.at(1, 2) = 0.;
-    answer.at(1, 3) = 0.;
-    answer.at(1, 4) = 0.;
-    answer.at(1, 5) = -this->eccT;
-    answer.at(1, 6) = this->eccS;
+    answer.at(1, 5)  = -l1.at(3);
+    answer.at(1, 6)  =  l1.at(2);
     //Second node
     answer.at(1, 7) = 1.;
-    answer.at(1, 8) = 0.;
-    answer.at(1, 9) = 0.;
-    answer.at(1, 10) = 0.;
-    answer.at(1, 11) = this->eccT;
-    answer.at(1, 12) = -this->eccS;
+    answer.at(1, 11) = -l2.at(3);
+    answer.at(1, 12) =  l2.at(2);
 
     //Shear displacement jump in y-plane
     //first node
-    answer.at(2, 1) = 0.;
     answer.at(2, 2) = -1.;
-    answer.at(2, 3) =  0.;
-    answer.at(2, 4) = this->eccT;
-    answer.at(2, 5) = 0;
-    answer.at(2, 6) = -this->length / 2.;
+    answer.at(2, 4)  =  l1.at(3);
+    answer.at(2, 6)  = -l1.at(1);
     //Second node
-    answer.at(2, 7) = 0.;
     answer.at(2, 8) = 1.;
-    answer.at(2, 9) =  0.;
-    answer.at(2, 10) = -this->eccT;
-    answer.at(2, 11) = 0;
-    answer.at(2, 12) = -this->length / 2.;
+    answer.at(2, 10) =  l2.at(3);
+    answer.at(2, 12) = -l2.at(1);
 
     //Shear displacement jump in z-plane
     //first node
-    answer.at(3, 1) = 0.;
-    answer.at(3, 2) = 0.;
     answer.at(3, 3) = -1.;
-    answer.at(3, 4) = -this->eccS;
-    answer.at(3, 5) = this->length / 2.;
-    answer.at(3, 6) = 0.;
+    answer.at(3, 4)  = -l1.at(2);
+    answer.at(3, 5)  =  l1.at(1);
     //Second node
-    answer.at(3, 7) = 0.;
-    answer.at(3, 8) = 0.;
     answer.at(3, 9) =  1.;
-    answer.at(3, 10) = this->eccS;
-    answer.at(3, 11) = this->length / 2.;
-    answer.at(3, 12) = 0.;
+    answer.at(3, 10) = -l2.at(2);
+    answer.at(3, 11) =  l2.at(1);
 
     //Rotation around x-axis
     //First node
     answer.at(4, 1) = 0.;
     answer.at(4, 2) = 0;
     answer.at(4, 3) = 0.;
-    answer.at(4, 4) = -sqrt(Ip / this->area);
+    answer.at(4, 4) = -1.;
     answer.at(4, 5) = 0.;
     answer.at(4, 6) = 0.;
     //Second node
     answer.at(4, 7) = 0.;
     answer.at(4, 8) = 0.;
     answer.at(4, 9) = 0.;
-    answer.at(4, 10) = sqrt(Ip / this->area);
+    answer.at(4, 10) = 1.;
     answer.at(4, 11) = 0.;
     answer.at(4, 12) = 0.;
 
@@ -164,14 +166,14 @@ Lattice3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     answer.at(5, 2) = 0.;
     answer.at(5, 3) = 0.;
     answer.at(5, 4) = 0.;
-    answer.at(5, 5) = -sqrt(I1 / this->area);
+    answer.at(5, 5) = -1.;
     answer.at(5, 6) = 0.;
     //Second node
     answer.at(5, 7) = 0.;
     answer.at(5, 8) = 0.;
     answer.at(5, 9) =  0.;
     answer.at(5, 10) = 0.;
-    answer.at(5, 11) = sqrt(I1 / this->area);
+    answer.at(5, 11) = 1.;
     answer.at(5, 12) = 0.;
 
     //Rotation around z-axis
@@ -181,30 +183,135 @@ Lattice3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     answer.at(6, 3) = 0.;
     answer.at(6, 4) = 0.;
     answer.at(6, 5) = 0.;
-    answer.at(6, 6) = -sqrt(I2 / this->area);
+    answer.at(6, 6) = -1.;
     //Second node
     answer.at(6, 7) = 0.;
     answer.at(6, 8) = 0.;
     answer.at(6, 9) =  0.;
     answer.at(6, 10) = 0.;
     answer.at(6, 11) = 0.;
-    answer.at(6, 12) = sqrt(I2 / this->area);
-
-    answer.times(1. / this->length);
-
+    answer.at(6, 12) = 1.;
     return;
 }
 
+    void
+    Lattice3d::giveInternalForcesVector(FloatArray &answer,
+                                             TimeStep *tStep, int useUpdatedGpRecord)
+    {
+        FloatMatrix b, bt;
+        FloatArray u, stress, strain, s, contrib;
+
+        this->length = giveLength();
+
+        this->computeVectorOf(VM_Total, tStep, u);
+
+        if ( initialDisplacements ) {
+            u.subtract(* initialDisplacements);
+        }
+
+        // zero answer will resize accordingly when adding first contribution
+        answer.clear();
+
+        // Loop over all IPs; per-IP partitioning is enforced via the section getters.
+        IntegrationRule *iRule = integrationRulesArray [ 0 ].get();
+        const int nGp = iRule->giveNumberOfIntegrationPoints();
+        for ( int i = 0; i < nGp; ++i ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+            this->computeBmatrixAt(gp, b);
+            bt.beTranspositionOf(b);
+
+            if ( useUpdatedGpRecord == 1 ) {
+                LatticeMaterialStatus *lmatStat = dynamic_cast < LatticeMaterialStatus * > ( gp->giveMaterialStatus() );
+                if ( lmatStat != nullptr ) {
+                    stress = lmatStat->giveLatticeStress();
+                } else {
+                    stress.resize(6); stress.zero();
+                }
+            } else {
+                if ( !this->isActivated(tStep) ) {
+                    strain.resize(6); strain.zero();
+                } else {
+                    strain.beProductOf(b, u);
+                    strain.times(1. / this->length);
+                }
+                this->computeStressVector(stress, strain, gp, tStep);
+            }
+
+            convertStressToResultants3d(s, stress, gp);
+
+            contrib.beProductOf(bt, s);
+            if ( answer.giveSize() == 0 ) {
+                answer = contrib;
+            } else {
+                answer.add(contrib);
+            }
+        }
+        if ( !this->isActivated(tStep) ) {
+            answer.zero();
+    return;
+}
+    }
+
 void
-Lattice3d :: giveGPCoordinates(FloatArray &coords)
+Lattice3d :: giveGpCoordinates(FloatArray &coords, GaussPoint *gp)
 {
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
     }
     coords.resize(3);
+
+    if ( gp == nullptr ) {
     coords = this->globalCentroid;
     return;
 }
+
+    // Rotate per-IP local offset (natural coords) into global frame, add to centroid.
+    const FloatArray &nc = gp->giveNaturalCoordinates();
+    FloatArray localOffset(3);
+    localOffset.at(1) = nc.at(1);
+    localOffset.at(2) = nc.at(2);
+    localOffset.at(3) = nc.at(3);
+
+    FloatArray globalOffset(3);
+    globalOffset.beTProductOf(this->localCoordinateSystem, localOffset);
+
+    coords = this->globalCentroid;
+    coords.add(globalOffset);
+}
+
+
+void
+Lattice3d :: computeLayerPositions(FloatArray &yOffset, FloatArray &zOffset, FloatArray &areas)
+{
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+
+    int n = 1;
+    LatticeCrossSection *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+    if ( this->isShellElement() && lcs != nullptr ) {
+        n = lcs->giveNLayers();
+    }
+
+    yOffset.resize(n); yOffset.zero();
+    zOffset.resize(n); zOffset.zero();
+    areas.resize(n);
+
+    if ( !this->isShellElement() ) {
+        areas.at(1) = this->area;
+        return;
+    }
+
+    const double h = this->shellH;
+    const double b = this->shellB;
+    const double dh = h / static_cast< double >( n );
+    const double aStrip = b * dh;
+    for ( int k = 1; k <= n; ++k ) {
+        yOffset.at(k) = -h / 2.0 + ( static_cast< double >( k ) - 0.5 ) * dh;
+        areas.at(k) = aStrip;
+    }
+}
+
 
 double
 Lattice3d :: giveLength()
@@ -244,7 +351,7 @@ void
 Lattice3d :: givePlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveCrossSection()->giveMaterial(gp)->giveStatus(gp) );
     plasticStrain = status->givePlasticLatticeStrain();
     return;
 }
@@ -253,7 +360,7 @@ void
 Lattice3d :: giveOldPlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveCrossSection()->giveMaterial(gp)->giveStatus(gp) );
     plasticStrain = status->giveOldPlasticLatticeStrain();
     return;
 }
@@ -273,43 +380,71 @@ Lattice3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, G
 void
 Lattice3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                     TimeStep *tStep)
-// Computes numerically the stiffness matrix of the receiver.
+// Section getters handle per-IP cross-section partitioning.
 {
-    FloatMatrix d, bi, bj, bjt, dbj, dij;
+    FloatMatrix d, ds, bj, bjt, dbj, contrib;
 
     answer.resize(12, 12);
     answer.zero();
-    this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
-    this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    double volume = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    IntegrationRule *iRule = integrationRulesArray [ 0 ].get();
+    const int nGp = iRule->giveNumberOfIntegrationPoints();
+    for ( int i = 0; i < nGp; ++i ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, bj);
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+        convertTangentToResultantTangent3d(ds, d, gp);
 
-    for ( int i = 1; i <= 6; i++ ) {
-        d.at(i, i) *= volume;
-    }
-
-    dbj.beProductOf(d, bj);
+        dbj.beProductOf(ds, bj);
     bjt.beTranspositionOf(bj);
-    answer.beProductOf(bjt, dbj);
+        contrib.beProductOf(bjt, dbj);
+        answer.add(contrib);
+    }
+    answer.times( 1. / this->giveLength() );
 
     return;
 }
 
 void Lattice3d :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
+    FloatArray yOff, zOff, areas;
+    this->computeLayerPositions(yOff, zOff, areas);
+    const int nLayers = areas.giveSize();
+
+    this->numberOfGaussPoints = nLayers;
     integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ].reset(new GaussIntegrationRule(1, this, 1, 3) );
-    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dLattice);
+    integrationRulesArray [ 0 ]->SetUpPointsBare(nLayers, _3dLattice);
+
+    for ( int k = 1; k <= nLayers; ++k ) {
+        GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(k - 1);
+        FloatArray nc(3);
+        nc.at(1) = 0.0;
+        nc.at(2) = yOff.at(k);
+        nc.at(3) = zOff.at(k);
+        gp->setNaturalCoordinates(nc);
+        gp->setWeight(areas.at(k));
+    }
+}
+
+
+bool Lattice3d :: isHybridShell()
+{
+    // A lattice3d element always has a LatticeCrossSection (enforced in computeCrossSectionProperties),
+    // so a shell element is always a layered (hybrid) shell.
+    return this->isShellElement();
 }
 
 
 
-double Lattice3d :: giveArea() {
+double Lattice3d :: giveArea(GaussPoint *gp) {
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
     }
-
+    if ( this->isHybridShell() ) {
+        auto *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        return this->shellB * this->shellH / static_cast< double >( lcs->giveNLayers() );
+    }
     return this->area;
 }
 
@@ -388,17 +523,34 @@ Lattice3d :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority
 
     PM_UPDATE_PARAMETER(minLength, ppm, ir, this->number, IPK_Lattice3d_mlength, priority);
     PM_UPDATE_PARAMETER(polygonCoords, ppm, ir, this->number, IPK_Lattice3d_polycoords, priority);
+    numberOfPolygonVertices = (int) ( polygonCoords.giveSize() / 3. );
     PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice3d_couplingflag, priority);
     PM_UPDATE_PARAMETER(couplingNumbers, ppm, ir, this->number, IPK_Lattice3d_couplingnumber, priority);
     PM_UPDATE_PARAMETER(pressures, ppm, ir, this->number, IPK_Lattice3d_pressures, priority);
+    PM_UPDATE_PARAMETER(shellNormal, ppm, ir, this->number, IPK_Lattice3d_shellnormal, priority);
+    PM_UPDATE_PARAMETER(zaxis, ppm, ir, this->number, IPK_Lattice3d_zaxis, priority);
+    PM_UPDATE_PARAMETER(s, ppm, ir, this->number, IPK_Lattice3d_s, priority);
 }
 
 void
 Lattice3d :: postInitialize()
 {
-    this->LatticeStructuralElement :: postInitialize();
+    LatticeStructuralElement :: postInitialize();
+
     numberOfPolygonVertices = (int) (polygonCoords.giveSize() / 3.);
+
+    // zaxis orients a beam section; shellnormal orients a shell. They are mutually exclusive.
+    if ( shellNormal.giveSize() != 0 && shellNormal.giveSize() != 3 ) {
+        OOFEM_ERROR("shellnormal must have exactly 3 components");
+    }
+    if ( zaxis.giveSize() != 0 && zaxis.giveSize() != 3 ) {
+        OOFEM_ERROR("zaxis must have exactly 3 components");
 }
+    if ( zaxis.giveSize() == 3 && shellNormal.giveSize() == 3 ) {
+        OOFEM_ERROR("zaxis (beam orientation) and shellnormal (shell orientation) are mutually exclusive");
+    }
+}
+
 
 int
 Lattice3d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords)
@@ -407,12 +559,10 @@ Lattice3d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &lco
         computeGeometryProperties();
     }
 
-    //answer.resize(3);
     answer = this->globalCentroid;
 
     return 1;
 }
-
 
 void
 Lattice3d :: computeGeometryProperties()
@@ -420,7 +570,6 @@ Lattice3d :: computeGeometryProperties()
     //coordinates of the two nodes
     Node *nodeA, *nodeB;
     FloatArray coordsA(3), coordsB(3);
-
     nodeA  = this->giveNode(1);
     nodeB  = this->giveNode(2);
 
@@ -459,48 +608,173 @@ Lattice3d :: computeGeometryProperties()
 
 
 void
-Lattice3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-// Returns the lumped mass matrix of the receiver. This expression is
-// valid in both local and global axes.
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    double density = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give('d', gp);
-    double halfMass = density * computeVolumeAround(gp) / 2.;
-    answer.resize(12, 12);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
-    answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
+  Lattice3d :: computeCrossSectionProperties() {
+
+  //Key check to make sure that lattice3d is only used with latticecross-section
+  auto *cs = dynamic_cast< LatticeCrossSection * >( this->giveCrossSection() );
+  if (!cs) {
+    OOFEM_ERROR("Expected LatticeCrossSection");
+  }
+
+  if (cs->giveShape() == 1) {
+    double r = cs->giveRadius();
+    const double rArea  = M_PI * r * r;
+    const double rI     = M_PI * pow(r, 4) / 4.0;
+    const double rIp    = M_PI * pow(r, 4) / 2.0;
+    const double kShear = 0.9;
+    // The section-property lookup is gp-independent, so a null gp is passed.
+    auto pick = [&](CrossSectionProperty key, double fallback) {
+        double v = cs->give(key, (GaussPoint *) nullptr);
+        return ( v > 0.0 ) ? v : fallback;
+    };
+    this->area       = pick(CS_Area, rArea);
+    this->I1         = pick(CS_InertiaMomentY, rI);
+    this->I2         = pick(CS_InertiaMomentZ, rI);
+    this->J          = pick(CS_TorsionConstantX, rIp);
+    this->Ip         = rIp;
+    this->shearArea1 = pick(CS_ShearAreaY, kShear * this->area);
+    this->shearArea2 = pick(CS_ShearAreaZ, kShear * this->area);
+
+    FloatArray s(3), t(3), ref(3);
+    ref.resize(3);
+    ref.zero();
+    ref.at(3) = 1.0;
+
+    if (fabs(normal.dotProduct(ref)) > 0.99) {
+      ref.zero();
+      ref.at(2) = 1.0;
 }
 
+    s.beVectorProductOf(ref, normal);
+    s.normalize();
 
+    t.beVectorProductOf(normal, s);
+    t.normalize();
   
-void
-Lattice3d :: computeCrossSectionProperties() {
+    this->localCoordinateSystem.resize(3,3);
+    for (int i = 1; i <= 3; ++i) {
+      this->localCoordinateSystem.at(1,i) = normal.at(i);
+      this->localCoordinateSystem.at(2,i) = s.at(i);
+      this->localCoordinateSystem.at(3,i) = t.at(i);
+    }
+
+    centroid.resize(3);
+    centroid.zero();
+
+    FloatArray midPointLocal(3);
+    midPointLocal.beProductOf(this->localCoordinateSystem, midPoint);
+    centroid = midPointLocal;
+
+    this->eccS = 0.0;
+    this->eccT = 0.0;
+    this->globalCentroid = midPoint;
+
+    return;
+  }
+
+  // Beam/frame cross-section: no polygon geometry. Section properties are taken directly
+  // from the LatticeCrossSection and the transverse frame is oriented by the mandatory
+  // zaxis.
     if ( this->numberOfPolygonVertices < 3 ) {
-        printf("Too small number of polygon vertices\n");
+    auto pick = [&](CrossSectionProperty key) {
+        return cs->give(key, (GaussPoint *) nullptr);
+    };
+    double a = pick(CS_Area);
+    if ( a <= 0.0 ) {
+      OOFEM_ERROR("Too small number of polygon vertices and no cross-section area given. Check meshing/cross-section.\n");
+    }
+    this->area       = a;
+    this->I1         = pick(CS_InertiaMomentY);
+    this->I2         = pick(CS_InertiaMomentZ);
+    this->J          = pick(CS_TorsionConstantX);
+    this->Ip         = this->I1 + this->I2;
+    this->shearArea1 = ( pick(CS_ShearAreaY) > 0.0 ) ? pick(CS_ShearAreaY) : this->area;
+    this->shearArea2 = ( pick(CS_ShearAreaZ) > 0.0 ) ? pick(CS_ShearAreaZ) : this->area;
+    this->shellB = 0.0;
+    this->shellH = 0.0;   // keep isHybridShell() false so the getters return these members
+
+    // Local frame: axis 1 = element axis; transverse axes from zaxis.
+    FloatArray lx = this->normal;                 // already normalized above
+    FloatArray ly(3), lz(3);
+    if ( this->zaxis.giveSize() == 3 ) {
+      lz = this->zaxis;
+      lz.add(-lz.dotProduct(lx), lx);             // orthogonalize against the element axis
+      if ( lz.computeNorm() < 1e-8 ) {
+        OOFEM_ERROR("zaxis is (nearly) parallel to the element axis\n");
+      }
+      lz.normalize();
+      ly.beVectorProductOf(lz, lx);
+      ly.normalize();
+    } else {
+      // No zaxis: the transverse orientation only matters for an asymmetric section (iy != iz),
+      // where leaving it unspecified is ambiguous.
+      if ( fabs(this->I1 - this->I2) > 1.e-12 * ( fabs(this->I1) + fabs(this->I2) ) ) {
+        OOFEM_ERROR("Beam cross-section with iy != iz requires a zaxis to orient the section.\n");
+      }
+      ly.zero();
+      if ( lx.at(1) == 0. ) {
+        ly.at(1) = 0.;        ly.at(2) = lx.at(3);  ly.at(3) = lx.at(2);
+      } else if ( lx.at(2) == 0. ) {
+        ly.at(1) = lx.at(3);  ly.at(2) = 0.;        ly.at(3) = -lx.at(1);
+      } else {
+        ly.at(1) = lx.at(2);  ly.at(2) = -lx.at(1); ly.at(3) = 0.;
+      }
+      ly.normalize();
+      lz.beVectorProductOf(lx, ly);
+      lz.normalize();
+    }
+
+    this->localCoordinateSystem.resize(3, 3);
+    for ( int i = 1; i <= 3; ++i ) {
+      this->localCoordinateSystem.at(1, i) = lx.at(i);
+      this->localCoordinateSystem.at(2, i) = ly.at(i);
+      this->localCoordinateSystem.at(3, i) = lz.at(i);
+    }
+
+    // Gauss point along the element: parameter (1+s)/2 from node A (s=0 -> midpoint).
+    FloatArray gpGlobal = midPoint;
+    if ( this->s != 0.0 ) {
+      FloatArray shift = this->normal;              // unit vector A->B
+      shift.times(0.5 * this->s * this->length);
+      gpGlobal.add(shift);
+    }
+    centroid.resize(3);
+    FloatArray gpLocal(3);
+    gpLocal.beProductOf(this->localCoordinateSystem, gpGlobal);
+    centroid = gpLocal;
+    this->eccS = 0.0;
+    this->eccT = 0.0;
+    this->globalCentroid = gpGlobal;
         return;
     }
 
+  //Shape is 0 (polygon based cross-section
+
     //Construct two perpendicular axis so that n is normal to the plane which they create
-    //Check, if one of the components of the normal-direction is zero
     FloatArray s(3), t(3);
-    if ( this->normal.at(1) == 0 ) {
-        s.at(1) = 0.;
-        s.at(2) = this->normal.at(3);
-        s.at(3) = -this->normal.at(2);
-    } else if ( this->normal.at(2) == 0 ) {
-        s.at(1) = this->normal.at(3);
-        s.at(2) = 0.;
-        s.at(3) = -this->normal.at(1);
-    } else {
-        s.at(1) = this->normal.at(2);
-        s.at(2) = -this->normal.at(1);
-        s.at(3) = 0.;
+  if ( this->shellNormal.giveSize() == 3 ) {
+    // Align local axis 2 with the shellnormal projected onto the cross-section plane.
+    double nDotAxial = shellNormal.dotProduct(normal);
+    FloatArray axialComp = normal;
+    axialComp.times(nDotAxial);
+    s = shellNormal;
+    s.subtract(axialComp);
+    if ( s.computeNorm() < 1e-8 ) {
+      OOFEM_ERROR("shellnormal is (nearly) parallel to the element axis");
     }
-
     s.normalize();
+    } else {
+    // No shellnormal: pick an arbitrary in-plane reference axis.
+    FloatArray ref(3);
+    ref.at(1) = 0.; ref.at(2) = 0.; ref.at(3) = 1.;
+    if (fabs(normal.dotProduct(ref)) > 0.99) {
+      ref.at(1) = 0.; ref.at(2) = 1.; ref.at(3) = 0.;
+    }
+    s.beVectorProductOf(ref, normal);
+    s.normalize();
+  }
 
-    t.beVectorProductOf(this->normal, s);
+  t.beVectorProductOf(normal, s);
     t.normalize();
 
     //Set up rotation matrix
@@ -516,24 +790,24 @@ Lattice3d :: computeCrossSectionProperties() {
     //Calculate the local coordinates of the polygon vertices
     FloatArray help(3), test(3);
     FloatArray lpc(3 * numberOfPolygonVertices);
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        for ( int n = 0; n < 3; n++ ) {
-            help(n) = polygonCoords(3 * k + n);
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        for ( int n = 1; n <= 3; n++ ) {
+            help.at(n) = polygonCoords.at(3 * (k - 1) + n);
         }
 
         test.beProductOf(lcs, help);
-        for ( int n = 0; n < 3; n++ ) {
-            lpc(3 * k + n) = test(n);
+
+        for ( int n = 1; n <= 3; n++ ) {
+            lpc.at(3 * (k - 1) + n) = test.at(n);
         }
     }
 
     this->area = 0.;
-
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        if ( k < numberOfPolygonVertices - 1 ) {
-            this->area += lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2);
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        if ( k < numberOfPolygonVertices ) {
+            this->area += lpc.at(3 * (k - 1) + 2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k - 1) + 3);
         } else {   //Back to zero for n+1
-            this->area += lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2);
+            this->area += lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3);
         }
     }
 
@@ -552,14 +826,14 @@ Lattice3d :: computeCrossSectionProperties() {
         polygonCoords = tempCoords;
 
         // Calculate again local co-ordinate system for different order
-        for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-            for ( int n = 0; n < 3; n++ ) {
-                help(n) = polygonCoords(3 * k + n);
+        for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+            for ( int n = 1; n <= 3; n++ ) {
+                help.at(n) = polygonCoords.at(3 * (k-1) + n );
             }
 
             test.beProductOf(lcs, help);
-            for ( int n = 0; n < 3; n++ ) {
-                lpc(3 * k + n) = test(n);
+            for ( int n = 1; n <= 3; n++ ) {
+                lpc.at(3 * (k-1) + n) = test.at(n);
             }
         }
     }
@@ -570,13 +844,14 @@ Lattice3d :: computeCrossSectionProperties() {
 
     //Calculate centroids
     centroid.resize(3);
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        if ( k < numberOfPolygonVertices - 1 ) {
-            centroid.at(2) += ( lpc(3 * k + 1) + lpc(3 * ( k + 1 ) + 1) ) * ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) );
-            centroid.at(3) += ( lpc(3 * k + 2) + lpc(3 * ( k + 1 ) + 2) ) * ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) );
+    centroid.zero();
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        if ( k < numberOfPolygonVertices ) {
+            centroid.at(2) += ( lpc.at(3 * (k-1) + 2) + lpc.at(3 * ( k ) + 2) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3) );
+            centroid.at(3) += ( lpc.at(3 * (k-1) + 3) + lpc.at(3 * ( k ) + 3) ) * ( lpc.at(3 * (k-1) +2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3) );
         } else { //Back to zero for n+1
-            centroid.at(2) += ( lpc(3 * k + 1) + lpc(1) ) * ( lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2) );
-            centroid.at(3) += ( lpc(3 * k + 2) + lpc(2) ) * ( lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2) );
+            centroid.at(2) += ( lpc.at(3 * (k-1) + 2) + lpc.at(2) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3) );
+            centroid.at(3) += ( lpc.at(3 * (k-1) + 3) + lpc.at(3) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3) );
         }
     }
 
@@ -585,9 +860,9 @@ Lattice3d :: computeCrossSectionProperties() {
     centroid.at(1) = lpc.at(1); //The first component of all lpcs should be the same
 
     //Shift coordinates to centroid
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        for ( int l = 0; l < 3; l++ ) {
-            lpc(3 * k + l) -= centroid(l);
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        for ( int l = 1; l <= 3; l++ ) {
+            lpc.at(3 * (k-1) + l) -= centroid.at(l);
         }
     }
 
@@ -598,51 +873,120 @@ Lattice3d :: computeCrossSectionProperties() {
     double Ixy = 0.;
     double a;
 
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        if ( k < numberOfPolygonVertices - 1 ) {
-            a = lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2);
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        if ( k < numberOfPolygonVertices ) {
+            a = lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3);
 
-            Ixx += ( ( pow(lpc(3 * k + 2), 2.) + lpc(3 * k + 2) * lpc(3 * ( k + 1 ) + 2) + pow(lpc(3 * ( k + 1 ) + 2), 2.) ) * a ) / 12.;
+            Ixx += ( ( pow(lpc.at(3 * (k-1) + 3), 2.) + lpc.at(3 * (k-1) + 3) * lpc.at(3 * ( k ) + 3) + pow(lpc.at(3 * ( k ) + 3), 2.) ) * a ) / 12.;
 
-            Iyy += ( ( pow(lpc(3 * k + 1), 2.) + lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 1) + pow(lpc(3 * ( k + 1 ) + 1), 2.) ) * a ) / 12.;
+            Iyy += ( ( pow(lpc.at(3 * (k-1) + 2), 2.) + lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 2) + pow(lpc.at(3 * ( k ) + 2), 2.) ) * a ) / 12.;
 
-            Ixy += ( ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) + 2. * lpc(3 * k + 1) * lpc(3 * k + 2) +
-                       2 * lpc(3 * ( k + 1 ) + 1) * lpc(3 * ( k + 1 ) + 2) + lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) ) * a ) / 24.;
+            Ixy += ( ( lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 3) + 2. * lpc.at(3 * (k-1) + 2) * lpc.at(3 * (k-1) + 3) +
+                    2 * lpc.at(3 * ( k ) + 2) * lpc.at(3 * ( k ) + 3) + lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3) ) * a ) / 24.;
         } else {   //Back to zero for n+1
-            a = lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2);
+            a = lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3);
 
-            Ixx += ( ( pow(lpc(3 * k + 2), 2.) + lpc(3 * k + 2) * lpc(2) + pow(lpc(2), 2.) ) * a ) / 12.;
+            Ixx += ( ( pow(lpc.at(3 * (k-1) + 3), 2.) + lpc.at(3 * (k-1) + 3) * lpc.at(3) + pow(lpc.at(3), 2.) ) * a ) / 12.;
 
-            Iyy += ( ( pow(lpc(3 * k + 1), 2.) + lpc(3 * k + 1) * lpc(1) + pow(lpc(1), 2.) ) * a ) / 12.;
+            Iyy += ( ( pow(lpc.at(3 * (k-1) + 2), 2.) + lpc.at(3 * (k-1) + 2) * lpc.at(2) + pow(lpc.at(2), 2.) ) * a ) / 12.;
 
-            Ixy += ( ( lpc(3 * k + 1) * lpc(2) + 2. * lpc(3 * k + 1) * lpc(3 * k + 2) +
-                       2 * lpc(1) * lpc(2) + lpc(1) * lpc(3 * k + 2) ) * a ) / 24.;
+            Ixy += ( ( lpc.at(3 * (k-1) + 2) * lpc.at(3) + 2. * lpc.at(3 * (k-1) + 2) * lpc.at(3 * (k-1) + 3) +
+                    2 * lpc.at(2) * lpc.at(3) + lpc.at(2) * lpc.at(3 * (k-1) + 3) ) * a ) / 24.;
         }
     }
 
     //Compute main axis of the cross-section
     double angleChange = 0.;
-    double sum = fabs(Ixx + Iyy);
-    double pi = 3.14159265;
-    if ( ( fabs(Ixx - Iyy) / sum > 1.e-6 ) && fabs(Ixy) / sum > 1.e-6 ) {
-        angleChange = 0.5 * atan(-2 * Ixy / ( Ixx - Iyy ) );
-    } else if ( ( fabs(Ixx - Iyy) / sum < 1.e-6 ) && fabs(Ixy) / sum > 1.e-6 ) {
-        angleChange = pi / 4.;
+
+    if ( this->isShellElement() ) {
+      // Shell mode: no principal-axis rotation, frame fixed by shellNormal.
+      this->I1 = Ixx;
+      this->I2 = Iyy;
+    } else {
+      double tol = 1e-12 * (fabs(Ixx) + fabs(Iyy));
+      if ( fabs(Ixx - Iyy) < tol && fabs(Ixy) < tol ) {
+        angleChange = 0.0;  // orientation arbitrary
+      } else {
+        angleChange = 0.5 * atan2(-2.0 * Ixy, (Ixx - Iyy));
     }
-
-    if ( Iyy > Ixx ) {
-        angleChange = angleChange + pi / 2.;
-    }
-
-    //Moment of inertias saved in the element
-
     this->I1 = ( Ixx + Iyy ) / 2. + sqrt(pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
     this->I2 = ( Ixx + Iyy ) / 2. - sqrt(pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
+    }
 
     this->Ip = I1 + I2;
 
-    //Rotation around normal axis by angleChange
+// Rectangle path: shape==2 (rectangular beam) or shellnormal-tagged shell.
+if ( cs->giveShape() == 2 || this->isShellElement() ) {
 
+    if (this->numberOfPolygonVertices != 4) {
+        OOFEM_ERROR("Rectangle cross-section must have 4 vertices.");
+    }
+
+    auto edgeLength = [&lpc](int k1, int k2) {
+        double dy = lpc.at(3 * (k2 - 1) + 2) - lpc.at(3 * (k1 - 1) + 2);
+        double dz = lpc.at(3 * (k2 - 1) + 3) - lpc.at(3 * (k1 - 1) + 3);
+        return std::sqrt(dy * dy + dz * dz);
+    };
+
+    const double e1 = edgeLength(1, 2);
+    const double e2 = edgeLength(2, 3);
+    const double e3 = edgeLength(3, 4);
+    const double e4 = edgeLength(4, 1);
+
+    const double rectTol = 1e-4 * (e1 + e2 + e3 + e4);
+    if (std::fabs(e1 - e3) > rectTol || std::fabs(e2 - e4) > rectTol) {
+        OOFEM_ERROR("Shape 2 cross-section is not a rectangle.");
+    }
+
+    const double d1 = 0.5 * (e1 + e3);
+    const double d2 = 0.5 * (e2 + e4);
+
+    double b = 0.0;
+    double h = 0.0;
+
+    const double dy12 = lpc.at(3*(2-1)+2) - lpc.at(3*(1-1)+2);
+    const double dz12 = lpc.at(3*(2-1)+3) - lpc.at(3*(1-1)+3);
+
+    if ( this->shellNormal.giveSize() == 3 ) {
+        // Local axis 2 is the shell normal; pick h, b by edge orientation.
+        if ( std::fabs(dy12) > std::fabs(dz12) ) {
+            h = d1;
+            b = d2;
+        } else {
+            h = d2;
+            b = d1;
+        }
+    } else {
+        // Rectangular beam: h = min edge, b = max edge.
+        h = std::min(d1, d2);
+        b = std::max(d1, d2);
+    }
+
+    this->shellH = h;
+    this->shellB = b;
+    if ( this->isShellElement() ) {
+        // Plate-twisting second moment per unit width.
+        this->J = b * h * h * h / 12.0;
+    } else {
+        // Saint-Venant rectangular beam torsion: J = beta * bMax * hMin^3.
+        double bMax = std::max(b, h);
+        double hMin = std::min(b, h);
+        double a = hMin / bMax;
+        double beta = (1.0 / 3.0) - 0.21 * a * (1.0 - std::pow(a, 4) / 12.0);
+        this->J = beta * bMax * hMin * hMin * hMin;
+    }
+
+
+    } else {
+      this->J = this->Ip; // temporary fallback for generic polygons
+    }
+
+
+
+    this->shearArea1 = area;
+    this->shearArea2 = area;
+
+    //Rotation around normal axis by angleChange
     FloatMatrix rotationChange(3, 3);
     rotationChange.zero();
 
@@ -656,26 +1000,26 @@ Lattice3d :: computeCrossSectionProperties() {
     this->localCoordinateSystem.beProductOf(rotationChange, lcs);
 
     //Calculate the polygon vertices in the new coordinate system
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        for ( int n = 0; n < 3; n++ ) {
-            help(n) = polygonCoords(3 * k + n);
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        for ( int n = 1; n <= 3; n++ ) {
+            help.at(n) = polygonCoords.at(3 * (k-1) + n);
         }
 
         test.beProductOf(this->localCoordinateSystem, help);
-        for ( int n = 0; n < 3; n++ ) {
-            lpc(3 * k + n) = test(n);
+        for ( int n = 1; n <= 3; n++ ) {
+            lpc.at(3 * (k-1) + n) = test.at(n);
         }
     }
 
     //Calculate centroid again in local coordinate system
     centroid.zero();
-    for ( int k = 0; k < numberOfPolygonVertices; k++ ) {
-        if ( k < numberOfPolygonVertices - 1 ) {
-            centroid.at(2) += ( lpc(3 * k + 1) + lpc(3 * ( k + 1 ) + 1) ) * ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) );
-            centroid.at(3) += ( lpc(3 * k + 2) + lpc(3 * ( k + 1 ) + 2) ) * ( lpc(3 * k + 1) * lpc(3 * ( k + 1 ) + 2) - lpc(3 * ( k + 1 ) + 1) * lpc(3 * k + 2) );
+    for ( int k = 1; k <= numberOfPolygonVertices; k++ ) {
+        if ( k < numberOfPolygonVertices ) {
+            centroid.at(2) += ( lpc.at(3 * (k-1) + 2) + lpc.at(3 * ( k ) + 2) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3) );
+            centroid.at(3) += ( lpc.at(3 * (k-1) + 3) + lpc.at(3 * ( k ) + 3) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3 * ( k ) + 3) - lpc.at(3 * ( k ) + 2) * lpc.at(3 * (k-1) + 3) );
         } else {   //Back to zero for n+1
-            centroid.at(2) += ( lpc(3 * k + 1) + lpc(1) ) * ( lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2) );
-            centroid.at(3) += ( lpc(3 * k + 2) + lpc(2) ) * ( lpc(3 * k + 1) * lpc(2) - lpc(1) * lpc(3 * k + 2) );
+            centroid.at(2) += ( lpc.at(3 * (k-1) + 2) + lpc.at(2) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3) );
+            centroid.at(3) += ( lpc.at(3 * (k-1) + 3) + lpc.at(3) ) * ( lpc.at(3 * (k-1) + 2) * lpc.at(3) - lpc.at(2) * lpc.at(3 * (k-1) + 3) );
         }
     }
 
@@ -697,6 +1041,138 @@ Lattice3d :: computeCrossSectionProperties() {
 
     return;
 }
+
+
+bool
+Lattice3d::giveRectangularSectionDimensions(double &by, double &bz, GaussPoint *gp) const
+{
+    if (this->numberOfPolygonVertices != 4) {
+        return false;
+    }
+
+    FloatArray global(3), local(3);
+    std::vector<std::pair<double,double>> yz;
+    yz.reserve(4);
+
+    for (int k = 1; k <= 4; ++k) {
+        for (int i = 1; i <= 3; ++i) {
+            global.at(i) = this->polygonCoords.at(3 * (k - 1) + i);
+        }
+
+        local.beProductOf(this->localCoordinateSystem, global);
+        yz.emplace_back(local.at(2), local.at(3));
+    }
+
+    auto edgeLength = [&yz](int k1, int k2) {
+        const double dy = yz[k2].first  - yz[k1].first;
+        const double dz = yz[k2].second - yz[k1].second;
+        return std::sqrt(dy * dy + dz * dz);
+    };
+
+    const double e1 = edgeLength(0, 1);
+    const double e2 = edgeLength(1, 2);
+    const double e3 = edgeLength(2, 3);
+    const double e4 = edgeLength(3, 0);
+
+    const double scale = std::max({e1, e2, e3, e4, 1.0});
+    const double tol = 1e-8 * scale;
+
+    if (std::fabs(e1 - e3) > tol || std::fabs(e2 - e4) > tol) {
+        return false;
+    }
+
+    by = 0.5 * (e1 + e3);
+    bz = 0.5 * (e2 + e4);
+
+    return (by > tol && bz > tol);
+}
+
+
+double Lattice3d :: giveI1(GaussPoint *gp) {
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+    if ( this->isHybridShell() ) {
+        auto *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        const double dh = this->shellH / static_cast< double >( lcs->giveNLayers() );
+        return this->shellB * this->shellB * this->shellB * dh / 12.0;
+    }
+    return this->I1;
+}
+
+double Lattice3d :: giveI2(GaussPoint *gp) {
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+    if ( this->isHybridShell() ) {
+        auto *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        const double dh = this->shellH / static_cast< double >( lcs->giveNLayers() );
+        return this->shellB * dh * dh * dh / 12.0;
+    }
+    return this->I2;
+}
+
+
+double Lattice3d :: giveJ(GaussPoint *gp) {
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+    if ( this->isHybridShell() ) {
+        auto *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        const double dh = this->shellH / static_cast< double >( lcs->giveNLayers() );
+        return this->shellB * dh * dh * dh / 12.0;
+    }
+    return this->J;
+}
+
+
+double Lattice3d :: giveShearArea1(GaussPoint *gp) {
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+    if ( this->isHybridShell() ) {
+        LatticeCrossSection *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        return this->shearArea1 / static_cast< double >( lcs->giveNLayers() );
+    }
+    return this->shearArea1;
+}
+
+double Lattice3d :: giveShearArea2(GaussPoint *gp) {
+    if ( geometryFlag == 0 ) {
+        computeGeometryProperties();
+    }
+    if ( this->isHybridShell() ) {
+        LatticeCrossSection *lcs = static_cast< LatticeCrossSection * >( this->giveCrossSection() );
+        return this->shearArea2 / static_cast< double >( lcs->giveNLayers() );
+    }
+    return this->shearArea2;
+}
+
+double Lattice3d :: giveTributaryWidth(GaussPoint *gp)
+{
+    if (geometryFlag == 0) {
+        computeGeometryProperties();
+    }
+
+    if ( this->shellB > 0.0 ) {
+        return this->shellB;
+    }
+    return 1.0;
+}
+
+void
+Lattice3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+// Valid in both local and global axes.
+{
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    double density = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give('d', gp);
+    double halfMass = density * computeVolumeAround(gp) / 2.;
+    answer.resize(12, 12);
+    answer.zero();
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
+    answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
+}
+
 
 
 void
@@ -803,7 +1279,7 @@ Lattice3d :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep)
     GraphicObj *go;
 
     //Create as many points as we have polygon vertices
-    numberOfPolygonVertices = this->polygonCoords.giveSize() / 3.;
+    this->numberOfPolygonVertices = this->polygonCoords.giveSize() / 3.;
     WCRec p [ numberOfPolygonVertices ]; /* poin */
 
     if ( !gc.testElementGraphicActivity(this) ) {

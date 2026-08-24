@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -48,11 +48,11 @@
 #define _IFT_Lattice2DMT_crackwidth "crackwidth"
 #define _IFT_Lattice2DMT_couplingflag "couplingflag"
 #define _IFT_Lattice2DMT_couplingnumber "couplingnumber"
+#define _IFT_Lattice2DMT_lumpedcapacity "lumpedcapacity"
 //@}
 
 
 namespace oofem {
-class ParamKey;
 /**
  * This class implements a 2-dimensional lattice mass transport element
  */
@@ -68,18 +68,14 @@ protected:
     FloatArray crackWidths;
     FloatArray crackLengths;
 
-    double dimension = 0., width = 0., thickness = 0.;
+    double dimension = 2., width = 0., thickness = 0.;
     FloatArray gpCoords;
 
     double crackWidth = 0.;
 
-    static ParamKey IPK_Lattice2d_mt_dim;
-    static ParamKey IPK_Lattice2d_mt_thickness;
-    static ParamKey IPK_Lattice2d_mt_width;
-    static ParamKey IPK_Lattice2d_mt_gpcoords;
-    static ParamKey IPK_Lattice2d_mt_crackwidth;
-    static ParamKey IPK_Lattice2d_mt_couplingflag;
-    static ParamKey IPK_Lattice2d_mt_couplingnumber;
+    /// 0 = consistent (coupled) capacity matrix; 1 = diagonal lumped form.
+    /// Lumping gives monotone behaviour for nonlinear c(p).
+    int lumpedCapacity = 0;
 
 public:
     Lattice2d_mt(int, Domain *, ElementMode em = HeatTransferEM);
@@ -116,6 +112,15 @@ public:
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     void postInitialize() override;
 
+    static ParamKey IPK_Lattice2d_mt_dim;
+    static ParamKey IPK_Lattice2d_mt_thickness;
+    static ParamKey IPK_Lattice2d_mt_width;
+    static ParamKey IPK_Lattice2d_mt_gpcoords;
+    static ParamKey IPK_Lattice2d_mt_crackwidth;
+    static ParamKey IPK_Lattice2d_mt_couplingflag;
+    static ParamKey IPK_Lattice2d_mt_couplingnumber;
+    static ParamKey IPK_Lattice2d_mt_lumpedcapacity;
+
     void updateInternalState(TimeStep *tStep) override;
 
 #ifdef __OOFEG
@@ -147,7 +152,7 @@ protected:
 
     double giveArea() override { return width * thickness; }
 
-    void  giveGpCoordinates(FloatArray &coords) override;
+    void  giveGpCoordinates(FloatArray &coords, GaussPoint *gp) override;
 
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override { return 0; }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,20 +44,29 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "Elements/LatticeElements/latticestructuralelement.h"
+#include "Elements/LatticeElements/lattice3d.h"
 #include "datastream.h"
 #include "staggeredproblem.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dofmanager.h"
+#include "dof.h"
+#include "dofiditem.h"
+
+#ifdef __TM_MODULE
+ #include "tm/Elements/LatticeElements/latticetransportelement.h"
+#endif
 
 namespace oofem {
 REGISTER_Material(LatticeLinearElastic);
 
 // constructor which creates a dummy material without a status and without random extension interface
-LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e, double a1, double a2) :
+LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e, double a1, double a2, double a3) :
     LatticeStructuralMaterial(n, d),
     eNormalMean(e),
     alphaOne(a1),
-    alphaTwo(a2)
+    alphaTwo(a2),
+      alphaThree(a3)
 {}
 
 
@@ -74,16 +83,53 @@ LatticeLinearElastic :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     LatticeStructuralMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
 
-    //Young's modulus of the material that the network element is made of
-    IR_GIVE_FIELD(ir, this->eNormalMean, _IFT_LatticeLinearElastic_e); // Macro
+    // eNormalMean = spring Em, emMacro = macroscopic Em. At least one of `e`, `em` must be set.
+    const bool emGiven = ir->hasField(_IFT_LatticeLinearElastic_em);
+    const bool eGiven  = ir->hasField(_IFT_LatticeLinearElastic_e);
+    if ( emGiven ) {
+        IR_GIVE_FIELD(ir, emMacro, _IFT_LatticeLinearElastic_em);
+    }
+    if ( eGiven ) {
+        IR_GIVE_FIELD(ir, eNormalMean, _IFT_LatticeLinearElastic_e);
+    } else if ( emGiven ) {
+        eNormalMean = emMacro;
+    } else {
+        OOFEM_ERROR("LatticeLinearElastic: either 'e' or 'em' (or both) must be supplied");
+    }
+    if ( !emGiven ) {
+        emMacro = eNormalMean;
+    }
 
-    //Parameter which relates the shear stiffness to the normal stiffness. Default is 1
+    // Spring ratios a1 (shear), a2 (bending), a3 (torsion); track explicit input.
+    const bool a1Given = ir->hasField(_IFT_LatticeLinearElastic_a1);
+    const bool a2Given = ir->hasField(_IFT_LatticeLinearElastic_a2);
+    const bool a3Given = ir->hasField(_IFT_LatticeLinearElastic_a3);
+
     alphaOne = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeLinearElastic_a1); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeLinearElastic_a1);
 
-    //Parameter which is used for the definition of bending stiffness. Default is 0.
-    alphaTwo = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeLinearElastic_a2); // Macro
+    alphaTwo = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeLinearElastic_a2);
+
+    alphaThree = alphaTwo;
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaThree, _IFT_LatticeLinearElastic_a3);
+
+    // Nu shortcut: spring ratios from Griffiths & Mustoe (2001); explicit a1/a2/a3 win.
+    nu = 0.;
+    if ( ir->hasField(_IFT_LatticeLinearElastic_nu) ) {
+        IR_GIVE_FIELD(ir, nu, _IFT_LatticeLinearElastic_nu);
+        nuWasGiven = true;
+        if ( nu >= 1. ) {
+            OOFEM_ERROR("LatticeLinearElastic: nu must be < 1");
+        }
+        const bool applyContinuumScaling = ( emGiven && !eGiven );
+        if ( applyContinuumScaling ) {
+            eNormalMean = emMacro / ( 1. - nu );
+        }
+        if ( !a1Given ) alphaOne   = ( 1. - 3. * nu ) / ( 1. + nu );
+        if ( !a2Given ) alphaTwo   = applyContinuumScaling ? 1. / ( 1. + nu ) : 1.;
+        if ( !a3Given ) alphaThree = 1. / ( 2. * ( 1. + nu ) );
+    }
 
     localRandomType = 0; //Default: No local random field
     IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, _IFT_LatticeLinearElastic_localrandomtype); // Macro
@@ -93,8 +139,12 @@ LatticeLinearElastic :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     }
 
 
+
     this->cAlpha = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cAlpha, _IFT_LatticeLinearElastic_calpha);
+
+    this->biotCoefficient = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, biotCoefficient, _IFT_LatticeLinearElastic_bio);
 }
 
 std::unique_ptr<MaterialStatus> 
@@ -106,13 +156,61 @@ LatticeLinearElastic :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
 {
-    if (!gp->hasMaterialStatus()) {
+    if ( gp->hasMaterialStatus() ) {
+        return static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+    }
         // create a new one
-        gp->setMaterialStatus(this->CreateStatus(gp));
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->setMaterialStatus(this->CreateStatus(gp)) );
         this->_generateStatusVariables(gp);
+    return status;
     }
 
-    return static_cast<MaterialStatus*> (gp->giveMaterialStatus());
+
+double
+LatticeLinearElastic :: giveCouplingPressure(GaussPoint *gp, TimeStep *tStep)
+{
+    double waterPressure = 0.;
+
+#ifdef __TM_MODULE
+    // Coupled (staggered) run: read the pore pressure from the dual transport
+    // element in the transport slave problem (couplingNumbers.at(1)). Average
+    // its current-step nodal pressures (the converged transport solution of
+    // this step), the same pressure state the boundary LatticeNeumannCoupling
+    // uses, so both coupling paths stay consistent.
+    EngngModel *master = this->domain->giveEngngModel()->giveMasterEngngModel();
+    if ( master ) {
+        auto *sp = dynamic_cast< StaggeredProblem * >( master );
+        if ( sp ) {
+            IntArray coupledModels;
+            sp->giveCoupledModels(coupledModels);
+            auto *se = static_cast< LatticeStructuralElement * >( gp->giveElement() );
+            if ( se->giveCouplingFlag() == 1 && coupledModels.giveSize() >= 2 &&
+                 coupledModels.at(2) != 0 ) {
+                IntArray couplingNumbers;
+                se->giveCouplingNumbers(couplingNumbers);
+                if ( couplingNumbers.giveSize() >= 1 && couplingNumbers.at(1) != 0 ) {
+                    Element *te = sp->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveElement( couplingNumbers.at(1) );
+                    int nnodes = te->giveNumberOfDofManagers();
+                    for ( int i = 1; i <= nnodes; i++ ) {
+                        waterPressure += te->giveDofManager(i)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
+                    }
+                    if ( nnodes > 0 ) {
+                        waterPressure /= nnodes;
+                    }
+                }
+            }
+            return waterPressure;
+        }
+    }
+#endif
+
+    // Standalone run: static pore-pressure field carried on the element.
+    FloatArray pressures;
+    static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
+    for ( int i = 1; i <= pressures.giveSize(); i++ ) {
+        waterPressure += pressures.at(i) / pressures.giveSize();
+    }
+    return waterPressure;
 }
 
 
@@ -133,24 +231,22 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
     }
 
     auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    //stress are sectional forces
     auto stress = dot(stiffnessMatrix, reducedStrain);
 
-    //Read in fluid pressures from structural element if this is not a slave problem
-    FloatArray pressures;
-    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
-    }
-
-    double waterPressure = 0.;
-    for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures [ i ];
-    }
-
-    stress.at(1) += waterPressure;
+    // Poromechanical coupling, concrete-mechanics convention: fluid pressure is
+    // a stress (compression negative, suction positive), so the total normal
+    // stress = effective + biot * (fluid pressure as stress). The pore pressure
+    // is read live from the coupled transport problem in a staggered run, or
+    // from the element's static field when run standalone.
+    stress.at(1) += this->biotCoefficient * this->giveCouplingPressure(gp, tStep);
 
     //Set all temp values
     status->letTempLatticeStrainBe(strain);
     status->letTempLatticeStressBe(stress);
+    // Expose the axial (normal) stress so a staggered Dirichlet coupling can read
+    // it via Lattice2d::giveTempNormalStress (cf. latticedamage).
+    status->setTempNormalLatticeStress(stress.at(1) );
 
     return stress;
 }
@@ -181,33 +277,49 @@ FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
     //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+
+  //Reduce Young's modulus based on temperature
+  double reductionFactor =1.;
+  if(this->tCrit !=0.){
+    reductionFactor = computeTemperatureReductionFactor(gp,atTime,VM_Total);
+  }
   
-  //static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+  // Shell mode: a1y (comp 2, out-of-plane shear) = G = Em/(2(1+nu)); the (1-nu)
+  // cancels the eNormalMean 1/(1-nu). a1z (comp 3) keeps the Griffiths-Mustoe ratio.
+  double a3eff = this->alphaThree;
+  double a1y = this->alphaOne;
+  const double a1z = this->alphaOne;
+  if ( nuWasGiven ) {
+      Lattice3d *elem = dynamic_cast< Lattice3d * >( gp->giveElement() );
+      if ( elem != nullptr && elem->isShellElement() ) {
+          a3eff = 1. / ( 1. + nu );
+          a1y = ( 1. - nu ) / ( 2. * ( 1. + nu ) );
+      }
+  }
 
     FloatArrayF< 6 >d = {
         1.,
-        this->alphaOne, // shear
-        this->alphaOne, // shear
-        this->alphaTwo, // torsion
-        this->alphaTwo, // torsion
-        this->alphaTwo, // torsion
+      a1y,
+      a1z,
+      a3eff,
+      this->alphaTwo,
+      this->alphaTwo
     };
 
-    return diag(d * this->give(eNormal_ID, gp) * this->eNormalMean);
+    return diag(d * this->give(eNormal_ID, gp) * this->eNormalMean * reductionFactor);
 }
-
 
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
   //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
-
-  //static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
   FloatArrayF< 3 >d = {
         1.,
         this->alphaOne, // shear
-        this->alphaTwo, // torsion
+        this->alphaTwo, // bending
     };
 
     return diag(d * this->give(eNormal_ID, gp) * this->eNormalMean);

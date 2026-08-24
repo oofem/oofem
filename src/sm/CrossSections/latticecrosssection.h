@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -43,7 +43,19 @@
 //@{
 #define _IFT_LatticeCrossSection_Name "latticecs"
 #define _IFT_LatticeCrossSection_Material "material"
+#define _IFT_LatticeCrossSection_area "area"
 #define _IFT_LatticeCrossSection_thickness "thickness"
+#define _IFT_LatticeCrossSection_MaterialNumber "material"
+#define _IFT_LatticeCrossSection_iy "iy"
+#define _IFT_LatticeCrossSection_iz "iz"
+#define _IFT_LatticeCrossSection_ik "ik"
+#define _IFT_LatticeCrossSection_shearcoeff "shearcoeff"
+#define _IFT_LatticeCrossSection_shearareay "shearareay"
+#define _IFT_LatticeCrossSection_shearareaz "shearareaz"
+#define _IFT_LatticeCrossSection_shape "shape"
+#define _IFT_LatticeCrossSection_radius "radius"
+#define _IFT_LatticeCrossSection_nLayers "nlayers"
+
 //@}
 
 namespace oofem {
@@ -60,6 +72,24 @@ typedef GaussPoint IntegrationPoint;
  */
 class LatticeCrossSection : public CrossSection
 {
+protected:
+    int materialNumber = 0; ///< Material number
+    double area = 0.;
+    double iy = 0.;
+    double iz = 0.;
+    double ik = 0.;
+    double beamshearcoeff = 0.;
+    double shearareay = 0.;
+    double shearareaz = 0.;
+  /// Cross-section shape: 0 = polygon/facet (from polycoords), 1 = circular (from radius),
+  /// 2 = rectangular (from 4 vertices), 3 = generic/property-defined (area/iy/iz/ik given directly,
+  /// no geometry). For shapes 0/1/2 a user-supplied property overrides the geometry-derived value.
+  int shape = 0;
+  double radius = 0.;
+  /// Number of through-thickness layers of a shell (layering is driven by the element's shellnormal,
+  /// not by the shape). 1 = single material point at the centroid (default).
+  int nLayers = 1;
+
 public:
     /**
      * Constructor. Creates cross section with given number, belonging to given domain.
@@ -101,11 +131,15 @@ public:
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const;
 
+    FloatArrayF< 6 >giveFrameForces3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const;
+
     FloatMatrixF< 1, 1 >give1dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
     FloatMatrixF< 3, 3 >give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
     FloatMatrixF< 6, 6 >give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 6, 6 >give3dFrameStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 
     LatticeStructuralMaterial *giveLatticeMaterial() const;
@@ -126,8 +160,15 @@ public:
     const char *giveClassName() const override { return "LatticeCrossSection"; }
     const char *giveInputRecordName() const override { return _IFT_LatticeCrossSection_Name; }
 
+    // Un-hide the base give(CrossSectionProperty, ...) overloads: declaring give(int,...)
+    // below would otherwise hide them (they answer a different question - section vs material property).
+    using CrossSection::give;
     virtual double give(int aProperty, GaussPoint *gp) const override;
     
+  int giveShape() const { return shape; }
+  double giveRadius() const { return radius; }
+  int giveNLayers() const { return nLayers; }
+
     //    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -39,6 +39,7 @@
 #include "../structuralms.h"
 #include "randommaterialext.h"
 #include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 namespace oofem {
 class GaussPoint;
@@ -84,7 +85,6 @@ protected:
 
     /// Non-equilibriated damage lattice strain
     FloatArrayF< 6 >tempDamageLatticeStrain;
-
 
     /// Equilibrated normal stress
     double normalLatticeStress = 0.;
@@ -139,8 +139,10 @@ public:
 
     /// Returns lattice strain.
     const FloatArrayF< 6 > &giveLatticeStrain() const { return this->latticeStrain; }
+
+
     /// Returns lattice strain.
-    const FloatArrayF< 6 > &giveTempLatticeStrain() const { return this->tempLatticeStress; }
+    const FloatArrayF< 6 > &giveTempLatticeStrain() const { return this->tempLatticeStrain; }
 
     /// Returns reduced lattice strain.
     const FloatArrayF< 6 > &giveReducedLatticeStrain() const { return reducedLatticeStrain; }
@@ -180,7 +182,6 @@ public:
     /// Assigns the temp value of damage lattice strain.
     void letTempDamageLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempDamageLatticeStrain = v; }
 
-
     /// Sets the temp normalStress
     void setTempNormalLatticeStress(double val) { this->tempNormalLatticeStress = val; }
 
@@ -189,7 +190,6 @@ public:
 
     /// Gives the last equilibrated normal stress
     double giveTempNormalLatticeStress() const { return this->tempNormalLatticeStress; }
-
 
     ///Sets the temp_crack_flag
     void setTempCrackFlag(int val) { tempCrackFlag = val; }

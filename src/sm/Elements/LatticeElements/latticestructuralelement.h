@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -36,6 +36,7 @@
 #define latticestructuralelement_h
 
 #include "sm/Elements/structuralelement.h"
+#include "sm/Materials/LatticeMaterials/latticestructuralmaterial.h"
 
 namespace oofem {
 /**
@@ -55,13 +56,34 @@ class LatticeStructuralElement : public StructuralElement
 public:
     LatticeStructuralElement(int n, Domain *d);
 
+    void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
+
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.
      * @return Cross-section area.
      */
-    virtual double giveArea() { return 0; }
+    virtual double giveArea(GaussPoint *gp) { return 0; }
+
+
+  virtual void giveSectionScaleFactors3d(FloatArray &q, GaussPoint *gp);
+
+  virtual void giveSectionScaleFactors2d(FloatArray &q, GaussPoint *gp);
+
+  virtual void convertStressToResultants3d(FloatArray &S, const FloatArray &sigma, GaussPoint *gp);
+
+  virtual void convertStressToResultants2d(FloatArray &S, const FloatArray &sigma, GaussPoint *gp);
+
+  virtual void convertTangentToResultantTangent3d(FloatMatrix &DS, const FloatMatrix &Dsig, GaussPoint *gp);
+
+  virtual void convertTangentToResultantTangent2d(FloatMatrix &DS, const FloatMatrix &Dsig, GaussPoint *gp);
+
+
+  virtual bool giveRectangularSectionDimensions(double &by, double &bz, GaussPoint *gp) const
+  {
+    return false;
+  }
 
     /**
      * Returns the element length
@@ -173,11 +195,18 @@ public:
     virtual double giveNormalStress() { return 0; }
 
     /**
+     * Returns the temp (current, not-yet-committed) normal stress.
+     * @return tempNormalStress
+     */
+    virtual double giveTempNormalStress() { return 0; }
+
+    /**
      * Returns the old normal stress.
      * @return oldNormalStress
      */
     virtual double giveOldNormalStress() { return 0; }
 
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Returns flag indicating if status has been updated
@@ -188,7 +217,48 @@ public:
     /**
      * Gives the GP coordinates
      */
-    virtual void  giveGpCoordinates(FloatArray &coords) { return; }
+  virtual void  giveGpCoordinates(FloatArray &coords, GaussPoint *gp = nullptr) { }
+
+  virtual double giveTributaryWidth(GaussPoint *gp)
+{
+    return 1.; // current element-constant value
+}
+
+    /**
+     * Gives the y second moment of area
+     */
+    virtual double giveI1(GaussPoint *gp) { return 0.; }
+
+    /**
+     * Gives the I2 second moment of area
+     */
+    virtual double giveI2(GaussPoint *gp) { return 0.; }
+
+    /**
+     * Gives the torsional Constant
+     */
+    virtual double giveJ(GaussPoint *gp) { return 0.; }
+
+    /**
+     * Gives the shear area 1
+     */
+    virtual double giveShearArea1(GaussPoint *gp) { return 0.; }
+
+    /**
+     * Gives the shear area 2
+     */
+    virtual double giveShearArea2(GaussPoint *gp) { return 0.; }
+
+protected:
+    /// Rodrigues rotation matrix from a rotation (spin) vector. Shared by the
+    /// geometrically nonlinear lattice elements (Lattice3dNL, LatticeLink3dNL).
+    static void computeGlobalRotationMatrix(FloatMatrix &answer, const FloatArray &psi);
+    /// Skew-symmetric matrix of a 3-vector (used by computeGlobalRotationMatrix).
+    static void computeSMtrx(FloatMatrix &answer, const FloatArray &vec);
+    /// Axial vector of log(R): the rotation vector of a rotation matrix (inverse of
+    /// computeGlobalRotationMatrix). Robust at angle -> 0 and angle -> pi.
+    static void logRotationVector(const FloatMatrix &R, FloatArray &theta);
+
 };
 } // end namespace oofem
 #endif

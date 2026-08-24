@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-class ParamKey;
 /**
  * This class implements a 2-dimensional lattice element
  */
@@ -59,14 +58,8 @@ protected:
 
     double width, thickness;
     FloatArray gpCoords;
-    int couplingFlag;
+    int couplingFlag = 0;
     IntArray couplingNumbers;
-
-    static ParamKey IPK_Lattice2d_thick;
-    static ParamKey IPK_Lattice2d_width;
-    static ParamKey IPK_Lattice2d_gpcoords;
-    static ParamKey IPK_Lattice2d_couplingflag;
-    static ParamKey IPK_Lattice2d_couplingnumber;
 
 public:
     Lattice2d(int n, Domain *d);
@@ -85,9 +78,13 @@ public:
 
     double giveNormalStress() override;
 
+    double giveTempNormalStress() override;
+
     int hasBeenUpdated() override;
 
-    double giveArea() override { return this->width * this->thickness; }
+    double giveArea(GaussPoint *gp) override { return this->width * this->thickness; }
+
+  double giveI2(GaussPoint *gp) override { return pow(this->width,3.)*this->thickness/12; }
 
     int computeNumberOfDofs() override { return 6; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
@@ -96,7 +93,6 @@ public:
     int giveCrackFlag() override;
 
     double giveCrackWidth() override;
-    //double giveOldCrackWidth() override;
 
     double giveDissipation() override;
     double giveDeltaDissipation() override;
@@ -111,6 +107,12 @@ public:
     const char *giveClassName() const override { return "Lattice2d"; }
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     
+    static ParamKey IPK_Lattice2d_thick;
+    static ParamKey IPK_Lattice2d_width;
+    static ParamKey IPK_Lattice2d_gpcoords;
+    static ParamKey IPK_Lattice2d_couplingflag;
+    static ParamKey IPK_Lattice2d_couplingnumber;
+
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG
@@ -137,7 +139,7 @@ protected:
     double givePitch();
     void computeGaussPoints() override;
     integrationDomain giveIntegrationDomain() const override { return _Line; }
-    void giveGpCoordinates(FloatArray &coords) override;
+    void giveGpCoordinates(FloatArray &coords, GaussPoint *gp) override;
 };
 } // end namespace oofem
 #endif

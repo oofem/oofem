@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -40,4 +40,9 @@ LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, Eleme
 { }
 
 
+void
+LatticeTransportElement :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority)
+{
+    TransportElement :: initializeFrom(ir, priority);
+}
 } // end namespace oofem

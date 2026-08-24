@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,13 +44,13 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "../sm/Elements/LatticeElements/latticestructuralelement.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "sm/CrossSections/latticecrosssection.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,6 +58,7 @@
 
 namespace oofem {
 REGISTER_Element(LatticeLink3d);
+
 ParamKey LatticeLink3d::IPK_LatticeLink3d_length("length");
 ParamKey LatticeLink3d::IPK_LatticeLink3d_diameter("diameter");
 ParamKey LatticeLink3d::IPK_LatticeLink3d_dirvector("dirvector");
@@ -75,7 +76,7 @@ LatticeLink3d :: ~LatticeLink3d()
 double
 LatticeLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
-    //Returns artifical volume (bond area times bond length) so that general parts of post processing work
+        //Returns artificial volume (bond area times bond length) so that general parts of post processing work
     return pow(this->bondLength, 2.) * this->bondDiameter * M_PI;
 }
 
@@ -139,7 +140,7 @@ LatticeLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 }
 
 void
-LatticeLink3d :: giveGPCoordinates(FloatArray &coords)
+    LatticeLink3d::giveGpCoordinates(FloatArray &coords, GaussPoint *gp)
 {
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
@@ -149,6 +150,20 @@ LatticeLink3d :: giveGPCoordinates(FloatArray &coords)
     return;
 }
 
+    void
+    LatticeLink3d::computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    // Returns the lumped mass matrix of the receiver. This expression is
+    // valid in both local and global axes.
+    {
+        GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+        double density = static_cast < LatticeCrossSection * > ( this->giveCrossSection() )->give('d', gp);
+        double halfMass = density * computeVolumeAround(gp) / 2.;
+        answer.resize(12, 12);
+        answer.zero();
+        answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
+        answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
+
+    }
 
 void
 LatticeLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
@@ -158,7 +173,6 @@ LatticeLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     FloatMatrix d, b, bt, db;
     FloatArray u, strain;
 
-    // This function can be quite costly to do inside the loops when one has many slave dofs.
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -203,9 +217,6 @@ void LatticeLink3d :: computeGaussPoints()
     integrationRulesArray [ 0 ].reset(new GaussIntegrationRule(1, this, 1, 3) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dLattice);
 }
-
-
-
 
 bool
 LatticeLink3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
@@ -283,7 +294,6 @@ LatticeLink3d :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int prio
     PM_UPDATE_PARAMETER(bondDiameter, ppm, ir, this->number, IPK_LatticeLink3d_diameter, priority) ;
     PM_UPDATE_PARAMETER(directionVector, ppm, ir, this->number, IPK_LatticeLink3d_dirvector, priority) ;
     PM_UPDATE_PARAMETER(bondEndLength, ppm, ir, this->number, IPK_LatticeLink3d_l_end, priority) ;
-
 }
 
 void
@@ -294,8 +304,9 @@ LatticeLink3d :: postInitialize()
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_length) ;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_diameter) ;
     PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_dirvector) ;
-    PM_ELEMENT_ERROR_IFNOTSET(ppm, this->number, IPK_LatticeLink3d_l_end) ;
+        // bondEndLength (l_end) is an optional dormant hook — no required check (fork keeps it optional).
 }
+
 
 int
 LatticeLink3d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords)
@@ -304,7 +315,6 @@ LatticeLink3d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray 
         computeGeometryProperties();
     }
 
-    //answer.resize(3);
     answer = this->globalCentroid;
 
     return 1;
@@ -318,10 +328,7 @@ LatticeLink3d :: computeGeometryProperties()
     Node *nodeA, *nodeB;
     FloatArray coordsA(3), coordsB(3);
 
-    //Order of nodes. However, might not matter.
-    //Reinforcement node
     nodeA  = this->giveNode(1);
-    //Lattice node
     nodeB  = this->giveNode(2);
 
     //Calculate components of distance from reinforcement node to lattice node.
@@ -342,10 +349,13 @@ LatticeLink3d :: computeGeometryProperties()
     FloatArray normal(3), s(3), t(3);
 
     //Calculate normal vector
+        if(this->directionVector.computeNorm() < 1e-12) {
+            OOFEM_ERROR("LatticeLink3d: directionVector is zero. Check input or link setup.");
+        }
     normal = this->directionVector;
     normal.normalize();
 
-    //Construct two perpendicular axis so that n is normal to the plane which they create
+        //Construct two perpendicular axes so that n is normal to the plane which they create
     //Check, if one of the components of the normal-direction is zero
     if ( normal.at(1) == 0 ) {
         s.at(1) = 0.;
@@ -383,8 +393,7 @@ LatticeLink3d :: computeGeometryProperties()
 
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-        this->globalCentroid.at(i) = nodeA->giveCoordinate(i);
-        ;
+            this->globalCentroid.at(i) = nodeB->giveCoordinate(i);
     }
 
     this->geometryFlag = 1;
@@ -412,7 +421,7 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
     FloatMatrix b, bt;
     FloatArray u, stress(6), strain(6);
 
-    // This function can be quite costly to do inside the loops when one has many slave dofs.
+
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -438,29 +447,14 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
             this->computeStressVector(stress, strain, gp, tStep);
         }
 
-        // updates gp stress and strain record  acording to current
+            // updates gp stress and strain record according to current
         // increment of displacement
         if ( stress.giveSize() == 0 ) {
             break;
         }
 
-        // now every gauss point has real stress vector
-        // compute nodal representation of internal forces using f = B^T*Sigma dV
-        //	double dV = this->computeVolumeAround(gp);
-        //		double dV = 1.;
-        if ( stress.giveSize() == 6 ) {
-            // It may happen that e.g. plane strain is computed
-            // using the default 3D implementation. If so,
-            // the stress needs to be reduced.
-            // (Note that no reduction will take place if
-            //  the simulation is actually 3D.)
-            FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm(stressTemp, stress, gp->giveMaterialMode() );
-
-            answer.beProductOf(bt, stressTemp);
-        } else {
+            // compute nodal representation of internal forces using f = B^T*stress
             answer.beProductOf(bt, stress);
-        }
 
         //Introduce integration of bond strength
         double area = this->computeVolumeAround(gp) / this->giveLength();

@@ -1,3 +1,4 @@
+
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -10,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -40,7 +41,8 @@
 
 namespace oofem {
 LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface()
-{ }
+    {
+    }
 
 
 void
@@ -117,6 +119,7 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     for ( double s : this->reducedLatticeStrain ) {
         fprintf(file, "% .4e ", s);
     }
+        fprintf(file, "\n");
 }
 
 
@@ -129,7 +132,6 @@ LatticeMaterialStatus :: giveInterface(InterfaceType type)
         return nullptr;
     }
 }
-
 
 void
 LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
@@ -162,6 +164,7 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
+
     if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -177,6 +180,11 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(crackFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+
+        if ( !stream.write(updateFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
 }
 
 
@@ -225,5 +233,11 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     if ( !stream.read(crackFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+
+        if ( !stream.read(updateFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
 }
 } // end namespace oofem

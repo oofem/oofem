@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -82,16 +82,66 @@ LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
 {
     auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
-    if ( type == IST_LatticeStress ) {
-        answer = status->giveLatticeStress();
+        if ( type == IST_LatticeForce ) {
+            auto help = status->giveLatticeStress();
+            answer.resize(3);
+            answer.at(1) = help.at(1);
+            answer.at(2) = help.at(2);
+            answer.at(3) = help.at(3);
+            return 1;
+        } else if ( type == IST_LatticeMoment )   {
+            auto help = status->giveLatticeStress();
+            answer.resize(3);
+            answer.at(1) = help.at(4);
+            answer.at(2) = help.at(5);
+            answer.at(3) = help.at(6);
         return 1;
     } else if  ( type == IST_LatticeStrain ) {
-        answer = status->giveLatticeStrain();
+            auto help = status->giveLatticeStrain();
+            answer.resize(3);
+            answer.at(1) = help.at(1);
+            answer.at(2) = help.at(2);
+            answer.at(3) = help.at(3);
+            return 1;
+        } else if ( type == IST_LatticeCurvature )   {
+            auto help = status->giveLatticeStrain();
+            answer.resize(3);
+            answer.at(1) = help.at(4);
+            answer.at(2) = help.at(5);
+            answer.at(3) = help.at(6);
+            return 1;
+        } else if ( type == IST_PlasticLatticeStrain )   {
+            auto help = status->givePlasticLatticeStrain();
+            answer.resize(3);
+            answer.at(1) = help.at(1);
+            answer.at(2) = help.at(2);
+            answer.at(3) = help.at(3);
+            return 1;
+        } else if ( type == IST_PlasticLatticeCurvature )   {
+            auto help = status->givePlasticLatticeStrain();
+            answer.resize(3);
+            answer.at(1) = help.at(4);
+            answer.at(2) = help.at(5);
+            answer.at(3) = help.at(6);
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
+
+
+void
+LatticeStructuralMaterial::initializeFrom(const std::shared_ptr<InputRecord> &ir)
+{
+    StructuralMaterial::initializeFrom(ir);
+
+    //temperature threshold used to compute reduction
+    this->tCrit = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->tCrit, _IFT_LatticeStructuralMaterial_tcrit); // Macro
+
+
+}
+
 
 
 double
@@ -100,7 +150,7 @@ LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, 
     FloatArrayF< 6 >tempStrain;
     tempStrain [ 0 ] = strain;
     auto answer = giveLatticeStress3d(tempStrain, gp, tStep);
-    return answer [ 0 ];
+        return answer [ { 0 } ];
 }
 
 FloatArrayF< 3 >
@@ -115,6 +165,14 @@ LatticeStructuralMaterial :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
 {
     OOFEM_ERROR("3dLattice mode not supported");
 }
+
+    FloatArrayF < 6 >
+    LatticeStructuralMaterial::giveFrameForces3d(const FloatArrayF < 6 > & strain, GaussPoint * gp, TimeStep * tStep)
+    {
+        OOFEM_ERROR("3dFrame mode not supported");
+    }
+
+
 
 FloatMatrixF< 1, 1 >
 LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
@@ -142,4 +200,69 @@ LatticeStructuralMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, 
 {
     OOFEM_ERROR("No general implementation provided");
 }
+
+    FloatMatrixF < 6, 6 >
+    LatticeStructuralMaterial::give3dFrameStiffnessMatrix(MatResponseMode mode, GaussPoint * gp, TimeStep * tStep) const
+    //
+    // return material stiffness matrix for 2dlattice
+    //
+    {
+        OOFEM_ERROR("No general implementation provided");
+    }
+
+
+ double LatticeStructuralMaterial::computeTemperatureReductionFactor(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+ {
+   double reductionFactor = 1.;
+
+    FloatArray et;
+
+    if ( gp->giveIntegrationRule() == NULL ) {
+        ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
+        return reductionFactor;
+    }
+
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        return reductionFactor;
+    }
+
+    //sum up all prescribed temperatures over an element
+    if ( selem ) {
+        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
+    }
+
+    /* add external source, if provided */
+    FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
+    FieldPtr tf = fm->giveField(FT_Temperature);
+    if ( tf ) {
+        // temperature field registered
+        Coordinates gcoords;
+        FloatArray et2;
+        elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
+        int err;
+        if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+        }
+
+        if ( et2.isNotEmpty() ) {
+            if ( et.isEmpty() ) {
+                et = et2;
+            } else {
+                et.at(1) += et2.at(1);
+            }
+        }
+    }
+
+    //Compute reductionFactor
+    if(et.isNotEmpty()) {
+        if ( et.at( 1 ) > this->referenceTemperature && et.at( 1 ) > 0. ) {
+            reductionFactor = exp( -pow( ( et.at( 1 ) - this->referenceTemperature ) / ( tCrit - this->referenceTemperature ), 2. ) );
+        }
+    }
+    return reductionFactor;
+ }
+
 } // end namespace oofem

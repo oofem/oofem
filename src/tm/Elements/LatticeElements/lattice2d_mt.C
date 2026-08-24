@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,12 +44,12 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
+#include "parametermanager.h"
+#include "paramkey.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "load.h"
 #include "classfactory.h"
-#include "parametermanager.h"
-#include "paramkey.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -66,17 +66,12 @@ ParamKey Lattice2d_mt::IPK_Lattice2d_mt_gpcoords("gpcoords");
 ParamKey Lattice2d_mt::IPK_Lattice2d_mt_crackwidth("crackwidth");
 ParamKey Lattice2d_mt::IPK_Lattice2d_mt_couplingflag("couplingflag");
 ParamKey Lattice2d_mt::IPK_Lattice2d_mt_couplingnumber("couplingnumber");
+ParamKey Lattice2d_mt::IPK_Lattice2d_mt_lumpedcapacity("lumpedcapacity");
 
 Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
 {
     numberOfDofMans  = 2;
-    dimension = 2.;
-    numberOfGaussPoints = 1;
-    couplingNumbers.resize(1);
-    couplingNumbers.zero();
-    crackWidths.resize(1);
-    crackWidths.zero();
 }
 
 double Lattice2d_mt :: giveLength()
@@ -199,15 +194,23 @@ void
 Lattice2d_mt :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority)
 {
     ParameterManager &ppm =  this->giveDomain()->elementPPM;
-
     // first call parent
     LatticeTransportElement :: initializeFrom(ir, priority);
+
     PM_UPDATE_PARAMETER(dimension, ppm, ir, this->number, IPK_Lattice2d_mt_dim, priority) ;
     PM_UPDATE_PARAMETER(thickness, ppm, ir, this->number, IPK_Lattice2d_mt_thickness, priority) ;
     PM_UPDATE_PARAMETER(width, ppm, ir, this->number, IPK_Lattice2d_mt_width, priority) ;
     PM_UPDATE_PARAMETER(gpCoords, ppm, ir, this->number, IPK_Lattice2d_mt_gpcoords, priority) ;
+
+    crackWidths.resize(1);
+    crackWidths.zero();
     PM_UPDATE_PARAMETER(crackWidths.at(1), ppm, ir, this->number, IPK_Lattice2d_mt_crackwidth, priority) ;
+
     PM_UPDATE_PARAMETER(couplingFlag, ppm, ir, this->number, IPK_Lattice2d_mt_couplingflag, priority) ;
+    PM_UPDATE_PARAMETER(lumpedCapacity, ppm, ir, this->number, IPK_Lattice2d_mt_lumpedcapacity, priority);
+
+    couplingNumbers.resize(1);
+    couplingNumbers.zero();
     PM_UPDATE_PARAMETER(couplingNumbers.at(1), ppm, ir, this->number, IPK_Lattice2d_mt_couplingnumber, priority) ;
 }
 
@@ -258,13 +261,22 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     answer.resize(2, 2);
     answer.zero();
+    double c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
+    if ( this->lumpedCapacity ) {
+        // diagonal (row-sum-preserving) form — TPFA-compatible, monotone for nonlinear c(p)
+        answer.at(1, 1) = 1.;
+        answer.at(2, 2) = 1.;
+        double dV = this->computeVolumeAround(gp) / ( 2.0 * this->dimension );
+        answer.times(c * dV);
+    } else {
+        // consistent (coupled) form
     answer.at(1, 1) = 2.;
     answer.at(1, 2) = 1.;
     answer.at(2, 1) = 1.;
     answer.at(2, 2) = 2.;
-    double c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
     double dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
     answer.times(c * dV);
+}
 }
 
 
@@ -326,7 +338,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
 
 
 void
-Lattice2d_mt :: giveGpCoordinates(FloatArray &answer)
+Lattice2d_mt :: giveGpCoordinates(FloatArray &answer, GaussPoint *gp)
 {
     answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);
@@ -336,10 +348,10 @@ Lattice2d_mt :: giveGpCoordinates(FloatArray &answer)
 int
 Lattice2d_mt :: computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords)
 {
-    //answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);
     answer.at(2) = this->gpCoords.at(2);
     answer.at(3) = 0.;
+
     return 1;
 }
 

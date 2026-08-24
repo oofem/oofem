@@ -94,8 +94,6 @@ set (sm_element
     LatticeElements/lattice3dboundarytruss.C
     LatticeElements/latticelink3d.C
     LatticeElements/latticelink3dboundary.C
-    LatticeElements/latticebeam3d.C
-    LatticeElements/latticebeam3dboundary.C
     tet21ghostsolid.C
     quad1platesubsoil.C 
     quad2platesubsoil.C

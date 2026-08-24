@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -144,7 +144,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
         OOFEM_ERROR("unknown mode");
     }
 
-    //return 0; // to make compiler happy
+    return 0; // to make compiler happy
 }
 
 

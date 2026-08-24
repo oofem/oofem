@@ -579,8 +579,10 @@ RheoChainMaterial :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
         lattice = true;
         this->alphaOne = 1.;
         this->alphaTwo = 1.;
+        this->alphaThree = 1.;
         IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_RheoChainMaterial_alphaOne);
         IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_RheoChainMaterial_alphaTwo);
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaThree, _IFT_RheoChainMaterial_alphaThree);
     } else {
         lattice = false;
         IR_GIVE_FIELD(ir, nu, _IFT_RheoChainMaterial_n);
@@ -614,7 +616,7 @@ RheoChainMaterial :: giveLinearElasticMaterial()
         if ( this->lattice ) {
             linearElasticMaterial = new LatticeLinearElastic(this->giveNumber(),
                                                              this->giveDomain(),
-                                                             1.0, this->alphaOne, this->alphaTwo);
+                                                             1.0, this->alphaOne, this->alphaTwo, this->alphaThree);
         } else {
             linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
                                                                        this->giveDomain(),

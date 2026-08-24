@@ -186,7 +186,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136) \
     ENUM_ITEM_WITH_VALUE(IST_NormalStress, 137) \
     ENUM_ITEM_WITH_VALUE(IST_LatticeStrain, 138) \
-    ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139) \
+    ENUM_ITEM_WITH_VALUE(IST_LatticeForce, 139) \
     ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140) \
     ENUM_ITEM_WITH_VALUE(IST_InternalSource, 141) \
     ENUM_ITEM_WITH_VALUE(IST_MacroSlipVector, 142) \
@@ -200,7 +200,16 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_ContactNormalGap, 150) \
     ENUM_ITEM_WITH_VALUE(IST_ContactPressure, 151) \
     ENUM_ITEM_WITH_VALUE(IST_ContactStatus, 152) \
-    ENUM_ITEM_WITH_VALUE(IST_Pressure_2, 153) /* Pressure for second phase in multiphase problems */
+    ENUM_ITEM_WITH_VALUE(IST_Pressure_2, 153) /* Pressure for second phase in multiphase problems */ \
+    ENUM_ITEM_WITH_VALUE(IST_LatticeCurvature, 156) \
+    ENUM_ITEM_WITH_VALUE(IST_LatticeMoment, 157) \
+    ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeCurvature, 158) \
+    ENUM_ITEM_WITH_VALUE(IST_TensionDissWork, 159) \
+    ENUM_ITEM_WITH_VALUE(IST_TensionDeltaDissWork, 160) \
+    ENUM_ITEM_WITH_VALUE(IST_ShearDissWork, 161) \
+    ENUM_ITEM_WITH_VALUE(IST_ShearDeltaDissWork, 162) \
+    ENUM_ITEM_WITH_VALUE(IST_CompressionDissWork, 163) \
+    ENUM_ITEM_WITH_VALUE(IST_CompressionDeltaDissWork, 164)
     
 
 /**

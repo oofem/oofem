@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -50,6 +50,8 @@ class LatticeTransportElement : public TransportElement
 {
 public:
     LatticeTransportElement(int, Domain *, ElementMode);
+
+    void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.
@@ -114,7 +116,7 @@ public:
     /**
      * Gives the GP coordinates
      */
-    virtual void  giveGpCoordinates(FloatArray &coords) { }
+    virtual void  giveGpCoordinates(FloatArray &coords, GaussPoint *gp = nullptr) { }
 
     /**
      * Returns the real volume
