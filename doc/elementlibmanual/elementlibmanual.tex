@@ -1633,17 +1633,6 @@ The main idea is to use the rotation of the beam element and the rigid arm from 
 \elementDescription{Reference}{\cite{SciGraLarRun20}}
 \end{elementsummary}
 
-\subsubsection{Bondlink3dtruss element}
-This class implements a bond link for connecting trusses and continuum elements for meshes in which the nodes of the trusses and continuum elements coincide. The bond area for this element is calculated from the length and diameter of the truss element that is bonded to the continuum as $A_{\mathrm{bond}} = \pi d l$, where $A_{\mathrm{bond}}$ is the bond area, $d$ is the reinforcement diameter and $l$ is the length of the element.
-The input parameters for this element are shown in Table~\ref{bondlink3dtrusssummary}.
-
-\begin{elementsummary}{bondlink3dtruss}{3d bond link element for trusses}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra}}{bondlink3dtruss element summary}{bondlink3dtrusssummary}
-\elementParam{\param{length}: bond length}
-\elementParam{\param{diameter}: diameter of rebar modelled by truss element }
-\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
-\elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-displacement) are required in each node.}
-\end{elementsummary}
-
 
 
 %-----------------------------------------------------------------------------------------------
