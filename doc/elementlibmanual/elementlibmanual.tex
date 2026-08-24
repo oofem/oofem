@@ -1479,6 +1479,21 @@ w-displacement) are required in each node, according to element mode (determined
 }
 \end{elementsummary}
 
+\subsubsection{Bondlink3dtruss element}
+
+This class implements a bond link for connecting trusses and continuum elements for meshes in which the nodes of the trusses and continuum elements coincide.
+The bond area for this element is calculated from the length and diameter of the truss element that is bonded to the continuum as $A_{\mathrm{bond}} = \pi d l$, where $A_{\mathrm{bond}}$ is the bond area, $d$ is the reinforcement diameter and $l$ is the length of the element.
+The input parameters for this element are shown in Table~\ref{bondlink3dtrusssummary}.
+
+\begin{elementsummary}{bondlink3dtruss}{3d bond link element for trusses}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra}}{bondlink3dtruss element summary}{bondlink3dtrusssummary}
+\elementParam{\param{length}: bond length}
+\elementParam{\param{diameter}: diameter of rebar modelled by truss element }
+\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
+\elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-displacement) are required in each node.}
+\elementDescription{Note}{Element is used together with the \param{linkslip} bond-slip material.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/regression/sm/linkslip02.in}{tests/regression/sm/linkslip02.in}}
+\end{elementsummary}
+
 \subsubsection{IntElLine1, Interface2dlin elements}
 Implementation of a two dimensional line element with a linear approximation of the displacement jump. 
 The element can be used to tie together two element edges and is defined by four nodes - two on each edge. Note that, the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{IntElLine1}.
