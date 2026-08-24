@@ -4229,7 +4229,7 @@ Note that the effective element size $h$ is obtained by projecting the element.
 For instance, if the element is a cube of edge length 100 mm, its effective
 size in the direction of the body diagonal can be 173 mm. 
 
-\subsubsection{Damage-plastic model for concrete - CDPM2}
+\subsubsection{Damage-plastic model for concrete - CDPM2} \label{sec:cdpm2}
 
 This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
 CDPM2 has been developed by Grassl and coworkers for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
@@ -4679,6 +4679,38 @@ Supported modes& 3dMat, PlaneStrain, 1dMat\\
 \end{longtable}
 
 
+\subsubsection{Damage-plastic model for fibre reinforced concrete - CDPM2F}
+CDPM2F is a fibre extension of CDPM2 in \ref{sec:cdpm2}. The theory of CDPM2F is described in \cite{ZhoMarGra24}.
+The main idea of CDPM2F is to adjust the damage part of CDPM2 to predict the effect of fibres.
+Below in Table~\ref{cdpm2f_table} the input parameters of CDPM2F in addition to those required for CDPM2 are described. 
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+\begin{longtable}{|l|p{9cm}|}
+%\begin{center}
+%\begin{mmt}
+\hline
+Description & CDPM2F\\
+\hline
+Record Format & \descitem{cdpm2f} \elemparam{lf}{rn} \elemparam{vf0}{rn} \elemparam{df}{rn} \elemparam{tau0}{rn} \elemparam{beta}{rn} [\elemparam{f}{rn}] \elemparam{ef}{rn} \elemparam{sm}{rn} [\elemparam{alpha}{rn}] [\elemparam{xi}{rn}]\\
+Parameters &- \param{lf} length of fibre\\
+&- \param{vf0} base volume fraction of fibres\\
+&- \param{df} diameter of fibre\\
+&- \param{tau0} initial bond strength of interface between fibre and matrix\\
+&- \param{beta} hardening parameter of interface between fibre and matrix\\
+&- \param{f} snubbing factor\\
+&- \param{ef} Young's modulus of fibre material\\
+&- \param{sm}  staturated crack spacing\\
+&- \param{alpha} parameter related to dispersion\\
+&- \param{xi}  parameter controling hardening of fibre stress strain response\\
+Supported modes& 3dMat, PlaneStrain, 1DMat\\
+\hline
+%\end{mmt}
+\caption{CDPM2F -- summary.}
+\label{cdpm2f_table}
+%\end{center}
+\end{longtable}
 \subsubsection{Fixed crack model for concrete - ConcreteFCM}
 \label{concreteFCM}
 Implementation of a fixed crack model. Uncracked material is modeled as isotropic linear elastic characterized by Young's modulus and Poisson's ratio. 
@@ -5737,6 +5769,46 @@ Supported modes& \_2dInterface, \_3dInterface\\
 \end{table}
 
 
+\subsubsection{LinkSlip - Slip model for trusses and beams}
+This is an elasto-plastic model for slip between reinforcement modelled as three-dimensional beam or truss elements and matrix elements. The theory of the model is described in the paper \cite{SciGraLarRun20} for the case of beams. The model parameters are summarised in Tab.~\ref{linkslip_table}.
+There are three types of constitutive relations supported which are shown in Figure~\ref{linkslip}, which are chosen by means of the input parameter \param{type}.
+
+\begin{figure}[!htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=1.\textwidth]{linkslip.eps}}
+\end{htmlonly}
+%begin{latexonly}
+ \centerline{\includegraphics[width=0.8\textwidth]{linkslip}}
+%end{latexonly}
+  \caption{Bond stress ($\tau$) - slip ($s$) diagram for link slip model.}
+  \label{linkslip}
+\end{figure}
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Slip model \\
+\hline
+Record Format & \descitem{linkslip} \elemparam{}{in} 
+\elemparam{kn}{rn}  \elemparam{kl}{rn} \optelemparam{type}{in} \elemparam{s1}{rn} \elemparam{s2}{rn} \elemparam{s3}{rn} \elemparam{t0}{rn} \optelemparam{tf}{rn}  \optelemparam{alpha}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{kn} interface elastic axial stiffness (in the direction of slip)\\
+&- \param{kl} interface elastic lateral stiffness\\
+&- \param{type} type of bond law (default is zero)\\
+&- \param{s1} characteristic slip value\\
+&- \param{s2} characteristic slip value\\
+&- \param{s3} characteristic slip value\\
+&- \param{t0} maximum bond stress\\
+&- \param{tf} residual bond stress at reinforcement pull-out\\
+&- \param{alpha} bond-slip curve parameter (exponent)\\
+
+Supported modes & \_3dInterface\\
+\hline
+\end{mmt}
+\caption{Slip model for truss and beam elements -- summary.}
+\label{linkslip_table}
+%\end{center}
+\end{table}
 \subsection{Material models for lattice elements}
 
 Lattice elements have to be used with material models describing the constitutive behaviour in the form of vector of tractions and rotational stress components, and strains and rotational strain components determined from displacement jumps smeared out over the element length. 
@@ -6064,6 +6136,138 @@ Supported modes & 3dlattice\\
 
 
 
+\subsubsection{Elastic material model for lattice based frame elements}
+This is an elastic material model used together with 3d lattice frame elements. It has been specifically developed to describe the failure of steel frame member using the lattice elements lattice3d and lattice3dnl. However, it can also been used with any other 3d lattice element.
+The stress-strain law has the form
+\begin{equation}
+  \mathbf{s} = \mathbf{D}_{\rm e} \mathbf{e}
+\end{equation}
+where $\mathbf{e}$ is a vector of internal forces and moments, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\mathbf{e}$ is a vector of generalised strains obtained from displacement jumps smeared over the element length and rotational components. The model parameters are summarised in Table \ref{latticeframesteelplastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Plasticity lattice model for steel \\
+\hline
+Record Format & \descitem{latticeframeelastic} \elemparam{}{in}
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \elemparam{e}{rn} \elemparam{n}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the lattice material.\\
+&- \param{n} Poisson's ratio of the material that the beam element is made of.\\
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Elastic model for 3D lattice based frame elements -- summary.}
+\label{latticeframeelastic_table}
+%\end{center}                  
+  \end{table}
+The linear-elastic response of the frame elements is given directly as an relationship between generalised stress (internal forces) and generalised strain. 
+%
+
+
+\subsubsection{Steel Plasticity material model for lattice based frame elements}
+This is a plasticity material used together with 3d lattice frame elements. It has been specifically developed to describe the failure process failure of steel frame member using the lattice elements lattice3d and lattice3dnl. 
+The generalised stress-strain law has the form
+\begin{equation}
+  \mathbf{s} = \mathbf{D}_{\rm e} \left(\mathbf{e}-\mathbf{e}_{\rm p} \right)
+\end{equation}
+where $\mathbf{e}$ is a vector of internal forces and moments, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\mathbf{e}$ is a vector of generalised strains obtained from displacement jumps smeared over the element length and rotational components and $\mathbf{e}_{\rm p}$ are the plastic strains. The model parameters are summarised in Table \ref{latticeframesteelplastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Plasticity lattice model for steel \\
+\hline
+Record Format & \descitem{latticeframesteelplastic} \elemparam{}{in}
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \elemparam{e}{rn} \elemparam{n}{rn} \elemparam{nx0}{rn} \elemparam{mx0}{rn} \elemparam{my0}{rn} \elemparam{mz0}{rn} \elemparam{sub}{in} \elemparam{iter}{in} \elemparam{tol}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the lattice material.\\
+&- \param{n} Poisson's ratio of the material that the beam element is made of.\\
+&- \param{nx0} ultimate capacity under pure axialloads.\\
+&- \param{mx0} ultimate capacity under pure moment about $x$.\\
+&- \param{my0} ultimate capacity under pure moment about $y$.\\
+&- \param{mz0} ultimate capacity under pure moment about $z$.\\
+&- \optparam{sub} maximum number of subincrementations.\\
+&- \optparam{iter} maximum number of newton iterations.\\
+&- \optparam{tol} tolerance for newton method.\\
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Plasticity steel model for 3D lattice frame elements -- summary.}
+\label{latticeframesteelplastic_table}
+%\end{center}                  
+  \end{table}
+The nonlinear response of the beam element is given directly as an relationship between internal force and strain. The basic equations include an additive decomposition of total strain into elastic part and plastic part of the form
+%
+\begin{equation}
+    \mathbf{e} = \mathbf{e}_{\rm e}+\mathbf{e}_{\rm p} 
+\end{equation}
+
+The trial stress is calculated as
+\begin{equation}
+    \mathbf{s}_{n+1}^{tr}  = \mathbf{D}^{\mathrm{e}} (\mathbf{e}_{n+1}  - \mathbf{e}_n^p)
+\end{equation}
+
+The yield function is given as
+\begin{equation}
+(\dfrac{N_x}{N_0})^2+ (\dfrac{M_x}{M_{x0}})^2+ (\dfrac{M_y}{M_{y0}})^2+ (\dfrac{M_z}{M_{z0}})^2 - 1 = 0
+\end{equation}
+where $N_x$, $M_x$,$M_y$ and $M$ , are the two components of bending moment, an axial force and
+a torsional moment, respectively. The corresponding components with the subscript 0 indicate a fully plastic value under the
+condition that each component of resultant forces acts independently.
+The loading-unloading conditions are
+\begin{equation}
+f(\bar{\mathbf{s}},\kappa)\le 0 \qquad \dot{\lambda}\geq 0 \qquad \dot{\lambda}f(\bar{\mathbf{s}},\kappa)=0,
+\end{equation}
+
+The flow rule is
+\begin{equation}
+\dot{\mathbf{e}}_{\rm{p}} = \dot{\lambda} \dfrac{\partial f}{\partial \bar{\mathbf{s}}},
+\end{equation}
+
+\subsubsection{Reinforced concrete plasticity-damage material model for lattice based frame elements}
+This is a plasticity-damage material used together with 3d lattice frame elements. It has been specifically developed to describe the failure process failure of reinforced concrete frame member using the lattice elements lattice3d and lattice3dnl. 
+The generalised stress-strain law has the form
+\begin{equation}
+  \mathbf{s} = \mathbf{D}_{\rm e} \left(\mathbf{e}-\mathbf{e}_{\rm p} \right)
+\end{equation}
+where $\mathbf{e}$ is a vector of internal forces and moments, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\mathbf{e}$ is a vector of translation and rotational jumps smeared over the element length and $\mathbf{e}_{\rm p}$ are the plastic smeared jumps. The model parameters are summarised in Table \ref{latticeframesteelplastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Damage-plasticity lattice model for reinforced concrete\\
+\hline
+Record Format & \descitem{latticeframeconcreteplastic} \elemparam{}{in}
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \elemparam{e}{rn} \elemparam{n}{rn} \elemparam{nx0}{rn} \elemparam{nx1}{rn} \elemparam{mx0}{rn} \elemparam{mx1}{rn} \elemparam{my0}{rn} \elemparam{my1}{rn} \elemparam{mz0}{rn} \elemparam{mz1}{rn} \elemparam{wu}{rn}  \elemparam{wf}{rn} \elemparam{sub}{in} \elemparam{iter}{in} \elemparam{tol}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the lattice material.\\
+&- \param{n} Poisson's ratio of the material that the beam element is made of.\\
+&- \param{nx0} ultimate positive capacity under pure axialloads.\\
+&- \param{mx0} ultimate positive capacity under pure moment about $x$.\\
+&- \param{my0} ultimate positive capacity under pure moment about $y$.\\
+&- \param{mz0} ultimate positive capacity under pure moment about $z$.\\
+&- \param{nx1} ultimate negative capacity under pure axialloads.\\
+&- \param{mx1} ultimate negative capacity under pure moment about $x$.\\
+&- \param{my1} ultimate negative capacity under pure moment about $y$.\\
+&- \param{mz1} ultimate negative capacity under pure moment about $z$.\\
+&- \param{wu} plastic generalised displacement jump norm (computed from rotational components only) threshold.\\
+&- \param{wf} threshold controlling the evolution of the damage.\\
+&- \optparam{sub} maximum number of subincrementations.\\
+&- \optparam{iter} maximum number of newton iterations.\\
+&- \optparam{tol} tolerance for newton method.\\
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Damage Plasticity concrete model for 3D lattice frame elements -- summary.}
+\label{latticeframesteelplastic_table}
+\end{table}
 \subsection{Material models for steel relaxation}
 
 \subsubsection{Model for relaxation of prestressing steel - SteelRelaxMat}
@@ -7246,6 +7450,8 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \bibitem{fib:2010} International Federation for Structural Concrete (\textit{fib}): The \textit{fib} Model Code for Concrete Structures 2010.
 \bibitem{GraDav11} P. Grassl and T. Davies: Lattice modelling of corrosion induced cracking and bond in reinforced concrete. Cement and Concrete Composites, 33, 918-924, 2011.
 \bibitem{AthWheGra18} I. Athanasiadis, S. Wheeler and P. Grassl: Hydro-mechanical network modelling of particulate composites. International Journal of Solids and Structures 130-131, 49-60, 2018.
+\bibitem{SciGraLarRun20} A. Sciegaj and P. Grassl and F. Larsson and K. Runesson and K. Lundgren. ``Upscaling of three-dimensional reinforced concrete representative volume elements to effective beam and plate models'', International Journal of Solids and Structures, vol. 202, pp. 835-853, 2020.
+\bibitem{ZhoMarGra24} C. Zhou and A. Marlot and P. Grassl: CDPM2F: A Damage-Plasticity Approach to Modelling the Failure of Engineered Cementitious Composites, Available at SSRN 4819173, 2024.
 \end{thebibliography}
 
 \end{document}

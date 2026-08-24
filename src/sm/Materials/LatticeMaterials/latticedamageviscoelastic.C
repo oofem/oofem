@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -68,10 +68,10 @@ LatticeDamageViscoelastic :: initializeFrom(const std::shared_ptr<InputRecord> &
 }
 
 
-std::unique_ptr<MaterialStatus> 
+std::unique_ptr< MaterialStatus >
 LatticeDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
 {
-    return std::make_unique<LatticeDamageViscoelasticStatus>(gp);
+    return std::make_unique< LatticeDamageViscoelasticStatus >(gp);
 }
 
 
@@ -127,6 +127,7 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
         reducedStrain -= FloatArrayF< 6 >(tempDamageLatticeStrain);
 
         rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
+
         tempStress = FloatArrayF< 6 >(viscoStress);
 
         for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
@@ -236,6 +237,10 @@ int LatticeDamageViscoelastic :: checkConsistency()
 
     if ( rheoMat->giveAlphaTwo() != this->alphaTwo ) {
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
+    }
+
+    if ( rheoMat->giveAlphaThree() != this->alphaThree ) {
+        OOFEM_ERROR("a3 must be set to the same value in both master and viscoelastic slave materials");
     }
 
     GaussPoint *noGP = NULL;

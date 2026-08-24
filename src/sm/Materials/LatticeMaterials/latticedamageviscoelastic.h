@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -117,7 +117,7 @@ public:
                                         TimeStep *tStep) override;
 
 
-    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr< MaterialStatus > CreateStatus(GaussPoint *gp) const override;
 
     RheoChainMaterial *giveViscoelasticMaterial();
 

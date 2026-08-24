@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -106,8 +106,6 @@ protected:
     enum LatticeBondPlasticity_SurfaceType { ST_Unknown, ST_Vertex, ST_Shear, ST_Compression };
 
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
-
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     /// compressive strength
     double fc = 0.;
@@ -209,7 +207,7 @@ public:
                              GaussPoint *gp) const;
 
 
-    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr< MaterialStatus > CreateStatus(GaussPoint *gp) const override;
 
     virtual FloatArrayF< 6 >giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 };

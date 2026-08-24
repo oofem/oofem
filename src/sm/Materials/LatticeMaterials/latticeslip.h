@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -46,12 +46,22 @@
 #define _IFT_LatticeSlip_a1 "a1"
 #define _IFT_LatticeSlip_a2 "a2"
 #define _IFT_LatticeSlip_t0 "t0"
+#define _IFT_LatticeSlip_s1 "s1"
+#define _IFT_LatticeSlip_type "type"
+#define _IFT_LatticeSlip_alpha "alpha"
+#define _IFT_LatticeSlip_s2 "s2"
+#define _IFT_LatticeSlip_s3 "s3"
+#define _IFT_LatticeSlip_tf "tf"
 //@}
 
 namespace oofem {
 class LatticeSlipStatus : public LatticeMaterialStatus
 {
 protected:
+
+    double kappa = 0;
+
+    double tempKappa = 0;
 
 
 public:
@@ -68,6 +78,13 @@ public:
     void saveContext(DataStream &stream, ContextMode mode) override;
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
+
+    double giveKappa() { return this->kappa; }
+
+    double giveTempKappa() { return this->tempKappa; }
+
+    void letTempKappaBe(const double &v)
+    { this->tempKappa = v; }
 };
 
 
@@ -90,7 +107,7 @@ protected:
     double alphaTwo = 0.;
 
     ///Strength for slip component
-    double tauZero = 0.;
+    double tauMax = 0.;
 
     /// coefficient variation of the Gaussian distribution
     double coefficientOfVariation = 0.;
@@ -101,6 +118,18 @@ protected:
     double cAlpha = 0.;
 
     double tAlphaMean = 0.;
+
+    double type = 0.;
+
+    double s1 = 0.;
+
+    double s2 = 0.;
+
+    double s3 = 0.;
+
+    double alpha = 0.;
+
+    double tauFinal = 0.;
 
 public:
 
@@ -124,11 +153,13 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
+    double evaluateBondStress(const double kappa) const;
+
     Interface *giveInterface(InterfaceType) override;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr< MaterialStatus > CreateStatus(GaussPoint *gp) const override;
 
 
 protected:

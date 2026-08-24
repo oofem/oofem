@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -74,10 +74,10 @@ LatticePlasticityDamageViscoelastic::initializeFrom(const std::shared_ptr<InputR
 }
 
 
-std::unique_ptr<MaterialStatus> 
+std::unique_ptr< MaterialStatus >
 LatticePlasticityDamageViscoelastic::CreateStatus(GaussPoint *gp) const
 {
-    return std::make_unique<LatticePlasticityDamageViscoelasticStatus>(1, LatticePlasticityDamageViscoelastic::domain, gp);
+    return std::make_unique< LatticePlasticityDamageViscoelasticStatus >(1, LatticePlasticityDamageViscoelastic::domain, gp);
 }
 
 
@@ -93,18 +93,26 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
     GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
+
     // just a dummy yet essential call to create a status of viscomaterial. Otherwise initTempStatus() would fail.
     rheoMat->giveStatus(rChGP);
 
     status->initTempStatus();
+
+    FloatArrayF< 6 >viscoStress;
+    FloatArrayF< 6 >plastDamStress;
+
+    if(status->giveTempDeletionFlag()==1){
+      //Deal with deleted element
+      status->letTempLatticeStressBe(viscoStress);
+      return viscoStress;
+    }
 
     FloatArrayF< 6 >reducedStrainForViscoMat;
     FloatArrayF< 6 >reducedStrain;
     FloatArrayF< 6 >quasiReducedStrain;
 
     FloatArray tempStressVE;
-    FloatArrayF< 6 >viscoStress;
-    FloatArrayF< 6 >plastDamStress;
 
     int itercount = 1;
 
@@ -170,14 +178,22 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         reducedStrainForViscoMat -= inelasticTrialStrain;
 
         rheoMat->giveRealStressVector(tempStressVE, rChGP, reducedStrainForViscoMat, tStep);
-        viscoStress = FloatArrayF< 6 >(tempStressVE);
+
+            viscoStress = FloatArrayF< 6 >(tempStressVE);
 
         for ( int i = 1; i <= 6; i++ ) {
             quasiReducedStrain.at(i) =  viscoStress.at(i) / elasticStiffnessMatrix.at(i, i) + inelasticTrialStrain.at(i);
         }
 
         plastDamStress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
-        this->performDamageEvaluation(gp, quasiReducedStrain, tStep);
+
+            if(status->giveTempDeletionFlag()==1){
+                //Deal with deleted element
+                status->letTempLatticeStressBe(plastDamStress);
+                return plastDamStress;
+            }
+
+            this->performDamageEvaluation(gp, quasiReducedStrain, tStep);
         double tempDamage = status->giveTempDamage();
         plastDamStress *= ( 1. - tempDamage );
 
@@ -290,6 +306,7 @@ LatticePlasticityDamageViscoelastic::give3dLatticeStiffnessMatrix(MatResponseMod
         return answer * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
+        return answer;
     }
 }
 
@@ -325,6 +342,10 @@ int LatticePlasticityDamageViscoelastic::checkConsistency()
 
     if ( rheoMat->giveAlphaTwo() != this->alphaTwo ) {
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
+    }
+
+    if ( rheoMat->giveAlphaThree() != this->alphaThree ) {
+      OOFEM_ERROR("a3 must be set to the same value in both master and viscoelastic slave materials");
     }
 
     GaussPoint *noGP = NULL;

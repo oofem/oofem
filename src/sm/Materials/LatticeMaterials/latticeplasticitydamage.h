@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -78,7 +78,40 @@ protected:
 
     double tempDamage = 0.;
 
-    //double e0 = 0.;
+    double dissipation = 0.;
+    
+    double tempDissipation = 0.;
+
+    double tensionDissipation = 0.;
+    
+    double tempTensionDissipation = 0.;
+
+    double compressionDissipation = 0.;
+    
+    double tempCompressionDissipation = 0.;
+
+    double shearDissipation = 0.;
+    
+    double tempShearDissipation = 0.;
+
+    double deltaDissipation = 0.;
+    
+    double tempDeltaDissipation = 0.;
+
+    double tensionDeltaDissipation = 0.;
+    
+    double tempTensionDeltaDissipation = 0.;
+
+    double compressionDeltaDissipation = 0.;
+    
+    double tempCompressionDeltaDissipation = 0.;
+
+    double shearDeltaDissipation = 0.;
+    
+    double tempShearDeltaDissipation = 0.;
+
+    int deletionFlag = 0;
+    int tempDeletionFlag = 1.;
 
     int compressionFlag = 0;
 
@@ -110,6 +143,30 @@ public:
 
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
+    double giveDissipation() const override {return dissipation;}
+    double giveTensionDissipation() const {return tensionDissipation;}
+    double giveCompressionDissipation() const {return compressionDissipation;}
+    double giveShearDissipation() const {return shearDissipation;}
+
+    double giveDeltaDissipation() const override {return deltaDissipation;}
+    double giveTensionDeltaDissipation() const {return tensionDeltaDissipation;}
+    double giveCompressionDeltaDissipation() const {return compressionDeltaDissipation;}
+    double giveShearDeltaDissipation() const {return shearDeltaDissipation;}
+    
+    void setTempDissipation(double newDiss) {this->tempDissipation = newDiss;}
+    void setTempTensionDissipation(double newDiss) {this->tempTensionDissipation = newDiss;}
+    void setTempCompressionDissipation(double newDiss) {this->tempCompressionDissipation = newDiss;}
+    void setTempShearDissipation(double newDiss) {this->tempShearDissipation = newDiss;}
+
+    void setTempDeltaDissipation(double newDiss) {this->tempDeltaDissipation = newDiss;}
+    void setTempTensionDeltaDissipation(double newDiss) {this->tempTensionDeltaDissipation = newDiss;}
+    void setTempCompressionDeltaDissipation(double newDiss) {this->tempCompressionDeltaDissipation = newDiss;}
+    void setTempShearDeltaDissipation(double newDiss) {this->tempShearDeltaDissipation = newDiss;}
+
+    void setTempDeletionFlag(int newFlag) {this->tempDeletionFlag = newFlag;}
+    int giveDeletionFlag() const{ return this->deletionFlag;}
+    int giveTempDeletionFlag() const{ return this->tempDeletionFlag;}
+    
     int giveCompressionFlag() const { return compressionFlag; }
 
     void setCompressionFlag(int flag) { compressionFlag = flag; }
@@ -206,18 +263,38 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
-                                   GaussPoint *gp, TimeStep *tStep) const;
+    double computeDeltaDissipation(const double omega,
+                                   const FloatArray &reducedStrain,
+                                   GaussPoint *gp,
+                                   TimeStep *atTime) const;
+    
 
-    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
-                                   GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma,
+                                   const double deltaLambda,
+                                   const int surface,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) const;
 
-    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma, const double deltaLambda,
+    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma,
+                                   const double deltaLambda,
+                                   const int surface,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) const;
+
+    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma,
+                                        const double deltaLambda,
+                                        const int surface,
                                         GaussPoint *gp, TimeStep *tStep) const;
 
+    int checkTransition(const FloatArrayF< 3 > &sigma, const double tempKappa, GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma, const double tempKappa,
-                                        const double deltaLambda, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma,
+                                        const double tempKappa,
+                                        const double deltaLambda,
+                                        const int surface,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) const;
 
     virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp, TimeStep *tStep) const;
 
@@ -231,10 +308,16 @@ public:
                                  FloatArrayF< 6 > &reducedStrain,
                                  TimeStep *tStep) const;
 
-    double performRegularReturn(FloatArrayF< 3 > &stress, LatticePlasticityDamage_ReturnResult &returnResult, double yieldValue, GaussPoint *gp, TimeStep *tStep) const;
+    double performRegularReturn(FloatArrayF< 3 > &stress,
+                                LatticePlasticityDamage_ReturnResult &returnResult,
+                                double yieldValue,
+                                const int surface,
+                                GaussPoint *gp,
+                                TimeStep *tStep) const;
 
     double computeYieldValue(const FloatArrayF< 3 > &sigma,
                              const double tempKappa,
+                             const int surface,
                              GaussPoint *gp,
                              TimeStep *tStep) const;
 
@@ -254,7 +337,7 @@ public:
 
     double computeEquivalentStress(const FloatArray &tempSigma) const;
 
-    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr< MaterialStatus > CreateStatus(GaussPoint *gp) const override;
 
     virtual FloatArrayF< 6 >giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 

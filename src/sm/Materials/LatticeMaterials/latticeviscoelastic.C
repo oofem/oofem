@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -33,6 +33,7 @@
  */
 
 #include "latticeviscoelastic.h"
+#include "Elements/LatticeElements/latticestructuralelement.h"
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "datastream.h"
@@ -61,10 +62,10 @@ LatticeViscoelastic::initializeFrom(const std::shared_ptr<InputRecord> &ir)
 }
 
 
-std::unique_ptr<MaterialStatus> 
+std::unique_ptr< MaterialStatus >
 LatticeViscoelastic::CreateStatus(GaussPoint *gp) const
 {
-    return std::make_unique<LatticeViscoelasticStatus>(gp);
+    return std::make_unique< LatticeViscoelasticStatus >(gp);
 }
 
 
@@ -98,10 +99,8 @@ LatticeViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
         reducedStrainForViscoMat -= FloatArrayF< 6 >(indepStrain);
     }
 
-
     rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
     tempStress = FloatArrayF< 6 >(viscoStress);
-
 
     status->letTempLatticeStrainBe(totalStrain);
     status->letTempLatticeStressBe(tempStress);
@@ -185,6 +184,9 @@ int LatticeViscoelastic::checkConsistency()
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
     }
 
+    if ( rheoMat->giveAlphaThree() != this->alphaThree ) {
+      OOFEM_ERROR("a3 must be set to the same value in both master and viscoelastic slave materials");
+    }
 
     return FEMComponent::checkConsistency();
 }
@@ -217,12 +219,9 @@ LatticeViscoelasticStatus::initTempStatus()
 void
 LatticeViscoelasticStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    //    MaterialStatus *mS = this->giveViscoelasticMatStatus();
-
     LatticeMaterialStatus::printOutputAt(file, tStep);
     fprintf(file, "\nViscoelastic material:");
 
-    //this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->printOutputAt(file, tStep);
 
     fprintf(file, "\n");
@@ -236,7 +235,6 @@ LatticeViscoelasticStatus::updateYourself(TimeStep *tStep)
 // temporary variables are having values corresponding to newly reached equilibrium.
 //
 {
-    //  this->slaveGpVisco->giveMaterialStatus()->updateYourself(tStep);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->updateYourself(tStep);
 
     LatticeMaterialStatus::updateYourself(tStep);
@@ -252,7 +250,6 @@ LatticeViscoelasticStatus::saveContext(DataStream &stream, ContextMode mode)
     // save parent class status
     LatticeMaterialStatus::saveContext(stream, mode);
 
-    //    this->slaveGpVisco->giveMaterialStatus()->saveContext(stream, mode);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->saveContext(stream, mode);
 }
 
@@ -264,7 +261,6 @@ LatticeViscoelasticStatus::restoreContext(DataStream &stream, ContextMode mode)
 {
     LatticeMaterialStatus::restoreContext(stream, mode);
 
-    //  this->slaveGpVisco->giveMaterialStatus()->restoreContext(stream, mode);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->restoreContext(stream, mode);
 }
 }     // end namespace oofem

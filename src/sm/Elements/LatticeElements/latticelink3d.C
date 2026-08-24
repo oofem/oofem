@@ -324,14 +324,14 @@ LatticeLink3d :: computeGlobalCoordinates(Coordinates &answer, const FloatArray 
 void
 LatticeLink3d :: computeGeometryProperties()
 {
-    //coordinates of the two nodes
+    //Node 1 carries the rigid arm and must have rotational DOFs; node 2 is where the slip is evaluated.
     Node *nodeA, *nodeB;
     FloatArray coordsA(3), coordsB(3);
 
     nodeA  = this->giveNode(1);
     nodeB  = this->giveNode(2);
 
-    //Calculate components of distance from reinforcement node to lattice node.
+    //Read the nodal coordinates.
 
     for ( int i = 0; i < 3; i++ ) {
         coordsA.at(i + 1) =  nodeA->giveCoordinate(i + 1);
@@ -340,7 +340,7 @@ LatticeLink3d :: computeGeometryProperties()
 
     FloatArray rigidGlobal(3);
 
-    //Calculate normal vector
+    //Rigid arm from node 1 (with the rigid arm) to node 2 (slip point).
     for ( int i = 0; i < 3; i++ ) {
         rigidGlobal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
     }

@@ -61,7 +61,7 @@ public:
     Lattice3dboundary_mt(int, Domain *, ElementMode em = HeatTransferEM);
     ~Lattice3dboundary_mt();                       // destructor
 
-    void computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx);
+    void computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx) override;
 
     void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint);
 

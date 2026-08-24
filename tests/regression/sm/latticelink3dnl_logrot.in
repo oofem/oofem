@@ -1,0 +1,21 @@
+latticelink3dnl_logrot.out
+Single LatticeLink3dNL element, large-rotation kinematic check. Node 1 (matrix) is rotated 180 deg about x (the bar axis) and node 2 (rebar) 180 deg about y, so the relative rotation is 180 deg about z. It verifies that the spring moment is driven by the log map of the relative rotation R2 R1^T, not by the difference of the nodal spins: the log map puts the whole rotation about z (component 5 = pi), giving the correct moment, whereas the spin difference (-pi, pi, 0) gives zero about z and spurious moments about x and y. Purely kinematic, independent of the bond material.
+NonLinearStatic nmsteps 1 nsteps 1 nmodules 1
+nsteps 1 rtolf 1.e-3 maxiter 300 stiffMode 1 controllmode 1 refloadmode 1 minsteplength 1.
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.0 0.0 0.0 bc 6 1 1 1 2 1 1
+node 2 coords 3 1.0 0.0 0.0 bc 6 1 1 1 1 2 1
+latticelink3Dnl 1 nodes 2 1 2 crossSect 1 mat 1 length 1.0 diameter 5.2e-3 dirvector 3 1.0 0.0 0.0
+LatticeCS 1 material 1 shape 1 radius 0.0026
+LatticeSlip 1 d 1. talpha 0.0 e 200.e9 a1 100. a2 100. t0 4.e6 type 1 s1 1.e-5 alpha 0.5
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 3.14159265358979
+ConstantFunction 1 f(t) 1.0
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 1 value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 2 value 3.14159265
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 3 value 0.0
+#%END_CHECK%

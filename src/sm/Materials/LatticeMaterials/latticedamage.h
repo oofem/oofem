@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -44,14 +44,18 @@
 #define _IFT_LatticeDamage_Name "latticedamage"
 #define _IFT_LatticeDamage_softeningType "stype"
 #define _IFT_LatticeDamage_wf "wf"
-#define _IFT_LatticeDamage_wfOne "wf1"
 #define _IFT_LatticeDamage_e0Mean "e0"
-#define _IFT_LatticeDamage_e0OneMean "e01"
+#define _IFT_LatticeDamage_ft "ft"
+#define _IFT_LatticeDamage_gf "gf"
+#define _IFT_LatticeDamage_sm "sm"
+#define _IFT_LatticeDamage_wfRatio "wfratio"
+#define _IFT_LatticeDamage_e0Ratio "e0ratio"
 #define _IFT_LatticeDamage_coh "coh"
 #define _IFT_LatticeDamage_ec "ec"
 #define _IFT_LatticeDamage_bio "bio"
 
 #define _IFT_LatticeDamage_btype "btype"
+#define _IFT_LatticeDamage_calDiss "caldiss"
 //@}
 
 namespace oofem {
@@ -143,11 +147,12 @@ protected:
 
     /// max effective strain at peak
     double e0Mean = 0.;
-    double e0OneMean = 0.;
-
-    ///tensile strength
-    double ftMean = 0.;
-    double ftOneMean = 0.;
+    /// bilinear (stype 2) kink ratios: sig1 = e0Ratio*ft, wf1 = wfRatio*wf
+    double e0Ratio = 0.3;
+    double wfRatio = 0.15;
+    /// crack spacing; when > 0 it replaces the element length as the softening characteristic
+    /// length (distributed cracking that cannot localize below sm, e.g. reinforced concrete).
+    double sm = 0.;
 
     /**parameter which determines the typ of the softeningFunction
      * 1 = linear softening
@@ -170,11 +175,13 @@ protected:
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
     double localRandomType = 0.;
 
-    /// Biot's coefficient
-    double biotCoefficient = 0.;
+    /// `biotCoefficient` is inherited from LatticeLinearElastic (read from "bio").
 
     /// Parameter specifying how the biot coefficient changes with the crack opening
     int biotType = 0;
+
+    /// Compute dissipation (postprocessing only); off by default, switch on (1) to pay the incremental integration per stress evaluation
+    int calDissFlag = 0;
 
 
 public:
@@ -199,11 +206,11 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    void performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const;
+    virtual void performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const;
 
     virtual double computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp) const;
 
-    virtual double computeBiot(double omega, double kappa, double le) const;
+    double computeBiot(double omega, double kappa, double le) const override;
 
     virtual double computeDamageParam(double kappa, GaussPoint *gp) const;
     ///Compute increment of dissipation for post-processing reasons
@@ -211,12 +218,14 @@ public:
 
     double computeDeltaDissipation3d(double omega, const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
 
-    std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;
+    std::unique_ptr< MaterialStatus > CreateStatus(GaussPoint *gp) const override;
 
     double give(int aProperty, GaussPoint *gp) const override;
 
 
 protected:
+    double computeDamageParamExplicit(double kappa, double e0, double wf, double eNormal, double le) const;
+
     double computeReferenceGf(GaussPoint *gp) const;
     double computeIntervals(double testDissipation, double referenceGf) const;
 

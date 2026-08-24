@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2025   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -42,6 +42,7 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "Elements/LatticeElements/latticestructuralelement.h"
+#include "integrationrule.h"
 #include "datastream.h"
 #include "staggeredproblem.h"
 #include "contextioerr.h"
@@ -69,16 +70,71 @@ LatticeDamage :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     softeningType = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_LatticeDamage_softeningType); // Macro
 
-    IR_GIVE_FIELD(ir, wf, _IFT_LatticeDamage_wf); // Macro
+    // Peak: tensile strength as ft (=> e0 = ft/eNormalMean) or e0 directly.
+    const bool ftGiven = ir->hasField(_IFT_LatticeDamage_ft);
+    if ( ftGiven && ir->hasField(_IFT_LatticeDamage_e0Mean) ) {
+        OOFEM_ERROR("give either ft or e0, not both (e0 is derived from ft)");
+    }
+    if ( ftGiven ) {
+        double ftInput = 0.;
+        IR_GIVE_FIELD(ir, ftInput, _IFT_LatticeDamage_ft);
+        if ( ftInput <= 0. ) {
+            OOFEM_ERROR("ft must be positive");
+        }
+        this->e0Mean = ftInput / this->eNormalMean; // eNormalMean set by the elastic base above
+    } else {
+        IR_GIVE_OPTIONAL_FIELD(ir, e0Mean, _IFT_LatticeDamage_e0Mean); // Macro
+    }
+    const double ft = this->eNormalMean * this->e0Mean; // effective tensile strength
 
-    if ( softeningType == 2 ) { //bilinear softening
-        wfOne = 0.15 * wf;
-        IR_GIVE_OPTIONAL_FIELD(ir, wfOne, _IFT_LatticeDamage_wfOne); // Macro
-        e0OneMean = 0.3 * e0Mean;
-        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage_e0OneMean);
+    // Optional crack spacing. When given (> 0), the softening is regularized by sm (a fixed
+    // crack spacing) instead of the element length, so cracking cannot localize below sm
+    // (distributed cracking, e.g. reinforced concrete); crack widths then use sm as the band.
+    IR_GIVE_OPTIONAL_FIELD(ir, sm, _IFT_LatticeDamage_sm);
+    if ( sm < 0. ) {
+        OOFEM_ERROR("sm must be positive");
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, e0Mean, _IFT_LatticeDamage_e0Mean); // Macro
+    // Bilinear (stype 2) kink ratios: kink stress = e0Ratio*ft, kink opening = wfRatio*wf.
+    if ( softeningType == 2 ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, wfRatio, _IFT_LatticeDamage_wfRatio);
+        IR_GIVE_OPTIONAL_FIELD(ir, e0Ratio, _IFT_LatticeDamage_e0Ratio);
+        if ( wfRatio <= 0. || wfRatio >= 1. || e0Ratio <= 0. || e0Ratio >= 1. ) {
+            OOFEM_ERROR("wfratio and e0ratio must lie in (0,1)");
+        }
+    } else if ( ir->hasField(_IFT_LatticeDamage_wfRatio) || ir->hasField(_IFT_LatticeDamage_e0Ratio) ) {
+        OOFEM_ERROR("wfratio/e0ratio apply only to stype 2 (bilinear softening)");
+    }
+
+    // Softening extent: exactly one of wf (direct) or gf (derived from fracture energy).
+    const bool wfGiven = ir->hasField(_IFT_LatticeDamage_wf);
+    const bool gfGiven = ir->hasField(_IFT_LatticeDamage_gf);
+    if ( wfGiven == gfGiven ) {
+        OOFEM_ERROR("give exactly one softening extent: wf or gf");
+    }
+    if ( gfGiven ) { // derived from fracture energy
+        if ( ft <= 0. ) {
+            OOFEM_ERROR("gf requires a positive ft (give ft or e0)");
+        }
+        double gf = 0.;
+        IR_GIVE_FIELD(ir, gf, _IFT_LatticeDamage_gf);
+        if ( gf <= 0. ) {
+            OOFEM_ERROR("gf must be positive");
+        }
+        if ( softeningType == 1 ) { // Gf = ft*wf/2
+            this->wf = 2. * gf / ft;
+        } else if ( softeningType == 2 ) { // Gf = ft*wf*(wfRatio + e0Ratio)/2
+            this->wf = 2. * gf / ( ft * ( wfRatio + e0Ratio ) );
+            this->wfOne = wfRatio * this->wf;
+        } else { // Gf = ft*wf
+            this->wf = gf / ft;
+        }
+    } else { // wf given directly
+        IR_GIVE_FIELD(ir, wf, _IFT_LatticeDamage_wf); // Macro
+        if ( softeningType == 2 ) {
+            this->wfOne = wfRatio * this->wf;
+        }
+    }
 
     this->coh = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, coh, _IFT_LatticeDamage_coh); // Macro
@@ -86,11 +142,12 @@ LatticeDamage :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     this->ec = 10.;
     IR_GIVE_OPTIONAL_FIELD(ir, ec, _IFT_LatticeDamage_ec); // Macro
 
-    this->biotCoefficient = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->biotCoefficient, _IFT_LatticeDamage_bio);
-
+    // biotCoefficient ("bio") is read by LatticeLinearElastic::initializeFrom (called above).
     this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage_btype);
+
+    this->calDissFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->calDissFlag, _IFT_LatticeDamage_calDiss);
 }
 
 
@@ -103,62 +160,46 @@ LatticeDamage :: computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPo
     double paramC = 0.5 * ( this->ec * e0 - e0 );
 
     double shearNorm = norm(strain [ { 1, 2 } ]);
-    return norm(Vec2( this->alphaOne * shearNorm / paramB, ( strain.at(1) + paramC ) / paramA )) * paramA - paramC;
+    return norm(FloatArrayF< 2 >{ this->alphaOne * shearNorm / paramB, ( strain.at(1) + paramC ) / paramA }) * paramA - paramC;
 }
 
 
 double
-LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
+LatticeDamage :: computeDamageParamExplicit(double tempKappa, double e0, double wfParam, double eNormal, double le) const
 {
-    double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
-    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-    double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
-
-    if ( softeningType == 1 ) { //linear
-        if ( tempKappa >= e0 && tempKappa < this->wf / le ) {
-            //linear stress-crack opening relation
-            //check if input parameter make sense
-            if ( this->wf / le <= e0 ) {
+    if ( softeningType == 1 ) {
+        if ( tempKappa >= e0 && tempKappa < wfParam / le ) {
+            if ( wfParam / le <= e0 ) {
                 OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
             }
-
-            return ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / le ) );
-        } else if ( tempKappa >= this->wf / le ) {
+            return ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( wfParam / le ) );
+        } else if ( tempKappa >= wfParam / le ) {
             return 1.;
         } else {
             return 0.;
         }
-    } else if ( softeningType == 2 ) {      //bilinear softening
-        //Check if input parameter make sense
+    } else if ( softeningType == 2 ) {
         if ( e0 > wfOne / le ) {
             OOFEM_ERROR("parameter wf1 is too small");
-        } else if ( wfOne / le >  this->wf / le ) {
+        } else if ( wfOne / le > wfParam / le ) {
             OOFEM_ERROR("parameter wf is too small");
         }
-
         if ( tempKappa > e0 ) {
-            double helpStrain = 0.3 * e0;
+            double helpStrain = this->e0Ratio * e0;
             double omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * le + 1. );
-
             if ( omega * tempKappa * le > 0 && omega * tempKappa * le < this->wfOne ) {
                 return omega;
             } else {
-                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * le / ( this->wf - this->wfOne ) );
-
-                if ( omega * tempKappa * le >= this->wfOne  && omega * tempKappa * le < this->wf  ) {
+                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( wfParam - this->wfOne ) ) ) / ( 1. - helpStrain * le / ( wfParam - this->wfOne ) );
+                if ( omega * tempKappa * le >= this->wfOne && omega * tempKappa * le < wfParam ) {
                     return omega;
                 }
             }
-
             return clamp(omega, 0., 1.);
         } else {
             return 0.;
         }
     } else if ( softeningType == 3 ) {
-        //exponential softening
-        //  iteration to achieve objectivity
-        //   we are finding state, where elastic stress is equal to
-        //   stress from crack-opening relation (wf = wf characterizes the carc opening diagram)
         if ( tempKappa <= e0 ) {
             return 0.0;
         } else {
@@ -167,15 +208,14 @@ LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
             double Ft = eNormal * e0;
             do {
                 nite++;
-                double help = le * omega * tempKappa / this->wf;
-                double Lhs = eNormal * tempKappa - Ft * exp(-help) * le * tempKappa / this->wf;
+                double help = le * omega * tempKappa / wfParam;
+                double Lhs = eNormal * tempKappa - Ft * exp(-help) * le * tempKappa / wfParam;
                 R = ( 1. - omega ) * eNormal * tempKappa - Ft * exp(-help);
                 omega += R / Lhs;
                 if ( nite > 40 ) {
                     OOFEM_ERROR("computeDamageParam: algorithm not converging");
                 }
             } while ( fabs(R) >= 1.e-4 );
-
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
                 OOFEM_ERROR("computeDamageParam: internal error\n");
             }
@@ -184,13 +224,27 @@ LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
     } else {
         OOFEM_ERROR("computeDamageParam: unknown softening type");
     }
+    return 0.;
 }
 
 
-std::unique_ptr<MaterialStatus> 
+double
+LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
+{
+    double e0      = this->give(e0_ID, gp) * this->e0Mean;
+    double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    // Characteristic length: the crack spacing sm if given (so cracking cannot localize
+    // below sm), otherwise the element length.
+    double le = ( this->sm > 0. ) ? this->sm
+              : static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
+    return computeDamageParamExplicit(tempKappa, e0, this->wf, eNormal, le);
+}
+
+
+std::unique_ptr< MaterialStatus >
 LatticeDamage :: CreateStatus(GaussPoint *gp) const
 {
-    return std::make_unique<LatticeDamageStatus>(gp);
+    return std::make_unique< LatticeDamageStatus >(gp);
 }
 
 
@@ -208,6 +262,7 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
+        return elastic;
     }
 }
 
@@ -231,6 +286,7 @@ LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
+        return elastic;
     }
 }
 
@@ -269,13 +325,14 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
         static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
     }
 
+
     double waterPressure = 0.;
     for ( int i = 0; i < pressures.giveSize(); i++ ) {
         waterPressure += 1. / pressures.giveSize() * pressures [ i ];
     }
     answer.at(1) += waterPressure;
 
-    double tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
+    double tempDeltaDissipation = calDissFlag ? computeDeltaDissipation3d(omega, reducedStrain, gp, tStep) : 0.;
     double tempDissipation = status->giveDissipation() + tempDeltaDissipation;
 
     //Set all temp values
@@ -327,8 +384,9 @@ LatticeDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reduc
     FloatArrayF< 6 >tempDamageLatticeStrain = omega * reducedStrain;
     status->letTempDamageLatticeStrainBe(tempDamageLatticeStrain);
 
-    //Compute crack width
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    //Compute crack width; use the crack spacing sm as the band width when given.
+    double length = ( this->sm > 0. ) ? this->sm
+                  : ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     double crackWidth = omega * norm(reducedStrain [ { 0, 1, 2 } ]) * length;
 
     status->setTempEquivalentStrain(equivStrain);
@@ -350,6 +408,7 @@ LatticeDamage :: computeBiot(double omega, double kappa, double le) const
         }
     } else {
         OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
+        return 0.;
     }
 }
 
@@ -359,10 +418,20 @@ LatticeDamage :: computeReferenceGf(GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
-    if ( softeningType == 1 ) {
-        return e0 * eNormal * this->wf / 2.;
-    } else {   //This is for the exponential law. Should also implement it for the bilinear one.
-        return e0 * eNormal * this->wf;
+    const double ft = e0 * eNormal;
+    // Per-element reference dissipation. With a crack spacing sm the softening spans more
+    // strain than one element, so the element sees a fraction he/sm of the crack energy.
+    double factor = 1.;
+    if ( this->sm > 0. ) {
+        double he = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
+        factor = he / this->sm;
+    }
+    if ( softeningType == 1 ) { // linear
+        return 0.5 * ft * this->wf * factor;
+    } else if ( softeningType == 2 ) { // bilinear
+        return 0.5 * ft * ( this->wfOne + this->e0Ratio * this->wf ) * factor;
+    } else { // exponential
+        return ft * this->wf * factor;
     }
 }
 
@@ -552,6 +621,11 @@ LatticeDamage :: giveIPValue(FloatArray &answer,
         answer.resize(1);
         answer.zero();
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
+        return 1;
+    } else if ( type == IST_TensileStrength ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = this->give(e0_ID, gp) * this->e0Mean;
         return 1;
     } else {
         return LatticeLinearElastic :: giveIPValue(answer, gp, type, atTime);
