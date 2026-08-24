@@ -59,6 +59,7 @@
 #define _IFT_ConcreteDPM2_dhard "dhard"
 #define _IFT_ConcreteDPM2_dilation "dilation"
 #define _IFT_ConcreteDPM2_asoft "asoft"
+#define _IFT_ConcreteDPM2_bsoft "bsoft"
 #define _IFT_ConcreteDPM2_hp "hp"
 #define _IFT_ConcreteDPM2_yieldtol "yieldtol"
 #define _IFT_ConcreteDPM2_newtoniter "newtoniter"
@@ -125,6 +126,10 @@ protected:
     double deltaLambda = 0.;
 
     double le = 0.;
+
+    /// Element deletion flags: the element is marked for deletion when the plastic return fails.
+    int deletionFlag = 0;
+    int tempDeletionFlag = 1;
 
     double alpha = 0.;
     double tempAlpha = 0.;
@@ -252,6 +257,11 @@ public:
      */
     double giveKappaP() const
     { return kappaP; }
+
+    /// Element deletion flag accessors (element marked for deletion when the plastic return fails).
+    void setTempDeletionFlag(int newFlag) { this->tempDeletionFlag = newFlag; }
+    int giveDeletionFlag() const { return this->deletionFlag; }
+    int giveTempDeletionFlag() const { return this->tempDeletionFlag; }
 
     /**
      * Get the hardening variable of the damage model from the
@@ -668,6 +678,9 @@ protected:
 
     /// Parameter of the ductilityMeasure of the damage model.
     double ASoft = 0.;
+
+    /// Parameter of the ductilityMeasure of the damage model.
+    double BSoft = 0.;
 
     /// Parameter of the hardening law of the plasticity model.
     double yieldHardPrimePeak = 0.;
