@@ -160,6 +160,12 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_X_LCS:
     case IST_Y_LCS:
     case IST_Z_LCS:
+    case IST_LatticeStrain:
+    case IST_LatticeForce:
+    case IST_PlasticLatticeStrain:
+    case IST_LatticeCurvature:
+    case IST_LatticeMoment:
+    case IST_PlasticLatticeCurvature:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:
