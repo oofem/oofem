@@ -274,26 +274,6 @@ Supported DofManagerType keywords are
    Values of array ``dofType`` can have following values: 0-primary DOF,
    2-linked DOF.
 
-   Rotational DOFs (``R_u``, ``R_v``, ``R_w``) declared as linked
-   (``dofType`` 2) are handled specially: instead of being interpolated
-   like the translations, they are constrained to the infinitesimal
-   rotation of the master element, omega = 1/2 curl(u), evaluated from its
-   shape-function gradients. This is currently implemented for the linear
-   tetrahedron. It allows a beam or frame node to be embedded in a solid
-   mesh so that its rotations follow the local continuum rotation. All three
-   rotations, including the torsional one about the beam axis, are then
-   determined automatically: no torsional restraint has to be applied and
-   the result does not depend on the frame element node ordering. This is a
-   rigid rotational bond that transfers moments and torsion, not a pinned
-   connection.
-
-   If the rotational DOFs are instead left as primary (``dofType`` 0) or are
-   fixed, they are not touched. This supports the alternative where only the
-   translations are bonded to the matrix and the frame element itself
-   carries the rotations; in that case the torsional DOF about the beam axis
-   has to be restrained separately. Linked rotational DOFs on a
-   non-tetrahedral master element are not supported and raise an error.
-
    The value of ``masterElement`` specifies the element number to which
    the hanging node is attached. The node can be attached to any
    arbitrary coordinate within the master element. The element must
@@ -306,6 +286,29 @@ Supported DofManagerType keywords are
    searched, otherwise only the elements in cross section with number
    ``masterRegion``. If ``masterElement`` is directly supplied
    ``masterRegion`` is unused.
+
+-  Continuum frame node
+
+   ``ContinuumFrameNode`` ``coords #(ra)`` ``dofType #(in)``
+   [``masterElement #(in)``] [``masterRegion #(in)``]
+
+   A frame/beam node embedded in a continuum (solid) mesh. Its input is
+   identical to ``HangingNode`` and its translational DOFs are interpolated
+   from the master element in exactly the same way. Its linked (``dofType``
+   2) rotational DOFs (``R_u``, ``R_v``, ``R_w``), however, are constrained
+   to the infinitesimal rotation of the master element,
+   omega = 1/2 curl(u), evaluated from the shape-function gradients of the
+   translations. This lets a frame node embedded in a solid mesh - which
+   carries no rotational DOFs - inherit the local continuum rotation. All
+   three rotations, including the torsional one about the beam axis, are
+   determined automatically: no torsional restraint has to be applied and
+   the result does not depend on the frame element node ordering.
+
+   Rotational DOFs left as primary (``dofType`` 0) or fixed are not touched.
+   To bond only the translations to the matrix and let the frame element
+   itself carry the rotations, use a plain ``HangingNode`` instead.
+   The continuum rotational constraint is currently implemented for the
+   linear tetrahedron only; a non-tetrahedral master element creates an error.
 
 -  Slave node
 

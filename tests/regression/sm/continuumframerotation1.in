@@ -1,5 +1,5 @@
-hangingrotation1.out
-Hanging node with rotational DOFs embedded in a linear tetrahedron. The four tet corners are given a rigid-body rotation field, so the hanging node must show zero translation and rotations 0.1, 0.2, 0.3.
+continuumframerotation1.out
+Continuum frame node with rotational DOFs embedded in a linear tetrahedron. The four tet corners are given a rigid-body rotation field, so the frame node must show zero translation and rotations 0.1, 0.2, 0.3.
 NonLinearStatic nmsteps 1 nsteps 2 nmodules 1 contextOutputStep 1000
 nsteps 2 rtolf 1.e-3 stiffMode 2 maxiter 1000 controllmode 1 donotfixload
 errorcheck
@@ -11,7 +11,7 @@ node 1 coords 3 0. 0. 0.
 node 2 coords 3 1. 0. 0.
 node 3 coords 3 0. 1. 0.
 node 4 coords 3 0. 0. 1.
-hangingnode 5 coords 3 0.25 0.25 0.25 dofType 6 2 2 2 2 2 2 dofidmask 6 1 2 3 4 5 6
+continuumframenode 5 coords 3 0.25 0.25 0.25 dofType 6 2 2 2 2 2 2 dofidmask 6 1 2 3 4 5 6
 #
 ltrspace 1 nodes 4 1 2 3 4
 #
