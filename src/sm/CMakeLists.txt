@@ -5,8 +5,6 @@ set (sm_boundary_conditions
         prescribeddispslipbcneumannrc.C
         prescribeddispslipmultiple.C
         transversereinfconstraint.C
-        latticeneumanncoupling.C
-        latticedirichletcoupling.C
     )
 
 set (sm_crosssection
@@ -17,7 +15,6 @@ set (sm_crosssection
     CrossSections/structuralinterfacecrosssection.C
     CrossSections/variablecrosssection.C
     CrossSections/warpingcrosssection.C
-    CrossSections/latticecrosssection.C
     )
 
 set (sm_emodel

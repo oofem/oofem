@@ -79,21 +79,6 @@ set (sm_material
     HyperelasticMaterials/simopistermaterial.C
     HyperelasticMaterials/ogdencompressiblematerial.C
     HyperelasticMaterials/hyperelasticmaterial1d.C
-    #Lattice models
-    LatticeMaterials/latticematstatus.C
-    LatticeMaterials/latticestructuralmaterial.C	
-    LatticeMaterials/latticelinearelastic.C
-    LatticeMaterials/latticedamage.C
-    LatticeMaterials/latticeviscoelastic.C
-    LatticeMaterials/latticedamageviscoelastic.C
-    LatticeMaterials/latticebondplasticity.C
-    LatticeMaterials/latticeplasticitydamage.C
-    LatticeMaterials/latticeslip.C
-    LatticeMaterials/latticeplasticitydamageviscoelastic.C
-    LatticeMaterials/latticedamageshell.C
-    LatticeMaterials/latticeframeelastic.C
-    LatticeMaterials/latticeframeconcreteplastic.C
-    LatticeMaterials/latticeframesteelplastic.C
     1D/isoasymm1d.C
 )
 

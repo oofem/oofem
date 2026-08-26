@@ -639,7 +639,7 @@ The crossSectType keyword can be one from following possibilities
      [``area #(rn)``] [``iy #(rn)``] [``iz #(rn)``] [``ik #(rn)``]
      [``shearcoeff #(rn)``] [``shearareay #(rn)``] [``shearareaz #(rn)``]
      [``nlayers #(in)``]
-   | Cross section for the 3d lattice elements (``lattice3d``,
+   | Part of the lattice module (compile with ``USE_LM``). Cross section for the 3d lattice elements (``lattice3d``,
      ``lattice3dnl``). The ``shape`` parameter selects how the section
      properties are obtained: ``0`` -- a general polygon/facet built from the
      element vertex coordinates (``polycoords``); ``1`` -- a circle (from
@@ -923,6 +923,7 @@ Currently, EntType keyword can be one from
    ``LatticeNeumannCoupling`` ``smnodes #(ia)`` ``tmnodes #(ia)``
    ``direction #(ra)``
 
+   Part of the lattice module (compile with ``USE_LM``).
    Active boundary condition coupling a transport (pore-pressure) lattice
    to a mechanical lattice in a staggered analysis. For each mechanical
    node listed in ``smnodes`` it reads the fluid pressure :math:`P_f`
@@ -941,6 +942,7 @@ Currently, EntType keyword can be one from
 
    ``LatticeDirichletCoupling`` ``couplingelements #(ia)``
 
+   Part of the lattice module (compile with ``USE_LM``).
    Boundary condition prescribing the pore pressure :math:`P_f` at a
    transport lattice node to the distance-weighted average of the
    (compression-only) normal stress of the mechanical lattice elements

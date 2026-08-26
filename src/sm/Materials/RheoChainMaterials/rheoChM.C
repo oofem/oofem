@@ -36,7 +36,9 @@
 #include "rheoChM.h"
 #include "material.h"
 #include "sm/Materials/isolinearelasticmaterial.h"
-#include "sm/Materials/LatticeMaterials/latticelinearelastic.h"
+#ifdef __LM_MODULE
+ #include "lm/Materials/latticelinearelastic.h"
+#endif
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -614,9 +616,13 @@ RheoChainMaterial :: giveLinearElasticMaterial()
 {
     if ( linearElasticMaterial == NULL ) {
         if ( this->lattice ) {
+#ifdef __LM_MODULE
             linearElasticMaterial = new LatticeLinearElastic(this->giveNumber(),
                                                              this->giveDomain(),
                                                              1.0, this->alphaOne, this->alphaTwo, this->alphaThree);
+#else
+            OOFEM_ERROR("lattice rheological chain requires the lattice module (build with USE_LM=ON)");
+#endif
         } else {
             linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
                                                                        this->giveDomain(),

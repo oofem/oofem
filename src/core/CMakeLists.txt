@@ -198,7 +198,6 @@ set (core_export
     vtkxmlexportmodule.C
     vtkmemoryexportmodule.C
     vtkxmlperiodicexportmodule.C
-    vtkxmllatticeexportmodule.C
     vtkpfemexportmodule.C
     vtkxfemexportmodule.C
     homexportmodule.C
