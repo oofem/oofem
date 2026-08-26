@@ -174,6 +174,7 @@ set (core_dofman
     slavenode.C
     generalslavenode.C
     hangingnode.C
+    continuumframenode.C
     qcnode.C
     rigidarmnode.C
     elementinternaldofman.C

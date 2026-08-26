@@ -1,0 +1,35 @@
+continuumframerotation2.out
+Continuum frame node with rotational DOFs embedded in a linear tetrahedron. The four tet corners are given a uniform translation, so the frame node must show the same translation and zero rotation.
+NonLinearStatic nmsteps 1 nsteps 2 nmodules 1 contextOutputStep 1000
+nsteps 2 rtolf 1.e-3 stiffMode 2 maxiter 1000 controllmode 1 donotfixload
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+#
+ndofman 5 nelem 1 ncrosssect 1 nmat 1 nbc 1 nltf 1 nic 0 nset 2
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 1. 0. 0.
+node 3 coords 3 0. 1. 0.
+node 4 coords 3 0. 0. 1.
+continuumframenode 5 coords 3 0.25 0.25 0.25 dofType 6 2 2 2 2 2 2 dofidmask 6 1 2 3 4 5 6
+#
+ltrspace 1 nodes 4 1 2 3 4
+#
+SimpleCS 1 material 1 set 1
+#
+IsoLE 1 d 0. E 30.e9 n 0.15 talpha 0.
+#
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.025 -0.05 0.025 set 2
+#
+PiecewiseLinFunction 1 npoints 2 t 2  0. 1. f(t) 2 0. 1.
+set 1 elements 1 1
+Set 2 nodes 4 1 2 3 4
+
+#%BEGIN_CHECK% tolerance 1e-6
+#NODE tStep 2 number 5 dof 1 unknown d value 0.025
+#NODE tStep 2 number 5 dof 2 unknown d value -0.05
+#NODE tStep 2 number 5 dof 3 unknown d value 0.025
+#NODE tStep 2 number 5 dof 4 unknown d value 0.0
+#NODE tStep 2 number 5 dof 5 unknown d value 0.0
+#NODE tStep 2 number 5 dof 6 unknown d value 0.0
+#%END_CHECK%
