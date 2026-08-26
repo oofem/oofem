@@ -179,8 +179,6 @@ set (core_dofman
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
-    latticedirichletcouplingnode.C
-    latticeneumanncouplingnode.C
     )
 
 set (core_material
