@@ -86,14 +86,6 @@ set (sm_element
     htselement.C
     lumpedmasselement.C
     springelement.C
-    LatticeElements/latticestructuralelement.C
-    LatticeElements/lattice2d.C
-    LatticeElements/lattice2dboundary.C
-    LatticeElements/lattice3d.C
-    LatticeElements/lattice3dboundary.C
-    LatticeElements/lattice3dboundarytruss.C
-    LatticeElements/latticelink3d.C
-    LatticeElements/latticelink3dboundary.C
     tet21ghostsolid.C
     quad1platesubsoil.C 
     quad2platesubsoil.C

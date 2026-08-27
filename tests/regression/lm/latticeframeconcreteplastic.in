@@ -1,0 +1,45 @@
+latticeframeconcreteplastic.out
+three point bending to test frame element with a concrete plasticity model
+NonLinearStatic nmsteps 1 nsteps 5 contextOutputStep 100 nmodules 0
+nsteps 3 rtolf 1.e-3 maxiter 2000 stiffmode 2 controllmode 1 refloadmode 1 minsteplength 1.e-3
+#vtkxml tstep_step 1 primvars 1 1 cellvars 7 138 139 140 156 157 158 52 domain_all element_all
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 11 nelem 10 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 2
+Node 1 coords 3 0.0 0.0 0.0 bc 6 1 1 1 1 0 0
+Node 2 coords 3 0.08 0.0 0.0
+Node 3 coords 3 0.16 0.0 0.0
+Node 4 coords 3 0.24 0.0 0.0
+Node 5 coords 3 0.32 0.0 0.0
+Node 6 coords 3 0.40 0.0 0.0 bc 6 0 2 0 0 0 0
+Node 7 coords 3 0.48 0.0 0.0
+Node 8 coords 3 0.56 0.0 0.0
+Node 9 coords 3 0.64 0.0 0.0
+Node 10 coords 3 0.72 0.0 0.0
+Node 11 coords 3 0.80 0.0 0.0 bc 6 0 1 1 0 0 0
+lattice3d 1 Nodes 2 1 2 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 2 Nodes 2 2 3 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 3 Nodes 2 3 4 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 4 Nodes 2 4 5 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 5 Nodes 2 5 6 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 6 Nodes 2 6 7 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 7 Nodes 2 7 8 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 8 Nodes 2 8 9 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 9 Nodes 2 9 10 zaxis 3 0 0 1 crossSect 1 mat 1
+lattice3d 10 Nodes 2 10 11 zaxis 3 0 0 1 crossSect 1 mat 1 
+latticecs 1 material 1 iy 3.2e-6 iz 2.8125e-6 ik 6.0125e-6 shearCoeff 0.83 area 0.006 shape 3
+latticeframeconcreteplastic 1 d 2400. E 30.e9 n 0.2 talpha 0 nx0 1.e3 vy0 1.69e5 vz0 1.69e5 mx0 1e3 my0 1e3 mz0 1.e3 nx01 1.e3 vy01 1.69e3 vz01 1.69e5 mx01 1e3 my01 1e3 mz01 1.e3 tol 1.e-6 iter 100 sub 10 wu 0.0032 wf 0.0032
+#latticeframeelastic 1 d 2400 E 30.e9 n 0.2 talpha 0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue -0.0001
+ConstantFunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 2. f(t) 2 0. 1.
+Set 1 elementranges {(1 10)}
+Set 2 nodes 1 6
+#vtkxml tstep_step 1 primvars 1 1 cellvars 7 138 139 140 156 157 158 52 domain_all element_all
+
+#%BEGIN_CHECK%
+#NODE number 6 dof 2 unknown d
+#REACTION number 1 dof 2
+#%END_CHECK%
+

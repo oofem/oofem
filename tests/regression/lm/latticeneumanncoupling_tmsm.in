@@ -1,0 +1,3 @@
+latticeneumanncoupling_tmsm.out
+Test of lattice Neumann hydro-mechanical boundary coupling (transport pressure -> mechanical force)
+StaggeredProblem nsteps 3 deltat 1. prob1 "latticeneumanncoupling_in.tm" prob2 "latticeneumanncoupling_in.sm" contextoutputstep 1 coupling 3 2 1 0

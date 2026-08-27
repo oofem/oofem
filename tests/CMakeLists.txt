@@ -133,6 +133,10 @@ if (USE_AM)
     oofem_regression_ctest(am "am")
 endif()
 
+if (USE_LM)
+    oofem_regression_ctest(lm "lm")
+endif()
+
 if (USE_TM AND USE_SM)
     oofem_regression_ctest(tmsm "tmsm")
 endif()

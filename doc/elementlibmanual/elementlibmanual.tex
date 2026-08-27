@@ -370,122 +370,6 @@ The element features are summarized in Table~\ref{beam3dsummary}.
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
-\subsection{Lattice elements}
-\subsubsection{Lattice2d element}
-Represents two-node lattice element. Each node has 3 degrees of freedom.
-The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
-The element is defined in x,y plane (see Figure~\ref{lattice2dfig}).
-The element features are summarized in Table~\ref{lattice2dsummary}.
-
-\begin{figure}[htb]
- \centering
- \begin{makeimage}
-  \input{lattice2d.tikz}
- \end{makeimage}
- \caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
- \label{lattice2dfig}
-\end{figure}
-
-\begin{elementsummary}{lattice2d}{2d lattice element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}{lattice2d element summary}{lattice2dsummary}
-\elementParam{\param{thick}: defines the out of plane ($z$-direction) thickness}
-\elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
-\elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
-\elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
-\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2drandom.in}{tests/sm/lattice2drandom.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticedamagevisco\_mps\_1.in}{tests/sm/latticedamagevisco\_mps\_1.in}}
-\end{elementsummary}
-
-The theory of lattice2d is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
-
-\subsubsection{latticeboundary2D element}
-Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell. It has three components which are displacements, which are produces of the macroscopic (average) strain components and length of the peridodic cell as $aE_{xx}$, $bE_{xx}$  and $bG_{xy}$ and the length of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice2dboundaryfig}). The coordinates $x$ and $y$ of the third node are the lengths $a$ and $b$ of the periodic cell, respectively.  The element is defined in x,y plane. The strain components at the additional node have the meaning of average strains in the periodic cell. The specific input parameters for this element in addition to those used for lattice2d are shown in Table~\ref{lattice2dboundarysummary}. 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.4\textwidth]{./lattice2dboundaryfig.pdf}
- \caption{latticeboundary2D element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
- \label{lattice2dboundaryfig}
-\end{figure}
-
-\begin{elementsummary}{latticeboundary2D}{2d lattice boundary element}{\field{location}{in}}{latticeboundary2D element summary}{latticeboundary2D summary}
-
-\elementParam{\param{location}: number between 1 and 8 which specifies the location of the node with respect to the periodic cell.}
-
-\elementDescription{Unknowns}{Nine DOFs are required, which are $u$-displacement, $v$-displacement and $w$-rotation at nodes 1 and 2, and $aE_{xx}$, $bE_{yy}$ and $bG_{xy}$ at node 3.}
-\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2dboundary1.in}{tests/sm/lattice2dboundary1.in}}
-\elementDescription{Reference}{\cite{GraJir10}}
-\end{elementsummary}
-
-\subsubsection{Lattice3d element}
-Lattice3d represents a two-node 3d lattice element. Each node has six degrees of freedom as shown in Figure~\ref{lattice3dfig}.
-The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. The properties of the mid-cross-section are internally computed from its vertices which are given as input in the global coordinate sytem. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
-The input parameters for this element are shown in Table~\ref{lattice3dsummary}. 
-
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.3\textwidth]{./lattice3d.pdf}
- \caption{Lattice3d element. Node numbering, DOF numbering, cross-section vertices and local coordinate system at integration point $C$.}
- \label{lattice3dfig}
-\end{figure}
-
-\begin{elementsummary}{lattice3d}{3d lattice element}{\field{polycoords}{ra}  \field{couplingflag}{in} \field{couplingnumbers}{ra} \field{pressures}{ra} \field{mlength}{rn}}{lattice3d element summary}{lattice3dsummary}
-\elementParam{\param{polycooords}: array of the coordinates of the vertices of the mid-cross-section of the lattice element in the global coordinate system.}
-\elementParam{\param{couplingflag}: flag (optional parameter. Default is 0) which activates coupling with a transport lattice element.}
-\elementParam{\param{couplingnumbers}: array of numbers of transport lattice elements (optional parameter), which are coupled with the 3d lattice element.}
-\elementParam{\param{pressures}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
-\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
-\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
-\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d2.in}{tests/sm/lattice3d2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d3.in}{tests/sm/lattice3d3.in}}
-\elementDescription{Reference}{\cite{GraBol16}}
-\end{elementsummary}
-
-
-\subsubsection{Lattice3dBoundary element}
-This element represents a three-noded 3d lattice element for boundaries of 3d periodic cells. The first two nodes have 6 degrees of freedom as for the element lattice3d. The third node is used to control the loading of the periodic cell using three normal ($aE_{xx}$, $bE_{yy}$ and $zE_{zz}$) and three shear strain ($cG_{yz}$, $cG_{xz}$, $bG_{xy}$) components. Here, $a$, $b$ and $c$ are the three dimensions of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice3dboundaryfig}). The connection between periodic nodes is defined as
-\begin{equation}
-  \mathbf{x}^{'} = \mathbf{M} \mathbf{x}
-\end{equation}
-Here, $\mathbf{x}^{'}$ and $\mathbf{x}$ are the nodes inside and outside, respectively, and $\mathbf{M}$ is the translation matrix, for which the input is provided in the form of a location parameter as shown in Table~\ref{lattice3dboundarysummary}. 
-
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.6\textwidth]{./lattice3dboundaryfig.pdf}
- \caption{Lattice3dboundary element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
- \label{lattice3dboundaryfig}
-\end{figure}
-
-\begin{elementsummary}{lattice3dboundary}{3d lattice boundary element}{\field{location}{in}}{lattice3dboundary element summary}{lattice3dboundarysummary}
-\elementParam{\param{location}: array of two numbers between number between 1 and 26, which specifies the location of the two nodes with respect to the 3d periodic cell.}
-\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each of the first two node. Node 3 requires the 6 quantities to control the periodic cell $aE_{xx}$, $bE_{yy}$, $zE_{zz}$, $cG_{yz}$, $cG_{xz}$ and $bG_{xy}$ }
-\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}}
-\elementDescription{Reference}{\cite{AthWheGra18}}
-\end{elementsummary}
-
-\subsubsection{Latticelink3d}
-This element represents a two-node 3d link element connecting 3d beam and 3d lattice elements. Each node has six degrees of freedom. 
-The input parameters for this element are shown in Table~\ref{latticelink3dsummary}. 
-
-\begin{elementsummary}{latticelink3d}{3d lattice link element}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra} \field{l\_end}{rn}}{latticelink3d element summary}{latticelink3dsummary}
-\elementParam{\param{length}: bond length}
-\elementParam{\param{diameter}: diameter }
-\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
-\elementParam{\param{l\_end}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
-\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
-\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
-\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticelink1.in}{tests/sm/latticelink1.in}}
-\elementDescription{Reference}{\cite{GraAnt19}}
-\end{elementsummary}
-
-\subsubsection{Latticelink3dboundary}
-Represents three-node 3d boundary link element connecting 3d beam and 3d lattice elements. The first two nodes have the same meaning as for latticelink3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
-The specific input parameters for this element in addition of those for latticelink3d are shown in Table~\ref{latticelink3dboundarysummary}. 
-
-\begin{elementsummary}{latticelink3dboundary}{3d lattice link boundary element}{{ \field{location}{in} }{rn}}{latticelink3dboundary element summary}{latticelink3dboundarysummary}
-\elementParam{\param{location}: }
-\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
-\elementDescription{Reference}{\cite{GraAnt19}}
-\end{elementsummary}
-
-%-----------------------------------------------------------------------------------------------
-\clearpage
 \subsection{Plane Stress Elements}
 \subsubsection{PlaneStress2d}
 Represents isoparametric four-node quadrilateral plane-stress
@@ -1174,7 +1058,7 @@ The element features are summarized in Table~\ref{axisymm3dsummary}.
 \begin{elementsummary}{Axisymm3d}{Triangular axisymmetric linear element}{\optField{NIP}{in} \optField{NIPfish}{in}}{Axisymm3d element summary}{axisymm3dsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points (possible completions are 1 (default), 4 and 7 point integration rule).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
-\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+ \elementDescription{Approximation}{Linear approximation of displacement and geometry.}
 \elementDescription{Integration}{The integration can be altered using \param{NIP} paramter (default is 1 point integration).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
@@ -1603,6 +1487,23 @@ approximation of displacement field. Can be used to glue together two elements w
   \href{https://github.com/oofem/oofem/blob/devel/tests/sm/InterfaceEL\_SurfQuad2.in}{tests/sm/InterfaceEL\_SurfQuad2.in}
 }
 \end{elementsummary}
+
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
+\subsubsection{Bondlink3d element}
+This class implements a bond link for connecting beam (frame) and continuum elements in unstructured meshes.
+The node ordering is important: the first node carries the rigid arm and must therefore have rotational degrees of freedom, while the slip (displacement jump) is evaluated at the second node. For continuum (matrix) element nodes that have no rotational degrees of freedom, the reinforcement (beam/rebar) node must be given first and the continuum node second. The slip is then evaluated at the matrix.
+The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node to compute the displacement jump at the matrix node (and two components, which are perpendicular to each other and lie in a plane for which the direction along the rebar is normal to. This element differs from the other interface elements since the first stiffness component is in the direction of the slip. The bond area for this element is calculated from the length and diameter of the truss element that is bonded to the continuum as $A_{\mathrm{bond}} = \pi d l$, where $A_{\mathrm{bond}}$ is the bond area, $d$ is the reinforcement diameter and $l$ is the length of the element. Each node has six degrees of freedom. The input parameters for this element are shown in Table~\ref{bondlink3dsummary}.
+
+\begin{elementsummary}{bondlink3d}{3d bond link element for beams}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra} \field{l\_end}{rn}}{bondlink3d element summary}{bondlink3dsummary}
+\elementParam{\param{length}: bond length}
+\elementParam{\param{diameter}: diameter }
+\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in the beam node and three dofs ($u$-displacement, $v$-displacement, $w$-displacement) in the continnum node. The order of input of nodes must be beam node first and continuum node second.}
+\elementDescription{Reference}{\cite{SciGraLarRun20}}
+\end{elementsummary}
+
 
 
 %-----------------------------------------------------------------------------------------------
@@ -2480,6 +2381,229 @@ Represents 1D isoparametric line element in 3D space. The element geometry is de
 % References;
 %\printbibliography
 
+
+\section{Elements for Lattice Analysis}
+For the lattice elements which are part of the lattice module, the solver must be compiled with \texttt{USE\_LM} (which also enables the SM and TM modules). The module gathers the lattice structural and transport elements.
+
+\subsection{Lattice structural elements}
+
+\subsubsection{Lattice2d element}
+Represents two-node lattice element. Each node has 3 degrees of freedom.
+The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
+The element is defined in x,y plane (see Figure~\ref{lattice2dfig}).
+The element features are summarized in Table~\ref{lattice2dsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{lattice2d.tikz}
+ \end{makeimage}
+ \caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
+ \label{lattice2dfig}
+\end{figure}
+
+\begin{elementsummary}{lattice2d}{2d lattice element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}{lattice2d element summary}{lattice2dsummary}
+\elementParam{\param{thick}: defines the out of plane ($z$-direction) thickness}
+\elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
+\elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
+\elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2drandom.in}{tests/sm/lattice2drandom.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticedamagevisco\_mps\_1.in}{tests/sm/latticedamagevisco\_mps\_1.in}}
+\end{elementsummary}
+
+The theory of lattice2d is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
+
+\subsubsection{latticeboundary2D element}
+Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell. It has three components which are displacements, which are produces of the macroscopic (average) strain components and length of the peridodic cell as $aE_{xx}$, $bE_{xx}$  and $bG_{xy}$ and the length of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice2dboundaryfig}). The coordinates $x$ and $y$ of the third node are the lengths $a$ and $b$ of the periodic cell, respectively.  The element is defined in x,y plane. The strain components at the additional node have the meaning of average strains in the periodic cell. The specific input parameters for this element in addition to those used for lattice2d are shown in Table~\ref{lattice2dboundarysummary}. 
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.4\textwidth]{./lattice2dboundaryfig.pdf}
+ \caption{latticeboundary2D element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
+ \label{lattice2dboundaryfig}
+\end{figure}
+
+\begin{elementsummary}{latticeboundary2D}{2d lattice boundary element}{\field{location}{in}}{latticeboundary2D element summary}{latticeboundary2D summary}
+
+\elementParam{\param{location}: number between 1 and 8 which specifies the location of the node with respect to the periodic cell.}
+
+\elementDescription{Unknowns}{Nine DOFs are required, which are $u$-displacement, $v$-displacement and $w$-rotation at nodes 1 and 2, and $aE_{xx}$, $bE_{yy}$ and $bG_{xy}$ at node 3.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice2dboundary1.in}{tests/sm/lattice2dboundary1.in}}
+\elementDescription{Reference}{\cite{GraJir10}}
+\end{elementsummary}
+
+\subsubsection{Lattice3d element}
+Lattice3d represents a two-node 3d lattice element. Each node has six degrees of freedom as shown in Figure~\ref{lattice3dfig}.
+The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. The properties of the mid-cross-section are internally computed from its vertices which are given as input in the global coordinate sytem. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
+The input parameters for this element are shown in Table~\ref{lattice3dsummary}. 
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.3\textwidth]{./lattice3d.pdf}
+ \caption{Lattice3d element. Node numbering, DOF numbering, cross-section vertices and local coordinate system at integration point $C$.}
+ \label{lattice3dfig}
+\end{figure}
+
+\begin{elementsummary}{lattice3d}{3d lattice element}{\field{polycoords}{ra}  \field{couplingflag}{in} \field{couplingnumbers}{ra} \field{pressures}{ra} \field{mlength}{rn}}{lattice3d element summary}{lattice3dsummary}
+\elementParam{\param{polycooords}: array of the coordinates of the vertices of the mid-cross-section of the lattice element in the global coordinate system.}
+\elementParam{\param{couplingflag}: flag (optional parameter. Default is 0) which activates coupling with a transport lattice element.}
+\elementParam{\param{couplingnumbers}: array of numbers of transport lattice elements (optional parameter), which are coupled with the 3d lattice element.}
+\elementParam{\param{pressures}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
+\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d2.in}{tests/sm/lattice3d2.in}, \href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d3.in}{tests/sm/lattice3d3.in}}
+\elementDescription{Reference}{\cite{GraBol16}}
+\end{elementsummary}
+
+
+\subsubsection{Lattice3dBoundary element}
+This element represents a three-noded 3d lattice element for boundaries of 3d periodic cells. The first two nodes have 6 degrees of freedom as for the element lattice3d. The third node is used to control the loading of the periodic cell using three normal ($aE_{xx}$, $bE_{yy}$ and $zE_{zz}$) and three shear strain ($cG_{yz}$, $cG_{xz}$, $bG_{xy}$) components. Here, $a$, $b$ and $c$ are the three dimensions of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice3dboundaryfig}). The connection between periodic nodes is defined as
+\begin{equation}
+  \mathbf{x}^{'} = \mathbf{M} \mathbf{x}
+\end{equation}
+Here, $\mathbf{x}^{'}$ and $\mathbf{x}$ are the nodes inside and outside, respectively, and $\mathbf{M}$ is the translation matrix, for which the input is provided in the form of a location parameter as shown in Table~\ref{lattice3dboundarysummary}. 
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{./lattice3dboundaryfig.pdf}
+ \caption{Lattice3dboundary element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
+ \label{lattice3dboundaryfig}
+\end{figure}
+
+\begin{elementsummary}{lattice3dboundary}{3d lattice boundary element}{\field{location}{in}}{lattice3dboundary element summary}{lattice3dboundarysummary}
+\elementParam{\param{location}: array of two numbers between number between 1 and 26, which specifies the location of the two nodes with respect to the 3d periodic cell.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each of the first two node. Node 3 requires the 6 quantities to control the periodic cell $aE_{xx}$, $bE_{yy}$, $zE_{zz}$, $cG_{yz}$, $cG_{xz}$ and $bG_{xy}$ }
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/lattice3d1.in}{tests/sm/lattice3d1.in}}
+\elementDescription{Reference}{\cite{AthWheGra18}}
+\end{elementsummary}
+
+\subsubsection{Latticelink3d}
+This element represents a two-node 3d link element connecting 3d beam and 3d lattice elements. Each node has six degrees of freedom.
+The node ordering is important: the first node carries the rigid arm and must therefore have rotational degrees of freedom, while the slip (displacement jump) is evaluated at the second node. Which physical entity is placed first is the user's modelling choice; it only has to be the node from which the rigid arm is offset. For a lattice model both matrix and reinforcement nodes usually have rotational degrees of freedom, so the matrix node is typically given first and the reinforcement node second, evaluating the slip at the reinforcement. 
+The input parameters for this element are shown in Table~\ref{latticelink3dsummary}.
+
+\begin{elementsummary}{latticelink3d}{3d lattice link element}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra} \field{l\_end}{rn}}{latticelink3d element summary}{latticelink3dsummary}
+\elementParam{\param{length}: bond length}
+\elementParam{\param{diameter}: diameter }
+\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
+\elementParam{\param{l\_end}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
+\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Tests/Examples}{\href{https://github.com/oofem/oofem/blob/devel/tests/sm/latticelink1.in}{tests/sm/latticelink1.in}}
+\elementDescription{Reference}{\cite{GraAnt19}}
+\end{elementsummary}
+
+\subsubsection{Latticelink3dboundary}
+Represents three-node 3d boundary link element connecting 3d beam and 3d lattice elements. The first two nodes have the same meaning as for latticelink3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
+The specific input parameters for this element in addition of those for latticelink3d are shown in Table~\ref{latticelink3dboundarysummary}. 
+
+\begin{elementsummary}{latticelink3dboundary}{3d lattice link boundary element}{{ \field{location}{in} }{rn}}{latticelink3dboundary element summary}{latticelink3dboundarysummary}
+\elementParam{\param{location}: }
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Reference}{\cite{GraAnt19}}
+\end{elementsummary}
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
+ \subsubsection{Lattice3dnl element}
+ Lattice3dnl is the geometrically nonlinear (large-rotation) counterpart of the lattice3d element. It accepts the same input and the same cross-section options (facet/shell via \param{polycoords}, or beam via the cross-section properties together with \param{zaxis} and \param{s}), but the displacement jumps and nodal forces are evaluated in the deformed configuration, so the element is suitable for large rotations and catenary action. The rotational part of the generalised strain is the exact relative rotation of the two nodes, i.e. the axial vector of $\mathbf{R}_2 \mathbf{R}_1^{\mathrm{T}}$, which reduces to the difference of the nodal rotation vectors for rotation about a single axis.
+
+ \begin{elementsummary}{lattice3dnl}{3d geometrically nonlinear lattice element}{\field{polycoords}{ra} \field{shellnormal}{ra} \optField{zaxis}{ra} \optField{s}{rn}}{lattice3dnl element summary}{lattice3dnlsummary}
+\elementParam{\param{polycoords}, \param{shellnormal}, \param{zaxis}, \param{s}: as for the lattice3d element.}
+\elementDescription{Cross-section}{As for the lattice3d element.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Reference}{\cite{AbdGra24}}
+\end{elementsummary}
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
+\subsection{Lattice transport elements}
+
+These are two-node lattice transport elements intended for coupled and stand-alone
+mass- or heat-transport analyses on Delaunay/Voronoi lattice networks. Each node
+carries one pressure (or temperature) degree of freedom. Flow along the element
+follows a linear pressure interpolation; the cross-section polygon is the dual
+Voronoi facet and enters strength/stiffness-like quantities through \param{polycoords}.
+
+The element assembles a capacity matrix that can optionally be switched from the
+default consistent form to a diagonal (row-sum-preserving) lumped form. Lumping
+makes the scheme equivalent to a two-point-flux-approximation (TPFA) finite-volume
+discretisation on the Voronoi dual and is recommended when the capacity
+$c(p)$ is strongly nonlinear (e.g.\ drying, Richards-type problems), where the
+consistent form is known to produce pressure oscillations and an apparent loss of
+conductivity near sharp fronts. Lumping is opt-in via \param{lumpedcapacity}; the
+default preserves existing behaviour.
+
+\subsubsection{latticemt2d element}
+Two-node 2D lattice mass-transport element. The element features are summarised
+in Table~\ref{latticemt2dsummary}.
+
+\begin{elementsummary}{latticemt2d}{2d lattice mass-transport element}{\field{thick}{rn} \field{width}{rn} \field{gpcoords}{ra} \optField{dim}{rn} \optField{crackwidth}{rn} \optField{couplingflag}{in} \optField{couplingnumber}{in} \optField{lumpedcapacity}{in}}{latticemt2d element summary}{latticemt2dsummary}
+\elementParam{\param{thick}: out-of-plane thickness.}
+\elementParam{\param{width}: Voronoi-facet width (cross-section length).}
+\elementParam{\param{gpcoords}: integration-point coordinates in the global system.}
+\elementParam{\param{dim}: dimension factor (optional, default 2).}
+\elementParam{\param{crackwidth}: crack width used in conductivity scaling (optional).}
+\elementParam{\param{couplingflag}: flag (optional, default 0) activating coupling with a mechanical lattice element.}
+\elementParam{\param{couplingnumber}: number of the coupled mechanical element.}
+\elementParam{\param{lumpedcapacity}: flag (optional, default 0). If set to 1, the capacity matrix is replaced by its diagonal (row-sum-preserving) lumped form, yielding a TPFA-equivalent, monotone scheme. Recommended for strongly nonlinear $c(p)$.}
+\elementDescription{Unknowns}{Single dof (P\_f - pressure / moisture) per node.}
+\elementDescription{Approximation}{Linear pressure along the element.}
+\elementDescription{Integration}{One Gauss point at \param{gpcoords}.}
+\elementDescription{CS properties}{simplecs.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+\subsubsection{latticemt3d element}
+Two-node 3D lattice mass-transport element. The cross-section is a polygonal
+Voronoi facet supplied via \param{polycoords}. The element features are summarised
+in Table~\ref{latticemt3dsummary}.
+
+\begin{elementsummary}{latticemt3d}{3d lattice mass-transport element}{\field{polycoords}{ra} \optField{dim}{rn} \optField{area}{rn} \optField{mlength}{rn} \optField{crackwidths}{ra} \optField{couplingflag}{in} \optField{couplingnumber}{ia} \optField{lumpedcapacity}{in}}{latticemt3d element summary}{latticemt3dsummary}
+\elementParam{\param{polycoords}: coordinates of the mid-cross-section (Voronoi facet) vertices in the global system.}
+\elementParam{\param{dim}: dimension factor (optional, default 3).}
+\elementParam{\param{area}: prescribed cross-section area (optional; otherwise computed from \param{polycoords}).}
+\elementParam{\param{mlength}: minimum element length threshold (optional).}
+\elementParam{\param{crackwidths}: per-vertex crack widths used in conductivity scaling (optional).}
+\elementParam{\param{couplingflag}: flag (optional, default 0) activating coupling with a mechanical lattice element.}
+\elementParam{\param{couplingnumber}: array of coupled mechanical element numbers.}
+\elementParam{\param{lumpedcapacity}: flag (optional, default 0). If set to 1, the capacity matrix is replaced by its diagonal (row-sum-preserving) lumped form, yielding a TPFA-equivalent, monotone scheme. Recommended for strongly nonlinear $c(p)$.}
+\elementDescription{Unknowns}{Single dof (P\_f - pressure / moisture) per node.}
+\elementDescription{Approximation}{Linear pressure along the element.}
+\elementDescription{Integration}{One Gauss point at the element midpoint.}
+\elementDescription{CS properties}{simplecs.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+\subsubsection{latticemt3dboundary element}
+Three-noded 3D lattice mass-transport element for boundaries of 3D periodic
+cells. The first two nodes carry the single pressure / moisture dof as in
+latticemt3d; the third is a control node that supplies the macro
+gradients driving the periodic cell. The dof of the node that lies outside the
+periodic cell is reconstructed from its periodic image inside the cell plus the
+control-node dofs, using the same translation pattern as
+lattice3dboundary (Figure~\ref{lattice3dboundaryfig}).
+The element features are summarised in Table~\ref{latticemt3dboundarysummary}.
+
+\begin{elementsummary}{latticemt3dboundary}{3d lattice mass-transport boundary element}{\field{polycoords}{ra} \field{location}{ia} \optField{dim}{rn} \optField{area}{rn} \optField{mlength}{rn} \optField{crackwidths}{ra} \optField{couplingflag}{in} \optField{couplingnumber}{ia} \optField{lumpedcapacity}{in}}{latticemt3dboundary element summary}{latticemt3dboundarysummary}
+\elementParam{\param{polycoords}: coordinates of the mid-cross-section (Voronoi facet) vertices in the global system.}
+\elementParam{\param{location}: array of two integers between 1 and 26 specifying the location of the two transport nodes with respect to the 3D periodic cell — same encoding as lattice3dboundary.}
+\elementParam{\param{dim}: dimension factor (optional, default 3).}
+\elementParam{\param{area}: prescribed cross-section area (optional; otherwise computed from \param{polycoords}).}
+\elementParam{\param{mlength}: minimum element length threshold (optional).}
+\elementParam{\param{crackwidths}: per-vertex crack widths used in conductivity scaling (optional).}
+\elementParam{\param{couplingflag}: flag (optional, default 0) activating coupling with a mechanical lattice element.}
+\elementParam{\param{couplingnumber}: array of coupled mechanical element numbers.}
+\elementParam{\param{lumpedcapacity}: flag (optional, default 0). Replaces the capacity matrix with its diagonal lumped form for monotone TPFA-equivalent behaviour.}
+\elementDescription{Unknowns}{Single dof (P\_f) per transport node. The third (control) node carries the periodic-cell dofs as for lattice3dboundary but reduced to the transport-relevant components.}
+\elementDescription{Approximation}{Linear pressure along the element.}
+\elementDescription{Integration}{One Gauss point at the element midpoint.}
+\elementDescription{CS properties}{simplecs.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
+
 \begin{thebibliography}{99}
 
 
@@ -2492,6 +2616,8 @@ Represents 1D isoparametric line element in 3D space. The element geometry is de
 \bibitem{GraAnt19} P. Grassl and A. Antonelli. ``3D network modelling of fracture processes in fibre-reinforced geomaterials'', International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.
 
   
+\bibitem{AbdGra24} G. Abdelrhim and P. Grassl. ``A simple frame element for large rotations'', Available at SSRN 4850146, 2024.
+\bibitem{SciGraLarRun20} A. Sciegaj and P. Grassl and F. Larsson and K. Runesson and K. Lundgren. ``Upscaling of three-dimensional reinforced concrete representative volume elements to effective beam and plate models'', International Journal of Solids and Structures, vol. 202, pp. 835-853, 2020.
 \end{thebibliography}
 \end{document}
 

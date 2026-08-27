@@ -1,0 +1,24 @@
+latticeneumanncoupling_out.sm
+sm part of lattice Neumann hydro-mechanical boundary coupling
+NonLinearStatic nsteps 2 nmodules 1 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 2000 refloadmode 1
+errorcheck
+domain 2dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 1
+node 1 coords 2 0.5 0.5
+node 2 coords 2 1.5 0.5
+node 3 coords 2 1.5 1.5
+node 4 coords 2 0.5 1.5
+lattice2D 1 nodes 2 1 2 crossSect 1 mat 1 thick 1.0 width 1 gpCoords 2 1.0 0.5
+lattice2D 2 nodes 2 2 3 crossSect 1 mat 1 thick 1.0 width 1 gpCoords 2 1.5 1.0
+lattice2D 3 nodes 2 3 4 crossSect 1 mat 1 thick 1.0 width 1 gpCoords 2 1.0 1.5
+lattice2D 4 nodes 2 4 1 crossSect 1 mat 1 thick 1.0 width 1 gpCoords 2 0.5 1.0
+latticecs 1 material 1
+latticedamage 1 d 0. talpha 0. e 36.995e3 e0 8.63619e-5 stype 3 wf 2.36899e-2 a1 0.3333 coh 2. ec 10
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 6 values 3 0. 0. 0. set 1
+LatticeNeumannCoupling 2 loadTimeFunction 1 smnodes 2 3 4 tmnodes 2 3 3 direction 3 0 1 0
+ConstantFunction 1 f(t) 1.
+Set 1 nodes 2 1 2
+#%BEGIN_CHECK% tolerance 1.e-5
+#ELEMENT tStep 2 number 2 gp 1 keyword 139 component 1 value -5.0000e-01
+#%END_CHECK%

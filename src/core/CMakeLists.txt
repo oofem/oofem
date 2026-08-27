@@ -179,8 +179,6 @@ set (core_dofman
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
-    latticedirichletcouplingnode.C
-    latticeneumanncouplingnode.C
     )
 
 set (core_material
@@ -200,7 +198,6 @@ set (core_export
     vtkxmlexportmodule.C
     vtkmemoryexportmodule.C
     vtkxmlperiodicexportmodule.C
-    vtkxmllatticeexportmodule.C
     vtkpfemexportmodule.C
     vtkxfemexportmodule.C
     homexportmodule.C
