@@ -497,7 +497,8 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     linearElasticMaterial.initializeFrom(ir);
 
     //damage flag
-    this->damageFlag = 1; //Default value using damage in tension and compression according to IJSS CDPM2 paper.
+    // damageFlag = 2: use secant stiffness rather than elastic stiffness, accelerating simulations
+    this->damageFlag = 2; //Default value using damage in tension and compression according to IJSS CDPM2 paper.
     IR_GIVE_OPTIONAL_FIELD(ir, this->damageFlag, _IFT_ConcreteDPM2_damflag);
 
     // elastic parameters
