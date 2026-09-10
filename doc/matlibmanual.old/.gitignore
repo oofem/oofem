@@ -1,0 +1,17 @@
+# Build products of the retired LaTeX manual; the sources are kept, the
+# generated DVI/PS/PDF and the tex4ht output are not.
+html/
+err
+*.png
+matlibmanual.4ct
+matlibmanual.4tc
+matlibmanual.css
+matlibmanual.dvi
+matlibmanual.idv
+matlibmanual.lg
+matlibmanual.lof
+matlibmanual.lot
+matlibmanual.pdf
+matlibmanual.ps
+matlibmanual.tmp
+matlibmanual.xref

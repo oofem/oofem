@@ -1,0 +1,82 @@
+/* Styling for the roles defined in _ext/oofemroles.py, which stand in for the
+   \param, \elemparam and \descitem macros of the LaTeX sources. */
+
+code.oofem-param {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+}
+
+.oofem-paramtype {
+    font-size: 0.8em;
+    opacity: 0.75;
+    padding-left: 0.15em;
+}
+
+strong.oofem-descitem {
+    font-family: var(--pst-font-family-monospace, monospace);
+}
+
+/* The summary tables are two columns of very different width; let the
+   description column take the space it needs. */
+table.docutils {
+    width: 100%;
+}
+
+table.docutils td {
+    vertical-align: top;
+}
+
+table.docutils td:first-child {
+    white-space: nowrap;
+    width: 1%;
+}
+
+/* A table wider than the window scrolls on its own rather than stretching the
+   page, so the body never scrolls horizontally. */
+.table-wrapper,
+div.body > table.docutils {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Citations.  basic.css floats the label and reserves a fixed 4em for it, but
+   these keys are names like [SciGraLarRun20] and run well past that, so the
+   label collided with the start of the reference.  A two-column grid sizes the
+   label to its own content instead, and a multi-paragraph entry simply adds
+   rows in the second column. */
+div.citation {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 0.6em;
+    margin-bottom: 0.4em;
+}
+
+div.citation > span.label {
+    float: none;
+    grid-column: 1;
+}
+
+div.citation > p {
+    margin-left: 0;
+    grid-column: 2;
+}
+
+/* Footnotes use the same pattern. */
+aside.footnote {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 0.6em;
+}
+
+aside.footnote > span {
+    float: none;
+    grid-column: 1;
+}
+
+aside.footnote > p {
+    margin-left: 0;
+    grid-column: 2;
+}
