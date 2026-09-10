@@ -360,6 +360,10 @@ in :numref:`Interface3dtrlinsummary`.
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Note                     | Element requires material model with _3dInterface support.                                   |
    +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/InterfaceEL_SurfTr1.in                                                                   |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/InterfaceEL_SurfTr1.in>`_     |
+   |                          | (and 1 more)                                                                                 |
+   +--------------------------+----------------------------------------------------------------------------------------------+
 
 IntElSurfQuad1 element
 ~~~~~~~~~~~~~~~~~~~~~~

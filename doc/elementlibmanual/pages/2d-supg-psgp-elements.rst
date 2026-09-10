@@ -75,6 +75,9 @@ pressure). The node numbering is anti-clockwise. The element features are summar
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   | Reliable                                                                                     |
    +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `fm/scctest01.in                                                                             |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/fm/scctest01.in>`_               |
+   +--------------------------+----------------------------------------------------------------------------------------------+
 
 .. _Tr21SUPG:
 
@@ -200,4 +203,8 @@ node numbering is anti-clockwise. The element features are summarized in Table
    |                          | :param:`twofluidmat`, that supports modelling of two immiscible fluids.                      |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   |                                                                                              |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `benchmark/fm/axi04.oofem.in                                                                 |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/benchmark/fm/axi04.oofem.in>`_   |
+   |                          | (and 2 more)                                                                                 |
    +--------------------------+----------------------------------------------------------------------------------------------+

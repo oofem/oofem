@@ -113,6 +113,9 @@ summarized in :numref:`qdktplatesummary`.
    | Reference                | J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements,       |
    |                          | IJNME, 15(12):1771-1812, 1980                                                                |
    +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/patch_qdtk.in                                                                            |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/patch_qdtk.in>`_              |
+   +--------------------------+----------------------------------------------------------------------------------------------+
 
 \subsubsection CCT Element  Implementation of constant curvature triangular element for
 plate analysis. Formulation based on Mindlin hypothesis. The structure should be defined
@@ -211,6 +214,9 @@ rotation around element normal).  The element features are summarized in Table
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   | Reliable                                                                                     |
    +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/patch_cct3d.in                                                                           |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/patch_cct3d.in>`_             |
+   +--------------------------+----------------------------------------------------------------------------------------------+
 
 \subsubsection RerShell Element Combination of CCT plate element (Mindlin hypothesis)
 with triangular plane stress element for membrane behavior. The element curvature can be
@@ -261,6 +267,9 @@ features are summarized in :numref:`rershellsummary`.
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   | Reliable                                                                                     |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/patch_rershell.in                                                                        |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/patch_rershell.in>`_          |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
 \subsubsection tr_shell11 element Combination of CCT3D plate element (Mindlin
@@ -342,6 +351,9 @@ complete set of 6 DOFs per node.  The element features are summarized in Table
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   | Reliable                                                                                     |
    +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/trshell11_1.in                                                                           |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/trshell11_1.in>`_             |
+   +--------------------------+----------------------------------------------------------------------------------------------+
 
 \subsubsection tr_shell02 element Combination of thin-plate DKT plate element with plane
 stress element (TrPlanestressRotAllman). This element comes with complete set of 6 DOFs
@@ -390,6 +402,9 @@ per node.  The element features are summarized in :numref:`trshell02summary`.
    | Status                   | -                                                                                            |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Note                     | Works only with linear material models, as bending and membrane actions are uncoupled        |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/trshell02_test.in                                                                        |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/trshell02_test.in>`_          |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
 .. _quad1mindlin:
@@ -445,6 +460,9 @@ the lumped mass matrix. The element features are summarized in Table
    | Reference                | [RobertCook1989]_                                                                            |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   | Experimental                                                                                 |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/patch_quad1mindlin.in                                                                    |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/patch_quad1mindlin.in>`_      |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
 .. _tr2shell7:
