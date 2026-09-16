@@ -167,6 +167,31 @@ show :
   # Extract include paths and libraries from compile command line
   resolve_includes (petsc_includes_all "${petsc_cpp_line}")
 
+  # MPI-enabled PETSc installations commonly export PCC=mpicc while leaving
+  # MPI_INCLUDE empty: the MPI headers are supplied implicitly by the compiler
+  # wrapper. CMake's source checks use CMAKE_C_COMPILER, not PCC, so append the
+  # wrapper's explicit include flags before compiling the PETSc probe. This is
+  # required by current prefix installations, whose petscsys.h includes mpi.h.
+  execute_process(
+    COMMAND ${petsc_cc} --showme:compile
+    OUTPUT_VARIABLE petsc_wrapper_cpp_line
+    RESULT_VARIABLE petsc_wrapper_showme_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  if (NOT petsc_wrapper_showme_result EQUAL 0)
+    execute_process(
+      COMMAND ${petsc_cc} -show
+      OUTPUT_VARIABLE petsc_wrapper_cpp_line
+      RESULT_VARIABLE petsc_wrapper_show_result
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+    )
+  endif ()
+  resolve_includes (petsc_wrapper_includes "${petsc_wrapper_cpp_line}")
+  list (APPEND petsc_includes_all ${petsc_wrapper_includes})
+  list (REMOVE_DUPLICATES petsc_includes_all)
+
   #on windows we need to make sure we're linking against the right
   #runtime library
   if (WIN32)
@@ -242,6 +267,32 @@ show :
     message (STATUS "Recognized PETSc install with single library for all packages")
   endif ()
 
+  # A shared PETSc library built with MPI still has unresolved MPI symbols.
+  # PETSc's PCC wrapper knows the exact MPI link interface, but the historical
+  # finder only queried PETSC_EXTERNAL_LIB_BASIC. Ask the wrapper explicitly
+  # so both the configuration probe and OOFEM itself link libmpi.
+  execute_process(
+    COMMAND ${petsc_cc} --showme:link
+    OUTPUT_VARIABLE petsc_wrapper_link_line
+    RESULT_VARIABLE petsc_wrapper_link_showme_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  if (NOT petsc_wrapper_link_showme_result EQUAL 0)
+    execute_process(
+      COMMAND ${petsc_cc} -show
+      OUTPUT_VARIABLE petsc_wrapper_link_line
+      RESULT_VARIABLE petsc_wrapper_link_show_result
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+    )
+  endif ()
+  resolve_libraries (petsc_wrapper_libraries "${petsc_wrapper_link_line}")
+  foreach (pkg SYS VEC MAT DM KSP SNES TS ALL)
+    list (APPEND PETSC_LIBRARIES_${pkg} ${petsc_wrapper_libraries})
+    list (REMOVE_DUPLICATES PETSC_LIBRARIES_${pkg})
+  endforeach ()
+
   include(Check${PETSC_LANGUAGE_BINDINGS}SourceRuns)
   macro (PETSC_TEST_RUNS includes libraries runs)
     if(${PETSC_LANGUAGE_BINDINGS} STREQUAL "C")
@@ -281,7 +332,9 @@ int main(int argc,char *argv[]) {
   find_path (PETSC_INCLUDE_DIR petscts.h HINTS "${PETSC_DIR}" PATH_SUFFIXES include NO_DEFAULT_PATH)
   find_path (PETSC_INCLUDE_CONF petscconf.h HINTS "${PETSC_DIR}" PATH_SUFFIXES "${PETSC_ARCH}/include" "bmake/${PETSC_ARCH}" NO_DEFAULT_PATH)
   mark_as_advanced (PETSC_INCLUDE_DIR PETSC_INCLUDE_CONF)
-  set (petsc_includes_minimal ${PETSC_INCLUDE_CONF} ${PETSC_INCLUDE_DIR})
+  set (petsc_includes_minimal
+    ${PETSC_INCLUDE_CONF} ${PETSC_INCLUDE_DIR} ${petsc_wrapper_includes})
+  list (REMOVE_DUPLICATES petsc_includes_minimal)
 
   petsc_test_runs ("${petsc_includes_minimal}" "${PETSC_LIBRARIES_TS}" petsc_works_minimal)
   if (petsc_works_minimal)
