@@ -46,6 +46,8 @@ non-linearity in the element records.
 :optparam:`solvertype{s}`
     Name of the non-linear solver.  Default ``nrsolver``, the Newton-Raphson
     solver whose attributes are documented under :ref:`NonLinearStatic`.
+    With a PETSc-enabled build, ``petscsnes`` selects the PETSc SNES adapter
+    and requires ``smtype 7``; see :ref:`petscsnessolver`.
 
 :optparam:`stiffmode{in}`
     Which stiffness the solver requests: ``0`` tangent (default), ``1`` secant,
@@ -54,7 +56,10 @@ non-linearity in the element records.
 :optparam:`initialguess{in}`
     How each step starts; see :ref:`common-analysis-parameters`.  For
     ``StaticStructural`` the default is ``1`` (approximated tangent problem),
-    which is the better choice when prescribed displacements change.
+    which is the better choice when prescribed displacements change.  With
+    ``petscsnes``, this predictor uses a separate PETSc linear solver and SNES
+    starts from the predicted solution.  Set ``initialguess 0`` to disable the
+    predictor.
 
 :optparam:`smtype{in}`
     Sparse matrix storage scheme.  Default ``0``, the symmetric skyline.  See
