@@ -646,6 +646,7 @@ EngngModel :: solveYourself()
                         }
                     } else { // else: do nothing, i.e., continue with the analysis
                         repeat = false;
+                        OOFEM_WARNING("%s", ce.what());
                     }
                 }
             }

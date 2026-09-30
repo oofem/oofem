@@ -134,17 +134,24 @@ NRSolver :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     // read relative error tolerances of the solver
     // if rtolv provided set to this tolerance both rtolf and rtold
     rtolf.resize(1);
-    rtolf.at(1) = 1.e-3; // Default value.
+    rtolf.at(1) = 1.e-3; // Default relative tolerance for force.
     rtold.resize(1);
-    rtold = Vec1(
-        0.0
-    );                       // Default off (0.0 or negative values mean that residual is ignored)
+    rtold.at(1) = 0.0;   //= Vec1(0.0);   // Default relative tolerance for displacement (off).
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
 
     // read optional force and displacement tolerances
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
+
+    atolf.resize(1); atolf.at(1) = 0.0; // Default absolute tolerance for force (off).
+    atold.resize(1); atold.at(1) = 0.0; // Default absolute tolerance for displacement (off).
+    IR_GIVE_OPTIONAL_FIELD(ir, atolf.at(1), _IFT_NRSolver_atolv);
+    IR_GIVE_OPTIONAL_FIELD(ir, atold.at(1), _IFT_NRSolver_atolv);
+
+    // read optional force and displacement tolerances
+    IR_GIVE_OPTIONAL_FIELD(ir, atolf.at(1), _IFT_NRSolver_atolf);
+    IR_GIVE_OPTIONAL_FIELD(ir, atold.at(1), _IFT_NRSolver_atold);
 
     prescribedDofs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, _IFT_NRSolver_ddm);
@@ -226,6 +233,12 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         }
         if ( rtold.at(1) > 0.0 ) {
             OOFEM_LOG_INFO(" DisplError");
+        }
+        if ( atolf.at(1) > 0.0 ) {
+            OOFEM_LOG_INFO(" AbsForceError");
+        }
+        if ( atold.at(1) > 0.0 ) {
+            OOFEM_LOG_INFO(" AbsDisplError");
         }
         OOFEM_LOG_INFO("\n----------------------------------------------------------------------------\n");
     }
@@ -312,11 +325,17 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
         //
         // update solution
         //
-        if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
-            // line search
+        if ( this->lsFlag ) {
+            // The energy line search is applied to every Newton correction.
+            // The first correction is often the most important one to damp
+            // when contact activates within a load step.
             LineSearchNM :: LS_status LSstatus;
             double eta;
             this->giveLineSearchSolver()->solve(X, ddX, F, R, R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
+            if (LSstatus == LineSearchNM::ls_failed) {
+                throw ConvergenceException(
+                    "No admissible line-search correction; requesting time-step reduction");
+            }
         } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
             ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
@@ -593,7 +612,7 @@ NRSolver :: printState(FILE *outputStream)
 bool
 NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &ddX, FloatArray &X,
                              double RRT, const FloatArray &internalForcesEBENorm,
-                             int nite, bool &errorOutOfRange)
+                             int nite, bool &errorOutOfRange) // NOLINT(readability-function-cognitive-complexity)
 {
     double forceErr, dispErr;
     FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;
@@ -619,6 +638,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         this->forceErrVecOld = this->forceErrVec; // copy the old values
         this->forceErrVec.resize( internalForcesEBENorm.giveSize() );
         forceErrVec.zero();
+        // @todo: this is only for force, not displacement. Should be generalized.
+        // @todo: this is only for the no-grouping case. Should be generalized.
     }
 
     if ( internalForcesEBENorm.giveSize() > 1 ) { // Special treatment when just one norm is given; No grouping
@@ -736,10 +757,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 
         //bool zeroNorm = false;
         // loop over dof groups and check convergence individually
+        bool converged_force = true;
+        bool converged_disp = true;
         for ( int dg = 1; dg <= nccdg; dg++ ) {
+            double current_force_err_abs = 0.0;
+            double current_disp_err_abs = 0.0;
             bool zeroFNorm = false, zeroDNorm = false;
             // Skips the ones which aren't used in this problem (the residual will be zero for these anyway, but it is annoying to print them all)
-            if ( !idsInUse.at(dg) ) {
+            if ( idsInUse.at(dg) == 0 ) {
                 continue;
             }
 
@@ -749,7 +774,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 OOFEM_LOG_INFO( "  %s:", DofIDItemToString( ( DofIDItem ) dg ).c_str() );
             }
 
-            if ( rtolf.at(1) > 0.0 ) {
+            bool current_dg_converged_force = false;
+            if ( rtolf.at(1) > 0.0 || atolf.at(1) > 0.0 ) {
+                current_force_err_abs = sqrt( dg_forceErr.at(dg) );
                 //  compute a relative error norm
                 if ( dg_forceScale.find(dg) != dg_forceScale.end() ) {
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) +
@@ -757,23 +784,27 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 } else if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) >= nrsolver_ERROR_NORM_SMALL_NUM ) {
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
                 } else {
-                    // If both external forces and internal ebe norms are zero, then the residual must be zero.
-                    //zeroNorm = true; // Warning about this afterwards.
+                    forceErr = current_force_err_abs; // Fallback to absolute error if denominator is too small
                     zeroFNorm = true;
-                    forceErr = sqrt( dg_forceErr.at(dg) );
                 }
 
                 if ( std::isnan( forceErr ) || forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
-                if ( forceErr > rtolf.at(1) ) {
-                    answer = false;
+
+                // Check convergence for force
+                if ( (rtolf.at(1) > 0.0 && forceErr <= rtolf.at(1)) || (atolf.at(1) > 0.0 && current_force_err_abs <= atolf.at(1)) ) {
+                    current_dg_converged_force = true;
+                } else {
+                    converged_force = false;
                 }
-		if ( (forceErr > 0.0) && (nite == 0)) {
-		  // if forceError > 0 and first iteration we report no convergence to actually
-		  // apply the loading
-		  answer = false;
-		}
+
+                // Special handling for first iteration
+        		if ( (forceErr > 0.0) && (nite == 0) ) { // Only relative force error matters here
+		            // if forceError > 0 and first iteration we report no convergence to actually
+		            // apply the loading
+		            converged_force = false;
+	        	}
 
                 if ( engngModel->giveProblemScale() == macroScale  && numPrintouts <= maxNumPrintouts ) {
                     OOFEM_LOG_INFO(zeroFNorm ? " *%.3e" : "  %.3e", forceErr);
@@ -785,21 +816,24 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
             }
 
-            if ( rtold.at(1) > 0.0 ) {
+            bool current_dg_converged_disp = false;
+            if ( rtold.at(1) > 0.0 || atold.at(1) > 0.0 ) {
+                current_disp_err_abs = sqrt( dg_dispErr.at(dg) );
                 // compute displacement error
                 if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
                     dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
                 } else {
-                    ///@todo This is almost always the case for displacement error. nrsolveR_ERROR_NORM_SMALL_NUM is no good.
-                    //zeroNorm = true; // Warning about this afterwards.
-                    //zeroDNorm = true;
-                    dispErr = sqrt( dg_dispErr.at(dg) );
+                    dispErr = current_disp_err_abs; // Fallback to absolute error if denominator is too small
                 }
                 if ( std::isnan( dispErr ) || dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
-                if ( dispErr > rtold.at(1) ) {
-                    answer = false;
+
+                // Check convergence for displacement
+                if ( (rtold.at(1) > 0.0 && dispErr <= rtold.at(1)) || (atold.at(1) > 0.0 && current_disp_err_abs <= atold.at(1)) ) {
+                    current_dg_converged_disp = true;
+                } else {
+                    converged_disp = false;
                 }
 
                 if ( engngModel->giveProblemScale() == macroScale  && numPrintouts <= maxNumPrintouts ) {
@@ -807,10 +841,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
             }
         }
-
+        answer = converged_force && converged_disp;
 
         if ( engngModel->giveProblemScale() == macroScale ) {
             OOFEM_LOG_INFO("\n");
+            // @todo: Add logging for absolute errors here.
         }
 
         //if ( zeroNorm ) OOFEM_WARNING("Had to resort to absolute error measure (marked by *)");
@@ -829,26 +864,32 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dXX = parallel_context->localNorm(X);
         dXX *= dXX;                                       // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
         dXdX = parallel_context->localNorm(ddX);
-        dXdX *= dXdX;
+        dXdX *= dXdX; // Squared norm of displacement increment
 
-        if ( rtolf.at(1) > 0.0 ) {
+        double forceErr_abs = sqrt(forceErr); // Absolute force error
+        double dispErr_abs = sqrt(dXdX);      // Absolute displacement error
+
+        bool converged_force = false;
+        if ( rtolf.at(1) > 0.0 || atolf.at(1) > 0.0 ) {
             // we compute a relative error norm
             if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
                 forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
             } else {
-                forceErr = sqrt(forceErr);   // absolute norm as last resort
+                forceErr = forceErr_abs;   // absolute norm as last resort
             }
             if ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                 errorOutOfRange = true;
             }
-            if ( fabs(forceErr) > rtolf.at(1) ) {
-                answer = false;
+
+            if ( (rtolf.at(1) > 0.0 && fabs(forceErr) <= rtolf.at(1)) || (atolf.at(1) > 0.0 && fabs(forceErr_abs) <= atolf.at(1)) ) {
+                converged_force = true;
             }
 
             if ( engngModel->giveProblemScale() == macroScale ) {
-                OOFEM_LOG_INFO(" %-15e", forceErr);
+                OOFEM_LOG_INFO(" %-15e", forceErr); // Relative force error
+                if (atolf.at(1) > 0.0) OOFEM_LOG_INFO(" %-15e", forceErr_abs); // Absolute force error
             }
-
+            
             if ( this->constrainedNRFlag ) {
                 // store the errors from the current iteration for use in the next
                 forceErrVec.at(1) = forceErr;
@@ -856,23 +897,29 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         }
 
         if ( rtold.at(1) > 0.0 ) {
+            bool converged_disp = false;
             // compute displacement error
             // err is relative displacement change
             if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
                 dispErr = sqrt(dXdX / dXX);
             } else {
-                dispErr = sqrt(dXdX);
+                dispErr = dispErr_abs;
             }
             if ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                 errorOutOfRange = true;
             }
-            if ( fabs(dispErr)  > rtold.at(1) ) {
-                answer = false;
+
+            if ( (rtold.at(1) > 0.0 && fabs(dispErr) <= rtold.at(1)) || (atold.at(1) > 0.0 && fabs(dispErr_abs) <= atold.at(1)) ) {
+                converged_disp = true;
             }
 
             if ( engngModel->giveProblemScale() == macroScale ) {
-                OOFEM_LOG_INFO(" %-15e", dispErr);
+                OOFEM_LOG_INFO(" %-15e", dispErr); // Relative displacement error
+                if (atold.at(1) > 0.0) OOFEM_LOG_INFO(" %-15e", dispErr_abs); // Absolute displacement error
             }
+            answer = converged_force && converged_disp;
+        } else {
+            answer = converged_force; // Only force convergence was checked
         }
 
         if ( engngModel->giveProblemScale() == macroScale ) {

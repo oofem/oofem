@@ -70,8 +70,17 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(ElasticBulkModulusInverse, 27) \
     ENUM_ITEM_WITH_VALUE(MRM_ScalarOne, 28) \
     ENUM_ITEM_WITH_VALUE(DeviatoricStiffness, 29) \
-    ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) 
-
+    ENUM_ITEM_WITH_VALUE(DeviatoricStress, 30) \
+    ENUM_ITEM_WITH_VALUE(EffectiveStressParameter_1, 31)  /*Bishop’s Parameter, fluid 1*/ \
+    ENUM_ITEM_WITH_VALUE(EffectiveStressParameter_2, 32)  /*Bishop’s Parameter, fluid 2*/ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_11, 33) /* Compressibility coefficient for fluid phase 1 (e.g., water) */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_12, 34) /* Compressibility coefficient for fluid phase 2 (e.g., air) */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_21, 35) /* Compressibility coefficient for fluid phase  */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_22, 36) /* Compressibility coefficient for fluid phase 2 (e.g., air) */ \
+    ENUM_ITEM_WITH_VALUE(Permeability_2, 37) /* Compressibility coefficient for solid skeleton */ \
+    ENUM_ITEM_WITH_VALUE(MassDensity_1, 38) /* Mass density of fluid phase 1 (e.g., water) */ \
+    ENUM_ITEM_WITH_VALUE(MassDensity_2, 39) /* Mass density of fluid phase 2 (e.g., air) */ 
+    
 #include "enum-impl.h"
 
 } // end namespace oofem

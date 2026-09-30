@@ -157,6 +157,15 @@ public:
     void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
 
     /**
+     * Returns the Young modulus obtained by linearizing the material response
+     * about its undeformed initial state.  It is intended for scale estimates,
+     * such as automatic contact-penalty selection.
+     *
+     * Materials that support such estimates should override this method.
+     */
+    virtual double giveInitialYoungsModulus() const;
+
+    /**
      * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.

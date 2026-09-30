@@ -1,0 +1,38 @@
+contact2d_friction_facet_stick_tangent.out
+strict analytical tangent check for sticking transport across adjacent master facets
+StaticStructural nsteps 26 deltat 0.025 renumber 0 nmodules 0 rtolv 1.e-8 stiffMode 0 manrmsteps 1 maxiter 120 initialguess 1 smtype 1 linesearch 1
+Domain PlaneStrain
+OutputManager tstep_all dofman_all element_all
+ndofman 10 nelem 6 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 2 nset 5 ncontactsurf 2
+node 1 coords 2 -1.0 -1.0
+node 2 coords 2  0.0 -1.0
+node 3 coords 2  1.0 -1.0
+node 4 coords 2 -1.0  0.0
+node 5 coords 2  0.0  0.0
+node 6 coords 2  1.0  0.0
+node 7 coords 2 -0.7  0.02
+node 8 coords 2 -0.3  0.02
+node 9 coords 2 -0.3  0.42
+node 10 coords 2 -0.7  0.42
+Quad1PlaneStrain 1 nodes 4 1 2 5 4 crosssect 1 mat 1 nlgeo 1
+Quad1PlaneStrain 2 nodes 4 2 3 6 5 crosssect 1 mat 1 nlgeo 1
+Quad1PlaneStrain 3 nodes 4 7 8 9 10 crosssect 1 mat 1 nlgeo 1
+StructuralContactElement_LineLin 4 nodes 2 5 4 crosssect 2 mat 2 NIP 2
+StructuralContactElement_LineLin 5 nodes 2 6 5 crosssect 2 mat 2 NIP 2
+StructuralContactElement_LineLin 6 nodes 2 7 8 crosssect 2 mat 2 NIP 2
+StructuralFEContactSurface 1 ce_set 3
+StructuralFEContactSurface 2 ce_set 4
+SimpleCS 1 set 5 thick 1.0 area 1.0
+DummyCS 2 mat 2
+MooneyRivlinCompressibleMat 1 d 0 C1 1.e4 C2 0.0 K 1.e6
+DummyMat 2
+BoundaryCondition 1 loadTimeFunction 1 values 2 0 0 dofs 2 1 2 set 1
+BoundaryCondition 2 loadTimeFunction 2 values 2 1.0 -0.05 dofs 2 1 2 set 2
+structuralpenaltycontactbc 3 loadTimeFunction 1 dofs 2 1 2 pn 1.e7 pt 1.e4 friction 10.0 mastersurface 1 slavesurface 2 nsd 2 tangentmode 3 fdcheck 1 fdperturbation 1.e-7 fdtolerance 2.e-6 fdoutputprefix "/tmp/contact2d_facet_stick_tangent_fd"
+ConstantFunction 1 f(t) 0.0
+PiecewiseLinFunction 2 npoints 2 t 2 0 1 f(t) 2 0 1
+set 1 nodes 3 1 2 3
+set 2 nodes 2 9 10
+set 3 elements 2 4 5
+set 4 elements 1 6
+set 5 elements 3 1 2 3

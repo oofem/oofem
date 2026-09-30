@@ -124,6 +124,7 @@ public:
      * Instanciates the receiver from input record.
      */
     void initializeFrom(const std::shared_ptr<InputRecord> &ir);
+    void postInitialize() ;
     /// Sets the receiver bounds according to given solution step number, returns end index.
     int setStepBounds(int startStepNumber);
     /// Sets the number of steps within the metastep.
@@ -153,7 +154,7 @@ public:
      * Used time function should provide step lengths as function of step number.
      * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
      */
-    Function *giveDtFunction(){return NULL;}
+    Function *giveDtFunction();
     
     
     /// Returns the time step length.

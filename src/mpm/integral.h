@@ -73,7 +73,7 @@ namespace oofem {
             }
         } 
         // evaluate term contribution to weak form on given cell at given point 
-        void assemble_lhs (SparseMtrx& dest, const UnknownNumberingScheme &s, TimeStep* tStep) const {
+        void assemble_lhs (SparseMtrx& dest, const UnknownNumberingScheme &s, TimeStep* tStep, double factor2 = 1.0) const {
             IntArray locr, locc;
 
             for (auto i: this->set->giveElementList()) { // loop over elements
@@ -88,14 +88,14 @@ namespace oofem {
                     // ->need to querry/store/identify element IR based on NIP.
                     IntegrationRule* ir =  this->term->giveElementIntegrationRule(e);
                     e->integrateTerm_dw(contrib, *this->term, ir, tStep); // @todo IR 
-                    contrib.times(this->factor);
+                    contrib.times(this->factor * factor2);
                     // assemble
                     dest.assemble (locr, locc, contrib);
                 }
             }
         }
         // evaluate contribution (all vars known) on given cell
-        void assemble_rhs (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep, FloatArray* eNorms=NULL ) const {
+        void assemble_rhs (FloatArray& dest, const UnknownNumberingScheme &s, TimeStep* tstep, FloatArray* eNorms=NULL, double factor2 = 1.0) const {
             IntArray locr, locc, dofIDs;
 
             for (auto i: this->set->giveElementList()) { // loop over elements
@@ -110,9 +110,11 @@ namespace oofem {
                     // ->need to querry/store/identify element IR based on NIP.
                     IntegrationRule* ir =  this->term->giveElementIntegrationRule(e);
                     e->integrateTerm_c(contrib, *this->term, ir, tstep); // @todo IR
-                    contrib.times(this->factor); 
+                    contrib.times(this->factor * factor2);
                     // assemble
-                    dest.assemble (contrib, locr);
+                    if (contrib.isNotEmpty()) {
+                        dest.assemble (contrib, locr);
+                    }
                     if ( eNorms ) {
                         eNorms->assembleSquared(contrib, dofIDs);
                     }

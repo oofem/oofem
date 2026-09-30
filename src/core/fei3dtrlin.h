@@ -86,8 +86,8 @@ public:
     double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void surfaceLocal2global(Coordinates &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
-    IntArray computeLocalSurfaceMapping(int iedge) const override;
-    void surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const ;
+    IntArray computeLocalSurfaceMapping(int isurf) const override;
+    std::tuple<FloatArrayF<3>, FloatArrayF<3>> surfaceEvalBaseVectorsAt(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override;
     void surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const ;
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order, const Element_Geometry_Type) const override;

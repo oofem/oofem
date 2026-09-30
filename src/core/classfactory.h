@@ -135,6 +135,7 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 #define REGISTER_Material(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, CTOR< Material, class, int, Domain* > );
 #define REGISTER_Material_Alt(class, altname) static bool __dummy_ ## class ## altname OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(#altname, CTOR< Material, class, int, Domain* > );
 #define REGISTER_EngngModel(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, CTOR< EngngModel, class, int, EngngModel* > );
+#define REGISTER_EngngModel_Alt(class, altname) static bool __dummy_ ## class ## altname OOFEM_ATTR_UNUSED = GiveClassFactory().registerEngngModel(#altname, CTOR< EngngModel, class, int, EngngModel* > );
 #define REGISTER_Function(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, CTOR< Function, class, int, Domain* > );
 #define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, CTOR< NonlocalBarrier, class, int, Domain* > );
 #define REGISTER_ExportModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, CTOR< ExportModule, class, int, EngngModel* > );

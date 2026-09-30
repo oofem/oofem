@@ -112,6 +112,8 @@ namespace oofem {
         ENUM_ITEM_WITH_VALUE(S_w, 53) /* Macroscopic reinforcement slip field in z-direction */          \
 \
         ENUM_ITEM_WITH_VALUE(VF, 54) /* Volume fraction */          \
+        ENUM_ITEM_WITH_VALUE(P_f2, 55) /* Pressure field of second phase */          \
+        ENUM_ITEM_WITH_VALUE(C_2, 56) /* Mass concentration of the first constituent */ \
         ENUM_ITEM_WITH_VALUE(MaxDofID, 500) /* Maximum value of DofIDItem, used for validation and array sizing */
 
 #include "enum-impl.h"

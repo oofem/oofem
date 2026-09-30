@@ -1,0 +1,41 @@
+continuumframerotation1.out
+Continuum frame node with rotational DOFs embedded in a linear tetrahedron. The four tet corners are given a rigid-body rotation field, so the frame node must show zero translation and rotations 0.1, 0.2, 0.3.
+NonLinearStatic nmsteps 1 nsteps 2 nmodules 1 contextOutputStep 1000
+nsteps 2 rtolf 1.e-3 stiffMode 2 maxiter 1000 controllmode 1 donotfixload
+errorcheck
+domain 3d
+OutputManager
+#
+ndofman 5 nelem 1 ncrosssect 1 nmat 1 nbc 4 nltf 1 nic 0 nset 5
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 1. 0. 0.
+node 3 coords 3 0. 1. 0.
+node 4 coords 3 0. 0. 1.
+continuumframenode 5 coords 3 0.25 0.25 0.25 dofType 6 2 2 2 2 2 2 dofidmask 6 1 2 3 4 5 6
+#
+ltrspace 1 nodes 4 1 2 3 4
+#
+SimpleCS 1 material 1 set 1
+#
+IsoLE 1 d 0. E 30.e9 n 0.15 talpha 0.
+#
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.025 -0.05 0.025 set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.025 0.25 -0.175 set 3
+BoundaryCondition  3 loadTimeFunction 1 dofs 3 1 2 3 values 3 -0.275 -0.05 0.125 set 4
+BoundaryCondition  4 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.225 -0.150 0.025 set 5
+#
+PiecewiseLinFunction 1 npoints 2 t 2  0. 1. f(t) 2 0. 1.
+set 1 elements 1 1
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+Set 5 nodes 1 4
+
+#%BEGIN_CHECK% tolerance 1e-6
+#NODE tStep 2 number 5 dof 1 unknown d value 0.0
+#NODE tStep 2 number 5 dof 2 unknown d value 0.0
+#NODE tStep 2 number 5 dof 3 unknown d value 0.0
+#NODE tStep 2 number 5 dof 4 unknown d value 0.1
+#NODE tStep 2 number 5 dof 5 unknown d value 0.2
+#NODE tStep 2 number 5 dof 6 unknown d value 0.3
+#%END_CHECK%

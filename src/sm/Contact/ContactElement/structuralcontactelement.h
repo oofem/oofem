@@ -42,6 +42,7 @@
 
 
 #define _IFT_StructuralContactElement_QuadLin_Name "structuralcontactelement_quadlin"
+#define _IFT_StructuralContactElement_QuadLinGauss_Name "structuralcontactelement_quadlingauss"
 #define _IFT_StructuralContactElement_LineLin_Name "structuralcontactelement_linelin"
 #define _IFT_StructuralContactElement_TrLin_Name "structuralcontactelement_trlin"
 
@@ -81,8 +82,29 @@ public:
   FEInterpolation *giveInterpolation() const override;
   FloatArray computeNormalVectorAt(const FloatArray &lCoords) override;
   void giveDofManDofIDMask(int inode, IntArray &answer) const override;
-  Element_Geometry_Type giveGeometryType() const override {return EGT_line_2;}
+  Element_Geometry_Type giveGeometryType() const override {return EGT_quad_1_interface;}
 
+};
+
+/**
+ * Four-node contact quadrilateral using an interior Gauss rule.
+ *
+ * The legacy QuadLin record deliberately retains its Lobatto rule for input
+ * compatibility.  This variant provides standard 2 x 2 interior sampling for
+ * NIP 4, avoiding contact points tied to the surface vertices.
+ */
+class StructuralContactElement_QuadLinGauss : public StructuralContactElement_QuadLin
+{
+public:
+  StructuralContactElement_QuadLinGauss(int n, Domain *d)
+    : StructuralContactElement_QuadLin(n, d) {}
+  const char *giveClassName() const override
+  { return "StructuralContactElement_QuadLinGauss"; }
+  const char *giveInputRecordName() const override
+  { return _IFT_StructuralContactElement_QuadLinGauss_Name; }
+
+protected:
+  void computeGaussPoints() override;
 };
 
 
@@ -101,7 +123,7 @@ public:
   FEInterpolation *giveInterpolation() const override;
   FloatArray computeNormalVectorAt(const FloatArray &lCoords) override;
   void giveDofManDofIDMask(int inode, IntArray &answer) const override;
-  Element_Geometry_Type giveGeometryType() const override {return EGT_line_2;}
+  Element_Geometry_Type giveGeometryType() const override {return EGT_triangle_1;}
 
 };
 

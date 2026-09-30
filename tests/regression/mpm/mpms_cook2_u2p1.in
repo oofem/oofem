@@ -10,7 +10,7 @@ Variable name "w" interpolation "feiquad" type 1 quantity 0 size 2 dofs 2 1 2 # 
 Variable name "p" interpolation "feilin"  type 0 quantity 3 size 1 dofs 1 11 # pressure 
 Variable name "dp" interpolation "feilin" type 0 quantity 3 size 1 dofs 1 11 # test function
 #BTSigmaTerm 1 variable "u"  testvariable "w" mmode 7 lhsmatmode 29 rhsmatmode 30
-SymbolicTerm 1 variable "u"  testvariable "w" mmode 7 lexpression "B(w,gp).T*Dm_dev(gp,ts)*B(u,gp)" rexpression "B(w,gp).T*Sig_dev(u,gp,ts)"
+SymbolicTerm 1 variable "u"  testvariable "w" mmode 7 lexpression "Grad_s(w,gp).T*MDer(gp,ts, MatResponseMode::DeviatoricStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*Sig_dev(u,gp,ts)"
 # symbolic equivalent of BTamNTerm
 #BTamNTerm 2 variable "p" testvariable "w" mmode 7 atype 28 
 SymbolicTerm 2 variable "p"  testvariable "w" mmode 7 lexpression "Div(w,gp).T*N(p,gp)" rexpression "Div(w,gp).T*N(p,gp)*ru(p, cell, ts)"

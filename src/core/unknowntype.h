@@ -51,7 +51,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(DeplanationFunction, 16)          \
     ENUM_ITEM_WITH_VALUE(MacroSlipVector, 17) \
     ENUM_ITEM_WITH_VALUE(ResidualForce, 18) \
-    ENUM_ITEM_WITH_VALUE(Concentration, 19) 
+    ENUM_ITEM_WITH_VALUE(Concentration, 19) \
+    ENUM_ITEM_WITH_VALUE(PressureVector_1, 20) /* Pressure for phase 1 */ \
+    ENUM_ITEM_WITH_VALUE(PressureVector_2, 21) /* Pressure for phase 2 */
 
 /**
  * Type representing particular unknown (its physical meaning).

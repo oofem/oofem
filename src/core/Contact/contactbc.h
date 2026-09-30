@@ -81,6 +81,7 @@ protected:
     /// contactSearchAlgorithm
   std::unique_ptr<ContactSearchAlgorithm> contactSearchAlgorithm;
     int updateEachNthIter = 1;
+    void refreshContactPairs(TimeStep *tStep) { contactSearchAlgorithm->updateContactPairs(tStep); }
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
@@ -144,6 +145,8 @@ public:
      * and initializing contact data structures.
      */
     void postInitialize() override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     /**
      * @brief Assembles extrapolated (predictor) contact forces.
      *
@@ -158,7 +161,10 @@ public:
      * @param ns  Numbering scheme.
      * @param cp  Contact pair.
      */
-    void giveLocationArray(IntArray &loc, const UnknownNumberingScheme &ns, const ContactPair *cp) const;
+    void giveRowLocationArray(IntArray &loc, const UnknownNumberingScheme &ns,
+                              const ContactPair *cp) const;
+    void giveColumnLocationArray(IntArray &loc, const UnknownNumberingScheme &ns,
+                                 const ContactPair *cp) const;
     /**
      * @brief Builds row/column location arrays for contact assembly (pure virtual).
      *

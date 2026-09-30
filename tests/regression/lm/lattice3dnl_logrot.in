@@ -1,0 +1,21 @@
+lattice3dnl_logrot.out
+Single Lattice3dNL element, large-rotation kinematic check. Node 1 is rotated 180 deg about x and node 2 180 deg about y, so the relative rotation is 180 deg about z. It verifies that the rotational strain comes from the log map of the relative rotation R2 R1^T, not from the difference of the nodal spins: the strain norm is then pi (the true angle), whereas the spin difference would give pi*sqrt(2) = 4.443, an impossible rotation. The mid-length rigid arms also swing node 2's arm, adding a real axial strain, and the corotational frame follows the average nodal spin. The check is purely kinematic and independent of the material.
+NonLinearStatic nmsteps 1 nsteps 1 nmodules 1
+nsteps 1 rtolf 1.e-3 maxiter 300 stiffMode 1 controllmode 1 refloadmode 1 minsteplength 1.
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.0 0.0 0.0 bc 6 1 1 1 2 1 1
+node 2 coords 3 1.0 0.0 0.0 bc 6 1 1 1 1 2 1
+lattice3Dnl 1 nodes 2 1 2 crossSect 1 mat 1
+LatticeCS 1 material 1 shape 1 radius 0.05
+latticeframeelastic 1 d 1. talpha 0.0 E 30.e9 n 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 3.14159265358979
+ConstantFunction 1 f(t) 1.0
+#%BEGIN_CHECK% tolerance 1.e-3
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 1 value -1.7676e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 2 value  1.7676e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 156 component 3 value -1.9029e+00
+#%END_CHECK%

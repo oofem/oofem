@@ -1,0 +1,41 @@
+contact2d_inclined_plane_stick.out
+Inclined-plane Coulomb verification: alpha=20deg, mu=0.5, expected stick
+StaticStructural nsteps 3 deltat 1 renumber 0 nmodules 1 rtolv 1e-8 rtolf 1e-7 stiffMode 0 manrmsteps 1 maxiter 100 initialguess 0 smtype 1 linesearch 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 3 150 151 152
+Domain PlaneStrain
+OutputManager tstep_all dofman_all element_all
+ndofman 10 nelem 6 ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 2 nset 6 ncontactsurf 2
+node 1 coords 2 -1.708375170 -1.153886598
+node 2 coords 2  2.050395314  0.214193859
+node 3 coords 2  1.879385242  0.684040287
+node 4 coords 2 -1.879385242 -0.684040287
+node 5 coords 2 -0.469846310 -0.171010072
+node 6 coords 2  0.469846310  0.171010072
+node 7 coords 2  0.264634224  0.734825645
+node 8 coords 2 -0.675058397  0.392805359
+node 9 coords 2  0.264634224  0.734825645
+node 10 coords 2 -0.675058397  0.392805359
+Quad1PlaneStrain 1 nodes 4 5 6 7 8 crosssect 1 mat 1 nlgeo 1
+Quad1PlaneStrain 2 nodes 4 1 2 3 4 crosssect 1 mat 1 nlgeo 1
+StructuralContactElement_LineLin 3 nodes 2 3 4 crosssect 2 mat 2 NIP 2
+StructuralContactElement_LineLin 4 nodes 2 5 6 crosssect 2 mat 2 NIP 2
+Spring 5 nodes 2 7 9 crosssect 1 mode 1 orientation 3 0.939692621 0.342020143 0 k 0.5
+Spring 6 nodes 2 8 10 crosssect 1 mode 1 orientation 3 0.939692621 0.342020143 0 k 0.5
+StructuralFEContactSurface 1 ce_set 3
+StructuralFEContactSurface 2 ce_set 4
+SimpleCS 1 set 6 thick 1.0 area 1.0
+DummyCS 2 mat 2
+mooneyrivlincompressiblemat 1 d 0 c1 5.e5 c2 0 k 5.e7
+DummyMat 2
+BoundaryCondition 1 loadTimeFunction 1 values 2 0 0 dofs 2 1 2 set 1
+NodalLoad 2 loadTimeFunction 2 dofs 2 1 2 components 2 0 -0.5 set 2
+structuralpenaltycontactbc 3 loadTimeFunction 1 dofs 2 1 2 pn 1.e7 pt 1.e5 friction 0.5 mastersurface 1 slavesurface 2 nsd 2 tangentmode 3
+ConstantFunction 1 f(t) 0.0
+PiecewiseLinFunction 2 npoints 4 t 4 0 1 2 3 f(t) 4 0 1.e-6 1 1
+set 1 nodes 6 1 2 3 4 9 10
+set 2 nodes 2 7 8
+set 3 elements 1 3
+set 4 elements 1 4
+set 5 elements 1 1
+set 6 elements 2 1 2
+# tan(20 deg)=0.364 < mu=0.5: static Coulomb solution must stick.

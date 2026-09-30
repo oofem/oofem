@@ -41,6 +41,9 @@ namespace oofem {
 class IntArray;
 class FloatArray;
 class FloatMatrix;
+class DataStream;
+class ContactElement;
+class Node;
 
 
 
@@ -82,13 +85,23 @@ protected:
   FloatArray contactPointCoords;
   //
   FloatArray previousContactPointCoords;
+  FloatArray previousMasterLocalCoordinates;
+  int previousMasterElementId = -1;
+  ContactFeatureType previousMasterFeatureType = ContactFeatureType::Surface;
+  int previousMasterFeatureIndex = 0;
+  bool previousContactActive = false;
   bool referenceContactPointInit = false;
   //traction vectors
   FloatArray tractionVector;
   FloatArray tempTractionVector;
+  // Accumulated plastic slip for optional isotropic friction hardening.
+  double accumulatedPlasticSlip = 0.0;
+  double tempAccumulatedPlasticSlip = 0.0;
   // dxi;
   double dXi;
   double temp_dXi;
+  AABB committedSlaveSearchAABB;
+  bool committedSlaveSearchAABBInitialized = false;
   
 
 public:
@@ -102,15 +115,41 @@ public:
   ~ContactPair(){;}
   //
   /**
-   * @brief Returns true if the pair is currently considered in contact.
-   *
-   * The default implementation delegates the decision to the master contact point
-   * (if available). If no master is assigned, the pair cannot be in contact.
+   * @brief Returns true if this slave currently has a valid master projection.
    */
-  virtual bool inContact() {
+  virtual bool hasMasterContact() const {
     if (!master) return false;
     return master->inContact();
   }
+  /**
+   * @brief Returns true if the valid master projection is actively penetrating.
+   */
+  virtual bool hasActiveContact() const {
+    return hasMasterContact() && normal_gap <= 0.0;
+  }
+  /**
+   * @brief Returns true if the pair was active in the last committed state.
+   */
+  bool hasContactHistory() const { return previousContactActive; }
+  /**
+   * @brief Returns true if a master projection exists in the last committed state.
+   *
+   * Projection history is retained while the gap is positive for search and
+   * facet continuity. Friction history is guarded separately by
+   * hasContactHistory(), and contact traction is reset whenever the committed
+   * state is inactive.
+   */
+  bool hasProjectionHistory() const {
+    return previousMasterElementId >= 0 && previousMasterLocalCoordinates.giveSize() > 0;
+  }
+  /** Committed master coordinates used by the finite-step friction update. */
+  const FloatArray &givePreviousMasterLocalCoordinates() const {
+    return previousMasterLocalCoordinates;
+  }
+  /**
+   * @brief Backward-compatible alias for a valid master projection.
+   */
+  virtual bool inContact() const { return hasMasterContact(); }
   //
   /**
    * @brief Computes the contact interpolation matrix (N-matrix) for this pair.
@@ -138,6 +177,15 @@ public:
    * @param tStep Current time step.
    */
   virtual void computeCurvature(FloatMatrix &G, TimeStep *tStep);
+  virtual void computeSecondBaseVectors(std::vector<std::vector<FloatArray>> &answer, TimeStep *tStep);
+  /**
+   * @brief Returns slave-side contact integration area/length for this pair.
+   *
+   * The penalty contact residual and tangent are integrated over the slave
+   * reference surface. Using the current measure here would require additional
+   * surface-Jacobian terms in the consistent tangent.
+   */
+  double giveContactArea(TimeStep *tStep);
   //
   /**
    * @brief Returns the master contact point (non-owning pointer).
@@ -158,13 +206,45 @@ public:
    */
   void giveLocationArray(const IntArray &dofs, IntArray &loc, const UnknownNumberingScheme &ns) const;
   /**
+   * @brief Builds the residual-row locations for the current master/slave pair.
+   */
+  void giveRowLocationArray(const IntArray &dofs, IntArray &loc,
+                            const UnknownNumberingScheme &ns) const;
+  /**
+   * @brief Builds tangent-column locations, including an exclusive old-master
+   * facet block after a facet transition.
+   */
+  void giveColumnLocationArray(const IntArray &dofs, IntArray &loc,
+                               const UnknownNumberingScheme &ns) const;
+  /** Current master nodes followed by slave nodes, matching the residual order. */
+  std::vector<Node *> giveResidualNodes() const;
+  /**
+   * Current residual nodes followed by old-master nodes that are not already
+   * present. This is the exact column support of the convected friction state.
+   */
+  std::vector<Node *> giveLinearizationNodes() const;
+  /** Returns the committed master element, or nullptr without projection history. */
+  ContactElement *givePreviousMasterContactElement() const;
+  /** True when current and committed projections use different master facets. */
+  bool hasMasterFacetTransition() const;
+  /** True when the current and committed generalized projection records differ. */
+  bool hasMasterFeatureTransition() const;
+  ContactFeatureType giveCurrentMasterFeatureType() const;
+  int giveCurrentMasterFeatureIndex() const;
+  ContactFeatureType givePreviousMasterFeatureType() const {
+    return previousMasterFeatureType;
+  }
+  int givePreviousMasterFeatureIndex() const { return previousMasterFeatureIndex; }
+  /**
  * @brief Returns the current normal gap (signed separation) of the pair.
  */
   double giveNormalGap() { return normal_gap;}
   /**
  * @brief Sets the current normal gap (signed separation) of the pair.
  */
-  void setNormalGap(double ng){this->normal_gap = ng;}
+  void setNormalGap(double ng);
+  /** Stores pressure and branch status on the slave integration point for output. */
+  void setOutputContactState(double pressure, int status);
   //
   /**
    * @brief Returns the current unit normal vector associated with the contact configuration.
@@ -209,7 +289,7 @@ public:
    *
    * Useful for gap/penetration evaluation and traction update procedures.
    */
-  FloatArray computeContactPointDisplacement() const;
+  FloatArray computeContactPointDisplacement(TimeStep *tStep) const;
   /**
    * @brief Sets the current normal vector.
    */
@@ -226,14 +306,22 @@ public:
    * @brief Sets a temporary traction vector (e.g., predictor or iteration-local value).
    */  
   void setTempTractionVector(const FloatArray &tv) {this->tempTractionVector = tv;}
+  void setTempAccumulatedPlasticSlip(double slip) {
+    this->tempAccumulatedPlasticSlip = slip;
+  }
   /**
    * @brief Returns the current traction vector associated with the contact constraint.
    */
   const FloatArray &giveTractionVector() const {return tractionVector;}
+  double giveAccumulatedPlasticSlip() const {return accumulatedPlasticSlip;}
   /**
    * @brief Assigns a master contact point for this pair.
    */
   void setMasterContactPoint(std::unique_ptr<ContactPoint> m) {master = std::move(m);}
+  /**
+   * @brief Clears the active contact state when no admissible master projection is found.
+   */
+  void clearContactState();
   /**
    * @brief Assigns a slave contact point for this pair.
    */
@@ -265,7 +353,15 @@ public:
    *
    * @return Bounding box enclosing the slave contact entity.
    */
-  AABB computeSlaveAABB();
+  AABB computeSlaveAABB(TimeStep *tStep) const;
+  /** Point AABB swept from the last accepted configuration to tStep. */
+  AABB computeSweptSlaveAABB(TimeStep *tStep) const;
+  /** Advances broad-phase history after an accepted solution step. */
+  void commitSearchState(TimeStep *tStep);
+  /** Stores committed friction/projection and swept-search state. */
+  void saveContext(DataStream &stream) const;
+  /** Restores committed friction/projection and swept-search state. */
+  void restoreContext(DataStream &stream);
 };
  
 } // end namespace oofem

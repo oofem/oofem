@@ -5,7 +5,7 @@ mpmsymbolicstationaryproblem nsteps 1 nvariables 2 nterms 1 nintegrals 1 lhsterm
 #errorcheck
 Variable name "u" interpolation "feilin" type 1 quantity 0 size 1 dofs 1 1 # displacement 
 Variable name "w" interpolation "feilin" type 1 quantity 0 size 1 dofs 1 1 # test function
-SymbolicTerm 1 variable "u"  testvariable "w" mmode 10 lexpression "B(w,gp).T*Dm(gp,ts)*B(u,gp)" rexpression "B(w,gp).T*Sig(u,gp,ts)"
+SymbolicTerm 1 variable "u"  testvariable "w" mmode 10 lexpression "Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*Sig(u,gp,ts)"
 #NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 1. 0.
 Integral 1 domain 1 set 1 term 1
 #Integral 2 domain 1 set 2 term 2

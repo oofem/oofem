@@ -114,6 +114,7 @@ void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
     stressVector = tempStressVector;
     strainVector = tempStrainVector;
     PVector      = tempPVector;
+    CVector      = tempCVector;
     FVector      = tempFVector;
 }
 
@@ -138,6 +139,7 @@ void StructuralMaterialStatus :: initTempStatus()
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
     tempPVector      = PVector;
+    tempCVector      = CVector;
     tempFVector      = FVector;
 }
 
@@ -153,6 +155,18 @@ StructuralMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
     }
 
     if ( ( iores = stressVector.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = PVector.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = CVector.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = FVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 }
@@ -171,6 +185,24 @@ StructuralMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     if ( ( iores = stressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
+    if ( ( iores = PVector.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = CVector.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = FVector.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    tempStrainVector = strainVector;
+    tempStressVector = stressVector;
+    tempPVector = PVector;
+    tempCVector = CVector;
+    tempFVector = FVector;
 }
 
 void StructuralMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)

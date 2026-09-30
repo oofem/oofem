@@ -37,6 +37,7 @@
 #include "floatmatrix.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
+#include "floatarrayf.h"
 
 namespace oofem {
 
@@ -55,6 +56,18 @@ FEContactPoint:: giveInterpolation()
   } else {
     OOFEM_ERROR("Incorrect spatial dimension");
   }
+}
+
+ContactElement *
+FEContactPoint::giveContactElement()
+{
+    return contactSurface->giveContactElement(contactElementId);
+}
+
+ContactElement *
+FEContactPoint::giveContactElementOnSurface(int elementId) const
+{
+    return contactSurface->giveContactElement(elementId);
 }
 
 void FEContactPoint:: computeNmatrix(FloatMatrix &answer)
@@ -91,37 +104,97 @@ FEContactPoint :: giveNormalVector()
   return contactSurface->giveContactElement(contactElementId)->computeNormalVectorAt(this->giveLocalCoordinates());
 }
 
-  
-void  
-FEContactPoint :: computeCurvature(FloatMatrix &kappa, const FloatArray &normal, TimeStep *tStep)
+
+double
+FEContactPoint :: giveSurfaceMeasure(TimeStep *tStep)
 {
-    //get curvature
-    // kappa = [dro/dksidksi * normal, dro/dksideta * normal;
-    //          dro/detadksi * normal, dro/detadeta * normal]
   auto ce = contactSurface->giveContactElement(contactElementId);
   FEIElementDeformedGeometryWrapper cellgeo(ce, tStep);
-  auto fe = this->giveInterpolation();
-  FloatMatrix d2Ndxi2;
-  fe->surfaceEvald2Ndxi2(d2Ndxi2, this->giveLocalCoordinates());
-  
-  FloatArray d2Ndxidxi, d2Ndetadeta, d2Ndxideta;
-  for (int i = 1; i <= ce->giveNumberOfNodes(); ++i) {
-    Coordinates nodeCoords = cellgeo.giveVertexCoordinates(i);
-    d2Ndxidxi.add(d2Ndxi2.at(i, 1), FloatArrayF<2>(nodeCoords.at(1), nodeCoords.at(2)));
-    if(surface_dimension == 2) {
-      d2Ndetadeta.add(d2Ndxi2.at(i, 2), FloatArrayF<2>(nodeCoords.at(1), nodeCoords.at(2)));
-      d2Ndxideta.add(d2Ndxi2.at(i, 3), FloatArrayF<2>(nodeCoords.at(1), nodeCoords.at(2)));
+  if (surface_dimension == 2) {
+    auto fe = dynamic_cast<FEInterpolation3d *>(this->giveInterpolation());
+    if (fe == nullptr) {
+      OOFEM_ERROR("Wrong 3d contact interpolation");
     }
-  }
-  kappa.resize(surface_dimension,surface_dimension);
-  kappa.at(1,1) = d2Ndxidxi.dotProduct(normal);
-  if(surface_dimension == 2) {
-    kappa.at(1,2) = d2Ndxideta.dotProduct(normal);
-    kappa.at(2,1) = kappa.at(1,2);
-    kappa.at(2,2) = d2Ndetadeta.dotProduct(normal);
+    auto [g1, g2] = fe->surfaceEvalBaseVectorsAt(0, this->giveLocalCoordinates(), cellgeo);
+    return norm(cross(g1, g2));
+  } else if (surface_dimension == 1) {
+    auto fe = dynamic_cast<FEInterpolation2d *>(this->giveInterpolation());
+    if (fe == nullptr) {
+      OOFEM_ERROR("Wrong 2d contact interpolation");
+    }
+    return norm(fe->surfaceEvalBaseVectorsAt(1, this->giveLocalCoordinates(), cellgeo));
+  } else {
+    OOFEM_ERROR("Incorrect contact surface dimension");
   }
 }
+
+double
+FEContactPoint :: giveReferenceSurfaceMeasure()
+{
+  auto ce = contactSurface->giveContactElement(contactElementId);
+  FEIElementGeometryWrapper cellgeo(ce);
+  if (surface_dimension == 2) {
+    auto fe = dynamic_cast<FEInterpolation3d *>(this->giveInterpolation());
+    if (fe == nullptr) {
+      OOFEM_ERROR("Wrong 3d contact interpolation");
+    }
+    auto [g1, g2] = fe->surfaceEvalBaseVectorsAt(0, this->giveLocalCoordinates(), cellgeo);
+    return norm(cross(g1, g2));
+  } else if (surface_dimension == 1) {
+    auto fe = dynamic_cast<FEInterpolation2d *>(this->giveInterpolation());
+    if (fe == nullptr) {
+      OOFEM_ERROR("Wrong 2d contact interpolation");
+    }
+    return norm(fe->surfaceEvalBaseVectorsAt(1, this->giveLocalCoordinates(), cellgeo));
+  }
+  OOFEM_ERROR("Incorrect contact surface dimension");
+}
+
   
+void
+FEContactPoint :: computeSecondBaseVectors(std::vector<std::vector<FloatArray>> &answer, TimeStep *tStep)
+{
+  if (surface_dimension < 1 || surface_dimension > 2) {
+    OOFEM_ERROR("FEContactPoint: unsupported surface dimension for second base vectors");
+  }
+
+  ContactElement *ce = contactSurface->giveContactElement(contactElementId);
+  FEIElementDeformedGeometryWrapper cellgeo(ce, tStep);
+  FloatMatrix d2Ndxi2;
+  this->giveInterpolation()->surfaceEvald2Ndxi2(d2Ndxi2, this->giveLocalCoordinates());
+
+  const int spatialDimension = surface_dimension + 1;
+  answer.assign(surface_dimension, std::vector<FloatArray>(surface_dimension));
+  for (int node = 1; node <= ce->giveNumberOfNodes(); ++node) {
+    const Coordinates &fullCoordinates = cellgeo.giveVertexCoordinates(node);
+    FloatArray coordinates(spatialDimension);
+    for (int k = 1; k <= spatialDimension; ++k) {
+      coordinates.at(k) = fullCoordinates.at(k);
+    }
+    answer[0][0].add(d2Ndxi2.at(node, 1), coordinates);
+    if (surface_dimension == 2) {
+      answer[1][1].add(d2Ndxi2.at(node, 2), coordinates);
+      answer[0][1].add(d2Ndxi2.at(node, 3), coordinates);
+    }
+  }
+  if (surface_dimension == 2) {
+    answer[1][0] = answer[0][1];
+  }
+}
+
+void
+FEContactPoint :: computeCurvature(FloatMatrix &kappa, const FloatArray &normal, TimeStep *tStep)
+{
+  std::vector<std::vector<FloatArray>> secondBaseVectors;
+  this->computeSecondBaseVectors(secondBaseVectors, tStep);
+
+  kappa.resize(surface_dimension, surface_dimension);
+  for (int i = 0; i < surface_dimension; ++i) {
+    for (int j = 0; j < surface_dimension; ++j) {
+      kappa(i, j) = secondBaseVectors[i][j].dotProduct(normal);
+    }
+  }
+}
 
 void
 FEContactPoint :: computeVectorOf(ValueModeType mode, TimeStep *tStep, FloatArray &answer)
@@ -135,6 +208,18 @@ void
 FEContactPoint :: giveUpdatedCoordinates(Coordinates &coords, TimeStep* tStep)
 {
   this->giveInterpolation()->local2global(coords, this->giveLocalCoordinates(), FEIElementDeformedGeometryWrapper(contactSurface->giveContactElement(contactElementId), tStep));
+}
+
+void
+FEContactPoint :: giveUpdatedCoordinatesOnElement(Coordinates &coords, int elementId,
+                                                   const FloatArray &localCoords, TimeStep *tStep) const
+{
+  ContactElement *element = contactSurface->giveContactElement(elementId);
+  if (element == nullptr) {
+    OOFEM_ERROR("FEContactPoint: invalid previous master contact element");
+  }
+  element->giveInterpolation()->local2global(coords, localCoords,
+                                              FEIElementDeformedGeometryWrapper(element, tStep));
 }
 
 

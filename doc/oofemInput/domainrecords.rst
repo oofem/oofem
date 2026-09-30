@@ -287,6 +287,29 @@ Supported DofManagerType keywords are
    ``masterRegion``. If ``masterElement`` is directly supplied
    ``masterRegion`` is unused.
 
+-  Continuum frame node
+
+   ``ContinuumFrameNode`` ``coords #(ra)`` ``dofType #(in)``
+   [``masterElement #(in)``] [``masterRegion #(in)``]
+
+   A frame/beam node embedded in a continuum (solid) mesh. Its input is
+   identical to ``HangingNode`` and its translational DOFs are interpolated
+   from the master element in exactly the same way. Its linked (``dofType``
+   2) rotational DOFs (``R_u``, ``R_v``, ``R_w``), however, are constrained
+   to the infinitesimal rotation of the master element,
+   omega = 1/2 curl(u), evaluated from the shape-function gradients of the
+   translations. This lets a frame node embedded in a solid mesh - which
+   carries no rotational DOFs - inherit the local continuum rotation. All
+   three rotations, including the torsional one about the beam axis, are
+   determined automatically: no torsional restraint has to be applied and
+   the result does not depend on the frame element node ordering.
+
+   Rotational DOFs left as primary (``dofType`` 0) or fixed are not touched.
+   To bond only the translations to the matrix and let the frame element
+   itself carry the rotations, use a plain ``HangingNode`` instead.
+   The continuum rotational constraint is currently implemented for the
+   linear tetrahedron only; a non-tetrahedral master element creates an error.
+
 -  Slave node
 
    ``SlaveNode``  ``coords #(ra)``  ``dofType #(in)``
@@ -611,6 +634,33 @@ The crossSectType keyword can be one from following possibilities
      number of external node with prescribed boundary condition which
      corresponds to the relative twist of warping cross section.
 
+-  | Lattice cross section
+   | ``LatticeCS`` ``material #(in)`` [``shape #(in)``] [``radius #(rn)``]
+     [``area #(rn)``] [``iy #(rn)``] [``iz #(rn)``] [``ik #(rn)``]
+     [``shearcoeff #(rn)``] [``shearareay #(rn)``] [``shearareaz #(rn)``]
+     [``nlayers #(in)``]
+   | Part of the lattice module (compile with ``USE_LM``). Cross section for the 3d lattice elements (``lattice3d``,
+     ``lattice3dnl``). The ``shape`` parameter selects how the section
+     properties are obtained: ``0`` -- a general polygon/facet built from the
+     element vertex coordinates (``polycoords``); ``1`` -- a circle (from
+     ``radius``); ``2`` -- a rectangle (from four vertices); ``3`` -- a
+     property-defined section given directly, with no geometry (default is
+     ``0``). For the geometric shapes (``0``, ``1``, ``2``) the properties are
+     computed from the geometry, and any individual property may be overridden
+     by supplying its value here. Parameter ``area`` is the cross section area,
+     ``iy`` and ``iz`` are the second moments of area along the local y and z
+     axes, and ``ik`` is the Saint-Venant torsional constant; the shear response
+     is set either by a shear correction factor ``shearcoeff`` or by equivalent
+     shear areas ``shearareay`` and ``shearareaz``. For the property-defined
+     section (``shape 3``) the element represents a two-node frame member (rod,
+     beam, ...): ``area`` is mandatory, the remaining properties are optional,
+     the transverse axes are oriented by the element's ``zaxis`` and the
+     integration-point position along the element by its ``s`` parameter (see the
+     element library manual). The number of through-thickness layers of a shell
+     is given by ``nlayers`` (shell mode is activated by the element's
+     ``shellnormal``; default is a single integration point at the centroid).
+     All properties are defined in the local coordinate system of the element.
+
 .. _MaterialTypeRecords:
 
 Material type records
@@ -867,6 +917,46 @@ Currently, EntType keyword can be one from
    change dynamically, as the solid part deforms. The velocities are
    obtained from coupled structural nodes.
 
+-  Lattice hydro-mechanical coupling, Neumann type (transport pressure
+   to mechanical force)
+
+   ``LatticeNeumannCoupling`` ``smnodes #(ia)`` ``tmnodes #(ia)``
+   ``direction #(ra)``
+
+   Part of the lattice module (compile with ``USE_LM``).
+   Active boundary condition coupling a transport (pore-pressure) lattice
+   to a mechanical lattice in a staggered analysis. For each mechanical
+   node listed in ``smnodes`` it reads the fluid pressure :math:`P_f`
+   from the corresponding transport node in ``tmnodes`` (in the coupled
+   transport slave problem of a ``StaggeredProblem``) and applies a nodal
+   force :math:`f = P_f\, l\, \mathbf{n}`, where :math:`l` is the distance
+   between the mechanical node and its transport counterpart and
+   :math:`\mathbf{n}` is the unit ``direction``. The ``smnodes`` and
+   ``tmnodes`` arrays must have the same length. The transport slave
+   problem is identified by the ``coupling`` field of the driving
+   ``StaggeredProblem``. Implements Approach 1 of Grassl, Fahy, Gallipoli
+   and Wheeler (2015).
+
+-  Lattice hydro-mechanical coupling, Dirichlet type (mechanical stress
+   to transport pressure)
+
+   ``LatticeDirichletCoupling`` ``couplingelements #(ia)``
+
+   Part of the lattice module (compile with ``USE_LM``).
+   Boundary condition prescribing the pore pressure :math:`P_f` at a
+   transport lattice node to the distance-weighted average of the
+   (compression-only) normal stress of the mechanical lattice elements
+   listed in ``couplingelements`` (read from the coupled mechanical slave
+   problem of a ``StaggeredProblem``). Tensile normal stress is clamped
+   to zero. The coupling is explicit (one-step lagged): the pressure
+   prescribed at step :math:`n` uses the mechanical stress of step
+   :math:`n-1`, and the first step prescribes zero. The node the
+   condition acts on is given through the associated set and ``dofs``
+   (DOF 11, :math:`P_f`), as for a standard ``BoundaryCondition``. The
+   mechanical slave problem is identified by the ``coupling`` field of the
+   driving ``StaggeredProblem``. Implements Approach 2 of Grassl, Fahy,
+   Gallipoli and Wheeler (2015).
+
 - Body loads
 
    - Volume flux (load)
@@ -1015,23 +1105,40 @@ Currently, EntType keyword can be one from
      -  Structural penalty contact boundary condition
 
    ``structuralpenaltycontactbc`` ``loadTimeFunction #(in)`` ``dofs #(ia)``
-   ``pn #(rn)`` ``pt #(rn)`` ``friction #(rn)`` ``mastersurface #(in)``
-   ``slavesurface #(in)`` ``nsd #(in)``
+   ``pn #(rn)`` ``pt #(rn)`` ``friction #(rn)``
+   ``mastersurface #(in)`` ``slavesurface #(in)`` ``nsd #(in)``
+   [``frictiontransition #(rn)``] [``frictionhardening #(rn)``]
+   [``algo #(in)``] [``searchpadding #(rn)``] [``searchtol #(rn)``]
+   [``facethysteresis #(rn)``] [``generalizedfeatures #(in)``]
+   [``directionalprojection #(in)``] [``autopenalty #(in)``]
+   [``tangentmode #(in)``] [``fdcheck #(in)``] [``fdperturbation #(rn)``]
+   [``fdoutputprefix #(s)``] [``fdtolerance #(rn)``]
 
    Represents a penalty-based contact boundary condition used to model
    contact interactions between deformable bodies. The contact formulation
    enforces normal and tangential constraints between surfaces defined by
    ``StructuralFEContactSurface`` records and their underlying
-   ``StructuralContactElement_*`` elements.
+   ``StructuralContactElement_*`` elements. The formulation follows
+   Konyukhov and Schweizerhof, *Computational Contact Mechanics:
+   Geometrically Exact Theory for Arbitrary Shaped Bodies* (Springer,
+   LNACM 67, 2013): closest-point projection (Ch. 3), penalty/friction
+   evolution and return mapping (Sec. 6.1), and consistent tangents
+   (Sec. 7.1).
 
-   The parameters have the following meaning:
+   Required parameters:
 
    - ``pn`` — normal penalty stiffness, controlling resistance against
-     penetration between contacting surfaces.
+     penetration between contacting surfaces. Still required as a
+     placeholder when ``autopenalty`` is ``1``, in which case its value is
+     ignored.
    - ``pt`` — tangential penalty stiffness, controlling tangential
-     response.
-   - ``friction`` — coefficient of friction (currently experimental and
-     under development). Set to ``0.0`` for frictionless contact.
+     response. Same placeholder rule as ``pn`` when ``autopenalty`` is
+     ``1``.
+   - ``friction`` — Coulomb coefficient of friction. Set to ``0.0`` for
+     frictionless contact. **The frictional branch of this boundary
+     condition is an experimental, unverified development feature —
+     use** ``friction 0`` **for production analyses until it has been
+     validated.**
    - ``mastersurface`` and ``slavesurface`` — identifiers of the master
      and slave contact surfaces defined by corresponding
      ``StructuralFEContactSurface`` records (see :ref:`ContactSurfaceRecords`).
@@ -1040,11 +1147,70 @@ Currently, EntType keyword can be one from
    - ``nsd`` — number of spatial dimensions (2 for plane strain or plane stress, or 3 for
      3D problems).
 
+   Optional parameters:
+
+   - ``frictiontransition`` (default ``0.0``, range ``[0, 1)``) —
+     smoothness of the differentiable stick/slip projection used by the
+     experimental friction model. Zero recovers the sharp Coulomb return
+     map. Requires ``tangentmode`` ``0``, ``2`` or ``3``.
+   - ``frictionhardening`` (default ``0.0``, range ``[0, 1)``) —
+     dimensionless post-yield tangential-slip hardening ratio used by the
+     experimental friction model. Zero is perfect Coulomb friction;
+     positive values require a positive ``pt`` and ``tangentmode`` ``0``,
+     ``2`` or ``3``.
+   - ``algo`` (default ``0``) — contact search algorithm: ``0`` plain
+     surface-to-surface search; ``1`` sweep-and-prune broad-phase search
+     (3D only, i.e. ``nsd 3``), recommended for larger numbers of contact
+     elements.
+   - ``searchpadding`` (default: automatic, geometry-based) — absolute
+     broad-phase bounding-box padding used by the contact search. A
+     negative value (or omitting the field) selects the automatic
+     default.
+   - ``searchtol`` (default ``1.e-10``) — parametric-domain margin used by
+     the "is this point still inside this facet" test. Comparable to other
+     codes' sliding-elastic-interface search tolerance (typical default
+     ``0.01``).
+   - ``facethysteresis`` (default ``0.0``) — relative distance-squared
+     margin a competing master facet must exceed before it is allowed to
+     replace the facet currently owned by a contact pair. Zero disables
+     the hysteresis. A small positive value (e.g. ``1.e-6``) suppresses
+     Newton chattering caused by a slave point sitting near a shared edge
+     between two adjacent facets, where the true closest facet would
+     otherwise flip every iteration.
+   - ``generalizedfeatures`` (default ``0``) — when set to ``1``, extends
+     the closest-point search from plain facet (surface) projection to
+     also consider edge and vertex features of the master surface.
+     Mutually exclusive with ``directionalprojection``.
+   - ``directionalprojection`` (default ``0``) — when set to ``1``,
+     projects each slave point onto the master surface along the slave
+     surface's own normal direction instead of performing a general
+     closest-point search. Currently requires ``nsd 3``. Mutually
+     exclusive with ``generalizedfeatures``.
+   - ``autopenalty`` (default ``0``) — when set to ``1``, the ``pn``/``pt``
+     values are ignored and the normal/tangential penalty stiffnesses are
+     instead computed automatically for each slave contact element from
+     the contacting materials' initial Young's modulus and element
+     geometry (an :math:`E_n A/V` factor).
+   - ``tangentmode`` (default ``0``) — selects the contact tangent
+     formulation: ``0`` automatic selection, ``1`` rate-form analytical
+     (diagnostic use), ``2`` branch-frozen finite-difference, ``3`` exact
+     finite-step analytical tangent (including facet-history columns,
+     with a finite-difference fallback for projection features it does
+     not yet support).
+   - ``fdcheck`` (default ``0``) — when set to ``1``, enables an internal
+     finite-difference verification of the analytical contact tangent on
+     every call. Development/debugging aid only; adds significant
+     runtime cost.
+   - ``fdperturbation`` (default ``1.e-7``) — relative perturbation size
+     used by ``fdcheck``.
+   - ``fdoutputprefix`` (default ``"contact_fd"``) — filename prefix for
+     the diagnostic output written by ``fdcheck``.
+   - ``fdtolerance`` (default ``0.0``) — relative tolerance used by
+     ``fdcheck`` when comparing the analytical and finite-difference
+     tangents.
+
    The contact is enforced via the penalty method and contributes to the
-   residual and tangent system of equations at each iteration. This
-   boundary condition supports frictionless contact and a preliminary
-   version of frictional contact, which is currently experimental and
-   under development.
+   residual and tangent system of equations at each iteration.
 
    **Example:**
 
@@ -1058,8 +1224,21 @@ Currently, EntType keyword can be one from
    stiffness equal to 1.e8. The condition acts on degrees of freedom 1 and
    2 (displacement is X and Y direction) in a 2D plane strain/stress domain.
 
-   For bidirectional contact, two such boundary conditions can be defined
-   with swapped master and slave surfaces.
+   For bidirectional (two-pass) contact, two such boundary conditions can
+   be defined with swapped master and slave surfaces, e.g.:
+
+   ::
+
+      structuralpenaltycontactbc 6 loadTimeFunction 3 dofs 3 1 2 3 \
+          pn 0.01 pt 0.01 friction 0 autopenalty 1 \
+          mastersurface 2 slavesurface 1 nsd 3 algo 1 directionalprojection 1
+      structuralpenaltycontactbc 7 loadTimeFunction 3 dofs 3 1 2 3 \
+          pn 0.01 pt 0.01 friction 0 autopenalty 1 \
+          mastersurface 1 slavesurface 2 nsd 3 algo 1 directionalprojection 1
+
+   This frictionless two-pass example uses automatic penalty stiffness and
+   the sweep-and-prune search with directional projection, each surface
+   acting as master for the other.
 
 
    -  Thermal surface-to-surface contact boundary condition

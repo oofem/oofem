@@ -37,7 +37,9 @@
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/Materials/structuralms.h"
 #include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
-#include "sm/Materials/LatticeMaterials/latticematstatus.h"
+#ifdef __LM_MODULE
+ #include "lm/Materials/latticematstatus.h"
+#endif
 #include "Loads/structtemperatureload.h"
 #include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "Loads/structeigenstrainload.h"
@@ -759,10 +761,13 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
             if ( matStat ) {
                 stress = matStat->giveStressVector();
             } else   {
+#ifdef __LM_MODULE
                 LatticeMaterialStatus *lmatStat = dynamic_cast< LatticeMaterialStatus * >( status );
                 if ( lmatStat ) {
                     stress = lmatStat->giveLatticeStress();
-                } else   {
+                } else
+#endif
+                {
                     StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
                     stress = ms->jumpTractionReduced(ms->giveTraction(), gp);
                 }

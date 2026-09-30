@@ -45,6 +45,8 @@
 #define _IFT_LineSearchNM_lsearchtol "lsearchtol"
 #define _IFT_LineSearchNM_lsearchamp "lsearchamp"
 #define _IFT_LineSearchNM_lsearchmaxeta "lsearchmaxeta"
+#define _IFT_LineSearchNM_lsearchmineta "lsearchmineta"
+#define _IFT_LineSearchNM_lsearchmaxiter "lsearchmaxiter"
 //@}
 
 namespace oofem {
@@ -76,7 +78,8 @@ public:
     /**
      * Solves the line search optimization problem in the form of @f$ g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1 @f$,
      * The aim is to find @f$ \eta @f$ so that the @f$ g(r) @f$ has decreased sufficiently.
-     * The total solution vector is updated at exit as well as InternalRhs vector.
+     * The increment is scaled at exit and InternalRhs is evaluated at the accepted
+     * trial point. The caller remains responsible for updating the total solution.
      * @param r  Old total solution.
      * @param dr Increment of solution.
      * @param F  Old InternalRhs (real internal forces).

@@ -77,6 +77,15 @@ public:
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
 
+    /** Undeformed isotropic Young modulus used by contact auto-penalty.
+     *  For the Simo-Pister energy, K is the small-strain Lame parameter
+     *  lambda and G is the shear modulus.
+     */
+    double giveInitialYoungsModulus() const override
+    {
+        return G * (3.0 * K + 2.0 * G) / (K + G);
+    }
+
     FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
 
     FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const override { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }

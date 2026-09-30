@@ -52,6 +52,7 @@
 #define _IFT_RheoChainMaterial_n "n"
 #define _IFT_RheoChainMaterial_alphaOne "a1"
 #define _IFT_RheoChainMaterial_alphaTwo "a2"
+#define _IFT_RheoChainMaterial_alphaThree "a3"
 #define _IFT_RheoChainMaterial_lattice "lattice"
 #define _IFT_RheoChainMaterial_relmatage "relmatage"
 #define _IFT_RheoChainMaterial_begoftimeofinterest "begoftimeofinterest"
@@ -150,7 +151,7 @@ protected:
     /// Poisson's ratio (assumed to be constant, unaffected by creep).
     double nu = 0.;
     /// Parameters for the lattice model
-    double alphaOne = 0., alphaTwo = 0.;
+    double alphaOne = 0., alphaTwo = 0., alphaThree = 0.;
     /// Time for which the partial moduli of individual units have been evaluated.
     mutable double EparValTime = -1.;
 
@@ -310,6 +311,7 @@ public:
 
     double giveAlphaOne() const { return this->alphaOne; }
     double giveAlphaTwo() const { return this->alphaTwo; }
+    double giveAlphaThree() const { return this->alphaThree; }
 
     /// Returns Poisson's ratio.
     double givePoissonsRatio() const { return nu; }

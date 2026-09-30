@@ -41,8 +41,17 @@
 #include "feinterpol.h"
 #include "element.h"
 #include "aabb.h"
+#include <map>
 
 namespace oofem {
+
+struct ContactOutputState
+{
+    double normalGap = 0.0;
+    double pressure = 0.0;
+    /// 0=open/unprojected, 1=active frictionless, 2=sticking, 3=sliding.
+    double status = 0.0;
+};
 
 /**
  * Abstract base class for all contact finite elements. Derived classes should be  base
@@ -59,6 +68,7 @@ namespace oofem {
   class OOFEM_EXPORT ContactElement : public Element
 {
 protected:
+    std::map<const GaussPoint *, ContactOutputState> contactOutputStates;
  public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
@@ -81,6 +91,9 @@ protected:
 
     
     virtual AABB computeAABB();
+    virtual AABB computeUpdatedAABB(TimeStep *tStep);
+    void setContactOutputState(const GaussPoint *gp, double normalGap, double pressure, int status);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 
 

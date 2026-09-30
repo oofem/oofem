@@ -100,7 +100,7 @@ public:
    * @param d   Pointer to the associated domain.
    */
   ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune(FEContactSurface *scs, FEContactSurface *mcs, Domain *d);
-  ~ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune(){;}
+  ~ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune() override = default;
   /**
    * @brief Updates the list of contact pairs using sweep-and-prune broad-phase detection.
    *
@@ -111,6 +111,7 @@ public:
    * @param tStep Current time step.
    */
   void updateContactPairs(TimeStep *tStep) override;
+  void restoreContext(DataStream &stream) override;
 protected:
   /**
    * @brief Initializes internal data structures for sweep-and-prune.
@@ -119,7 +120,7 @@ protected:
    * tracking potential pairs. Typically called on the first update before
    * incremental sorting is applied.
    */
-    void initialize();
+    void initialize(TimeStep *tStep);
   /**
    * @brief Recomputes AABBs used by the search algorithm.
    *
@@ -128,7 +129,7 @@ protected:
    * implementation details). These AABBs are the input to the sweep-and-prune
    * endpoint generation.
    */
-    void updateAABBs();
+    void updateAABBs(TimeStep *tStep);
   /**
    * @brief Updates per-axis bound (endpoint) arrays from current AABBs.
    *
@@ -136,7 +137,7 @@ protected:
    * from the current AABBs. These bound arrays are then processed by sorting
    * (initially or incrementally) to detect overlaps efficiently.
    */
-    void updateBoundss();
+    void updateBoundss(TimeStep *tStep);
   /**
    * @brief Performs incremental sorting of bounds using insertion sort.
    *

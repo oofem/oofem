@@ -1,0 +1,63 @@
+contact_test_02_friction.out
+A frictional block presses onto a long plane then transitions from stick to sliding (mu=0.5)
+StaticStructural nsteps 100 deltat 0.01 renumber 0 nmodules 2 rtolv 1.e-8 stiffMode 0 manrmsteps 1 maxiter 100 initialguess 1 smtype 1 linesearch 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 4 1 150 151 152
+errorcheck
+domain 3d
+# Detailed Gauss-point text is disabled for this 100-frame animation; all
+# requested fields are available in VTU and the regression module reads state
+# directly rather than parsing this output selection.
+OutputManager
+ndofman 16 nelem 4 ncrosssect 2 nmat 2 nbc 5 nic 0 nltf 3 nset 6 ncontactsurf 2
+node 1 coords 3 -2.5 -0.5 0.0
+node 2 coords 3 -1.5 -0.5 0.0
+node 3 coords 3 -1.5  0.5 0.0
+node 4 coords 3 -2.5  0.5 0.0
+node 5 coords 3 -2.5 -0.5 1.0
+node 6 coords 3 -1.5 -0.5 1.0
+node 7 coords 3 -1.5  0.5 1.0
+node 8 coords 3 -2.5  0.5 1.0
+node 9 coords 3 -3.0 -1.0 -0.1
+node 10 coords 3 3.0 -1.0 -0.1
+node 11 coords 3 3.0  1.0 -0.1
+node 12 coords 3 -3.0  1.0 -0.1
+node 13 coords 3 -3.0 -1.0 0.0
+node 14 coords 3 3.0 -1.0 0.0
+node 15 coords 3 3.0  1.0 0.0
+node 16 coords 3 -3.0  1.0 0.0
+lspace 1 nodes 8 1 2 3 4 5 6 7 8 crosssect 1 mat 1 nlgeo 1
+lspace 2 nodes 8 9 10 11 12 13 14 15 16 crosssect 1 mat 1 nlgeo 1
+StructuralContactElement_QuadLin 3 nodes 4 13 14 15 16 crosssect 2 mat 2 NIP 4
+StructuralContactElement_QuadLin 4 nodes 4 1 2 3 4 crosssect 2 mat 2 NIP 4
+StructuralFEContactSurface 1 ce_set 4
+StructuralFEContactSurface 2 ce_set 5
+SimpleCS 1 material 1 set 6
+DummyCS 2 mat 2
+# Use an inversion-resistant neo-Hookean specialization for the finite
+# compression/shear path.
+MooneyRivlinCompressibleMat 1 d 0 C1 2500.0 C2 0.0 K 3333.333333333333
+DummyMat 2
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0 set 2
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 1 values 1 3.0 set 3
+BoundaryCondition 4 loadTimeFunction 3 dofs 1 3 values 1 -0.1 set 3
+# The tangential penalty is deliberately below the normal penalty so the
+# stick/slip transition is resolved without an excessively stiff trial branch.
+structuralpenaltycontactbc 5 loadTimeFunction 1 dofs 3 1 2 3 pn 1.e6 pt 1.e3 friction 0.5 mastersurface 1 slavesurface 2 nsd 3
+ConstantFunction 1 f(t) 0.0
+PiecewiseLinFunction 2 npoints 3 t 3 0 0.2 1 f(t) 3 0 0 1
+PiecewiseLinFunction 3 npoints 3 t 3 0 0.2 1 f(t) 3 0 1 1
+set 1 nodes 8 9 10 11 12 13 14 15 16
+set 2 nodes 4 5 6 7 8
+set 3 nodes 4 5 6 7 8
+set 4 elements 1 3
+set 5 elements 1 4
+set 6 elements 2 1 2
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 100 number 1 dof 1 unknown d value  2.911201e+00
+#NODE tStep 100 number 1 dof 3 unknown d value -4.939095e-04
+#NODE tStep 100 number 2 dof 1 unknown d value  2.873793e+00
+#NODE tStep 100 number 2 dof 3 unknown d value -1.821131e-03
+#ELEMENT tStep 20 number 4 gp 1 keyword 152 component 1 value 2.0
+#ELEMENT tStep 100 number 4 gp 1 keyword 152 component 1 value 3.0
+#%END_CHECK%

@@ -1,7 +1,7 @@
 tm05.out
 Test of mpm tm mpm formulation, single element, boundary flux, transient, nonzero initial condition
 # final time 500, initial time step 1 
-mpmproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 keeptangent ptype "tm" smtype 1
+mpmnonstationaryproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 keeptangent ptype "tm" smtype 1
 #vtkxml tstep_all domain_all primvars 2 1 6
 errorcheck
 domain HeatTransfer

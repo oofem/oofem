@@ -1047,6 +1047,16 @@ Domain :: postInitialize()
     for ( auto &el: elementList ) {
         el->postInitialize();
     }
+
+    for ( auto &el: materialList ) {
+        el->postInitialize();
+    }
+
+    for ( auto &el: crossSectionList ) {
+        el->postInitialize();
+    }
+
+
     //@TODO clear parameterPriorityManager
 
     for ( auto &cs: contactSurfaceList ) {
@@ -1614,6 +1624,9 @@ Domain :: saveContext(DataStream &stream, ContextMode mode)
 
     save_components(this->dofManagerList, stream, mode);
     save_components(this->elementList, stream, mode);
+    if (mode & CM_Definition) {
+        save_components(this->contactSurfaceList, stream, mode);
+    }
     save_components(this->bcList, stream, mode);
 
     auto ee = this->giveErrorEstimator();
@@ -1674,6 +1687,10 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
                        [this] (std::string &x, int i) { return classFactory.createDofManager(x.c_str(), i, this); });
     restore_components(this->elementList, stream, mode,
                        [this] (std::string &x, int i) { return classFactory.createElement(x.c_str(), i, this); });
+    if (mode & CM_Definition) {
+        restore_components(this->contactSurfaceList, stream, mode,
+                           [this] (std::string &x, int i) { return classFactory.createContactSurface(x.c_str(), i, this); });
+    }
     restore_components(this->bcList, stream, mode,
                        [this] (std::string &x, int i) { return classFactory.createBoundaryCondition(x.c_str(), i, this); });
 

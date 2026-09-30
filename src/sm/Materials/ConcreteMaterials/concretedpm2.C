@@ -66,6 +66,8 @@ ConcreteDPM2Status::initTempStatus()
     // Call the function of the parent class to initialize the variables defined there.
     StructuralMaterialStatus::initTempStatus();
 
+    this->tempDeletionFlag = this->deletionFlag;
+
     tempReducedStrain = reducedStrain;
     tempPlasticStrain = plasticStrain;
 
@@ -105,6 +107,8 @@ ConcreteDPM2Status::updateYourself(TimeStep *tStep)
     // Call corresponding function of the parent class to update
     // variables defined there.
     StructuralMaterialStatus::updateYourself(tStep);
+
+    this->deletionFlag = this->tempDeletionFlag;
 
     // update variables defined in ConcreteDPM2Status
 
@@ -561,6 +565,9 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     this->ASoft = 15;
     IR_GIVE_OPTIONAL_FIELD(ir, this->ASoft, _IFT_ConcreteDPM2_asoft);
 
+    this->BSoft = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->BSoft, _IFT_ConcreteDPM2_bsoft);
+
     this->helem = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->helem, _IFT_ConcreteDPM2_helem);
 
@@ -814,6 +821,13 @@ ConcreteDPM2::giveRealStressVector_3d(const FloatArrayF< 6 > &fullStrainVector, 
 
     // Initialize temp variables for this gauss point
     status->initTempStatus();
+
+    // Skip an element that was already marked for deletion in a previous step.
+    if ( status->giveTempDeletionFlag() == 1 ) {
+        FloatArrayF< 6 >stress;
+        status->letTempStressVectorBe(stress);
+        return stress;
+    }
 
     //    Remove thermal/shrinkage strains
     auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
@@ -1475,7 +1489,7 @@ ConcreteDPM2::computeDuctilityMeasureDamage(GaussPoint *gp, const double sig, co
         Rs = 0;
     }
 
-    return 1. + ( ASoft - 1. ) * Rs; // ductilityMeasure
+    return 1. + ( this->ASoft - 1. ) * pow(Rs, this->BSoft); // ductilityMeasure
 }
 
 
@@ -1568,7 +1582,13 @@ ConcreteDPM2::performPlasticityReturn(GaussPoint *gp, const FloatMatrixF< 6, 6 >
                     OOFEM_LOG_INFO("Regular case %g \n", 15.18);
                 }
                 OOFEM_LOG_INFO("KappaP old %g new %g yieldfun %g\n", status->giveTempKappaP(), tempKappaP, yieldValue);
-                OOFEM_ERROR("Could not reach convergence with small deltaStrain, giving up.");
+                // Mark the element for deletion and continue instead of aborting the whole analysis.
+                OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                status->setTempDeletionFlag(1);
+                for ( int k = 0; k < 6; k++ ) {
+                    effectiveStress.at(k + 1) = 0.;
+                }
+                return effectiveStress;
             } else if ( subincrementcounter > 9 && tempKappaP < 1. ) {
                 tempKappaP = 1.;
                 status->letTempKappaPBe(tempKappaP);
@@ -1766,13 +1786,13 @@ ConcreteDPM2::computeRatioPotential(double sig,
     double yieldHardOne = computeHardeningOne(tempKappa);
     double yieldHardTwo = computeHardeningTwo(tempKappa);
 
-    //Compute dilation parameter
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
+    //Compute dilation parameter (mQ = dmg/dsig with mg per eq.(23), generalised with qh factors)
+    double AGParam = 3. * this->ft * yieldHardOne * yieldHardTwo / this->fc + this->m * yieldHardOne * yieldHardOne / 2.;
     double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
+        yieldHardOne * yieldHardTwo * ( 1. + this->ft / this->fc ) / 3. /
+        ( log(AGParam) + log(this->dilationConst + 1.) - log(2. * this->dilationConst - 1.) - log(3. * yieldHardOne * yieldHardTwo + this->m * yieldHardOne * yieldHardOne / 2.) );
 
-    double R = ( sig - ft / 3. * yieldHardTwo ) / fc / BGParam;
+    double R = ( sig - this->ft * yieldHardOne * yieldHardTwo / 3. ) / ( this->fc * BGParam );
     double mQ = AGParam * exp(R);
 
     double Bl = sig / fc + rho / ( fc * sqrt(6.) );
@@ -2231,13 +2251,13 @@ ConcreteDPM2::computeDGDInv(double sig,
     double yieldHardOne = computeHardeningOne(tempKappa);
     double yieldHardTwo = computeHardeningTwo(tempKappa);
 
-    //Compute dilation parameter
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
+    //Compute dilation parameter (mQ = dmg/dsig with mg per eq.(23), generalised with qh1 factors)
+    double AGParam = 3. * this->ft * yieldHardOne * yieldHardTwo / this->fc + this->m * yieldHardOne * yieldHardOne / 2.;
     double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
+        yieldHardOne * yieldHardTwo * ( 1. + this->ft / this->fc ) / 3. /
+        ( log(AGParam) + log(this->dilationConst + 1.) - log(2. * this->dilationConst - 1.) - log(3. * yieldHardOne * yieldHardTwo + this->m * yieldHardOne * yieldHardOne / 2.) );
 
-    double R = ( sig - ft / 3. * yieldHardTwo ) / fc / BGParam;
+    double R = ( sig - this->ft * yieldHardOne * yieldHardTwo / 3. ) / ( this->fc * BGParam );
     double mQ = AGParam * exp(R);
 
     double Bl = sig / fc + rho / ( fc * sqrt(6.) );
@@ -2453,36 +2473,36 @@ ConcreteDPM2::computeDDGDInvDKappa(double sig,
     double dYieldHardOneDKappa = computeHardeningOnePrime(tempKappa);
     double dYieldHardTwoDKappa = computeHardeningTwoPrime(tempKappa);
 
-    //Compute dilation parameter
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
-    double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
+    //Compute dilation parameter (mQ = dmg/dsig with mg per eq.(23), generalised with qh1 factors)
+    double AGParam = 3. * this->ft * yieldHardOne * yieldHardTwo / this->fc + this->m * yieldHardOne * yieldHardOne / 2.;
+    double BGParamTop = yieldHardOne * yieldHardTwo * ( 1. + this->ft / this->fc ) / 3.;
+    double BGParamBottom = log(AGParam) + log(this->dilationConst + 1.) - log(2. * this->dilationConst - 1.) - log(3. * yieldHardOne * yieldHardTwo + this->m * yieldHardOne * yieldHardOne / 2.);
+    double BGParam = BGParamTop / BGParamBottom;
 
-    double R = ( sig - ft / 3. * yieldHardTwo ) / ( fc * BGParam );
+    double R = ( sig - this->ft * yieldHardOne * yieldHardTwo / 3. ) / ( this->fc * BGParam );
     double mQ = AGParam * exp(R);
 
     //Compute the derivative of mQ with respect to kappa
+    double dQh1Qh2DKappa = yieldHardOne * dYieldHardTwoDKappa + yieldHardTwo * dYieldHardOneDKappa;
 
-    //Derivative of AGParam
-    double dAGParamDKappa = dYieldHardTwoDKappa * 3. * this->ft / this->fc;
+    //Derivative of AGParam = 3*ft*qh1*qh2/fc + m*qh1^2/2
+    double dAGParamDKappa = 3. * this->ft / this->fc * dQh1Qh2DKappa + this->m * yieldHardOne * dYieldHardOneDKappa;
 
     //Derivative of BGParam
-    double BGParamTop = yieldHardTwo / 3. * ( 1. + this->ft / this->fc );
-    double BGParamBottom = ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
-
-    double dBGParamTopDKappa = dYieldHardTwoDKappa / 3. * ( 1. + this->ft / this->fc );
-    double dBGParamBottomDKappa = 1. / AGParam * dAGParamDKappa - 3. * dYieldHardTwoDKappa / ( 3 * yieldHardTwo + m / 2. );
+    double dBGParamTopDKappa = ( 1. + this->ft / this->fc ) / 3. * dQh1Qh2DKappa;
+    double denomLog = 3. * yieldHardOne * yieldHardTwo + this->m * yieldHardOne * yieldHardOne / 2.;
+    double dDenomLogDKappa = 3. * dQh1Qh2DKappa + this->m * yieldHardOne * dYieldHardOneDKappa;
+    double dBGParamBottomDKappa = dAGParamDKappa / AGParam - dDenomLogDKappa / denomLog;
     double dBGParamDKappa = ( dBGParamTopDKappa * BGParamBottom - BGParamTop * dBGParamBottomDKappa ) / pow(BGParamBottom, 2.);
 
     //Derivative of R
-    double RTop = ( sig - ft / 3. * yieldHardTwo );
-    double RBottom = fc * BGParam;
-    double dRTopDKappa = -this->ft / 3. * dYieldHardTwoDKappa;
+    double RTop = sig - this->ft * yieldHardOne * yieldHardTwo / 3.;
+    double RBottom = this->fc * BGParam;
+    double dRTopDKappa = -this->ft / 3. * dQh1Qh2DKappa;
     double dRBottomDKappa = this->fc * dBGParamDKappa;
     double dRDKappa = ( dRTopDKappa * RBottom - RTop * dRBottomDKappa ) / pow(RBottom, 2.);
 
-    double dMQDKappa = dAGParamDKappa * exp(R) + AGParam * dRDKappa * exp(R);
+    double dMQDKappa = ( dAGParamDKappa + AGParam * dRDKappa ) * exp(R);
 
     double Bl = sig / fc + rho / ( fc * sqrt(6.) );
 
@@ -2514,13 +2534,13 @@ ConcreteDPM2::computeDDGDDInv(double sig,
     double yieldHardOne = computeHardeningOne(tempKappa);
     double yieldHardTwo = computeHardeningTwo(tempKappa);
 
-    //CoQpute dilation parameter
-    double AGParam = this->ft * yieldHardTwo * 3 / this->fc + m / 2;
+    //Compute dilation parameter (mQ = dmg/dsig with mg per eq.(23), generalised with qh1 factors)
+    double AGParam = 3. * this->ft * yieldHardOne * yieldHardTwo / this->fc + this->m * yieldHardOne * yieldHardOne / 2.;
     double BGParam =
-        yieldHardTwo / 3. * ( 1. + this->ft / this->fc ) /
-        ( log(AGParam) + log(this->dilationConst + 1.) - log(2 * this->dilationConst - 1.) - log(3. * yieldHardTwo + this->m / 2) );
+        yieldHardOne * yieldHardTwo * ( 1. + this->ft / this->fc ) / 3. /
+        ( log(AGParam) + log(this->dilationConst + 1.) - log(2. * this->dilationConst - 1.) - log(3. * yieldHardOne * yieldHardTwo + this->m * yieldHardOne * yieldHardOne / 2.) );
 
-    double R = ( sig - ft / 3. * yieldHardTwo ) / fc / BGParam;
+    double R = ( sig - this->ft * yieldHardOne * yieldHardTwo / 3. ) / ( this->fc * BGParam );
 
     double dMQDSig = AGParam / ( BGParam * fc ) * exp(R);
 

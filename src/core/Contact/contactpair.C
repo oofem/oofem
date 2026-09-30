@@ -34,12 +34,47 @@
 
 
 #include "contactpair.h"
+#include "contactelement.h"
+#include "node.h"
+#include "datastream.h"
+#include "contextioerr.h"
+#include <algorithm>
+#include <limits>
+#include <cmath>
 
 namespace oofem {
 
 ContactPair ::  ContactPair(std::unique_ptr<ContactPoint> s) : slave(std::move(s)), tractionVector()
 {
-  tractionVector.resize(2);
+  const int tangentSize = slave ? slave->giveSurfaceDimension() : 0;
+  tractionVector.resize(tangentSize);
+  tractionVector.zero();
+  tempTractionVector.resize(tangentSize);
+  tempTractionVector.zero();
+  dXi = 0.0;
+  temp_dXi = 0.0;
+}
+
+void
+ContactPair :: setNormalGap(double ng)
+{
+  normal_gap = ng;
+  auto *slavePoint = dynamic_cast<FEContactPoint_Slave *>(slave.get());
+  if (slavePoint != nullptr) {
+    slavePoint->giveContactElement()->setContactOutputState(
+      slavePoint->giveIntegrationPoint(), ng, 0.0, 0);
+  }
+}
+
+void
+ContactPair :: setOutputContactState(double pressure, int status)
+{
+  auto *slavePoint = dynamic_cast<FEContactPoint_Slave *>(slave.get());
+  if (slavePoint != nullptr) {
+    const double outputGap = std::isfinite(normal_gap) ? normal_gap : 0.0;
+    slavePoint->giveContactElement()->setContactOutputState(
+      slavePoint->giveIntegrationPoint(), outputGap, pressure, status);
+  }
 }
 
 
@@ -78,7 +113,8 @@ ContactPair :: givePreviousTangentVector(int i) const
 std::vector<FloatArray>
 ContactPair :: giveTangentVectors() const {
   std::vector<FloatArray> ret;
-  for (int i = 1; i <= 2; i++) {
+  const int tangentSize = slave ? slave->giveSurfaceDimension() : 0;
+  for (int i = 1; i <= tangentSize; i++) {
     ret.emplace_back(giveTangentVector(i));
   }
   return ret;
@@ -87,7 +123,8 @@ ContactPair :: giveTangentVectors() const {
 std::vector<FloatArray>
 ContactPair :: givePreviousTangentVectors() const {
   std::vector<FloatArray> ret;
-  for (int i = 1; i <= 2; i++) {
+  const int tangentSize = slave ? slave->giveSurfaceDimension() : 0;
+  for (int i = 1; i <= tangentSize; i++) {
     ret.emplace_back(givePreviousTangentVector(i));
   }
   return ret;
@@ -145,9 +182,31 @@ ContactPair :: compute_dNdxi_matrices(std::vector<FloatMatrix> &dNdxi)
 void
 ContactPair :: computeCurvature(FloatMatrix &G, TimeStep *tStep)
 {
-  this->master->computeCurvature(G, this->normalVector, tStep);
+  FloatArray unitNormal = this->normalVector;
+  const double normalNorm = unitNormal.computeNorm();
+  if (normalNorm <= 0.0) {
+    OOFEM_ERROR("ContactPair: zero normal vector in curvature computation");
+  }
+  unitNormal /= normalNorm;
+  this->master->computeCurvature(G, unitNormal, tStep);
+}
+
+void
+ContactPair :: computeSecondBaseVectors(std::vector<std::vector<FloatArray>> &answer, TimeStep *tStep)
+{
+  this->master->computeSecondBaseVectors(answer, tStep);
 }
  
+
+double
+ContactPair :: giveContactArea(TimeStep *)
+{
+  const double contactArea = slave->giveIntegrationWeight() * slave->giveReferenceSurfaceMeasure();
+  if (contactArea <= 0.0) {
+    OOFEM_ERROR("ContactPair: non-positive contact integration area");
+  }
+  return contactArea;
+}
 
   
 void
@@ -167,27 +226,179 @@ ContactPair :: initContactPoint()
 void
 ContactPair :: giveLocationArray(const IntArray &dofs, IntArray &loc, const UnknownNumberingScheme &ns) const
 {
+  this->giveRowLocationArray(dofs, loc, ns);
+}
+
+void
+ContactPair :: giveRowLocationArray(const IntArray &dofs, IntArray &loc,
+                                    const UnknownNumberingScheme &ns) const
+{
   IntArray loc_slave;
   this->master->giveLocationArray(loc, dofs, ns);
   this->slave->giveLocationArray(loc_slave, dofs, ns);
-  //
   loc.followedBy(loc_slave);
-  
+}
+
+void
+ContactPair :: giveColumnLocationArray(const IntArray &dofs, IntArray &loc,
+                                       const UnknownNumberingScheme &ns) const
+{
+  loc.clear();
+  for (Node *node : this->giveLinearizationNodes()) {
+    IntArray nodeLoc;
+    node->giveLocationArray(dofs, nodeLoc, ns);
+    loc.followedBy(nodeLoc);
+  }
+}
+
+std::vector<Node *>
+ContactPair :: giveResidualNodes() const
+{
+  std::vector<Node *> nodes;
+  const auto appendElementNodes = [&nodes](ContactElement *element) {
+    if (element == nullptr) {
+      return;
+    }
+    for (int i = 1; i <= element->giveNumberOfNodes(); ++i) {
+      nodes.push_back(element->giveNode(i));
+    }
+  };
+
+  appendElementNodes(master ? master->giveContactElement() : nullptr);
+  appendElementNodes(slave ? slave->giveContactElement() : nullptr);
+  return nodes;
+}
+
+ContactElement *
+ContactPair :: givePreviousMasterContactElement() const
+{
+  if (!this->hasProjectionHistory()) {
+    return nullptr;
+  }
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  if (masterPoint == nullptr) {
+    return nullptr;
+  }
+  return masterPoint->giveContactElementOnSurface(previousMasterElementId);
+}
+
+bool
+ContactPair :: hasMasterFacetTransition() const
+{
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  return masterPoint != nullptr && this->hasProjectionHistory()
+      && masterPoint->giveContactElementId() != previousMasterElementId;
+}
+
+ContactFeatureType
+ContactPair :: giveCurrentMasterFeatureType() const
+{
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  return masterPoint ? masterPoint->giveContactFeatureType()
+                     : ContactFeatureType::Surface;
+}
+
+int
+ContactPair :: giveCurrentMasterFeatureIndex() const
+{
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  return masterPoint ? masterPoint->giveContactFeatureIndex() : 0;
+}
+
+bool
+ContactPair :: hasMasterFeatureTransition() const
+{
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  return masterPoint != nullptr && this->hasProjectionHistory()
+      && (masterPoint->giveContactElementId() != previousMasterElementId
+          || masterPoint->giveContactFeatureType() != previousMasterFeatureType
+          || masterPoint->giveContactFeatureIndex() != previousMasterFeatureIndex);
+}
+
+std::vector<Node *>
+ContactPair :: giveLinearizationNodes() const
+{
+  std::vector<Node *> nodes = this->giveResidualNodes();
+  ContactElement *previousMaster = this->givePreviousMasterContactElement();
+  if (previousMaster == nullptr) {
+    return nodes;
+  }
+
+  for (int i = 1; i <= previousMaster->giveNumberOfNodes(); ++i) {
+    Node *node = previousMaster->giveNode(i);
+    if (std::find(nodes.begin(), nodes.end(), node) == nodes.end()) {
+      nodes.push_back(node);
+    }
+  }
+  return nodes;
 }
 
 
 void
+ContactPair :: clearContactState()
+{
+  this->setOutputContactState(0.0, 0);
+  master.reset();
+  normal_gap = std::numeric_limits<double>::infinity();
+  normalVector.clear();
+  tangentVector1.clear();
+  tangentVector2.clear();
+
+  // Search misses are iteration-local; committed friction history is cleared only after convergence.
+  referenceContactPointCoords.clear();
+  tempReferenceContactPointCoords.clear();
+  contactPointCoords.clear();
+  referenceContactPointInit = false;
+
+  const int tangentSize = slave ? slave->giveSurfaceDimension() : 0;
+  tempTractionVector.resize(tangentSize);
+  tempTractionVector.zero();
+  tempAccumulatedPlasticSlip = 0.0;
+  temp_dXi = 0.0;
+}
+
+void
 ContactPair :: updateYourself(TimeStep *tStep)
 {
-  if(this->giveNormalGap() <= 0 && this->inContact()) {
+  const bool activeContact = this->hasActiveContact();
+  if(this->hasMasterContact()) {
     referenceContactPointInit = true;
-    previousContactPointCoords = master->giveGlobalCoordinates();
-    tractionVector = tempTractionVector;
+    Coordinates updatedMasterCoords;
+    master->giveUpdatedCoordinates(updatedMasterCoords, tStep);
+    previousContactPointCoords = updatedMasterCoords;
+    previousMasterLocalCoordinates = master->giveLocalCoordinates();
+    auto *masterPoint = static_cast<FEContactPoint *>(master.get());
+    previousMasterElementId = masterPoint->giveContactElementId();
+    previousMasterFeatureType = masterPoint->giveContactFeatureType();
+    previousMasterFeatureIndex = masterPoint->giveContactFeatureIndex();
+    previousContactActive = activeContact;
     previousNormalVector = normalVector;
     previousTangentVector1 = tangentVector1;
     previousTangentVector2 = tangentVector2;
+    if (activeContact) {
+      tractionVector = tempTractionVector;
+      accumulatedPlasticSlip = tempAccumulatedPlasticSlip;
+    } else {
+      tractionVector.zero();
+      tempTractionVector.zero();
+      accumulatedPlasticSlip = 0.0;
+      tempAccumulatedPlasticSlip = 0.0;
+    }
   } else {
     referenceContactPointInit = false;
+    previousContactPointCoords.clear();
+    previousMasterLocalCoordinates.clear();
+    previousMasterElementId = -1;
+    previousMasterFeatureType = ContactFeatureType::Surface;
+    previousMasterFeatureIndex = 0;
+    previousContactActive = false;
+    previousNormalVector.clear();
+    previousTangentVector1.clear();
+    previousTangentVector2.clear();
+    tractionVector.zero();
+    tempTractionVector.zero();
+    accumulatedPlasticSlip = 0.0;
+    tempAccumulatedPlasticSlip = 0.0;
   }
 
 
@@ -210,38 +421,126 @@ ContactPair :: computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &ans
 }
   
 FloatArray
-ContactPair :: computeContactPointDisplacement() const
+ContactPair :: computeContactPointDisplacement(TimeStep *tStep) const
 {
-  // @todo
-  if (previousContactPointCoords.giveSize() == 0) {
-    FloatArray ret = master->giveGlobalCoordinates();
-    ret.times(0);
-    return ret;
+  const int spatialDimension = (slave ? slave->giveSurfaceDimension() : 2) + 1;
+  if (previousMasterElementId < 0 || previousMasterLocalCoordinates.giveSize() == 0) {
+    return FloatArray(spatialDimension);
   }
-  FloatArray contactPointCoords = master->giveGlobalCoordinates();
-  return contactPointCoords - previousContactPointCoords;
+  auto *masterPoint = dynamic_cast<FEContactPoint *>(master.get());
+  if (masterPoint == nullptr) {
+    OOFEM_ERROR("ContactPair: objective friction update requires an FE master contact point");
+  }
+  Coordinates currentProjection, previousProjectionInCurrentConfiguration;
+  master->giveUpdatedCoordinates(currentProjection, tStep);
+  masterPoint->giveUpdatedCoordinatesOnElement(previousProjectionInCurrentConfiguration,
+                                                previousMasterElementId,
+                                                previousMasterLocalCoordinates, tStep);
+  const Coordinates fullDisplacement = currentProjection - previousProjectionInCurrentConfiguration;
+  FloatArray displacement(spatialDimension);
+  for (int k = 1; k <= spatialDimension; ++k) {
+    displacement.at(k) = fullDisplacement.at(k);
+  }
+  return displacement;
 }
 
 AABB
-ContactPair :: computeSlaveAABB()
+ContactPair :: computeSlaveAABB(TimeStep *tStep) const
 {
-  // TODO
-  auto coords = slave->giveGlobalCoordinates();
+  Coordinates coords;
+  slave->giveUpdatedCoordinates(coords, tStep);
   double x = coords.at(1);
   double y = coords.at(2);
-  double z = coords.at(3);
+  double z = (coords.giveSize() > 2) ? coords.at(3) : 0.0;
   AABB aabb(Vector(x, y, z), Vector(x, y, z));
-  //
-  aabb.min.x -= 0.5;
-  aabb.min.y -= 0.5;
-  aabb.min.z -= 0.5;
-  //
-  aabb.max.x += 0.5;
-  aabb.max.y += 0.5;
-  aabb.max.z += 0.5;
-  //
   return aabb;
 }
 
-};
+AABB
+ContactPair :: computeSweptSlaveAABB(TimeStep *tStep) const
+{
+  AABB currentAABB = this->computeSlaveAABB(tStep);
+  AABB sweptAABB = currentAABB;
+  if (committedSlaveSearchAABBInitialized) {
+    sweptAABB.merge(committedSlaveSearchAABB);
+  }
+  return sweptAABB;
+}
 
+void
+ContactPair :: commitSearchState(TimeStep *tStep)
+{
+  committedSlaveSearchAABB = this->computeSlaveAABB(tStep);
+  committedSlaveSearchAABBInitialized = true;
+}
+
+void
+ContactPair :: saveContext(DataStream &stream) const
+{
+  contextIOResultType result = CIO_OK;
+  if ((result = previousContactPointCoords.storeYourself(stream)) != CIO_OK
+      || (result = previousMasterLocalCoordinates.storeYourself(stream)) != CIO_OK
+      || !stream.write(previousMasterElementId)
+      || !stream.write(static_cast<int>(previousMasterFeatureType))
+      || !stream.write(previousMasterFeatureIndex)
+      || !stream.write(previousContactActive)
+      || (result = previousNormalVector.storeYourself(stream)) != CIO_OK
+      || (result = previousTangentVector1.storeYourself(stream)) != CIO_OK
+      || (result = previousTangentVector2.storeYourself(stream)) != CIO_OK
+      || (result = tractionVector.storeYourself(stream)) != CIO_OK
+      || !stream.write(accumulatedPlasticSlip)
+      || !stream.write(committedSlaveSearchAABBInitialized)) {
+    THROW_CIOERR(result == CIO_OK ? CIO_IOERR : result);
+  }
+
+  if (committedSlaveSearchAABBInitialized) {
+    const double bounds[6] = {
+      committedSlaveSearchAABB.min.x, committedSlaveSearchAABB.min.y, committedSlaveSearchAABB.min.z,
+      committedSlaveSearchAABB.max.x, committedSlaveSearchAABB.max.y, committedSlaveSearchAABB.max.z
+    };
+    if (!stream.write(bounds, 6)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+  }
+}
+
+void
+ContactPair :: restoreContext(DataStream &stream)
+{
+  contextIOResultType result = CIO_OK;
+  int storedFeatureType = static_cast<int>(ContactFeatureType::Surface);
+  if ((result = previousContactPointCoords.restoreYourself(stream)) != CIO_OK
+      || (result = previousMasterLocalCoordinates.restoreYourself(stream)) != CIO_OK
+      || !stream.read(previousMasterElementId)
+      || !stream.read(storedFeatureType)
+      || !stream.read(previousMasterFeatureIndex)
+      || !stream.read(previousContactActive)
+      || (result = previousNormalVector.restoreYourself(stream)) != CIO_OK
+      || (result = previousTangentVector1.restoreYourself(stream)) != CIO_OK
+      || (result = previousTangentVector2.restoreYourself(stream)) != CIO_OK
+      || (result = tractionVector.restoreYourself(stream)) != CIO_OK
+      || !stream.read(accumulatedPlasticSlip)
+      || !stream.read(committedSlaveSearchAABBInitialized)) {
+    THROW_CIOERR(result == CIO_OK ? CIO_IOERR : result);
+  }
+  if (storedFeatureType < static_cast<int>(ContactFeatureType::Vertex)
+      || storedFeatureType > static_cast<int>(ContactFeatureType::Surface)) {
+    OOFEM_ERROR("ContactPair: invalid stored master feature type");
+  }
+  previousMasterFeatureType = static_cast<ContactFeatureType>(storedFeatureType);
+
+  if (committedSlaveSearchAABBInitialized) {
+    double bounds[6];
+    if (!stream.read(bounds, 6)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    committedSlaveSearchAABB =
+      AABB(Vector(bounds[0], bounds[1], bounds[2]), Vector(bounds[3], bounds[4], bounds[5]));
+  }
+
+  tempTractionVector = tractionVector;
+  tempAccumulatedPlasticSlip = accumulatedPlasticSlip;
+  previousContactActive = previousContactActive && this->hasProjectionHistory();
+}
+
+};

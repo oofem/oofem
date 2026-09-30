@@ -1,0 +1,23 @@
+lattice3dshell_combined_n4_lle.out
+Shell-mode lattice3d combined test (LatticeLinearElastic, N=4): all 6 dofs prescribed at free end.
+StaticStructural nsteps 1 rtolv 1.e-6 ddm 12 2 1 2 2 2 3 2 4 2 5 2 6 ddv 6 1.e-4 1.e-4 1.e-4 1.e-3 1.e-3 1.e-3 ddltf 2 nmodules 1
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 6 0 0 0 0 0 0
+lattice3D 1 nodes 2 1 2 crossSect 1 mat 1 shellnormal 3 0.0 0.0 1.0 polycoords 12 0.5 -0.05 -0.005   0.5 0.05 -0.005   0.5 0.05 0.005   0.5 -0.05 0.005
+latticecs 1 material 1 nlayers 4
+latticelinearelastic 1 d 2400. tAlpha 0.0 e 30.e9 a1 0.5 a2 1.0 a3 0.5
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 1. f(t) 2 0. 1.
+#%BEGIN_CHECK% tolerance 1.e-1
+#REACTION tStep 1 number 1 dof 1 value -3.0000e+3
+#REACTION tStep 1 number 1 dof 2 value  6.0000e+3
+#REACTION tStep 1 number 1 dof 3 value -9.0000e+3
+#REACTION tStep 1 number 1 dof 4 value -1.2500e-1
+#REACTION tStep 1 number 1 dof 5 value  4.4997e+3
+#REACTION tStep 1 number 1 dof 6 value  2.9750e+3
+#%END_CHECK%

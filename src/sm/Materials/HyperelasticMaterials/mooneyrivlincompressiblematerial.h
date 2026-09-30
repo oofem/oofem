@@ -80,6 +80,15 @@ public:
     MooneyRivlinCompressibleMaterial(int n, Domain *d);
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
+
+    /** Undeformed isotropic Young modulus used by contact auto-penalty. */
+    double giveInitialYoungsModulus() const override
+    {
+        const double shearModulus = 2.0 * (C1 + C2);
+        return 9.0 * K * shearModulus / (3.0 * K + shearModulus);
+    }
 
     FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
 

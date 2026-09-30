@@ -36,7 +36,10 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "convergenceexception.h"
+#include "contextioerr.h"
 #include "mathfem.h"
+#include <cmath>
 
 
 
@@ -53,6 +56,10 @@ MooneyRivlinCompressibleMaterial::giveFirstPKStressVector_3d(const FloatArrayF< 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     Tensor2_3d F(vF), P;
+    const double J = F.compute_determinant();
+    if (!(J > 0.0) || !std::isfinite(J)) {
+        throw ConvergenceException("Non-positive deformation Jacobian; requesting time-step reduction");
+    }
     // compute the first Piola-Kirchhoff
     P(i_3, j_3) =  C1 * this->compute_dI1_Cdev_dF(F)(i_3, j_3) + C2 * this->compute_dI2_Cdev_dF(F)(i_3, j_3) + this->compute_dVolumetricEnergy_dF(F)(i_3, j_3);
     auto vP = P.to_voigt_form();
@@ -72,6 +79,10 @@ MooneyRivlinCompressibleMaterial::give3dMaterialStiffnessMatrix_dPdF(MatResponse
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     FloatArrayF< 9 >vF(status->giveTempFVector() );
     Tensor2_3d F(vF);
+    const double J = F.compute_determinant();
+    if (!(J > 0.0) || !std::isfinite(J)) {
+        throw ConvergenceException("Non-positive deformation Jacobian; requesting time-step reduction");
+    }
     Tensor4_3d A;
     A(i_3, j_3, k_3, l_3) = C1 * this->compute_d2I1_Cdev_dF2(F)(i_3, j_3, k_3, l_3) + C2 * this->compute_d2I2_Cdev_dF2(F)(i_3, j_3, k_3, l_3) + this->compute_d2VolumetricEnergy_dF2(F)(i_3, j_3, k_3, l_3);
     return A.to_voigt_form();
@@ -94,5 +105,27 @@ MooneyRivlinCompressibleMaterial::initializeFrom(const std::shared_ptr<InputReco
     BaseHyperElasticMaterial::initializeFrom(ir);
     IR_GIVE_FIELD(ir, C1, _IFT_MooneyRivlinCompressibleMaterial_c1);
     IR_GIVE_FIELD(ir, C2, _IFT_MooneyRivlinCompressibleMaterial_c2);
+}
+
+void
+MooneyRivlinCompressibleMaterial::saveContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::saveContext(stream, mode);
+
+    if ( ( mode & CM_Definition )
+         && ( !stream.write(C1) || !stream.write(C2) || !stream.write(K) ) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+}
+
+void
+MooneyRivlinCompressibleMaterial::restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::restoreContext(stream, mode);
+
+    if ( ( mode & CM_Definition )
+         && ( !stream.read(C1) || !stream.read(C2) || !stream.read(K) ) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
 }
 } // end namespace oofem

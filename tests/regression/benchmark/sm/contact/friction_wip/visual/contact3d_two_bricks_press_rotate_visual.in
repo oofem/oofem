@@ -1,0 +1,429 @@
+contact3d_two_bricks_press_rotate_visual.out
+Rotating frictional two-brick stack in two-pass penalty contact
+StaticStructural nsteps 16 deltat 0.05 renumber 0 nmodules 1 rtolf 1.e-3 rtold 1.e-3 stiffMode 0 manrmsteps 1 maxiter 100 initialguess 0 smtype 1 linesearch 1 treductiontype simplereduction dtmax 0.05 dtmin 0.005 nmaxrestarts 10 ncrf 0.5 minrequirediter 3 maxrequirediter 25
+vtkxml tstep_all domain_all primvars 1 1 cellvars 4 1 150 151 152
+domain 3d
+OutputManager
+ndofman 189 nelem 116 ncrosssect 3 nmat 3 nbc 51 nic 0 nltf 34 nset 21 ncontactsurf 2
+node 1 coords 3 -1 -1 0
+node 2 coords 3 -0.5 -1 0
+node 3 coords 3 0 -1 0
+node 4 coords 3 0.5 -1 0
+node 5 coords 3 1 -1 0
+node 6 coords 3 -1 -0.5 0
+node 7 coords 3 -0.5 -0.5 0
+node 8 coords 3 0 -0.5 0
+node 9 coords 3 0.5 -0.5 0
+node 10 coords 3 1 -0.5 0
+node 11 coords 3 -1 0 0
+node 12 coords 3 -0.5 0 0
+node 13 coords 3 0 0 0
+node 14 coords 3 0.5 0 0
+node 15 coords 3 1 0 0
+node 16 coords 3 -1 0.5 0
+node 17 coords 3 -0.5 0.5 0
+node 18 coords 3 0 0.5 0
+node 19 coords 3 0.5 0.5 0
+node 20 coords 3 1 0.5 0
+node 21 coords 3 -1 1 0
+node 22 coords 3 -0.5 1 0
+node 23 coords 3 0 1 0
+node 24 coords 3 0.5 1 0
+node 25 coords 3 1 1 0
+node 26 coords 3 -1 -1 0.5
+node 27 coords 3 -0.5 -1 0.5
+node 28 coords 3 0 -1 0.5
+node 29 coords 3 0.5 -1 0.5
+node 30 coords 3 1 -1 0.5
+node 31 coords 3 -1 -0.5 0.5
+node 32 coords 3 -0.5 -0.5 0.5
+node 33 coords 3 0 -0.5 0.5
+node 34 coords 3 0.5 -0.5 0.5
+node 35 coords 3 1 -0.5 0.5
+node 36 coords 3 -1 0 0.5
+node 37 coords 3 -0.5 0 0.5
+node 38 coords 3 0 0 0.5
+node 39 coords 3 0.5 0 0.5
+node 40 coords 3 1 0 0.5
+node 41 coords 3 -1 0.5 0.5
+node 42 coords 3 -0.5 0.5 0.5
+node 43 coords 3 0 0.5 0.5
+node 44 coords 3 0.5 0.5 0.5
+node 45 coords 3 1 0.5 0.5
+node 46 coords 3 -1 1 0.5
+node 47 coords 3 -0.5 1 0.5
+node 48 coords 3 0 1 0.5
+node 49 coords 3 0.5 1 0.5
+node 50 coords 3 1 1 0.5
+node 51 coords 3 -1 -1 1
+node 52 coords 3 -0.5 -1 1
+node 53 coords 3 0 -1 1
+node 54 coords 3 0.5 -1 1
+node 55 coords 3 1 -1 1
+node 56 coords 3 -1 -0.5 1
+node 57 coords 3 -0.5 -0.5 1
+node 58 coords 3 0 -0.5 1
+node 59 coords 3 0.5 -0.5 1
+node 60 coords 3 1 -0.5 1
+node 61 coords 3 -1 0 1
+node 62 coords 3 -0.5 0 1
+node 63 coords 3 0 0 1
+node 64 coords 3 0.5 0 1
+node 65 coords 3 1 0 1
+node 66 coords 3 -1 0.5 1
+node 67 coords 3 -0.5 0.5 1
+node 68 coords 3 0 0.5 1
+node 69 coords 3 0.5 0.5 1
+node 70 coords 3 1 0.5 1
+node 71 coords 3 -1 1 1
+node 72 coords 3 -0.5 1 1
+node 73 coords 3 0 1 1
+node 74 coords 3 0.5 1 1
+node 75 coords 3 1 1 1
+node 76 coords 3 -1 -1 1.5
+node 77 coords 3 -0.5 -1 1.5
+node 78 coords 3 0 -1 1.5
+node 79 coords 3 0.5 -1 1.5
+node 80 coords 3 1 -1 1.5
+node 81 coords 3 -1 -0.5 1.5
+node 82 coords 3 -0.5 -0.5 1.5
+node 83 coords 3 0 -0.5 1.5
+node 84 coords 3 0.5 -0.5 1.5
+node 85 coords 3 1 -0.5 1.5
+node 86 coords 3 -1 0 1.5
+node 87 coords 3 -0.5 0 1.5
+node 88 coords 3 0 0 1.5
+node 89 coords 3 0.5 0 1.5
+node 90 coords 3 1 0 1.5
+node 91 coords 3 -1 0.5 1.5
+node 92 coords 3 -0.5 0.5 1.5
+node 93 coords 3 0 0.5 1.5
+node 94 coords 3 0.5 0.5 1.5
+node 95 coords 3 1 0.5 1.5
+node 96 coords 3 -1 1 1.5
+node 97 coords 3 -0.5 1 1.5
+node 98 coords 3 0 1 1.5
+node 99 coords 3 0.5 1 1.5
+node 100 coords 3 1 1 1.5
+node 101 coords 3 -1 -1 2
+node 102 coords 3 -0.5 -1 2
+node 103 coords 3 0 -1 2
+node 104 coords 3 0.5 -1 2
+node 105 coords 3 1 -1 2
+node 106 coords 3 -1 -0.5 2
+node 107 coords 3 -0.5 -0.5 2
+node 108 coords 3 0 -0.5 2
+node 109 coords 3 0.5 -0.5 2
+node 110 coords 3 1 -0.5 2
+node 111 coords 3 -1 0 2
+node 112 coords 3 -0.5 0 2
+node 113 coords 3 0 0 2
+node 114 coords 3 0.5 0 2
+node 115 coords 3 1 0 2
+node 116 coords 3 -1 0.5 2
+node 117 coords 3 -0.5 0.5 2
+node 118 coords 3 0 0.5 2
+node 119 coords 3 0.5 0.5 2
+node 120 coords 3 1 0.5 2
+node 121 coords 3 -1 1 2
+node 122 coords 3 -0.5 1 2
+node 123 coords 3 0 1 2
+node 124 coords 3 0.5 1 2
+node 125 coords 3 1 1 2
+node 126 coords 3 -1 -1 2
+node 127 coords 3 -0.3333333333333334 -1 2
+node 128 coords 3 0.3333333333333333 -1 2
+node 129 coords 3 1 -1 2
+node 130 coords 3 -1 -0.3333333333333334 2
+node 131 coords 3 -0.3333333333333334 -0.3333333333333334 2
+node 132 coords 3 0.3333333333333333 -0.3333333333333334 2
+node 133 coords 3 1 -0.3333333333333334 2
+node 134 coords 3 -1 0.3333333333333333 2
+node 135 coords 3 -0.3333333333333334 0.3333333333333333 2
+node 136 coords 3 0.3333333333333333 0.3333333333333333 2
+node 137 coords 3 1 0.3333333333333333 2
+node 138 coords 3 -1 1 2
+node 139 coords 3 -0.3333333333333334 1 2
+node 140 coords 3 0.3333333333333333 1 2
+node 141 coords 3 1 1 2
+node 142 coords 3 -1 -1 2.666666666666667
+node 143 coords 3 -0.3333333333333334 -1 2.666666666666667
+node 144 coords 3 0.3333333333333333 -1 2.666666666666667
+node 145 coords 3 1 -1 2.666666666666667
+node 146 coords 3 -1 -0.3333333333333334 2.666666666666667
+node 147 coords 3 -0.3333333333333334 -0.3333333333333334 2.666666666666667
+node 148 coords 3 0.3333333333333333 -0.3333333333333334 2.666666666666667
+node 149 coords 3 1 -0.3333333333333334 2.666666666666667
+node 150 coords 3 -1 0.3333333333333333 2.666666666666667
+node 151 coords 3 -0.3333333333333334 0.3333333333333333 2.666666666666667
+node 152 coords 3 0.3333333333333333 0.3333333333333333 2.666666666666667
+node 153 coords 3 1 0.3333333333333333 2.666666666666667
+node 154 coords 3 -1 1 2.666666666666667
+node 155 coords 3 -0.3333333333333334 1 2.666666666666667
+node 156 coords 3 0.3333333333333333 1 2.666666666666667
+node 157 coords 3 1 1 2.666666666666667
+node 158 coords 3 -1 -1 3.333333333333333
+node 159 coords 3 -0.3333333333333334 -1 3.333333333333333
+node 160 coords 3 0.3333333333333333 -1 3.333333333333333
+node 161 coords 3 1 -1 3.333333333333333
+node 162 coords 3 -1 -0.3333333333333334 3.333333333333333
+node 163 coords 3 -0.3333333333333334 -0.3333333333333334 3.333333333333333
+node 164 coords 3 0.3333333333333333 -0.3333333333333334 3.333333333333333
+node 165 coords 3 1 -0.3333333333333334 3.333333333333333
+node 166 coords 3 -1 0.3333333333333333 3.333333333333333
+node 167 coords 3 -0.3333333333333334 0.3333333333333333 3.333333333333333
+node 168 coords 3 0.3333333333333333 0.3333333333333333 3.333333333333333
+node 169 coords 3 1 0.3333333333333333 3.333333333333333
+node 170 coords 3 -1 1 3.333333333333333
+node 171 coords 3 -0.3333333333333334 1 3.333333333333333
+node 172 coords 3 0.3333333333333333 1 3.333333333333333
+node 173 coords 3 1 1 3.333333333333333
+node 174 coords 3 -1 -1 4
+node 175 coords 3 -0.3333333333333334 -1 4
+node 176 coords 3 0.3333333333333333 -1 4
+node 177 coords 3 1 -1 4
+node 178 coords 3 -1 -0.3333333333333334 4
+node 179 coords 3 -0.3333333333333334 -0.3333333333333334 4
+node 180 coords 3 0.3333333333333333 -0.3333333333333334 4
+node 181 coords 3 1 -0.3333333333333334 4
+node 182 coords 3 -1 0.3333333333333333 4
+node 183 coords 3 -0.3333333333333334 0.3333333333333333 4
+node 184 coords 3 0.3333333333333333 0.3333333333333333 4
+node 185 coords 3 1 0.3333333333333333 4
+node 186 coords 3 -1 1 4
+node 187 coords 3 -0.3333333333333334 1 4
+node 188 coords 3 0.3333333333333333 1 4
+node 189 coords 3 1 1 4
+lspace 1 nodes 8 1 2 7 6 26 27 32 31 crosssect 1 mat 1 nlgeo 1
+lspace 2 nodes 8 2 3 8 7 27 28 33 32 crosssect 1 mat 1 nlgeo 1
+lspace 3 nodes 8 3 4 9 8 28 29 34 33 crosssect 1 mat 1 nlgeo 1
+lspace 4 nodes 8 4 5 10 9 29 30 35 34 crosssect 1 mat 1 nlgeo 1
+lspace 5 nodes 8 6 7 12 11 31 32 37 36 crosssect 1 mat 1 nlgeo 1
+lspace 6 nodes 8 7 8 13 12 32 33 38 37 crosssect 1 mat 1 nlgeo 1
+lspace 7 nodes 8 8 9 14 13 33 34 39 38 crosssect 1 mat 1 nlgeo 1
+lspace 8 nodes 8 9 10 15 14 34 35 40 39 crosssect 1 mat 1 nlgeo 1
+lspace 9 nodes 8 11 12 17 16 36 37 42 41 crosssect 1 mat 1 nlgeo 1
+lspace 10 nodes 8 12 13 18 17 37 38 43 42 crosssect 1 mat 1 nlgeo 1
+lspace 11 nodes 8 13 14 19 18 38 39 44 43 crosssect 1 mat 1 nlgeo 1
+lspace 12 nodes 8 14 15 20 19 39 40 45 44 crosssect 1 mat 1 nlgeo 1
+lspace 13 nodes 8 16 17 22 21 41 42 47 46 crosssect 1 mat 1 nlgeo 1
+lspace 14 nodes 8 17 18 23 22 42 43 48 47 crosssect 1 mat 1 nlgeo 1
+lspace 15 nodes 8 18 19 24 23 43 44 49 48 crosssect 1 mat 1 nlgeo 1
+lspace 16 nodes 8 19 20 25 24 44 45 50 49 crosssect 1 mat 1 nlgeo 1
+lspace 17 nodes 8 26 27 32 31 51 52 57 56 crosssect 1 mat 1 nlgeo 1
+lspace 18 nodes 8 27 28 33 32 52 53 58 57 crosssect 1 mat 1 nlgeo 1
+lspace 19 nodes 8 28 29 34 33 53 54 59 58 crosssect 1 mat 1 nlgeo 1
+lspace 20 nodes 8 29 30 35 34 54 55 60 59 crosssect 1 mat 1 nlgeo 1
+lspace 21 nodes 8 31 32 37 36 56 57 62 61 crosssect 1 mat 1 nlgeo 1
+lspace 22 nodes 8 32 33 38 37 57 58 63 62 crosssect 1 mat 1 nlgeo 1
+lspace 23 nodes 8 33 34 39 38 58 59 64 63 crosssect 1 mat 1 nlgeo 1
+lspace 24 nodes 8 34 35 40 39 59 60 65 64 crosssect 1 mat 1 nlgeo 1
+lspace 25 nodes 8 36 37 42 41 61 62 67 66 crosssect 1 mat 1 nlgeo 1
+lspace 26 nodes 8 37 38 43 42 62 63 68 67 crosssect 1 mat 1 nlgeo 1
+lspace 27 nodes 8 38 39 44 43 63 64 69 68 crosssect 1 mat 1 nlgeo 1
+lspace 28 nodes 8 39 40 45 44 64 65 70 69 crosssect 1 mat 1 nlgeo 1
+lspace 29 nodes 8 41 42 47 46 66 67 72 71 crosssect 1 mat 1 nlgeo 1
+lspace 30 nodes 8 42 43 48 47 67 68 73 72 crosssect 1 mat 1 nlgeo 1
+lspace 31 nodes 8 43 44 49 48 68 69 74 73 crosssect 1 mat 1 nlgeo 1
+lspace 32 nodes 8 44 45 50 49 69 70 75 74 crosssect 1 mat 1 nlgeo 1
+lspace 33 nodes 8 51 52 57 56 76 77 82 81 crosssect 1 mat 1 nlgeo 1
+lspace 34 nodes 8 52 53 58 57 77 78 83 82 crosssect 1 mat 1 nlgeo 1
+lspace 35 nodes 8 53 54 59 58 78 79 84 83 crosssect 1 mat 1 nlgeo 1
+lspace 36 nodes 8 54 55 60 59 79 80 85 84 crosssect 1 mat 1 nlgeo 1
+lspace 37 nodes 8 56 57 62 61 81 82 87 86 crosssect 1 mat 1 nlgeo 1
+lspace 38 nodes 8 57 58 63 62 82 83 88 87 crosssect 1 mat 1 nlgeo 1
+lspace 39 nodes 8 58 59 64 63 83 84 89 88 crosssect 1 mat 1 nlgeo 1
+lspace 40 nodes 8 59 60 65 64 84 85 90 89 crosssect 1 mat 1 nlgeo 1
+lspace 41 nodes 8 61 62 67 66 86 87 92 91 crosssect 1 mat 1 nlgeo 1
+lspace 42 nodes 8 62 63 68 67 87 88 93 92 crosssect 1 mat 1 nlgeo 1
+lspace 43 nodes 8 63 64 69 68 88 89 94 93 crosssect 1 mat 1 nlgeo 1
+lspace 44 nodes 8 64 65 70 69 89 90 95 94 crosssect 1 mat 1 nlgeo 1
+lspace 45 nodes 8 66 67 72 71 91 92 97 96 crosssect 1 mat 1 nlgeo 1
+lspace 46 nodes 8 67 68 73 72 92 93 98 97 crosssect 1 mat 1 nlgeo 1
+lspace 47 nodes 8 68 69 74 73 93 94 99 98 crosssect 1 mat 1 nlgeo 1
+lspace 48 nodes 8 69 70 75 74 94 95 100 99 crosssect 1 mat 1 nlgeo 1
+lspace 49 nodes 8 76 77 82 81 101 102 107 106 crosssect 1 mat 1 nlgeo 1
+lspace 50 nodes 8 77 78 83 82 102 103 108 107 crosssect 1 mat 1 nlgeo 1
+lspace 51 nodes 8 78 79 84 83 103 104 109 108 crosssect 1 mat 1 nlgeo 1
+lspace 52 nodes 8 79 80 85 84 104 105 110 109 crosssect 1 mat 1 nlgeo 1
+lspace 53 nodes 8 81 82 87 86 106 107 112 111 crosssect 1 mat 1 nlgeo 1
+lspace 54 nodes 8 82 83 88 87 107 108 113 112 crosssect 1 mat 1 nlgeo 1
+lspace 55 nodes 8 83 84 89 88 108 109 114 113 crosssect 1 mat 1 nlgeo 1
+lspace 56 nodes 8 84 85 90 89 109 110 115 114 crosssect 1 mat 1 nlgeo 1
+lspace 57 nodes 8 86 87 92 91 111 112 117 116 crosssect 1 mat 1 nlgeo 1
+lspace 58 nodes 8 87 88 93 92 112 113 118 117 crosssect 1 mat 1 nlgeo 1
+lspace 59 nodes 8 88 89 94 93 113 114 119 118 crosssect 1 mat 1 nlgeo 1
+lspace 60 nodes 8 89 90 95 94 114 115 120 119 crosssect 1 mat 1 nlgeo 1
+lspace 61 nodes 8 91 92 97 96 116 117 122 121 crosssect 1 mat 1 nlgeo 1
+lspace 62 nodes 8 92 93 98 97 117 118 123 122 crosssect 1 mat 1 nlgeo 1
+lspace 63 nodes 8 93 94 99 98 118 119 124 123 crosssect 1 mat 1 nlgeo 1
+lspace 64 nodes 8 94 95 100 99 119 120 125 124 crosssect 1 mat 1 nlgeo 1
+lspace 65 nodes 8 126 127 131 130 142 143 147 146 crosssect 2 mat 2 nlgeo 1
+lspace 66 nodes 8 127 128 132 131 143 144 148 147 crosssect 2 mat 2 nlgeo 1
+lspace 67 nodes 8 128 129 133 132 144 145 149 148 crosssect 2 mat 2 nlgeo 1
+lspace 68 nodes 8 130 131 135 134 146 147 151 150 crosssect 2 mat 2 nlgeo 1
+lspace 69 nodes 8 131 132 136 135 147 148 152 151 crosssect 2 mat 2 nlgeo 1
+lspace 70 nodes 8 132 133 137 136 148 149 153 152 crosssect 2 mat 2 nlgeo 1
+lspace 71 nodes 8 134 135 139 138 150 151 155 154 crosssect 2 mat 2 nlgeo 1
+lspace 72 nodes 8 135 136 140 139 151 152 156 155 crosssect 2 mat 2 nlgeo 1
+lspace 73 nodes 8 136 137 141 140 152 153 157 156 crosssect 2 mat 2 nlgeo 1
+lspace 74 nodes 8 142 143 147 146 158 159 163 162 crosssect 2 mat 2 nlgeo 1
+lspace 75 nodes 8 143 144 148 147 159 160 164 163 crosssect 2 mat 2 nlgeo 1
+lspace 76 nodes 8 144 145 149 148 160 161 165 164 crosssect 2 mat 2 nlgeo 1
+lspace 77 nodes 8 146 147 151 150 162 163 167 166 crosssect 2 mat 2 nlgeo 1
+lspace 78 nodes 8 147 148 152 151 163 164 168 167 crosssect 2 mat 2 nlgeo 1
+lspace 79 nodes 8 148 149 153 152 164 165 169 168 crosssect 2 mat 2 nlgeo 1
+lspace 80 nodes 8 150 151 155 154 166 167 171 170 crosssect 2 mat 2 nlgeo 1
+lspace 81 nodes 8 151 152 156 155 167 168 172 171 crosssect 2 mat 2 nlgeo 1
+lspace 82 nodes 8 152 153 157 156 168 169 173 172 crosssect 2 mat 2 nlgeo 1
+lspace 83 nodes 8 158 159 163 162 174 175 179 178 crosssect 2 mat 2 nlgeo 1
+lspace 84 nodes 8 159 160 164 163 175 176 180 179 crosssect 2 mat 2 nlgeo 1
+lspace 85 nodes 8 160 161 165 164 176 177 181 180 crosssect 2 mat 2 nlgeo 1
+lspace 86 nodes 8 162 163 167 166 178 179 183 182 crosssect 2 mat 2 nlgeo 1
+lspace 87 nodes 8 163 164 168 167 179 180 184 183 crosssect 2 mat 2 nlgeo 1
+lspace 88 nodes 8 164 165 169 168 180 181 185 184 crosssect 2 mat 2 nlgeo 1
+lspace 89 nodes 8 166 167 171 170 182 183 187 186 crosssect 2 mat 2 nlgeo 1
+lspace 90 nodes 8 167 168 172 171 183 184 188 187 crosssect 2 mat 2 nlgeo 1
+lspace 91 nodes 8 168 169 173 172 184 185 189 188 crosssect 2 mat 2 nlgeo 1
+StructuralContactElement_QuadLinGauss 92 nodes 4 101 102 107 106 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 93 nodes 4 102 103 108 107 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 94 nodes 4 103 104 109 108 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 95 nodes 4 104 105 110 109 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 96 nodes 4 106 107 112 111 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 97 nodes 4 107 108 113 112 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 98 nodes 4 108 109 114 113 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 99 nodes 4 109 110 115 114 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 100 nodes 4 111 112 117 116 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 101 nodes 4 112 113 118 117 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 102 nodes 4 113 114 119 118 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 103 nodes 4 114 115 120 119 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 104 nodes 4 116 117 122 121 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 105 nodes 4 117 118 123 122 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 106 nodes 4 118 119 124 123 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 107 nodes 4 119 120 125 124 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 108 nodes 4 126 130 131 127 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 109 nodes 4 127 131 132 128 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 110 nodes 4 128 132 133 129 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 111 nodes 4 130 134 135 131 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 112 nodes 4 131 135 136 132 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 113 nodes 4 132 136 137 133 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 114 nodes 4 134 138 139 135 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 115 nodes 4 135 139 140 136 crosssect 3 mat 3 NIP 4
+StructuralContactElement_QuadLinGauss 116 nodes 4 136 140 141 137 crosssect 3 mat 3 NIP 4
+StructuralFEContactSurface 1 ce_set 20
+StructuralFEContactSurface 2 ce_set 21
+SimpleCS 1 material 1 set 1
+SimpleCS 2 material 2 set 2
+DummyCS 3 mat 3
+SimoPisterMat 1 d 0 g 0.1071428571428572 k 0
+SimoPisterMat 2 d 0 g 4.545454545454545 k 0
+DummyMat 3
+BoundaryCondition 1 loadTimeFunction 34 dofs 3 1 2 3 values 3 0 0 0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 1 set 4
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 2 values 1 1 set 4
+BoundaryCondition 4 loadTimeFunction 33 dofs 1 3 values 1 -1 set 4
+BoundaryCondition 5 loadTimeFunction 3 dofs 1 1 values 1 1 set 5
+BoundaryCondition 6 loadTimeFunction 4 dofs 1 2 values 1 1 set 5
+BoundaryCondition 7 loadTimeFunction 33 dofs 1 3 values 1 -1 set 5
+BoundaryCondition 8 loadTimeFunction 5 dofs 1 1 values 1 1 set 6
+BoundaryCondition 9 loadTimeFunction 6 dofs 1 2 values 1 1 set 6
+BoundaryCondition 10 loadTimeFunction 33 dofs 1 3 values 1 -1 set 6
+BoundaryCondition 11 loadTimeFunction 7 dofs 1 1 values 1 1 set 7
+BoundaryCondition 12 loadTimeFunction 8 dofs 1 2 values 1 1 set 7
+BoundaryCondition 13 loadTimeFunction 33 dofs 1 3 values 1 -1 set 7
+BoundaryCondition 14 loadTimeFunction 9 dofs 1 1 values 1 1 set 8
+BoundaryCondition 15 loadTimeFunction 10 dofs 1 2 values 1 1 set 8
+BoundaryCondition 16 loadTimeFunction 33 dofs 1 3 values 1 -1 set 8
+BoundaryCondition 17 loadTimeFunction 11 dofs 1 1 values 1 1 set 9
+BoundaryCondition 18 loadTimeFunction 12 dofs 1 2 values 1 1 set 9
+BoundaryCondition 19 loadTimeFunction 33 dofs 1 3 values 1 -1 set 9
+BoundaryCondition 20 loadTimeFunction 13 dofs 1 1 values 1 1 set 10
+BoundaryCondition 21 loadTimeFunction 14 dofs 1 2 values 1 1 set 10
+BoundaryCondition 22 loadTimeFunction 33 dofs 1 3 values 1 -1 set 10
+BoundaryCondition 23 loadTimeFunction 15 dofs 1 1 values 1 1 set 11
+BoundaryCondition 24 loadTimeFunction 16 dofs 1 2 values 1 1 set 11
+BoundaryCondition 25 loadTimeFunction 33 dofs 1 3 values 1 -1 set 11
+BoundaryCondition 26 loadTimeFunction 17 dofs 1 1 values 1 1 set 12
+BoundaryCondition 27 loadTimeFunction 18 dofs 1 2 values 1 1 set 12
+BoundaryCondition 28 loadTimeFunction 33 dofs 1 3 values 1 -1 set 12
+BoundaryCondition 29 loadTimeFunction 19 dofs 1 1 values 1 1 set 13
+BoundaryCondition 30 loadTimeFunction 20 dofs 1 2 values 1 1 set 13
+BoundaryCondition 31 loadTimeFunction 33 dofs 1 3 values 1 -1 set 13
+BoundaryCondition 32 loadTimeFunction 21 dofs 1 1 values 1 1 set 14
+BoundaryCondition 33 loadTimeFunction 22 dofs 1 2 values 1 1 set 14
+BoundaryCondition 34 loadTimeFunction 33 dofs 1 3 values 1 -1 set 14
+BoundaryCondition 35 loadTimeFunction 23 dofs 1 1 values 1 1 set 15
+BoundaryCondition 36 loadTimeFunction 24 dofs 1 2 values 1 1 set 15
+BoundaryCondition 37 loadTimeFunction 33 dofs 1 3 values 1 -1 set 15
+BoundaryCondition 38 loadTimeFunction 25 dofs 1 1 values 1 1 set 16
+BoundaryCondition 39 loadTimeFunction 26 dofs 1 2 values 1 1 set 16
+BoundaryCondition 40 loadTimeFunction 33 dofs 1 3 values 1 -1 set 16
+BoundaryCondition 41 loadTimeFunction 27 dofs 1 1 values 1 1 set 17
+BoundaryCondition 42 loadTimeFunction 28 dofs 1 2 values 1 1 set 17
+BoundaryCondition 43 loadTimeFunction 33 dofs 1 3 values 1 -1 set 17
+BoundaryCondition 44 loadTimeFunction 29 dofs 1 1 values 1 1 set 18
+BoundaryCondition 45 loadTimeFunction 30 dofs 1 2 values 1 1 set 18
+BoundaryCondition 46 loadTimeFunction 33 dofs 1 3 values 1 -1 set 18
+BoundaryCondition 47 loadTimeFunction 31 dofs 1 1 values 1 1 set 19
+BoundaryCondition 48 loadTimeFunction 32 dofs 1 2 values 1 1 set 19
+BoundaryCondition 49 loadTimeFunction 33 dofs 1 3 values 1 -1 set 19
+structuralpenaltycontactbc 50 loadTimeFunction 34 dofs 3 1 2 3 pn 5 pt 5 friction 0.2 autopenalty 1 mastersurface 1 slavesurface 2 nsd 3 algo 1 generalizedfeatures 1 searchpadding 0.9 tangentmode 3
+structuralpenaltycontactbc 51 loadTimeFunction 34 dofs 3 1 2 3 pn 5 pt 5 friction 0.2 autopenalty 1 mastersurface 2 slavesurface 1 nsd 3 algo 1 generalizedfeatures 1 searchpadding 0.9 tangentmode 3
+PiecewiseLinFunction 1 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1687461244450931 0.3579604780797938 0.5629839755511789 0.7787682579175257 0.9999999999999999 1.221231742082474 1.437016024448821 1.642039521920206 1.831253875554907 2
+PiecewiseLinFunction 2 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1441228056353687 -0.2600735106701009 -0.3449970239279145 -0.3968022466674206 -0.4142135623730949 -0.3968022466674206 -0.3449970239279145 -0.2600735106701011 -0.1441228056353687 0
+PiecewiseLinFunction 3 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1605383515085183 0.3253314889432296 0.4903216583434241 0.6514462541674906 0.8047378541243649 0.9464219102774564 1.073009690941852 1.181384184836838 1.268876852248394 1.333333333333333
+PiecewiseLinFunction 4 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.03983316227521483 -0.05406218108680272 -0.04233669076821678 -0.004945411805771904 0.05719095841793664 0.142542416249211 0.2490073255309972 0.3739641668600013 0.5143360880947231 0.6666666666666665
+PiecewiseLinFunction 5 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1523305785719434 0.2927024998066652 0.4176593411356694 0.5241242504174557 0.60947570824873 0.6716120784724386 0.7090033574348835 0.7207288477534695 0.7064998289418816 0.6666666666666667
+PiecewiseLinFunction 6 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.06445648108493918 0.1519491484964955 0.260323642391481 0.3869114230558769 0.5285954792089682 0.6818870791658427 0.843011674989909 1.008001844390104 1.172794981824815 1.333333333333333
+PiecewiseLinFunction 7 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1441228056353687 0.2600735106701009 0.3449970239279145 0.3968022466674206 0.4142135623730949 0.3968022466674206 0.3449970239279145 0.2600735106701011 0.1441228056353687 0
+PiecewiseLinFunction 8 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1687461244450931 0.3579604780797938 0.5629839755511789 0.7787682579175257 0.9999999999999999 1.221231742082474 1.437016024448821 1.642039521920206 1.831253875554907 2
+PiecewiseLinFunction 9 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.06445648108493918 0.1519491484964957 0.260323642391481 0.386911423055877 0.5285954792089682 0.6818870791658427 0.8430116749899091 1.008001844390104 1.172794981824815 1.333333333333333
+PiecewiseLinFunction 10 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1523305785719434 -0.2927024998066653 -0.4176593411356694 -0.5241242504174556 -0.60947570824873 -0.6716120784724385 -0.7090033574348834 -0.7207288477534693 -0.7064998289418815 -0.6666666666666666
+PiecewiseLinFunction 11 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.05624870814836436 0.1193201593599313 0.1876613251837263 0.2595894193058419 0.3333333333333333 0.4070772473608248 0.4790053414829404 0.5473465073067354 0.6104179585183023 0.6666666666666667
+PiecewiseLinFunction 12 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.04804093521178954 -0.08669117022336698 -0.1149990079759716 -0.1322674155558069 -0.1380711874576984 -0.1322674155558069 -0.1149990079759715 -0.08669117022336703 -0.04804093521178959 0
+PiecewiseLinFunction 13 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.04804093521178954 0.08669117022336698 0.1149990079759716 0.1322674155558069 0.1380711874576984 0.132267415555807 0.1149990079759716 0.08669117022336709 0.04804093521178965 1.110223024625157e-16
+PiecewiseLinFunction 14 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.05624870814836436 0.1193201593599313 0.1876613251837262 0.2595894193058418 0.3333333333333333 0.4070772473608247 0.4790053414829403 0.5473465073067353 0.6104179585183023 0.6666666666666666
+PiecewiseLinFunction 15 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.03983316227521483 0.05406218108680272 0.04233669076821678 0.004945411805771904 -0.05719095841793664 -0.142542416249211 -0.2490073255309972 -0.3739641668600013 -0.5143360880947231 -0.6666666666666665
+PiecewiseLinFunction 16 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1605383515085183 0.3253314889432296 0.4903216583434241 0.6514462541674906 0.8047378541243649 0.9464219102774564 1.073009690941852 1.181384184836838 1.268876852248394 1.333333333333333
+PiecewiseLinFunction 17 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.03983316227521483 -0.05406218108680272 -0.04233669076821678 -0.004945411805771904 0.05719095841793664 0.142542416249211 0.2490073255309974 0.3739641668600014 0.5143360880947232 0.6666666666666667
+PiecewiseLinFunction 18 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1605383515085183 -0.3253314889432296 -0.4903216583434241 -0.6514462541674906 -0.8047378541243649 -0.9464219102774564 -1.073009690941852 -1.181384184836838 -1.268876852248394 -1.333333333333333
+PiecewiseLinFunction 19 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.04804093521178954 -0.08669117022336692 -0.1149990079759715 -0.1322674155558068 -0.1380711874576983 -0.1322674155558068 -0.1149990079759714 -0.08669117022336692 -0.04804093521178948 1.110223024625157e-16
+PiecewiseLinFunction 20 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.05624870814836436 -0.1193201593599313 -0.1876613251837263 -0.2595894193058419 -0.3333333333333333 -0.4070772473608248 -0.4790053414829403 -0.5473465073067354 -0.6104179585183023 -0.6666666666666666
+PiecewiseLinFunction 21 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.05624870814836436 -0.1193201593599313 -0.1876613251837262 -0.2595894193058418 -0.3333333333333332 -0.4070772473608247 -0.4790053414829402 -0.5473465073067352 -0.6104179585183022 -0.6666666666666665
+PiecewiseLinFunction 22 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.04804093521178954 0.08669117022336692 0.1149990079759715 0.1322674155558068 0.1380711874576983 0.1322674155558068 0.1149990079759715 0.08669117022336698 0.04804093521178954 0
+PiecewiseLinFunction 23 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.06445648108493918 -0.1519491484964955 -0.260323642391481 -0.3869114230558769 -0.5285954792089682 -0.6818870791658427 -0.843011674989909 -1.008001844390104 -1.172794981824815 -1.333333333333333
+PiecewiseLinFunction 24 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1523305785719434 0.2927024998066652 0.4176593411356694 0.5241242504174557 0.60947570824873 0.6716120784724386 0.7090033574348835 0.7207288477534695 0.7064998289418816 0.6666666666666667
+PiecewiseLinFunction 25 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1441228056353687 -0.2600735106701009 -0.3449970239279145 -0.3968022466674206 -0.4142135623730949 -0.3968022466674206 -0.3449970239279145 -0.2600735106701011 -0.1441228056353687 0
+PiecewiseLinFunction 26 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1687461244450931 -0.3579604780797938 -0.5629839755511789 -0.7787682579175257 -0.9999999999999999 -1.221231742082474 -1.437016024448821 -1.642039521920206 -1.831253875554907 -2
+PiecewiseLinFunction 27 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1523305785719434 -0.2927024998066653 -0.4176593411356694 -0.5241242504174556 -0.60947570824873 -0.6716120784724385 -0.7090033574348834 -0.7207288477534693 -0.7064998289418815 -0.6666666666666666
+PiecewiseLinFunction 28 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.06445648108493918 -0.1519491484964957 -0.260323642391481 -0.386911423055877 -0.5285954792089682 -0.6818870791658427 -0.8430116749899091 -1.008001844390104 -1.172794981824815 -1.333333333333333
+PiecewiseLinFunction 29 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1605383515085183 -0.3253314889432296 -0.4903216583434241 -0.6514462541674906 -0.8047378541243649 -0.9464219102774564 -1.073009690941852 -1.181384184836838 -1.268876852248394 -1.333333333333333
+PiecewiseLinFunction 30 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.03983316227521483 0.05406218108680272 0.04233669076821678 0.004945411805771904 -0.05719095841793664 -0.142542416249211 -0.2490073255309974 -0.3739641668600014 -0.5143360880947232 -0.6666666666666667
+PiecewiseLinFunction 31 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 -0.1687461244450931 -0.3579604780797938 -0.5629839755511789 -0.7787682579175257 -0.9999999999999999 -1.221231742082474 -1.437016024448821 -1.642039521920206 -1.831253875554907 -2
+PiecewiseLinFunction 32 npoints 16 t 16 0 0.1 0.2 0.3 0.4 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1 f(t) 16 0 0 0 0 0 0 0.1441228056353687 0.2600735106701009 0.3449970239279145 0.3968022466674206 0.4142135623730949 0.3968022466674206 0.3449970239279145 0.2600735106701011 0.1441228056353687 0
+PiecewiseLinFunction 33 npoints 3 t 3 0 0.5 1 f(t) 3 0 1 1
+ConstantFunction 34 f(t) 1
+set 1 elements 64 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64
+set 2 elements 27 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91
+set 3 nodes 25 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+set 4 nodes 1 174
+set 5 nodes 1 175
+set 6 nodes 1 176
+set 7 nodes 1 177
+set 8 nodes 1 178
+set 9 nodes 1 179
+set 10 nodes 1 180
+set 11 nodes 1 181
+set 12 nodes 1 182
+set 13 nodes 1 183
+set 14 nodes 1 184
+set 15 nodes 1 185
+set 16 nodes 1 186
+set 17 nodes 1 187
+set 18 nodes 1 188
+set 19 nodes 1 189
+set 20 elements 16 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107
+set 21 elements 9 108 109 110 111 112 113 114 115 116
+# Top-face nodal paths sample the exact prescribed rigid-body rotation.
+# Contact is represented here by penalty-only OOFEM boundary conditions.
+# No temporary middle-body guides are active.

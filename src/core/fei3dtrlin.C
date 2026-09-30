@@ -37,6 +37,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "gaussintegrationrule.h"
 #include <stdexcept>
 
@@ -253,30 +254,25 @@ FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &
     OOFEM_ERROR("FEI3dTrLin :: surfaceEvaldNdx - Not supported");
 }
 
-void
-FEI3dTrLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+std::tuple<FloatArrayF<3>, FloatArrayF<3>>
+FEI3dTrLin :: surfaceEvalBaseVectorsAt(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    // Note: These are not normalized. Returns the two tangent vectors to the surface.
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
-    G1.resize(0);
-    G2.resize(0);
-    for ( int i = 0; i < 3; ++i ) {
-        G1.add( dNdxi(i, 1), cellgeo.giveVertexCoordinates(i) );
-        G2.add( dNdxi(i, 2), cellgeo.giveVertexCoordinates(i) );
+    FloatArrayF<3> G1, G2;
+    for (int i = 0; i < 3; ++i) {
+        const FloatArrayF<3> coordinates(cellgeo.giveVertexCoordinates(i + 1));
+        G1 += dNdxi(i, 0) * coordinates;
+        G2 += dNdxi(i, 1) * coordinates;
     }
+    return std::make_tuple(G1, G2);
 }
 
 double
 FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    FloatArray G1, G2; // local curvilinear base vectors
-    this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
-    answer.beVectorProductOf(G1, G2);
-    double J = answer.computeNorm();
-    answer.times(1 / J);
-    return J;
+    return FEInterpolation3d::surfaceEvalNormal(answer, isurf, lcoords, cellgeo);
 }
 
 void
@@ -284,9 +280,8 @@ FEI3dTrLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Flo
 {
     // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
     // Note! The base vectors are not normalized except the third (normal)
-    FloatArray G1, G2, G3;
-    this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
-    G3.beVectorProductOf(G1, G2);
+    auto [G1, G2] = this->surfaceEvalBaseVectorsAt(0, lcoords, cellgeo);
+    auto G3 = cross(G1, G2);
 
     jacobianMatrix.resize(3, 3);
     jacobianMatrix.at(1, 1) = G1.at(1);
@@ -303,15 +298,13 @@ FEI3dTrLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Flo
 double
 FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
-    OOFEM_ERROR("FEI3dTrLin :: surfaceGiveTransformationJacobian - Not supported yet");
-    //return 0;
+    return FEInterpolation3d::surfaceGiveTransformationJacobian(isurf, lcoords, cellgeo);
 }
 
 IntArray
 FEI3dTrLin :: computeLocalSurfaceMapping(int isurf) const
 {
-    //surfNodes.setValues(3, 1, 2, 3);
-    return computeLocalEdgeMapping(isurf);
+    return {1, 2, 3};
 
 }
 

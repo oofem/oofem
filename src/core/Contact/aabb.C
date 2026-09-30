@@ -34,6 +34,8 @@
 
 #include "aabb.h"
 #include <stdexcept>
+#include <cmath>
+#include <limits>
 
 namespace oofem {
 
@@ -59,8 +61,15 @@ AABB :: AABB(const Vector& min, const Vector& max)
 	this->max = max;
 }
 
+AABB :: AABB()
+{
+	const double inf = std::numeric_limits<double>::infinity();
+	this->min = Vector(+inf, +inf, +inf);
+	this->max = Vector(-inf, -inf, -inf);
+}
+
 bool
-AABB :: contains(const Vector& v)
+AABB :: contains(const Vector& v) const
 {
 	return (
 		this->min.x <= v.x
@@ -78,9 +87,26 @@ AABB :: contains(const Vector& v)
 }
 
 bool
-AABB :: contains(double x, double y, double z)
+AABB :: contains(double x, double y, double z) const
 {
 	return this->contains(Vector(x, y, z));
+}
+
+bool
+AABB :: intersects(const AABB& other) const
+{
+	return (
+		this->min.x <= other.max.x && this->max.x >= other.min.x &&
+		this->min.y <= other.max.y && this->max.y >= other.min.y &&
+		this->min.z <= other.max.z && this->max.z >= other.min.z
+	);
+}
+
+void
+AABB :: merge(const AABB& other)
+{
+	this->merge(other.min);
+	this->merge(other.max);
 }
 
 void
@@ -98,6 +124,26 @@ AABB :: merge(const Vector& v)
 	if (v.x > this->max.x) this->max.x = v.x;
 	if (v.y > this->max.y) this->max.y = v.y;
 	if (v.z > this->max.z) this->max.z = v.z;
+}
+
+void
+AABB :: expandBy(double padding)
+{
+	this->min.x -= padding;
+	this->min.y -= padding;
+	this->min.z -= padding;
+	this->max.x += padding;
+	this->max.y += padding;
+	this->max.z += padding;
+}
+
+double
+AABB :: diagonalLength() const
+{
+	const double dx = this->max.x - this->min.x;
+	const double dy = this->max.y - this->min.y;
+	const double dz = this->max.z - this->min.z;
+	return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 } // end namespace oofem

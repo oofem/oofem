@@ -66,6 +66,14 @@ std::array< std::array< int, 3 >, 3 >StructuralMaterial::svIndex = {{
 StructuralMaterial::StructuralMaterial(int n, Domain *d) : Material(n, d) { }
 
 
+double
+StructuralMaterial::giveInitialYoungsModulus() const
+{
+    OOFEM_ERROR("Material %d (%s) does not provide its initial Young modulus",
+                this->giveNumber(), this->giveClassName());
+}
+
+
 bool
 StructuralMaterial::hasMaterialModeCapability(MaterialMode mode) const
 //

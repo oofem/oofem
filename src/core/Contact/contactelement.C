@@ -39,6 +39,7 @@
 
 #include "mathfem.h"
 #include "feinterpol.h"
+#include "node.h"
 
 
 
@@ -69,7 +70,6 @@ ContactElement :: ~ContactElement()
 AABB
 ContactElement :: computeAABB()
 {
-  // TODO
   AABB aabb;
   int nnode = this->giveNumberOfNodes();
   for (int i=1; i<=nnode; i++) {
@@ -81,6 +81,58 @@ ContactElement :: computeAABB()
       aabb.merge(x,y,z);
   }
   return aabb;
+}
+
+AABB
+ContactElement :: computeUpdatedAABB(TimeStep *tStep)
+{
+  if (tStep == nullptr) {
+      return this->computeAABB();
+  }
+  AABB aabb;
+  int nnode = this->giveNumberOfNodes();
+  for (int i = 1; i <= nnode; i++) {
+      Node *node = this->giveNode(i);
+      double x = node->giveUpdatedCoordinate(1, tStep);
+      double y = node->giveUpdatedCoordinate(2, tStep);
+      double z = (node->giveCoordinates().giveSize() > 2) ? node->giveUpdatedCoordinate(3, tStep) : 0.0;
+      aabb.merge(x, y, z);
+  }
+  return aabb;
+}
+
+void
+ContactElement :: setContactOutputState(const GaussPoint *gp, double normalGap,
+                                        double pressure, int status)
+{
+  if (gp == nullptr) {
+    return;
+  }
+  contactOutputStates[gp] = { normalGap, pressure, static_cast<double>(status) };
+}
+
+int
+ContactElement :: giveIPValue(FloatArray &answer, GaussPoint *gp,
+                              InternalStateType type, TimeStep *tStep)
+{
+  if (type != IST_ContactNormalGap
+      && type != IST_ContactPressure
+      && type != IST_ContactStatus) {
+    return Element :: giveIPValue(answer, gp, type, tStep);
+  }
+
+  answer.resize(1);
+  const auto state = contactOutputStates.find(gp);
+  if (state == contactOutputStates.end()) {
+    answer.at(1) = 0.0;
+  } else if (type == IST_ContactNormalGap) {
+    answer.at(1) = state->second.normalGap;
+  } else if (type == IST_ContactPressure) {
+    answer.at(1) = state->second.pressure;
+  } else {
+    answer.at(1) = state->second.status;
+  }
+  return 1;
 }
 
   

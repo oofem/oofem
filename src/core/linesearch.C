@@ -38,121 +38,217 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "convergedreason.h"
+#include "convergenceexception.h"
 #include "engngm.h"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <stdexcept>
 
 namespace oofem {
 LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :
     NumericalMethod(d, m)
 {
-    max_iter = 10;
-    ls_tolerance = 0.80;
+    // Robust Newton defaults for contact.  In particular, a contact-state
+    // change should damp the Newton direction; extrapolating beyond the full
+    // step is counterproductive when the active projection changes.
+    max_iter = 5;
+    ls_tolerance = 0.90;
     amplifFactor = 2.5;
     maxEta = 4.0;
-    minEta = 0.2;
+    minEta = 0.01;
 }
 
 ConvergedReason
 LineSearchNM :: solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                       IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep)
 {
-    int ico, ils, neq = r.giveSize();
-    double s0;
-
-    FloatArray g(neq), rb(neq);
-    // Compute inner product at start and stop if positive
-    g = R;
-    g.times(lambda);
-    if ( R0 ) {
-        g.add(* R0);
-    }
-
-    g.subtract(F);
-
+    const int neq = r.giveSize();
+    const FloatArray rb(r);
+    FloatArray freeCorrection(dr);
+    FloatArray prescribedCorrection(neq);
+    prescribedCorrection.zero();
     for ( auto eq : eqnmask ) {
-        g.at( eq ) = 0.0;
+        prescribedCorrection.at(eq) = freeCorrection.at(eq);
+        freeCorrection.at(eq) = 0.0;
     }
 
-    s0 = ( -1.0 ) * g.dotProduct(dr);
-    if ( s0 >= 0.0 ) {
-        //printf ("\nLineSearchNM::solve starting inner product uphill, val=%e",s0);
-        OOFEM_LOG_DEBUG("LS: product uphill, eta=%e\n", 1.0);
-        r.add(dr);
-        tStep->incrementStateCounter();        // update solution state counter
-        engngModel->updateComponent(tStep, InternalRhs, domain);
-        etaValue = 1.0;
-        status = ls_ok;
-        return CR_CONVERGED;
-    }
+    // OOFEM inserts prescribed increments into the first linear solution.
+    // Split that out here rather than forming the initial line-search
+    // residual from it directly: prescribed motion is exact, while only the
+    // unconstrained Newton correction is scaled by the line search.
+    FloatArray trialBase(rb);
+    trialBase.add(prescribedCorrection);
+    FloatArray g(neq);
 
-    // keep original total displacement r
-    rb = r;
+    struct TrialMeasure {
+        double directional = 0.0;
+        double norm = 0.0;
+    };
 
-    eta.resize(this->max_iter + 1);
-    prod.resize(this->max_iter + 1);
-    // prepare starting product ratios and step lengths
-    prod.at(1) = 1.0;
-    eta.at(1) = 0.0;
-    eta.at(2) = 1.0;
-    // following counter shows how many times the max or min step length has been reached
-    ico = 0;
-
-    // begin line search loop
-    for ( ils = 2; ils <= this->max_iter; ils++ ) {
-        // update displacements
-        r = rb;
-        r.add(this->eta.at(ils), dr);
-
-        tStep->incrementStateCounter();        // update solution state counter
-        // update internal forces according to new state
-        engngModel->updateComponent(tStep, InternalRhs, domain);
-        // compute out-of balance forces g in new state
+    auto computeResidualMeasure = [&]() {
         g = R;
         g.times(lambda);
         if ( R0 ) {
             g.add(* R0);
         }
-
         g.subtract(F);
-
         for ( auto eq : eqnmask ) {
-            g.at( eq ) = 0.0;
+            g.at(eq) = 0.0;
+        }
+        return TrialMeasure { g.dotProduct(freeCorrection), g.computeNorm() };
+    };
+
+    auto evaluateTrial = [&](double step) {
+        r = trialBase;
+        r.add(step, freeCorrection);
+        tStep->incrementStateCounter();
+        engngModel->initForNewIteration(domain, tStep, 0, r);
+        try {
+            engngModel->updateComponent(tStep, InternalRhs, domain);
+            return computeResidualMeasure();
+        } catch (const ConvergenceException &) {
+            const double invalid = std::numeric_limits<double>::quiet_NaN();
+            return TrialMeasure { invalid, invalid };
+        } catch (const std::domain_error &) {
+            const double invalid = std::numeric_limits<double>::quiet_NaN();
+            return TrialMeasure { invalid, invalid };
+        }
+    };
+
+    auto restoreUnperturbedState = [&]() {
+        r = rb;
+        tStep->incrementStateCounter();
+        engngModel->initForNewIteration(domain, tStep, 0, r);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
+    };
+
+    // The scalar stationarity function is the residual projected onto the
+    // fixed Newton direction — the energy criterion of Bonet and Wood.
+    const bool hasPrescribedCorrection = prescribedCorrection.computeSquaredNorm() > 0.0;
+    const TrialMeasure initial = hasPrescribedCorrection ? evaluateTrial(0.0) : computeResidualMeasure();
+    if (!std::isfinite(initial.directional) || !std::isfinite(initial.norm)) {
+        // The prescribed part of the increment alone inverted an element.
+        // A line search is not allowed to weaken a Dirichlet condition; let
+        // the engineering model reduce and retry the complete time step.
+        restoreUnperturbedState();
+        dr.zero();
+        etaValue = 0.0;
+        status = ls_failed;
+        return CR_DIVERGED_ITS;
+    }
+
+    if (freeCorrection.computeSquaredNorm() < 1.e-60) {
+        dr = prescribedCorrection;
+        r = rb;
+        etaValue = 1.0;
+        status = ls_ok;
+        return CR_CONVERGED;
+    }
+
+    const double rInitial = initial.directional;
+    const double initialMagnitude = std::abs(rInitial);
+
+    double step = 1.0;
+    double bestStep = step;
+    double bestDirectionalMagnitude = std::numeric_limits<double>::infinity();
+    bool accepted = false;
+
+    for (int iteration = 1; iteration <= max_iter; ++iteration) {
+        const TrialMeasure trial = evaluateTrial(step);
+        const double rTrial = trial.directional;
+        const double magnitude = std::abs(rTrial);
+        const bool validTrial = std::isfinite(magnitude) && std::isfinite(trial.norm);
+        if (validTrial && magnitude < bestDirectionalMagnitude) {
+            bestDirectionalMagnitude = magnitude;
+            bestStep = step;
         }
 
-        // compute current inner-product ratio
-        double si = ( -1.0 ) * g.dotProduct(dr) / s0;
-        prod.at(ils) = si;
-
-        // check if line-search tolerance is satisfied
-        if ( fabs(si) < ls_tolerance ) {
-            dr.times( this->eta.at(ils) );
-            //printf ("\nLineSearchNM::solve tolerance satisfied for eta=%e, ils=%d", eta.at(ils),ils);
-            OOFEM_LOG_DEBUG( "LS: ils=%d, eta=%e\n", ils, eta.at(ils) );
-
-            etaValue = eta.at(ils);
-            status = ls_ok;
-            return CR_CONVERGED;
+        const double ratio = magnitude / std::max(initialMagnitude, 1.e-30);
+        const double normRatio = trial.norm / std::max(initial.norm, 1.e-30);
+        OOFEM_LOG_DEBUG("LS: iteration=%d, eta=%e, ratio=%e, norm_ratio=%e\n",
+                        iteration, step, ratio, normRatio);
+        if (validTrial && (initialMagnitude < 1.e-30 ? trial.norm <= initial.norm
+                                                     : ratio <= ls_tolerance)) {
+            accepted = true;
+            break;
         }
 
-        // call line-search routine to get new estimate of eta.at(ils)
-        this->search(ils, prod, eta, this->amplifFactor, this->maxEta, this->minEta, ico);
-        if ( ico == 2 ) {
-            break; // exit the loop
+        if (!validTrial) {
+            // An inverted trial configuration is rejected and the correction
+            // is halved. The minimum line-search bound is deliberately not
+            // enforced for this path; several halvings may be needed to
+            // regain J > 0.
+            step *= 0.5;
+            continue;
         }
-    } // end line search loop
 
-    // exceeded no of ls iterations of ls failed
-    //if (ico == 2) printf("\nLineSearchNM::solve max or min step length has been reached two times");
-    //else printf("\nLineSearchNM::solve reached max number of ls searches");
-    OOFEM_LOG_DEBUG( "LS: ils=%d, ico=%d, eta=%e\n", ils, ico, eta.at(ils) );
-    /* update F before */
+        // Quadratic energy interpolation.  Unlike OOFEM's former secant
+        // search, this never extrapolates beyond the full Newton step.
+        double nextStep = 0.5 * step;
+        if (initialMagnitude >= 1.e-30 && std::abs(rTrial) > 1.e-30) {
+            const double a = rInitial / rTrial;
+            const double A = 1.0 + a * (step - 1.0);
+            const double B = a * step * step;
+            const double discriminant = B * B - 4.0 * A * B;
+            if (std::abs(A) > 1.e-30) {
+                if (discriminant >= 0.0) {
+                    nextStep = (B + std::sqrt(discriminant)) / (2.0 * A);
+                    if (nextStep < 0.0) {
+                        nextStep = (B - std::sqrt(discriminant)) / (2.0 * A);
+                    }
+                } else {
+                    nextStep = 0.5 * B / A;
+                }
+            }
+        }
+
+        if (!std::isfinite(nextStep) || nextStep <= 0.0 || nextStep > 1.0) {
+            nextStep = 0.5 * step;
+        }
+        if (nextStep < minEta) {
+            // Recovery for a vanishing interpolation step.
+            nextStep = 0.5;
+        }
+        step = nextStep;
+    }
+
+    // If every sampled state was invalid, keep cutting back instead of
+    // silently restoring the original full step (the former OOFEM behavior).
+    const bool hasValidTrial = std::isfinite(bestDirectionalMagnitude);
+    if (!accepted && !hasValidTrial) {
+        restoreUnperturbedState();
+        dr.zero();
+        etaValue = 0.0;
+        status = ls_failed;
+        OOFEM_LOG_DEBUG("LS: no admissible trial correction found\n");
+        return CR_DIVERGED_ITS;
+    }
+
+    double acceptedStep = accepted ? step : bestStep;
+    TrialMeasure finalTrial;
+    if (!accepted || acceptedStep != step) {
+        finalTrial = evaluateTrial(acceptedStep);
+    } else {
+        finalTrial = computeResidualMeasure();
+    }
+    if (!std::isfinite(finalTrial.directional) || !std::isfinite(finalTrial.norm)) {
+        restoreUnperturbedState();
+        dr.zero();
+        etaValue = 0.0;
+        status = ls_failed;
+        return CR_DIVERGED_ITS;
+    }
+
+    dr = prescribedCorrection;
+    dr.add(acceptedStep, freeCorrection);
     r = rb;
-    r.add(dr);
-
-    tStep->incrementStateCounter();           // update solution state counter
-    engngModel->updateComponent(tStep, InternalRhs, domain);
-    etaValue = 1.0;
-    status = ls_failed;
-    return CR_DIVERGED_ITS;
+    etaValue = acceptedStep;
+    status = ls_ok;
+    OOFEM_LOG_DEBUG("LS: accepted eta=%e%s\n", acceptedStep,
+                    accepted ? "" : " (best trial)");
+    return CR_CONVERGED;
 }
 
 
@@ -277,6 +373,12 @@ LineSearchNM :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     if ( maxEta > 15.0 ) {
         maxEta = 15.0;
     }
+
+    IR_GIVE_OPTIONAL_FIELD(ir, minEta, _IFT_LineSearchNM_lsearchmineta);
+    minEta = std::clamp(minEta, 1.e-8, 0.5);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, max_iter, _IFT_LineSearchNM_lsearchmaxiter);
+    max_iter = std::clamp(max_iter, 1, 50);
 
     //printf ("\nLineSearchNM::initializeFrom: tol=%e, ampl=%e, maxEta=%e\n",
     //    ls_tolerance, amplifFactor,maxEta);

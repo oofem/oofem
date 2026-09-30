@@ -79,6 +79,7 @@ public:
     int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder) override;
 
     int SetUpPointsOnLine(int nPoints, MaterialMode mode) override;
+    int SetUpPointsBare(int nPoints, MaterialMode mode) override;
     int SetUpPointsOnTriangle(int nPoints, MaterialMode mode) override;
     int SetUpPointsOnSquare(int nPoints, MaterialMode mode) override;
     int SetUpPointsOn3dDegShell(int nPointsXY, int nPointsZ, MaterialMode mode) override;

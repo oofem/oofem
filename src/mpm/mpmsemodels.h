@@ -233,7 +233,126 @@ namespace oofem {
         const char *giveInputRecordName() const { return _IFT_StationaryMPMSProblem_Name; }
         const char *giveClassName() const override { return "StationaryMPMSProblem"; }
         fMode giveFormulation() override { return TL; }
-    };
+
+    }; // end class StationaryMPMSProblem
         
+
+    #define _IFT_NonStationaryMPMSProblem_Name "mpmnonstationaryproblem"
+
+    /**
+     * This class represents generic nonstationary, nonlinear multi-physics problem (P\dot(x)+Kx=f). 
+     * The solution is stored in UnknownsField, which can obtain/ project solution from/to DOFs (nodes). If the problem
+     * keeps the same equation numbers, solution is taken from UnknownsField without any projection, which is more efficient.
+     *
+     * @todo Documentation errors (there is no "UnknownsField" used here).
+     */
+    class NonStationaryMPMSProblem : public EngngModel
+    {
+    protected:
+        SparseMtrxType sparseMtrxType = SMT_Skyline;
+        std :: unique_ptr< DofDistributedPrimaryField > field;
+
+        std :: unique_ptr< SparseMtrx > effectiveMatrix;
+
+        FloatArray solution;
+        FloatArray internalForces;
+        FloatArray eNorm;
+
+        /// Numerical method used to solve the problem
+        std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
+
+        /// Initial time from which the computation runs. Default is zero.
+        double initT = 0.;
+        /// Length of time step.
+        double deltaT = 0.;
+        double alpha = 0.;
+        /// Associated time function for time step increment.
+        int dtFunction = 0;
+        /// Specified times where the problem is solved
+        FloatArray prescribedTimes;
+        bool keepTangent = false, hasTangent = false;
+        IntArray exportFields;
+        /// identifies what problem to solve (UP, UPV, etc) 
+        std::string problemType;
+
+        // list of integrals contributing to lhs and rhs (problemType = "symbolic" only)
+        IntArray lhsIntegrals;     // terms involving unknowns at current time step
+        IntArray lhsdotIntegrals;  // terms involving time derivative of unknowns at current time step
+        IntArray rhsIntegrals;
+
+        bool debug = false;
+
+    public:
+        NonStationaryMPMSProblem(int i, EngngModel * _master) : EngngModel(i, _master), nMethod(nullptr) { ndomains = 1;}
+        void initializeFrom(const std::shared_ptr<InputRecord> &ir) override ;
+        void postInitialize() override {
+            this->giveDomain(1)->giveConnectivityTable()->buildSharedBoundaryEntities(this->giveDomain(1));
+            for (const auto& i: integralList) {
+                i->initialize();
+            } 
+            EngngModel::postInitialize();
+        }
+        NumericalMethod *giveNumericalMethod(MetaStep *mStep) override {
+            if ( !nMethod ) {
+                nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
+            }
+            return nMethod.get();
+        }
+
+        void solveYourselfAt(TimeStep *tStep) override;
+        void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+        bool newDofHandling() override { return true; }
+        void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+        void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+        void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+        double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
+        void saveContext(DataStream &stream, ContextMode mode) override;
+        void restoreContext(DataStream &stream, ContextMode mode) override;
+
+        virtual void applyIC();
+
+        int requiresUnknownsDictionaryUpdate() override {return true;}
+        int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override {
+            return tStep->giveNumber() % 2;
+        }
+        void updateDomainLinks() override;
+
+        /*
+        Function *giveDtFunction();
+        */
+        TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+        double giveDeltaT(int n);
+        double giveDiscreteTime(int iStep);
+        TimeStep *giveNextStep() override;
+        TimeStep *giveCurrentStep(bool force = false) override { return timeStepController->giveCurrentStep(); }
+        TimeStep *givePreviousStep(bool force = false) override { return timeStepController->givePreviousStep(); }
+
+
+
+
+        bool requiresEquationRenumbering(TimeStep *tStep) override;
+        int forceEquationNumbering() override;
+
+        void printOutputAt(FILE *file, TimeStep *tStep) override;
+        
+        void updateYourself(TimeStep *tStep) override;
+        
+        int checkConsistency() override;
+        FieldPtr giveField (FieldType key, TimeStep *tStep) override;
+        // identification
+        const char *giveInputRecordName() const { return _IFT_NonStationaryMPMSProblem_Name; }
+        const char *giveClassName() const override { return "NonStationaryMPMSProblem"; }
+        fMode giveFormulation() override { return TL; }
+
+    /** nlinear statics number starts simulation at time = 0
+     */
+    double giveFinalTime() override
+    {
+        return this->timeStepController->giveFinalTime();
+    }
+
+    }; // end class NonStationaryMPMSProblem
+
+
 } // end namespace oofem
 #endif // mpmsemodels_h

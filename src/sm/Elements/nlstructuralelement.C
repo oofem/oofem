@@ -49,6 +49,7 @@
 #include "mathfem.h"
 #include "parametermanager.h"
 #include "paramkey.h"
+#include "contextioerr.h"
 
 namespace oofem {
 
@@ -520,6 +521,26 @@ void NLStructuralElement::giveInputRecord(DynamicInputRecord &input)
     StructuralElement::giveInputRecord(input);
 
     input.setField(nlGeometry, IPK_NLStructuralElement_nlgeoflag.getNameCStr());
+}
+
+void
+NLStructuralElement::saveContext(DataStream &stream, ContextMode mode)
+{
+    StructuralElement::saveContext(stream, mode);
+
+    if ( ( mode & CM_Definition ) && !stream.write(nlGeometry) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+}
+
+void
+NLStructuralElement::restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralElement::restoreContext(stream, mode);
+
+    if ( ( mode & CM_Definition ) && !stream.read(nlGeometry) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
 }
 
 int

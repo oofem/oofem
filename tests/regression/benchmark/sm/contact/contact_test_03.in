@@ -1,0 +1,410 @@
+contact_test_03.out
+Two 5 x 5 element blocks are compressed against each other with two-pass contact between them.
+StaticStructural nsteps 50 deltat 0.02 renumber 0 nmodules 2 rtolv 1.e-8 stiffMode 0 manrmsteps 1 maxiter 100 initialguess 1 smtype 1 linesearch 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 4 1 150 151 152
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 216 nelem 150 ncrosssect 3 nmat 3 nbc 6 nic 0 nltf 2 nset 8 ncontactsurf 2
+# Rigid-body nodes are linked to a six-DOF control point.
+node 1 coords 3 -2.5 -2.5 0
+node 2 coords 3 -2.5 -2.5 0.5
+node 3 coords 3 -2.5 -2.5 1
+node 4 coords 3 -2.5 -1.5 0
+node 5 coords 3 -2.5 -1.5 0.5
+node 6 coords 3 -2.5 -1.5 1
+node 7 coords 3 -2.5 -0.5 0
+node 8 coords 3 -2.5 -0.5 0.5
+node 9 coords 3 -2.5 -0.5 1
+node 10 coords 3 -2.5 0.5 0
+node 11 coords 3 -2.5 0.5 0.5
+node 12 coords 3 -2.5 0.5 1
+node 13 coords 3 -2.5 1.5 0
+node 14 coords 3 -2.5 1.5 0.5
+node 15 coords 3 -2.5 1.5 1
+node 16 coords 3 -2.5 2.5 0
+node 17 coords 3 -2.5 2.5 0.5
+node 18 coords 3 -2.5 2.5 1
+node 19 coords 3 -1.5 -2.5 0
+node 20 coords 3 -1.5 -2.5 0.5
+node 21 coords 3 -1.5 -2.5 1
+node 22 coords 3 -1.5 -1.5 0
+node 23 coords 3 -1.5 -1.5 0.5
+node 24 coords 3 -1.5 -1.5 1
+node 25 coords 3 -1.5 -0.5 0
+node 26 coords 3 -1.5 -0.5 0.5
+node 27 coords 3 -1.5 -0.5 1
+node 28 coords 3 -1.5 0.5 0
+node 29 coords 3 -1.5 0.5 0.5
+node 30 coords 3 -1.5 0.5 1
+node 31 coords 3 -1.5 1.5 0
+node 32 coords 3 -1.5 1.5 0.5
+node 33 coords 3 -1.5 1.5 1
+node 34 coords 3 -1.5 2.5 0
+node 35 coords 3 -1.5 2.5 0.5
+node 36 coords 3 -1.5 2.5 1
+node 37 coords 3 -0.5 -2.5 0
+node 38 coords 3 -0.5 -2.5 0.5
+node 39 coords 3 -0.5 -2.5 1
+node 40 coords 3 -0.5 -1.5 0
+node 41 coords 3 -0.5 -1.5 0.5
+node 42 coords 3 -0.5 -1.5 1
+node 43 coords 3 -0.5 -0.5 0
+node 44 coords 3 -0.5 -0.5 0.5
+node 45 coords 3 -0.5 -0.5 1
+node 46 coords 3 -0.5 0.5 0
+node 47 coords 3 -0.5 0.5 0.5
+node 48 coords 3 -0.5 0.5 1
+node 49 coords 3 -0.5 1.5 0
+node 50 coords 3 -0.5 1.5 0.5
+node 51 coords 3 -0.5 1.5 1
+node 52 coords 3 -0.5 2.5 0
+node 53 coords 3 -0.5 2.5 0.5
+node 54 coords 3 -0.5 2.5 1
+node 55 coords 3 0.5 -2.5 0
+node 56 coords 3 0.5 -2.5 0.5
+node 57 coords 3 0.5 -2.5 1
+node 58 coords 3 0.5 -1.5 0
+node 59 coords 3 0.5 -1.5 0.5
+node 60 coords 3 0.5 -1.5 1
+node 61 coords 3 0.5 -0.5 0
+node 62 coords 3 0.5 -0.5 0.5
+node 63 coords 3 0.5 -0.5 1
+node 64 coords 3 0.5 0.5 0
+node 65 coords 3 0.5 0.5 0.5
+node 66 coords 3 0.5 0.5 1
+node 67 coords 3 0.5 1.5 0
+node 68 coords 3 0.5 1.5 0.5
+node 69 coords 3 0.5 1.5 1
+node 70 coords 3 0.5 2.5 0
+node 71 coords 3 0.5 2.5 0.5
+node 72 coords 3 0.5 2.5 1
+node 73 coords 3 1.5 -2.5 0
+node 74 coords 3 1.5 -2.5 0.5
+node 75 coords 3 1.5 -2.5 1
+node 76 coords 3 1.5 -1.5 0
+node 77 coords 3 1.5 -1.5 0.5
+node 78 coords 3 1.5 -1.5 1
+node 79 coords 3 1.5 -0.5 0
+node 80 coords 3 1.5 -0.5 0.5
+node 81 coords 3 1.5 -0.5 1
+node 82 coords 3 1.5 0.5 0
+node 83 coords 3 1.5 0.5 0.5
+node 84 coords 3 1.5 0.5 1
+node 85 coords 3 1.5 1.5 0
+node 86 coords 3 1.5 1.5 0.5
+node 87 coords 3 1.5 1.5 1
+node 88 coords 3 1.5 2.5 0
+node 89 coords 3 1.5 2.5 0.5
+node 90 coords 3 1.5 2.5 1
+node 91 coords 3 2.5 -2.5 0
+node 92 coords 3 2.5 -2.5 0.5
+node 93 coords 3 2.5 -2.5 1
+node 94 coords 3 2.5 -1.5 0
+node 95 coords 3 2.5 -1.5 0.5
+node 96 coords 3 2.5 -1.5 1
+node 97 coords 3 2.5 -0.5 0
+node 98 coords 3 2.5 -0.5 0.5
+node 99 coords 3 2.5 -0.5 1
+node 100 coords 3 2.5 0.5 0
+node 101 coords 3 2.5 0.5 0.5
+node 102 coords 3 2.5 0.5 1
+node 103 coords 3 2.5 1.5 0
+node 104 coords 3 2.5 1.5 0.5
+node 105 coords 3 2.5 1.5 1
+node 106 coords 3 2.5 2.5 0
+node 107 coords 3 2.5 2.5 0.5
+node 108 coords 3 2.5 2.5 1
+node 109 coords 3 -2.5 -2.5 -1
+node 110 coords 3 -2.5 -2.5 -0.5
+node 111 coords 3 -2.5 -2.5 0
+node 112 coords 3 -2.5 -1.5 -1
+node 113 coords 3 -2.5 -1.5 -0.5
+node 114 coords 3 -2.5 -1.5 0
+node 115 coords 3 -2.5 -0.5 -1
+node 116 coords 3 -2.5 -0.5 -0.5
+node 117 coords 3 -2.5 -0.5 0
+node 118 coords 3 -2.5 0.5 -1
+node 119 coords 3 -2.5 0.5 -0.5
+node 120 coords 3 -2.5 0.5 0
+node 121 coords 3 -2.5 1.5 -1
+node 122 coords 3 -2.5 1.5 -0.5
+node 123 coords 3 -2.5 1.5 0
+node 124 coords 3 -2.5 2.5 -1
+node 125 coords 3 -2.5 2.5 -0.5
+node 126 coords 3 -2.5 2.5 0
+node 127 coords 3 -1.5 -2.5 -1
+node 128 coords 3 -1.5 -2.5 -0.5
+node 129 coords 3 -1.5 -2.5 0
+node 130 coords 3 -1.5 -1.5 -1
+node 131 coords 3 -1.5 -1.5 -0.5
+node 132 coords 3 -1.5 -1.5 0
+node 133 coords 3 -1.5 -0.5 -1
+node 134 coords 3 -1.5 -0.5 -0.5
+node 135 coords 3 -1.5 -0.5 0
+node 136 coords 3 -1.5 0.5 -1
+node 137 coords 3 -1.5 0.5 -0.5
+node 138 coords 3 -1.5 0.5 0
+node 139 coords 3 -1.5 1.5 -1
+node 140 coords 3 -1.5 1.5 -0.5
+node 141 coords 3 -1.5 1.5 0
+node 142 coords 3 -1.5 2.5 -1
+node 143 coords 3 -1.5 2.5 -0.5
+node 144 coords 3 -1.5 2.5 0
+node 145 coords 3 -0.5 -2.5 -1
+node 146 coords 3 -0.5 -2.5 -0.5
+node 147 coords 3 -0.5 -2.5 0
+node 148 coords 3 -0.5 -1.5 -1
+node 149 coords 3 -0.5 -1.5 -0.5
+node 150 coords 3 -0.5 -1.5 0
+node 151 coords 3 -0.5 -0.5 -1
+node 152 coords 3 -0.5 -0.5 -0.5
+node 153 coords 3 -0.5 -0.5 0
+node 154 coords 3 -0.5 0.5 -1
+node 155 coords 3 -0.5 0.5 -0.5
+node 156 coords 3 -0.5 0.5 0
+node 157 coords 3 -0.5 1.5 -1
+node 158 coords 3 -0.5 1.5 -0.5
+node 159 coords 3 -0.5 1.5 0
+node 160 coords 3 -0.5 2.5 -1
+node 161 coords 3 -0.5 2.5 -0.5
+node 162 coords 3 -0.5 2.5 0
+node 163 coords 3 0.5 -2.5 -1
+node 164 coords 3 0.5 -2.5 -0.5
+node 165 coords 3 0.5 -2.5 0
+node 166 coords 3 0.5 -1.5 -1
+node 167 coords 3 0.5 -1.5 -0.5
+node 168 coords 3 0.5 -1.5 0
+node 169 coords 3 0.5 -0.5 -1
+node 170 coords 3 0.5 -0.5 -0.5
+node 171 coords 3 0.5 -0.5 0
+node 172 coords 3 0.5 0.5 -1
+node 173 coords 3 0.5 0.5 -0.5
+node 174 coords 3 0.5 0.5 0
+node 175 coords 3 0.5 1.5 -1
+node 176 coords 3 0.5 1.5 -0.5
+node 177 coords 3 0.5 1.5 0
+node 178 coords 3 0.5 2.5 -1
+node 179 coords 3 0.5 2.5 -0.5
+node 180 coords 3 0.5 2.5 0
+node 181 coords 3 1.5 -2.5 -1
+node 182 coords 3 1.5 -2.5 -0.5
+node 183 coords 3 1.5 -2.5 0
+node 184 coords 3 1.5 -1.5 -1
+node 185 coords 3 1.5 -1.5 -0.5
+node 186 coords 3 1.5 -1.5 0
+node 187 coords 3 1.5 -0.5 -1
+node 188 coords 3 1.5 -0.5 -0.5
+node 189 coords 3 1.5 -0.5 0
+node 190 coords 3 1.5 0.5 -1
+node 191 coords 3 1.5 0.5 -0.5
+node 192 coords 3 1.5 0.5 0
+node 193 coords 3 1.5 1.5 -1
+node 194 coords 3 1.5 1.5 -0.5
+node 195 coords 3 1.5 1.5 0
+node 196 coords 3 1.5 2.5 -1
+node 197 coords 3 1.5 2.5 -0.5
+node 198 coords 3 1.5 2.5 0
+node 199 coords 3 2.5 -2.5 -1
+node 200 coords 3 2.5 -2.5 -0.5
+node 201 coords 3 2.5 -2.5 0
+node 202 coords 3 2.5 -1.5 -1
+node 203 coords 3 2.5 -1.5 -0.5
+node 204 coords 3 2.5 -1.5 0
+node 205 coords 3 2.5 -0.5 -1
+node 206 coords 3 2.5 -0.5 -0.5
+node 207 coords 3 2.5 -0.5 0
+node 208 coords 3 2.5 0.5 -1
+node 209 coords 3 2.5 0.5 -0.5
+node 210 coords 3 2.5 0.5 0
+node 211 coords 3 2.5 1.5 -1
+node 212 coords 3 2.5 1.5 -0.5
+node 213 coords 3 2.5 1.5 0
+node 214 coords 3 2.5 2.5 -1
+node 215 coords 3 2.5 2.5 -0.5
+node 216 coords 3 2.5 2.5 0
+lspace 1 nodes 8 1 19 22 4 2 20 23 5 crosssect 1 mat 1 nlgeo 1
+lspace 2 nodes 8 2 20 23 5 3 21 24 6 crosssect 1 mat 1 nlgeo 1
+lspace 3 nodes 8 4 22 25 7 5 23 26 8 crosssect 1 mat 1 nlgeo 1
+lspace 4 nodes 8 5 23 26 8 6 24 27 9 crosssect 1 mat 1 nlgeo 1
+lspace 5 nodes 8 7 25 28 10 8 26 29 11 crosssect 1 mat 1 nlgeo 1
+lspace 6 nodes 8 8 26 29 11 9 27 30 12 crosssect 1 mat 1 nlgeo 1
+lspace 7 nodes 8 10 28 31 13 11 29 32 14 crosssect 1 mat 1 nlgeo 1
+lspace 8 nodes 8 11 29 32 14 12 30 33 15 crosssect 1 mat 1 nlgeo 1
+lspace 9 nodes 8 13 31 34 16 14 32 35 17 crosssect 1 mat 1 nlgeo 1
+lspace 10 nodes 8 14 32 35 17 15 33 36 18 crosssect 1 mat 1 nlgeo 1
+lspace 11 nodes 8 19 37 40 22 20 38 41 23 crosssect 1 mat 1 nlgeo 1
+lspace 12 nodes 8 20 38 41 23 21 39 42 24 crosssect 1 mat 1 nlgeo 1
+lspace 13 nodes 8 22 40 43 25 23 41 44 26 crosssect 1 mat 1 nlgeo 1
+lspace 14 nodes 8 23 41 44 26 24 42 45 27 crosssect 1 mat 1 nlgeo 1
+lspace 15 nodes 8 25 43 46 28 26 44 47 29 crosssect 1 mat 1 nlgeo 1
+lspace 16 nodes 8 26 44 47 29 27 45 48 30 crosssect 1 mat 1 nlgeo 1
+lspace 17 nodes 8 28 46 49 31 29 47 50 32 crosssect 1 mat 1 nlgeo 1
+lspace 18 nodes 8 29 47 50 32 30 48 51 33 crosssect 1 mat 1 nlgeo 1
+lspace 19 nodes 8 31 49 52 34 32 50 53 35 crosssect 1 mat 1 nlgeo 1
+lspace 20 nodes 8 32 50 53 35 33 51 54 36 crosssect 1 mat 1 nlgeo 1
+lspace 21 nodes 8 37 55 58 40 38 56 59 41 crosssect 1 mat 1 nlgeo 1
+lspace 22 nodes 8 38 56 59 41 39 57 60 42 crosssect 1 mat 1 nlgeo 1
+lspace 23 nodes 8 40 58 61 43 41 59 62 44 crosssect 1 mat 1 nlgeo 1
+lspace 24 nodes 8 41 59 62 44 42 60 63 45 crosssect 1 mat 1 nlgeo 1
+lspace 25 nodes 8 43 61 64 46 44 62 65 47 crosssect 1 mat 1 nlgeo 1
+lspace 26 nodes 8 44 62 65 47 45 63 66 48 crosssect 1 mat 1 nlgeo 1
+lspace 27 nodes 8 46 64 67 49 47 65 68 50 crosssect 1 mat 1 nlgeo 1
+lspace 28 nodes 8 47 65 68 50 48 66 69 51 crosssect 1 mat 1 nlgeo 1
+lspace 29 nodes 8 49 67 70 52 50 68 71 53 crosssect 1 mat 1 nlgeo 1
+lspace 30 nodes 8 50 68 71 53 51 69 72 54 crosssect 1 mat 1 nlgeo 1
+lspace 31 nodes 8 55 73 76 58 56 74 77 59 crosssect 1 mat 1 nlgeo 1
+lspace 32 nodes 8 56 74 77 59 57 75 78 60 crosssect 1 mat 1 nlgeo 1
+lspace 33 nodes 8 58 76 79 61 59 77 80 62 crosssect 1 mat 1 nlgeo 1
+lspace 34 nodes 8 59 77 80 62 60 78 81 63 crosssect 1 mat 1 nlgeo 1
+lspace 35 nodes 8 61 79 82 64 62 80 83 65 crosssect 1 mat 1 nlgeo 1
+lspace 36 nodes 8 62 80 83 65 63 81 84 66 crosssect 1 mat 1 nlgeo 1
+lspace 37 nodes 8 64 82 85 67 65 83 86 68 crosssect 1 mat 1 nlgeo 1
+lspace 38 nodes 8 65 83 86 68 66 84 87 69 crosssect 1 mat 1 nlgeo 1
+lspace 39 nodes 8 67 85 88 70 68 86 89 71 crosssect 1 mat 1 nlgeo 1
+lspace 40 nodes 8 68 86 89 71 69 87 90 72 crosssect 1 mat 1 nlgeo 1
+lspace 41 nodes 8 73 91 94 76 74 92 95 77 crosssect 1 mat 1 nlgeo 1
+lspace 42 nodes 8 74 92 95 77 75 93 96 78 crosssect 1 mat 1 nlgeo 1
+lspace 43 nodes 8 76 94 97 79 77 95 98 80 crosssect 1 mat 1 nlgeo 1
+lspace 44 nodes 8 77 95 98 80 78 96 99 81 crosssect 1 mat 1 nlgeo 1
+lspace 45 nodes 8 79 97 100 82 80 98 101 83 crosssect 1 mat 1 nlgeo 1
+lspace 46 nodes 8 80 98 101 83 81 99 102 84 crosssect 1 mat 1 nlgeo 1
+lspace 47 nodes 8 82 100 103 85 83 101 104 86 crosssect 1 mat 1 nlgeo 1
+lspace 48 nodes 8 83 101 104 86 84 102 105 87 crosssect 1 mat 1 nlgeo 1
+lspace 49 nodes 8 85 103 106 88 86 104 107 89 crosssect 1 mat 1 nlgeo 1
+lspace 50 nodes 8 86 104 107 89 87 105 108 90 crosssect 1 mat 1 nlgeo 1
+lspace 51 nodes 8 109 127 130 112 110 128 131 113 crosssect 2 mat 2 nlgeo 1
+lspace 52 nodes 8 110 128 131 113 111 129 132 114 crosssect 2 mat 2 nlgeo 1
+lspace 53 nodes 8 112 130 133 115 113 131 134 116 crosssect 2 mat 2 nlgeo 1
+lspace 54 nodes 8 113 131 134 116 114 132 135 117 crosssect 2 mat 2 nlgeo 1
+lspace 55 nodes 8 115 133 136 118 116 134 137 119 crosssect 2 mat 2 nlgeo 1
+lspace 56 nodes 8 116 134 137 119 117 135 138 120 crosssect 2 mat 2 nlgeo 1
+lspace 57 nodes 8 118 136 139 121 119 137 140 122 crosssect 2 mat 2 nlgeo 1
+lspace 58 nodes 8 119 137 140 122 120 138 141 123 crosssect 2 mat 2 nlgeo 1
+lspace 59 nodes 8 121 139 142 124 122 140 143 125 crosssect 2 mat 2 nlgeo 1
+lspace 60 nodes 8 122 140 143 125 123 141 144 126 crosssect 2 mat 2 nlgeo 1
+lspace 61 nodes 8 127 145 148 130 128 146 149 131 crosssect 2 mat 2 nlgeo 1
+lspace 62 nodes 8 128 146 149 131 129 147 150 132 crosssect 2 mat 2 nlgeo 1
+lspace 63 nodes 8 130 148 151 133 131 149 152 134 crosssect 2 mat 2 nlgeo 1
+lspace 64 nodes 8 131 149 152 134 132 150 153 135 crosssect 2 mat 2 nlgeo 1
+lspace 65 nodes 8 133 151 154 136 134 152 155 137 crosssect 2 mat 2 nlgeo 1
+lspace 66 nodes 8 134 152 155 137 135 153 156 138 crosssect 2 mat 2 nlgeo 1
+lspace 67 nodes 8 136 154 157 139 137 155 158 140 crosssect 2 mat 2 nlgeo 1
+lspace 68 nodes 8 137 155 158 140 138 156 159 141 crosssect 2 mat 2 nlgeo 1
+lspace 69 nodes 8 139 157 160 142 140 158 161 143 crosssect 2 mat 2 nlgeo 1
+lspace 70 nodes 8 140 158 161 143 141 159 162 144 crosssect 2 mat 2 nlgeo 1
+lspace 71 nodes 8 145 163 166 148 146 164 167 149 crosssect 2 mat 2 nlgeo 1
+lspace 72 nodes 8 146 164 167 149 147 165 168 150 crosssect 2 mat 2 nlgeo 1
+lspace 73 nodes 8 148 166 169 151 149 167 170 152 crosssect 2 mat 2 nlgeo 1
+lspace 74 nodes 8 149 167 170 152 150 168 171 153 crosssect 2 mat 2 nlgeo 1
+lspace 75 nodes 8 151 169 172 154 152 170 173 155 crosssect 2 mat 2 nlgeo 1
+lspace 76 nodes 8 152 170 173 155 153 171 174 156 crosssect 2 mat 2 nlgeo 1
+lspace 77 nodes 8 154 172 175 157 155 173 176 158 crosssect 2 mat 2 nlgeo 1
+lspace 78 nodes 8 155 173 176 158 156 174 177 159 crosssect 2 mat 2 nlgeo 1
+lspace 79 nodes 8 157 175 178 160 158 176 179 161 crosssect 2 mat 2 nlgeo 1
+lspace 80 nodes 8 158 176 179 161 159 177 180 162 crosssect 2 mat 2 nlgeo 1
+lspace 81 nodes 8 163 181 184 166 164 182 185 167 crosssect 2 mat 2 nlgeo 1
+lspace 82 nodes 8 164 182 185 167 165 183 186 168 crosssect 2 mat 2 nlgeo 1
+lspace 83 nodes 8 166 184 187 169 167 185 188 170 crosssect 2 mat 2 nlgeo 1
+lspace 84 nodes 8 167 185 188 170 168 186 189 171 crosssect 2 mat 2 nlgeo 1
+lspace 85 nodes 8 169 187 190 172 170 188 191 173 crosssect 2 mat 2 nlgeo 1
+lspace 86 nodes 8 170 188 191 173 171 189 192 174 crosssect 2 mat 2 nlgeo 1
+lspace 87 nodes 8 172 190 193 175 173 191 194 176 crosssect 2 mat 2 nlgeo 1
+lspace 88 nodes 8 173 191 194 176 174 192 195 177 crosssect 2 mat 2 nlgeo 1
+lspace 89 nodes 8 175 193 196 178 176 194 197 179 crosssect 2 mat 2 nlgeo 1
+lspace 90 nodes 8 176 194 197 179 177 195 198 180 crosssect 2 mat 2 nlgeo 1
+lspace 91 nodes 8 181 199 202 184 182 200 203 185 crosssect 2 mat 2 nlgeo 1
+lspace 92 nodes 8 182 200 203 185 183 201 204 186 crosssect 2 mat 2 nlgeo 1
+lspace 93 nodes 8 184 202 205 187 185 203 206 188 crosssect 2 mat 2 nlgeo 1
+lspace 94 nodes 8 185 203 206 188 186 204 207 189 crosssect 2 mat 2 nlgeo 1
+lspace 95 nodes 8 187 205 208 190 188 206 209 191 crosssect 2 mat 2 nlgeo 1
+lspace 96 nodes 8 188 206 209 191 189 207 210 192 crosssect 2 mat 2 nlgeo 1
+lspace 97 nodes 8 190 208 211 193 191 209 212 194 crosssect 2 mat 2 nlgeo 1
+lspace 98 nodes 8 191 209 212 194 192 210 213 195 crosssect 2 mat 2 nlgeo 1
+lspace 99 nodes 8 193 211 214 196 194 212 215 197 crosssect 2 mat 2 nlgeo 1
+lspace 100 nodes 8 194 212 215 197 195 213 216 198 crosssect 2 mat 2 nlgeo 1
+StructuralContactElement_QuadLin 101 nodes 4 4 22 19 1 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 102 nodes 4 7 25 22 4 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 103 nodes 4 10 28 25 7 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 104 nodes 4 13 31 28 10 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 105 nodes 4 16 34 31 13 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 106 nodes 4 22 40 37 19 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 107 nodes 4 25 43 40 22 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 108 nodes 4 28 46 43 25 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 109 nodes 4 31 49 46 28 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 110 nodes 4 34 52 49 31 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 111 nodes 4 40 58 55 37 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 112 nodes 4 43 61 58 40 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 113 nodes 4 46 64 61 43 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 114 nodes 4 49 67 64 46 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 115 nodes 4 52 70 67 49 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 116 nodes 4 58 76 73 55 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 117 nodes 4 61 79 76 58 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 118 nodes 4 64 82 79 61 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 119 nodes 4 67 85 82 64 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 120 nodes 4 70 88 85 67 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 121 nodes 4 76 94 91 73 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 122 nodes 4 79 97 94 76 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 123 nodes 4 82 100 97 79 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 124 nodes 4 85 103 100 82 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 125 nodes 4 88 106 103 85 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 126 nodes 4 111 129 132 114 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 127 nodes 4 114 132 135 117 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 128 nodes 4 117 135 138 120 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 129 nodes 4 120 138 141 123 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 130 nodes 4 123 141 144 126 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 131 nodes 4 129 147 150 132 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 132 nodes 4 132 150 153 135 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 133 nodes 4 135 153 156 138 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 134 nodes 4 138 156 159 141 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 135 nodes 4 141 159 162 144 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 136 nodes 4 147 165 168 150 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 137 nodes 4 150 168 171 153 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 138 nodes 4 153 171 174 156 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 139 nodes 4 156 174 177 159 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 140 nodes 4 159 177 180 162 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 141 nodes 4 165 183 186 168 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 142 nodes 4 168 186 189 171 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 143 nodes 4 171 189 192 174 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 144 nodes 4 174 192 195 177 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 145 nodes 4 177 195 198 180 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 146 nodes 4 183 201 204 186 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 147 nodes 4 186 204 207 189 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 148 nodes 4 189 207 210 192 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 149 nodes 4 192 210 213 195 crosssect 3 mat 3 NIP 1
+StructuralContactElement_QuadLin 150 nodes 4 195 213 216 198 crosssect 3 mat 3 NIP 1
+StructuralFEContactSurface 1 ce_set 7
+StructuralFEContactSurface 2 ce_set 8
+SimpleCS 1 material 1 set 1
+SimpleCS 2 material 2 set 2
+DummyCS 3 mat 3
+MooneyRivlinCompressibleMat 1 d 0 C1 0.1667778519012675 C2 0 K 166.6666666666665
+MooneyRivlinCompressibleMat 2 d 0 C1 0.1667778519012675 C2 0 K 166.6666666666665
+DummyMat 3
+BoundaryCondition 1 loadTimeFunction 2 dofs 1 2 values 1 0 set 3
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 1 values 1 0 set 4
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 3 values 1 0 set 5
+BoundaryCondition 4 loadTimeFunction 1 dofs 1 3 values 1 1 set 6
+structuralpenaltycontactbc 5 loadTimeFunction 2 dofs 3 1 2 3 pn 50 pt 50 friction 0 mastersurface 2 slavesurface 1 nsd 3
+structuralpenaltycontactbc 6 loadTimeFunction 2 dofs 3 1 2 3 pn 50 pt 50 friction 0 mastersurface 1 slavesurface 2 nsd 3
+PiecewiseLinFunction 1 npoints 2 t 2 0 1 f(t) 2 0 -0.5
+ConstantFunction 2 f(t) 1.0
+set 1 elements 50 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+set 2 elements 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+set 3 nodes 72 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99 102 105 108 109 112 115 118 121 124 127 130 133 136 139 142 145 148 151 154 157 160 163 166 169 172 175 178 181 184 187 190 193 196 199 202 205 208 211 214
+set 4 nodes 72 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99 102 105 108 109 112 115 118 121 124 127 130 133 136 139 142 145 148 151 154 157 160 163 166 169 172 175 178 181 184 187 190 193 196 199 202 205 208 211 214
+set 5 nodes 36 109 112 115 118 121 124 127 130 133 136 139 142 145 148 151 154 157 160 163 166 169 172 175 178 181 184 187 190 193 196 199 202 205 208 211 214
+set 6 nodes 36 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99 102 105 108
+set 7 elements 25 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125
+set 8 elements 25 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150
+#
+# Two-pass is represented by reversed independent penalty BCs.
+# RigidArmNode is a small-rotation rigid-body approximation.
+#%BEGIN_CHECK% tolerance 1.e-6
+#NODE tStep 50 number 207 dof 1 unknown d value  5.30315102e-01
+#NODE tStep 50 number 207 dof 2 unknown d value -1.03284871e-01
+#NODE tStep 50 number 207 dof 3 unknown d value -2.22935084e-01
+#NODE tStep 50 number 216 dof 1 unknown d value  5.29236111e-01
+#NODE tStep 50 number 216 dof 2 unknown d value  5.29236111e-01
+#NODE tStep 50 number 216 dof 3 unknown d value -2.27131813e-01
+#%END_CHECK%

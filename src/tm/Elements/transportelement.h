@@ -188,7 +188,7 @@ protected:
      * @param mode Mode of value (incremental, total, ...).
      * @param indx Unknown index.
      */
-    void computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx);
+    virtual void computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx);
     /**
      * Computes the part of LHS due to applied BCs.
      * the result should be localized.

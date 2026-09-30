@@ -1,0 +1,45 @@
+tm22.out
+Test of mpmNonStationaryProblem symbolic formulation, single element, transient heat transfer problem, prescribed nodal flux
+# final time 500, initial time step 1 
+mpmnonstationaryproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 keeptangent ptype "symbolic" smtype 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 lhsdotterms 1 2 rhsterms 0
+#vtkxml tstep_all domain_all primvars 2 1 6
+errorcheck
+#
+Variable name "t" interpolation "feilin" type scalar quantity 2 size 1 dofs 1 10 # temperature
+Variable name "w" interpolation "feilin" type scalar quantity 2 size 1 dofs 1 10 # test function
+SymbolicTerm 1 variable "t"  testvariable "w" mmode "_2dHeat" lexpression "Grad(w,gp).T*[[0.2, 0.],[0.0, 0.2]]*Grad(t,gp)" rexpression "Grad(w,gp).T*[[0.2, 0.0],[0.0, 0.2]]*Grad(t,gp)*ru(t, cell, ts)"
+SymbolicTerm 2 variable "t"  testvariable "w" mmode "_2dHeat" lexpression "N(w,gp).T*[[0.05]]*N(t,gp)" rexpression "N(w,gp).T*[[0.05]]*N(t,gp)*rv(t, cell, ts)"
+#NTfTerm 2 variable "t" testvariable "w" mmode 6 flux 2 1. 0.
+Integral 1 domain 1 set 1 term 1
+Integral 1 domain 1 set 1 term 2
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 4 nelem 1 nbc 2 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
+node 1 coords 3 0.            0.           0. 
+node 2 coords 3 3.0           0.           0. 
+node 3 coords 3 0.0           1.0          0. 
+node 4 coords 3 3.0           1.0          0. 
+q1 1 nodes 4 1 2 4 3 
+#
+dummycs 1 mat 1 set 1
+# thermo-mechanical material model
+tmm 1 d 1.0 e 5. nu 0.3 lambda 0.2 c 0.05 alpha 1.0
+#
+# temperature prescribed (bleeding=pressure set to zero?)
+boundarycondition 1 loadtimefunction 1 set 2 values 1 0.0 dofs 1 10 
+# temperature  dicrete nodal flux (q=4*0.25/A, T(1) = 5/6 = 0.8333333333333334)
+nodalload 2 loadtimefunction 2 dofs 1 10 Components 1 0.25 set 3
+#
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 1. 10. f(t) 4 0. 0. 1.0 1.0 
+set 1 elements 1 1
+set 2 noderanges {(1 2)}
+# flux
+set 3 nodes 2 3 4
+# all nodes
+set 4 noderanges {(1 4)}
+#%BEGIN_CHECK%
+#NODE tStep 10 number 3 dof 10 unknown d value 0.833333334 tolerance 1.e-5
+#NODE tStep 10 number 4 dof 10 unknown d value 0.833333334 tolerance 1.e-5
+#%END_CHECK%

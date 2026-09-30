@@ -45,6 +45,7 @@
 #include "classfactory.h"
 #include "engngm.h"
 #include "function.h"
+#include <algorithm>
 
 namespace oofem {
 
@@ -72,6 +73,14 @@ TimeStepController :: restoreContext(DataStream &stream)
 
 }
 
+void
+TimeStepController :: restoreStepState(TimeStep &current, TimeStep &previous)
+{
+    currentStep = std::make_unique<TimeStep>(current);
+    previousStep = std::make_unique<TimeStep>(previous);
+    currentMetaStepNumber = std::max(0, current.giveMetaStepNumber() - 1);
+}
+
  
 TimeStep*
 TimeStepController :: giveNextStep()
@@ -87,9 +96,10 @@ TimeStepController :: giveNextStep()
 
     auto mStepNum = currentStep->giveMetaStepNumber();
     previousStep = std :: move(currentStep);    
+    istep =  previousStep->giveNumber() + 1;
     dt = this->giveCurrentMetaStep()->giveDeltaT(istep, previousStep);
     totalTime = previousStep->giveTargetTime() +  dt;
-    istep =  previousStep->giveNumber() + 1;      
+        
     counter = previousStep->giveSolutionStateCounter() + 1;
 
     //
@@ -119,9 +129,6 @@ TimeStepController :: instanciateMetaSteps(DataReader &dr)
     int i=0;
     for(const std::shared_ptr<InputRecord>& mrec: mrecs){
         metaStepList[i].initializeFrom(mrec);
-        if(i > 0) {
-            metaStepList[i].setPreviousMetaStepFinalTime(metaStepList[i-1].giveFinalTime());
-        }
         totalNumberOfSteps += metaStepList[i].giveNumberOfSteps();
         i++;
     }
@@ -183,8 +190,14 @@ void
 TimeStepController :: postInitialize()
 {
     int istep = eModel->giveNumberOfFirstStep(true);
+    int i=0;
     for ( auto &metaStep: metaStepList ) {
         istep = metaStep.setStepBounds(istep);
+        if(i > 0) {
+          metaStepList[i].setPreviousMetaStepFinalTime(metaStepList[i-1].giveFinalTime());
+        }
+        metaStepList[i].postInitialize();
+        i++;
     }
 
 

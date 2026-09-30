@@ -1,0 +1,24 @@
+latticedirichletcoupling_out.sm
+sm part of lattice Dirichlet hydro-mechanical boundary coupling
+NonLinearStatic nsteps 5 nmodules 0 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 2000
+domain 2dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 4 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 2 nset 2
+node 1 coords 2 0.5 0.5
+node 2 coords 2 1.5 0.5
+node 3 coords 2 1.5 1.5
+node 4 coords 2 0.5 1.5
+lattice2D 1 nodes 2 1 2 crossSect 2 mat 2 thick 1.0 width 1.0 gpCoords 2 1.0 0.5 couplingflag 1 couplingnumber 1
+lattice2D 2 nodes 2 2 3 crossSect 1 mat 1 thick 1.0 width 1.0 gpCoords 2 1.5 1.0 couplingflag 1 couplingnumber 2
+lattice2D 3 nodes 2 3 4 crossSect 2 mat 2 thick 1.0 width 1.0 gpCoords 2 1.0 1.5 couplingflag 1 couplingnumber 3
+lattice2D 4 nodes 2 4 1 crossSect 1 mat 1 thick 1.0 width 1.0 gpCoords 2 0.5 1.0 couplingflag 1 couplingnumber 4
+latticecs 1 material 1
+latticecs 2 material 2
+latticedamage 1 d 0. talpha 0. calpha 0.0 e 36.995e3 e0 8.63619e+5 stype 3 wf 2.36899e-2 a1 0.3333 coh 2. ec 10
+latticedamage 2 d 0. talpha 0. calpha 0.1 e 35.14525e3 e0 8.2043805e+5 stype 3 wf 2.2505405e-2 a1 0.3333 coh 2. ec 10
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 6 values 3 0. 0. 0. set 1
+StructTemperatureLoad 2 loadTimeFunction 2 Components 1 1.0 set 2
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 5. f(t) 2 0. 1.
+Set 1 nodes 4 1 2 3 4
+Set 2 elements 2 1 3

@@ -65,6 +65,8 @@ public:
     DummyCrossSection(int n, Domain *d);
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;

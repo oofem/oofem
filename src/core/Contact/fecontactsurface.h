@@ -36,6 +36,7 @@
 #define fecontactsurface_h
 
 #include "contactsurface.h"
+#include "contactprojection.h"
 #include "contactelement.h"
 #include "floatarray.h"
 /*#include "chartype.h"
@@ -89,8 +90,20 @@ protected:
     int contactElementSetNumber;
     /// Array containing dofmanager numbers.
     IntArray contactElementSet;
+    /// Parametric-domain margin (in [-1,1]-normalized element coordinates)
+    /// by which a projection may fall outside an element and still be
+    /// accepted as "inside" it (comparable to other codes' sliding-elastic-
+    /// interface search tolerance, typical default 0.01): a slave point
+    /// whose ray/closest-point projection sits exactly on a shared edge
+    /// between two facets will
+    /// otherwise be rejected by one or both facets on alternating
+    /// iterations, causing the owned facet to flip every Newton iteration.
+    /// Default reproduces the previous unconditional near-zero tolerance.
+    double domainTolerance = 1.e-10;
 
 public:
+    void setDomainTolerance(double tol) { domainTolerance = tol; }
+    double giveDomainTolerance() const { return domainTolerance; }
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
      * @param n Element's number
@@ -102,6 +115,8 @@ public:
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
     void postInitialize() override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     /**
      * @brief Returns the i-th contact element associated with this surface.
      *
@@ -129,45 +144,64 @@ public:
      *
      * @return Number of contact elements.
      */
-    int giveNumberOfContactElements(){return contactElementSet.giveSize();}
+    int giveNumberOfContactElements() const {return contactElementSet.giveSize();}
     /**
-     * @brief Projects a contact point onto a 3D contact element and evaluates contact kinematics.
+     * @brief Projects a contact point onto the smooth parameterization of a 3D contact element.
      *
-     * Attempts to find the projection of the contact point @p cp onto the 3D contact element @p e
-     * for the given time step. On success, returns the local surface coordinates of the projection,
-     * the normal gap measure, and associated geometric vectors required by the contact formulation
-     * (e.g., normal/tangent directions depending on the element type).
+     * Attempts to find an unconstrained stationary closest-point projection of @p cp onto the
+     * smooth parameterization of @p e. A stationary projection on the closed parametric boundary
+     * is admissible as a one-sided surface limit. An unconstrained projection outside that domain
+     * is rejected: projecting it subsequently onto an edge or vertex would require separate
+     * point-to-curve or point-to-corner kinematics and is not represented by the returned surface
+     * normal and tangent basis.
      *
      * @param cp   Contact point to be projected (typically on the slave side).
      * @param e    Candidate master-side contact element on this surface.
      * @param tStep Current time step.
      *
      * @return Tuple with:
-     *   - success flag (true if a valid projection was found),
+     *   - success flag (true if a valid, locally minimizing smooth-surface projection was found),
      *   - local coordinates (2D parametric coordinates on the element surface),
      *   - signed normal gap (convention defined by the contact formulation),
      *   - additional 3D vectors associated with the projection (e.g., normal and tangents).
      */
-    virtual std::tuple <bool, FloatArrayF<2>, double,FloatArrayF<3>,FloatArrayF<3>,FloatArrayF<3>> findContactPointInElement_3d(ContactPoint *cp, ContactElement *e, TimeStep *tStep);
+    virtual std::tuple <bool, FloatArrayF<2>, double, double, FloatArrayF<3>,FloatArrayF<3>,FloatArrayF<3>> findContactPointInElement_3d(ContactPoint *cp, ContactElement *e, TimeStep *tStep);
+    /** Intersects a 3-D master facet with the ray through @p cp in @p direction. */
+    virtual std::tuple <bool, FloatArrayF<2>, double, double, FloatArrayF<3>,FloatArrayF<3>,FloatArrayF<3>>
+      findContactPointAlongDirectionInElement_3d(ContactPoint *cp, ContactElement *e,
+                                                 const FloatArrayF<3> &direction,
+                                                 TimeStep *tStep);
+    /** Current unit normal of the finite-element surface carrying @p cp. */
+    FloatArrayF<3> computeContactPointNormal_3d(ContactPoint *cp, TimeStep *tStep) const;
     /**
-     * @brief Projects a contact point onto a 2D contact element and evaluates contact kinematics.
+     * @brief Projects a contact point onto the smooth parameterization of a 2D contact element.
      *
-     * Attempts to find the projection of the contact point @p cp onto the 2D contact element @p e
-     * for the given time step. On success, returns the local coordinate of the projection (1D
-     * parameter), the normal gap measure, and associated geometric vectors required by the contact
-     * formulation (e.g., normal/tangent directions depending on the element type).
+     * An unconstrained stationary projection at an endpoint is admissible as a one-sided curve
+     * limit. A projection whose unconstrained coordinate lies outside the segment is rejected;
+     * endpoint contact outside the curve domain requires separate point-contact kinematics.
      *
      * @param cp   Contact point to be projected (typically on the slave side).
      * @param e    Candidate master-side contact element on this surface.
      * @param tStep Current time step.
      *
      * @return Tuple with:
-     *   - success flag (true if a valid projection was found),
+     *   - success flag (true if a valid, locally minimizing smooth-curve projection was found),
      *   - local coordinate (1D parametric coordinate on the element),
      *   - signed normal gap (convention defined by the contact formulation),
      *   - additional 2D vectors associated with the projection (e.g., normal and tangent).
      */
-    virtual std::tuple <bool, FloatArrayF<1>, double,FloatArrayF<2>,FloatArrayF<2>> findContactPointInElement_2d(ContactPoint *cp, ContactElement *e, TimeStep *tStep);
+    virtual std::tuple <bool, FloatArrayF<1>, double, double, FloatArrayF<2>,FloatArrayF<2>> findContactPointInElement_2d(ContactPoint *cp, ContactElement *e, TimeStep *tStep);
+    /** Generalized point-to-edge projection for a linear 3-D contact facet. */
+    ContactProjection findContactPointOnEdge_3d(ContactPoint *cp, ContactElement *e,
+                                                int edgeIndex, TimeStep *tStep);
+    /** Generalized point-to-vertex projection for a linear 3-D contact facet. */
+    ContactProjection findContactPointOnVertex_3d(ContactPoint *cp, ContactElement *e,
+                                                  int vertexIndex, TimeStep *tStep);
+    /** Generalized point-to-corner projection for a linear 2-D contact segment. */
+    ContactProjection findContactPointOnVertex_2d(ContactPoint *cp, ContactElement *e,
+                                                  int vertexIndex, TimeStep *tStep);
+    int giveNumberOfEdges(ContactElement *e) const;
+    int giveNumberOfVertices(ContactElement *e) const;
 
 private:
     /**
@@ -188,7 +222,7 @@ private:
      *   - signed normal gap,
      *   - additional 3D vectors associated with the projection (e.g., normal and tangent).
      */
-    virtual std::tuple <bool, FloatArrayF<2>, double,  FloatArrayF<3>,FloatArrayF<3>,FloatArrayF<3>> computeContactPointLocalCoordinates_3d(ContactPoint *cp, ContactElement *contactElement, TimeStep *tStep);
+    virtual std::tuple <bool, FloatArrayF<2>, double, double, FloatArrayF<3>,FloatArrayF<3>,FloatArrayF<3>> computeContactPointLocalCoordinates_3d(ContactPoint *cp, ContactElement *contactElement, TimeStep *tStep);
     /**
      * @brief Computes 2D local (parametric) coordinate of a projected contact point on a contact element.
      *
@@ -207,8 +241,13 @@ private:
      *   - signed normal gap,
      *   - additional 2D vectors associated with the projection (e.g., normal and tangent).
      */
-    virtual std::tuple <bool,  FloatArrayF<1>, double, FloatArrayF<2>,FloatArrayF<2>> 
+    virtual std::tuple <bool, FloatArrayF<1>, double, double, FloatArrayF<2>,FloatArrayF<2>>
       computeContactPointLocalCoordinates_2d(ContactPoint *cp, ContactElement *contactElement, TimeStep *tStep);
+    FloatArray computeIncidentPseudoNormal3d(ContactElement *representative,
+                                             int firstNode, int secondNode,
+                                             TimeStep *tStep) const;
+    FloatArray computeIncidentPseudoNormal2d(ContactElement *representative,
+                                             int vertexNode, TimeStep *tStep) const;
 
 };
 

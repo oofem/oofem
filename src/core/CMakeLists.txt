@@ -174,12 +174,11 @@ set (core_dofman
     slavenode.C
     generalslavenode.C
     hangingnode.C
+    continuumframenode.C
     qcnode.C
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
-    latticedirichletcouplingnode.C
-    latticeneumanncouplingnode.C
     )
 
 set (core_material
@@ -199,7 +198,6 @@ set (core_export
     vtkxmlexportmodule.C
     vtkmemoryexportmodule.C
     vtkxmlperiodicexportmodule.C
-    vtkxmllatticeexportmodule.C
     vtkpfemexportmodule.C
     vtkxfemexportmodule.C
     homexportmodule.C
@@ -359,7 +357,7 @@ if (USE_PYTHON_EXTENSION)
 endif ()
 
 if (USE_PYBIND_BINDINGS)
-    list (APPEND core_unsorted pythonfield.C)
+    list (APPEND core_unsorted pythonfield.C pythonmaterial.C)
 endif ()
 
 

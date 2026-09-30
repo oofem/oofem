@@ -129,6 +129,8 @@ public:
      * @see saveContext member function.
      */
     void restoreContext(DataStream &stream);
+    /** Synchronizes controller-owned steps from the engineering-model context. */
+    void restoreStepState(TimeStep &current, TimeStep &previous);
     //functions copied from engng
     /// Return number of meta steps.
     int giveNumberOfMetaSteps() { return numberOfMetaSteps; }
@@ -160,4 +162,3 @@ protected:
 };
 } // end namespace oofem
 #endif // timestepcontroller_h
-

@@ -1,0 +1,17 @@
+# Build products of the retired LaTeX manual; the sources are kept, the
+# generated DVI/PS/PDF and the tex4ht output are not.
+html/
+err
+*.png
+elementlibmanual.4ct
+elementlibmanual.4tc
+elementlibmanual.css
+elementlibmanual.dvi
+elementlibmanual.idv
+elementlibmanual.lg
+elementlibmanual.lof
+elementlibmanual.lot
+elementlibmanual.pdf
+elementlibmanual.ps
+elementlibmanual.tmp
+elementlibmanual.xref

@@ -263,8 +263,9 @@ private:
         // Regex: Matches Matrices [[..]], Slices [..], Logic (&&, ||), Comparisons (>=, ==), Math, Parens
         //std::regex re(R"(\[\[.*?\]\]|\[.*?\]|[a-zA-Z_]\w*|\d*\.?\d+|&&|\|\||==|!=|>=|<=|>|<|\.T|\+|\-|\*|\(|\)|,)");
         // Added (?:[eE][+-]?\d+)? to the number matching block
-        std::regex re(R"(\[\[.*?\]\]|\[.*?\]|[a-zA-Z_]\w*|\d*\.?\d+(?:[eE][+-]?\d+)?|&&|\|\||==|!=|>=|<=|>|<|\.T|\+|\-|\*|\(|\)|,)");
-        
+        // std::regex re(R"(\[\[.*?\]\]|\[.*?\]|[a-zA-Z_]\w*|\d*\.?\d+(?:[eE][+-]?\d+)?|&&|\|\||==|!=|>=|<=|>|<|\.T|\+|\-|\*|\(|\)|,)");
+        // Added support for enum literals (e.g., MatResponseMode::Stress)
+        std::regex re(R"(\[\[.*?\]\]|\[.*?\]|[a-zA-Z_]\w*(?:::\w+)*|\d*\.?\d+(?:[eE][+-]?\d+)?|&&|\|\||==|!=|>=|<=|>|<|\.T|\+|\-|\*|\(|\)|,)");
         auto it = std::sregex_token_iterator(expr.begin(), expr.end(), re);
         std::vector<std::string> tokens(it, std::sregex_token_iterator());
 
@@ -284,7 +285,12 @@ private:
                 ops.push(t); arg_count_stack.push(0);
             } 
             // 3. Parentheses
-            else if (t == "(") { ops.push(t); }
+            else if (t == "(") { 
+                // --- NEW: Detect if the user is trying to call an undeclared function ---
+                if (std::isalpha(last[0]) && last != "if" && !func_registry.count(last)) {
+                    throw std::runtime_error("Compiler Error: Unregistered function '" + last + "()'");
+                }
+                ops.push(t); }
             else if (t == ")") {
                 while (!ops.empty() && ops.top() != "(") { rpn.push_back(ops.top()); ops.pop(); }
                 if (!ops.empty()) ops.pop(); 
@@ -417,6 +423,10 @@ private:
                 eval_stack.push(slot);
                 if (is_last) program.push_back({OpCode::COPY, "COPY", {}, -1, slot, final_target});
             }
+        }
+        // --- NEW: Validate the final Abstract Syntax Tree ---
+        if (eval_stack.size() != 1) {
+            throw std::runtime_error("Compiler Error: Invalid expression syntax. Missing operator between variables?");
         }
     }
 };
@@ -558,10 +568,13 @@ public:
                         O.value = FloatMatrix(std::get<double>(L.value) * std::get<FloatMatrix>(R.value)); O.type = VarSlot::Type::MATRIX;
                     } else if (L.type == VarSlot::Type::MATRIX && R.type == VarSlot::Type::MATRIX) {
                         const auto &m1 = std::get<FloatMatrix>(L.value), &m2 = std::get<FloatMatrix>(R.value);
-                        if (m1.cols() != m2.rows()) throw std::runtime_error("Matrix Multiplication size mismatch");
+                        if (m1.cols() != m2.rows()) {
+                            throw std::runtime_error("Matrix Multiplication size mismatch");
+                        }
                         auto res = m1 * m2;
-                        if (res.rows() == 1 && res.cols() == 1) { O.value = res(0,0); O.type = VarSlot::Type::SCALAR; }
-                        else { O.value = res; O.type = VarSlot::Type::MATRIX; }
+                        //if (res.rows() == 1 && res.cols() == 1) { O.value = res(0,0); O.type = VarSlot::Type::SCALAR; }
+                        //else { O.value = res; O.type = VarSlot::Type::MATRIX; }
+                        O.value = res; O.type = VarSlot::Type::MATRIX;
                     } else if (L.type == VarSlot::Type::MATRIX && R.type == VarSlot::Type::SCALAR) {
                         O.value =  FloatMatrix(std::get<double>(R.value) * std::get<FloatMatrix>(L.value));; O.type = VarSlot::Type::MATRIX;
                     } else { O.value = std::get<double>(L.value) * std::get<double>(R.value); O.type = VarSlot::Type::SCALAR; }

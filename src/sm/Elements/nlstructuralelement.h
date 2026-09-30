@@ -230,6 +230,8 @@ public:
     // data management
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     void giveInputRecord(DynamicInputRecord &input) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     // definition
     const char *giveClassName() const override { return "NLStructuralElement"; }

@@ -47,7 +47,7 @@
 
 ///@name Input fields for PythonField
 //@{
-#define _IFT_PythonField_Name "pythonmaterial"
+#define _IFT_PythonField_Name "pythonfield"
 #define _IFT_PythonField_moduleName "module" /// The name of the module with the supplied functions (i.e. the name of the python script, without file extension)
 //@}
 

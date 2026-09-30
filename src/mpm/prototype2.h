@@ -310,6 +310,10 @@ namespace oofem {
                 if ((e->giveNumberOfDofManagers() > 2) && (e->giveDofManagerNumber(3) ==0)) {
                     int ndm = d->giveNumberOfDofManagers()+1;
                     std::unique_ptr<DofManager> dm = std::make_unique<DofManager>(ndm, d);
+                    Coordinates c1 = e->giveDofManager(1)->giveCoordinates();
+                    Coordinates c2 = e->giveDofManager(2)->giveCoordinates();
+                    Coordinates midNodeCoords((c1[0] + c2[0])/2, (c1[1] + c2[1])/2, (c1[2] + c2[2])/2);
+                    dm->setCoordinates(midNodeCoords); // set coordinates of mid-node
                     d->resizeDofManagers(ndm);
                     d->setDofManager(ndm, std::move(dm));
                     e->setDofManager(3, ndm);
@@ -322,6 +326,11 @@ namespace oofem {
                     if (e->giveDofManagerNumber(4+i) == 0) {
                         int ndm = d->giveNumberOfDofManagers()+1;
                         std::unique_ptr<DofManager> dm= std::make_unique<DofManager>(ndm, d);
+                        // @TODO: set coordinates of mid-node on edge
+                        Coordinates c1 = e->giveDofManager(i)->giveCoordinates();
+                        Coordinates c2 = e->giveDofManager(i%4+1)->giveCoordinates();
+                        Coordinates midNodeCoords((c1[0] + c2[0])/2, (c1[1] + c2[1])/2, (c1[2] + c2[2])/2);
+                        dm->setCoordinates(midNodeCoords); // set coordinates of mid-node
                         d->resizeDofManagers(ndm);
                         d->setDofManager(ndm, std::move(dm));
                         e->setDofManager(4+i, ndm);

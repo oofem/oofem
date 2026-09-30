@@ -35,8 +35,10 @@
 #ifndef contactsearch_h
 #define contactsearch_h
 
+#include "aabb.h"
 #include "intarray.h"
 #include <memory>
+#include <vector>
 
 namespace oofem {
 class FloatArray;
@@ -44,6 +46,8 @@ class ContactPair;
 class FEContactSurface;
 class Domain;
 class TimeStep;
+class ContactElement;
+class DataStream;
 
 /**
  * @brief Abstract base class for contact search algorithms.
@@ -72,7 +76,7 @@ protected:
 
 public:
   ContactSearchAlgorithm(Domain *d) {domain = d;}
-  ~ContactSearchAlgorithm(){;}
+  virtual ~ContactSearchAlgorithm() = default;
   /**
    * @brief Creates initial contact pairs based on the current configuration.
    *
@@ -89,6 +93,12 @@ public:
    * @param tStep Current time step.
    */
   virtual void updateContactPairs(TimeStep *tStep) = 0;
+  /** Commits broad-phase history after an accepted solution step. */
+  virtual void commitSearchState(TimeStep *tStep);
+  /** Stores committed search and pair state. */
+  virtual void saveContext(DataStream &stream) const;
+  /** Restores committed search and pair state. */
+  virtual void restoreContext(DataStream &stream);
   /**
    * @brief Returns the internally stored list of contact pairs.
    *
@@ -107,11 +117,46 @@ protected:
   FEContactSurface *slaveContactSurface;
   FEContactSurface *masterContactSurface;
   int surface_dimension;
+  double searchPadding = 1.e-12;
+  /// Negative selects the geometry-based default; nonnegative is an absolute distance.
+  double configuredSearchPadding = -1.0;
+  bool generalizedFeatures = false;
+  bool directionalProjection = false;
+  /**
+   * Relative dead-band a rival master facet must beat the pair's currently
+   * owned facet by (scaled by the candidates' own distance magnitude) before
+   * it is allowed to take over ownership. Zero reproduces the previous
+   * machine-epsilon-only tie-break, which lets ownership flip on an
+   * infinitesimal, noise-level distance difference. This is needed at
+   * near-degenerate shared edges/ridges between adjacent facets (e.g. the
+   * saddle point of two crossing curved surfaces approximated by flat
+   * quads), where the true closest facet is genuinely ambiguous and the tight
+   * tie-break otherwise reassigns ownership on essentially every residual
+   * evaluation, preventing Newton convergence. See
+   * doc/contact-improvement-handoff.md, 2026-07-28 entries.
+   */
+  double facetOwnershipHysteresis = 0.0;
+  std::vector<AABB> masterSearchAABBs;
+  std::vector<AABB> committedMasterSearchAABBs;
+  void updateMasterSearchAABBs(TimeStep *tStep);
+  AABB computeSweptMasterSearchAABB(int masterIndex, TimeStep *tStep) const;
+  std::vector<int> findCandidateMasterContactElements(ContactPair *cp, TimeStep *tStep);
+  void appendCurrentActiveMasterCandidate(ContactPair *cp, std::vector<int> &candidates) const;
+  void updatePairFrom3dCandidates(ContactPair *cp, const std::vector<int> &masterCandidateIndices, TimeStep *tStep);
+  void updatePairFrom2dCandidates(ContactPair *cp, const std::vector<int> &masterCandidateIndices, TimeStep *tStep);
+  double computeSearchPadding(TimeStep *tStep);
 public:
   ContactSearchAlgorithm_Surface2FESurface(FEContactSurface *scs, FEContactSurface *mcs, Domain *d, int sd);
-  ~ContactSearchAlgorithm_Surface2FESurface(){;}
+  ~ContactSearchAlgorithm_Surface2FESurface() override = default;
   void createContactPairs() override;
   void updateContactPairs(TimeStep *tStep) override{;}
+  void setSearchPadding(double padding) { configuredSearchPadding = padding; }
+  void setGeneralizedFeatures(bool enabled) { generalizedFeatures = enabled; }
+  void setDirectionalProjection(bool enabled) { directionalProjection = enabled; }
+  void setFacetOwnershipHysteresis(double relativeMargin) { facetOwnershipHysteresis = relativeMargin; }
+  void commitSearchState(TimeStep *tStep) override;
+  void saveContext(DataStream &stream) const override;
+  void restoreContext(DataStream &stream) override;
 };
 
 
@@ -121,7 +166,7 @@ public:
 protected:
 public:
   ContactSearchAlgorithm_Surface2FESurface_3d(FEContactSurface *scs, FEContactSurface *mcs, Domain *d);
-  ~ContactSearchAlgorithm_Surface2FESurface_3d(){;}
+  ~ContactSearchAlgorithm_Surface2FESurface_3d() override = default;
   void updateContactPairs(TimeStep *tStep) override;
 };
  
@@ -130,7 +175,7 @@ public:
 protected:
 public:
   ContactSearchAlgorithm_Surface2FESurface_2d(FEContactSurface *scs, FEContactSurface *mcs, Domain *d);
-  ~ContactSearchAlgorithm_Surface2FESurface_2d(){;}
+  ~ContactSearchAlgorithm_Surface2FESurface_2d() override = default;
   void updateContactPairs(TimeStep *tStep) override;
 };  
 

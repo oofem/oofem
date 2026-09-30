@@ -1,6 +1,6 @@
 mp04.out
 Test of mpm uptetra21 element
-mpmproblem nsteps 1 deltat 0.1 alpha 0.5 rtolv 1.e-6 
+mpmnonstationaryproblem nsteps 1 deltat 0.1 alpha 0.5 rtolv 1.e-6 
 domain HeatTransfer
 outputmanager tstep_all dofman_all element_all
 ndofman 18 nelem 3 nbc 3 ncrosssect 1 nic 1 nltf 1 nmat 1 nset 5

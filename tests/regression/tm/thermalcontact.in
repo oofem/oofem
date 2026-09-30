@@ -78,7 +78,7 @@ Set 2 elements 1 3
 Set 3 elements 1 4 
 Set 4 nodes 4 1 2 3 4
 #%BEGIN_CHECK%
-#NODE tStep 5 number  5 dof 10 unknown d value 3.54212665e+01
-#NODE tStep 5 number  9 dof 10 unknown d value 3.53452302e+01
-#NODE tStep 5 number 16 dof 10 unknown d value 3.34443218e+01
+#NODE tStep 5 number  5 dof 10 unknown d value 3.54213338e+01
+#NODE tStep 5 number  9 dof 10 unknown d value 3.53451626e+01
+#NODE tStep 5 number 16 dof 10 unknown d value 3.34443325e+01
 #%END_CHECK%

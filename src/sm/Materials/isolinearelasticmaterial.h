@@ -123,6 +123,9 @@ public:
     /// Returns Young's modulus.
     double giveYoungsModulus() const { return E; }
 
+    /// The initial and current elastic Young moduli are identical.
+    double giveInitialYoungsModulus() const override { return E; }
+
     /// Returns Poisson's ratio.
     double givePoissonsRatio() const { return nu; }
 

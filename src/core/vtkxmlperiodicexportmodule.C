@@ -47,9 +47,6 @@
 #include "dof.h"
 
 #ifdef __SM_MODULE
- #include "../sm/Elements/LatticeElements/lattice2dboundary.h"
- #include "../sm/Elements/LatticeElements/lattice3dboundary.h"
- #include "../sm/Elements/LatticeElements/latticelink3dboundary.h"
  #include "../sm/Elements/3D/ltrspaceboundary.h"
  #include "../sm/Elements/Beams/libeam3dboundary.h"
 #endif
@@ -179,7 +176,7 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(ExportRegion &vtkPiece, TimeStep *tS
                         cellNodes.at(ielnode) = elem->giveNode(ielnode)->giveNumber();
                     }
                 }
-            } else if ( dynamic_cast< LIBeam3dBoundary * >( elem ) || dynamic_cast< Lattice3dBoundary * >( elem ) || dynamic_cast< LatticeLink3dBoundary * >( elem ) || dynamic_cast< Lattice2dBoundary * >( elem ) ) {
+            } else if ( dynamic_cast< LIBeam3dBoundary * >( elem ) ) {
                 cellNodes.resize(2);
                 IntArray loc = elem->giveLocation();
                 for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
@@ -252,7 +249,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(ExportRegion& vtkPiece,
                     extraNodes++;
                 }
             }
-        } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) || dynamic_cast< Lattice3dBoundary * >( element ) || dynamic_cast< LatticeLink3dBoundary * >( element ) || dynamic_cast< Lattice2dBoundary * >( element ) ) {
+        } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) ) {
             IntArray loc = element->giveLocation();
             for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
                 if ( loc.at(ielnode) != 0 ) {
@@ -298,7 +295,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(ExportRegion& vtkPiece,
 #ifdef __SM_MODULE
         if ( dynamic_cast< LTRSpaceBoundary * >( element ) ) {
             elemNodes = 4;
-        } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) || dynamic_cast< Lattice3dBoundary * >( element ) || dynamic_cast< LatticeLink3dBoundary * >( element ) || dynamic_cast< Lattice2dBoundary * >( element ) ) {
+        } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) ) {
             elemNodes = 2;
         }
 #endif
@@ -360,7 +357,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(ExportRegion& vtkPiece,
                         regionDofMans++;
                     }
                 }
-            } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) || dynamic_cast< Lattice3dBoundary * >( element ) || dynamic_cast< LatticeLink3dBoundary * >( element ) || dynamic_cast< Lattice2dBoundary * >( element ) ) { //beam elements - only unique nodes
+            } else if ( dynamic_cast< LIBeam3dBoundary * >( element ) ) { //beam elements - only unique nodes
                 IntArray loc = element->giveLocation();
                 FloatArray nodeCoords;
                 if ( loc.at(elementNode) != 0 ) { //boundary element with mirrored node
@@ -541,7 +538,7 @@ void VTKXMLPeriodicExportModule :: exportPrimaryVars(ExportRegion &vtkPiece, Set
                                                dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(10);
                             valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(4) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(3);
-                        } else if ( dofIDVector == macro3DVoigtIDs ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt, Lattice3dBoundary
+                        } else if ( dofIDVector == macro3DVoigtIDs ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(3) * switches.at(3) * macroField.at(5) + unitCellSize.at(2) * switches.at(2) * macroField.at(6);

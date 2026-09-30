@@ -96,7 +96,7 @@ public:
   const char *giveClassName() const override { return "ThermalContactElement_QuadLin"; }
   const char *giveInputRecordName() const override {return _IFT_ThermalContactElement_QuadLin_Name;}
   virtual Element_Geometry_Type giveGeometryType() const override {
-    return EGT_quad_1 ;
+    return EGT_quad_1_interface ;
   }
   FEInterpolation * giveInterpolation() const override;
 

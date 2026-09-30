@@ -33,6 +33,7 @@
  */
 
 #include "metastep.h"
+#include "engngm.h"
 #include "function.h"
 
 namespace oofem {
@@ -72,25 +73,37 @@ MetaStep :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     } else if(finalTime == 0) {
       IR_GIVE_OPTIONAL_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);
       if ( numberOfSteps < 0 ) {
-	OOFEM_ERROR("Numer of steps has to be positive number");
-      } else {
-	dtFunction = 0;
-	if ( ir->hasField(_IFT_MetaStep_dtFunction) ) {
-	  IR_GIVE_FIELD(ir, this->dtFunction, _IFT_MetaStep_dtFunction);
-	} else if ( ir->hasField(_IFT_MetaStep_prescribedTimes) ) {
-	  IR_GIVE_OPTIONAL_FIELD(ir, prescribedTimes, _IFT_MetaStep_prescribedTimes);
-	  if ( prescribedTimes.giveSize() > 0 ) {
-	    numberOfSteps = prescribedTimes.giveSize();
-	    finalTime = prescribedTimes.at(numberOfSteps);
-	  } 
-	} else {
-	  //@todo: how to get dt
-	  finalTime = numberOfSteps * deltaT + this->previousMetaStepFinalTime;
-	}
-      }
+	      OOFEM_ERROR("Number of steps has to be positive number");
+      } 
+    } 
+    dtFunction = 0;
+    if ( ir->hasField(_IFT_MetaStep_dtFunction) ) {
+      IR_GIVE_FIELD(ir, this->dtFunction, _IFT_MetaStep_dtFunction);
+    } else if ( ir->hasField(_IFT_MetaStep_prescribedTimes) ) {
+      IR_GIVE_OPTIONAL_FIELD(ir, prescribedTimes, _IFT_MetaStep_prescribedTimes);
     } 
     
     this->attributes = ir;
+}
+
+void
+MetaStep :: postInitialize()
+{
+    // determine finalTime if not specified and not computable from prescribed times or time function
+    if ( finalTime == 0 ) {
+      if ( dtFunction ) {
+        // loop over steps and sum up time increments
+        double time = 0;
+        for ( int i = 1; i <= numberOfSteps; i++ ) {
+          //time += giveDtFunction()->evaluateAtTime(i);
+        }
+        finalTime = time;
+      } else if ( prescribedTimes.giveSize() > 0 ) {
+        finalTime = prescribedTimes.at(prescribedTimes.giveSize());
+      } else {
+        finalTime = numberOfSteps * deltaT + this->previousMetaStepFinalTime;
+      }
+    }
 }
 
 int
@@ -190,6 +203,7 @@ MetaStep :: setTimeStepReductionFactor(double tsrf)
   this->timeStepReductionStrategy->setTimeStepIncrementAdaptationFactor(tsrf);
 }
   
-
+Function * 
+MetaStep :: giveDtFunction(){if ( dtFunction )  return this->eModel->giveDomain(1)->giveFunction(dtFunction); else return NULL;}
   
 } // end namespace oofem

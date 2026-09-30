@@ -1,0 +1,62 @@
+contact_test_02.out
+Confined compression across a nonconforming two-facet/one-facet interface
+StaticStructural nsteps 20 deltat 0.05 renumber 0 nmodules 2 rtolv 1.e-9 stiffMode 0 manrmsteps 1 maxiter 100 initialguess 1 smtype 0
+vtkxml tstep_all domain_all primvars 1 1 cellvars 4 1 150 151 152
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 20 nelem 6 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 2 nset 6 ncontactsurf 2
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 0.5 0.0 0.0
+node 3 coords 3 1.0 0.0 0.0
+node 4 coords 3 0.0 1.0 0.0
+node 5 coords 3 0.5 1.0 0.0
+node 6 coords 3 1.0 1.0 0.0
+node 7 coords 3 0.0 0.0 1.0
+node 8 coords 3 0.5 0.0 1.0
+node 9 coords 3 1.0 0.0 1.0
+node 10 coords 3 0.0 1.0 1.0
+node 11 coords 3 0.5 1.0 1.0
+node 12 coords 3 1.0 1.0 1.0
+node 13 coords 3 0.2 0.1 1.02
+node 14 coords 3 0.8 0.1 1.02
+node 15 coords 3 0.8 0.9 1.02
+node 16 coords 3 0.2 0.9 1.02
+node 17 coords 3 0.2 0.1 2.02
+node 18 coords 3 0.8 0.1 2.02
+node 19 coords 3 0.8 0.9 2.02
+node 20 coords 3 0.2 0.9 2.02
+lspace 1 nodes 8 1 2 5 4 7 8 11 10 crosssect 1 mat 1 nlgeo 1
+lspace 2 nodes 8 2 3 6 5 8 9 12 11 crosssect 1 mat 1 nlgeo 1
+lspace 3 nodes 8 13 14 15 16 17 18 19 20 crosssect 1 mat 1 nlgeo 1
+StructuralContactElement_QuadLin 4 nodes 4 7 8 11 10 crosssect 2 mat 2 NIP 4
+StructuralContactElement_QuadLin 5 nodes 4 8 9 12 11 crosssect 2 mat 2 NIP 4
+StructuralContactElement_QuadLin 6 nodes 4 13 14 15 16 crosssect 2 mat 2 NIP 4
+StructuralFEContactSurface 1 ce_set 4
+StructuralFEContactSurface 2 ce_set 5
+SimpleCS 1 material 1 set 6
+DummyCS 2 mat 2
+# Compressible Mooney-Rivlin surrogate using E=10000, nu=0.3-equivalent
+# small-strain shear and bulk moduli.
+MooneyRivlinCompressibleMat 1 d 0 C1 1923.076923076923 C2 0.0 K 8333.333333333334
+DummyMat 2
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 3 values 1 -0.05 set 3
+# This reduced case isolates a nonconforming-interface requirement using
+# OOFEM's one-pass penalty contact on a small variable-thickness mesh.
+structuralpenaltycontactbc 4 loadTimeFunction 1 dofs 3 1 2 3 pn 1.e6 pt 1.e6 friction 0.0 mastersurface 1 slavesurface 2 nsd 3
+ConstantFunction 1 f(t) 0.0
+PiecewiseLinFunction 2 npoints 2 t 2 0 1 f(t) 2 0 1
+set 1 nodes 6 1 2 3 4 5 6
+set 2 nodes 8 13 14 15 16 17 18 19 20
+set 3 nodes 4 17 18 19 20
+set 4 elements 2 4 5
+set 5 elements 1 6
+set 6 elements 3 1 2 3
+#%BEGIN_CHECK% tolerance 1.e-6
+#NODE tStep 20 number 7 dof 1 unknown d value -2.70148052e-03
+#NODE tStep 20 number 7 dof 3 unknown d value -1.24355820e-02
+#NODE tStep 20 number 13 dof 3 unknown d value -3.15809114e-02
+#ELEMENT tStep 20 number 6 gp 1 keyword 152 component 1 value 1.0
+#%END_CHECK%

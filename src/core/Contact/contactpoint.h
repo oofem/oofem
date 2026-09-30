@@ -38,10 +38,13 @@
 #include "gausspoint.h"
 #include "fecontactsurface.h"
 #include "feinterpol.h"
+#include "contactprojection.h"
+#include <vector>
 
 namespace oofem {
 class IntArray;
 class FloatArray;
+class ContactElement;
 
 /**
  * @brief Represents a discrete contact point used in contact mechanics formulations.
@@ -71,7 +74,7 @@ protected:
   int surface_dimension;
 public:
   ContactPoint() {}
-  ~ContactPoint(){;}
+  virtual ~ContactPoint() = default;
   /**
    * @brief Computes the interpolation matrix (N-matrix) for this contact point.
    *
@@ -95,6 +98,7 @@ public:
    * @param tStep  Current time step.
    */  
   virtual void computeCurvature(FloatMatrix &G, const FloatArray &normal, TimeStep *tStep) = 0;
+  virtual void computeSecondBaseVectors(std::vector<std::vector<FloatArray>> &answer, TimeStep *tStep) = 0;
   /**
    * @brief Returns the local (parametric) coordinates of the contact point.
    *
@@ -139,6 +143,26 @@ public:
    */
   virtual FloatArray giveNormalVector() = 0;
   /**
+   * @brief Returns the quadrature weight associated with this contact point.
+   *
+   * Master points created by closest-point projection are not integration points,
+   * so they use unit weight. Slave points override this with their Gauss weight.
+   */
+  virtual double giveIntegrationWeight() { return 1.0; }
+  /**
+   * @brief Returns the current surface/line measure at this contact point.
+   *
+   * The returned value excludes the quadrature weight.
+   */
+  virtual double giveSurfaceMeasure(TimeStep *tStep) = 0;
+  /**
+   * @brief Returns the reference surface/line measure at this contact point.
+   *
+   * The returned value excludes the quadrature weight. Penalty contact uses this
+   * measure so the area factor is fixed with respect to displacement increments.
+   */
+  virtual double giveReferenceSurfaceMeasure() = 0;
+  /**
    * @brief Called to update internal state of the contact point for the time step.
    *
    * Default implementation is empty; subclasses may cache geometry/kinematics.
@@ -176,12 +200,13 @@ public:
    * @param tStep  Current time step.
    */
   virtual void giveUpdatedCoordinates(Coordinates &coords, TimeStep* tStep) = 0;
+  virtual ContactElement *giveContactElement() { return nullptr; }
   /**
    * @brief Returns the surface dimension associated with this contact point.
    *
    * For example: 1 for a segment in 2D, 2 for a face in 3D.
    */
-  int giveSurfaceDimension(){return surface_dimension;}
+  int giveSurfaceDimension() const {return surface_dimension;}
 
 };
 
@@ -190,36 +215,54 @@ class FEContactPoint : public ContactPoint
 {
 protected:
   int contactElementId;
-  std::unique_ptr<FEContactSurface> contactSurface;
+  FEContactSurface *contactSurface = nullptr;
+  ContactFeatureType featureType = ContactFeatureType::Surface;
+  int featureIndex = 0;
 
 public:
-  FEContactPoint(FEContactSurface *cs, int ceId, int sd) : ContactPoint(), contactElementId(ceId), contactSurface(std::move(cs)){this->surface_dimension  = sd;}
-  ~FEContactPoint(){;}
+  FEContactPoint(FEContactSurface *cs, int ceId, int sd,
+                 ContactFeatureType ft = ContactFeatureType::Surface,
+                 int fi = 0)
+    : ContactPoint(), contactElementId(ceId), contactSurface(cs),
+      featureType(ft), featureIndex(fi)
+  {
+    this->surface_dimension = sd;
+  }
+  ~FEContactPoint() override = default;
   //
   void computeNmatrix(FloatMatrix &answer) override;
   //  
   void compute_dNdxi_matrix(FloatMatrix &Bs, int i) override;
   //
   FloatArray giveNormalVector() override;
+  double giveSurfaceMeasure(TimeStep *tStep) override;
+  double giveReferenceSurfaceMeasure() override;
   //
   void computeVectorOf(ValueModeType mode, TimeStep *tStep, FloatArray &answer) override;
   //  
   void computeCurvature(FloatMatrix &G, const FloatArray &normal, TimeStep *tStep) override;
+  void computeSecondBaseVectors(std::vector<std::vector<FloatArray>> &answer, TimeStep *tStep) override;
   //
   bool giveLocationArray(IntArray &locationArray,const IntArray &dofIDArry, 
 			 const UnknownNumberingScheme &s) const override;
   //
   void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep, bool padding = false) override;
-  void giveUpdatedCoordinates(Coordinates &coords, TimeStep* tStep) override;   
+  void giveUpdatedCoordinates(Coordinates &coords, TimeStep* tStep) override;
+  void giveUpdatedCoordinatesOnElement(Coordinates &coords, int elementId,
+                                       const FloatArray &localCoords, TimeStep *tStep) const;
   ///////////////////////////////////////////////////////////////////////////////////////
   bool inContact() override {return(contactElementId < 0 ? false : true);}
   //
   const FloatArray &giveLocalCoordinates() override = 0;
   Coordinates giveGlobalCoordinates() override = 0;
   //
-   FEInterpolation* giveInterpolation();
+  FEInterpolation *giveInterpolation();
+  ContactElement *giveContactElement() override;
+  ContactElement *giveContactElementOnSurface(int elementId) const;
   int giveContactElementId(){return contactElementId;}
   void setContactElementId(int ceId){contactElementId = ceId;}
+  ContactFeatureType giveContactFeatureType() const { return featureType; }
+  int giveContactFeatureIndex() const { return featureIndex; }
   /////////////////////////////////////////////////////////////////////////////////////////
 };
 
@@ -227,14 +270,16 @@ public:
 class FEContactPoint_Slave : public FEContactPoint
 {
 protected:
-  std::unique_ptr<GaussPoint> slave_point;
+  GaussPoint *slave_point = nullptr;
   
 public:
-  FEContactPoint_Slave(FEContactSurface *cs, int ceId, int sd,GaussPoint *gp)  : FEContactPoint(cs, ceId, sd),slave_point(std::move(gp)){;}
-  ~FEContactPoint_Slave(){;}
+  FEContactPoint_Slave(FEContactSurface *cs, int ceId, int sd,GaussPoint *gp)  : FEContactPoint(cs, ceId, sd),slave_point(gp){;}
+  ~FEContactPoint_Slave() override = default;
   //
   const FloatArray &giveLocalCoordinates() override {return slave_point->giveNaturalCoordinates();}
   Coordinates giveGlobalCoordinates() override {return slave_point->giveGlobalCoordinates();}
+  double giveIntegrationWeight() override { return slave_point->giveWeight(); }
+  GaussPoint *giveIntegrationPoint() const { return slave_point; }
 };
 
   
@@ -245,8 +290,11 @@ protected:
   FloatArray localCoordinates;  
   
 public:
-  FEContactPoint_Master(FEContactSurface *cs, int ceId, int sd, FloatArray lc)  : FEContactPoint(cs, ceId, sd),localCoordinates(lc){;}
-  ~FEContactPoint_Master(){;}
+  FEContactPoint_Master(FEContactSurface *cs, int ceId, int sd, FloatArray lc,
+                        ContactFeatureType ft = ContactFeatureType::Surface,
+                        int fi = 0)
+    : FEContactPoint(cs, ceId, sd, ft, fi), localCoordinates(lc) { }
+  ~FEContactPoint_Master() override = default;
   //
   const FloatArray &giveLocalCoordinates() override {return this->localCoordinates;}
   Coordinates giveGlobalCoordinates() override;

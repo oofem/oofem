@@ -37,6 +37,8 @@
 #include "material.h"
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 
 namespace oofem {
@@ -61,6 +63,24 @@ DummyCrossSection :: giveInputRecord(DynamicInputRecord &input)
     CrossSection :: giveInputRecord(input);
 
     input.setField(this->matNumber, _IFT_DummyCrossSection_material);
+}
+
+void
+DummyCrossSection :: saveContext(DataStream &stream, ContextMode mode)
+{
+    CrossSection :: saveContext(stream, mode);
+    if ((mode & CM_Definition) && !stream.write(matNumber)) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+}
+
+void
+DummyCrossSection :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    CrossSection :: restoreContext(stream, mode);
+    if ((mode & CM_Definition) && !stream.read(matNumber)) {
+        THROW_CIOERR(CIO_IOERR);
+    }
 }
 
 

@@ -1,0 +1,21 @@
+latticelink3dnl_rotation.out
+LatticeLink3dNL large-rotation kinematic check. Matrix node 1 is rotated about y to pi/2 with rebar node 2 clamped. The rigid arm (0,0,-0.011) swings with the rotation, so the axial slip is 0.011*sin(theta_y). This checks the corotational rigid-arm behaviour: a linear link would instead give 0.011*theta_y (0.01728 at pi/2). The check reads the slip strain, so it is purely kinematic and independent of the bond material.
+NonLinearStatic nmsteps 1 nsteps 6 contextOutputStep 1000 nmodules 1
+nsteps 6 rtolf 1.e-3 maxiter 300 stiffMode 1 controllmode 1 refloadmode 1 minsteplength 1.e-3
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2
+node 1 coords 3 0.0 0.0  0.000 bc 6 1 1 1 1 2 1
+node 2 coords 3 0.0 0.0 -0.011 bc 6 1 1 1 0 1 1
+latticelink3Dnl 1 nodes 2 1 2 crossSect 1 mat 1 length 2.5e-2 diameter 5.2e-3 dirvector 3 1.0 0.0 0.0
+LatticeCS 1 material 1 shape 1 radius 0.0026
+LatticeSlip 1 d 1. talpha 0.0 e 200.e9 a1 100. a2 100. t0 4.e6 type 1 s1 1.e-5 alpha 0.5
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 1.5707963
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 6. f(t) 2 0. 1.
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 3 number 1 gp 1 keyword 138 component 1 value 5.5000e-3
+#ELEMENT tStep 6 number 1 gp 1 keyword 138 component 1 value 1.0625e-2
+#%END_CHECK%

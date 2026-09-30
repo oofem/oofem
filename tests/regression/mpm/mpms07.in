@@ -7,7 +7,7 @@ errorcheck
 #Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # test function
 Variable name "u" interpolation "feiquad" type 1 quantity 0 size 2 dofs 2 1 2 # temperature 
 Variable name "w" interpolation "feiquad" type 1 quantity 0 size 2 dofs 2 1 2 # test function
-SymbolicTerm 1 variable "u"  testvariable "w" mmode 6 lexpression "B(w,gp).T*Dm(gp,ts)*B(u,gp)" rexpression "B(w,gp).T*Sig(u,gp,ts)"
+SymbolicTerm 1 variable "u"  testvariable "w" mmode 6 lexpression "Grad_s(w,gp).T*MDer(gp,ts, MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*Sig(u,gp,ts)"
 SymbolicTerm 2 variable "u"  testvariable "w" mmode 6 lexpression "0.0" rexpression "N(w,gp).T*[[0.0],[-1.0]]" # constant heat source
 Integral 1 domain 1 set 1 term 1
 Integral 2 domain 1 set 3 term 2

@@ -48,6 +48,7 @@ namespace oofem {
 REGISTER_Element(StructuralContactElement_LineLin);
 REGISTER_Element(StructuralContactElement_TrLin);
 REGISTER_Element(StructuralContactElement_QuadLin);
+REGISTER_Element(StructuralContactElement_QuadLinGauss);
 
 
 StructuralContactElement :: StructuralContactElement(int n, Domain *aDomain) : ContactElement(n, aDomain)
@@ -71,8 +72,11 @@ void StructuralContactElement :: computeGaussPoints()
 {
   if ( integrationRulesArray.size() == 0 ) {
     integrationRulesArray.resize(1);
-    //integrationRulesArray [ 0 ] = std::make_unique< GaussIntegrationRule >(1, this);
-    integrationRulesArray [ 0 ] = std::make_unique<LobattoIntegrationRule>(1, this);
+    if (this->giveGeometryType() == EGT_triangle_1) {
+      integrationRulesArray[0] = std::make_unique<GaussIntegrationRule>(1, this);
+    } else {
+      integrationRulesArray[0] = std::make_unique<LobattoIntegrationRule>(1, this);
+    }
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
   }
 }
@@ -109,6 +113,17 @@ StructuralContactElement_QuadLin :: giveDofManDofIDMask(int inode, IntArray &ans
   answer = {
     D_u, D_v, D_w
   };
+}
+
+void
+StructuralContactElement_QuadLinGauss :: computeGaussPoints()
+{
+  if (integrationRulesArray.empty()) {
+    integrationRulesArray.resize(1);
+    integrationRulesArray[0] = std::make_unique<GaussIntegrationRule>(1, this);
+    this->giveCrossSection()->setupIntegrationPoints(
+      *integrationRulesArray[0], numberOfGaussPoints, this);
+  }
 }
 
 

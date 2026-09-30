@@ -18,7 +18,7 @@ set (mpm_element
     )
 
     set (mpm_problems
-    mpmproblem.C
+    mpmassemblers.C
     dg.C
     mpmsemodels.C
     )

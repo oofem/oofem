@@ -784,13 +784,13 @@ CylindricalALM :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
         }
 
         nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
-        if ( calm_HPCWeights.giveSize() == 0 ) {
+        if ( calm_HPCDmanWeightSrcArray.isEmpty()) {
             // no weights -> set to 1.0 by default
-            calm_HPCWeights.resize(nsize);
+            calm_HPCDmanWeightSrcArray.resize(nsize);
             for ( int i = 1; i <= nsize; i++ ) {
-                calm_HPCWeights.at(i) = 1.0;
+                calm_HPCDmanWeightSrcArray.at(i) = 1.0;
             }
-        } else if ( nsize != calm_HPCWeights.giveSize() ) {
+        } else if ( nsize != calm_HPCDmanWeightSrcArray.giveSize() ) {
             OOFEM_ERROR("HPC map size and weight array size mismatch");
         }
 
@@ -944,9 +944,7 @@ void CylindricalALM :: convertHPCMap()
     }
 
     calm_HPCIndirectDofMask.resize(count);
-    if ( calm_Control == calml_hpc ) {
-        calm_HPCWeights.resize(count);
-    }
+    calm_HPCWeights.resize(count);
 
     for ( int i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);

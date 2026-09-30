@@ -1,0 +1,21 @@
+lattice3dnlshell_dmg_bend_n7.out
+Shell-mode lattice3dnl with large rotations and lattice damage, 7 layers: pure out-of-plane bending. Checks that tension-face cracking spreads through the thickness. Regression test of the layered-damage path in the nonlinear element.
+StaticStructural nsteps 100 rtolv 1.e-6 ddm 2 2 5 ddv 1 1.e-2 ddltf 2 nmodules 1
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1
+node 2 coords 3 1.000000e-01 0.000000e+00 0.000000e+00 bc 6 1 1 0 1 0 1
+lattice3Dnl 1 nodes 2 1 2 crossSect 1 mat 1 shellnormal 3 0.0 0.0 1.0 polycoords 12 0.05 -0.05 -0.005   0.05 0.05 -0.005   0.05 0.05 0.005   0.05 -0.05 0.005
+latticecs 1 material 1 nlayers 7
+latticedamage 1 d 2400. talpha 0.0 e 30.e9 e0 1.e-4 wf 1.e-4 a1 0.5 a2 1.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 100. f(t) 2 0. 1.
+#%BEGIN_CHECK% tolerance 1.e-2
+#REACTION tStep 10  number 1 dof 5 value -2.5000e+00
+#REACTION tStep 25  number 1 dof 5 value -6.0707e+00
+#REACTION tStep 50  number 1 dof 5 value -9.3365e+00
+#REACTION tStep 100 number 1 dof 5 value -1.4305e+01
+#%END_CHECK%

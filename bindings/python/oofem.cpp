@@ -819,6 +819,7 @@ PYBIND11_MODULE(oofempy, m) {
                 if (i >= (size_t) s.giveSize()) throw py::index_error();
                 return s[i];
             })
+            .def("__len__", &oofem::FloatArray::giveSize)  // Enables len(obj) in Python
             .def("__repr__",
                 [](const oofem::FloatArray &s) {
                     std::ostringstream streamObj;
@@ -1004,6 +1005,7 @@ PYBIND11_MODULE(oofempy, m) {
             .def("sort", &oofem::IntArray::sort)
             .def("zero", &oofem::IntArray::zero)
             .def("pY", &oofem::IntArray::pY)
+            .def("__len__", &oofem::IntArray::giveSize)  // Enables len(obj) in Python
             .def("__repr__",
                 [](const oofem::IntArray &s) {
                     std::string a = "<oofempy.IntArray: {";
@@ -1357,6 +1359,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveDofManDofIDMask", &oofem::Element::giveDofManDofIDMask)
         .def("getActivityTimeFunctionNumber", &oofem::Element::getActivityTimeFunctionNumber)
         .def("setActivityTimeFunctionNumber", &oofem::Element::setActivityTimeFunctionNumber)
+        .def("computeMeanSize", &oofem::Element::computeMeanSize)
     ;
 
 #ifdef __SM_MODULE
@@ -1970,6 +1973,18 @@ PYBIND11_MODULE(oofempy, m) {
         .value("IntSource_hh", oofem::MatResponseMode::IntSource_hh)
         .value("IntSource_hw", oofem::MatResponseMode::IntSource_hw)
         .value("IntSource_wh", oofem::MatResponseMode::IntSource_wh)
+        .value("Stress", oofem::MatResponseMode::Stress)
+        .value("DeviatoricStress", oofem::MatResponseMode::DeviatoricStress)
+        .value("EffectiveStressParameter_1", oofem::MatResponseMode::EffectiveStressParameter_1)
+        .value("EffectiveStressParameter_2", oofem::MatResponseMode::EffectiveStressParameter_2)
+        .value("Permeability", oofem::MatResponseMode::Permeability)
+        .value("CompressibilityCoefficient_11", oofem::MatResponseMode::CompressibilityCoefficient_11)
+        .value("CompressibilityCoefficient_12", oofem::MatResponseMode::CompressibilityCoefficient_12)
+        .value("CompressibilityCoefficient_21", oofem::MatResponseMode::CompressibilityCoefficient_21)
+        .value("CompressibilityCoefficient_22", oofem::MatResponseMode::CompressibilityCoefficient_22)
+        .value("Permeability_2", oofem::MatResponseMode::Permeability_2)
+        .value("MassDensity_1", oofem::MatResponseMode::MassDensity_1)
+        .value("MassDensity_2", oofem::MatResponseMode::MassDensity_2)
     ;
 
     py::enum_<oofem::MaterialMode>(m, "MaterialMode")

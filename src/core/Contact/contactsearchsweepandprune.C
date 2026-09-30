@@ -34,8 +34,35 @@
 
 #include "contactsearchsweepandprune.h"
 #include "floatarrayf.h"
+#include <algorithm>
 
 namespace oofem {
+
+namespace {
+
+constexpr bool
+boundLess(const Bound &a, const Bound &b)
+{
+	if (a.value < b.value) {
+		return true;
+	}
+	if (b.value < a.value) {
+		return false;
+	}
+	if (a.isMin != b.isMin) {
+		return a.isMin; // Closed intervals overlap when their endpoints touch.
+	}
+	return a.id < b.id;
+}
+
+static_assert(boundLess(Bound{0.0, 2u, false, true}, Bound{0.0, 1u, true, false}),
+              "SAP touching intervals require minimum endpoints before maximum endpoints");
+static_assert(!boundLess(Bound{0.0, 1u, true, false}, Bound{0.0, 2u, false, true}),
+              "SAP touching endpoint ordering must be antisymmetric");
+static_assert(boundLess(Bound{0.0, 1u, false, true}, Bound{0.0, 2u, true, true}),
+              "SAP equal endpoint ties require deterministic entity ordering");
+
+}
 
 ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune(
 	FEContactSurface *scs,
@@ -47,17 +74,19 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: ContactSearchAlgori
 }
 
 void
-ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: initialize()
+ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: initialize(TimeStep *tStep)
 {
 	unsigned int n_slaves = contactPairs.size();
 	unsigned int n_masters = this->masterContactSurface->giveNumberOfContactElements();
 	unsigned int n = n_slaves + n_masters;
 	//
 	aabbs.resize(n_slaves + n_masters);
-	updateAABBs();
+	updateAABBs(tStep);
 	//
+	this->potentialPairs.clear();
 	for (int axis=0; axis<3; axis++) {
 		this->boundss[axis] = {};
+		this->potentialPairsPerAxes[axis].clear();
 	}
 	for (unsigned int i = 0; i < n; ++i) {
 		bool isSlave = i >= n_masters;
@@ -82,11 +111,9 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: initialize()
 		auto& bounds = this->boundss[axis];
 		auto& potentialPairsPerAxis = this->potentialPairsPerAxes[axis];
 		potentialPairsPerAxis.clear();
-		std::sort(bounds.begin(), bounds.end(), [](const Bound& a, const Bound& b) {
-			return a.value < b.value;
-		});
-		unsigned int nBounds = bounds.size();
-		for (size_t i = 0; i < nBounds - 1; ++i) {
+		std::sort(bounds.begin(), bounds.end(), boundLess);
+		const size_t nBounds = bounds.size();
+		for (size_t i = 0; i + 1 < nBounds; ++i) {
 			const auto& bi = bounds[i];
 			if (!bi.isMin) continue;
 			for (size_t j = i + 1; j < nBounds; ++j) {
@@ -129,20 +156,22 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: initialize()
 }
 
 void
-ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateAABBs()
+ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateAABBs(TimeStep *tStep)
 {
 	unsigned int index = 0;
+	double searchPadding = this->computeSearchPadding(tStep);
 	//
 	unsigned int n_masters = this->masterContactSurface->giveNumberOfContactElements();
 	for (unsigned int i = 1; i <= n_masters; ++i) {
-		const auto& master = this->masterContactSurface->giveContactElement_InSet(i);
-		auto aabb = master->computeAABB();
+		auto aabb = this->computeSweptMasterSearchAABB(i, tStep);
+		aabb.expandBy(searchPadding);
 		aabbs[index] = aabb;
 		index++;
 	}
 	//
 	for (const auto& slave : contactPairs) {
-		auto aabb = slave->computeSlaveAABB();
+		auto aabb = slave->computeSweptSlaveAABB(tStep);
+		aabb.expandBy(searchPadding);
 		aabbs[index] = aabb;
 		index++;
 	}
@@ -150,11 +179,11 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateAABBs()
 }
 
 void
-ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateBoundss()
+ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateBoundss(TimeStep *tStep)
 {
-	updateAABBs();
+	updateAABBs(tStep);
 	//
-	for (int axis = 0; axis < 2; ++axis) {
+	for (int axis = 0; axis < 3; ++axis) {
 		auto& bounds =
 			(axis == 0) ? std::get<0>(this->boundss)
 			:
@@ -178,9 +207,9 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: insertionSort()
 			for (size_t j = i; j >= 1; --j) {
 				Bound& b1 = bounds[j - 1];
 				Bound& b2 = bounds[j];
-				if (b1.value <= b2.value) break;
-				std::swap(bounds[j], bounds[j - 1]);
-				this->solveInversion(axis, b2, b1);
+				if (!boundLess(b2, b1)) break;
+				std::swap(b1, b2);
+				this->solveInversion(axis, b1, b2);
 			}
 		}
 	}
@@ -250,10 +279,11 @@ void
 ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateContactPairs(TimeStep *tStep)
 {
 	if (!this->isInitialized) {
-		this->initialize();
+		this->initialize(tStep);
+	} else {
+		this->updateBoundss(tStep);
+		this->insertionSort();
 	}
-	this->updateBoundss();
-	this->insertionSort();
 	//
 	std::map<unsigned int, std::vector<unsigned int>> slave2masters;
 	for (IJ ij : potentialPairs) {
@@ -264,44 +294,45 @@ ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: updateContactPairs(
 		slave2masters[i_slave].push_back(i_master);
 	}
 	//
-	unsigned int n_masters = this->masterContactSurface->giveNumberOfContactElements();
+	const unsigned int n_masters = this->masterContactSurface->giveNumberOfContactElements();
 	//
-	/*
-	 * Copy and adjustment from ContactSearchAlgorithm_Surface2FESurface_3d :: updateContactPairs
-	 * TODO code deduplication
-	 */
-	FloatArrayF<3> normalVector, tangentVector1, tangentVector2;
-	for (auto [i_slave_plus_n_masters, i_masters] : slave2masters) {
-		unsigned int i_slave = i_slave_plus_n_masters - n_masters;
-		auto& cp = contactPairs[i_slave];
-		auto slavePoint = dynamic_cast<FEContactPoint_Slave*> (cp->giveSlaveContactPoint());
-		int closestContactElementId = -1;
-		FloatArray contactPointLocalCoordinates;
-		double gap = 0;
-		for ( unsigned int i_master_0 : i_masters ) {
-			unsigned int i_master = i_master_0 + 1;
-			auto contactElement = this->masterContactSurface->giveContactElement_InSet(i_master);
-			auto [inElement,localCoords, newGap,normal, t1, t2] = this->masterContactSurface->findContactPointInElement_3d(slavePoint, contactElement, tStep);
-			if (inElement) {
-				if ( closestContactElementId == -1. || newGap < gap ) {
-					gap = newGap;
-					normalVector = normal;
-					tangentVector1 = t1;
-					tangentVector2 = t2;
-					contactPointLocalCoordinates = localCoords;
-					closestContactElementId = contactElement->giveNumber();
+		for (size_t i_slave = 0; i_slave < contactPairs.size(); ++i_slave) {
+			auto& cp = contactPairs[i_slave];
+			std::vector<int> masterCandidateIndices;
+
+		const unsigned int encodedSlaveId = n_masters + static_cast<unsigned int>(i_slave);
+		auto candidateIt = slave2masters.find(encodedSlaveId);
+		if (candidateIt != slave2masters.end()) {
+			for (unsigned int i_master_0 : candidateIt->second) {
+				if (i_master_0 < n_masters) {
+					masterCandidateIndices.push_back(i_master_0 + 1);
 				}
 			}
 		}
-		if (closestContactElementId) {
-			auto master_point = std::make_unique<FEContactPoint_Master>(this->masterContactSurface, closestContactElementId, 2, contactPointLocalCoordinates);
-			cp->setMasterContactPoint(std::move(master_point));
-			cp->setNormalGap(gap);
-			cp->setNormalVector(normalVector);
-			cp->setTangentVector1(tangentVector1);
-			cp->setTangentVector2(tangentVector2);  
+
+		this->appendCurrentActiveMasterCandidate(cp.get(), masterCandidateIndices);
+			if (masterCandidateIndices.empty()) {
+				cp->clearContactState();
+				continue;
+			}
+
+			this->updatePairFrom3dCandidates(cp.get(), masterCandidateIndices, tStep);
 		}
+}
+
+void
+ContactSearchAlgorithm_Surface2FESurface_3d_SweepAndPrune :: restoreContext(DataStream &stream)
+{
+	ContactSearchAlgorithm_Surface2FESurface_3d :: restoreContext(stream);
+	potentialPairs.clear();
+	for (auto &pairs : potentialPairsPerAxes) {
+		pairs.clear();
 	}
+	for (auto &bounds : boundss) {
+		bounds.clear();
+	}
+	aabbs.clear();
+	isInitialized = false;
 }
 
 } // end namespace oofem

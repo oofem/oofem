@@ -62,8 +62,11 @@
 #define _IFT_NRSolver_ddfunc "ddltf"
 #define _IFT_NRSolver_linesearch "linesearch"
 #define _IFT_NRSolver_rtolv "rtolv"
+#define _IFT_NRSolver_atolv "atolv"
 #define _IFT_NRSolver_rtolf "rtolf"
+#define _IFT_NRSolver_atolf "atolf"
 #define _IFT_NRSolver_rtold "rtold"
+#define _IFT_NRSolver_atold "atold"
 #define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
 #define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
@@ -150,6 +153,11 @@ protected:
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group
     FloatArray rtold;
+    
+    /// Absolute unbalanced force tolerance for each group
+    FloatArray atolf;
+    /// Absolute iterative displacement change tolerance for each group
+    FloatArray atold;
 
     ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
     FloatArray forceErrVec;

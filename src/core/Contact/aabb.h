@@ -73,7 +73,7 @@ class AABB {
    * The bounding box is typically initialized later by expanding
    * it to include points or other bounding boxes.
    */
-    AABB() = default;
+    AABB();
   /**
    * @brief Constructs an axis-aligned bounding box from corner coordinates.
    *
@@ -95,8 +95,11 @@ class AABB {
    * @return True if the point is inside or on the boundary of the box,
    *         false otherwise.
    */
-    bool contains(const Vector& v);
-    bool contains(double x, double y, double z);
+    bool contains(const Vector& v) const;
+    bool contains(double x, double y, double z) const;
+    bool intersects(const AABB& other) const;
+    /** Expands this box to include the complete other box. */
+    void merge(const AABB& other);
   /**
    * @brief Expands the bounding box to include a given point.
    *
@@ -121,6 +124,8 @@ class AABB {
    * @param z Z-coordinate of the point.
    */
   void merge(double x, double y, double z);
+  void expandBy(double padding);
+  double diagonalLength() const;
 };
 
 } // end namespace oofem

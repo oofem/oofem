@@ -86,16 +86,6 @@ set (sm_element
     htselement.C
     lumpedmasselement.C
     springelement.C
-    LatticeElements/latticestructuralelement.C
-    LatticeElements/lattice2d.C
-    LatticeElements/lattice2dboundary.C
-    LatticeElements/lattice3d.C
-    LatticeElements/lattice3dboundary.C
-    LatticeElements/lattice3dboundarytruss.C
-    LatticeElements/latticelink3d.C
-    LatticeElements/latticelink3dboundary.C
-    LatticeElements/latticebeam3d.C
-    LatticeElements/latticebeam3dboundary.C
     tet21ghostsolid.C
     quad1platesubsoil.C 
     quad2platesubsoil.C
@@ -143,7 +133,8 @@ set (sm_interface_elements
     Interfaces/intelsurfquad1.C
     Interfaces/bondlink3d.C
     Interfaces/bondlink3dboundary.C
-    #    bondlink3dboundarybeam.C	
+    Interfaces/bondlink3dtruss.C
+    #    bondlink3dboundarybeam.C
     #    bondlink3dboundaryplate.C		
     Interfaces/Deprecated/interfaceelement1d.C
     Interfaces/Deprecated/interfaceelem2dlin.C

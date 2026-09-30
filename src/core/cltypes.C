@@ -160,6 +160,12 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_X_LCS:
     case IST_Y_LCS:
     case IST_Z_LCS:
+    case IST_LatticeStrain:
+    case IST_LatticeForce:
+    case IST_PlasticLatticeStrain:
+    case IST_LatticeCurvature:
+    case IST_LatticeMoment:
+    case IST_PlasticLatticeCurvature:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:
@@ -218,6 +224,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_MoistureContent:
     case IST_IncrementCreepModulus:
     case IST_InternalSource:
+    case IST_ContactNormalGap:
+    case IST_ContactPressure:
+    case IST_ContactStatus:
         return ISVT_SCALAR;
 
     default:
@@ -250,7 +259,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
     if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField || type == MacroSlipVector || type == ResidualForce ) {
         return ISVT_VECTOR;
-    } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction || type == Concentration ) {
+    } else if ( type == FluxVector || type == PressureVector || type == PressureVector_1 || type == PressureVector_2 || type == Temperature || type == Humidity || type == DeplanationFunction || type == Concentration ) {
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
