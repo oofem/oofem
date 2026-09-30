@@ -98,22 +98,22 @@ public:
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
-            answer = this->giveInterfaceCrossSection()->giveEngTraction_3d(jump, gp, tStep);
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_ntt(jump, gp, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
-            answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_nt(jump, gp, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
-            answer = Vec1(this->giveInterfaceCrossSection()->giveEngTraction_1d(jump.at(1), gp, tStep));
+            answer = Vec1(this->giveInterfaceCrossSection()->giveEngTraction_n(jump.at(1), gp, tStep));
         }
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
-            answer = this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_ntt(rMode, ip, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
-            answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_nt(rMode, ip, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
-            answer = this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_n(rMode, ip, tStep);
         }
     }
 

@@ -69,8 +69,8 @@ void UPLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeS
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+    e->getLocalCodeNumbers (locu, FT_Displacements);
+    e->getLocalCodeNumbers (locp, FT_Pressure);
 
     e->giveCharacteristicMatrix(contrib, MomentumBalance_StiffnessMatrix, tStep);
     contrib.times(this->alpha);
@@ -99,8 +99,8 @@ void UPResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element,
     vec.resize(ndofs);
     vec.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure);
+    e->getLocalCodeNumbers (locu, FT_Displacements);
+    e->getLocalCodeNumbers (locp, FT_Pressure);
 
     e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
     vec.assemble(contrib, locu);
@@ -136,8 +136,8 @@ void TMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeS
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature);
+    e->getLocalCodeNumbers (locu, FT_Displacements);
+    e->getLocalCodeNumbers (loct, FT_Temperature);
 
     e->giveCharacteristicMatrix(contrib, MomentumBalance_StiffnessMatrix, tStep);
     contrib.times(this->alpha);
@@ -169,9 +169,9 @@ void TMLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeS
                 if(contrib.isNotEmpty()) {
                     contrib.times(this->alpha);
                     if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
-                        e->getSurfaceElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                        e->getSurfaceElementCodeNumbers(loct, FT_Temperature, boundaryID);
                     } else {
-                        e->getEdgeElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                        e->getEdgeElementCodeNumbers(loct, FT_Temperature, boundaryID);
                     }
                     answer.assemble(contrib, loct, loct);
                 }
@@ -191,8 +191,8 @@ void TMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element,
     vec.resize(ndofs);
     vec.zero();
 
-    e->getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement);
-    e->getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature);
+    e->getLocalCodeNumbers (locu, FT_Displacements);
+    e->getLocalCodeNumbers (loct, FT_Temperature);
 
     e->giveCharacteristicVector(contrib, MomentumBalance_StressResidual, mode, tStep);
     vec.assemble(contrib, locu);
@@ -211,9 +211,9 @@ void TMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element,
                 e->giveCharacteristicVectorFromBC(contrib, EnergyBalance_ConvectionBCResidual, mode, tStep, bc, boundaryID);
                 if(contrib.isNotEmpty()) {
                     if (bc->giveBCGeoType() == bcGeomType::SurfaceLoadBGT) {
-                        e->getSurfaceElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                        e->getSurfaceElementCodeNumbers(loct, FT_Temperature, boundaryID);
                     } else {
-                        e->getEdgeElementCodeNumbers(loct, Variable::VariableQuantity::Temperature, boundaryID);
+                        e->getEdgeElementCodeNumbers(loct, FT_Temperature, boundaryID);
                     }
                     vec.assemble(contrib, loct);
                 }

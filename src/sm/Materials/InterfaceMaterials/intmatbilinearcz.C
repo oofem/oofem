@@ -100,7 +100,7 @@ int IntMatBilinearCZ :: checkConsistency()
     return 1;
 }
 
-FloatArrayF<3> IntMatBilinearCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+FloatArrayF<3> IntMatBilinearCZ :: giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     double maxDamage = 0.99999999;
 
@@ -236,10 +236,10 @@ FloatArrayF<3> IntMatBilinearCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &
     OOFEM_ERROR("No convergence in.");
 }
 
-FloatMatrixF<3,3> IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+FloatMatrixF<3,3> IntMatBilinearCZ :: giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_WARNING("not implemented. Use numerical Jacobian instead.");
-    return this->give3dStiffnessMatrix_dTdj_Num(gp, tStep);
+    return this->giveStiffnessMatrix_dTdj_Num_ntt(gp, tStep);
 }
 
 double IntMatBilinearCZ :: computeYieldFunction(double iTractionNormal, double iTractionTang) const

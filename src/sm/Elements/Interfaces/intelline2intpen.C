@@ -62,7 +62,7 @@ IntElLine2IntPen :: initializeFrom(const std::shared_ptr<InputRecord> &ir, int p
 }
 
 
-FloatArrayF<2>
+FloatArrayF<3>
 IntElLine2IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
     //printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
@@ -76,13 +76,14 @@ IntElLine2IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 //    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdxi( dNdxi, xi_0, FEIElementGeometryWrapper(this) );
 
-    FloatArrayF<2> G;
+    FloatArrayF<3> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
         double X2_i = 0.5 * ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i + numNodes / 2)->giveCoordinate(2) );
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
+        G.at(3) += dNdxi.at(i, 1) * 0; // Assuming 3D space, z-coordinate is 0 for a line element in the xy-plane   
     }
     return G;
 }

@@ -113,7 +113,7 @@ namespace oofem {
 \
         ENUM_ITEM_WITH_VALUE(VF, 54) /* Volume fraction */          \
         ENUM_ITEM_WITH_VALUE(P_f2, 55) /* Pressure field of second phase */          \
-        ENUM_ITEM_WITH_VALUE(C_2, 56) /* Mass concentration of the first constituent */ \
+        ENUM_ITEM_WITH_VALUE(C_2, 56) /* Mass concentration of the second constituent */ \
         ENUM_ITEM_WITH_VALUE(MaxDofID, 500) /* Maximum value of DofIDItem, used for validation and array sizing */
 
 #include "enum-impl.h"

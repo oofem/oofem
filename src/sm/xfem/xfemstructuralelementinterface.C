@@ -1027,7 +1027,7 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
     if ( intMat == nullptr ) {
         OOFEM_ERROR("Failed to cast StructuralInterfaceMaterial*.")
     }
-    auto TLocRenumbered = intMat->giveFirstPKTraction_3d(jump3DLocRenumbered, F, & iGP, tStep);
+    auto TLocRenumbered = intMat->giveFirstPKTraction_ntt(jump3DLocRenumbered, F, & iGP, tStep);
 
     FloatArrayF<3> TLoc = {TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1)};
 
@@ -1083,7 +1083,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                         ///////////////////////////////////////////////////
                         // Analytical tangent
 
-                        auto K3DRenumbered = intMat->give3dStiffnessMatrix_dTdj(TangentStiffness, gp, tStep);
+                        auto K3DRenumbered = intMat->giveStiffnessMatrix_dTdj_ntt(TangentStiffness, gp, tStep);
 
                         FloatMatrix K3D(3,3);
                         K3D.at(1, 1) = K3DRenumbered.at(2, 2);

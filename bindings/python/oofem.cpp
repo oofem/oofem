@@ -111,6 +111,7 @@
 #include "sparsemtrx.h"
 
 #include "field.h"
+#include "stateoperator.h"
 #include "feinterpol.h"
 #include "util.h"
 #include "datareader.h"
@@ -1206,8 +1207,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveMetaStep", &oofem::EngngModel::giveMetaStep, py::return_value_policy::reference)
         .def("terminateAnalysis", &oofem::EngngModel::terminateAnalysis)
         .def("terminate", &oofem::EngngModel::terminate)
-        .def("solveYourself", &oofem::EngngModel::solveYourself)
-        .def("solveYourselfAt", &oofem::EngngModel::solveYourselfAt)
+        // The solution enters OpenMP parallel regions whose worker threads may call back
+        // into Python (PythonField, PythonMaterial, classes derived in Python). Holding the
+        // GIL here would block them while this thread waits on the parallel barrier, so it
+        // is released for the duration; every callback re-acquires it for its own thread.
+        .def("solveYourself", &oofem::EngngModel::solveYourself, py::call_guard<py::gil_scoped_release>())
+        .def("solveYourselfAt", &oofem::EngngModel::solveYourselfAt, py::call_guard<py::gil_scoped_release>())
         .def("terminate",&oofem::EngngModel::terminate)
         .def("giveField", (FieldPtr (oofem::EngngModel::*)(oofem::FieldType, oofem::TimeStep*)) &oofem::EngngModel::giveField)
         .def("giveField", (FieldPtr (oofem::EngngModel::*)(oofem::InternalStateType, oofem::TimeStep*)) &oofem::EngngModel::giveField)
@@ -1608,18 +1613,11 @@ PYBIND11_MODULE(oofempy, m) {
         .value("scalar", oofem::Variable::VariableType::scalar)
         .value("vector", oofem::Variable::VariableType::vector)
     ;
-    py::enum_<oofem::Variable::VariableQuantity>(m, "VariableQuantity")
-        .value("Displacement", oofem::Variable::VariableQuantity::Displacement)
-        .value("Temperature", oofem::Variable::VariableQuantity::Temperature)
-        .value("Pressure", oofem::Variable::VariableQuantity::Pressure)
-        .value("VolumeFraction", oofem::Variable::VariableQuantity::VolumeFraction)
-    ;
-
     py::class_<oofem::FEInterpolation>(m,"FEInterpolation")
     ;
 
     py::class_<oofem::Variable>(m, "Variable")
-        .def(py::init<const oofem::FEInterpolation*, oofem::Variable::VariableQuantity, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
+        .def(py::init<const oofem::FEInterpolation*, oofem::FieldType, oofem::Variable::VariableType, int, oofem::IntArray&, oofem::Variable*>()) // , py::arg("dual")=NULL
         .def_readonly("dofIDs", &oofem::Variable::dofIDs)
         .def_readonly("type", &oofem::Variable::type)
         .def_readonly("q", &oofem::Variable::q)
@@ -1659,6 +1657,17 @@ PYBIND11_MODULE(oofempy, m) {
         .value("FT_TransportProblemUnknowns", oofem::FieldType::FT_TransportProblemUnknowns)
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
         .value("FT_EigenStrain", oofem::FieldType::FT_EigenStrain)
+        .value("FT_VOF", oofem::FieldType::FT_VOF)
+        .value("FT_Pressure2", oofem::FieldType::FT_Pressure2)
+        .value("FT_Concentration1", oofem::FieldType::FT_Concentration1)
+        .value("FT_Concentration2", oofem::FieldType::FT_Concentration2)
+    ;
+
+    py::enum_<oofem::StateOperator>(m, "StateOperator")
+        .value("SO_Value", oofem::StateOperator::SO_Value)
+        .value("SO_Gradient", oofem::StateOperator::SO_Gradient)
+        .value("SO_SymmetricGradient", oofem::StateOperator::SO_SymmetricGradient)
+        .value("SO_Divergence", oofem::StateOperator::SO_Divergence)
     ;
 
 
@@ -1846,6 +1855,7 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_Humidity", oofem::InternalStateType::IST_Humidity)
       .value("IST_Velocity", oofem::InternalStateType::IST_Velocity)
       .value("IST_Pressure", oofem::InternalStateType::IST_Pressure)
+      .value("IST_Pressure_2", oofem::InternalStateType::IST_Pressure_2)
       .value("IST_VOFFraction", oofem::InternalStateType::IST_VOFFraction)
       .value("IST_Density", oofem::InternalStateType::IST_Density)
       .value("IST_MaterialInterfaceVal", oofem::InternalStateType::IST_MaterialInterfaceVal)

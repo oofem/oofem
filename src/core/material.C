@@ -70,6 +70,21 @@ Material :: giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeSt
     OOFEM_ERROR( "Characteristic value %s(%d) on element %d and GP %d not defined", __MatResponseModeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
 }
 
+void
+Material :: giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
+{
+    OOFEM_ERROR( "Characteristic vector %s(%d) on element %d and GP %d not defined", __MatResponseModeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
+}
+
+void
+Material :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
+{
+    // Reaching this means the response mode is not implemented by the receiver. Report it rather
+    // than silently handing back an empty (zero) matrix, which would be assembled as a singular
+    // contribution and surface much later as a solver failure.
+    OOFEM_ERROR( "Characteristic matrix %s(%d) on element %d and GP %d not defined", __MatResponseModeToString(type), type, gp->giveElement()->giveNumber(), gp->giveNumber() );
+}
+
 bool
 Material :: hasProperty(int aProperty, GaussPoint *gp) const
 // Returns true if the aProperty is defined on a material

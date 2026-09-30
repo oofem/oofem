@@ -57,70 +57,6 @@
 
 namespace oofem {
 
-    void MPMhelper_Grad_s(FloatMatrix& answer, const Variable *v, GaussPoint* gp)  {
-    const FEInterpolation* interpol = v->interpolation;
-    const MPElement* cell = static_cast<const MPElement*>(gp->giveElement());
-    const MaterialMode mmode = gp->giveMaterialMode();
-
-    FloatMatrix dn, dndx, jacobianMatrix, inv;
-    int nnodes = interpol->giveNumberOfNodes(cell->giveGeometryType());
-    int ndofs = v->size;
-    interpol->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(cell));
-
-    if ((mmode == _3dUP) || (mmode == _3dUPV) || (mmode==_3dMat)) {
-            // 3D mode only now
-            answer.resize(6, nnodes*ndofs);
-            for (int i = 0; i< nnodes; i++) {
-                answer(0, i*ndofs+0) = dndx(i, 0);
-                answer(1, i*ndofs+1) = dndx(i, 1);
-                answer(2, i*ndofs+2) = dndx(i, 2);
-
-                answer(3, i*ndofs+1) = dndx(i, 2);
-                answer(3, i*ndofs+2) = dndx(i, 1);
-
-                answer(4, i*ndofs+0) = dndx(i, 2);
-                answer(4, i*ndofs+2) = dndx(i, 0);
-
-                answer(5, i*ndofs+0) = dndx(i, 1);
-                answer(5, i*ndofs+1) = dndx(i, 0);
-            }   
-        } else if ((mmode == _2dUP) || (mmode == _2dUPV)) {
-            answer.resize(6, nnodes*ndofs);
-            for (int i = 0; i< nnodes; i++) {
-                answer(0, i*ndofs+0) = dndx(i, 0);
-                answer(1, i*ndofs+1) = dndx(i, 1);
-
-                answer(5, i*ndofs+0) = dndx(i, 1);
-                answer(5, i*ndofs+1) = dndx(i, 0);
-            }
-        } else if ((mmode == _PlaneStress)) {
-            answer.resize(3, nnodes*ndofs);
-            for (int i = 0; i< nnodes; i++) {
-                answer(0, i*ndofs+0) = dndx(i, 0);
-                answer(1, i*ndofs+1) = dndx(i, 1);
-
-                answer(2, i*ndofs+0) = dndx(i, 1);
-                answer(2, i*ndofs+1) = dndx(i, 0);
-            }
-        } else if (mmode == _PlaneStrain) {
-            answer.resize(4, nnodes*ndofs);
-            for (int i = 0; i< nnodes; i++) {
-                answer(0, i*ndofs+0) = dndx(i, 0);
-                answer(1, i*ndofs+1) = dndx(i, 1);
-
-                answer(3, i*ndofs+0) = dndx(i, 1);
-                answer(3, i*ndofs+1) = dndx(i, 0);
-            }
-        } else if (mmode == _1dMat) {
-            answer.resize(1, nnodes*ndofs);
-            for (int i = 0; i< nnodes; i++) {
-                answer(0, i*ndofs+0) = dndx(i, 0);
-            }
-        } else {
-            OOFEM_ERROR("Unsupported material mode %d", mmode);
-        }
-    }
-
     /* Define custom functors for evaluator */
     auto MPMfunctor_Grad_s = [](const std::vector<const VarSlot*>& args, VarSlot& out) {
         // Compute the symmetric gradient of the first argument (assumed to be a vector field) 
@@ -138,8 +74,9 @@ namespace oofem {
         const Variable* v = static_cast<const Variable*>(raw_ptr0);
         GaussPoint* gp = static_cast<GaussPoint*>(raw_ptr1);
         // functor logic
+        const MPElement* cell = static_cast<const MPElement*>(gp->giveElement());
         FloatMatrix answer;
-        MPMhelper_Grad_s(answer, v, gp);
+        cell->computeGradSymMatrixAt(answer, v, gp);
 
         out.value = answer;
         out.type = VarSlot::Type::MATRIX;
@@ -162,29 +99,10 @@ namespace oofem {
         const Variable* v = static_cast<const Variable*>(raw_ptr0);
         GaussPoint* gp = static_cast<GaussPoint*>(raw_ptr1);
         const MPElement* cell = static_cast<const MPElement*>(gp->giveElement());
-        const MaterialMode mmode = gp->giveMaterialMode();
-
 
         // functor logic
-        if (v->size != 1) {
-            OOFEM_ERROR("MPMfunctor_Grad functor expects a scalar field variable (size=1).");
-        }
         FloatMatrix answer;
-        const FEInterpolation* interpol = v->interpolation;
-
-        FloatMatrix dndx, answerT;
-        interpol->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(cell));
-        if (mmodeIs1D(mmode)) {
-            answerT.beSubMatrixOf(dndx, 1, dndx.rows(), 1, 1);
-        } else if (mmodeIs2D(mmode)) {  
-            answerT.beSubMatrixOf(dndx, 1, dndx.rows(), 1, 2);
-        } else if (mmodeIs3D(mmode)) { 
-            answerT.beSubMatrixOf(dndx, 1, dndx.rows(), 1, 3);
-        } else {
-            OOFEM_ERROR("Unsupported material mode %d", mmode);
-        } 
-
-        answer.beTranspositionOf(answerT); // Gradient of scalar field is just dN/dx, size will be (nnodes x 1) -> (1 x nnodes) after transpose
+        cell->computeGradMatrixAt(answer, v, gp);
 
         out.value = answer;
         out.type = VarSlot::Type::MATRIX;
@@ -248,12 +166,7 @@ namespace oofem {
 
         // functor logic
         FloatMatrix N;
-        FloatArray nvec;
-
-        const FEInterpolation* interpol = v->interpolation;
-
-        interpol->evalN(nvec, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(cell));
-        N.beNMatrixOf(nvec, v->size);
+        cell->computeNMatrixAt(N, v, gp);
 
         out.value = N;
         out.type = VarSlot::Type::MATRIX;
@@ -298,23 +211,21 @@ auto MPMfunctor_MProp = [](const std::vector<const VarSlot*>& args, VarSlot& out
         // ARGS: args[0] - pointer to GaussPoint (as a user pointer)
         //       args[1] - pointer to TimeStep (as a user pointer)
         //       args[2] - property ID (as a double, to be casted to MaterialResponseMode enum)
-        //       args[3] - generalized flux (vector)
         // OUTPUT: out - VarSlot to store the resulting characteristic vector (e.g. stress, etc depending on property ID)
+        // The generalized state is no longer passed in: it is pushed to the material once per
+        // iteration before any term is evaluated, so this is a cache read.
         OOFEM_LOG_DEBUG("    [C++ Callback] Called MVec functor with %ld arguments\n", args.size());
-        if (args.size() != 4) {
-            OOFEM_ERROR("MPMfunctor_MVec functor expects exactly 4 arguments: GaussPoint, TimeStep, PropertyID and GeneralizedFlux.");
+        if (args.size() != 3) {
+            OOFEM_ERROR("MPMfunctor_MVec functor expects exactly 3 arguments: GaussPoint, TimeStep and PropertyID.");
         }
         // 1. Retrieve the generic pointers to arguments
         void* raw_ptr0 = std::get<void*>(args[0]->value);
         void* raw_ptr1 = std::get<void*>(args[1]->value);
         double raw_val2 = std::get<double>(args[2]->value);
-        const FloatMatrix& fluxMat = std::get<FloatMatrix>(args[3]->value);
         // 2. Cast back to your specific application type (Variable class)
         GaussPoint* gp = static_cast<GaussPoint*>(raw_ptr0);
         TimeStep* tstep = static_cast<TimeStep*>(raw_ptr1);
         MatResponseMode propertyID = static_cast<MatResponseMode>(raw_val2);
-        FloatArray fluxVec;
-        fluxMat.copyColumn(fluxVec, 1);
 
         // functor logic
         MPElement* cell = static_cast<MPElement*>(gp->giveElement());
@@ -322,7 +233,7 @@ auto MPMfunctor_MProp = [](const std::vector<const VarSlot*>& args, VarSlot& out
 
         FloatArray charVec;
 
-        cs->giveMaterial(gp)->giveCharacteristicVector(charVec, fluxVec, propertyID, gp, tstep);
+        cs->giveMaterial(gp)->giveCharacteristicVector(charVec, propertyID, gp, tstep);
         
         out.value = FloatMatrix::fromArray(charVec);
         out.type = VarSlot::Type::MATRIX;
@@ -386,12 +297,20 @@ auto MPMfunctor_MProp = [](const std::vector<const VarSlot*>& args, VarSlot& out
         MPElement* cell = static_cast<MPElement*>(gp->giveElement());
         StructuralCrossSection* cs = static_cast<StructuralCrossSection*>(cell->giveCrossSection());
 
-        FloatMatrix B, answer;
-        FloatArray u, eps, sig;
-        MPMhelper_Grad_s(B, v, gp);
-        cell->getUnknownVector(u, v, VM_TotalIntrinsic, tstep);
-        eps.beProductOf(B,u);
-        cs->giveMaterial(gp)->giveCharacteristicVector(sig, eps, MatResponseMode::Stress, gp, tstep);
+        // The strain is no longer derived here: it was pushed to the material as part of the
+        // generalized state once per iteration, so this is a cache read. The field argument is
+        // kept for backward compatibility of the input syntax and is validated against the field
+        // that actually supplies the strain on this cell, so that a deck naming the wrong one
+        // fails instead of silently reading another field's state.
+        const Variable* strainSource = cell->giveStateVariableSource(FT_Displacements);
+        if (strainSource != nullptr && strainSource != v) {
+            OOFEM_ERROR("Sig(%s, ...) does not match the field supplying the strain on element %d ('%s')",
+                        v->name.c_str(), cell->giveNumber(), strainSource->name.c_str());
+        }
+
+        FloatMatrix answer;
+        FloatArray sig;
+        cs->giveMaterial(gp)->giveCharacteristicVector(sig, MatResponseMode::Stress, gp, tstep);
         answer = FloatMatrix::fromArray(sig);
         out.value = answer;
         out.type = VarSlot::Type::MATRIX;
@@ -419,12 +338,20 @@ auto MPMfunctor_MProp = [](const std::vector<const VarSlot*>& args, VarSlot& out
         MPElement* cell = static_cast<MPElement*>(gp->giveElement());
         StructuralCrossSection* cs = static_cast<StructuralCrossSection*>(cell->giveCrossSection());
 
-        FloatMatrix B, answer;
-        FloatArray u, eps, sig;
-        MPMhelper_Grad_s(B, v, gp);
-        cell->getUnknownVector(u, v, VM_TotalIntrinsic, tstep);
-        eps.beProductOf(B,u);
-        cs->giveMaterial(gp)->giveCharacteristicVector(sig, eps, MatResponseMode::DeviatoricStress, gp, tstep);
+        // The strain is no longer derived here: it was pushed to the material as part of the
+        // generalized state once per iteration, so this is a cache read. The field argument is
+        // kept for backward compatibility of the input syntax and is validated against the field
+        // that actually supplies the strain on this cell, so that a deck naming the wrong one
+        // fails instead of silently reading another field's state.
+        const Variable* strainSource = cell->giveStateVariableSource(FT_Displacements);
+        if (strainSource != nullptr && strainSource != v) {
+            OOFEM_ERROR("Sig_dev(%s, ...) does not match the field supplying the strain on element %d ('%s')",
+                        v->name.c_str(), cell->giveNumber(), strainSource->name.c_str());
+        }
+
+        FloatMatrix answer;
+        FloatArray sig;
+        cs->giveMaterial(gp)->giveCharacteristicVector(sig, MatResponseMode::DeviatoricStress, gp, tstep);
         answer = FloatMatrix::fromArray(sig);
         out.value = answer;
         out.type = VarSlot::Type::MATRIX;
@@ -658,6 +585,11 @@ class SymbolicTerm : public GenericCellTerm {
             mutable std::vector<Instruction> program;
             mutable std::map<std::string, int> symbols;
             mutable std::map<int, VarData> constants;
+            /**
+             * Immutable execution environment for this expression, established at the end of
+             * initializeFrom and read-only thereafter; see buildEnvironment and _evaluateVM.
+             */
+            std::unique_ptr<MPMEnvironment> env;
         };
         mutable VMContext lhsExpressionContext, rhsExpressionContext;
         
@@ -713,49 +645,79 @@ class SymbolicTerm : public GenericCellTerm {
             OOFEM_ERROR("%s", msg.c_str());
         }
         this->problem = problem;
+
+        // Both expressions are compiled and the problem is known, so the invariant part of their
+        // execution environment can be established now, once, instead of at every evaluation.
+        this->buildEnvironment(lhsExpressionContext);
+        this->buildEnvironment(rhsExpressionContext);
+    }
+
+    /**
+     * Establishes the immutable execution environment of one compiled expression.
+     *
+     * Everything except the point being evaluated is invariant: the symbol table, the functor
+     * table, the compiled constants, the problem's variables and the response-mode literals.
+     * Setting all of that up per Gauss point, per term, per sweep dominated the cost of evaluating
+     * cheap expressions.
+     *
+     * Called at the end of initializeFrom rather than lazily on first evaluation, so that the
+     * environment is fully built before any assembly starts and evaluation needs no locking.
+     */
+    void buildEnvironment(VMContext& context) const {
+        context.env = std::make_unique<MPMEnvironment>();
+        MPMEnvironment& env = *context.env;
+
+        env.symbols = context.symbols;
+
+        env.functors["Grad_s"] = MPMfunctor_Grad_s;
+        env.functors["Grad"] = MPMfunctor_Grad;
+        env.functors["Div"] = MPMfunctor_Div;
+        env.functors["N"] = MPMfunctor_N;
+        env.functors["Sig"] = MPMfunctor_Sig;
+        env.functors["Sig_dev"] = MPMfunctor_Sig_dev;
+        env.functors["MDer"] = MPMfunctor_MDer;
+        env.functors["MVec"] = MPMfunctor_MVec;
+        env.functors["MProp"] = MPMfunctor_MProp;
+        env.functors["vcat"] = MPMfunctor_vcat;
+        env.functors["eval"] = MPMfunctor_Eval;
+        env.functors["LumpMatrix"] = MPMfunctor_LumpMatrix;
+        env.functors["print"] = MPMfunctor_print;
+        env.functors["ru"] = MPMfunctor_FieldNodalValues;
+        env.functors["rv"] = MPMfunctor_FieldNodalVelocities;
+
+        // Seed the template slot pool with the invariant bindings, by doing them once on a
+        // throwaway evaluator and keeping its pool.
+        MPMEvaluator seed(pool_ptr, context.symbols);
+        for (auto const& [idx, val] : context.constants) {
+            seed.init_slot(idx, val);
+        }
+        // all problem variables, as user pointers
+        for (auto &i : problem->giveVariables()) {
+            seed.set_variable(i.first, (void*)i.second.get());
+        }
+        // Every response mode by name, so that a deck can say
+        // MDer(gp, ts, MatResponseMode::Permeability) rather than MDer(gp, ts, 19) and stop
+        // encoding enum values. Driven off the {value, name} table that enum-impl.h already
+        // generates for its ToString helper, so new modes need no work here; set_variable ignores
+        // names the script does not use.
+        for (auto &item : EnumData<MatResponseMode>::value_to_name) {
+            seed.set_variable(std::string("MatResponseMode::") + item.name, (double)item.value);
+        }
+
+        env.pool = seed.givePool();
+        env.is_set = seed.giveIsSet();
     }
 
     void _evaluateVM (FloatMatrix& answer, MPElement& cell, GaussPoint* gp, TimeStep* tStep, VMContext& context) const {
-        try {   
-            MPMEvaluator vm(pool_ptr, context.symbols);
-            for(auto const& [idx, val] : context.constants) vm.init_slot(idx, val);
-            
-            // define variables accessible in the VM (as user pointers)
-            if (0) {
-                vm.set_variable(this->field->name.c_str(),  (void*)this->field);
-                vm.set_variable(this->testField->name.c_str(),  (void*)this->testField);
-            } else {
-                // experimental - register all problem variables
-                for (auto &i : problem->giveVariables()) {
-                    vm.set_variable(i.first.c_str(), (void*)i.second.get());
-                }
-            }
+        try {
+            // Private scratch over the shared, read-only environment: only the slot pool is
+            // copied, so concurrent evaluations of the same expression do not interfere.
+            MPMEvaluator vm(*context.env);
 
-            // define enum literals accessible in the VM (e.g., material response mode IDs)
-            vm.set_variable("MatResponseMode::TangentStiffness", (double)MatResponseMode::TangentStiffness);
-            vm.set_variable("MatResponseMode::DeviatoricStiffness", (double)MatResponseMode::DeviatoricStiffness);
-
+            // The only genuinely per-evaluation bindings.
             vm.set_variable("gp", (void*)gp);
             vm.set_variable("ts", (void*)tStep);
             vm.set_variable("cell", (void*)&cell);
-
-            // register functors
-            vm.register_functor("Grad_s", MPMfunctor_Grad_s);
-            vm.register_functor("Grad", MPMfunctor_Grad);
-            vm.register_functor("Div", MPMfunctor_Div);
-            vm.register_functor("N", MPMfunctor_N);          
-            vm.register_functor("Sig", MPMfunctor_Sig);
-            vm.register_functor("Sig_dev", MPMfunctor_Sig_dev);
-            vm.register_functor("MDer", MPMfunctor_MDer);
-            vm.register_functor("MVec", MPMfunctor_MVec);
-            vm.register_functor("MProp", MPMfunctor_MProp);
-            vm.register_functor("vcat", MPMfunctor_vcat);
-            vm.register_functor("eval", MPMfunctor_Eval);
-            vm.register_functor("LumpMatrix", MPMfunctor_LumpMatrix);
-            vm.register_functor("print", MPMfunctor_print);
-
-            vm.register_functor("ru", MPMfunctor_FieldNodalValues);
-            vm.register_functor("rv", MPMfunctor_FieldNodalVelocities);
 
             vm.execute(context.program);
             if (vm.get_result().type == VarSlot::Type::MATRIX) {

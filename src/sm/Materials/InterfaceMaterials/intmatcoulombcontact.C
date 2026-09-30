@@ -48,7 +48,7 @@ IntMatCoulombContact :: IntMatCoulombContact(int n, Domain *d) : StructuralInter
 
 
 FloatArrayF<3>
-IntMatCoulombContact :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+IntMatCoulombContact :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
     auto tempShearStressShift = status->giveShearStressShift();
@@ -87,7 +87,7 @@ IntMatCoulombContact :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoin
 
 
 FloatMatrixF<3,3>
-IntMatCoulombContact :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatCoulombContact :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
     const auto &jump = status->giveTempJump();

@@ -154,7 +154,18 @@ public:
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+    void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+
+    /**
+     * The generalized state of a structural material is the total strain, i.e. the symmetric
+     * gradient of the displacement field; its size follows from the material mode of the point.
+     */
+    StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override;
+    /**
+     * Bridges the push half of the generic interface onto giveRealStressVector, which already
+     * performs the constitutive integration and caches strain and stress in the status.
+     */
+    void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Returns the Young modulus obtained by linearizing the material response

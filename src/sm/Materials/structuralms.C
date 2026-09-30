@@ -75,8 +75,14 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) cons
     FloatArray helpVec;
 
     MaterialStatus :: printOutputAt(File, tStep);
-    NLStructuralElement * el = static_cast< NLStructuralElement * >( gp->giveElement());
-    if ( el->giveGeometryMode() == 1) {
+    // The status can sit on a point of an element that is no NLStructuralElement at all: an mpm
+    // cell is one, and it reaches a structural material through a term rather than through
+    // StructuralElement. giveGeometryMode() is not virtual, so a static_cast here reads
+    // nlGeometry at an offset past the end of such an object -- undefined, and on MSVC an
+    // access violation. Ask for the large-deformation mode the same way the constructor does,
+    // and treat anything that does not carry one as small deformation.
+    NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElement() );
+    if ( el && el->giveGeometryMode() == 1) {
       fprintf(File, "  F ");
       StructuralMaterial :: giveFullVectorFormF( helpVec, FVector, gp->giveMaterialMode() );
       for ( auto &var : helpVec ) {

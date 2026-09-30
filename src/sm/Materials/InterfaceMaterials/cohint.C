@@ -48,7 +48,7 @@ REGISTER_Material(CohesiveInterfaceMaterial);
 CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 FloatArrayF<3>
-CohesiveInterfaceMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+CohesiveInterfaceMaterial :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
@@ -75,7 +75,7 @@ CohesiveInterfaceMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, Gaus
 
 
 FloatMatrixF<3,3>
-CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+CohesiveInterfaceMaterial :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 

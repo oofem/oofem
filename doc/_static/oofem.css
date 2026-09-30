@@ -1,21 +1,134 @@
-/* Styling for the roles defined in _ext/oofemroles.py, which stand in for the
-   \param, \elemparam and \descitem macros of the LaTeX sources. */
+/* Presentation shared by every OOFEM manual.
+ *
+ * This is the single place for the HTML page width and figure sizing: the
+ * manuals differ in theme (classic, alabaster, pydata), so the rules below
+ * name the content container of each one and the blocks that do not apply
+ * simply do nothing.  Keep presentation here rather than in per-manual
+ * html_theme_options, which are theme-specific and drift apart.
+ */
 
+/* ---- Page width ---------------------------------------------------------
+ * The text column spans about 80% of the window and is centred.  Full width
+ * makes long lines tiring to read; a narrow fixed column wastes the screen on
+ * the wide record-syntax blocks and tables these manuals are full of.
+ */
+
+/* classic and alabaster themes.  "width: auto" is needed because alabaster
+   gives div.document a fixed pixel width, which max-width alone cannot
+   widen. */
+div.document {
+    width: auto;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* The theme caps the text itself as well; let it fill the width set above. */
+div.body {
+    max-width: none;
+}
+
+/* pydata-sphinx-theme (the top-level documentation index) */
+.bd-page-width {
+    max-width: 80%;
+}
+
+/* On a narrow screen there is nothing to gain from a gutter, so give the text
+   the whole width back.  875px is alabaster's own breakpoint. */
+@media screen and (max-width: 875px) {
+    div.document,
+    .bd-page-width {
+        max-width: 100%;
+    }
+}
+
+/* ---- Figures ------------------------------------------------------------
+ * A figure never overflows the text column, and keeps its aspect ratio when
+ * the window is narrow.  The absolute cap stops a small diagram from being
+ * stretched across the whole column, where a rasterised source would only
+ * look blurry.
+ */
+div.body img,
+.bd-content img {
+    max-width: min(100%, 46em);
+    height: auto;
+}
+
+div.figure,
+figure {
+    max-width: 100%;
+}
+
+/* Keep the caption with the image rather than spanning the whole column. */
+div.figure > img,
+figure > img {
+    display: block;
+}
+
+/* ---- Roles --------------------------------------------------------------
+ * Styling for the roles defined in _ext/oofemroles.py, which stand in for the
+ * \param, \elemparam and \descitem macros of the LaTeX sources.
+ */
+
+/* The console stack the themes reserve for signatures (.sig).  Plain <code>
+   falls back to the browser's generic monospace, which is usually a soft
+   Courier; naming the stack keeps record keywords crisp and consistent
+   between the manuals. */
+:root {
+    --oofem-mono: 'Consolas', 'Menlo', 'DejaVu Sans Mono',
+                  'Bitstream Vera Sans Mono', monospace;
+}
+
+/* A parameter reference keeps the tinted box the theme gives every ``literal``,
+   so that a keyword looks the same here as it does in the user manual, where
+   keywords are written as plain literals.  The heavier weight is what marks it
+   out as a parameter rather than a value or a file name. */
 code.oofem-param {
-    background: transparent;
-    border: none;
-    padding: 0;
+    font-family: var(--oofem-mono);
     font-weight: 600;
 }
 
+/* ---- Record syntax blocks ----------------------------------------------
+ * Produced by the "record" directive in _ext/oofemroles.py.  The signature is
+ * one code artifact, set apart as a block the way the theme sets apart a
+ * literal block, so the parameter boxes are dropped inside it: a record with
+ * twenty attributes would otherwise read as a field of grey rectangles with
+ * the (type) suffixes and [ ] brackets stranded between them.
+ */
+div.oofem-record {
+    background-color: #fafbfc;
+    border-top: 1px solid #ac9;
+    border-bottom: 1px solid #ac9;
+    padding: 8px 12px;
+    margin: 0.3em 0 1.2em 0;
+}
+
+div.oofem-record > p {
+    margin: 0.35em 0;
+    line-height: 1.85;
+}
+
+div.oofem-record p.oofem-record-label {
+    margin: 0 0 0.5em 0;
+    font-size: 0.85em;
+    color: #4a5560;
+}
+
+div.oofem-record code.oofem-param,
+div.oofem-record code.docutils.literal {
+    background: transparent;
+    padding: 0;
+}
+
+/* The separating space is emitted by the role itself, so no padding here. */
 .oofem-paramtype {
     font-size: 0.8em;
     opacity: 0.75;
-    padding-left: 0.15em;
+    white-space: nowrap;
 }
 
 strong.oofem-descitem {
-    font-family: var(--pst-font-family-monospace, monospace);
+    font-family: var(--pst-font-family-monospace, var(--oofem-mono));
 }
 
 /* The summary tables are two columns of very different width; let the

@@ -52,7 +52,7 @@ IntMatBilinearCZJansson :: IntMatBilinearCZJansson(int n, Domain *d) : Structura
 
 ///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 FloatArrayF<3>
-IntMatBilinearCZJansson :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZJansson :: giveFirstPKTraction_ntt(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     // returns real stress vector in 3d stress space of receiver according to
     // previous level of stress and current
@@ -271,7 +271,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, const
 
 
 FloatMatrixF<3,3>
-IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZJansson :: giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
     //this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);

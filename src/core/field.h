@@ -63,7 +63,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7) \
     ENUM_ITEM_WITH_VALUE(FT_TemperatureAmbient, 8) \
     ENUM_ITEM_WITH_VALUE(FT_EigenStrain, 9) \
-    ENUM_ITEM_WITH_VALUE(FT_VOF, 10)
+    ENUM_ITEM_WITH_VALUE(FT_VOF, 10) \
+    ENUM_ITEM_WITH_VALUE(FT_Pressure2, 11) /* Pressure of the second phase in multiphase problems */ \
+    ENUM_ITEM_WITH_VALUE(FT_Concentration1, 12) /* Mass concentration of the first constituent; cf. dof C_1 */ \
+    ENUM_ITEM_WITH_VALUE(FT_Concentration2, 13) /* Mass concentration of the second constituent; cf. dof C_2 */
 
 #include "enum-impl.h"
 

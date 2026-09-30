@@ -49,7 +49,7 @@ IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : Structura
 
 
 FloatArrayF<3>
-IntMatBilinearCZElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const 
+IntMatBilinearCZElastic :: giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const 
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
@@ -84,7 +84,7 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, co
 
 
 FloatMatrixF<3,3>
-IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZElastic :: giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 

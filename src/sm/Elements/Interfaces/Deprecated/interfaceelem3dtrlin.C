@@ -155,14 +155,14 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
 void
 InterfaceElement3dTrLin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(strain, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_ntt(strain, gp, tStep);
 }
 
 
 void
 InterfaceElement3dTrLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveStiffnessMatrix_Eng_ntt(rMode, gp, tStep);
 }
 
 

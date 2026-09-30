@@ -58,7 +58,7 @@ public:
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
 
-    FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const override;
+    FloatArrayF<3> computeCovarBaseVectorAt(GaussPoint *gp) const override;
 
 
     /**

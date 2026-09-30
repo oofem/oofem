@@ -47,10 +47,10 @@ TMBTSigTerm::TMBTSigTerm (const Variable *testField, const Variable* unknownFiel
 void TMBTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
     FloatArray eps, sig;
     FloatMatrix B;
+    // Only B is needed here; the generalized state was pushed to the material before this sweep,
+    // so the stress is a cache read.
     this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
-
-    
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, MatResponseMode::Stress, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, MatResponseMode::Stress, gp, tstep);
     answer.beTProductOf(B, sig);
 }
 
@@ -87,7 +87,7 @@ void TMgNTfTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, 
     sv(7) = gradp(1);
     sv(8) = gradp(2);
     sv(9) = t;
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, sv, rhsType, gp, tstep); // update
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, rhsType, gp, tstep);
     answer.beTProductOf(B, fp);
 }
 
@@ -202,7 +202,7 @@ void InternalTMFluxSourceTerm::evaluate (FloatArray& answer, MPElement& cell, Ga
     FloatArray eps, n, f;
     FloatMatrix B, N;
     this->computeTMgeneralizedStrain(eps, B, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode(), tstep);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(f, eps, MatResponseMode::IntSource, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(f, MatResponseMode::IntSource, gp, tstep);
     this->testField->interpolation->evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&cell));    
     N.beNMatrixOf(n, testField->size);
     answer.beTProductOf(N, f);

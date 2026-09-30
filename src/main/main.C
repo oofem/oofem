@@ -100,6 +100,11 @@ void oofem_print_epilog();
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
 
+#ifdef _PYTHON_EXTENSION
+// Thread state of the main thread, saved while the GIL is released; see main().
+static PyThreadState *oofemPythonThreadState = nullptr;
+#endif
+
 #define LOG_ERR_HEADER "_______________________________________________________"
 #define LOG_ERR_TAIL   "_______________________________________________________\a\n"
 
@@ -281,6 +286,10 @@ int main(int argc, char *argv[])
     // Adding . to the system path allows us to run Python functions stored in the working directory.
     PyRun_SimpleString("import sys");
     PyRun_SimpleString("sys.path.append(\".\")");
+    // Release the GIL held since Py_Initialize(). Every entry point into Python acquires
+    // it for the calling thread, so holding it here would deadlock any worker thread that
+    // evaluates a Python function during a parallel assembly loop.
+    oofemPythonThreadState = PyEval_SaveThread();
 #endif
 
 #ifdef __MPI_PARALLEL_MODE
@@ -444,6 +453,11 @@ void oofem_finalize_modules()
 #endif
 
 #ifdef _PYTHON_EXTENSION
+    if ( oofemPythonThreadState ) {
+        // Py_Finalize() requires the GIL, released after Py_Initialize() in main().
+        PyEval_RestoreThread(oofemPythonThreadState);
+        oofemPythonThreadState = nullptr;
+    }
     Py_Finalize();
 #endif
 }

@@ -432,6 +432,13 @@ EngngModel:: instanciateMPM (DataReader &dr, const std::shared_ptr<InputRecord> 
         var->initializeFrom(mir);
         variableMap[name] = std::move(var);
     }
+    // Second pass, once every record has been read, so that `dualto` may name a variable declared
+    // later. Has to happen here rather than in postInitialize: the mpm problems run
+    // Integral::initialize -- which consumes the unknown/test distinction -- before calling
+    // EngngModel::postInitialize.
+    for (auto &i: variableMap) {
+        i.second->postInitialize(this);
+    }
     //if(variableMap.empty()) OOFEM_ERROR("No MPM Variables defined.");
     for(auto mir: dr.giveGroupRecords(ir,"nterms",DataReader::IR_mpmTermRec,/*optional*/true)){
         IR_GIVE_RECORD_KEYWORD_FIELD(mir, name, num);

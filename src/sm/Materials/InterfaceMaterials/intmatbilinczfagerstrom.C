@@ -53,7 +53,7 @@ IntMatBilinearCZFagerstrom :: IntMatBilinearCZFagerstrom(int n, Domain *d) : Str
 
 
 FloatArrayF<3>
-IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZFagerstrom :: giveFirstPKTraction_ntt(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     ///@todo - need to rearrange traction and stiffness matrix so the first component is normal
     // returns vector in 3d stress space of receiver according to
@@ -230,7 +230,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, co
 
 
 FloatMatrixF<3,3>
-IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZFagerstrom :: giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 

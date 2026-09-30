@@ -72,10 +72,21 @@ class TMElement : public MPElement {
         virtual const Variable* getT() const = 0;
 
     public:
-    TMElement(int n, Domain* d): 
+    TMElement(int n, Domain* d):
         MPElement(n,d) { }
 
-    // Note: performance can be probably improved once it will be possible 
+    /**
+     * Registers the primary fields of the receiver as the sources of its state quantities; see
+     * UPElement::postInitialize for why the classic formulations do this here rather than in
+     * Integral::initialize.
+     */
+    void postInitialize() override {
+        MPElement::postInitialize();
+        this->registerStateVariable(this->getU());
+        this->registerStateVariable(this->getT());
+    }
+
+    // Note: performance can be probably improved once it will be possible
     // to directly assemble multiple term contributions to the system matrix.
     // template metaprogramming?
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override {
@@ -192,8 +203,8 @@ class TMElement : public MPElement {
         
             IntArray locu, loct;
             FloatArray contrib, contrib2;
-            getSurfaceLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-            getSurfaceLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
+            getSurfaceLocalCodeNumbers (locu, FT_Displacements) ;
+            getSurfaceLocalCodeNumbers (loct, FT_Temperature) ;
 
             // integrate traction contribution (momentum balance)
             int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
@@ -227,8 +238,8 @@ class TMElement : public MPElement {
         if (bct == TransmissionBC ) {
             IntArray locu, loct;
             FloatArray contrib, contrib2;
-            getEdgeLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-            getEdgeLocalCodeNumbers (loct, Variable::VariableQuantity::Pressure) ;
+            getEdgeLocalCodeNumbers (locu, FT_Displacements) ;
+            getEdgeLocalCodeNumbers (loct, FT_Pressure) ;
 
             // integrate traction contribution (momentum balance)
             int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
@@ -256,8 +267,8 @@ class TMElement : public MPElement {
             if (load->giveBCValType() == ForceLoadBVT) {
                 FloatArray contribu, contribt;
                 IntArray locu, loct;
-                getLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-                getLocalCodeNumbers (loct, Variable::VariableQuantity::Temperature) ;
+                getLocalCodeNumbers (locu, FT_Displacements) ;
+                getLocalCodeNumbers (loct, FT_Temperature) ;
                 this->integrateTerm_c(contribu, NTf_Body(getU(), BodyFluxFunctor(load, getU()->dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
                 this->integrateTerm_c(contribt, NTf_Body(getT(), BodyFluxFunctor(load, getT()->dofIDs)), this->giveDefaultIntegrationRulePtr(), tStep);
                 answer.assemble(contribu, locu);
@@ -271,8 +282,8 @@ class TMElement : public MPElement {
     }
 
 
-    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const Variable::VariableQuantity q, char btype) override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const FieldType q, char btype) override {
+        if (q == FT_Displacements) {
             // better to integrate this into FEInterpolation class 
             FloatArray nn, h1(3), h2(3);
             answer.resize(3,3);
@@ -310,7 +321,7 @@ class TMElement : public MPElement {
             return 0;
         }
     }
-  //virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const = 0; 
+  //virtual void getLocalCodeNumbers (IntArray& answer, const FieldType q ) const = 0; 
     //virtual void giveDofManDofIDMask(int inode, IntArray &answer) const =0;
 
 };
@@ -339,18 +350,18 @@ class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 21,22,23, 25,26,27, 29,30,31 };
           int o = (num-1)*4+1;
           answer={o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Temperature) {
+        } else if (q == FT_Temperature) {
           //answer = {4, 8, 12, 16, 20, 24, 28, 32};
           answer={num*4};
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -369,14 +380,14 @@ class TMBrick11 : public TMElement, public ZZNodalRecoveryModelInterface {
     }
     int getNumberOfSurfaceDOFs() const override {return 16;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
+        if (q == FT_Displacements) {
         answer={1,2,3, 5,6,7, 9,10,11, 13,14,15};
         } else {
         answer ={4, 8, 12, 16};
         }
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         if (it == ZZNodalRecoveryModelInterfaceType) {
             return this;
@@ -403,8 +414,8 @@ private:
 
 const FEI3dHexaLin TMBrick11::uInterpol;
 const FEI3dHexaLin TMBrick11::tInterpol;
-const Variable TMBrick11::t(&TMBrick11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
-const Variable TMBrick11::u(&TMBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const Variable TMBrick11::t(&TMBrick11::tInterpol, FT_Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable TMBrick11::u(&TMBrick11::uInterpol, FT_Displacements, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_TMBrick11_Name "tmbrick11"
 REGISTER_Element(TMBrick11)
@@ -432,18 +443,18 @@ class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15};
           int o = (num-1)*4+1;
           answer={o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Temperature) {
+        } else if (q == FT_Temperature) {
           //answer = {4, 8, 12, 16};
           answer={num*4};
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -462,14 +473,14 @@ class TMTetra11 : public TMElement, public ZZNodalRecoveryModelInterface {
     }
     int getNumberOfSurfaceDOFs() const override {return 12;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
+        if (q == FT_Displacements) {
         answer={1,2,3, 5,6,7, 9,10,11};
         } else {
         answer ={4, 8, 12};
         }
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         if (it == ZZNodalRecoveryModelInterfaceType) {
             return this;
@@ -496,8 +507,8 @@ private:
 
 const FEI3dTetLin TMTetra11::uInterpol;
 const FEI3dTetLin TMTetra11::tInterpol;
-const Variable TMTetra11::t(&TMTetra11::tInterpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 1, NULL, {10});
-const Variable TMTetra11::u(&TMTetra11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const Variable TMTetra11::t(&TMTetra11::tInterpol, FT_Temperature, Variable::VariableType::scalar, 1, NULL, {10});
+const Variable TMTetra11::u(&TMTetra11::uInterpol, FT_Displacements, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_TMTetra11_Name "tmtetra11"
 REGISTER_Element(TMTetra11)
@@ -513,30 +524,56 @@ REGISTER_Element(TMTetra11)
 class TMMaterialStatus : public MaterialStatus
 {
 protected:
-    /// Equilibrated strain vector in reduced form
-    FloatArray strainVector;
+    /**
+     * Equilibrated generalized state as pushed by updateTempState: strain(6), temperature
+     * gradient(3), temperature. The strain is the leading block of this vector rather than a
+     * separate member, so that the state is held exactly once.
+     */
+    FloatArray stateVector;
     /// Equilibrated stress vector in reduced form
     FloatArray stressVector;
     /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
     FloatArray tempStressVector;
-    /// Temporary strain vector in reduced form (to find balanced state)
-    FloatArray tempStrainVector;
+    /// Temporary generalized state (to find balanced state)
+    FloatArray tempStateVector;
     /// Temporary flux 
     FloatArray tempFluxVector;
     /// Equilibrated flux
     FloatArray fluxVector;
 public:
+    /// Number of leading components of the generalized state that hold the strain.
+    static constexpr int strainSize = 6;
+
     /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
-    TMMaterialStatus (GaussPoint * g) : MaterialStatus(g), strainVector(), stressVector(),
-    tempStressVector(), tempStrainVector() 
+    TMMaterialStatus (GaussPoint * g) : MaterialStatus(g), stateVector(), stressVector(),
+    tempStressVector(), tempStateVector()
     {}
 
-/// Returns the const pointer to receiver's strain vector.
-    const FloatArray &giveStrainVector() const { return strainVector; }
+    /// Returns the const pointer to receiver's generalized state vector.
+    const FloatArray &giveStateVector() const { return stateVector; }
+    /// Returns the const pointer to receiver's temporary generalized state vector.
+    const FloatArray &giveTempStateVector() const { return tempStateVector; }
+    /// Assigns tempStateVector to given vector v.
+    void letTempStateVectorBe(const FloatArray &v) { tempStateVector = v; }
+
+    /// Strain is the leading block of the generalized state; it is not stored separately.
+    static FloatArray giveStrainPartOf(const FloatArray &state) {
+        FloatArray e;
+        if ( state.giveSize() >= strainSize ) {
+            e.resize(strainSize);
+            for ( int i = 1; i <= strainSize; i++ ) {
+                e.at(i) = state.at(i);
+            }
+        }
+        return e;
+    }
+    /// Returns receiver's equilibrated strain vector.
+    FloatArray giveStrainVector() const { return giveStrainPartOf(stateVector); }
+    /// Returns receiver's temporary strain vector.
+    FloatArray giveTempStrainVector() const { return giveStrainPartOf(tempStateVector); }
+
     /// Returns the const pointer to receiver's stress vector.
     const FloatArray &giveStressVector() const { return stressVector; }
-    /// Returns the const pointer to receiver's temporary strain vector.
-    const FloatArray &giveTempStrainVector() const { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
     const FloatArray &giveTempStressVector() const { return tempStressVector; }
     /// Returns the const pointer to receiver's temporary flux vector.
@@ -545,15 +582,13 @@ public:
     const FloatArray &giveFluxVector() const { return fluxVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
-    /// Assigns tempStrainVector to given vector v
-    void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
     /// Assigns tempFluxVector to given vector v
     void letTempFluxVectorBe(const FloatArray &v) { tempFluxVector = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override {
         MaterialStatus :: printOutputAt(file, tStep);
         fprintf(file, "  strains ");
-        for ( auto &var : strainVector ) {
+        for ( auto &var : this->giveStrainVector() ) {
             fprintf( file, " %+.4e", var );
         }
       
@@ -572,13 +607,13 @@ public:
     void initTempStatus() override {
         MaterialStatus :: initTempStatus();
         tempStressVector = stressVector;
-        tempStrainVector = strainVector;
+        tempStateVector = stateVector;
         tempFluxVector = fluxVector;
     }
     void updateYourself(TimeStep *tStep) override {
         MaterialStatus :: updateYourself(tStep);
         stressVector = tempStressVector;
-        strainVector = tempStrainVector;
+        stateVector = tempStateVector;
         fluxVector = tempFluxVector;
     }
     const char *giveClassName() const override {return "TMMaterialStatus";}
@@ -632,42 +667,61 @@ class TMSimpleMaterial : public Material {
         }
     }
     /**
-     * @param flux Generalized strain vector, flux.at(1-6) containing total strain vector, flux(7-9) temperature gradient, flux(10) temperature
+     * Generalized state is [ strain(6), temperature gradient(3), temperature ], the packing that
+     * was previously documented on giveCharacteristicVector and assumed by its callers.
      */
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
+    StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override {
+        return { { FT_Displacements, SO_SymmetricGradient }, { FT_Temperature, SO_Gradient }, { FT_Temperature, SO_Value } };
+    }
+
+    void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override {
+        const int expected = TMMaterialStatus::strainSize + 3 + 1;
+        if (stateVector.giveSize() != expected) {
+            OOFEM_ERROR("state vector size %d does not match the declared layout "
+                        "(%d strain + 3 temperature gradient + temperature = %d)",
+                        stateVector.giveSize(), TMMaterialStatus::strainSize, expected);
+        }
+
+        TMMaterialStatus *status = static_cast< TMMaterialStatus * >( this->giveStatus(gp) );
+        // The state is stored once, whole; strain is read back as its leading block.
+        status->letTempStateVectorBe(stateVector);
+
+        // All the constitutive work happens here, once; the queries below are reads.
+        // Mechanical part: subtract the free thermal dilatation from the total strain.
+        FloatArray eps = TMMaterialStatus::giveStrainPartOf(stateVector);
+        double t = stateVector.at(10);
+        eps.at(1) -= t * alpha;
+        eps.at(2) -= t * alpha;
+        eps.at(3) -= t * alpha;
+
+        FloatMatrix d;
+        FloatArray sig;
+        this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
+        sig.beProductOf(d, eps);
+        status->letTempStressVectorBe(sig);
+
+        // Thermal part: Fourier flux from the (negated) temperature gradient.
+        FloatMatrix k;
+        FloatArray grad(3), q;
+        grad.at(1) = -stateVector.at(7);
+        grad.at(2) = -stateVector.at(8);
+        grad.at(3) = -stateVector.at(9);
+        this->giveCharacteristicMatrix(k, Conductivity, gp, tStep);
+        q.beProductOf(k, grad);
+        status->letTempFluxVectorBe(q);
+    }
+
+    void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
         TMMaterialStatus *status = static_cast< TMMaterialStatus * >( this->giveStatus(gp) );
         if (type == Stress) {
-            FloatMatrix d;
-            FloatArray eps(6);
-            for (int i=0; i<6; i++) {
-                eps(i) = flux(i);
-            }
-            double t = flux(9);
-            eps(0)-= t*alpha;
-            eps(1)-= t*alpha;
-            eps(2)-= t*alpha;
- 
-            this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
-
-            answer.beProductOf(d, eps);
-            // update gp status
-            status->letTempStrainVectorBe(flux);
-            status->letTempStressVectorBe(answer);
-
+            answer = status->giveTempStressVector();
         } else if (type == Flux) {
-            FloatMatrix k;
-            FloatArray grad(3);
-            this->giveCharacteristicMatrix(k, Conductivity, gp, tStep);
-            grad(0) = -flux(6);
-            grad(1) = -flux(7);
-            grad(2) = -flux(8);
-            answer.beProductOf(k, grad);
-            status->letTempFluxVectorBe(answer);
+            answer = status->giveTempFluxVector();
         } else if (type == IntSource) {
             answer.resize(1);
             answer.zero();
         } else {
-            OOFEM_ERROR("Unknown characteristic vector type");
+            this->Material::giveCharacteristicVector(answer, type, gp, tStep);
         }
     }
 

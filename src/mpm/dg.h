@@ -77,10 +77,10 @@ class ScalarAdvectionLhsAssembler : public MatrixAssembler
 protected:
     double alpha;
     double deltaT;
-    Variable::VariableQuantity q;
+    FieldType q;
 
 public:
-    ScalarAdvectionLhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) ;
+    ScalarAdvectionLhsAssembler(double alpha, double deltaT, FieldType q) ;
     void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
@@ -93,10 +93,10 @@ class ScalarAdvectionRhsAssembler : public VectorAssembler
 protected:
     double alpha;
     double deltaT;
-    Variable::VariableQuantity q;
+    FieldType q;
 
 public:
-    ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) ;
+    ScalarAdvectionRhsAssembler(double alpha, double deltaT, FieldType q) ;
     void vectorFromElement(FloatArray &mat, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
@@ -131,7 +131,7 @@ class DGProblem : public EngngModel
 {
 protected:
 
-    Variable::VariableQuantity unknownQuantity = Variable::VariableQuantity::VolumeFraction;
+    FieldType unknownQuantity = FT_VOF;
     
     LinSystSolverType solverType = ST_Direct;
     SparseMtrxType sparseMtrxType = SMT_Skyline;

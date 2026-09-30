@@ -408,12 +408,12 @@ namespace oofem {
          * @param coords 
          */
         void evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const override {
-            FloatArray u, eps, sig;
+            FloatArray sig;
             FloatMatrix B;
-            cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
+            // The generalized state was pushed to the material before this sweep, so the response
+            // is a cache read; only the operator matrix is still needed here.
             this->grad(B, this->field, this->field->interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
-            eps.beProductOf(B, u);
-            cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, this->rhsmatmode, gp, tstep);
+            cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, this->rhsmatmode, gp, tstep);
             answer.beTProductOf(B, sig);
         }
         void getDimensions(Element& cell) const override {}
@@ -590,7 +590,7 @@ namespace oofem {
             Domain *domain = this->giveDomain(1);
             Set myset (1, domain);
             FEI2dQuadLin interpol(1,2);
-            Variable u = Variable(&interpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
+            Variable u = Variable(&interpol, FT_Displacements, Variable::VariableType::vector, 2, NULL, {1,2});
 	        BTSigmaTerm2 mt(&u,&u, _2dUP);
             myset.setElementList({1});
             this->integralList.push_back(std::make_unique<Integral>(domain, &myset, &mt));
@@ -735,12 +735,12 @@ namespace oofem {
                return EGT_quad_1;
             }
             // MPElement requirements
-            void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {}
-            void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {}
+            void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {}
+            void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {}
             int getNumberOfSurfaceDOFs() const override {return 0;}
             int getNumberOfEdgeDOFs() const override {return 0;}
-            void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
-            void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+            void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
+            void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
             DofManager *giveInternalDofManager(int i) const override {
                     return this->internalDofManagers.at(i-1).get();
             }
@@ -790,12 +790,12 @@ namespace oofem {
                return EGT_line_1;
             }
             // MPElement requirements
-            void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {}
-            void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {}
+            void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {}
+            void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {}
             int getNumberOfSurfaceDOFs() const override {return 0;}
             int getNumberOfEdgeDOFs() const override {return 0;}
-            void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
-            void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+            void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
+            void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
 
     };
     #define _IFT_L1Element_Name "l1"

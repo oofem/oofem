@@ -23,6 +23,7 @@ in braces, e.g. :elemparam:`E{rn}`.
 import re
 
 from docutils import nodes
+from docutils.parsers.rst import Directive
 
 #: ``name{type}`` as produced by the normalisation pass over the RST sources.
 _TYPED = re.compile(r"^(?P<name>.*?)\s*\{(?P<type>[^{}]*)\}$", re.DOTALL)
@@ -41,7 +42,9 @@ def _param_nodes(text, optional):
     name, ptype = _split_type(text)
     result = [nodes.literal(name, name, classes=["oofem-param"])]
     if ptype:
-        result.append(nodes.inline(ptype, "(%s)" % ptype,
+        # The separating space is part of the text rather than CSS padding, so
+        # that the text and LaTeX writers space the type off the name as well.
+        result.append(nodes.inline(ptype, " (%s)" % ptype,
                                    classes=["oofem-paramtype"]))
     if optional:
         result = ([nodes.Text("[")] + result + [nodes.Text("]")])
@@ -61,6 +64,45 @@ def _make_wrapper_role(node_class, prefix="", suffix="", classes=None):
                           classes=list(classes or []))
         return [node], []
     return role
+
+
+class RecordDirective(Directive):
+    """The syntax block of an input record: its keyword and its attributes.
+
+    A record signature is a code artifact, not running prose, so it is wrapped
+    in a container the stylesheet can set apart as a whole -- the same thing
+    the theme does for a literal block.  Inside it the individual parameter
+    references are left unboxed, because a signature with twenty attributes
+    would otherwise dissolve into a field of little grey rectangles.
+
+    The optional argument replaces the default "Record syntax" caption; pass
+    ``none`` to leave the block uncaptioned::
+
+        .. record::
+
+           :descitem:`StaticStructural` :elemparam:`nsteps{in}`
+
+        .. record:: Meta-step record
+
+           :elemparam:`nsteps{in}` :elemparam:`attributes{s}`
+    """
+
+    has_content = True
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+
+    default_caption = "Record syntax"
+
+    def run(self):
+        caption = self.arguments[0].strip() if self.arguments else self.default_caption
+        container = nodes.container(classes=["oofem-record"])
+        if caption.lower() != "none":
+            label = nodes.paragraph(classes=["oofem-record-label"])
+            label += nodes.strong(caption, caption)
+            container += label
+        self.state.nested_parse(self.content, self.content_offset, container)
+        return [container]
 
 
 def setup(app):
@@ -83,6 +125,9 @@ def setup(app):
     app.add_role("bf", _make_wrapper_role(nodes.strong))
     app.add_role("tt", _make_wrapper_role(nodes.literal))
     app.add_role("mmt", _make_wrapper_role(nodes.literal))
+
+    # Record syntax blocks.
+    app.add_directive("record", RecordDirective)
 
     return {
         "version": "1.0",

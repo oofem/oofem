@@ -240,14 +240,14 @@ CohesiveSurface3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 CohesiveSurface3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(strain, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_ntt(strain, gp, tStep);
 }
 
 
 void
 CohesiveSurface3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveStiffnessMatrix_Eng_ntt(rMode, gp, tStep);
 }
 
 

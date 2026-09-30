@@ -65,8 +65,22 @@ namespace oofem {
 class UPElement : public MPElement {
         
     public:
-    UPElement(int n, Domain* d): 
+    UPElement(int n, Domain* d):
         MPElement(n,d) { }
+
+    /**
+     * Registers the primary fields of the receiver as the sources of its state quantities.
+     *
+     * The symbolic problems get this from Integral::initialize, which walks each term's set. The
+     * classic up formulation has no Variable/Integral records in the input -- its terms are
+     * hardwired -- so the fields are registered here instead, from the same getU()/getP() the
+     * terms are built with.
+     */
+    void postInitialize() override {
+        MPElement::postInitialize();
+        this->registerStateVariable(this->getU());
+        this->registerStateVariable(this->getP());
+    }
 
     // Note: performance can be probably improved once it will be possible 
     // to directly assemble multiple term contributions to the system matrix.
@@ -140,8 +154,8 @@ class UPElement : public MPElement {
 
         IntArray locu, locp;
         FloatArray contrib, contrib2;
-        getSurfaceLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getSurfaceLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
+        getSurfaceLocalCodeNumbers (locu, FT_Displacements) ;
+        getSurfaceLocalCodeNumbers (locp, FT_Pressure) ;
 
         // integrate traction contribution (momentum balance)
         int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
@@ -168,8 +182,8 @@ class UPElement : public MPElement {
 
         IntArray locu, locp;
         FloatArray contrib, contrib2;
-        getEdgeLocalCodeNumbers (locu, Variable::VariableQuantity::Displacement) ;
-        getEdgeLocalCodeNumbers (locp, Variable::VariableQuantity::Pressure) ;
+        getEdgeLocalCodeNumbers (locu, FT_Displacements) ;
+        getEdgeLocalCodeNumbers (locp, FT_Pressure) ;
 
         // integrate traction contribution (momentum balance)
         int o = getU()->interpolation->giveInterpolationOrder()+load->giveApproxOrder();
@@ -188,8 +202,8 @@ class UPElement : public MPElement {
     }
 
 
-    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const Variable::VariableQuantity q, char btype) override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const FieldType q, char btype) override {
+        if (q == FT_Displacements) {
             // better to integrate this into FEInterpolation class 
             FloatArray nn, h1(3), h2(3);
             answer.resize(3,3);
@@ -227,7 +241,7 @@ class UPElement : public MPElement {
             return 0;
         }
     }
-  //virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const = 0; 
+  //virtual void getLocalCodeNumbers (IntArray& answer, const FieldType q ) const = 0; 
     //virtual void giveDofManDofIDMask(int inode, IntArray &answer) const =0;
     private:
         virtual int  giveNumberOfUDofs() const = 0;
@@ -259,13 +273,13 @@ class UPTetra21 : public UPElement {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 20,21,22, 23,24,25, 26,27,28, 29,30,31, 32,33,34 };
           int o = (num-1)*4+1-(num>4)*(num-5);
           answer = {o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Pressure) {
+        } else if (q == FT_Pressure) {
           if (num<=4) {
             //answer = {4, 8, 12, 16};
             answer={num*4};
@@ -274,7 +288,7 @@ class UPTetra21 : public UPElement {
           }
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -294,14 +308,14 @@ class UPTetra21 : public UPElement {
     }
     int getNumberOfSurfaceDOFs() const override {return 21;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
+        if (q == FT_Displacements) {
         answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 16,17,18, 19,20,21};
         } else {
         answer ={4, 8, 12};
         }
     }
-  void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+  void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
 
     private:
         virtual int  giveNumberOfUDofs() const override {return 30;} 
@@ -319,8 +333,8 @@ class UPTetra21 : public UPElement {
 
 const FEI3dTetQuad UPTetra21::uInterpol;
 const FEI3dTetLin  UPTetra21::pInterpol;
-const Variable UPTetra21::p(&UPTetra21::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable UPTetra21::u(&UPTetra21::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const Variable UPTetra21::p(&UPTetra21::pInterpol, FT_Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPTetra21::u(&UPTetra21::uInterpol, FT_Displacements, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_UPTetra21_Name "uptetra21"
 REGISTER_Element(UPTetra21)
@@ -347,18 +361,18 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4   u5 v5 w5  u6 v6 w6*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15, 17,18,19, 21,22,23, 25,26,27, 29,30,31 };
           int o = (num-1)*4+1;
           answer={o, o+1, o+2};
-        } else if (q == Variable::VariableQuantity::Pressure) {
+        } else if (q == FT_Pressure) {
           //answer = {4, 8, 12, 16, 20, 24, 28, 32};
           answer={num*4};
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -377,14 +391,14 @@ class UPBrick11 : public UPElement, public ZZNodalRecoveryModelInterface {
     }
     int getNumberOfSurfaceDOFs() const override {return 16;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
+        if (q == FT_Displacements) {
         answer={1,2,3, 5,6,7, 9,10,11, 13,14,15};
         } else {
         answer ={4, 8, 12, 16};
         }
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         if (it == ZZNodalRecoveryModelInterfaceType) {
             return this;
@@ -411,8 +425,8 @@ private:
 
 const FEI3dHexaLin  UPBrick11::uInterpol;
 const FEI3dHexaLin  UPBrick11::pInterpol;
-const Variable UPBrick11::p(&UPBrick11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable UPBrick11::u(&UPBrick11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 3, NULL, {1,2,3});
+const Variable UPBrick11::p(&UPBrick11::pInterpol, FT_Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPBrick11::u(&UPBrick11::uInterpol, FT_Displacements, Variable::VariableType::vector, 3, NULL, {1,2,3});
 
 #define _IFT_UPBrick11_Name "upbrick11"
 REGISTER_Element(UPBrick11)
@@ -439,18 +453,18 @@ class UPQuad11 : public UPElement {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4 p4*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15 };
           int o = (num-1)*3+1;
           answer={o, o+1};
-        } else if (q == Variable::VariableQuantity::Pressure) {
+        } else if (q == FT_Pressure) {
           //answer = {4, 8, 12, 16};
           answer={num*3};
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -466,13 +480,13 @@ class UPQuad11 : public UPElement {
         return EGT_quad_1;
     }
     int getNumberOfSurfaceDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
 
     int getNumberOfEdgeDOFs() const override  {return 6;}
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override  {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override  {
+        if (q == FT_Displacements) {
             answer={1,2, 4,5};
         } else {
             answer ={3, 6};
@@ -497,8 +511,8 @@ private:
 
 const FEI2dQuadLin  UPQuad11::uInterpol(1,2);
 const FEI2dQuadLin  UPQuad11::pInterpol(1,2);
-const Variable UPQuad11::p(&UPQuad11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable UPQuad11::u(&UPQuad11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 2, NULL, {1,2});
+const Variable UPQuad11::p(&UPQuad11::pInterpol, FT_Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPQuad11::u(&UPQuad11::uInterpol, FT_Displacements, Variable::VariableType::vector, 2, NULL, {1,2});
 
 #define _IFT_UPQuad11_Name "upquad11"
 REGISTER_Element(UPQuad11)
@@ -525,18 +539,18 @@ class UPLine11 : public UPElement {
         this->computeGaussPoints();
     }
 
-  void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+  void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         /* dof ordering: u1 v1 w1 p1  u2 v2 w2 p2  u3 v3 w3 p3  u4 v4 w4 p4*/
-        if (q == Variable::VariableQuantity::Displacement) {
+        if (q == FT_Displacements) {
           //answer={1,2,3, 5,6,7, 9,10,11, 13,14,15 };
           //int o = (num-1)*2+1;
           answer={num*2-1};
-        } else if (q == Variable::VariableQuantity::Pressure) {
+        } else if (q == FT_Pressure) {
           //answer = {4, 8, 12, 16};
           answer={num*2};
         }
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
@@ -552,13 +566,13 @@ class UPLine11 : public UPElement {
         return EGT_line_1;
     }
     int getNumberOfSurfaceDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
 
     int getNumberOfEdgeDOFs() const override  {return 4;}
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override  {
-        if (q == Variable::VariableQuantity::Displacement) {
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override  {
+        if (q == FT_Displacements) {
             answer={1, 3};
         } else {
             answer ={2, 4};
@@ -583,8 +597,8 @@ private:
 
 const FEI1dLin  UPLine11::uInterpol(1);
 const FEI1dLin  UPLine11::pInterpol(1);
-const Variable UPLine11::p(&UPLine11::pInterpol, Variable::VariableQuantity::Pressure, Variable::VariableType::scalar, 1, NULL, {11});
-const Variable UPLine11::u(&UPLine11::uInterpol, Variable::VariableQuantity::Displacement, Variable::VariableType::vector, 1, NULL, {1});
+const Variable UPLine11::p(&UPLine11::pInterpol, FT_Pressure, Variable::VariableType::scalar, 1, NULL, {11});
+const Variable UPLine11::u(&UPLine11::uInterpol, FT_Displacements, Variable::VariableType::vector, 1, NULL, {1});
 
 #define _IFT_UPLine11_Name "upline11"
 REGISTER_Element(UPLine11)
@@ -600,37 +614,70 @@ REGISTER_Element(UPLine11)
 class UPMaterialStatus : public MaterialStatus
 {
 protected:
-    /// Equilibrated strain vector in reduced form
-    FloatArray strainVector;
+    /**
+     * Equilibrated generalized state as pushed by updateTempState: strain(6), pressure
+     * gradient(nsd), pressure. The strain is the leading block of this vector rather than a
+     * separate member, so that the state is held exactly once.
+     */
+    FloatArray stateVector;
+    /// Temporary generalized state (to find balanced state)
+    FloatArray tempStateVector;
     /// Equilibrated stress vector in reduced form
     FloatArray stressVector;
     /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
     FloatArray tempStressVector;
-    /// Temporary strain vector in reduced form (to find balanced state)
-    FloatArray tempStrainVector;
+    /// Equilibrated Darcy flux, i.e. the fluid mass balance pressure contribution
+    FloatArray darcyFluxVector;
+    /// Temporary Darcy flux
+    FloatArray tempDarcyFluxVector;
 public:
+    /// Number of leading components of the generalized state that hold the strain.
+    static constexpr int strainSize = 6;
+
     /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
-    UPMaterialStatus (GaussPoint * g) : MaterialStatus(g), strainVector(), stressVector(),
-    tempStressVector(), tempStrainVector() 
+    UPMaterialStatus (GaussPoint * g) : MaterialStatus(g), stateVector(), tempStateVector(),
+    stressVector(), tempStressVector(), darcyFluxVector(), tempDarcyFluxVector()
     {}
 
-/// Returns the const pointer to receiver's strain vector.
-    const FloatArray &giveStrainVector() const { return strainVector; }
+    /// Returns the const pointer to receiver's generalized state vector.
+    const FloatArray &giveStateVector() const { return stateVector; }
+    /// Returns the const pointer to receiver's temporary generalized state vector.
+    const FloatArray &giveTempStateVector() const { return tempStateVector; }
+    /// Assigns tempStateVector to given vector v.
+    void letTempStateVectorBe(const FloatArray &v) { tempStateVector = v; }
+
+    /// Strain is the leading block of the generalized state; it is not stored separately.
+    static FloatArray giveStrainPartOf(const FloatArray &state) {
+        FloatArray e;
+        if ( state.giveSize() >= strainSize ) {
+            e.resize(strainSize);
+            for ( int i = 1; i <= strainSize; i++ ) {
+                e.at(i) = state.at(i);
+            }
+        }
+        return e;
+    }
+    /// Returns receiver's equilibrated strain vector.
+    FloatArray giveStrainVector() const { return giveStrainPartOf(stateVector); }
+    /// Returns receiver's temporary strain vector.
+    FloatArray giveTempStrainVector() const { return giveStrainPartOf(tempStateVector); }
+
     /// Returns the const pointer to receiver's stress vector.
     const FloatArray &giveStressVector() const { return stressVector; }
-    /// Returns the const pointer to receiver's temporary strain vector.
-    const FloatArray &giveTempStrainVector() const { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
     const FloatArray &giveTempStressVector() const { return tempStressVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
-    /// Assigns tempStrainVector to given vector v
-    void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+
+    /// Returns the const pointer to receiver's temporary Darcy flux.
+    const FloatArray &giveTempDarcyFluxVector() const { return tempDarcyFluxVector; }
+    /// Assigns tempDarcyFluxVector to given vector v
+    void letTempDarcyFluxVectorBe(const FloatArray &v) { tempDarcyFluxVector = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override {
         MaterialStatus :: printOutputAt(file, tStep);
         fprintf(file, "  strains ");
-        for ( auto &var : strainVector ) {
+        for ( auto &var : this->giveStrainVector() ) {
             fprintf( file, " %+.4e", var );
         }
       
@@ -643,13 +690,15 @@ public:
 
     void initTempStatus() override {
         MaterialStatus :: initTempStatus();
+        tempStateVector = stateVector;
         tempStressVector = stressVector;
-        tempStrainVector = strainVector;
+        tempDarcyFluxVector = darcyFluxVector;
     }
     void updateYourself(TimeStep *tStep) override {
         MaterialStatus :: updateYourself(tStep);
+        stateVector = tempStateVector;
         stressVector = tempStressVector;
-        strainVector = tempStrainVector;
+        darcyFluxVector = tempDarcyFluxVector;
     }
     const char *giveClassName() const override {return "UPMaterialStatus";}
 
@@ -709,21 +758,58 @@ class UPSimpleMaterial : public Material {
         }
     }
 
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
+    /**
+     * Generalized state is [ strain(6), pressure gradient(nsd), pressure ]. The strain block is
+     * always 6 components -- TangentStiffness is 6x6 in every UP mode -- and nsd follows from the
+     * material mode.
+     */
+    StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override {
+        if ((mmode == _1dUP) || (mmode == _2dUP) || (mmode == _3dUP)) {
+            return { { FT_Displacements, SO_SymmetricGradient }, { FT_Pressure, SO_Gradient }, { FT_Pressure, SO_Value } };
+        }
+        return StateVariableLayout();
+    }
+
+    void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override {
+        MaterialMode mmode = gp->giveMaterialMode();
+        int nsd = (mmode == _3dUP) ? 3 : ((mmode == _2dUP) ? 2 : 1);
+        int expected = UPMaterialStatus::strainSize + nsd + 1;
+        if (stateVector.giveSize() != expected) {
+            OOFEM_ERROR("state vector size %d does not match the declared layout "
+                        "(%d strain + %d pressure gradient + pressure = %d)",
+                        stateVector.giveSize(), UPMaterialStatus::strainSize, nsd, expected);
+        }
+
+        UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
+        // The state is stored once, whole; strain is read back as its leading block.
+        status->letTempStateVectorBe(stateVector);
+
+        FloatArray gradp(nsd);
+        for (int i = 1; i <= nsd; i++) {
+            gradp.at(i) = stateVector.at(UPMaterialStatus::strainSize + i);
+        }
+
+        // All the constitutive work happens here, once; the queries below are reads.
+        FloatMatrix d, _k;
+        FloatArray sig, w;
+
+        this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
+        sig.beProductOf( d, UPMaterialStatus::giveStrainPartOf(stateVector) );
+        status->letTempStressVectorBe(sig);
+
+        this->giveCharacteristicMatrix(_k, Permeability, gp, tStep);
+        w.beProductOf(_k, gradp);
+        status->letTempDarcyFluxVectorBe(w);
+    }
+
+    void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override {
+        UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
         if (type == Stress) {
-            FloatMatrix d;
-            UPMaterialStatus *status = static_cast< UPMaterialStatus * >( this->giveStatus(gp) );
-
-            this->giveCharacteristicMatrix(d, TangentStiffness, gp, tStep);
-            answer.beProductOf(d, flux);
-            // update gp status
-            status->letTempStrainVectorBe(flux);
-            status->letTempStressVectorBe(answer);
-
-        }else if (type == FluidMassBalancePressureContribution) {
-            FloatMatrix _k;
-            this->giveCharacteristicMatrix(_k, Permeability, gp, tStep);
-            answer.beProductOf(_k, flux);
+            answer = status->giveTempStressVector();
+        } else if (type == FluidMassBalancePressureContribution) {
+            answer = status->giveTempDarcyFluxVector();
+        } else {
+            this->Material::giveCharacteristicVector(answer, type, gp, tStep);
         }
     }
 

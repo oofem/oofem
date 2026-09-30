@@ -69,12 +69,12 @@ public:
 
     FEInterpolation *giveInterpolation() const override;
 
-    int computeNumberOfDofs() override { return 8; }
+    int computeNumberOfDofs() override { return (domain->giveNumberOfSpatialDimensions() * 4); }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     double computeAreaAround(GaussPoint *gp) override;
     void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    virtual FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
+    virtual FloatArrayF<3> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 
@@ -89,12 +89,22 @@ public:
 
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
-        answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
+        int nsd = domain->giveNumberOfSpatialDimensions();
+        if (nsd == 2) {
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_nt(jump, gp, tStep);
+        } else {
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_tnn(jump, gp, tStep);
+        }
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
-    {
-        answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
+    {   
+        int nsd = domain->giveNumberOfSpatialDimensions();
+        if (nsd == 2) {
+            answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_nt(rMode, ip, tStep);
+        } else {
+            answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_tnn(rMode, ip, tStep);
+        }
     }
 
 #ifdef __OOFEG

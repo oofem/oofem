@@ -97,8 +97,8 @@ class PoissonElement : public MPElement {
     PoissonElement(int n, Domain* d): 
         MPElement(n,d), 
         interpol(1,2), 
-        t(&interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3), 
-        dt(&interpol, Variable::VariableQuantity::Temperature, Variable::VariableType::scalar, 3, &t),
+        t(&interpol, FT_Temperature, Variable::VariableType::scalar, 3), 
+        dt(&interpol, FT_Temperature, Variable::VariableType::scalar, 3, &t),
         p(&t,&dt,1.0),
         ir(1, this)
     {
@@ -121,19 +121,19 @@ class PoissonElement : public MPElement {
         }
     }
 
-    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int n) const override {
+    void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int n) const override {
         answer = {n};
     }
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
 
     int getNumberOfSurfaceDOFs() const override {return 0;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer.clear();
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer.clear();
     }
     

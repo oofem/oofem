@@ -67,12 +67,12 @@ public:
 
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
-        answer = this->giveInterfaceCrossSection()->giveEngTraction_3d(jump, gp, tStep);
+        answer = this->giveInterfaceCrossSection()->giveEngTraction_ntt(jump, gp, tStep);
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
-        answer = this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(rMode, ip, tStep);
+        answer = this->giveInterfaceCrossSection()->giveStiffnessMatrix_Eng_ntt(rMode, ip, tStep);
     }
 
     // definition & identification

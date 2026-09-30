@@ -482,13 +482,13 @@ BondLink3d :: giveLength()
 void
 BondLink3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->giveStiffnessMatrix_Eng_ntt(rMode, gp, tStep);
 }
 
 void
 BondLink3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->giveEngTraction_3d(strain, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->giveEngTraction_ntt(strain, gp, tStep);
 }
 
 

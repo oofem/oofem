@@ -158,6 +158,23 @@ void PythonMaterial::postInitialize()
         if (nb::hasattr(pyObject, "printOutputAt")) {
             pyPrintOutputAt = pyObject.attr("printOutputAt");
         }
+        // Push half of the interface. Required: the state is no longer handed to
+        // giveCharacteristicVector, so a material that still expects it there would be called
+        // with the wrong arguments. Report it here, with what to do about it, rather than let it
+        // surface as a python TypeError deep in the assembly loop.
+        if (!nb::hasattr(pyObject, "updateTempState")) {
+            OOFEM_ERROR("PythonMaterial: object '%s' has no updateTempState. The material state is "
+                        "now pushed once per iteration instead of being deposited inside "
+                        "giveCharacteristicVector: move the state deposit into "
+                        "updateTempState(self, stateVector, gp, tStep, stateDict, tempStateDict) "
+                        "and drop the leading flux argument of "
+                        "giveCharacteristicVector(self, mode, gp, tStep, stateDict, tempStateDict).",
+                        objectName.c_str());
+        }
+        pyUpdateTempState = pyObject.attr("updateTempState");
+        if (nb::hasattr(pyObject, "giveStateVariableIDs")) {
+            pyGiveStateVariableIDs = pyObject.attr("giveStateVariableIDs");
+        }
     } catch (const std::exception &e) {
         OOFEM_ERROR("PythonMaterial: initialization failed: %s", e.what());
     }
@@ -183,6 +200,23 @@ void PythonMaterial::postInitialize()
         pyGiveCharacteristicValue = pyObject.attr("giveCharacteristicValue");
         if (py::hasattr(pyObject, "printOutputAt")) {
             pyPrintOutputAt = pyObject.attr("printOutputAt");
+        }
+        // Push half of the interface. Required: the state is no longer handed to
+        // giveCharacteristicVector, so a material that still expects it there would be called
+        // with the wrong arguments. Report it here, with what to do about it, rather than let it
+        // surface as a python TypeError deep in the assembly loop.
+        if (!py::hasattr(pyObject, "updateTempState")) {
+            OOFEM_ERROR("PythonMaterial: object '%s' has no updateTempState. The material state is "
+                        "now pushed once per iteration instead of being deposited inside "
+                        "giveCharacteristicVector: move the state deposit into "
+                        "updateTempState(self, stateVector, gp, tStep, stateDict, tempStateDict) "
+                        "and drop the leading flux argument of "
+                        "giveCharacteristicVector(self, mode, gp, tStep, stateDict, tempStateDict).",
+                        objectName.c_str());
+        }
+        pyUpdateTempState = pyObject.attr("updateTempState");
+        if (py::hasattr(pyObject, "giveStateVariableIDs")) {
+            pyGiveStateVariableIDs = pyObject.attr("giveStateVariableIDs");
         }
     } catch (const std::exception &e) {
         OOFEM_ERROR("PythonMaterial: initialization failed: %s", e.what());
@@ -280,7 +314,7 @@ void PythonMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMo
 #endif
 }
 
-void PythonMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
+void PythonMaterial::giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const
 {
 #if defined(_USE_NANOBIND) || defined(_PYBIND_BINDINGS)
     auto ms = static_cast<PythonMaterialStatus *>(this->giveStatus(gp));
@@ -288,15 +322,61 @@ void PythonMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& fl
 
 #ifdef _USE_NANOBIND
     nb::gil_scoped_acquire gil;
-    nb::object result = pyGiveCharacteristicVector(nb::cast(flux), nb::cast(type), nb::cast(gp), nb::cast(tStep), ms->giveStateDictionary(), ms->giveTempStateDictionary());
+    nb::object result = pyGiveCharacteristicVector(nb::cast(type), nb::cast(gp), nb::cast(tStep), ms->giveStateDictionary(), ms->giveTempStateDictionary());
     answer = nb::cast<FloatArray>(result);
 #elif defined(_PYBIND_BINDINGS)
     py::gil_scoped_acquire gil;
-    py::object result = pyGiveCharacteristicVector(flux, type, gp, tStep, ms->giveStateDictionary(), ms->giveTempStateDictionary());
+    py::object result = pyGiveCharacteristicVector(type, gp, tStep, ms->giveStateDictionary(), ms->giveTempStateDictionary());
     answer = result.cast<FloatArray>();
 #else
     OOFEM_ERROR("Not compiled with python support.");
 #endif
+}
+
+void PythonMaterial::updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep)
+{
+#if defined(_USE_NANOBIND) || defined(_PYBIND_BINDINGS)
+    auto ms = static_cast<PythonMaterialStatus *>(this->giveStatus(gp));
+#endif
+
+    // The material decomposes the state itself, into whatever entries of the temporary state
+    // dictionary it uses -- that dictionary is a python material's state store, so there is
+    // nothing for this side to unpack or cache.
+#ifdef _USE_NANOBIND
+    nb::gil_scoped_acquire gil;
+    pyUpdateTempState(nb::cast(stateVector), nb::cast(gp), nb::cast(tStep), ms->giveStateDictionary(), ms->giveTempStateDictionary());
+#elif defined(_PYBIND_BINDINGS)
+    py::gil_scoped_acquire gil;
+    pyUpdateTempState(stateVector, gp, tStep, ms->giveStateDictionary(), ms->giveTempStateDictionary());
+#else
+    OOFEM_ERROR("Not compiled with python support.");
+#endif
+}
+
+StateVariableLayout PythonMaterial::giveStateVariableIDs(MaterialMode mmode) const
+{
+#if defined(_USE_NANOBIND) || defined(_PYBIND_BINDINGS)
+    if ( pyGiveStateVariableIDs ) {
+#ifdef _USE_NANOBIND
+        nb::gil_scoped_acquire gil;
+        nb::object result = pyGiveStateVariableIDs(nb::cast(mmode));
+#else
+        py::gil_scoped_acquire gil;
+        py::object result = pyGiveStateVariableIDs(mmode);
+#endif
+        // The python side returns a sequence of (field, operator) pairs. Converted element by
+        // element: handing the sequence straight to a caster would ask pybind to materialize a
+        // temporary, which it refuses outside a bound function.
+        StateVariableLayout layout;
+        for ( auto item : result ) {
+            auto pair = item;
+            layout.push_back( { (FieldType) pair[ py::int_(0) ].template cast<int>(),
+                                (StateOperator) pair[ py::int_(1) ].template cast<int>() } );
+        }
+        return layout;
+    }
+#endif
+    return StateVariableLayout();
 }
 
 double PythonMaterial::giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const

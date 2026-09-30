@@ -261,6 +261,23 @@ public:
     virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
     /**
+     * The generalized state of a transport material is the gradient of the primary field followed
+     * by the field value itself; HeMo models take both fields. Mirrors the argument order of
+     * giveFluxVector.
+     */
+    StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override;
+
+    /**
+     * Bridges the push half of the generic interface onto giveFluxVector, which is the transport
+     * counterpart of StructuralMaterial::giveRealStressVector: it performs the constitutive
+     * evaluation and caches field, gradient and flux in the status.
+     *
+     * Note that updateInternalState is deliberately kept separate and is called first -- it only
+     * deposits the field value, and the hydration models override it to drive their submodel.
+     */
+    void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override;
+
+    /**
      * Returns nonzero if receiver generates internal source of state variable(s), zero otherwise.
      */
     virtual bool hasInternalSource() const { return false; }

@@ -50,7 +50,7 @@ CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralInter
 
 
 double
-CebFipSlip90Material :: giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const
+CebFipSlip90Material :: giveEngTraction_n(double jump, GaussPoint *gp, TimeStep *tStep) const
 {
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     double slip = jump; ///@todo This isn't slip, this is the normal displacement. This code should be rewritten to deal with a 3D jump.
@@ -82,7 +82,7 @@ CebFipSlip90Material :: giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep
 
 
 FloatMatrixF<1,1>
-CebFipSlip90Material :: give1dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+CebFipSlip90Material :: giveStiffnessMatrix_Eng_n(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     FloatMatrixF<1,1> answer;

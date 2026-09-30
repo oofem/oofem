@@ -140,9 +140,9 @@ public:
     
     double evaluateBondStress(const double kappa) const;
 
-    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<3> giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
     
     Interface *giveInterface(InterfaceType) override;
                                   

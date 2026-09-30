@@ -1,0 +1,38 @@
+mpms09.out
+Order invariance of the material state push, ordering A: the state-consuming term listed second.
+# Term 1 asks for the cached stress, term 2 for the state-dependent tangent. Before the state was
+# pushed explicitly, the deposit happened as a side effect inside a term's residual expression, so
+# which term ran first decided whether the other saw current or stale state. The push now happens
+# once, before any term is evaluated, so the result must not depend on this ordering.
+# mpms10.in is this deck with lhsterms reversed and must produce the same answer.
+#
+mpmsymbolicstationaryproblem nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 2 1 2 rhsterms 0 nmodules 1
+errorcheck
+Variable name "u" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 # displacement
+Variable name "w" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 dualto "u" # test function
+SymbolicTerm 1 variable "u"  testvariable "w" mmode 10 lexpression "Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*MVec(gp,ts,MatResponseMode::Stress)"
+SymbolicTerm 2 variable "u"  testvariable "w" mmode 10 lexpression "0.1*Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "0.1*Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)*ru(u, cell, ts)"
+Integral 1 domain 1 set 1 term 1
+Integral 2 domain 1 set 1 term 2
+#
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 2 nelem 1 nbc 2 ncrosssect 1 nic 0 nltf 1 nmat 1 nset 3
+node 1 coords 3 0.            0.           0.
+node 2 coords 3 1.0           0.           0.
+#
+l1 1 nodes 2 1 2     mat 1 crosssect 1
+#
+simplecs 1 thick 1.0
+statedeptangentmat 1 d 1 e 1.0 beta 5.0
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 2 values 1 0   dofs 1 1
+nodalload 2 loadtimefunction 1 set 3 components 1 0.2 dofs 1 1
+#
+constantfunction 1 f(t) 1
+set 1 elements 1 1
+set 2 nodes 1 1
+set 3 nodes 1 2
+#%BEGIN_CHECK%
+#NODE tStep 1 number 2 dof 1 unknown d value 1.68809326e-01 tolerance 1.e-8
+#%END_CHECK%

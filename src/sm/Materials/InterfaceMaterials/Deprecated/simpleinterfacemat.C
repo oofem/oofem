@@ -49,7 +49,7 @@ SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : Structura
 
 
 FloatArrayF<3>
-SimpleInterfaceMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+SimpleInterfaceMaterial :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     bool shearYieldingFlag = false;
@@ -97,7 +97,7 @@ SimpleInterfaceMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussP
 
 
 FloatMatrixF<3,3>
-SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+SimpleInterfaceMaterial :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     double normalJump = status->giveTempJump().at(1);

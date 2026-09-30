@@ -97,13 +97,11 @@ html_theme = 'alabaster'
 html_static_path = ['../_static']
 html_css_files = ['oofem.css']
 
-# The material model tables are wide, so use the whole browser window.
-# alabaster caps the outer container at page_width (940px by default), which
-# overrides body_max_width on its own, so both have to be set.  body_max_width
-# stays at 100% so the text fills the page width rather than 80% of it.
+# The material model tables are wide, so the text column is widened to 80% of
+# the browser window.  That, and the figure sizing, is set once for every
+# manual in doc/_static/oofem.css -- do not add page_width or body_max_width
+# here, as the stylesheet loads after the theme and would override them.
 html_theme_options = {
-    'page_width': '80%',
-    'body_max_width': '100%',
     'sidebar_width': '250px',
 }
 

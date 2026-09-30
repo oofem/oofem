@@ -44,7 +44,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'classic'
 
+# The classic theme caps the text column at 800px by default, which wastes most
+# of a wide window.  It is widened to 80% of the available width -- along with
+# the figure sizing -- in doc/_static/oofem.css, which global_conf.py wires
+# into every manual, so no html_theme_options are needed here.
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', 'figs']
+# '../_static' must stay, so the shared stylesheet is copied.
+html_static_path = ['../_static', 'figs']

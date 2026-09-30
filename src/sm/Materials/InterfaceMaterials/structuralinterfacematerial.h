@@ -88,19 +88,25 @@ public:
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
+     * The interface material supports different modes, depending on the number of nonzero components of the jump vector and their physical meaning.
+     * The modes are encoded using 'n' and 't' in the service name, where 'n' stands for normal and 't' for tangential components of the jump vector.
      * @param answer Contains result.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual double giveFirstPKTraction_1d(double jump, double reducedF, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<2> giveFirstPKTraction_2d(const FloatArrayF<2> &jump, const FloatMatrixF<2,2> &reducedF, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+    virtual double giveFirstPKTraction_n(double jump, double reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<2> giveFirstPKTraction_nt(const FloatArrayF<2> &jump, const FloatMatrixF<2,2> &reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<3> giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+    { OOFEM_ERROR("not implemented ");  }
+    virtual FloatArrayF<3> giveFirstPKTraction_tnn(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
     { OOFEM_ERROR("not implemented ");  }
 
-    virtual double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<2> giveEngTraction_2d(const FloatArrayF<2> &jump, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual double giveEngTraction_n(double jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<2> giveEngTraction_nt(const FloatArrayF<2> &jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<3> giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<3> giveEngTraction_tnn(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+    { OOFEM_ERROR("not implemented ");  }
 
     /**
      * Gives the tangent: @f$ \frac{\partial T}{\partial j} @f$.
@@ -110,21 +116,28 @@ public:
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual FloatMatrixF<1,1> give1dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<2,2> give2dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<1,1> giveStiffnessMatrix_dTdj_n(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<2,2> giveStiffnessMatrix_dTdj_nt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> giveStiffnessMatrix_dTdj_tnn(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+    { OOFEM_ERROR("not implemented ");  }
 
-    virtual FloatMatrixF<1,1> give1dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<2,2> give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<1,1> giveStiffnessMatrix_Eng_n(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<2,2> giveStiffnessMatrix_Eng_nt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> giveStiffnessMatrix_Eng_tnn(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+    { OOFEM_ERROR("not implemented ");  }
 
-    FloatMatrixF<1,1> give1dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
-    FloatMatrixF<2,2> give2dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
-    FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<1,1> giveStiffnessMatrix_dTdj_Num_n(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<2,2> giveStiffnessMatrix_dTdj_Num_nt(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> giveStiffnessMatrix_dTdj_Num_ntt(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> giveStiffnessMatrix_dTdj_Num_tnn(GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatMatrixF<1,1> give1dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
-    FloatMatrixF<2,2> give2dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
-    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF<1,1> giveStiffnessMatrix_Eng_Num_n(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<2,2> giveStiffnessMatrix_Eng_Num_nt(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> giveStiffnessMatrix_Eng_Num_ntt(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> giveStiffnessMatrix_Eng_Num_tnn(GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.

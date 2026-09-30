@@ -44,6 +44,7 @@
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "matresponsemode.h"
+#include "stateoperator.h"
 #include "dictionary.h"
 #include "chartype.h"
 
@@ -133,19 +134,65 @@ public:
      * Default implementation returns true.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const { return true; }
+
+    /**
+     * Updates the temporary (working) state of the receiver at given integration point.
+     *
+     * This is the "push" half of the material interface: the element (or term) hands over the
+     * generalized state vector and the material performs all the constitutive work here once --
+     * internal iterations, return mapping, phase-change evaluation, derived properties -- and
+     * caches the results in its MaterialStatus. The giveCharacteristic{Vector,Matrix,Value}
+     * queries are then the "pull" half and are expected to be cheap reads of that cache.
+     *
+     * Contract:
+     * - exactly one updateTempState call per integration point per iteration, before any query;
+     * - initTempStatus has been called earlier in the step (see EngngModel::initStepIncrements);
+     * - the queries must not modify state, so that the result does not depend on the order in
+     *   which tangent and residual contributions happen to be assembled.
+     *
+     * The layout of @p stateVector is the one the receiver advertises through
+     * giveStateVariableIDs; it is not a fixed convention.
+     *
+     * @param stateVector Generalized state (strain, gradients, field values) laid out as
+     * giveStateVariableIDs describes.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) { }
+
+    /**
+     * Returns the layout of the generalized state vector expected by updateTempState.
+     *
+     * Each entry is a (field, operator) pair, in the order the pieces are packed into the state
+     * vector: which primary field, and what is taken of it. The two are kept separate so that they
+     * compose -- a material needing both a pressure and its gradient names the same field twice
+     * with different operators, and a new field costs no new operator.
+     *
+     * An empty layout (the default) means the receiver does not participate in the push/pull
+     * protocol and the caller must fall back on the physics-specific entry points.
+     *
+     * @param mmode Material mode of the integration point, since the layout may depend on it.
+     */
+    virtual StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const { return StateVariableLayout(); }
+
     /**
      * @brief Returns characteristic matrix of the receiver
-     * 
+     *
+     * Part of the "pull" half of the interface, see updateTempState. Expected to return values
+     * cached by the preceding updateTempState call rather than recompute them.
      */
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {}
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const;
     /**
      * @brief Returns characteristic vector of the receiver
-     * 
+     *
+     * Part of the "pull" half of the interface, see updateTempState. Expected to return values
+     * cached by the preceding updateTempState call rather than recompute them; it takes no state
+     * argument precisely so that it cannot be mistaken for a combined update-and-query.
      */
-    virtual void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {}
+    virtual void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const;
     /**
      * @brief Returns characteristic value of the receiver
-     * 
+     *
      */
     virtual double giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const ;
     /**

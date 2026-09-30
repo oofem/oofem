@@ -61,12 +61,12 @@ void BTSigTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp,
 }
 
 void BTSigTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
-    FloatArray u, eps, sig;
+    FloatArray sig;
     FloatMatrix B;
-    cell.getUnknownVector(u, this->field, VM_TotalIntrinsic, tstep);
+    // The strain is no longer derived here: it was pushed to the material as part of the
+    // generalized state before this sweep, so the stress is a cache read.
     this->grad(B, this->field, this->field->interpolation, cell, gp->giveNaturalCoordinates(), gp->giveMaterialMode());
-    eps.beProductOf(B, u);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, eps, Stress, gp, tstep);
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(sig, Stress, gp, tstep);
     answer.beTProductOf(B, sig);
 }
 
@@ -133,12 +133,12 @@ void gNTfTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, 
 }
 
 void gNTfTerm::evaluate (FloatArray& answer, MPElement& cell, GaussPoint* gp, TimeStep* tstep) const  {
-    FloatArray p, gradp, fp;
+    FloatArray fp;
     FloatMatrix B;
-    cell.getUnknownVector(p, this->field, VM_TotalIntrinsic, tstep);
+    // The field gradient was pushed to the material as part of the generalized state before this
+    // sweep, so the flux is a cache read.
     this->grad(B, this->field, this->field->interpolation, cell, gp->giveNaturalCoordinates());
-    gradp.beProductOf(B, p);
-    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, gradp, rhsType, gp, tstep); // update
+    cell.giveCrossSection()->giveMaterial(gp)->giveCharacteristicVector(fp, rhsType, gp, tstep);
     answer.beTProductOf(B, fp);
 }
 

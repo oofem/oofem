@@ -316,17 +316,37 @@ IsotropicLinearElasticMaterial::giveCharacteristicValue(MatResponseMode type, Ga
 }
 
 void
-IsotropicLinearElasticMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+IsotropicLinearElasticMaterial::giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     if (type == Stress) {
-        return LinearElasticMaterial::giveRealStressVector(answer, gp, flux, tStep);
+        // Cache read. Delegated rather than repeated here, so that the check for a query arriving
+        // before any updateTempState applies to this material too.
+        this->StructuralMaterial::giveCharacteristicVector(answer, type, gp, tStep);
     } else if (type == DeviatoricStress) {
+        // Derived from the strain cached by the push, so that this query does not depend on a
+        // state vector being handed in.
+        const FloatArray &cached = status->giveTempStrainVector();
+        if ( cached.isEmpty() ) {
+            OOFEM_ERROR("deviatoric stress queried on element %d GP %d before any updateTempState "
+                        "established the strain; the integration point supplies no strain field to push",
+                        gp->giveElement()->giveNumber(), gp->giveNumber());
+        }
+        // The status may hold the full 6-component strain even in a reduced mode (the reduced
+        // routines expand and delegate to the 3d one), so bring it back to the size the
+        // deviatoric operator expects.
+        FloatArray eps;
+        MaterialMode mmode = gp->giveMaterialMode();
+        if ( cached.giveSize() == 6 && StructuralMaterial::giveSizeOfVoigtSymVector(mmode) != 6 ) {
+            StructuralMaterial::giveReducedSymVectorForm(eps, cached, mmode);
+        } else {
+            eps = cached;
+        }
         FloatMatrix d;
         this->giveDeviatoricConstitutiveMatrix(d, TangentStiffness, gp, tStep);
-        answer.beProductOf(d, flux);
-        return; 
+        answer.beProductOf(d, eps);
     } else {
-        OOFEM_ERROR("Not implemented");
-    } 
+        this->StructuralMaterial::giveCharacteristicVector(answer, type, gp, tStep);
+    }
 }
 
 void 
