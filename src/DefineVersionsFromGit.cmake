@@ -54,6 +54,7 @@ elseif(GIT_EXECUTABLE)
     set(OOFEM_GIT_BRANCH ${GIT_BRANCH})
   endif()
 endif()
+#Emergency section, setting up temporary values. Problems on forked repositories on github, not on local computers.
 if(NOT DEFINED OOFEM_GIT_HASH)
   message(WARNING "Using <unknown> for version information (git failed or not found)")
   set(OOFEM_VERSION_MAJOR "3")
