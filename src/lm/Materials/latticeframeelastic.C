@@ -165,7 +165,7 @@ LatticeFrameElastic::giveLatticeStress3d(const FloatArrayF < 6 > & strain, Gauss
 FloatMatrixF< 6, 6 >
 LatticeFrameElastic::give3dFrameStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+    this->giveStatus(gp);
 
     //Reduce Young's modulus based on temperature
     double reductionFactor =1.;

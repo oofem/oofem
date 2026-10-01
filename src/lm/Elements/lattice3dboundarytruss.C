@@ -201,8 +201,6 @@ Lattice3dBoundaryTruss :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
         computeGeometryProperties();
     }
 
-    double volume = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
@@ -448,7 +446,6 @@ Lattice3dBoundaryTruss :: giveInternalForcesVector(FloatArray &answer, TimeStep 
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
-    double dV;
 
     this->computeVectorOf(VM_Total, tStep, u);
 

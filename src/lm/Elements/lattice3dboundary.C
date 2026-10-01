@@ -464,7 +464,6 @@ Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
-    double dV;
 
     this->computeVectorOf(VM_Total, tStep, u);
 
