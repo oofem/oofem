@@ -10,6 +10,7 @@ module.
     :maxdepth: 2
 
     app-sparse-solvers
+    app-nonlinear-solvers
     app-eigen-solvers
     app-load-balancing
     app-error-estimators

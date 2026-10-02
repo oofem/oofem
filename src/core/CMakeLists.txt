@@ -120,7 +120,7 @@ set (core_nm
     )
 
 if (USE_PETSC)
-    list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
+    list (APPEND core_nm petscsolver.C petscsparsemtrx.C petscsnessolver.C)
 endif ()
 
 if (USE_INTEL_MKL_PARDISO OR USE_ONEAPI)

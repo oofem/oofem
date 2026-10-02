@@ -980,7 +980,7 @@ PetscSparseMtrx :: createVecGlobal(Vec *answer) const
 int
 PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
 {
-    PetscScalar *ptr;
+    const PetscScalar *ptr;
 
 #ifdef __MPI_PARALLEL_MODE
     if ( emodel->isParallel() ) {
@@ -996,22 +996,22 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
         VecScatterDestroy(& n2gvecscat);
 
         dest.resize(neqs);
-        VecGetArray(locVec, & ptr);
+        VecGetArrayRead(locVec, & ptr);
         for ( int i = 0; i < neqs; i++ ) {
             dest.at(i + 1) = ptr [ i ];
         }
 
-        VecRestoreArray(locVec, & ptr);
+        VecRestoreArrayRead(locVec, & ptr);
         VecDestroy(& locVec);
     } else {
 #endif
     int neqs = this->giveNumberOfRows();
     dest.resize(neqs);
-    VecGetArray(src, & ptr);
+    VecGetArrayRead(src, & ptr);
     for ( int i = 0; i < neqs; i++ ) {
         dest.at(i + 1) = ptr [ i ];
     }
-    VecRestoreArray(src, & ptr);
+    VecRestoreArrayRead(src, & ptr);
 #ifdef __MPI_PARALLEL_MODE
 }
 #endif
