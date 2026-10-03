@@ -61,9 +61,9 @@ public:
     const char *giveInputRecordName() const override { return _IFT_IntMatDummyCZ_Name; }
 
 
-    FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<3> giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

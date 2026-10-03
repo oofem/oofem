@@ -67,7 +67,7 @@ public:
 
     double computeAreaAround(GaussPoint *gp) override;
     void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
+    FloatArrayF<3> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 

@@ -5,8 +5,8 @@ mpmnonstationaryproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 manrmsteps 0 k
 #vtkxml tstep_all domain_all primvars 2 1 6
 errorcheck
 #
-Variable name "t" interpolation "feilin" type scalar quantity 2 size 1 dofs 1 10 # temperature
-Variable name "w" interpolation "feilin" type scalar quantity 2 size 1 dofs 1 10 # test function
+Variable name "t" interpolation "feilin" type scalar quantity "Temperature" size 1 dofs 1 10 # temperature
+Variable name "w" interpolation "feilin" type scalar quantity "Temperature" size 1 dofs 1 10 # test function
 SymbolicTerm 1 variable "t"  testvariable "w" mmode "_2dHeat" lexpression "Grad(w,gp).T*[[0.2, 0.],[0.0, 0.2]]*Grad(t,gp)" rexpression "Grad(w,gp).T*[[0.2, 0.0],[0.0, 0.2]]*Grad(t,gp)*ru(t, cell, ts)"
 SymbolicTerm 2 variable "t"  testvariable "w" mmode "_2dHeat" lexpression "N(w,gp).T*[[0.05]]*N(t,gp)" rexpression "N(w,gp).T*[[0.05]]*N(t,gp)*rv(t, cell, ts)"
 #NTfTerm 2 variable "t" testvariable "w" mmode 6 flux 2 1. 0.

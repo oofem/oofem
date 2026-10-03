@@ -63,18 +63,21 @@ Since attributes in XML are string-only, here we describe how other types are re
 
 * `spring01.xml`:
 
-  ```{literalinclude} ../../tests/sm/spring01.xml
+  ```{literalinclude} ../../tests/regression/sm/spring01.xml
   :language: xml
   ```
 
-* `spring01-exportmodules.xml` (included via `xi:include`):
-  
-  ```{literalinclude} ../../tests/sm/spring01-exportmodules.xml
+* `spring01-exportmodules.fragment.xml`, pulled into the file above via
+  `xi:include`:
+
+  ```{literalinclude} ../../tests/regression/sm/spring01-exportmodules.fragment.xml
   :language: xml
   ```
-* `spring01-errorcheck.xml` (included via `xi:include`):
-  
-  ```{literalinclude} ../../tests/sm/spring01-errorcheck.xml
+
+* `spring01-errorcheck.fragment.xml`, pulled in indirectly — the fragment above
+  includes it in turn:
+
+  ```{literalinclude} ../../tests/regression/sm/spring01-errorcheck.fragment.xml
   :language: xml
   ```
 

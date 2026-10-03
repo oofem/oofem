@@ -62,6 +62,8 @@ protected:
     nb::object pyGiveCharacteristicVector;
     nb::object pyGiveCharacteristicValue;
     nb::object pyPrintOutputAt;
+    nb::object pyUpdateTempState;
+    nb::object pyGiveStateVariableIDs;
 #elif defined(_PYBIND_BINDINGS)
     py::object pyObject;
     py::object pyHasMaterialModeCapability;
@@ -69,6 +71,8 @@ protected:
     py::object pyGiveCharacteristicVector;
     py::object pyGiveCharacteristicValue;
     py::object pyPrintOutputAt;
+    py::object pyUpdateTempState;
+    py::object pyGiveStateVariableIDs;
 #endif
 
 public:
@@ -87,8 +91,24 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
-    void giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+    void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
     double giveCharacteristicValue(MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const override;
+
+    /**
+     * Forwards the state push to the python object's updateTempState.
+     *
+     * The material decomposes the state itself into the entries of the temporary state dictionary
+     * it uses -- that dictionary is a python material's state store. postInitialize requires the
+     * method to exist, since the state is no longer passed to giveCharacteristicVector.
+     */
+    void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override;
+
+    /**
+     * Forwards to the python object's giveStateVariableIDs, if it defines one; returns an empty
+     * layout otherwise, meaning the material does not advertise one. The python side returns a
+     * sequence of (FieldType, StateOperator) pairs.
+     */
+    StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override;
 
     void printOutputAt(FILE *file, TimeStep *tStep, const PythonMaterialStatus *status) const;
 };

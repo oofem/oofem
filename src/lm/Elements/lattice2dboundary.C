@@ -469,7 +469,6 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
-    double dV;
 
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.

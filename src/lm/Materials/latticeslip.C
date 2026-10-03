@@ -118,8 +118,6 @@ LatticeSlip::giveLatticeStress3d(const FloatArrayF < 6 > & totalStrain, GaussPoi
     //evaluate tempKappa (no elastic strain in axial direction)
     double tempKappa = status->giveKappa() + fabs(totalStrain.at(1) - oldStrain.at(1) );
 
-    double deltaSlip = totalStrain.at(1) - oldStrain.at(1);
-
     /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
     FloatArrayF < 6 > stress;
     stress.at(1) = oldStress.at(1) +
@@ -266,7 +264,6 @@ LatticeSlipStatus::saveContext(DataStream &stream, ContextMode mode)
 // no temp variables stored
 //
 {
-    contextIOResultType iores;
     // save parent class status
     LatticeMaterialStatus::saveContext(stream, mode);
 
@@ -279,8 +276,6 @@ LatticeSlipStatus::saveContext(DataStream &stream, ContextMode mode)
 void
 LatticeSlipStatus::restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
     LatticeMaterialStatus::restoreContext(stream, mode);
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);

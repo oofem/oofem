@@ -15,6 +15,7 @@ set (mpm_element
     tm.C
     sadg.C
     termlibrary4.C
+    statedependentmat.C
     )
 
     set (mpm_problems

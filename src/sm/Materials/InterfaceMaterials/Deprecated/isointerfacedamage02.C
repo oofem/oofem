@@ -52,7 +52,7 @@ IsoInterfaceDamageMaterial_2 :: IsoInterfaceDamageMaterial_2(int n, Domain *d) :
 
 
 FloatArrayF<3>
-IsoInterfaceDamageMaterial_2 :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+IsoInterfaceDamageMaterial_2 :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     IsoInterfaceDamageMaterialStatus_2 *status = static_cast< IsoInterfaceDamageMaterialStatus_2 * >( this->giveStatus(gp) );
 
@@ -74,7 +74,7 @@ IsoInterfaceDamageMaterial_2 :: giveEngTraction_3d(const FloatArrayF<3> &jump, G
         omega = this->computeDamageParam(tempKappa, jump, gp);
     }
 
-    auto de = this->give3dStiffnessMatrix_Eng(ElasticStiffness, gp, tStep);
+    auto de = this->giveStiffnessMatrix_Eng_ntt(ElasticStiffness, gp, tStep);
     auto answer = dot(de, jump);
     // damage in tension only
     if ( equivStrain >= 0.0 ) {
@@ -92,7 +92,7 @@ IsoInterfaceDamageMaterial_2 :: giveEngTraction_3d(const FloatArrayF<3> &jump, G
 
 
 FloatMatrixF<3,3>
-IsoInterfaceDamageMaterial_2 :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IsoInterfaceDamageMaterial_2 :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IsoInterfaceDamageMaterialStatus_2 *status = static_cast< IsoInterfaceDamageMaterialStatus_2 * >( this->giveStatus(gp) );
 

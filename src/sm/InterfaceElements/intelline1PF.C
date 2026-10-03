@@ -99,19 +99,20 @@ IntElLine1PF :: computeGaussPoints()
 }
 
 
-FloatArrayF<2>
+FloatArrayF<3>
 IntElLine1PF :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdxi;
     interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    FloatArrayF<2> G;
+    FloatArrayF<3> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
         double X2_i = 0.5 * ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i + numNodes / 2)->giveCoordinate(2) );
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
+        // Assuming 3D space, z-coordinate is 0 for a line element in the xy-plane
     }
     return G;
 }

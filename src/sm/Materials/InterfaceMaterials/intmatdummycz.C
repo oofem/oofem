@@ -42,7 +42,7 @@ REGISTER_Material(IntMatDummyCZ);
 IntMatDummyCZ :: IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d) {}
 
 FloatArrayF<3>
-IntMatDummyCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+IntMatDummyCZ :: giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
@@ -51,7 +51,7 @@ IntMatDummyCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatM
     return {0., 0., 0.};
 }
 
-FloatMatrixF<3,3> IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+FloatMatrixF<3,3> IntMatDummyCZ :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     return zero<3,3>();
 }

@@ -54,6 +54,11 @@
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
 #include "enum.h"
+#include "dofiditem.h"
+#include "stateoperator.h"
+#include "stateoperator.h"
+
+#include <map>
 
 
 namespace oofem {
@@ -80,27 +85,34 @@ class EngngModel;
 #define ENUM_CLASS
 #include "enum-impl.h"
 
-#define ENUM_TYPE VariableQuantity
-#define ENUM_DEF ENUM_ITEM(Displacement) ENUM_ITEM(Velocity) ENUM_ITEM(Temperature) ENUM_ITEM(Pressure) ENUM_ITEM(VolumeFraction)
-#define ENUM_CLASS
-#include "enum-impl.h"
-
-
 class OOFEM_EXPORT Variable {
     public:
     typedef oofem::VariableType VariableType;
-    typedef oofem::VariableQuantity VariableQuantity;
 
     std::string name;
-    const FEInterpolation* interpolation;  
-    Variable* dualVar; //? or just bool?
+    const FEInterpolation* interpolation;
+    /**
+     * When the receiver is a test (weighting) function, the unknown field it weights; null when
+     * the receiver is itself an unknown.
+     *
+     * Declared in the input as `dualto "<name>"` on the test variable and resolved by
+     * EngngModel::instanciateMPM. This is the only thing that distinguishes the two roles: a deck
+     * declares them as two Variable records that differ just by name, and may give them different
+     * interpolations (a non-symmetric, Petrov-Galerkin formulation). Assembly needs the
+     * distinction because nodal unknowns have to be read through the unknown field's
+     * interpolation, not its weighting function's.
+     */
+    Variable* dualVar;
+    /// Name given by `dualto`, resolved into @ref dualVar after all variables have been read.
+    std::string dualVarName;
     VariableType type;
-    VariableQuantity q;
+    /// What the field physically is. Core-level, so a material can name it in its state layout.
+    FieldType q;
     int size;
     IntArray dofIDs;
 
-    Variable () : name(), interpolation(nullptr), dualVar(NULL), type(VariableType::scalar), q(VariableQuantity::Displacement), size(0) {}
-    Variable (const FEInterpolation* i, Variable::VariableQuantity q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}, std::string name="") : 
+    Variable () : name(), interpolation(nullptr), dualVar(NULL), type(VariableType::scalar), q(FT_Displacements), size(0) {}
+    Variable (const FEInterpolation* i, FieldType q, Variable::VariableType t, int size, Variable* dual = NULL, std :: initializer_list< int > dofIDs={}, std::string name="") : 
         interpolation(i), 
         dualVar(dual), 
         q(q), 
@@ -108,7 +120,7 @@ class OOFEM_EXPORT Variable {
         this->type = t;
         this->size = size;
     }
-    Variable (const FEInterpolation* i, Variable::VariableQuantity q, Variable::VariableType t, int size, IntArray& dofIDs, Variable* dual = NULL, std::string name="") : 
+    Variable (const FEInterpolation* i, FieldType q, Variable::VariableType t, int size, IntArray& dofIDs, Variable* dual = NULL, std::string name="") : 
         name(name),
         interpolation(i), 
         dualVar(dual), 
@@ -118,6 +130,19 @@ class OOFEM_EXPORT Variable {
         this->size = size;
     }
 
+
+    /**
+     * Completes the set-up of the receiver once every variable of the problem has been read.
+     *
+     * Resolves the `dualto` name into @ref dualVar, so the declaration order of the Variable
+     * records does not matter. Only relevant to variables built from an input record; those
+     * constructed directly (from python, or the hardwired fields of the classic up/tm elements)
+     * pass their dual to the constructor.
+     */
+    void postInitialize(EngngModel *problem);
+
+    /// True if the receiver is a test (weighting) function of some unknown field.
+    bool isTestField() const { return this->dualVar != nullptr; }
 
     /// Returns DodIF mask in node; need generalization (which dofMan)
     const IntArray& getDofManDofIDs () const {return this->dofIDs;}
@@ -374,9 +399,9 @@ class OOFEM_EXPORT MPElement : public Element {
      * @param answer code numbers corrresponding to given variable
      * @param q variable type 
      */
-  virtual void getDofManLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q, int n) const = 0;
-  virtual void getInternalDofManLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q, int n) const = 0;
-  virtual void getLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q ) const {
+  virtual void getDofManLocalCodeNumbers(IntArray& answer, const FieldType q, int n) const = 0;
+  virtual void getInternalDofManLocalCodeNumbers(IntArray& answer, const FieldType q, int n) const = 0;
+  virtual void getLocalCodeNumbers (IntArray& answer, const FieldType q ) const {
     IntArray dl;
     answer.resize(0);
     
@@ -397,14 +422,14 @@ class OOFEM_EXPORT MPElement : public Element {
   /**
      Returns mapping from quantity dofs to local surface dofs
   */
-  virtual void getSurfaceLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const =0;
-  virtual void getEdgeLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q) const =0;
+  virtual void getSurfaceLocalCodeNumbers (IntArray& answer, const FieldType q) const =0;
+  virtual void getEdgeLocalCodeNumbers (IntArray& answer, const FieldType q) const =0;
   /** @brief Returns element code numbers of the unknowns associated with given boundary entity. 
    * @param answer 
    * @param q 
    * @param isurf
    */ 
-  virtual void getSurfaceElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
+  virtual void getSurfaceElementCodeNumbers (IntArray& answer, const FieldType q, int isurf ) const {
     IntArray dl, sn = this->getGeometryInterpolation()->boundarySurfaceGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
@@ -412,7 +437,7 @@ class OOFEM_EXPORT MPElement : public Element {
       answer.followedBy(dl);
     }
   }
-  virtual void getEdgeElementCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int isurf ) const {
+  virtual void getEdgeElementCodeNumbers (IntArray& answer, const FieldType q, int isurf ) const {
     IntArray dl, sn = this->getGeometryInterpolation()->boundaryEdgeGiveNodes(isurf, this->giveGeometryType());
     answer.resize(0);
     for (int i : sn) {
@@ -493,7 +518,77 @@ class OOFEM_EXPORT MPElement : public Element {
         answer = FloatArray::fromVector(ans);
     }
 
-  virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf) 
+    /**
+     * @name Interpolation operators for a Variable at an integration point.
+     *
+     * These are the shared implementations of the operators the symbolic terms expose as Grad_s,
+     * Grad and N. They live here rather than in the symbolic layer so that both the symbolic
+     * functors and assembleStateVector use one definition.
+     */
+    //@{
+    /// Symmetric gradient (strain) operator of a vector field; shape depends on the material mode.
+    void computeGradSymMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint *gp) const;
+    /// Gradient operator of a scalar field; nsd rows.
+    void computeGradMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint *gp) const;
+    /// Interpolation (shape function) operator of a field.
+    void computeNMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint *gp) const;
+    /// Divergence operator of a vector field.
+    void computeDivMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint *gp) const;
+    /// Dispatches to the operator named by @p op.
+    void computeStateOperatorAt(FloatMatrix &answer, StateOperator op, const Variable *v, GaussPoint *gp) const;
+    //@}
+
+    /// Maps a field, by what it physically is, onto the Variable supplying it.
+    typedef std::map<int, const Variable *> StateVariableMap;
+
+    /**
+     * Records the given primary field as a source of state on the receiver, under what it
+     * physically is (Variable::q).
+     *
+     * Called from Integral::initialize for the unknown field of each term acting on the receiver,
+     * alongside the creation of the dofs and integration rules that term needs. Resolution is
+     * therefore per cell, which is what lets a domain carry several materials with different state
+     * layouts, each fed by its own fields.
+     *
+     * Test (weighting) fields must not be registered: they are declared with the same dof ids as
+     * the field they weight, and may carry a different interpolation. Variable::isTestField says
+     * which is which.
+     */
+    void registerStateVariable(const Variable *v);
+
+    /// Returns the primary field registered for the given physical field, or nullptr.
+    const Variable *giveStateVariableSource(FieldType field) const {
+        auto it = this->stateVariables.find( (int) field );
+        return ( it == this->stateVariables.end() ) ? nullptr : it->second;
+    }
+
+    /**
+     * Assembles the generalized state vector described by @p layout at the given point, from the
+     * fields registered on the receiver.
+     *
+     * This is the C++ counterpart of the packing input decks used to do by hand, in expressions of
+     * the form "flux = vcat(eps, pw, pa)". Each entry names a field and the operator to apply to
+     * it.
+     *
+     * @param layout Layout advertised by the material through giveStateVariableIDs.
+     */
+    void assembleStateVector(FloatArray &answer, const StateVariableLayout &layout, GaussPoint *gp, TimeStep *tStep);
+
+    /**
+     * Pushes the current state to the material at every integration point of the receiver.
+     *
+     * Materials advertising an empty layout are skipped -- they do not participate in the
+     * push/pull protocol and keep using their physics-specific entry points.
+     */
+    void updateTempState(TimeStep *tStep);
+
+protected:
+    /// Which primary field supplies each state quantity on the receiver; see registerStateVariable.
+    StateVariableMap stateVariables;
+
+public:
+
+  virtual double computeSurfaceVolumeAround(GaussPoint* igp, int iSurf)
   {return igp->giveWeight()*this->getGeometryInterpolation()->boundarySurfaceGiveTransformationJacobian(iSurf, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
   virtual double computeEdgeVolumeAround(GaussPoint* igp, int iEdge) 
   {return igp->giveWeight()*this->getGeometryInterpolation()->boundaryEdgeGiveTransformationJacobian(iEdge, igp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));}
@@ -515,7 +610,7 @@ class OOFEM_EXPORT MPElement : public Element {
      * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
      * 
      */
-    virtual int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const Variable::VariableQuantity q, char btype) {
+    virtual int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const FieldType q, char btype) {
         answer.clear(); 
         return 0;
     }

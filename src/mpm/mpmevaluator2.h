@@ -440,14 +440,38 @@ private:
  * from a matrix element-wise automatically.
  * *
  */
+/**
+ * @brief Immutable execution environment shared by all evaluations of one compiled expression.
+ *
+ * Everything here is established once and read-only thereafter: the symbol table, the functor
+ * table, and a template slot pool with the compiled constants and any invariant variables already
+ * bound. An MPMEvaluator built from it copies only the slot pool, which is the sole mutable state
+ * of an evaluation -- so evaluations of the same expression are independent and may run
+ * concurrently.
+ */
+struct MPMEnvironment {
+    std::map<std::string, int> symbols;
+    std::map<std::string, Functor> functors;
+    /// Template slot pool, with the invariant bindings already applied.
+    std::vector<VarSlot> pool;
+    /// Initialization flags matching @ref pool.
+    std::vector<bool> is_set;
+};
+
 class MPMEvaluator {
     std::vector<VarSlot> pool;
     // PARALLEL ARRAY FOR TRACKING INITIALIZATION STATUS
-    std::vector<bool> is_set; 
+    std::vector<bool> is_set;
 
-    std::map<std::string, int> symbol_table;
-    std::map<std::string, Functor> functors;
-        int last_output_idx = 0; 
+    /**
+     * Tables owned by the receiver. Populated only when it was constructed standalone; when built
+     * from an MPMEnvironment they stay empty and the pointers below reference the shared tables.
+     */
+    std::map<std::string, int> ownedSymbols;
+    std::map<std::string, Functor> ownedFunctors;
+    const std::map<std::string, int> *symbol_table_p;
+    const std::map<std::string, Functor> *functors_p;
+        int last_output_idx = 0;
 
     bool to_bool(const VarSlot& s) {
         //if (s.type == VarSlot::Type::MATRIX) return false; 
@@ -474,13 +498,45 @@ public:
      * @param sz Total number of slots required for variables, constants, and intermediates.
      * @param syms The symbol table generated during compilation.
      */
-    MPMEvaluator(int sz, std::map<std::string, int> syms) : pool(sz), is_set(sz, false), symbol_table(syms) {}
+    /**
+     * @brief Constructs a standalone evaluator that owns its symbol and functor tables.
+     * @param sz Total number of slots required for variables, constants, and intermediates.
+     * @param syms The symbol table generated during compilation.
+     */
+    MPMEvaluator(int sz, std::map<std::string, int> syms)
+        : pool(sz), is_set(sz, false), ownedSymbols(std::move(syms)),
+          symbol_table_p(&ownedSymbols), functors_p(&ownedFunctors) {}
+
+    /**
+     * @brief Constructs an evaluator over a shared, immutable environment.
+     *
+     * Only the slot pool is copied; the symbol and functor tables are referenced. @p env must
+     * outlive the receiver.
+     */
+    explicit MPMEvaluator(const MPMEnvironment &env)
+        : pool(env.pool), is_set(env.is_set),
+          symbol_table_p(&env.symbols), functors_p(&env.functors) {}
+
+    // The receiver points at either its own tables or a shared environment's, so copying it would
+    // leave those pointers dangling. It is only ever used as a local.
+    MPMEvaluator(const MPMEvaluator &) = delete;
+    MPMEvaluator &operator=(const MPMEvaluator &) = delete;
+
+    /// Read access to the slot pool, to capture it as an MPMEnvironment template.
+    const std::vector<VarSlot> &givePool() const { return pool; }
+    /// Read access to the initialization flags, to capture them as an MPMEnvironment template.
+    const std::vector<bool> &giveIsSet() const { return is_set; }
     /**
      * @brief Injects a C++ function into the VM environment.
      * @param name Name of the function as it appears in the expression string.
      * @param f Lambda or function pointer following the Functor signature.
      */
-    void register_functor(std::string name, Functor f) { functors[name] = f; }
+    void register_functor(std::string name, Functor f) {
+        if (functors_p != &ownedFunctors) {
+            throw std::runtime_error("VM Error: cannot register a functor on an evaluator built over a shared environment; register it on the environment instead");
+        }
+        ownedFunctors[name] = f;
+    }
 
     // Internal Initialization (Sets flag to true)
     void init_slot(int idx, VarData val) {
@@ -495,7 +551,7 @@ public:
     // Public API
     /*
     void set_variable(std::string name, VarData val) {
-        if (symbol_table.count(name)) init_slot(symbol_table.at(name), val);
+        if (symbol_table_p->count(name)) init_slot(symbol_table_p->at(name), val);
         else throw std::runtime_error("Variable '" + name + "' not found in script symbols.");
     }
     */
@@ -506,8 +562,8 @@ public:
      * @return true if the script uses this variable and it was bound, false if ignored.
      */
     bool set_variable(const std::string& name, VarData val) {
-        auto it = symbol_table.find(name);
-        if (it != symbol_table.end()) {
+        auto it = symbol_table_p->find(name);
+        if (it != symbol_table_p->end()) {
             init_slot(it->second, val);
             return true;
         }
@@ -622,7 +678,7 @@ public:
                 case OpCode::CALL_FUNC: {
                     std::vector<const VarSlot*> args; 
                     for (int idx : instr.inputs) { check_init(idx); args.push_back(&pool[idx]); }
-                    functors.at(instr.func_name)(args, O); 
+                    functors_p->at(instr.func_name)(args, O); 
                     break;
                 }
                 case OpCode::CMP_GT: 

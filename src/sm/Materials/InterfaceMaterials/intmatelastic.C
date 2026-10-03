@@ -49,7 +49,7 @@ IntMatElastic :: IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n
 
 
 FloatArrayF<3>
-IntMatElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+IntMatElastic :: giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
@@ -63,7 +63,7 @@ IntMatElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatM
 }
 
 FloatMatrixF<3,3>
-IntMatElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatElastic :: giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     return eye<3>() * k;
 }

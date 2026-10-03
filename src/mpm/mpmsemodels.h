@@ -46,11 +46,27 @@
 #include "integral.h"
 #include "nrsolver.h"
 #include "connectivitytable.h"
+#include "mpm.h"
 
 #define _IFT_StationaryMPMSProblem_Name "mpmsymbolicstationaryproblem"
 
 
 namespace oofem {
+
+/**
+ * Pushes the current generalized state to the material at every integration point of every mpm
+ * cell of the problem, so that the subsequent giveCharacteristic* queries are reads of a cache
+ * consistent with the current solution.
+ *
+ * Call once per assembly phase, right after the solution field has been refreshed and before any
+ * term is evaluated. One call covers both the residual and the tangent sweep of that phase, since
+ * both read the same solution -- which is precisely what removes the dependence of the tangent on
+ * whether a residual sweep happened to run first.
+ *
+ * Which field supplies which state quantity was resolved per cell during Integral::initialize, so
+ * this is just a walk over the cells.
+ */
+void mpmUpdateMaterialTempState(EngngModel *problem, TimeStep *tStep);
 
     class StationaryMPMSProblem : public EngngModel
     {
@@ -97,6 +113,10 @@ namespace oofem {
         }
 
         void solveYourselfAt(TimeStep *tStep) override {
+            // Reset the temporary (working) material state at every integration point from the last
+            // equilibrated one; see NonStationaryMPMSProblem::solveYourselfAt for the rationale.
+            this->initStepIncrements();
+
             unknownsField->advanceSolution(tStep);
 
             this->forceEquationNumbering();
@@ -122,10 +142,17 @@ namespace oofem {
                     // loop over lhs integrals
                     for (auto i: lhsIntegrals) {
                         Integral* integral = this->integralList[i-1].get();
-                        integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+                        integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep);
                     }
+                    // see updateComponent below
+                    this->effectiveMatrix->assembleBegin();
+                    this->effectiveMatrix->assembleEnd();
                 }
             }
+            // Push the state before the external-force assembly: rhs terms may query material
+            // properties too (permeability and density in a gravity-driven Darcy term, say).
+            mpmUpdateMaterialTempState(this, tStep);
+
             // assemble rhs
             FloatArray rhs(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ));
             // loop over rhs integrals
@@ -168,7 +195,7 @@ namespace oofem {
                 eNorm.zero();
                 for (auto i: lhsIntegrals) {
                     Integral* integral = this->integralList[i-1].get();
-                    integral->assemble_rhs (residualVector, EModelDefaultEquationNumbering(), tStep, &eNorm); 
+                    integral->assemble_rhs (residualVector, EModelDefaultEquationNumbering(), tStep, &eNorm);
                 }
                 this->updateSharedDofManagers(this->residualVector, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
                 return;
@@ -179,8 +206,14 @@ namespace oofem {
                     // loop over lhs integrals
                     for (auto i: lhsIntegrals) {
                         Integral* integral = this->integralList[i-1].get();
-                        integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep); 
+                        integral->assemble_lhs (*effectiveMatrix, EModelDefaultEquationNumbering(), tStep);
                     }
+                    // Finalize the matrix. Assembling through the integrals bypasses
+                    // EngngModel::assemble, which is the only other caller of these; without them
+                    // a storage format that defers assembly -- PETSc, whose assembleEnd is
+                    // MatAssemblyEnd -- reaches the solver unassembled.
+                    this->effectiveMatrix->assembleBegin();
+                    this->effectiveMatrix->assembleEnd();
                 }
                 return;
             } else {
@@ -205,6 +238,18 @@ namespace oofem {
             previousStep = std :: move(currentStep);
             currentStep = std::make_unique<TimeStep>(istep, this, 1, ( double ) istep, 0., counter);
             return currentStep.get();
+        }
+
+        /**
+         * Pushes the state once per equilibrium iteration, which is the rate at which the solution
+         * actually changes. updateComponent may be called several times within one iteration (the
+         * residual and the tangent are separate calls), so the push is hoisted here rather than
+         * repeated there.
+         */
+        void initForNewIteration(Domain *d, TimeStep *tStep, int iterationNumber, const FloatArray &solution) override
+        {
+            EngngModel::initForNewIteration(d, tStep, iterationNumber, solution);
+            mpmUpdateMaterialTempState(this, tStep);
         }
 
         NumericalMethod *giveNumericalMethod(MetaStep *mStep) override
@@ -301,6 +346,16 @@ namespace oofem {
 
         void solveYourselfAt(TimeStep *tStep) override;
         void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+        /**
+         * Pushes the state once per equilibrium iteration, which is the rate at which the solution
+         * actually changes. updateComponent may be called several times within one iteration (the
+         * residual and the tangent are separate calls), so the push is hoisted here rather than
+         * repeated there.
+         */
+        void initForNewIteration(Domain *d, TimeStep *tStep, int iterationNumber, const FloatArray &solution) override {
+            EngngModel::initForNewIteration(d, tStep, iterationNumber, solution);
+            mpmUpdateMaterialTempState(this, tStep);
+        }
         bool newDofHandling() override { return true; }
         void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
         void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;

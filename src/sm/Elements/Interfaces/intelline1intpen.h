@@ -57,7 +57,7 @@ public:
     int computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords) override;
 
 
-    FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const override;
+    FloatArrayF<3> computeCovarBaseVectorAt(GaussPoint *gp) const override;
 
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using

@@ -4,9 +4,9 @@
   <Analysis _="mpmsymbolicstationaryproblem" nsteps="1" lhsterms="1 2 3 4" rhsterms="5" profileopt="1" maxiter="10">
     <MPMVariables>
       <!-- displacement -->
-      <Variable name="u" interpolation="feilin" type="vector" quantity="Displacement" size="2" dofs="1 2"/>
+      <Variable name="u" interpolation="feilin" type="vector" quantity="Displacements" size="2" dofs="1 2"/>
       <!-- test function -->
-      <Variable name="w" interpolation="feilin" type="vector" quantity="Displacement" size="2" dofs="1 2"/>
+      <Variable name="w" interpolation="feilin" type="vector" quantity="Displacements" size="2" dofs="1 2"/>
       <!-- pressure -->
       <Variable name="p" interpolation="feiconst" type="scalar" quantity="Pressure" size="1" dofs="11"/>
       <!-- test function -->

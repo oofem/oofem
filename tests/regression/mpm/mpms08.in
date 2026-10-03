@@ -11,8 +11,8 @@ Demo of symbolic mpm expression parser
 
 mpmsymbolicstationaryproblem nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 rhsterms 1 2 nmodules 1
 errorcheck
-Variable name "u" interpolation feiquad type scalar quantity 2 size 1 dofs 1 "T_f" # temperature 
-Variable name "w" interpolation feiquad type scalar quantity 2 size 1 dofs 1 "T_f" # test function
+Variable name "u" interpolation feiquad type scalar quantity "Temperature" size 1 dofs 1 "T_f" # temperature 
+Variable name "w" interpolation feiquad type scalar quantity "Temperature" size 1 dofs 1 "T_f" # test function
 SymbolicTerm 1 variable "u"  testvariable "w" mmode "_2dHeat" lexpression "Grad(w,gp).T*[[1.0,0.0],[0.0,1.0]]*Grad(u,gp)" rexpression "Grad(w,gp).T*[[1.0,0.0],[0.0,1.0]]*Grad(u,gp)*ru(u, cell, ts)"
 SymbolicTerm 2 variable "u"  testvariable "w" mmode "_2dHeat" lexpression "0.0" rexpression "N(w,gp).T*[[1.0]]" # constant heat source
 Integral 1 domain 1 set 1 term 1

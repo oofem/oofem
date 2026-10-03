@@ -54,7 +54,7 @@ IntMatBilinearCZFagerstromRate :: IntMatBilinearCZFagerstromRate(int n, Domain *
 
 ///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 FloatArrayF<3>
-IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_ntt(const FloatArrayF<3> &d, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     // returns real stress vector in 3d stress space of receiver according to
     // previous level of stress and current

@@ -74,15 +74,23 @@ int PythonField :: evaluateAt(FloatArray &answer, const Coordinates &coords, Val
 {
     // Do not use the raw CPython API functions Py_Initialize and Py_Finalize as these do not properly handle the lifetime of pybind11’s internal data.
     // https://pybind11.readthedocs.io/en/stable/advanced/embedding.html
-    
+
     // py::scoped_interpreter guard{}; // start the interpreter and keep it alive
-    
+
 //     py::initialize_interpreter();
+    // Fields are evaluated per integration point, so this runs on the worker threads of a
+    // parallel assembly loop as well; the GIL has to be held for the calling thread.
     #ifdef _USE_NANOBIND
+        nb::gil_scoped_acquire gil;
         nb::module_ calc = nb::module_::import_(moduleName.c_str());
         nb::object result = calc.attr(functionName.c_str())(nb::cast(coords), nb::cast(mode), nb::cast(tStep));
         answer = nb::cast<FloatArray>(result);
     #else
+        py::gil_scoped_acquire gil;
+        // Casting the result creates temporaries, which are kept alive by the frame that
+        // pybind11 pushes when a bound function is entered. A worker thread has no such
+        // frame of its own, so one is opened here.
+        py::detail::loader_life_support frame{};
         py::module calc = py::module::import(moduleName.c_str());
         py::object result = calc.attr(functionName.c_str())(coords, mode, tStep);
         answer = result.cast<FloatArray>();

@@ -50,7 +50,7 @@ BondCEBMaterial :: BondCEBMaterial(int n, Domain *d) : StructuralInterfaceMateri
 
 
 FloatArrayF<3>
-BondCEBMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+BondCEBMaterial :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     BondCEBMaterialStatus *status = static_cast< BondCEBMaterialStatus * >( this->giveStatus(gp) );
 
@@ -94,12 +94,57 @@ BondCEBMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp
     return answer;
 }
 
+FloatArrayF<3>
+BondCEBMaterial :: giveEngTraction_tnn(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+{
+    BondCEBMaterialStatus *status = static_cast< BondCEBMaterialStatus * >( this->giveStatus(gp) );
+
+    // normal tractions evaluated elastically
+    FloatArrayF<3> answer;
+    answer.at(2) = kn * jump.at(2);
+    answer.at(3) = kn * jump.at(3);
+
+
+    // trial value of shear tractions evaluated elastically
+    double s, dKappa = 0.;
+
+    double depsi = jump.at(1) - status->giveJump().at(1);
+    answer.at(1) = status->giveTraction().at(1) + ks * depsi;
+    s = answer.at(1);
+    dKappa = depsi;
+
+
+    // cumulative slip at the end of the step
+    double tempKappa = status->giveKappa() + dKappa;
+
+    // maximum allowed norm of shear traction
+    double smax = evaluateBondStress(tempKappa);
+
+    // reduce shear tractions, if needed
+    if ( s > smax ) {
+        answer.at(1) *= smax / s;
+    }
+ 
+    // update gp
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
+    status->setTempKappa(tempKappa);
+
+    return answer;
+}
 
 FloatMatrixF<3,3>
-BondCEBMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+BondCEBMaterial :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     ///@todo Only elastic tangent supported
     return diag<3>({kn, ks, ks});
+}
+
+FloatMatrixF<3,3>
+BondCEBMaterial :: giveStiffnessMatrix_Eng_tnn(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+    ///@todo Only elastic tangent supported
+    return diag<3>({ks, kn, kn});
 }
 
 double

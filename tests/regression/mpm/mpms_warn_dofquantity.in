@@ -1,0 +1,45 @@
+mpms_warn_dofquantity.out
+Warning test: a variable's declared field disagrees with the dofs it occupies.
+# The field a Variable represents and the dofs it lives on are independent declarations, so they
+# can contradict each other. Here the displacement field is stored on V_u/V_v, which conventionally
+# carry velocity. That is legitimate -- a deck may place a field on an unconventional dof, and the
+# Non-isothermal decks do -- so it warns and runs rather than failing. Without the warning a stale
+# or mistyped "quantity" changes what a variable means with no diagnostic at all, and surfaces far
+# away as an unsupported-material-mode error inside a state operator.
+# 
+test nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 rhsterms 1 2 nmodules 0
+Variable name "u" interpolation "feilin" type 1 quantity "Displacements" size 2 dofs 2 7 8 # displacement 
+Variable name "w" interpolation "feilin" type 1 quantity "Displacements" size 2 dofs 2 7 8 # test function
+BTSigmaTerm 1 variable "u"  testvariable "w" mmode 6
+NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 1. 0.
+Integral 1 domain 1 set 1 term 1
+Integral 2 domain 1 set 2 term 2
+#
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 4 nelem 2 nbc 2 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
+node 1 coords 3 0.            0.           0.
+node 2 coords 3 1.0           0.           0.
+node 3 coords 3 1.0           1.0          0.
+node 4 coords 3 0.0           1.0          0.
+#
+q1 1 nodes 4 1 2 3 4 mat 1 crosssect 1
+l1 2 nodes 2 2 3     mat 1 crosssect 1
+#
+simplecs 1 thick 1.0
+isole 1 d 1 e 1 n 0.3 talpha 1.
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 3 values 1 0   dofs 1 7 
+# y-displacement
+boundarycondition 2 loadtimefunction 1 set 4 values 1 0   dofs 1 8 
+#
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 1. 5. f(t) 4 0. 0. 1.0 1.0 
+set 1 elements 1 1
+# 
+set 2 elements 1 2 
+# x-bc
+set 3 nodes 2 1 4
+# y-bc
+set 4 nodes 1 1

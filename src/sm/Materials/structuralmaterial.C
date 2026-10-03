@@ -94,13 +94,48 @@ StructuralMaterial::giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMod
     }
 }
 
-void 
-StructuralMaterial::giveCharacteristicVector(FloatArray &answer, FloatArray& flux, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
+void
+StructuralMaterial::giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint* gp, TimeStep *tStep) const {
     if (type == Stress) {
-        return this->giveRealStressVector(answer, gp, flux, tStep);
+        // Cache read: updateTempState ran giveRealStressVector, which stored the resulting stress
+        // as the temporary value in the status.
+        //
+        // The reduced-mode routines expand to the 3d form and delegate to
+        // giveRealStressVector_3d (see giveRealStressVector_PlaneStrain), so what the status holds
+        // is the full 6-component vector regardless of mode. Reduce it back to the mode the point
+        // is in, which is what the caller's operator matrix is sized for.
+        const FloatArray &cached = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) )->giveTempStressVector();
+        if ( cached.isEmpty() ) {
+            OOFEM_ERROR("stress queried on element %d GP %d before any updateTempState established it; "
+                        "the integration point supplies no strain field to push",
+                        gp->giveElement()->giveNumber(), gp->giveNumber());
+        }
+        MaterialMode mmode = gp->giveMaterialMode();
+        if ( cached.giveSize() == 6 && StructuralMaterial::giveSizeOfVoigtSymVector(mmode) != 6 ) {
+            StructuralMaterial::giveReducedSymVectorForm(answer, cached, mmode);
+        } else {
+            answer = cached;
+        }
     } else {
-        OOFEM_ERROR("Not implemented");
-    } 
+        this->Material::giveCharacteristicVector(answer, type, gp, tStep);
+    }
+}
+
+StateVariableLayout
+StructuralMaterial::giveStateVariableIDs(MaterialMode mmode) const
+{
+    return { { FT_Displacements, SO_SymmetricGradient } };
+}
+
+void
+StructuralMaterial::updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep)
+{
+    // giveRealStressVector dispatches on the material mode, runs the constitutive integration and
+    // stores both the strain and the resulting stress as temporary values in the status. The
+    // returned stress is therefore redundant here -- the point of this call is the caching, which
+    // the subsequent giveCharacteristicVector(Stress, ...) query reads back.
+    FloatArray stress;
+    this->giveRealStressVector(stress, gp, stateVector, tStep);
 }
 
 void

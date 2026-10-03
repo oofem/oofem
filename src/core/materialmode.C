@@ -37,7 +37,7 @@
 namespace oofem {
 
 bool mmodeIs1D(MaterialMode mmode){
-    return (mmode == _1dMat) || (mmode == _1dMatGrad) || (mmode == _1dInterface) || (mmode == _1dHeat) || (mmode == _1dHeMo) || (mmode == _1dLattice);
+    return (mmode == _1dMat) || (mmode == _1dMatGrad) || (mmode == _1dInterface) || (mmode == _1dHeat) || (mmode == _1dHeMo) || (mmode == _1dUP) || (mmode == _1dLattice);
 }
 bool mmodeIs2D(MaterialMode mmode){
     return (mmode == _PlaneStress) || (mmode == _PlaneStrain) || (mmode == _PlaneStressGrad) || (mmode == _PlaneStrainGrad) || (mmode == _2dPlate) || (mmode == _2dPlateSubSoil) || (mmode == _2dBeam) || (mmode == _2dInterface) || (mmode == _2dHeat) || (mmode == _2dHeMo) || (mmode == _2dFlow) || (mmode == _2dAxiFlow) || (mmode == _2dUP) || (mmode == _2dUPV) || (mmode == _2dLattice) || (mmode == _2dMTLattice);  

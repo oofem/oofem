@@ -637,7 +637,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             F.rotatedWith(Q,'n');
 
             // Compute cohesive traction based on jump
-            T = intMat->giveFirstPKTraction_3d(jump, F, gp, tStep);
+            T = intMat->giveFirstPKTraction_ntt(jump, F, gp, tStep);
 
             //zzjump.printYourself("spatial jump");
             //T.printYourself("Traction");
@@ -750,7 +750,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     for ( auto &gp: *iRuleL ) {
         FloatArrayF<3> lCoords = { gp->giveNaturalCoordinate(1), gp->giveNaturalCoordinate(2), xi};
 
-        auto D = intMat->give3dStiffnessMatrix_dTdj(TangentStiffness, gp, tStep);
+        auto D = intMat->giveStiffnessMatrix_dTdj_ntt(TangentStiffness, gp, tStep);
 
         //IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( intMat->giveStatus(gp) );
         //double damage = status->giveTempDamage();

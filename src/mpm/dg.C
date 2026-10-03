@@ -60,7 +60,7 @@
 namespace oofem {
 REGISTER_EngngModel(DGProblem);
 
-ScalarAdvectionLhsAssembler :: ScalarAdvectionLhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
+ScalarAdvectionLhsAssembler :: ScalarAdvectionLhsAssembler(double alpha, double deltaT, FieldType q) : 
     MatrixAssembler(), alpha(alpha), deltaT(deltaT)
 {
     this->q = q;
@@ -95,7 +95,7 @@ void ScalarAdvectionLhsAssembler :: matrixFromElement(FloatMatrix &answer, Eleme
     }
 }
 
-ScalarAdvectionRhsAssembler :: ScalarAdvectionRhsAssembler(double alpha, double deltaT, Variable::VariableQuantity q) : 
+ScalarAdvectionRhsAssembler :: ScalarAdvectionRhsAssembler(double alpha, double deltaT, FieldType q) : 
     VectorAssembler(), alpha(alpha), deltaT(deltaT)
 {
     this->q = q;

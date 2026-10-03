@@ -73,14 +73,23 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
     auto N = interp.evalN(ip->giveNaturalCoordinates().at(1));
+    int nsd = domain->giveNumberOfSpatialDimensions();
 
-    answer.resize(2, 8);
+    answer.resize(nsd, nsd*4);
     answer.zero();
+    for (int i=1; i<=nsd; i++) {
+        answer.at(i,i) = -N.at(1);
+        answer.at(i, (nsd*2)+i) = N.at(1);
+        answer.at(i, nsd+i) = -N.at(2);
+        answer.at(i, (nsd*3)+i) = N.at(2);
+    }
+/*
     answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
     answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
 
     answer.at(1, 5) = answer.at(2, 6) = N.at(1);
     answer.at(1, 7) = answer.at(2, 8) = N.at(2);
+*/
 }
 
 
@@ -98,20 +107,25 @@ IntElLine1 :: computeGaussPoints()
     }
 }
 
-FloatArrayF<2>
+FloatArrayF<3>
 IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdxi;
     interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    int nsd = domain->giveNumberOfSpatialDimensions();
 
-    FloatArrayF<2> G;
+    FloatArrayF<3> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
         double X2_i = 0.5 * ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i + numNodes / 2)->giveCoordinate(2) );
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
+        if (nsd>2) {
+            double X3_i = 0.5 * ( this->giveNode(i)->giveCoordinate(3) + this->giveNode(i + numNodes / 2)->giveCoordinate(3) );
+            G.at(3) += dNdxi.at(i, 1) * X3_i;   
+        }
     }
     return G;
 }
@@ -133,7 +147,7 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
             r += N.at(i) * X_i;
         }
         return ds * r;
-    } else { // regular 2d
+    } else { // regular 2d or 3d case
         double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
         return ds * thickness;
     }
@@ -182,7 +196,14 @@ void IntElLine1::postInitialize()
 void
 IntElLine1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    if (nsd == 2) {
+        answer = {D_u, D_v};
+    } else if (nsd == 3) {
+        answer = {D_u, D_v, D_w};
+    } else {
+        OOFEM_ERROR("unsupported number of spatial dimensions (%d)", nsd);
+    }
 }
 
 void
@@ -190,19 +211,39 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Transformation matrix to the local coordinate system
     // xy plane
+    int nsd = domain->giveNumberOfSpatialDimensions();
     auto G = this->computeCovarBaseVectorAt(gp);
     G /= norm(G);
 
-    answer.resize(2, 2);
+    
+    answer.resize(nsd, nsd);
 //     answer.at(1, 1) =  G.at(1);//tangent vector
 //     answer.at(2, 1) = -G.at(2);
 //     answer.at(1, 2) =  G.at(2);
 //     answer.at(2, 2) =  G.at(1);
     //normal is -G.at(2), G.at(1), perpendicular to nodes 1 2
-    answer.at(1, 1) = -G.at(2);//normal vector
-    answer.at(2, 1) = G.at(1);
-    answer.at(1, 2) = G.at(1);
-    answer.at(2, 2) = G.at(2);
+    if (nsd == 2) {
+        answer.at(1, 1) = -G.at(2);// local vector =(normal_component, tangential_component) 
+        answer.at(2, 1) = G.at(1);
+        answer.at(1, 2) = G.at(1);
+        answer.at(2, 2) = G.at(2);
+    } else {
+        // in 3d, we need to define the third direction as well, which is perpendicular to the plane defined by the two vectors (tangent and normal)
+        FloatArrayF<3> t = G; // tangent vector
+        FloatArrayF<3> n = {-G.at(2), G.at(1), 0.0}; // normal vector, perpendicular to nodes 1 2
+        FloatArrayF<3> b = cross(t, n); // binormal vector, perpendicular to the plane defined by t and n
+
+        // local coordina system is defined by the tangent, normal and binormal vectors
+        answer.at(1, 1) = t.at(1);
+        answer.at(1, 2) = t.at(2);
+        answer.at(1, 3) = t.at(3);
+        answer.at(2, 1) = n.at(1);
+        answer.at(2, 2) = n.at(2);
+        answer.at(2, 3) = n.at(3);          
+        answer.at(3, 1) = b.at(1);
+        answer.at(3, 2) = b.at(2);
+        answer.at(3, 3) = b.at(3);
+    }
 }
 
 FEInterpolation *

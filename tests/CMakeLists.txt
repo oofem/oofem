@@ -162,7 +162,28 @@ if (USE_SM AND USE_PYTHON_EXTENSION)
 endif()
 
 if (USE_MPM)
-    oofem_regression_ctest(mpm "mpm")
+    # mpms_err_* are negative tests: they are expected to fail, and to say why. mpms_warn_* are
+    # expected to succeed but to emit a diagnostic, which the suite's -Werror would otherwise
+    # promote to a failure. Both are registered separately, below.
+    oofem_regression_ctest(mpm "mpm" EXCLUDE mpms_err_dualto.in mpms_warn_dofquantity.in)
+
+    # Run through a pipe: the solver reports the error by throwing, which reaches ctest as a
+    # crashed subprocess and would be judged a failure before PASS_REGULAR_EXPRESSION is consulted.
+    # Piping makes the test's exit status that of the grep, i.e. "did it say the right thing".
+    if (UNIX)
+        add_test(NAME "tests/regression/mpm/mpms_err_dualto.in"
+                 WORKING_DIRECTORY "${oofem_SOURCE_DIR}/tests/regression/mpm"
+                 COMMAND bash -c "$<TARGET_FILE:oofem> -f mpms_err_dualto.in 2>&1 | grep -q 'supplied by more than one unknown'")
+        set_tests_properties("tests/regression/mpm/mpms_err_dualto.in" PROPERTIES LABELS mpm)
+
+        # This one must both run to completion and warn, so the pipeline checks the message and
+        # PASS_REGULAR_EXPRESSION alone would not be enough. Run bare: with -Werror the warning
+        # this deck exists to produce would abort it.
+        add_test(NAME "tests/regression/mpm/mpms_warn_dofquantity.in"
+                 WORKING_DIRECTORY "${oofem_SOURCE_DIR}/tests/regression/mpm"
+                 COMMAND bash -c "$<TARGET_FILE:oofem> -f mpms_warn_dofquantity.in 2>&1 | tee /dev/stderr | grep -q 'conventionally carries'")
+        set_tests_properties("tests/regression/mpm/mpms_warn_dofquantity.in" PROPERTIES LABELS mpm)
+    endif()
 endif()
 
 if (USE_TM AND USE_SM AND USE_DSS AND USE_IML)

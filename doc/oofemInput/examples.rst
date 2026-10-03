@@ -5,7 +5,7 @@ Beam structure
 --------------
 
 This example for a simple beam structure gives basic overview of the
-input file (found under tests/sm/beam2d_1.in). Structure geometry and
+input file (found under ``tests/regression/sm/beam2d_1.in``). Structure geometry and
 its constitutive and geometrical properties are shown in Fig.
 (ex01_). The linear static analysis is required, the influence
 of shear is neglected.
@@ -176,7 +176,7 @@ Element-cut example
 
 The example shows explicit direct integration analysis of simple
 structure with two DOFs. The geometry and partitioning is sketched in
-fig. (nodecut-ex01_).
+fig. (elmentcut-ex02_).
 
 .. figure:: figs/poofem_ex02.pdf
    :alt: Element-cut partitioning example: (a) whole geometry, (b) partition 0, (c) partition 1.
@@ -244,52 +244,8 @@ fig. (nodecut-ex01_).
    NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
    ConstantFunction 1 f(t) 1.0
 
-Figures
--------
+.. seealso::
 
-.. figure:: figs/nodecut0cb.pdf
-   :alt: Node-cut partitioning.
-   :name: nodecut
-
-
-   Node-cut partitioning.
-
-
-.. figure:: figs/nodecut1cb.pdf
-   :alt: Node-cut partitioning - local constitutive mode.
-   :name: nodecut-lm
-
-
-   Node-cut partitioning - local constitutive mode.
-
-
-.. figure:: figs/nodecutnonloc1.pdf
-   :alt: Node-cut partitioning - nonlocal constitutive mode.
-   :name: nodecut-nlm
-
-
-   Node-cut partitioning - nonlocal constitutive mode.
-
-
-.. figure:: figs/elementcut0.pdf
-   :alt: Element-cut partitioning.
-   :name: elmentcut
-  
-
-   Element-cut partitioning.
-
-
-.. figure:: figs/elementcut1.pdf
-   :alt: Element-cut partitioning, local constitutive mode.
-   :name: elmentcut-lm
-
-
-   Element-cut partitioning, local constitutive mode.
-
-
-.. [1]
-   Hovewer, the problem does not support the changes of static system.
-   But it is possible to apply direct displacement control without
-   requiring BC applied (see nrsolver documentation). Therefore it is
-   possible to combine direct displacement control with direct load
-   control or indirect control.
+   The figures illustrating the node-cut and element-cut partitioning
+   strategies, and how each behaves in local and nonlocal constitutive mode,
+   are in :ref:`parallel-partitioning-figures`.

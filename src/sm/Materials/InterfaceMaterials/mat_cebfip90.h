@@ -114,8 +114,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_CebFipSlip90Material_Name; }
     const char *giveClassName() const override { return "CebFipSlip90Material"; }
 
-    double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<1,1> give1dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    double giveEngTraction_n(double jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> giveStiffnessMatrix_Eng_n(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

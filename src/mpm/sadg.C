@@ -81,11 +81,11 @@ class SADGElement : public MPElement {
     public:
     SADGElement(int n, Domain* d): MPElement(n,d) { }
 
-    void getDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
           answer={num};
     }
 
-    void getInternalDofManLocalCodeNumbers (IntArray& answer, const Variable::VariableQuantity q, int num ) const  override {
+    void getInternalDofManLocalCodeNumbers (IntArray& answer, const FieldType q, int num ) const  override {
         answer={};
     }
     // Note: performance can be probably improved once it will be possible 
@@ -138,7 +138,7 @@ class SADGElement : public MPElement {
     }
 
 
-    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const Variable::VariableQuantity q, char btype) override {
+    int computeFluxLBToLRotationMatrix(FloatMatrix &answer, int iSurf, const FloatArray& lc, const FieldType q, char btype) override {
         answer.clear(); 
         return 0;
     }
@@ -326,10 +326,10 @@ class SADGBLine1 : public SADGBoundaryElement {
     }
     int getNumberOfSurfaceDOFs() const override {return 0;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         return NULL;
     }
@@ -350,7 +350,7 @@ private:
 };
 
 const FEI2dLineLin SADGBLine1::interpol = FEI2dLineLin(1,2);
-const Variable SADGBLine1::scalarVariable(&SADGBLine1::interpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+const Variable SADGBLine1::scalarVariable(&SADGBLine1::interpol, FT_VOF, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGBLine1_Name "sadgbline1"
 REGISTER_Element(SADGBLine1)
@@ -405,10 +405,10 @@ class SADGTriangle1 : public SADGElement {
     }
     int getNumberOfSurfaceDOFs() const override {return 0;}
     int getNumberOfEdgeDOFs() const override {return 2;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         return NULL;
     }
@@ -426,7 +426,7 @@ private:
 };
 
 const FEI2dTrLin  SADGTriangle1::scalarInterpol = FEI2dTrLin(1,2);
-const Variable SADGTriangle1::scalarVariable(&SADGTriangle1::scalarInterpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+const Variable SADGTriangle1::scalarVariable(&SADGTriangle1::scalarInterpol, FT_VOF, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGTriangle1_Name "sadgtria1"
 REGISTER_Element(SADGTriangle1)
@@ -479,10 +479,10 @@ class SADGBrick1 : public SADGElement {
     }
     int getNumberOfSurfaceDOFs() const override {return 4;}
     int getNumberOfEdgeDOFs() const override {return 2;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         return NULL;
     }
@@ -500,7 +500,7 @@ private:
 };
 
 const FEI3dHexaLin  SADGBrick1::scalarInterpol = FEI3dHexaLin();
-const Variable SADGBrick1::scalarVariable(&SADGBrick1::scalarInterpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+const Variable SADGBrick1::scalarVariable(&SADGBrick1::scalarInterpol, FT_VOF, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGBrick1_Name "sadgbrick1"
 REGISTER_Element(SADGBrick1)
@@ -545,10 +545,10 @@ class SADGBQuad1 : public SADGBoundaryElement {
     }
     int getNumberOfSurfaceDOFs() const override {return 0;}
     int getNumberOfEdgeDOFs() const override {return 0;}
-    void getSurfaceLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {
+    void getSurfaceLocalCodeNumbers(IntArray& answer, const FieldType q) const override {
         answer={};
     }
-    void getEdgeLocalCodeNumbers(IntArray& answer, const Variable::VariableQuantity q) const override {}
+    void getEdgeLocalCodeNumbers(IntArray& answer, const FieldType q) const override {}
     Interface *giveInterface(InterfaceType it) override {
         return NULL;
     }
@@ -569,7 +569,7 @@ private:
 };
 
 const FEI3dQuadLin SADGBQuad1::interpol = FEI3dQuadLin();
-const Variable SADGBQuad1::scalarVariable(&SADGBQuad1::interpol, Variable::VariableQuantity::VolumeFraction, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
+const Variable SADGBQuad1::scalarVariable(&SADGBQuad1::interpol, FT_VOF, Variable::VariableType::scalar, 1, NULL, {DofIDItem::C_1});
 
 #define _IFT_SADGBQuad1_Name "sadgbquad1"
 REGISTER_Element(SADGBQuad1)

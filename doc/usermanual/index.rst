@@ -1,8 +1,3 @@
-.. OOFEM User manual documentation master file, created by
-   sphinx-quickstart on Tue Nov 19 09:32:57 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 OOFEM User Manual
 ===============================================
 
@@ -10,6 +5,15 @@ Authors: |author|
 
 Version: |version|, Date: |today|
 
+This manual is the entry point to `OOFEM <https://oofem.org>`_, a parallel,
+object-oriented finite element solver for mechanical, transport and fluid
+mechanics problems.  It takes you from installing the code, through running
+your first analysis, to reading the results and exporting them for
+visualization.  The individual components you can use in an input file are
+documented in detail in the companion manuals listed in :ref:`documentation`.
+
+The sources live on `GitHub <https://github.com/oofem/oofem>`_; questions are
+welcome on the `OOFEM forum <https://www.oofem.org/forum/>`_.
 
 .. toctree::
    :maxdepth: 2
@@ -18,12 +22,10 @@ Version: |version|, Date: |today|
    introduction
    installation
    gettingstarted
-   understandinginput 
+   understandinginput
    understandingoutput
    postprocessing
-   
-
-  
+   python
 
 
 Indices and tables

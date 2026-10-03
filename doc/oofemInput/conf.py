@@ -13,6 +13,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+# doc/_ext holds the extensions shared by the OOFEM manuals; oofemroles defines
+# the record/parameter markup roles (:descitem:, :elemparam:, :param:, ...).
+sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
 # Import shared settings
 from global_conf import *
@@ -27,7 +30,7 @@ project = 'OOFEM Input Manual'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [ 'sphinx.ext.imgconverter', 'myst_parser']
+extensions = ['sphinx.ext.imgconverter', 'myst_parser', 'oofemroles']
 myst_enable_extensions = ['colon_fence' ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -46,21 +49,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'classic'
 
-# Add/Update "html_theme_options" like this on your conf.py
-html_theme_options = {'body_max_width': '100%'}
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
-
-#html_css_files = [
-#    'custom.css',
-#]
+# The page width and the figure sizing come from doc/_static/oofem.css, which
+# global_conf wires in for every manual; do not set them per manual here.
 
 master_doc = 'index'
 
-latex_elements = {
-
-  'preamble': r'''\usepackage{lscape}'''
-}
+# The solver/storage compatibility matrix used to need a landscape page; it is
+# now two portrait-friendly list-tables, so no LaTeX preamble is required.

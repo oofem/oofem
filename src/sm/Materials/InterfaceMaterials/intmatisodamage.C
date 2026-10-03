@@ -50,7 +50,7 @@ IntMatIsoDamage :: IntMatIsoDamage(int n, Domain *d) : StructuralInterfaceMateri
 
 
 FloatArrayF<3>
-IntMatIsoDamage :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+IntMatIsoDamage :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
 
@@ -99,17 +99,17 @@ IntMatIsoDamage :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp
 
 
 FloatArrayF<3>
-IntMatIsoDamage :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint* gp, TimeStep* tStep) const
+IntMatIsoDamage :: giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint* gp, TimeStep* tStep) const
 {
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * > ( this->giveStatus ( gp ) );
-    auto answer = this->giveEngTraction_3d(jump, gp, tStep);
+    auto answer = this->giveEngTraction_ntt(jump, gp, tStep);
     status->letTempFirstPKTractionBe(answer);
     return answer;
 }
 
 
 FloatMatrixF<2,2>
-IntMatIsoDamage :: give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatIsoDamage :: giveStiffnessMatrix_Eng_nt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
 
@@ -161,7 +161,7 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *
 
 
 FloatMatrixF<3,3>
-IntMatIsoDamage :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+IntMatIsoDamage :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
 

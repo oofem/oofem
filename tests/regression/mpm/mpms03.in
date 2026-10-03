@@ -3,8 +3,8 @@ Demo of symbolic mpm problem; bending of clamped cantilever (l=3, h=0.3) loaded 
 # 
 test nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 1 1 rhsterms 1 2 nmodules 1
 errorcheck
-Variable name "u" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # displacement 
-Variable name "w" interpolation "feilin" type 1 quantity 0 size 2 dofs 2 1 2 # test function
+Variable name "u" interpolation "feilin" type 1 quantity "Displacements" size 2 dofs 2 1 2 # displacement 
+Variable name "w" interpolation "feilin" type 1 quantity "Displacements" size 2 dofs 2 1 2 # test function
 BTSigmaTerm 1 variable "u"  testvariable "w" mmode 6
 NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 0. 1.
 Integral 1 domain 1 set 1 term 1

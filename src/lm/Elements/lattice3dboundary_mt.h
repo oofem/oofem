@@ -63,13 +63,14 @@ public:
 
     void computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx) override;
 
+    using Lattice3d_mt::computeGradientMatrixAt;
     void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint);
 
-    double computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *) override;
 
-    void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rmode, TimeStep *tStep);
+    void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rmode, TimeStep *tStep) override;
 
-    void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep) override;
 
     ///a function that gives the location array of the boundary element
     void giveLocationArray(IntArray &locArray) { locArray = location; }
@@ -80,18 +81,18 @@ public:
 
     virtual void computeHomogenisedInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, FloatArray &unknowns);
 
-    virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     // definition
-    virtual const char *giveInputRecordName() const { return _IFT_Lattice3dboundary_mt_Name; }
-    const char *giveClassName() const { return "Lattice3dboundary_mt"; }
+    const char *giveInputRecordName() const override { return _IFT_Lattice3dboundary_mt_Name; }
+    const char *giveClassName() const override { return "Lattice3dboundary_mt"; }
 
     virtual void computeGeometryProperties();
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    virtual int            computeNumberOfDofs() { return 5; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int            computeNumberOfDofs() override { return 5; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
 
 #ifdef __OOFEG

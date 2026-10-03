@@ -146,7 +146,7 @@ LinkSlip :: evaluateBondStress(const double kappa) const
 
 
 FloatArrayF<3>
-LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+LinkSlip :: giveEngTraction_ntt(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
 
@@ -191,7 +191,7 @@ LinkSlip :: giveInterface(InterfaceType type)
 }
 
 FloatMatrixF<3,3>
-LinkSlip :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+LinkSlip :: giveStiffnessMatrix_Eng_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     return diag<3>({this->kNormal, this->kLateral, this->kLateral});
 }

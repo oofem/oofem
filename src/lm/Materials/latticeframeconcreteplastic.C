@@ -198,8 +198,6 @@ LatticeFrameConcretePlastic::giveBaseCapacitiesFromSection(GaussPoint *gp) const
     }
 
     const double A  = elem->giveArea(gp);
-    const double I1 = elem->giveI1(gp);
-    const double I2 = elem->giveI2(gp);
     const double J = elem->giveJ(gp);
 
     auto *cs = dynamic_cast<LatticeCrossSection *>(elem->giveCrossSection());
@@ -523,7 +521,6 @@ LatticeFrameConcretePlastic::checkTransition(const FloatArrayF < 6 > & stress,  
         m.at(6) = -1;
     }
 
-    int counter = 1;
     for ( int xi = -1; xi < 2; xi += 2 ) {
         for ( int yi = -1; yi < 2; yi += 2 ) {
             for ( int zi = -1; zi < 2; zi += 2 ) {
@@ -539,7 +536,6 @@ LatticeFrameConcretePlastic::checkTransition(const FloatArrayF < 6 > & stress,  
                                     k.at(5) = yj;
                                     k.at(6) = zj;
                                 }
-                                counter++;
                             }
                         }
                     }
@@ -610,10 +606,10 @@ LatticeFrameConcretePlastic::performPlasticityReturn(GaussPoint * gp, const Floa
                 if ( subIncrementCounter > numberOfSubIncrements ) {
                     OOFEM_LOG_INFO("Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
                     OOFEM_LOG_INFO("Yield value %e \n", yieldValue);
-                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3), convergedStrain.at(4), convergedStrain.at(5), convergedStrain.at(6) );
-                    OOFEM_LOG_INFO("tempStrain value %e %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3), tempStrain.at(4), tempStrain.at(5), tempStrain.at(6) );
-                    OOFEM_LOG_INFO("deltaStrain value %e %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3), deltaStrain.at(4), deltaStrain.at(5), deltaStrain.at(6) );
-                    OOFEM_LOG_INFO("targetstrain value %e %e %e %e\n", strain.at(1), strain.at(2), strain.at(3), strain.at(4), strain.at(5), strain.at(6) );
+                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3), convergedStrain.at(4), convergedStrain.at(5), convergedStrain.at(6) );
+                    OOFEM_LOG_INFO("tempStrain value %e %e %e %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3), tempStrain.at(4), tempStrain.at(5), tempStrain.at(6) );
+                    OOFEM_LOG_INFO("deltaStrain value %e %e %e %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3), deltaStrain.at(4), deltaStrain.at(5), deltaStrain.at(6) );
+                    OOFEM_LOG_INFO("targetstrain value %e %e %e %e %e %e\n", strain.at(1), strain.at(2), strain.at(3), strain.at(4), strain.at(5), strain.at(6) );
 
                     OOFEM_ERROR("LatticeFrameConcretePlastic :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
                 }
@@ -947,7 +943,7 @@ LatticeFrameConcretePlastic::giveFrameForces3d(const FloatArrayF < 6 > & origina
 FloatMatrixF < 6, 6 >
 LatticeFrameConcretePlastic::give3dFrameStiffnessMatrix(MatResponseMode rmode, GaussPoint * gp, TimeStep * atTime) const
 {
-    static_cast < LatticeFrameConcretePlasticStatus * > ( this->giveStatus(gp) );
+    this->giveStatus(gp);
 
     double g = this->e / ( 2. * ( 1. + this->nu ) );
     const double area       = ( static_cast < LatticeStructuralElement * > ( gp->giveElement() ) )->giveArea(gp);

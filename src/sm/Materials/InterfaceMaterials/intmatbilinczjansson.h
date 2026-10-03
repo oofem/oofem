@@ -166,8 +166,8 @@ protected:
     bool mSemiExplicit = false; // If semi-explicit time integration should be used
 
     int checkConsistency() override;
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
+    void giveInterfaceMaterialStiffnessMatrix_ntt(FloatMatrix &answer, MatResponseMode rMode,
+                                                  GaussPoint *gp, TimeStep *tStep);
 
 public:
     IntMatBilinearCZJansson(int n, Domain * d);
@@ -175,8 +175,8 @@ public:
     const char *giveClassName() const override { return "IntMatBilinearCZJansson"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatBilinearCZJansson_Name; }
 
-    FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<3> giveFirstPKTraction_ntt(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> giveStiffnessMatrix_dTdj_ntt(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

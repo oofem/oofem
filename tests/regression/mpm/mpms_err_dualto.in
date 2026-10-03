@@ -1,0 +1,40 @@
+mpms_err_dualto.out
+Negative test: two unknown fields claim the same state quantity.
+# "u" and "w" are declared with the same dof ids, and term 2 names "w" as its variable, the way a
+# pure source term does. Without `dualto "u"` on "w" nothing says it is a weighting function, so
+# both claim IST_StrainTensor and the state source cannot be resolved. Expected to fail.
+# 
+mpmsymbolicstationaryproblem nsteps 1 nvariables 2 nterms 2 nintegrals 2 lhsterms 2 1 2 rhsterms 0 nmodules 0
+#errorcheck
+Variable name "u" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 # displacement 
+Variable name "w" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 # test function
+SymbolicTerm 1 variable "u"  testvariable "w" mmode 10 lexpression "Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*Sig(u,gp,ts)"
+#NTfTerm 2 variable "u" testvariable "w" mmode 6 flux 2 1. 0.
+SymbolicTerm 2 variable "w"  testvariable "w" mmode 10 lexpression "0.0" rexpression "Grad_s(w,gp).T*Sig(w,gp,ts)"
+Integral 1 domain 1 set 1 term 1
+Integral 2 domain 1 set 1 term 2
+#Integral 2 domain 1 set 2 term 2
+#
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 2 nelem 1 nbc 2 ncrosssect 1 nic 0 nltf 1 nmat 1 nset 3
+node 1 coords 3 0.            0.           0.
+node 2 coords 3 1.0           0.           0.
+#
+l1 1 nodes 2 1 2     mat 1 crosssect 1
+#
+simplecs 1 thick 1.0
+isole 1 d 1 e 1 n 0.3 talpha 1.
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 2 values 1 0   dofs 1 1 
+nodalload 2 loadtimefunction 1 set 3 components 1 1.0 dofs 1 1
+#
+#
+constantfunction 1 f(t) 1
+set 1 elements 1 1 
+# x-bc
+set 2 nodes 1 1 
+set 3 nodes 1 2
+#%BEGIN_CHECK% 
+## check nodes 
+#%END_CHECK%

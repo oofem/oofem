@@ -62,7 +62,7 @@ def test_8():
 
 
     interpolation = oofempy.linearinterpolation()
-    w= u = oofempy.Variable(interpolation, oofempy.VariableQuantity.Displacement, oofempy.VariableType.vector, 2, [1,2], None)
+    w= u = oofempy.Variable(interpolation, oofempy.FieldType.FT_Displacements, oofempy.VariableType.vector, 2, [1,2], None)
     mt = oofempy.BTSigmaTerm(w, u, oofempy.MaterialMode._PlaneStress)
     lt = oofempy.NTfTerm(w, u, oofempy.MaterialMode._PlaneStress, (1.,0.))
     tstep = problem.giveNextStep()

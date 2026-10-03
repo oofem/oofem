@@ -63,10 +63,10 @@ class OOFEM_EXPORT PythonExpression : public Function
 private:
     /// Expression for the function value or path to python script   
     std :: string fExpression;
-    /// Expression for first time derivative or path to python script   
-    std :: string dfdtExpression = "0";
-    /// Expression for second time derivative or path to python script   
-    std :: string d2fdt2Expression = "0";
+    /// Expression for first time derivative or path to python script
+    std :: string dfdtExpression = "ret=0";
+    /// Expression for second time derivative or path to python script
+    std :: string d2fdt2Expression = "ret=0";
     
 
     PyObject *f;
@@ -75,7 +75,7 @@ private:
 
     PyObject *main_dict = nullptr;
 
-    /// Helper function to convert the std::map to a Python dictionary.
+    /// Helper function to convert the std::map to a Python dictionary. Requires the GIL.
     PyObject *getDict(const std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given value dictionary.
     void getArray(FloatArray &answer, PyObject **func, const std :: map< std :: string, FunctionArgument > &valDict);
