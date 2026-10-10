@@ -1,0 +1,37 @@
+idmfatigue01.out
+Test of fatigue damage law with exponential softening on a 1D truss element, local version
+StaticStructural nsteps 20 rtolf 1e-4 nmodules 1
+errorcheck
+#vtkxml tstep_step 1 vars 5 1 4 13 82 90 primvars 1 1 stype 1
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nltf 2 nic 0 nset 4
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 0.2 0.0 0.0
+truss1d 1 nodes 2 1 2 mat 1
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
+#fa 6.25e-3 is the amplitude A.
+#fm 2. is the exponent m.
+#fs0 0.5 is the threshold s₀. Nothing accumulates below 50% of e0.
+#fkd 1. is the acceleration exponent kd.
+#fdmax 0.999 is the cap on damage.
+#fcj 100. means 100x more simulated cycles.
+#Cycle from +3 to -3 MPa, limit +4 MPa
+idmfat1 1 d 2400. E 30.e3 n 0.2 tAlpha 12.e-6 equivstraintype 0 damlaw 0 e0 1.33333e-4 ef 1.5e-3 fa 6.25e-3 fm 2. fs0 0.5 fkd 1. fdmax 0.999 fcj 1000.
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 1 values 1 5.e-6 set 4
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 6 1.0 5.0 9. 13. 17. 20. f(t) 6 0. 4. 0. -4. 0 0.
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 2 1 2
+Set 4 nodes 1 2
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 5 number 1 gp 1 keyword 4 component 1  value +1.0000e-04
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1  value +2.6911e+00
+#ELEMENT tStep 5 number 1 gp 1 keyword 52 component 1 value 0.102959 
+#ELEMENT tStep 16 number 1 gp 1 keyword 4 component 1  value -2.5000e-05
+#ELEMENT tStep 16 number 1 gp 1 keyword 1 component 1  value -6.7278e-01
+#ELEMENT tStep 16 number 1 gp 1 keyword 52 component 1 value 0.102959 
+#%END_CHECK%

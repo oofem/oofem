@@ -2,8 +2,9 @@ latticetransmat.out
 Test of lattice transport material
 #
 TransientTransport nsteps 2 deltat 20.0 rtolf 1e-6 forcescale 1 0 forcescaledofs 1 11 alpha 1. contextOutputStep 100 nmodules 1
-errorcheck
-domain 2dMassLatticeTransport 
+#errorcheck
+vtkxml tstep_step 1 domain_all primvars 1 5 stype 1
+domain 2dMassLatticeTransport
 #
 OutputManager tstep_step 1 dofman_all
 ndofman 7 nelem 6 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 2

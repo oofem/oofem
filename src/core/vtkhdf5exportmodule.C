@@ -973,7 +973,8 @@ VTKHDF5ExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     Domain *d = emodel->giveDomain(1);
     int nc = 0;
     ( void ) nc; //silence the warning
-    FloatArray gc, value;
+    FloatArray value;
+    Coordinates gc;
     std::ofstream stream;
     InternalStateType isttype;
     InternalStateValueType vtype;

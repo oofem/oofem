@@ -1,8 +1,8 @@
 deepbeamFE2_01.out
 FE2 analysis of a reinforced concrete deep beam - Dirichlet-Dirichlet BC. Added by Adam Sciegaj
-StaticStructural nsteps 2 deltat 1.0 constrainednrminiter 5 rtolf 1.0e-3 MaxIter 20 minIter 1 initialguess 1 nmodules 1
+StaticStructural nsteps 2 deltat 1.0 constrainednrminiter 5 rtolf 1.0e-3 MaxIter 20 minIter 1 initialguess 1 nmodules 2
 errorcheck
-#vtkxml tstep_all domain_all vars 4 1 4 5 12 cellvars 1 47 stype 2
+vtkxml tstep_all domain_all vars 4 1 4 5 12 cellvars 1 47 stype 2
 #vtkxml tstep_all domain_all vars 4 1 4 5 12 ipvars 3 1 4 5
 #matlab tstep_all mesh data specials reactionforces integrationpoints internalvars 2 1 4
 domain 2dplanestress
