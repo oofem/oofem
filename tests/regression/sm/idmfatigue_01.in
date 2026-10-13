@@ -1,4 +1,4 @@
-idmfatigue01.out
+idmfatigue_01.out
 Test of fatigue damage law with exponential softening on a 1D truss element, local version
 StaticStructural nsteps 20 rtolf 1e-4 nmodules 1
 errorcheck
