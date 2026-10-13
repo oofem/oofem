@@ -14,8 +14,8 @@ constitutive equation
 .. math::
    :label: eq:bigham-model
 
-   \mbf{\tau} &=& \mbf{\tau}_0 + \mu \mbf{\dot\gamma} \;\;\;\text{if}\ \dot\tau \ge \tau_0 \\
-   \dot\gamma &=& \mbf{0} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\text{if}\ \dot\tau \le \tau_0
+   \mbf{\tau} &= \mbf{\tau}_0 + \mu \mbf{\dot\gamma} \;\;\;\text{if}\ \dot\tau \ge \tau_0 \\
+   \dot\gamma &= \mbf{0} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\text{if}\ \dot\tau \le \tau_0
 
 where :math:`\mbf{\tau}` is the shear stress applied to material, :math:`\dot\tau = \sqrt{\mbf{\tau} : \mbf{\tau}}`
 is the shear stress measure, :math:`\mbf{\dot\gamma}` is

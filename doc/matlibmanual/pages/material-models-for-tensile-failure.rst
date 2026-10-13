@@ -1134,7 +1134,7 @@ model is schematically shown in ``ff4``
 and the basic equations are summarized in :numref:`tab2`.
 Here, :math:`\veps` and :math:`\vsig` are the (nominal) second-order
 strain and stress tensors
-with components :math:`\eps_{ij}` and :math:`\sigma_{ij}`; :math:`ě` and :math:`š`
+with components :math:`\eps_{ij}` and :math:`\sigma_{ij}`; :math:`e` and :math:`s`
 are first-order strain and stress tensors with components :math:`e_i`
 and :math:`s_i`, which characterize the strain and stress on “microplanes”
 of different orientations given by a unit vector :math:`\mbf{n}`
@@ -1197,11 +1197,11 @@ state of the intact material between defects such as microcracks or voids.
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
    |                                                                                            |                                         |                                                                                |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vet = \vepst \cdot \mbf{n}`                                                        | :math:`\vst = \psi š`                   | :math:`š = \vsig \cdot \mbf{n}`                                                |
+   | :math:`\vet = \vepst \cdot \mbf{n}`                                                        | :math:`\vst = \psi s`                   | :math:`s = \vsig \cdot \mbf{n}`                                                |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vsigt : \dvepst = \frac{3}{2\pi} \int_{\Omega} \vst \cdot \dvet \; \mbox{d}\Omega` | :math:`\dvs \cdot ě = d\vst \cdot \vet` | :math:`\dvsig : \veps = \frac{3}{2\pi} \int_{\Omega} \dvs \cdot ě \; d\Omega`  |
+   | :math:`\vsigt : \dvepst = \frac{3}{2\pi} \int_{\Omega} \vst \cdot \dvet \; \mbox{d}\Omega` | :math:`\dvs \cdot e = d\vst \cdot \vet` | :math:`\dvsig : \veps = \frac{3}{2\pi} \int_{\Omega} \dvs \cdot e \; d\Omega`  |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vsigt = \frac{3}{2\pi} \int_\Omega (\vst \otimes \mbf{n}) \sym \; d\Omega`         | :math:`ě = \psi \vet`                   | :math:`\veps = \frac{3}{2\pi} \int_\Omega (ě \otimes \mbf{n}) \sym \; d\Omega` |
+   | :math:`\vsigt = \frac{3}{2\pi} \int_\Omega (\vst \otimes \mbf{n}) \sym \; d\Omega`         | :math:`e = \psi \vet`                   | :math:`\veps = \frac{3}{2\pi} \int_\Omega (e \otimes \mbf{n}) \sym \; d\Omega` |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
 
 .. figure:: /figures/dm_comp.png

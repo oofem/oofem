@@ -70,8 +70,8 @@ and the calculation of damage variables :math:`d_p` stems from :eq:`comp_eq_H`, 
 .. math::
    :label: comp_eq_dp11
 
-   d_{11} &=& 1 - \frac{\sigma'_{11}}{E_{11}\left(\varepsilon_{11}+\frac{\nu_{21}}{E_{22}}\sigma_{22}+ \frac{\nu_{31}}{E_{33}}\sigma_{33} \right)}\\
-   d_{12} &=& 1 - \frac{\sigma'_{12}}{G_{12}\varepsilon_{12}}
+   d_{11} &= 1 - \frac{\sigma'_{11}}{E_{11}\left(\varepsilon_{11}+\frac{\nu_{21}}{E_{22}}\sigma_{22}+ \frac{\nu_{31}}{E_{33}}\sigma_{33} \right)}\\
+   d_{12} &= 1 - \frac{\sigma'_{12}}{G_{12}\varepsilon_{12}}
 
 Damage is always controled not to decrease. :numref:`comp_performance` shows a typical performance for this damage model in one direction.
 

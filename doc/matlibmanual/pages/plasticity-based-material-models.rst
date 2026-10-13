@@ -49,14 +49,14 @@ The model is described by the equations
 
 .. math::
 
-   \bsig & = &\mbf{D} : \left(\eps - \epsp \right)
+   \bsig & = \mbf{D} : \left(\eps - \epsp \right)
    \\
-   \tauY & = & h(\kappa)
+   \tauY & = h(\kappa)
    \\
-   \epspd = \dot{\lambda} \frac{\partial g}{\partial \bsig} & = &
+   \epspd = \dot{\lambda} \frac{\partial g}{\partial \bsig} & = 
    \dot{\lambda} \left( \alphaPsi \mbf{\delta} + \frac{\mbf{s}}{2\sqrt{J_2}} \right)
    \\
-   \dot{\kappa} & = & \sqrt{\frac{2}{3}} \; \| \epspd \|
+   \dot{\kappa} & = \sqrt{\frac{2}{3}} \; \| \epspd \|
 
 and
 
@@ -299,7 +299,7 @@ and the damage law
 
    \omega(\kappa) = \omega_c(1-\mbox{e}^{-a\kappa}),
 
-In the equations above, :math:`\veps` is the strain tensor, :math:`\veps_{\rm{e}}` is the elastic strain tensor, :math:`\veps_{p}` is the plastic strain tensor, :math:`\mbf{D}` is the elastic stiffness tensor, :math:`\vsig` is the nominal stress tensor, :math:`\bar{\vsig}` is the effective stress tensor, :math:`\bar{š}` is the effective deviatoric stress tensor, :math:`\sigma_Y` is the magnitude of stress at yielding under uniaxial tension (or compression), :math:`\kappa` is the cumulated plastic strain, :math:`H` is the hardening modulus, :math:`\lambda` is the plastic multiplier, :math:`\omega` is the damage variable, :math:`\omega_c` is critical damage and :math:`a` is a positive dimensionless parameter.
+In the equations above, :math:`\veps` is the strain tensor, :math:`\veps_{\rm{e}}` is the elastic strain tensor, :math:`\veps_{p}` is the plastic strain tensor, :math:`\mbf{D}` is the elastic stiffness tensor, :math:`\vsig` is the nominal stress tensor, :math:`\bar{\vsig}` is the effective stress tensor, :math:`\bar{s}` is the effective deviatoric stress tensor, :math:`\sigma_Y` is the magnitude of stress at yielding under uniaxial tension (or compression), :math:`\kappa` is the cumulated plastic strain, :math:`H` is the hardening modulus, :math:`\lambda` is the plastic multiplier, :math:`\omega` is the damage variable, :math:`\omega_c` is critical damage and :math:`a` is a positive dimensionless parameter.
 
 Large-strain formulation
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -714,7 +714,7 @@ where the yield value :math:`f_t` is defined as
 
 .. _tensfig:
 
-.. figure:: /figures/tension.svg
+.. figure:: /figures/tension.pdf
    :width: 70%
    :alt: Tensile behavior of proposed model (:math:`f_t=0.2` MPa, :math:`G_f^I=0.018` N/mm)
 
@@ -747,7 +747,7 @@ where :math:`c_0` is initial cohesion of joint, :math:`\phi_0` initial friction 
 
    g_2=\vert\tau\vert+\sigma\tan\Phi-c
 
-.. figure:: /figures/shearconf.svg
+.. figure:: /figures/shearconf.pdf
    :width: 70%
    :alt: Shear behavior of proposed model for different confinement levels in MPa (:math:`c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}`)
 

@@ -414,17 +414,17 @@ Factors transforming the physical time :math:`t` into :math:`t_e`, :math:`t_r` a
 .. math::
    :label: dtedt
 
-   \frac{dt_e}{dt} &=& \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
-   \frac{dt_r}{dt} &=& \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
-   \frac{dt_s}{dt} &=& \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
+   \frac{dt_e}{dt} &= \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
+   \frac{dt_r}{dt} &= \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
+   \frac{dt_s}{dt} &= \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
 
 Functions describing the influence of temperature have the form 
 
 .. math::
 
-   \beta_{eT}(T) &=& \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
-   \beta_{rT}(T) &=& \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
-   \beta_{sT}(T) &=& \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
+   \beta_{eT}(T) &= \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+   \beta_{rT}(T) &= \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+   \beta_{sT}(T) &= \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
 
 motivated by the rate process theory. :math:`R` is the universal gas constant and :math:`Q_e`, :math:`Q_r`, :math:`Q_s` are activation energies for hydration, viscous processes and microprestress relaxation, respectively. Only the ratios :math:`Q_e/R`, :math:`Q_r/R` and :math:`Q_s/R` have to be specified.
 
@@ -432,9 +432,9 @@ Functions describing the influence of humidity have the form
 
 .. math::
 
-   \beta_{eh}(h) &=& \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
-   \beta_{rh}(h) &=& \alpha_r + \left( 1 - \alpha_r \right) h^2\\
-   \beta_{sh}(h) &=& \alpha_s + \left( 1 - \alpha_s \right) h^2
+   \beta_{eh}(h) &= \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
+   \beta_{rh}(h) &= \alpha_r + \left( 1 - \alpha_r \right) h^2\\
+   \beta_{sh}(h) &= \alpha_s + \left( 1 - \alpha_s \right) h^2
 
 where :math:`\alpha_e`, :math:`\alpha_r` and :math:`\alpha_s` are parameters. 
 
@@ -1093,11 +1093,11 @@ The yield function
 .. math::
    :label: eq:yieldSurface
 
-   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
-   && 
-   +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
+   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p}) &=
+   \left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 \\
+   &\quad + m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
 
-depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable :math:`\kappa_{\rm p}` (which enters through a dimensionless variable :math:`q_{\rm h}`). Parameter :math:`\fc` is the uniaxial compressive strength. 
+depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable :math:`\kappa_{\rm p}` (which enters through a dimensionless variable :math:`q_{\rm h}`). Parameter :math:`\fc` is the uniaxial compressive strength.
 
 Note that, under uniaxial compression characterized by axial stress :math:`\bar{\sigma}<0`, we have :math:`\bar{\sigma}_{\rm V}=\bar{\sigma}/3`, :math:`\bar{\rho}=-\sqrt{2/3}\,\bar{\sigma}` and :math:`\bar{\theta}=60^o`. The yield function then reduces to :math:`f_{\rm p}=(\bar{\sigma}/\fc)^2-q_{\rm{h}}^2`. This means that function :math:`q_{\rm{h}}` describes the evolution of the uniaxial compressive yield stress normalized by its maximum value, :math:`\fc`.
 
@@ -1420,8 +1420,8 @@ is decomposed into
 
 .. math::
 
-   \bar{\boldsymbol{\sigma}}_t &=& \sum_{I=1}^3 \langle\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I \\
-   \bar{\boldsymbol{\sigma}}_c &=& -\sum_{I=1}^3 \langle-\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I
+   \bar{\boldsymbol{\sigma}}_t &= \sum_{I=1}^3 \langle\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I \\
+   \bar{\boldsymbol{\sigma}}_c &= -\sum_{I=1}^3 \langle-\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I
 
 where :math:`\langle\ldots\rangle` are Macaulay brackets (positive-part operator).
 
@@ -1444,7 +1444,7 @@ The **hardening laws** read
 .. math::
    :label: eq:hardeningLawOne
 
-   q_{\rm h1}(\kappa_{\rm p}) &=& 
+   q_{\rm h1}(\kappa_{\rm p}) &= 
    \left\{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
    1 & \mbox{if $\kappa_{\rm p} \ge 1$}
    \end{array}
@@ -1453,7 +1453,7 @@ The **hardening laws** read
 .. math::
    :label: eq:hardeningLawTwo
 
-   q_{\rm h2}(\kappa_{\rm p}) &=& \left\{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
+   q_{\rm h2}(\kappa_{\rm p}) &= \left\{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
    1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
    \end{array}
    \right\}
@@ -2174,9 +2174,9 @@ For **SRF** the nominal bridging stress is
 
 .. math::
 
-   \sigma_{b,f}(w) &=& 2 V_f \sqrt{ \frac{E_f (1+\eta) \tau_0 \bar{w}}{D_f} } - \frac{V_f E_f (1+\eta) \bar{w} }{L_f}  \quad \mathrm{for} \: \bar{w} < w^* \\
-   \sigma_{b,f}(w) &=& \frac{V_f L_f \tau_s(w)}{D_f} \left( 1- \frac{2 \bar{w}}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
-   \sigma_{b,f}(w) &=& 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
+   \sigma_{b,f}(w) &= 2 V_f \sqrt{ \frac{E_f (1+\eta) \tau_0 \bar{w}}{D_f} } - \frac{V_f E_f (1+\eta) \bar{w} }{L_f}  \quad \mathrm{for} \: \bar{w} < w^* \\
+   \sigma_{b,f}(w) &= \frac{V_f L_f \tau_s(w)}{D_f} \left( 1- \frac{2 \bar{w}}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
+   \sigma_{b,f}(w) &= 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
 
 where :math:`w^* = \left(L_f^2 \tau_0 \right)/[(1+\eta) E_f D_f]`; :math:`\tau_0` is the bond shear strength between the fiber and matrix for small crack openings, :math:`w<w^\ast`.
 
