@@ -601,7 +601,7 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
         }
     }
 
-    double reactionForce = reactionForces.at(index);
+    double reactionForce = reactionForces.at(eqn.at(index));
     bool check = checkValue(reactionForce);
     if ( !check ) {
         OOFEM_WARNING("Check failed in %s: tstep %d, reaction forces number %d, dof %d:\n"
@@ -649,7 +649,7 @@ ReactionErrorCheckingRule :: getValue(double &answer, Domain *domain, TimeStep *
         }
     }
 
-    answer = reactionForces.at(index);
+    answer = reactionForces.at(eqn.at(index));
     return true;
 #else
     OOFEM_WARNING("Reaction forces only supported for structural problems yet");
