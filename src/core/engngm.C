@@ -370,11 +370,10 @@ EngngModel :: instanciateDomains(DataReader &dr)
 {
     int result = 1;
     // read problem domains
-    auto Idomain=domainList.begin();
-    for(size_t i=0; i<domainList.size(); i++){
+    for ( auto &Idomain : domainList ) {
         const std::shared_ptr<InputRecord>& rec=dr.giveNextInputRecord(DataReader::IR_domainRec);
         DataReader::RecordGuard guard(dr,rec);
-        result&=(*Idomain)->instanciateYourself(dr,rec);
+        result&=Idomain->instanciateYourself(dr,rec);
     }
     this->postInitialize();
     return result;
