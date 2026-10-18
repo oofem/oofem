@@ -1164,7 +1164,6 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     IntArray loc, dofids;
     FloatArray charVec;
     FloatMatrix R;
-    IntArray dofIDarry;
     int nnode = domain->giveNumberOfDofManagers();
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1185,12 +1184,14 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
             }
 
             if ( charVec.isNotEmpty() ) {
+                const IntArray &dofIDarry = load->giveDofIDs();
+
                 if ( node->computeM2LTransformation(R, dofIDarry) ) {
                     charVec.rotatedWith(R, 't');
                 }
 
-                if ( load->giveDofIDs().giveSize() ) {
-                    node->giveLocationArray(load->giveDofIDs(), loc, s);
+                if ( dofIDarry.giveSize() ) {
+                    node->giveLocationArray( dofIDarry, loc, s );
                 } else {
                     node->giveCompleteLocationArray(loc, s);
                 }
