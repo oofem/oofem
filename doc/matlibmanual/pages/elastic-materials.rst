@@ -110,14 +110,14 @@ where :math:`\xi=1-(\nu_{xy}*\nu_{yx}+\nu_{yz}*\nu_{zy}+\nu_{zx}*\nu_{xz})-(\nu_
 
 .. math::
 
-   \begin{eqnarray}
-   d_{xx}&=&E_X(1-\nu_{yz}*\nu_{zy})/\xi,\\
-   d_{xy}&=&E_y*(\nu_{xy}+\nu_{xz}*\nu_{zy})/\xi,\\
-   d_{xz}&=&E_z*(\nu_{xz}+\nu_{yz}*\nu_{xy})/\xi,\\
-   d_{yy}&=&E_y*(1-\nu_{xz}*\nu_{zx})/\xi,\\
-   d_{yz}&=&E_z*(\nu_{yz}+\nu_{yx}*\nu_{xz})/\xi,\\
-   d_{zz}&=&E_z*(1-\nu_{yx}*\nu_{xy})/\xi.
-   \end{eqnarray}
+   
+   d_{xx}&=E_X(1-\nu_{yz}*\nu_{zy})/\xi,\\
+   d_{xy}&=E_y*(\nu_{xy}+\nu_{xz}*\nu_{zy})/\xi,\\
+   d_{xz}&=E_z*(\nu_{xz}+\nu_{yz}*\nu_{xy})/\xi,\\
+   d_{yy}&=E_y*(1-\nu_{xz}*\nu_{zx})/\xi,\\
+   d_{yz}&=E_z*(\nu_{yz}+\nu_{yx}*\nu_{xz})/\xi,\\
+   d_{zz}&=E_z*(1-\nu_{yx}*\nu_{xy})/\xi.
+   
 
 :math:`E_i` is Young's modulus in the :math:`i`-th direction, :math:`G_{ij}` is the shear modulus in :math:`ij` plane, :math:`\nu_{ij}` is the major Poisson ratio, and :math:`\nu_{ji}` is the minor Poisson ratio. Assuming that :math:`E_x>E_y>E_z`, :math:`\nu_{xy} > \nu_{yx}` etc., then :math:`\nu_{xy}` is referred to as the major Poisson ratio, while :math:`\nu_{yx}` is referred as the minor Poisson ratio.
 

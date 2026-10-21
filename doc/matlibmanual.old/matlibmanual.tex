@@ -2330,6 +2330,268 @@ Features & Adaptivity support\\
 \clearpage
 
 %------------------------------------------------------------------
+\subsubsection{Isotropic damage model with fatigue - IdmFat1}
+\label{sec:idmfat1}
+%------------------------------------------------------------------
+This model extends the isotropic damage model for tensile failure, Section~\ref{sec:idmtf}
+(Idm1), by a fatigue mechanism. It reuses the definitions of equivalent strain,
+all damage laws and the input parameters of Idm1; the keyword of the material
+record is {\it idmfat1}. The stress is computed from the secant relation
+$$
+\mbf{\sigma}=(1-\omega)\,\mbf{D}_e\,\mbf{\varepsilon}
+$$
+with a scalar damage variable $\omega$. Since the unloading is secant, no permanent strain
+is produced (option {\it permstrain} of Idm1 is not supported).
+
+\paragraph{Static and fatigue damage.}
+As in Idm1, the history variable $\kappa$ stores the largest equivalent strain $\tilde\varepsilon$ reached so far.
+In the fatigue model, damage can increase in two different situations, which are distinguished
+using the damage envelope $\kappa_e=\max(\kappa,\varepsilon_0)$, where $\varepsilon_0$ is the
+strain at peak stress (parameter {\it e0}):
+\begin{itemize}
+\item {\bf Static damage} grows when the equivalent strain sets a new maximum,
+$\tilde\varepsilon>\kappa_e$. Its increment is obtained from the selected damage law $g(\kappa)$
+of Idm1 (Tab.~\ref{id_table}), $\Delta\omega_s=g(\kappa_{n+1})-g(\kappa_n)$. In monotonic
+loading, the model reduces exactly to Idm1.
+\item {\bf Fatigue damage} grows when the equivalent strain is increasing but has not exceeded the envelope,
+$\tilde\varepsilon_n<\tilde\varepsilon\le\kappa_e$. In this range a static model produces no damage.
+The rate is given by
+\begin{equation}
+\label{fatigue_rate}
+(1-\omega)^{k_d}\,{\rm d}\omega_f = A\,{\rm d}F(x),\qquad
+F(x)=\langle x-s_0\rangle^{m+1},\qquad x=\frac{\tilde\varepsilon}{\varepsilon_0}
+\end{equation}
+where $A$, $m$, $s_0$ and $k_d$ are material parameters (keywords {\it fa}, {\it fm},
+{\it fs0} and {\it fkd}). Parameter $s_0\in[0,1)$ is the fatigue threshold, i.e., the normalized
+strain level below which no fatigue damage accumulates, and $k_d\ge 0$ controls the acceleration
+of damage growth (the factor $(1-\omega)^{-k_d}$ in the damage rate produces the third stage of the fatigue life).
+Damage does not change during unloading.
+\end{itemize}
+The total damage is updated incrementally, $\omega_{n+1}=\omega_n+\Delta\omega_f+\Delta\omega_s$, and is limited
+by $\omega_{\rm max}$ (keyword {\it fdmax}). The static part $g(\kappa_n)$ is stored
+as an additional history variable, so that $\omega-g(\kappa)$ is the part of damage caused by fatigue.
+
+\paragraph{Numerical integration.}
+Equation~(\ref{fatigue_rate}) is separable and is integrated exactly over each step in which the equivalent strain
+increases from $\tilde\varepsilon_n$ to $\min(\tilde\varepsilon_{n+1},\kappa_e)$:
+$$
+(1-\omega_{n+1})^{k_d+1}=(1-\omega_n)^{k_d+1}-(k_d+1)\,A\,c_j\,\left[F(x_{\rm hi})-F(x_{\rm lo})\right]
+$$
+If the right-hand side falls below $(1-\omega_{\rm max})^{k_d+1}$, damage is set to $\omega_{\rm max}$.
+The result is independent of the step size, provided that the load history is resolved
+well enough to capture the load peaks (at least 8--10 steps per cycle are recommended).
+Factor $c_j\ge 1$ (keyword {\it fcj}) multiplies the fatigue increment, so that each simulated cycle
+represents $c_j$ real cycles. This is an approximate ``cycle jump'', appropriate only if the stress
+redistribution during the skipped cycles is negligible. The default value is 1.
+The factor can be varied during the analysis by specifying a time function $f(t)$ with keyword {\it fcjfunc}; the factor is
+then $c_jf(t)$, evaluated at the target time of each step (and not smaller than 1). The number of real cycles is the integral of the factor
+over the simulated cycles, e.g., a factor of 1 during the first cycles, then 100 during a stable stage, and again 1 close to failure.
+
+\paragraph{Response under cyclic loading.}
+For a cycle with normalized minimum and maximum equivalent strain $x_{\rm min}$ and $x_{\rm max}$
+(below the envelope), integration of (\ref{fatigue_rate}) over one cycle gives
+$$
+\frac{{\rm d}\omega}{{\rm d}N}=\frac{A\left[\langle x_{\rm max}-s_0\rangle^{m+1}-\langle x_{\rm min}-s_0\rangle^{m+1}\right]}{(1-\omega)^{k_d}}
+$$
+For constant amplitude under strain control, denote by $r$ the numerator, i.e., the damage rate for $\omega=0$. Then
+$$
+\omega(N)=1-\left[1-(k_d+1)\,r\,N\right]^{1/(k_d+1)},\qquad
+N_f=\frac{1}{(k_d+1)\,r},\qquad
+\frac{E}{E_0}=\left(1-\frac{N}{N_f}\right)^{1/(k_d+1)}
+$$
+The fatigue life thus follows a power-law S--N relation with slope $m+1$ in terms of $x_{\rm max}-s_0$.
+Parameters can be calibrated as follows: $m$ and $A$ from the S--N curve, $k_d$ from the
+shape of the stiffness-decay curve $E/E_0$ versus $N/N_f$, and $s_0$ from the run-out level.
+For load-controlled tests the strain increases with damage, the envelope is eventually exceeded and the
+static branch takes over, which produces the final acceleration of failure.
+
+\paragraph{Remarks and limitations.}
+\begin{itemize}
+\item The fatigue increment depends only on the local equivalent strain path. In problems with strain gradients
+(bending of beams and slabs) or with strain localization, the response is mesh dependent. The nonlocal version,
+Section~\ref{sec:idmnlfat1}, should be used in such cases.
+\item Only the Mazars definition of equivalent strain (default) responds to tensile straining; for fatigue in
+compression choose an equivalent strain sensitive to compression (e.g., {\it equivstraintype}=3 or 7) and adjust {\it e0} accordingly.
+\item The stiffness matrix is secant. Fatigue growth is not included in the tangent stiffness.
+\item There is no accumulation of permanent strain and no separate initial stage of rapid stiffness decrease.
+\end{itemize}
+
+The model parameters are summarized in Tab.~\ref{idfat_table}.
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Isotropic damage model for concrete with fatigue\\
+\hline
+Record Format & \descitem{IdmFat1}
+\elemparam{}{in}
+\elemparam{d}{rn}
+\elemparam{E}{rn}
+\elemparam{n}{rn}
+[\elemparam{tAlpha}{rn}]
+[\elemparam{equivstraintype}{in}]
+[\elemparam{k}{rn}]
+[\elemparam{damlaw}{in}]
+\elemparam{e0}{rn}
+[\elemparam{wf}{rn}]
+[\elemparam{ef}{rn}]
+[\elemparam{gf}{rn}]
+\elemparam{fa}{rn}
+[\elemparam{fm}{rn}]
+[\elemparam{fs0}{rn}]
+[\elemparam{fkd}{rn}]
+[\elemparam{fdmax}{rn}]
+[\elemparam{fcj}{rn}]
+[\elemparam{fcjfunc}{in}]\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{tAlpha} thermal expansion coefficient\\
+&- \param{equivstraintype}, \param{k}, \param{damlaw}, \param{e0}, \param{wf}, \param{ef}, \param{gf}
+and all other parameters of the static damage law: same as for Idm1, see Tab.~\ref{id_table}\\
+&- \param{fa} fatigue amplitude $A$ (dimensionless, required)\\
+&- \param{fm} fatigue exponent $m$, default value 2\\
+&- \param{fs0} fatigue threshold $s_0$ (normalized by $\varepsilon_0$), $0\le s_0<1$, default value 0.5\\
+&- \param{fkd} acceleration exponent $k_d\ge 0$, default value 1\\
+&- \param{fdmax} maximum value of total damage $\omega_{\rm max}$, $0<\omega_{\rm max}<1$, default value 0.999\\
+&- \param{fcj} cycle-scaling factor $c_j\ge 1$ (approximate cycle jump), default value 1\\
+&- \param{fcjfunc} number of a time function $f(t)$; the cycle-scaling factor used at time $t$ is $c_jf(t)$ (but at least 1), which allows the cycle jump to be changed during the analysis; default is no function\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
+Features & Secant stiffness; permanent strain is not supported\\
+\hline
+\caption{Isotropic damage model with fatigue -- summary.}
+\label{idfat_table}
+\end{longtable}
+
+\noindent Example (uniaxial tension, $E=30$~GPa, $f_t=E\varepsilon_0=4$~MPa):
+\begin{verbatim}
+idmfat1 1 d 2400. E 30.e3 n 0.2 tAlpha 12.e-6 equivstraintype 0 damlaw 0 \
+      e0 1.33333e-4 gf 100e-6 \
+      fa 6.25e-3 fm 2. fs0 0.5 fkd 1. fdmax 0.999 fcj 1.
+\end{verbatim}
+(The backslash at the end of a line continues the input record on the next line.)
+For $x_{\rm max}=0.7$, $x_{\rm min}\approx 0$, the parameters above give $N_f=1/[2\cdot 6.25\cdot10^{-3}\cdot 0.2^3]=10^4$ cycles.
+The values of the fatigue parameters in this example are only illustrative and are not calibrated for a specific concrete.
+
+\clearpage
+
+%------------------------------------------------------------------
+\subsubsection{Nonlocal isotropic damage model with fatigue - IdmnlFat1}
+\label{sec:idmnlfat1}
+%------------------------------------------------------------------
+Nonlocal version of the isotropic damage model with fatigue from Section~\ref{sec:idmfat1},
+based on the nonlocal isotropic damage model Idmnl1 from Section~\ref{sec:nidm}
+(keyword {\it idmnlfat1}). The nonlocal equivalent strain $\bar\varepsilon$, defined
+by the weighted average described in Section~\ref{sec:nidm}, replaces the local equivalent strain
+$\tilde\varepsilon$ in all formulas of the local model. This means that
+\begin{itemize}
+\item the history variable $\kappa$ and the envelope $\kappa_e=\max(\kappa,\varepsilon_0)$ are based on $\bar\varepsilon$,
+\item static damage grows when $\bar\varepsilon$ sets a new maximum, using the damage law $g(\kappa)$ of Idm1,
+\item fatigue damage grows according to (\ref{fatigue_rate}) when $\bar\varepsilon$ is increasing below the envelope,
+with $x=\bar\varepsilon/\varepsilon_0$.
+\end{itemize}
+The internal length $R$ of the nonlocal weight function therefore regularizes both the static softening
+and the fatigue damage growth, which removes the mesh sensitivity of the local model in the presence of strain gradients
+or localization. The exact step-by-step integration, the cycle law, the calibration and the meaning of the fatigue parameters are the same as
+for the local model.
+
+\paragraph{Remarks and limitations.}
+\begin{itemize}
+\item Only averaging of the equivalent strain is supported (\param{averagedQuantity}=1, default). Averaging of the compliance
+variable is rejected, because the fatigue law requires a strain measure.
+\item As in Idmnl1, the softening law is specified using strain parameters ({\it ef}); parameters {\it wf} and {\it gf} that
+activate the crack-band adjustment are not used. The fracture energy dissipated per unit crack area is then determined
+by {\it ef} together with the nonlocal length {\it r}.
+\item The nonlocal contributions to the tangent stiffness are added, as in Idmnl1, only when the nonlocal equivalent strain sets a
+new maximum. Fatigue growth below the envelope is not contained in the tangent stiffness; convergence relies on the secant stiffness and
+smaller time steps are advisable close to failure.
+\item The nonlocal average is evaluated at every iteration, so the computational cost of long cyclic analyses is high; the cycle-scaling
+factor {\it fcj} can be used to reduce the number of simulated cycles.
+\end{itemize}
+
+The model parameters are summarized in Tab.~\ref{idnlfat_table}.
+
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Nonlocal isotropic damage model for concrete with fatigue\\
+\hline
+Record Format & \descitem{IdmnlFat1}
+\elemparam{}{in}
+\elemparam{d}{rn}
+\elemparam{E}{rn}
+\elemparam{n}{rn}
+[\elemparam{tAlpha}{rn}]
+[\elemparam{equivstraintype}{in}]
+[\elemparam{k}{rn}]
+[\elemparam{damlaw}{in}]
+\elemparam{e0}{rn}
+[\elemparam{ef}{rn}]
+[\elemparam{At}{rn}]
+[\elemparam{Bt}{rn}]
+[\elemparam{md}{rn}]
+\elemparam{r}{rn}
+[\elemparam{regionMap}{ia}]
+[\elemparam{wft}{in}]
+[\elemparam{averagingType}{in}]
+[\elemparam{m}{rn}]
+[\elemparam{scalingType}{in}]
+[\elemparam{averagedQuantity}{in}]
+[\elemparam{nlVariation}{in}]
+[\elemparam{beta}{rn}]
+[\elemparam{zeta}{rn}]
+[\elemparam{maxOmega}{rn}]
+\elemparam{fa}{rn}
+[\elemparam{fm}{rn}]
+[\elemparam{fs0}{rn}]
+[\elemparam{fkd}{rn}]
+[\elemparam{fdmax}{rn}]
+[\elemparam{fcj}{rn}]
+[\elemparam{fcjfunc}{in}]\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{tAlpha} thermal expansion coefficient\\
+&- \param{equivstraintype}, \param{k}, \param{damlaw}, \param{e0}, \param{ef}, \param{At}, \param{Bt}, \param{md}: same as for Idmnl1,
+see Tab.~\ref{idnl_table} (parameters {\it wf} and {\it gf} cannot be used)\\
+&- \param{r}, \param{regionMap}, \param{wft}, \param{averagingType}, \param{m}, \param{scalingType}, \param{averagedQuantity}, \param{nlVariation},
+\param{beta}, \param{zeta}, \param{maxOmega}: nonlocal parameters, same as for Idmnl1, see Tabs.~\ref{idnl_table} and \ref{idnl_table_cont}
+(\param{averagedQuantity} must be 1)\\
+&- \param{fa} fatigue amplitude $A$ (dimensionless, required)\\
+&- \param{fm} fatigue exponent $m$, default value 2\\
+&- \param{fs0} fatigue threshold $s_0$ (normalized by $\varepsilon_0$), $0\le s_0<1$, default value 0.5\\
+&- \param{fkd} acceleration exponent $k_d\ge 0$, default value 1\\
+&- \param{fdmax} maximum value of total damage $\omega_{\rm max}$, $0<\omega_{\rm max}<1$, default value 0.999\\
+&- \param{fcj} cycle-scaling factor $c_j\ge 1$ (approximate cycle jump), default value 1\\
+&- \param{fcjfunc} number of a time function $f(t)$; the cycle-scaling factor used at time $t$ is $c_jf(t)$ (but at least 1), which allows the cycle jump to be changed during the analysis; default is no function\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
+Features & Nonlocal averaging of equivalent strain; secant stiffness for fatigue growth\\
+\hline
+\caption{Nonlocal isotropic damage model with fatigue -- summary.}
+\label{idnlfat_table}
+\end{longtable}
+
+\noindent Example (SI-type units MPa and m, $E=30$~GPa, nonlocal radius 1~cm):
+\begin{verbatim}
+idmnlfat1 1 d 2400. E 30.e3 n 0.2 tAlpha 12.e-6 equivstraintype 0 damlaw 0 \
+        e0 1.33333e-4 ef 1.5e-3 r 0.01 \
+        fa 6.25e-3 fm 2. fs0 0.5 fkd 1. fdmax 0.999 fcj 1.
+\end{verbatim}
+In a uniform strain field the nonlocal average equals the local value, so the nominal fatigue life is the same as for the local model.
+
+\clearpage
+
+%------------------------------------------------------------------
 \subsubsection{Anisotropic damage model - Mdm}
 %------------------------------------------------------------------
 
@@ -5718,7 +5980,7 @@ In the model, the interface is assumed to have only elastic stiffness $k_{\text{
 	\end{cases}
 \end{equation}
 
-\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_{\text{s}}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. Should the provided stiffness be smaller than $k_n = \dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
+\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_{\text{s}}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. If the provided stiffness $k_s$ is smaller than $\dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted up to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
 \begin{equation}
 \dfrac{\partial \mbf{t}}{\partial \mbf{\delta}}= \left[ \begin{array}{cc}
 \dfrac{\partial t_\text{n}}{\partial \delta_\text{n}} &

@@ -674,6 +674,125 @@ Features: Adaptivity support
 Isotropic damage model for tensile failure -- summary.
 :name: id_table
 
+
+.. _sec:idmfat1:
+
+Isotropic damage model with fatigue - IdmFat1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This model extends the isotropic damage model for tensile failure, Section :ref:`sec:idmtf` (Idm1), by a fatigue mechanism. It reuses the definitions of equivalent strain, all damage laws and the input parameters of Idm1; the keyword of the material record is *idmfat1*. The stress is computed from the secant relation
+
+.. math::
+
+   \mbf{\sigma}=(1-\omega)\,\mbf{D}_e\,\mbf{\varepsilon}
+
+with a scalar damage variable :math:`\omega`. Since the unloading is secant, no permanent strain is produced (option *permstrain* of Idm1 is not supported).
+
+**Static and fatigue damage.**
+As in Idm1, the history variable :math:`\kappa` stores the largest equivalent strain :math:`\tilde\varepsilon` reached so far. In the fatigue model, damage can increase in two different situations, which are distinguished using the damage envelope :math:`\kappa_e=\max(\kappa,\varepsilon_0)`, where :math:`\varepsilon_0` is the strain at peak stress (parameter *e0*):
+
+    - **Static damage** grows when the equivalent strain sets a new maximum, :math:`\tilde\varepsilon>\kappa_e`. Its increment is obtained from the selected damage law :math:`g(\kappa)` of Idm1 (:numref:`id_table`), :math:`\Delta\omega_s=g(\kappa_{n+1})-g(\kappa_n)`. In monotonic loading, the model reduces exactly to Idm1.
+
+    - **Fatigue damage** grows when the equivalent strain is increasing but has not exceeded the envelope, :math:`\tilde\varepsilon_n<\tilde\varepsilon\le\kappa_e`. In this range a static model produces no damage. The rate is given by
+
+      .. math::
+         :label: fatigue_rate
+
+         (1-\omega)^{k_d}\,{\rm d}\omega_f = A\,{\rm d}F(x),\qquad
+         F(x)=\langle x-s_0\rangle^{m+1},\qquad x=\frac{\tilde\varepsilon}{\varepsilon_0}
+
+      where :math:`A`, :math:`m`, :math:`s_0` and :math:`k_d` are material parameters (keywords *fa*, *fm*, *fs0* and *fkd*). Parameter :math:`s_0\in[0,1)` is the fatigue threshold, i.e., the normalized strain level below which no fatigue damage accumulates, and :math:`k_d\ge 0` controls the acceleration of damage growth (the factor :math:`(1-\omega)^{-k_d}` in the damage rate produces the third stage of the fatigue life). Damage does not change during unloading.
+
+The total damage is updated incrementally, :math:`\omega_{n+1}=\omega_n+\Delta\omega_f+\Delta\omega_s`, and is limited by :math:`\omega_{\rm max}` (keyword *fdmax*). The static part :math:`g(\kappa_n)` is stored as an additional history variable, so that :math:`\omega-g(\kappa)` is the part of damage caused by fatigue.
+
+**Numerical integration.**
+Equation :eq:`fatigue_rate` is separable and is integrated exactly over each step in which the equivalent strain increases from :math:`\tilde\varepsilon_n` to :math:`\min(\tilde\varepsilon_{n+1},\kappa_e)`:
+
+.. math::
+
+   (1-\omega_{n+1})^{k_d+1}=(1-\omega_n)^{k_d+1}-(k_d+1)\,A\,c_j\,\left[F(x_{\rm hi})-F(x_{\rm lo})\right]
+
+If the right-hand side falls below :math:`(1-\omega_{\rm max})^{k_d+1}`, damage is set to :math:`\omega_{\rm max}`. The result is independent of the step size, provided that the load history is resolved well enough to capture the load peaks (at least 8--10 steps per cycle are recommended). Factor :math:`c_j\ge 1` (keyword *fcj*) multiplies the fatigue increment, so that each simulated cycle represents :math:`c_j` real cycles. This is an approximate "cycle jump", appropriate only if the stress redistribution during the skipped cycles is negligible. The default value is 1. The factor can be varied during the analysis by specifying a time function :math:`f(t)` with keyword *fcjfunc*; the factor is then :math:`c_jf(t)`, evaluated at the target time of each step (and not smaller than 1). The number of real cycles is the integral of the factor over the simulated cycles, e.g., a factor of 1 during the first cycles, then 100 during a stable stage, and again 1 close to failure.
+
+**Response under cyclic loading.**
+For a cycle with normalized minimum and maximum equivalent strain :math:`x_{\rm min}` and :math:`x_{\rm max}` (below the envelope), integration of :eq:`fatigue_rate` over one cycle gives
+
+.. math::
+
+   \frac{{\rm d}\omega}{{\rm d}N}=\frac{A\left[\langle x_{\rm max}-s_0\rangle^{m+1}-\langle x_{\rm min}-s_0\rangle^{m+1}\right]}{(1-\omega)^{k_d}}
+
+For constant amplitude under strain control, denote by :math:`r` the numerator, i.e., the damage rate for :math:`\omega=0`. Then
+
+.. math::
+
+   \omega(N)=1-\left[1-(k_d+1)\,r\,N\right]^{1/(k_d+1)},\qquad
+   N_f=\frac{1}{(k_d+1)\,r},\qquad
+   \frac{E}{E_0}=\left(1-\frac{N}{N_f}\right)^{1/(k_d+1)}
+
+The fatigue life thus follows a power-law S--N relation with slope :math:`m+1` in terms of :math:`x_{\rm max}-s_0`. Parameters can be calibrated as follows: :math:`m` and :math:`A` from the S--N curve, :math:`k_d` from the shape of the stiffness-decay curve :math:`E/E_0` versus :math:`N/N_f`, and :math:`s_0` from the run-out level. For load-controlled tests the strain increases with damage, the envelope is eventually exceeded and the static branch takes over, which produces the final acceleration of failure.
+
+**Remarks and limitations.**
+
+    - The fatigue increment depends only on the local equivalent strain path. In problems with strain gradients (bending of beams and slabs) or with strain localization, the response is mesh dependent. The nonlocal version, Section :ref:`sec:idmnlfat1`, should be used in such cases.
+
+    - Only the Mazars definition of equivalent strain (default) responds to tensile straining; for fatigue in compression choose an equivalent strain sensitive to compression (e.g., *equivstraintype*\ =3 or 7) and adjust *e0* accordingly.
+
+    - The stiffness matrix is secant. Fatigue growth is not included in the tangent stiffness.
+
+    - There is no accumulation of permanent strain and no separate initial stage of rapid stiffness decrease.
+
+The model parameters are summarized in :numref:`idfat_table`.
+
+.. table:: Isotropic damage model with fatigue -- summary.
+   :name: idfat_table
+
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Description        | Isotropic damage model for concrete with fatigue                                             |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Record Format      | :descitem:`IdmFat1` :elemparam:`in` :elemparam:`d{rn}` :elemparam:`E{rn}` :elemparam:`n{rn}` |
+   |                    | [:elemparam:`tAlpha{rn}`] [:elemparam:`equivstraintype{in}`] [:elemparam:`k{rn}`]            |
+   |                    | [:elemparam:`damlaw{in}`] :elemparam:`e0{rn}` [:elemparam:`wf{rn}`] [:elemparam:`ef{rn}`]    |
+   |                    | [:elemparam:`gf{rn}`] :elemparam:`fa{rn}` [:elemparam:`fm{rn}`] [:elemparam:`fs0{rn}`]       |
+   |                    | [:elemparam:`fkd{rn}`] [:elemparam:`fdmax{rn}`] [:elemparam:`fcj{rn}`]                       |
+   |                    | [:elemparam:`fcjfunc{in}`]                                                                   |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Parameters         | - material number                                                                            |
+   |                    | - :param:`d` material density                                                                |
+   |                    | - :param:`E` Young's modulus                                                                 |
+   |                    | - :param:`n` Poisson's ratio                                                                 |
+   |                    | - :param:`tAlpha` thermal expansion coefficient                                              |
+   |                    | - :param:`equivstraintype`, :param:`k`, :param:`damlaw`, :param:`e0`, :param:`wf`,           |
+   |                    |   :param:`ef`, :param:`gf` and all other parameters of the static damage law: same as for    |
+   |                    |   Idm1, see :numref:`id_table`                                                               |
+   |                    | - :param:`fa` fatigue amplitude :math:`A` (dimensionless, required)                          |
+   |                    | - :param:`fm` fatigue exponent :math:`m`, default value 2                                    |
+   |                    | - :param:`fs0` fatigue threshold :math:`s_0` (normalized by :math:`\varepsilon_0`),          |
+   |                    |   :math:`0\le s_0<1`, default value 0.5                                                      |
+   |                    | - :param:`fkd` acceleration exponent :math:`k_d\ge 0`, default value 1                       |
+   |                    | - :param:`fdmax` maximum value of total damage :math:`\omega_{\rm max}`,                     |
+   |                    |   :math:`0<\omega_{\rm max}<1`, default value 0.999                                          |
+   |                    | - :param:`fcj` cycle-scaling factor :math:`c_j\ge 1` (approximate cycle jump), default value |
+   |                    |   1                                                                                          |
+   |                    | - :param:`fcjfunc` number of a time function :math:`f(t)`; the cycle-scaling factor used at  |
+   |                    |   time :math:`t` is :math:`c_jf(t)` (but at least 1), which allows the cycle jump to be      |
+   |                    |   changed during the analysis; default is no function                                        |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Supported modes    | 3dMat, PlaneStress, PlaneStrain, 1dMat                                                       |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Features           | Secant stiffness; permanent strain is not supported                                          |
+   +--------------------+----------------------------------------------------------------------------------------------+
+
+Example (uniaxial tension, :math:`E=30` GPa, :math:`f_t=E\varepsilon_0=4` MPa):
+
+.. code-block:: none
+
+   idmfat1 1 d 2400. E 30.e3 n 0.2 tAlpha 12.e-6 equivstraintype 0 damlaw 0 \
+         e0 1.33333e-4 gf 100e-6 \
+         fa 6.25e-3 fm 2. fs0 0.5 fkd 1. fdmax 0.999 fcj 1.
+
+(The backslash at the end of a line continues the input record on the next line.) For :math:`x_{\rm max}=0.7`, :math:`x_{\rm min}\approx 0`, the parameters above give :math:`N_f=1/[2\cdot 6.25\cdot10^{-3}\cdot 0.2^3]=10^4` cycles. The values of the fatigue parameters in this example are only illustrative and are not calibrated for a specific concrete.
+
+
 .. _sec:nidm:
 
 Nonlocal isotropic damage model for tensile failure - Idmnl1
@@ -888,6 +1007,95 @@ The model parameters are summarized in :numref:`idnl_table` and :numref:`idnl_ta
    | Features           | Adaptivity support                                                                           |
    +--------------------+----------------------------------------------------------------------------------------------+
 
+
+
+.. _sec:idmnlfat1:
+
+Nonlocal isotropic damage model with fatigue - IdmnlFat1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Nonlocal version of the isotropic damage model with fatigue from Section :ref:`sec:idmfat1`, based on the nonlocal isotropic damage model Idmnl1 from Section :ref:`sec:nidm` (keyword *idmnlfat1*). The nonlocal equivalent strain :math:`\bar\varepsilon`, defined by the weighted average described in Section :ref:`sec:nidm`, replaces the local equivalent strain :math:`\tilde\varepsilon` in all formulas of the local model. This means that
+
+    - the history variable :math:`\kappa` and the envelope :math:`\kappa_e=\max(\kappa,\varepsilon_0)` are based on :math:`\bar\varepsilon`,
+
+    - static damage grows when :math:`\bar\varepsilon` sets a new maximum, using the damage law :math:`g(\kappa)` of Idm1,
+
+    - fatigue damage grows according to :eq:`fatigue_rate` when :math:`\bar\varepsilon` is increasing below the envelope, with :math:`x=\bar\varepsilon/\varepsilon_0`.
+
+The internal length :math:`R` of the nonlocal weight function therefore regularizes both the static softening and the fatigue damage growth, which removes the mesh sensitivity of the local model in the presence of strain gradients or localization. The exact step-by-step integration, the cycle law, the calibration and the meaning of the fatigue parameters are the same as for the local model.
+
+**Remarks and limitations.**
+
+    - Only averaging of the equivalent strain is supported (:param:`averagedQuantity`\ =1, default). Averaging of the compliance variable is rejected, because the fatigue law requires a strain measure.
+
+    - As in Idmnl1, the softening law is specified using strain parameters (*ef*); parameters *wf* and *gf* that activate the crack-band adjustment are not used. The fracture energy dissipated per unit crack area is then determined by *ef* together with the nonlocal length *r*.
+
+    - The nonlocal contributions to the tangent stiffness are added, as in Idmnl1, only when the nonlocal equivalent strain sets a new maximum. Fatigue growth below the envelope is not contained in the tangent stiffness; convergence relies on the secant stiffness and smaller time steps are advisable close to failure.
+
+    - The nonlocal average is evaluated at every iteration, so the computational cost of long cyclic analyses is high; the cycle-scaling factor *fcj* can be used to reduce the number of simulated cycles.
+
+The model parameters are summarized in :numref:`idnlfat_table`.
+
+.. table:: Nonlocal isotropic damage model with fatigue -- summary.
+   :name: idnlfat_table
+
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Description        | Nonlocal isotropic damage model for concrete with fatigue                                    |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Record Format      | :descitem:`IdmnlFat1` :elemparam:`in` :elemparam:`d{rn}` :elemparam:`E{rn}`                  |
+   |                    | :elemparam:`n{rn}` [:elemparam:`tAlpha{rn}`] [:elemparam:`equivstraintype{in}`]              |
+   |                    | [:elemparam:`k{rn}`] [:elemparam:`damlaw{in}`] :elemparam:`e0{rn}` [:elemparam:`ef{rn}`]     |
+   |                    | [:elemparam:`At{rn}`] [:elemparam:`Bt{rn}`] [:elemparam:`md{rn}`] :elemparam:`r{rn}`         |
+   |                    | [:elemparam:`regionMap{ia}`] [:elemparam:`wft{in}`] [:elemparam:`averagingType{in}`]         |
+   |                    | [:elemparam:`m{rn}`] [:elemparam:`scalingType{in}`] [:elemparam:`averagedQuantity{in}`]      |
+   |                    | [:elemparam:`nlVariation{in}`] [:elemparam:`beta{rn}`] [:elemparam:`zeta{rn}`]               |
+   |                    | [:elemparam:`maxOmega{rn}`] :elemparam:`fa{rn}` [:elemparam:`fm{rn}`] [:elemparam:`fs0{rn}`] |
+   |                    | [:elemparam:`fkd{rn}`] [:elemparam:`fdmax{rn}`] [:elemparam:`fcj{rn}`]                       |
+   |                    | [:elemparam:`fcjfunc{in}`]                                                                   |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Parameters         | - material number                                                                            |
+   |                    | - :param:`d` material density                                                                |
+   |                    | - :param:`E` Young's modulus                                                                 |
+   |                    | - :param:`n` Poisson's ratio                                                                 |
+   |                    | - :param:`tAlpha` thermal expansion coefficient                                              |
+   |                    | - :param:`equivstraintype`, :param:`k`, :param:`damlaw`, :param:`e0`, :param:`ef`,           |
+   |                    |   :param:`At`, :param:`Bt`, :param:`md`: same as for Idmnl1, see :numref:`idnl_table`        |
+   |                    |   (parameters *wf* and *gf* cannot be used)                                                  |
+   |                    | - :param:`r`, :param:`regionMap`, :param:`wft`, :param:`averagingType`, :param:`m`,          |
+   |                    |   :param:`scalingType`, :param:`averagedQuantity`, :param:`nlVariation`, :param:`beta`,      |
+   |                    |   :param:`zeta`, :param:`maxOmega`: nonlocal parameters, same as for Idmnl1, see             |
+   |                    |   :numref:`idnl_table` and :numref:`idnl_table_cont` (:param:`averagedQuantity` must be 1)   |
+   |                    | - :param:`fa` fatigue amplitude :math:`A` (dimensionless, required)                          |
+   |                    | - :param:`fm` fatigue exponent :math:`m`, default value 2                                    |
+   |                    | - :param:`fs0` fatigue threshold :math:`s_0` (normalized by :math:`\varepsilon_0`),          |
+   |                    |   :math:`0\le s_0<1`, default value 0.5                                                      |
+   |                    | - :param:`fkd` acceleration exponent :math:`k_d\ge 0`, default value 1                       |
+   |                    | - :param:`fdmax` maximum value of total damage :math:`\omega_{\rm max}`,                     |
+   |                    |   :math:`0<\omega_{\rm max}<1`, default value 0.999                                          |
+   |                    | - :param:`fcj` cycle-scaling factor :math:`c_j\ge 1` (approximate cycle jump), default value |
+   |                    |   1                                                                                          |
+   |                    | - :param:`fcjfunc` number of a time function :math:`f(t)`; the cycle-scaling factor used at  |
+   |                    |   time :math:`t` is :math:`c_jf(t)` (but at least 1), which allows the cycle jump to be      |
+   |                    |   changed during the analysis; default is no function                                        |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Supported modes    | 3dMat, PlaneStress, PlaneStrain, 1dMat                                                       |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Features           | Nonlocal averaging of equivalent strain; secant stiffness for fatigue growth                 |
+   +--------------------+----------------------------------------------------------------------------------------------+
+
+Example (SI-type units MPa and m, :math:`E=30` GPa, nonlocal radius 1 cm):
+
+.. code-block:: none
+
+   idmnlfat1 1 d 2400. E 30.e3 n 0.2 tAlpha 12.e-6 equivstraintype 0 damlaw 0 \
+           e0 1.33333e-4 ef 1.5e-3 r 0.01 \
+           fa 6.25e-3 fm 2. fs0 0.5 fkd 1. fdmax 0.999 fcj 1.
+
+In a uniform strain field the nonlocal average equals the local value, so the nominal fatigue life is the same as for the local model.
+
+
+
+
 .. _subsubsection_anisotropic_damage_model_mdm:
 
 
@@ -926,7 +1134,7 @@ model is schematically shown in ``ff4``
 and the basic equations are summarized in :numref:`tab2`.
 Here, :math:`\veps` and :math:`\vsig` are the (nominal) second-order
 strain and stress tensors
-with components :math:`\eps_{ij}` and :math:`\sigma_{ij}`; :math:`ě` and :math:`š`
+with components :math:`\eps_{ij}` and :math:`\sigma_{ij}`; :math:`e` and :math:`s`
 are first-order strain and stress tensors with components :math:`e_i`
 and :math:`s_i`, which characterize the strain and stress on “microplanes”
 of different orientations given by a unit vector :math:`\mbf{n}`
@@ -989,11 +1197,11 @@ state of the intact material between defects such as microcracks or voids.
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
    |                                                                                            |                                         |                                                                                |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vet = \vepst \cdot \mbf{n}`                                                        | :math:`\vst = \psi š`                   | :math:`š = \vsig \cdot \mbf{n}`                                                |
+   | :math:`\vet = \vepst \cdot \mbf{n}`                                                        | :math:`\vst = \psi s`                   | :math:`s = \vsig \cdot \mbf{n}`                                                |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vsigt : \dvepst = \frac{3}{2\pi} \int_{\Omega} \vst \cdot \dvet \; \mbox{d}\Omega` | :math:`\dvs \cdot ě = d\vst \cdot \vet` | :math:`\dvsig : \veps = \frac{3}{2\pi} \int_{\Omega} \dvs \cdot ě \; d\Omega`  |
+   | :math:`\vsigt : \dvepst = \frac{3}{2\pi} \int_{\Omega} \vst \cdot \dvet \; \mbox{d}\Omega` | :math:`\dvs \cdot e = d\vst \cdot \vet` | :math:`\dvsig : \veps = \frac{3}{2\pi} \int_{\Omega} \dvs \cdot e \; d\Omega`  |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
-   | :math:`\vsigt = \frac{3}{2\pi} \int_\Omega (\vst \otimes \mbf{n}) \sym \; d\Omega`         | :math:`ě = \psi \vet`                   | :math:`\veps = \frac{3}{2\pi} \int_\Omega (ě \otimes \mbf{n}) \sym \; d\Omega` |
+   | :math:`\vsigt = \frac{3}{2\pi} \int_\Omega (\vst \otimes \mbf{n}) \sym \; d\Omega`         | :math:`e = \psi \vet`                   | :math:`\veps = \frac{3}{2\pi} \int_\Omega (e \otimes \mbf{n}) \sym \; d\Omega` |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
 
 .. figure:: /figures/dm_comp.png

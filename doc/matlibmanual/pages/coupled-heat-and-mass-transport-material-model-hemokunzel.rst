@@ -11,8 +11,8 @@ and negligible water convection. The governing equations for temperature and hum
 .. math::
    :label: eq-governing-heat
 
-   \frac{\partial Q}{\partial t} &=& \frac{\partial Q}{\partial T} \frac{\partial T}{\partial t} = C_v \frac{\partial T}{\partial t} = -\nabla q_T = \nabla \left( \lambda \nabla T \right ) + h_v \nabla \left( \delta_p \nabla (H p_{sat}) \right )\\
-   \frac{\partial w}{\partial t} &=& \frac{\partial w}{\partial H} \frac{\partial H}{\partial t} = -\nabla q_H = \nabla \left( D_H \nabla H + \delta_p \nabla (H p_{sat}) \right )
+   \frac{\partial Q}{\partial t} &= \frac{\partial Q}{\partial T} \frac{\partial T}{\partial t} = C_v \frac{\partial T}{\partial t} = -\nabla q_T = \nabla \left( \lambda \nabla T \right ) + h_v \nabla \left( \delta_p \nabla (H p_{sat}) \right )\\
+   \frac{\partial w}{\partial t} &= \frac{\partial w}{\partial H} \frac{\partial H}{\partial t} = -\nabla q_H = \nabla \left( D_H \nabla H + \delta_p \nabla (H p_{sat}) \right )
 
 .. table:: Parameters from Kunzel's model.
    :name: tab-parameters-kunzel
@@ -77,14 +77,14 @@ where
 .. math::
    :label: k_TT
 
-   k_{TT} &=& \lambda(w) + h_v \cdot \delta_p(T) \cdot H \cdot  \frac{\Delta p_{sat}}{\Delta T}(T),\\
-   k_{TH} &=& h_v \cdot \delta_p(T) \cdot p_{sat}(T),\\
-   k_{HT} &=& \delta_p(T) \cdot H \cdot \frac{\Delta p_{sat}}{\Delta T}(T),\\
-   k_{HH} &=& D_w(H) \cdot \frac{\Delta w}{\Delta H}(H) + \delta_p(T) \cdot p_{sat}(T),\\
-   c_{TT} &=& C_s \cdot \rho + C_w \cdot w,\\
-   c_{TH} &=& 0,\\
-   c_{HT} &=& 0,\\
-   c_{HH} &=& \frac{\Delta w}{\Delta H}(H).
+   k_{TT} &= \lambda(w) + h_v \cdot \delta_p(T) \cdot H \cdot  \frac{\Delta p_{sat}}{\Delta T}(T),\\
+   k_{TH} &= h_v \cdot \delta_p(T) \cdot p_{sat}(T),\\
+   k_{HT} &= \delta_p(T) \cdot H \cdot \frac{\Delta p_{sat}}{\Delta T}(T),\\
+   k_{HH} &= D_w(H) \cdot \frac{\Delta w}{\Delta H}(H) + \delta_p(T) \cdot p_{sat}(T),\\
+   c_{TT} &= C_s \cdot \rho + C_w \cdot w,\\
+   c_{TH} &= 0,\\
+   c_{HT} &= 0,\\
+   c_{HH} &= \frac{\Delta w}{\Delta H}(H).
 
 Note, that conductivity matrix \tenss{K} is unsymmetric hence unsymmetric matrix storage needs to be used (smtype).
 

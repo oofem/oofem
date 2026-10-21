@@ -72,6 +72,7 @@ def test_6():
     
         
     problem.terminateAnalysis()
+    problem.getLogger().printStatistics()
     print("\nProblem solved")
 
 
