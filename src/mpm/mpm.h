@@ -648,6 +648,16 @@ public:
         answer.clear();
     }
 
+    /**
+     * Adds the squared residual contributions of the receiver, by dof id, to @p answer. They make
+     * the reference the convergence of the residual of each dof group is measured against.
+     *
+     * The default is the squared entries of the internal residual (MPM_InternalResidual).
+     *
+     * @param answer Sums of squares by dof id; sized to the largest dof id of the domain.
+     * @param dofScale Scaling of the equations, by dof id; empty for no scaling.
+     */
+    virtual void assembleResidualNorms(FloatArray &answer, const FloatArray &dofScale, TimeStep *tStep);
 };
 
 

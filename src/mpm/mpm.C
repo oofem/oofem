@@ -39,6 +39,7 @@
 #include "material.h"
 #include "internalstatetype.h"
 #include "dofiditem.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 
@@ -424,6 +425,22 @@ MPElement::updateTempState(TimeStep *tStep)
             mat->updateTempState(state, gp, tStep);
         }
     }
+}
+
+
+void
+MPElement::assembleResidualNorms(FloatArray &answer, const FloatArray &dofScale, TimeStep *tStep)
+{
+    FloatArray r;
+    IntArray loc, dofids;
+    this->giveCharacteristicVector(r, MPM_InternalResidual, VM_Total, tStep);
+    this->giveLocationArray(loc, EModelDefaultEquationNumbering(), & dofids);
+    for ( int i = 1; i <= dofids.giveSize(); i++ ) {
+        if ( dofids.at(i) <= dofScale.giveSize() ) {
+            r.at(i) *= dofScale.at( dofids.at(i) );
+        }
+    }
+    answer.assembleSquared(r, dofids);
 }
 
 
