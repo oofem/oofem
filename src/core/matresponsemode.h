@@ -79,8 +79,27 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_22, 36) /* Compressibility coefficient for fluid phase 2 (e.g., air) */ \
     ENUM_ITEM_WITH_VALUE(Permeability_2, 37) /* Compressibility coefficient for solid skeleton */ \
     ENUM_ITEM_WITH_VALUE(MassDensity_1, 38) /* Mass density of fluid phase 1 (e.g., water) */ \
-    ENUM_ITEM_WITH_VALUE(MassDensity_2, 39) /* Mass density of fluid phase 2 (e.g., air) */ 
-    
+    ENUM_ITEM_WITH_VALUE(MassDensity_2, 39) /* Mass density of fluid phase 2 (e.g., air) */ \
+    /* Coefficients of coupled thermo-hydro-mechanical models of porous media. The values are fixed: \
+       python materials written before these had names test the bare integers. */ \
+    ENUM_ITEM_WITH_VALUE(ThermalStressCoupling, 41) /* Thermal stress coupling of the skeleton (E*beta_s) */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_1T, 42) /* Thermal expansion storage of fluid phase 1 */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_2T, 43) /* Thermal expansion storage of fluid phase 2 */ \
+    ENUM_ITEM_WITH_VALUE(VolumetricHeatCapacity, 44) /* Volumetric heat capacity of the mixture (rho*c)_mix */ \
+    ENUM_ITEM_WITH_VALUE(EffectiveConductivity, 45) /* Effective thermal conductivity of the mixture */ \
+    ENUM_ITEM_WITH_VALUE(HeatSource, 46) /* Volumetric heat source */ \
+    ENUM_ITEM_WITH_VALUE(VolumetricHeatCapacity_1, 47) /* Volumetric heat capacity of fluid phase 1 (rho_1*Cp_1) */ \
+    ENUM_ITEM_WITH_VALUE(VolumetricHeatCapacity_2, 48) /* Volumetric heat capacity of fluid phase 2 (rho_2*Cp_2) */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_22_Stab, 50) /* Stabilized (tangent only) compressibility coefficient 22 */ \
+    ENUM_ITEM_WITH_VALUE(CompressibilityCoefficient_11_Stab, 51) /* Stabilized (tangent only) compressibility coefficient 11 */ \
+    ENUM_ITEM_WITH_VALUE(SolventStorage, 60) /* Storage capacity of dissolved constituents (n*Sw) */ \
+    ENUM_ITEM_WITH_VALUE(SolventDiffusivity_1, 61) /* Effective diffusivity of constituent 1 */ \
+    ENUM_ITEM_WITH_VALUE(SolventDiffusivity_2, 62) /* Effective diffusivity of constituent 2 */ \
+    ENUM_ITEM_WITH_VALUE(SolventSource_1, 63) /* Mass generation rate of constituent 1 */ \
+    ENUM_ITEM_WITH_VALUE(SolventSource_2, 64) /* Mass generation rate of constituent 2 */ \
+    ENUM_ITEM_WITH_VALUE(VaporizationRate, 65) /* Mass rate of vaporization (fluid 1 to fluid 2) */ \
+    ENUM_ITEM_WITH_VALUE(VaporizationCoefficient, 66) /* Derivative of the vaporization rate w.r.t. fluid 2 pressure */
+
 #include "enum-impl.h"
 
 } // end namespace oofem
