@@ -519,6 +519,27 @@ class OOFEM_EXPORT MPElement : public Element {
     }
 
     /**
+     * Whether the geometry interpolation of the receiver is of higher order than the
+     * interpolations of (some of) its fields -- a cell given with the inner nodes of a quadratic
+     * field, whose geometry follows them. The gradients of the fields then have to be taken
+     * through the geometry of the cell (see evaldNdx) rather than through the field
+     * interpolations, which assume the geometry they interpolate themselves.
+     */
+    virtual bool hasHigherOrderGeometry() const { return false; }
+
+    /**
+     * Evaluates the derivatives dN_i/dx_j of the shape functions of an interpolation at a point
+     * of a cell. On a cell with a higher order geometry (MPElement::hasHigherOrderGeometry), they
+     * are the derivatives with respect to the local coordinates, mapped by the Jacobian of the
+     * cell geometry; otherwise the interpolation evaluates them itself.
+     * @param answer Derivatives, one row per shape function, one column per global coordinate.
+     * @param interpol Interpolation of the field.
+     * @param cell Cell.
+     * @param lcoords Local coordinates of the point.
+     */
+    static void evaldNdx(FloatMatrix &answer, const FEInterpolation *interpol, const Element &cell, const FloatArray &lcoords);
+
+    /**
      * @name Interpolation operators for a Variable at an integration point.
      *
      * These are the shared implementations of the operators the symbolic terms expose as Grad_s,
