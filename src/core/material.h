@@ -163,10 +163,13 @@ public:
     /**
      * Returns the layout of the generalized state vector expected by updateTempState.
      *
-     * Each entry is a (field, operator) pair, in the order the pieces are packed into the state
-     * vector: which primary field, and what is taken of it. The two are kept separate so that they
-     * compose -- a material needing both a pressure and its gradient names the same field twice
-     * with different operators, and a new field costs no new operator.
+     * Each entry is a (field, operator[, value mode]) triple, in the order the pieces are packed
+     * into the state vector: which primary field, what is taken of it, and of which value of the
+     * field. The field and the operator are kept separate so that they compose -- a material
+     * needing both a pressure and its gradient names the same field twice with different
+     * operators, and a new field costs no new operator. The value mode defaults to
+     * VM_TotalIntrinsic; a rate-dependent material asks for rates with VM_Velocity, e.g.
+     * { FT_Displacements, SO_SymmetricGradient, VM_Velocity } for the strain rate.
      *
      * An empty layout (the default) means the receiver does not participate in the push/pull
      * protocol and the caller must fall back on the physics-specific entry points.

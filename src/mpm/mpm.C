@@ -371,7 +371,7 @@ MPElement::assembleStateVector(FloatArray &answer, const StateVariableLayout &la
 
         FloatArray u, contribution;
         FloatMatrix op;
-        this->getUnknownVector(u, v, VM_TotalIntrinsic, tStep);
+        this->getUnknownVector(u, v, spec.mode, tStep);
         this->computeStateOperatorAt(op, spec.op, v, gp);
 
         contribution.beProductOf(op, u);

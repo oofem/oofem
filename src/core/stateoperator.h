@@ -37,6 +37,7 @@
 
 #include "enum.h"
 #include "field.h"
+#include "valuemodetype.h"
 
 #include <vector>
 
@@ -60,17 +61,25 @@ namespace oofem {
 #include "enum-impl.h"
 
 /**
- * One entry of the generalized state layout a material advertises: which primary field, and what
- * is taken of it.
+ * One entry of the generalized state layout a material advertises: which primary field, what is
+ * taken of it, and of which value of the field.
  *
  * The field is named by what it physically is, not by where its degrees of freedom happen to be
  * numbered, so a material never obliges a deck to renumber its dofs. FieldType is the core-level
  * vocabulary for this; the mpm module's Variable carries one, and a material in core could not
  * depend on an mpm-local type anyway.
+ *
+ * The value mode selects the nodal values the operator is applied to. It defaults to
+ * VM_TotalIntrinsic, the value at the intrinsic time of the step (alpha-weighted in the
+ * generalized trapezoidal rule), so an entry written as { field, op } keeps its meaning. Other
+ * modes give, for example, a rate (VM_Velocity: { FT_Displacements, SO_SymmetricGradient,
+ * VM_Velocity } is the strain rate), the increment over the step (VM_Incremental) or the value at
+ * its end (VM_Total); the operators are linear, so they commute with the choice of the value.
  */
 struct StateVariableSpec {
     FieldType field;
     StateOperator op;
+    ValueModeType mode = VM_TotalIntrinsic;
 };
 
 /// Generalized state layout; see Material::giveStateVariableIDs.
