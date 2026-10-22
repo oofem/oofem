@@ -21,6 +21,7 @@ The model description and parameters are summarized in :numref:`maz_table`.
 
 .. table:: Mazars damage model -- summary
    :name: maz_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Mazars damage model for concrete                                                             |
@@ -70,6 +71,7 @@ The model description and parameters are summarized in :numref:`maznl_table`.
 
 .. table:: Nonlocal Mazars damage model -- summary
    :name: maznl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal Mazars damage model for concrete                                                    |
@@ -116,6 +118,7 @@ CebFip78 material model -- summary.
 
 .. table:: CebFip78 material model -- summary.
    :name: cebfip_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | CebFip78 model for concrete creep with aging                                                 |
@@ -149,6 +152,7 @@ in :numref:`doublepowerlaw_table`.
 
 .. table:: Double-power law model -- summary.
    :name: doublepowerlaw_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Double-power law model for concrete creep with aging                                         |
@@ -258,6 +262,7 @@ Autogenous shrinkage strain can be computed as
 
 .. table:: EC2Creep material model -- summary.
    :name: ec2creep_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | EC2CreepMat model for concrete creep and shrinkage                                           |
@@ -414,17 +419,17 @@ Factors transforming the physical time :math:`t` into :math:`t_e`, :math:`t_r` a
 .. math::
    :label: dtedt
 
-   \frac{dt_e}{dt} &=& \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
-   \frac{dt_r}{dt} &=& \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
-   \frac{dt_s}{dt} &=& \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
+   \frac{dt_e}{dt} &= \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
+   \frac{dt_r}{dt} &= \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
+   \frac{dt_s}{dt} &= \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
 
 Functions describing the influence of temperature have the form 
 
 .. math::
 
-   \beta_{eT}(T) &=& \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
-   \beta_{rT}(T) &=& \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
-   \beta_{sT}(T) &=& \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
+   \beta_{eT}(T) &= \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+   \beta_{rT}(T) &= \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+   \beta_{sT}(T) &= \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
 
 motivated by the rate process theory. :math:`R` is the universal gas constant and :math:`Q_e`, :math:`Q_r`, :math:`Q_s` are activation energies for hydration, viscous processes and microprestress relaxation, respectively. Only the ratios :math:`Q_e/R`, :math:`Q_r/R` and :math:`Q_s/R` have to be specified.
 
@@ -432,9 +437,9 @@ Functions describing the influence of humidity have the form
 
 .. math::
 
-   \beta_{eh}(h) &=& \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
-   \beta_{rh}(h) &=& \alpha_r + \left( 1 - \alpha_r \right) h^2\\
-   \beta_{sh}(h) &=& \alpha_s + \left( 1 - \alpha_s \right) h^2
+   \beta_{eh}(h) &= \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
+   \beta_{rh}(h) &= \alpha_r + \left( 1 - \alpha_r \right) h^2\\
+   \beta_{sh}(h) &= \alpha_s + \left( 1 - \alpha_s \right) h^2
 
 where :math:`\alpha_e`, :math:`\alpha_r` and :math:`\alpha_s` are parameters. 
 
@@ -511,6 +516,7 @@ The “MPS” model is almost unit-independent, except for
 
 .. table:: B3 creep and shrinkage model -- summary
    :name: b3_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | B3 material model for concrete aging                                                         |
@@ -649,6 +655,7 @@ B3solid creep and shrinkage model -- summary.
 
 .. table:: B3solid creep and shrinkage model -- summary.
    :name: b3solid_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    |                    | - :param:`fc` 28-day mean cylinder compression strength [MPa]                                |
@@ -746,6 +753,7 @@ parameters :math:`q_i` estimated from composition.
 
 .. table:: MPS theory---summary
    :name: mps_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    |                    | - :param:`fc` 28-day standard cylinder compression strength [MPa]                            |
@@ -1008,6 +1016,7 @@ The model description and parameters are summarized in :numref:`mps_dam_table`.
 
 .. table:: MPS damage--summary.
    :name: mps_dam_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | MPS damage model for concrete creep with cracking                                            |
@@ -1048,6 +1057,7 @@ Model M4 covers inelastic behavior of concrete under complex triaxial stress sta
 
 .. table:: Microplane model M4 -- summary.
    :name: m4_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | M4 material model                                                                            |
@@ -1093,8 +1103,8 @@ The yield function
 .. math::
    :label: eq:yieldSurface
 
-   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
-   && 
+   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+   & 
    +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
 
 depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable :math:`\kappa_{\rm p}` (which enters through a dimensionless variable :math:`q_{\rm h}`). Parameter :math:`\fc` is the uniaxial compressive strength. 
@@ -1238,6 +1248,7 @@ For uniaxial tension, for instance, all three principal plastic strain rates are
 
 .. table:: Damage-plastic model for concrete -- summary
    :name: dpm_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Damage-plastic model for concrete                                                            |
@@ -1420,8 +1431,8 @@ is decomposed into
 
 .. math::
 
-   \bar{\boldsymbol{\sigma}}_t &=& \sum_{I=1}^3 \langle\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I \\
-   \bar{\boldsymbol{\sigma}}_c &=& -\sum_{I=1}^3 \langle-\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I
+   \bar{\boldsymbol{\sigma}}_t &= \sum_{I=1}^3 \langle\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I \\
+   \bar{\boldsymbol{\sigma}}_c &= -\sum_{I=1}^3 \langle-\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I
 
 where :math:`\langle\ldots\rangle` are Macaulay brackets (positive-part operator).
 
@@ -1444,7 +1455,7 @@ The **hardening laws** read
 .. math::
    :label: eq:hardeningLawOne
 
-   q_{\rm h1}(\kappa_{\rm p}) &=& 
+   q_{\rm h1}(\kappa_{\rm p}) &= 
    \left\{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
    1 & \mbox{if $\kappa_{\rm p} \ge 1$}
    \end{array}
@@ -1453,7 +1464,7 @@ The **hardening laws** read
 .. math::
    :label: eq:hardeningLawTwo
 
-   q_{\rm h2}(\kappa_{\rm p}) &=& \left\{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
+   q_{\rm h2}(\kappa_{\rm p}) &= \left\{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
    1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
    \end{array}
    \right\}
@@ -1647,13 +1658,14 @@ from which :math:`\varepsilon_{\rm i}` can be evaluated iteratively if the total
 .. table:: Summary of parameters of CDPM2
    :name: CDPM2-params
    :align: center
+   :widths: 26 18 6 17 88
 
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
    | parameter                | OOFEM identifier | unit | default         | meaning                                                                                |
    +==========================+==================+======+=================+========================================================================================+
    | :math:`E`                | E                | Pa   |                 | Young's modulus                                                                        |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`\nu`              | n                | -    |                 | Poisson's ratio                                                                        |
+   | :math:`\nu`              | n                | \-   |                 | Poisson's ratio                                                                        |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
    | :math:`f_t`              | ft               | Pa   |                 | uniaxial tensile strength                                                              |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
@@ -1661,31 +1673,31 @@ from which :math:`\varepsilon_{\rm i}` can be evaluated iteratively if the total
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
    | :math:`w_f`              | wf               | m    |                 | critical crack opening                                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`e`                | ecc              | -    | 0.525           | eccentricity, eq.~(:eq:`eq:rFunction`)--(:eq:`eq:frictionM`)                           |
+   | :math:`e`                | ecc              | \-   | 0.525           | eccentricity, eq.~(:eq:`eq:rFunction`)--(:eq:`eq:frictionM`)                           |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`q_{h0}`           | kinit            | -    | 0.3             | initial value of hardening variable :math:`q_{h1}`, eq.~(:eq:`eq:hardeningLawOne`)     |
+   | :math:`q_{h0}`           | kinit            | \-   | 0.3             | initial value of hardening variable :math:`q_{h1}`, eq.~(:eq:`eq:hardeningLawOne`)     |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`H_p`              | hp               | -    | 0.5             | hardening modulus (for the last stage, eq.~(:eq:`eq:hardeningLawTwo`))                 |
+   | :math:`H_p`              | hp               | \-   | 0.5             | hardening modulus (for the last stage, eq.~(:eq:`eq:hardeningLawTwo`))                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`D_f`              | dilation         | -    | 0.85            | dilation factor, eq.~(:eq:`cdpm2:betac`)                                               |
+   | :math:`D_f`              | dilation         | \-   | 0.85            | dilation factor, eq.~(:eq:`cdpm2:betac`)                                               |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`A_h`              | Ahard            | -    | 0.08            | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
+   | :math:`A_h`              | Ahard            | \-   | 0.08            | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`B_h`              | Bhard            | -    | 0.003           | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
+   | :math:`B_h`              | Bhard            | \-   | 0.003           | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`C_h`              | Chard            | -    | 2               | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
+   | :math:`C_h`              | Chard            | \-   | 2               | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`D_h`              | Dhard            | -    | :math:`10^{-6}` | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
+   | :math:`D_h`              | Dhard            | \-   | :math:`10^{-6}` | hardening parameter, eq.~(:eq:`eq:xh`)                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`A_s`              | Asoft            | -    | 15              | softening parameter, eq.~(:eq:`eq:xs`)                                                 |
+   | :math:`A_s`              | Asoft            | \-   | 15              | softening parameter, eq.~(:eq:`eq:xs`)                                                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`\varepsilon_{fc}` | efc              | -    | :math:`10^{-4}` | softening parameter for compression, eq.~(:eq:`cdpm2:sigma`)                           |
+   | :math:`\varepsilon_{fc}` | efc              | \-   | :math:`10^{-4}` | softening parameter for compression, eq.~(:eq:`cdpm2:sigma`)                           |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | stype                    |                  | -    | 1               | type of softening (1=bilinear)                                                         |
+   | stype                    |                  | \-   | 1               | type of softening (1=bilinear)                                                         |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`w_{f1}/w_f`       | wf1              | -    | 0.15            | softening parameter for tension                                                        |
+   | :math:`w_{f1}/w_f`       | wf1              | \-   | 0.15            | softening parameter for tension                                                        |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`\sigma_1/f_t`     | ft1              | -    | 0.3             | softening parameter for tension, eq.~(:eq:`cdpm2:omegat`)                              |
+   | :math:`\sigma_1/f_t`     | ft1              | \-   | 0.3             | softening parameter for tension, eq.~(:eq:`cdpm2:omegat`)                              |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
 
 From the presented description of the model equations, it is clear that CDPM2 uses a large number of parameters. In [GraXenNys13]_ it was recommended to adjust only a few basic parameters, most of which have a certain physical meaning, and to set all the other parameters to their default values. The physical parameters that can be adjusted depending on the specific type of concrete are Young's modulus, Poisson's ratio, uniaxial tensile and compression strengths, and the critical crack opening, which controls the tensile fracture energy. A summary of all model parameters and of their recommended default values is provided in Table :numref:`CDPM2-params`. The table shows the symbol used for the parameter in equations describing the theoretical background and also the corresponding identifier used in OOFEM input files.
@@ -1727,6 +1739,7 @@ By default, two damage variables are used, i.e., the effective stress is transfo
 
 .. table:: CDPM2 -- summary
    :name: cdpm2_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | CDPM2                                                                                        |
@@ -1818,6 +1831,7 @@ Below in Table :numref:`cdpm2f_table` the input parameters of CDPM2F in addition
 
 .. table:: CDPM2F -- summary.
    :name: cdpm2f_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | CDPM2F                                                                                       |
@@ -1857,6 +1871,7 @@ ConcreteFCM 1 d 24.e-3 talpha 12.e-6 E 20000.~n 0.2 Gf 100e-6 ft 2.0 softType 2 
 
 .. table:: Fixed crack model for concrete -- summary
    :name: concrete_fcm_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Fixed crack model for concrete                                                               |
@@ -2089,6 +2104,7 @@ Here, the time development of fracture energy is chosen to be the same as the te
 
 .. table:: Viscoelastic fixed crack model for concrete -- summary.
    :name: concretefcmviscoelastic_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Viscoelastic fixed crack model for concrete                                                  |
@@ -2174,9 +2190,9 @@ For **SRF** the nominal bridging stress is
 
 .. math::
 
-   \sigma_{b,f}(w) &=& 2 V_f \sqrt{ \frac{E_f (1+\eta) \tau_0 \bar{w}}{D_f} } - \frac{V_f E_f (1+\eta) \bar{w} }{L_f}  \quad \mathrm{for} \: \bar{w} < w^* \\
-   \sigma_{b,f}(w) &=& \frac{V_f L_f \tau_s(w)}{D_f} \left( 1- \frac{2 \bar{w}}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
-   \sigma_{b,f}(w) &=& 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
+   \sigma_{b,f}(w) &= 2 V_f \sqrt{ \frac{E_f (1+\eta) \tau_0 \bar{w}}{D_f} } - \frac{V_f E_f (1+\eta) \bar{w} }{L_f}  \quad \mathrm{for} \: \bar{w} < w^* \\
+   \sigma_{b,f}(w) &= \frac{V_f L_f \tau_s(w)}{D_f} \left( 1- \frac{2 \bar{w}}{L_f} \right)^2 \quad \mathrm{for} \: w^* \leq \bar{w} < L_f/2 \\
+   \sigma_{b,f}(w) &= 0 \quad \mathrm{for} \: \bar{w} > L_f/2 
 
 where :math:`w^* = \left(L_f^2 \tau_0 \right)/[(1+\eta) E_f D_f]`; :math:`\tau_0` is the bond shear strength between the fiber and matrix for small crack openings, :math:`w<w^\ast`.
 
@@ -2281,6 +2297,7 @@ Sample syntax for a fixed crack model reinforced with fibers with volume density
 
 .. table:: Fixed crack model for fiber reinforced concrete -- summary.
    :name: frcfcm_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Fixed crack model for FRC                                                                    |

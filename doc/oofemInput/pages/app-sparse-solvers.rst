@@ -120,6 +120,7 @@ Solver identifiers
 .. _sparsesolverparams:
 
 .. table:: Solver parameters.
+   :widths: 24 4 59
 
    +------------------------+----+-----------------------------------------------------------+
    | Solver type            | id | Solver parameters and notes                               |
@@ -167,6 +168,7 @@ Iterative solvers from the IML library
 .. _precondtable:
 
 .. table:: Preconditioning summary.
+   :widths: 14 4 20 44
 
    +--------------+----+--------------------+--------------------------------------------+
    | Precond type | id | Compatible storage | Description and parameters                 |

@@ -1,0 +1,33 @@
+beam3d_hex.out
+Notched 3-point bending beam (3D, hexahedra) - adaptive linear static analysis with Gmsh remeshing
+adaptlinearstatic nsteps 1 adapt 1 maxadaptsteps 3 meshpackage 4 eetype 1 normtype 1 requirederror 0.20 minelemsize 10.0 gmshgeo "beam3d.geo" gmshctrl "beam3d_hex.ctrl" gmshopts "--elemtype hex" profileopt 1 nmodules 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+SimpleCS 1 material 1 set 1
+IsoLE 1 E 20.e3 n 0.2 d 0.0 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 2 3 values 2 0.0 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 -0.1 set 4
+ConstantFunction 1 f(t) 1.0
+Set 1 elements
+Set 2 nodes
+Set 3 nodes
+Set 4 nodes
+
+# Gmsh physical groups -> oofem properties
+# (gmsh UNV element type 115: linear hexahedron)
+group Elastic Concrete
+elemprop set 1
+etype[115] LSpace
+
+group SupportL
+nodeprop set 2
+
+group SupportR
+nodeprop set 3
+
+group Load
+nodeprop set 4
+

@@ -49,6 +49,7 @@ form with 9 components for a full 3D state.
 
 .. table:: Nonlinear geometry modes
    :name: strain_tensor_table
+   :widths: 13 30
 
    +-------------+------------------------------+
    | nlgeo       | strain tensor                |

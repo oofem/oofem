@@ -1,0 +1,33 @@
+beam.out
+Notched 3-point bending beam (2D) - adaptive linear static analysis with Gmsh remeshing
+adaptlinearstatic nsteps 1 adapt 1 maxadaptsteps 5 meshpackage 4 eetype 1 normtype 1 requirederror 0.15 minelemsize 1.0 gmshgeo "beam.geo" gmshctrl "beam.ctrl" profileopt 1 nmodules 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+SimpleCS 1 thick 1.0 material 1 set 1
+IsoLE 1 E 20.e3 n 0.2 d 0.0 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 2 values 1 -0.1 set 4
+ConstantFunction 1 f(t) 1.0
+Set 1 elements
+Set 2 nodes
+Set 3 nodes
+Set 4 nodes
+
+# Gmsh physical groups -> oofem properties
+# (gmsh UNV element type 91: linear triangle)
+group Elastic Concrete
+elemprop set 1
+etype[91] TrPlaneStress2D
+
+group SupportL
+nodeprop set 2
+
+group SupportR
+nodeprop set 3
+
+group Load
+nodeprop set 4
+

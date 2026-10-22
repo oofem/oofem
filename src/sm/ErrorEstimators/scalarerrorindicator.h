@@ -72,6 +72,7 @@ public:
     double giveValue(EE_ValueType type, TimeStep *tStep) override { return 0.0; }
     int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
     RemeshingCriteria *giveRemeshingCrit() override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
 

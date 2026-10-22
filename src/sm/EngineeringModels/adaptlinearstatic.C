@@ -37,42 +37,142 @@
 #include "mesherinterface.h"
 #include "errorestimator.h"
 #include "domain.h"
+#include "timestep.h"
+#include "metastep.h"
+#include "timestepcontroller.h"
+#include "sparsemtrx.h"
 #include "classfactory.h"
 #include "contextioerr.h"
 #include "outputmanager.h"
+#include "logger.h"
 
 namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
+
+AdaptiveLinearStatic :: AdaptiveLinearStatic(int i, EngngModel *master) : LinearStatic(i, master),
+    meshPackage(MPT_T3D), adaptFlag(false), maxAdaptSteps(5), remeshingStrategy(NoRemeshing_RS)
+{ }
+
+
+AdaptiveLinearStatic :: ~AdaptiveLinearStatic() { }
+
+
+TimeStep *
+AdaptiveLinearStatic :: giveNextStep()
+{
+    // single load case: all (adaptive) solution steps have the same target time
+    if ( !currentStep ) {
+        // first step -> generate initial step
+        currentStep = std :: make_unique< TimeStep >(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., 1., 0);
+    }
+    previousStep = std :: move(currentStep);
+    currentStep = std :: make_unique< TimeStep >(previousStep->giveNumber() + 1, this, 1, 1.0, 1.0,
+                                                 previousStep->giveSolutionStateCounter() + 1);
+    return currentStep.get();
+}
+
+
+void
+AdaptiveLinearStatic :: solveYourself()
+{
+    if ( this->isParallel() ) {
+        OOFEM_ERROR("parallel mode not supported");
+    }
+
+    this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
+
+    auto activeMStep = this->giveMetaStep(1);
+    timeStepController->setCurrentMetaStepNumber(0);
+    timeStepController->initMetaStepAttributes(activeMStep);
+
+    for ( int iadapt = 0; ; iadapt++ ) {
+        this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
+        this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+
+        this->preInitializeNextStep();
+        TimeStep *tStep = this->giveNextStep();
+        tStep->setMetaStepNumber(1);
+
+        if ( this->requiresEquationRenumbering(tStep) ) {
+            this->forceEquationNumbering();
+        }
+
+        OOFEM_LOG_INFO("\nAdaptive step %d: %d nodes, %d elements, %d equations\n", iadapt,
+                       this->giveDomain(1)->giveNumberOfDofManagers(), this->giveDomain(1)->giveNumberOfElements(),
+                       this->giveNumberOfDomainEquations( 1, this->giveEquationNumbering() ) );
+
+        this->initializeYourself(tStep);
+        this->solveYourselfAt(tStep);
+        // update + error estimation
+        this->updateYourself(tStep);
+
+        this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
+        double steptime = this->giveSolutionStepTime();
+        tStep->solutionTime = steptime;
+
+        this->terminate(tStep);
+
+        OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n", tStep->giveNumber(), steptime);
+        if ( !suppressOutput ) {
+            fprintf(this->giveOutputStream(), "\nUser time consumed by solution step %d: %.3f [s]\n\n", tStep->giveNumber(), steptime);
+        }
+
+        if ( remeshingStrategy == NoRemeshing_RS ) {
+            OOFEM_LOG_INFO("Error estimate acceptable, no remeshing required\n");
+            break;
+        }
+
+        // ask mesher for new mesh (writes at least the mesh density suggestion)
+        Domain *dNew = nullptr;
+        MesherInterface :: returnCode result =
+            mesher->createMesh(tStep, 1, this->giveDomain(1)->giveSerialNumber() + 1, & dNew);
+
+        if ( result == MesherInterface :: MI_FAILED ) {
+            OOFEM_ERROR("createMesh failed");
+        } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
+            OOFEM_LOG_INFO("Remeshing required, mesh density file created\n");
+            break;
+        }
+
+        if ( !adaptFlag || iadapt >= maxAdaptSteps ) {
+            // new mesh not used
+            delete dNew;
+            if ( adaptFlag ) {
+                OOFEM_WARNING("Maximum number of adaptive steps (%d) reached", maxAdaptSteps);
+            }
+            break;
+        }
+
+        this->replaceDomain(dNew);
+    }
+}
+
+
+void
+AdaptiveLinearStatic :: replaceDomain(Domain *dNew)
+{
+    dNew->setNumber(1);
+    // deletes the old domain
+    this->setDomain(1, dNew);
+
+    // new discretization -> renumber equations, reassemble stiffness matrix
+    this->equationNumberingCompleted = 0;
+    this->forceEquationNumbering();
+    this->stiffnessMatrix.reset();
+    this->initFlag = 1;
+
+    // relink numerical method, error estimator, mesher, export modules to new domain
+    this->updateDomainLinks();
+}
+
 
 void
 AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
 {
     LinearStatic :: updateYourself(tStep);
-    // perform error evaluation
     // evaluate error of the reached solution
     this->defaultErrEstimator->estimateError(temporaryEM, tStep);
-    // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
-    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy(tStep);
-
-    if ( strategy == NoRemeshing_RS ) {
-        return;
-    } else {
-        // do remeshing
-        std :: unique_ptr< MesherInterface >mesher( classFactory.createMesherInterface( meshPackage, this->giveDomain(1) ) );
-        Domain *newDomain;
-
-        MesherInterface :: returnCode result =
-            mesher->createMesh(tStep, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
-
-        if ( result == MesherInterface :: MI_OK ) { } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
-            // terminate step
-            //this->terminate( tStep );
-            //this->terminateAnalysis();
-            //exit(1);
-        } else {
-            OOFEM_ERROR("createMesh failed");
-        }
-    }
+    this->remeshingStrategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy(tStep);
 }
 
 
@@ -84,47 +184,18 @@ AdaptiveLinearStatic :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     LinearStatic :: printOutputAt(file, tStep);
-    fprintf(file, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep) * 100.0);
+    fprintf(file, "\nAdaptive step %d: %d nodes, %d elements\n", tStep->giveNumber() - 1,
+            this->giveDomain(1)->giveNumberOfDofManagers(), this->giveDomain(1)->giveNumberOfElements() );
+    this->defaultErrEstimator->printOutputAt(file, tStep);
 }
 
 
 int
 AdaptiveLinearStatic :: initializeAdaptive(int tStepNumber)
 {
-    /*
-     * Due to linear character of the problem,
-     * the whole analysis is restarted from beginning.
-     * The solution steps represent the adaptive steps and for each adaptive step
-     * new domain with corresponding domainSerNum is generated.
-     */
-    int result = 1;
-    /*
-     * this -> initStepIncrements();
-     *
-     * int sernum = tStepNumber + 1;
-     * printf ("\nrestoring domain %d.%d\n", 1, sernum);
-     * Domain* dNew = new Domain (1, sernum, this);
-     * FILE* domainInputFile;
-     * this->giveDomainFile (&domainInputFile, 1, sernum, contextMode_read);
-     * if (!dNew -> instanciateYourself(domainInputFile)) OOFEM_ERROR("domain Instanciation failed");
-     * fclose (domainInputFile);
-     *
-     * printf ("\ndeleting old domain\n");
-     * delete domainList->at(1);
-     * domainList->put(1, dNew);
-     *
-     * // init equation numbering
-     * this->forceEquationNumbering();
-     *
-     * // set time step
-     * this->giveCurrentStep()->setTime(tStepNumber+1);
-     *
-     * // init equation numbering
-     * // this->forceEquationNumbering();
-     * this->giveNumericalMethod(giveCurrentStep())->setDomain (dNew);
-     * this->ee->setDomain (dNew);
-     */
-    return result;
+    // The whole adaptive loop is performed within single run (see solveYourself),
+    // restart is not needed due to linear character of the problem.
+    return 1;
 }
 
 
@@ -140,14 +211,24 @@ AdaptiveLinearStatic :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
 
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveLinearStatic_meshpackage);
+    // same numbering as AdaptiveNonLinearStatic (0-T3D, 1-Targe2, 2-Freem, 3-Subdivision, 4-Gmsh)
+    meshPackage = ( MeshPackageType ) meshPackageId;
 
-    if ( meshPackageId == 1 ) {
-        meshPackage = MPT_TARGE2;
-    } else if ( meshPackageId == 2 ) {
-        meshPackage = MPT_FREEM;
-    } else {
-        meshPackage = MPT_T3D;
+    int adapt = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, adapt, _IFT_AdaptiveLinearStatic_adapt);
+    adaptFlag = adapt != 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, maxAdaptSteps, _IFT_AdaptiveLinearStatic_maxadaptsteps);
+
+    if ( !this->defaultErrEstimator ) {
+        throw ValueInputException(ir, "eetype", "error estimator not defined");
     }
+
+    // mesher specific parameters are part of this record
+    mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+    if ( !mesher ) {
+        throw ValueInputException(ir, _IFT_AdaptiveLinearStatic_meshpackage, "unknown mesh package");
+    }
+    mesher->initializeFrom(ir);
 }
 
 
@@ -157,5 +238,8 @@ AdaptiveLinearStatic :: updateDomainLinks()
     LinearStatic :: updateDomainLinks();
     // associate ee to possibly newly restored mesh
     this->defaultErrEstimator->setDomain( this->giveDomain(1) );
+    if ( mesher ) {
+        mesher->setDomain( this->giveDomain(1) );
+    }
 }
 } // end namespace oofem

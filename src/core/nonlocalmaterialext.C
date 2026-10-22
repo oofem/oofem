@@ -39,6 +39,7 @@
 #include "integrationrule.h"
 #include "nonlocalmaterialext.h"
 #include "material.h"
+#include "crosssection.h"
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "nonlocalbarrier.h"
@@ -942,8 +943,9 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
     Element *ielem = jGp->giveElement();
     IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
 
-    if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE, jGp) ) {
-        if ( ielem->giveMaterial()->give(AVERAGING_TYPE, jGp) == 1 ) {
+    Material *jmat = ielem->giveCrossSection()->giveMaterial(jGp);
+    if ( jmat->hasProperty(AVERAGING_TYPE, jGp) ) {
+        if ( jmat->give(AVERAGING_TYPE, jGp) == 1 ) {
             weight = 1. / ( iRule->giveNumberOfIntegrationPoints() ); //assign the same weights over the whole element
         }
     }

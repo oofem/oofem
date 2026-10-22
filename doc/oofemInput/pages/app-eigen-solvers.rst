@@ -27,6 +27,7 @@ record.
 .. _eigenvaluesolverparamtable:
 
 .. table:: Eigenvalue solver parameters.
+   :widths: 20 17 37
 
    +--------------------+-----------------+-------------------------------------+
    | Solver type        | ``stype`` id    | Solver parameters                   |

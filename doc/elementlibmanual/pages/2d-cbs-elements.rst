@@ -45,6 +45,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 
 .. table:: Tr1CBS element summary
    :name: Tr1CBSsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Tr1CBS                                                                                       |

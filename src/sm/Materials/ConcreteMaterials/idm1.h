@@ -231,6 +231,8 @@ protected:
 
     /// Cached source element set used to map internal variables (adaptivity), created on demand
     Set *sourceElemSet = nullptr;
+    /// Serial number of the (old) domain the cached source element set was created for
+    int sourceElemSetDomainSerNum = -1;
 
 #ifdef IDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity.

@@ -192,6 +192,8 @@ protected:
 
     ///cached source element set used to map internal variables (adaptivity), created on demand
     std::unique_ptr<Set> sourceElemSet;
+    /// Serial number of the (old) domain the cached source element set was created for
+    int sourceElemSetDomainSerNum = -1;
 
 #ifdef MDM_MAPPING_DEBUG
     /// Mapper used to map internal variables in adaptivity.

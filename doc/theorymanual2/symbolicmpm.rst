@@ -185,7 +185,10 @@ with the deck otherwise unchanged; the complete input file is
 Response modes are best given by name
 (``MatResponseMode::DeviatoricStiffness``) rather than by their integer
 value. The full description of the expression language, of the available
-functors and of the evaluation mechanics is in ``doc/symbolic_term.md``.
+functors and of the evaluation mechanics is in the
+`SymbolicTerm expression language
+<http://www.oofem.org/resources/doc/oofemInput/html/pages/app-symbolic-term.html>`__
+section of the OOFEM Input manual.
 
 .. _mpm-material-interface:
 
@@ -263,14 +266,59 @@ pressure declares
    }
 
 and receives :math:`[\,\varepsilon,\ \nabla p,\ p\,]` packed in that order.
-A material returning an empty layout — the default — does not participate
-in this protocol and keeps using its physics-specific entry points; a cell
-that cannot supply every declared field (a thermo-mechanical material
-driven for the thermal sub-problem alone, say) is skipped rather than given
-a partial state. The same interface is available to materials implemented in
-python, where ``giveStateVariableIDs(mmode)`` returns a sequence of
-``(FieldType, StateOperator)`` pairs. The design rationale is described in
-``doc/unified_material_interface.md``.
+
+The nodal unknowns are read as total values (``VM_TotalIntrinsic``), and the
+field axis is matched against the deck's *quantity* keyword rather than
+against dof ids, so a material never obliges a deck to renumber its dofs.
+Any ``FieldType`` of ``src/core/field.h`` may be named; these formulations
+use ``FT_Displacements``, ``FT_Pressure``, ``FT_Pressure2``,
+``FT_Temperature``, ``FT_Concentration1`` and ``FT_Concentration2``. Naming
+the same field twice with different operators is normal, and is how a
+material asks for both a quantity and its gradient. Only the four operators
+above are available; anything else is rejected when the state is pushed,
+with *unsupported state operator*.
+
+Three further properties are worth noting. The layout is queried per
+integration point with that point's material mode, so a material may
+advertise one layout in ``_3dUP`` and decline in modes it does not
+implement. A material returning an empty layout — the default — does not
+participate in this protocol and keeps using its physics-specific entry
+points. And a cell that cannot supply every declared field (a
+thermo-mechanical material driven for the thermal sub-problem alone, say) is
+skipped rather than given a partial state, which would be positionally
+ambiguous; a later query that does need the missing value reports it as
+unset rather than returning stale data.
+
+The same interface is available to materials implemented in python, where
+``giveStateVariableIDs(mmode)`` returns a sequence of
+``(FieldType, StateOperator)`` pairs, both enumerations being exported by the
+``oofem`` module:
+
+.. code-block:: python
+
+   import oofem
+
+   class MyMaterial:
+       def giveStateVariableIDs(self, mmode):
+           return [(oofem.FieldType.FT_Displacements,
+                    oofem.StateOperator.SO_SymmetricGradient),
+                   (oofem.FieldType.FT_Pressure, oofem.StateOperator.SO_Value),
+                   (oofem.FieldType.FT_Pressure2, oofem.StateOperator.SO_Value)]
+
+       def updateTempState(self, stateVector, gp, tStep, stateDict, tempStateDict):
+           eps = stateVector[0:6]
+           pw, pa = stateVector[6], stateVector[7]
+           ...   # all constitutive work here, results into tempStateDict
+
+A python material that defines ``updateTempState`` but no
+``giveStateVariableIDs`` advertises an empty layout and is therefore never
+pushed to; one that defines neither is reported at initialization, naming
+what to change.
+
+For a field to be available to be pushed at all, some term on the cell must
+name it as its *unknown* variable; test functions are excluded through
+``dualto``. The design rationale for the ``(field, operator)`` split and for
+the push/pull contract is described in ``doc/unified_material_interface.md``.
 
 Example: Cook membrane
 ----------------------

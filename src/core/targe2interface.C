@@ -48,7 +48,8 @@ Targe2Interface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNu
 {
     * dNew = NULL;
     if ( this->createInput(this->domain, tStep) ) {
-        return MI_NEEDS_EXTERNAL_ACTION;
+        // run external mesher and converter, if requested
+        return this->remeshExternally("targe2.bmf", tStep, domainNumber, domainSerNum, dNew);
     } else {
         return MI_FAILED;
     }

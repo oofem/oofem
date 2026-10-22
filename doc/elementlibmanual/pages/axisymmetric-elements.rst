@@ -12,10 +12,10 @@ finite element. Nonzero strains read
 
 .. math::
 
-   \varepsilon_{x}=\varepsilon_{r}&=&\frac{\partial u}{\partial x}\\
-   \varepsilon_{y}=\varepsilon_{z}&=&\frac{\partial v}{\partial y}\\
-   \varepsilon_{\theta}&=&\frac{u}{r}\\
-   \gamma_{xy}=\gamma_{rz}&=&\frac{\partial u}{\partial y} + \frac{\partial v}{\partial x}
+   \varepsilon_{x}=\varepsilon_{r}&=\frac{\partial u}{\partial x}\\
+   \varepsilon_{y}=\varepsilon_{z}&=\frac{\partial v}{\partial y}\\
+   \varepsilon_{\theta}&=\frac{u}{r}\\
+   \gamma_{xy}=\gamma_{rz}&=\frac{\partial u}{\partial y} + \frac{\partial v}{\partial x}
 
 Stress components can be computed from elasticity matrix. Note that this matrix
 corresponds to a submatrix of the full 3D elasticity matrix.
@@ -41,6 +41,7 @@ node has 2 degrees of freedom.  Node numbering and edge position is the same as 
 
 .. table:: Axisymm3d element summary
    :name: axisymm3dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Axisymm3d                                                                                    |
@@ -58,15 +59,15 @@ node has 2 degrees of freedom.  Node numbering and edge position is the same as 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Integration              | The integration can be altered using :param:`NIP` paramter (default is 1 point integration). |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Loads                    | Boundary and body loads are supported.                                                       |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples           | `sm/axisymm06.in                                                                             |
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/axisymm06.in>`_,              |
@@ -85,6 +86,7 @@ summarized in :numref:`q4axisymmsummary`.
 
 .. table:: Q4axisymm element summary
    :name: q4axisymmsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Q4axisymm                                                                                    |
@@ -109,15 +111,15 @@ summarized in :numref:`q4axisymmsummary`.
    |                          | remaining terms (creesponding to :math:`\varepsilon_\theta` and :math:`\gamma_{rz}`) are     |
    |                          | integrated by default using 1 point formula (see :param:`NIPfish` parameter).                |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Loads                    | No boundary and body loads are supported.                                                    |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
 L4axisymm element
@@ -130,6 +132,7 @@ the same as in Fig. :ref:`Planestress2dfig`. The element features are summarized
 
 .. table:: L4axisymm element summary
    :name: l4axisymmsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | L4axisymm                                                                                    |
@@ -151,15 +154,15 @@ the same as in Fig. :ref:`Planestress2dfig`. The element features are summarized
    |                          | integration rule). The remaining strain components (:math:`\varepsilon_\theta` and           |
    |                          | :math:`\gamma_{rz}`) are integrated using one point integration formula.                     |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Loads                    | Boundary and body loads supported.                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples           | `sm/axisymm03.in                                                                             |
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/axisymm03.in>`_,              |

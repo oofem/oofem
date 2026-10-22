@@ -201,6 +201,27 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
     }
 }
 
+void
+ZZErrorEstimator :: reinitialize()
+{
+    this->stateCounter = -1;
+    ErrorEstimator :: reinitialize();
+}
+
+
+void
+ZZErrorEstimator :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    double rel = this->giveValue(relativeErrorEstimateEEV, tStep);
+    fprintf(file, "\nError estimator/indicator (%s):\n", this->giveClassName() );
+    fprintf(file, "  Norm type                   : %s\n", this->normType == EnergyNorm ? "energy" : "L2");
+    fprintf(file, "  Global norm                 : %e\n", this->giveValue(globalNormEEV, tStep) );
+    fprintf(file, "  Global error norm           : %e\n", this->giveValue(globalErrorEEV, tStep) );
+    fprintf(file, "  Relative error estimate     : %5.2f%%\n", rel * 100.0);
+    this->giveRemeshingCrit()->printOutputAt(file, tStep);
+}
+
+
 RemeshingCriteria *
 ZZErrorEstimator :: giveRemeshingCrit()
 {
@@ -356,7 +377,7 @@ ZZRemeshingCriteria :: giveRemeshingStrategy(TimeStep *tStep)
 int
 ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 {
-    int nelem, nnode, elemPolyOrder, ielemNodes;
+    int nelem, nnode, elemPolyOrder, ielemNodes, nOverLimit = 0;
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
     EE_ErrorType errorType = indicatorET;
     double pe, coeff = 2.0;
@@ -414,7 +435,16 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             continue;
         }
 
+        currDensity = elem->computeMeanSize();
+        elemPolyOrder = elem->giveInterpolation()->giveInterpolationOrder();
+
+        // remeshing is required only if the required size (limited by the minimum element size)
+        // is substantially smaller than the current one; elements already at the minimum size
+        // (e.g. at singularities) can not be refined further and do not trigger remeshing
         if ( iratio > 1.0 ) {
+            nOverLimit++;
+        }
+        if ( iratio > 1.0 && max(this->minElemSize, currDensity / pow(iratio, 1.0 / elemPolyOrder) ) < 0.8 * currDensity ) {
             this->remeshingStrategy = RemeshingFromPreviousState_RS;
         }
 
@@ -424,8 +454,6 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         //  if (iratio > 5.0)iratio = 5.0;
 
-        currDensity = elem->computeMeanSize();
-        elemPolyOrder = elem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
         ielemNodes = elem->giveNumberOfDofManagers();
@@ -449,7 +477,19 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     // remember time stamp
     stateCounter = tStep->giveSolutionStateCounter();
+
+    OOFEM_LOG_INFO("ZZRemeshingCriteria: relative error %5.2f%% (required %5.2f%%), %d elements over error limit, %s\n",
+                   pe * 100., this->requiredError * 100., nOverLimit, __RemeshingStrategyToString(this->remeshingStrategy) );
     return 1;
+}
+
+
+void
+ZZRemeshingCriteria :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    fprintf(file, "  Required relative error     : %5.2f%%\n", this->requiredError * 100.0);
+    fprintf(file, "  Minimum element size        : %e\n", this->minElemSize);
+    RemeshingCriteria :: printOutputAt(file, tStep);
 }
 
 void

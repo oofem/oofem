@@ -1656,8 +1656,10 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 int
 Element :: adaptiveFinish(TimeStep *tStep)
 {
+    // material is given by cross section (element material number need not to be set)
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
-                                              ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
+                                              ( this->giveCrossSection()->giveMaterial(gp)->giveInterface(MaterialModelMapperInterfaceType) );
 
     if ( !interface ) {
         return 0;

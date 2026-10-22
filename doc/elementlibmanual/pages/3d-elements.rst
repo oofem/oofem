@@ -15,6 +15,7 @@ freedom. The same numbering convection is adopted as in mechanics, see Fig.
 
 .. table:: Tetrah1ht element summary
    :name: Tetrah1htsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Tetrah1ht                                                                                    |
@@ -36,9 +37,9 @@ freedom. The same numbering convection is adopted as in mechanics, see Fig.
    | Loads                    | Body loads are supported. Boundary loads are supported and computed using numerical          |
    |                          | integration. The side and surface numbering is shown in Fig. :ref:`lintetrahedron_fig`.      |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   |                                                                                              |
    +--------------------------+----------------------------------------------------------------------------------------------+
@@ -129,6 +130,7 @@ problems. Each node has 1 degree of freedom. The element features are summarized
 
 .. table:: Brick1ht element summary
    :name: Brick1htsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Brick1ht                                                                                     |
@@ -149,9 +151,9 @@ problems. Each node has 1 degree of freedom. The element features are summarized
    | Loads                    | Body loads are supported. Boundary loads are supported and computed using numerical          |
    |                          | integration. The side and surface numbering is shown in fig. (:ref:`Brick1htfig`)).          |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   |                                                                                              |
    +--------------------------+----------------------------------------------------------------------------------------------+

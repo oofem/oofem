@@ -35,6 +35,7 @@
 #include "sm/ErrorEstimators/scalarerrorindicator.h"
 #include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "element.h"
+#include "domain.h"
 #include "integrationrule.h"
 #include "gausspoint.h"
 #include "mathfem.h"
@@ -101,6 +102,29 @@ ScalarErrorIndicator :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
 
     return this->giveRemeshingCrit()->initializeFrom(ir);
 }
+
+void
+ScalarErrorIndicator :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    double maxVal = 0.0;
+    int maxElem = 0, nnonzero = 0;
+    for ( auto &elem : this->domain->giveElements() ) {
+        double val = this->giveElementError(indicatorET, elem.get(), tStep);
+        if ( val > 0.0 ) {
+            nnonzero++;
+        }
+        if ( val > maxVal ) {
+            maxVal = val;
+            maxElem = elem->giveLabel();
+        }
+    }
+    fprintf(file, "\nError estimator/indicator (%s):\n", this->giveClassName() );
+    fprintf(file, "  Indicator variable          : %s\n", __InternalStateTypeToString(varType) );
+    fprintf(file, "  Maximum indicator value     : %e (element %d)\n", maxVal, maxElem);
+    fprintf(file, "  Elements with nonzero value : %d of %d\n", nnonzero, this->domain->giveNumberOfElements() );
+    this->giveRemeshingCrit()->printOutputAt(file, tStep);
+}
+
 
 RemeshingCriteria *
 ScalarErrorIndicator :: giveRemeshingCrit()

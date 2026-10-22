@@ -726,20 +726,34 @@ with the solver type.  See :ref:`sparselinsolver` for details.
 Adaptive linear static
 ----------------------
 
-Adaptive linear static analysis.  Multiple loading cases are not supported.
-Because the problem is linear, a complete reanalysis from the beginning is done
-after adaptive remeshing: after the first step the error is estimated,
-information about the required density is generated through the mesher
-interface, and the solution terminates.  If the error criterion is not
-satisfied, a new mesh and a corresponding input file are generated and a new
-analysis should be run, until the error is acceptable.  The error estimator
-currently available for linear problems is Zienkiewicz-Zhu.
+Adaptive linear static analysis.  Only a single loading case is supported.
+The problem is analysed on the initial mesh, the error is estimated
+(Zienkiewicz-Zhu error estimator) and the required mesh density is evaluated by
+the remeshing criterion and passed to the mesh generator interface, which
+typically writes it into a mesher-specific density file.  This is the default
+behaviour; it is useful also for ordinary analyses, to obtain the error
+estimate.
+
+When adaptivity is enabled (:param:`adapt` = 1) and the error criterion is not
+satisfied, the mesh generator interface is asked to create a new mesh.  If the
+interface is able to provide it (the built-in subdivision, or an external mesh
+generator run by the interface itself, see :ref:`meshpackages`), a new solution
+step is created on the new mesh and the analysis, error estimation and density
+evaluation are repeated, until the error is acceptable or :param:`maxadaptsteps`
+remeshings have been done.  Because the problem is linear, a complete
+reanalysis is done on each new mesh and no mapping of the solution is needed.
+All solution steps have the same target time; each step corresponds to one
+mesh, so the output and export modules (e.g. VTK) produce one result per mesh.
+If the interface can not create the new mesh, the density file is written and
+the analysis terminates, as in the default mode.
 
 .. note::
 
    The adaptive framework needs specific functionality from the elements and
-   material models.  See the Element Library Manual and the Material Library
-   Manual.
+   material models.  The Zienkiewicz-Zhu error estimator is supported by
+   ``TrPlaneStress2d``, ``TrPlaneStrain``, ``PlaneStress2d``, ``LTRSpace``,
+   ``LSpace`` and some plate and shell elements; see the Element Library Manual
+   and the Material Library Manual.
 
 .. record::
 
@@ -747,6 +761,9 @@ currently available for linear problems is Zienkiewicz-Zhu.
    :elemparam:`errorestimatorparams{...}`
    :optelemparam:`sparselinsolverparams{...}`
    :optelemparam:`meshpackage{in}`
+   :optelemparam:`adapt{in}`
+   :optelemparam:`maxadaptsteps{in}`
+   :optelemparam:`meshpackageparams{...}`
 
 **Parameters**
 
@@ -757,13 +774,31 @@ currently available for linear problems is Zienkiewicz-Zhu.
     Attributes of the sparse linear solver; see :ref:`sparselinsolver`.
 
 :optparam:`meshpackage{in}`
-    Mesh package interface used to generate the required mesh density for
-    remeshing.  The supported interfaces are described in :ref:`meshpackages`.
-    The T3d interface is used by default.
+    Mesh package interface used to generate the required mesh density and,
+    optionally, the new mesh.  The supported interfaces and their numbering
+    (the same as for :ref:`AdaptiveNonLinearStatic`) are described in
+    :ref:`meshpackages`.  The T3d interface (0) is used by default.
+
+:optparam:`adapt{in}`
+    Enables the adaptive loop (remeshing and reanalysis) when set to ``1``.
+    Default is ``0``: only the error estimate and the required mesh density are
+    produced.
+
+:optparam:`maxadaptsteps{in}`
+    Maximum number of remeshings in the adaptive loop.  Default is ``5``.
+
+:optparam:`meshpackageparams{...}`
+    Parameters of the mesh package interface (for example :param:`remeshcmd`,
+    or :param:`gmshgeo` and :param:`gmshctrl` for Gmsh); see
+    :ref:`meshpackages`.
 
 :param:`errorestimatorparams{...}`
     Parameters of the Zienkiewicz-Zhu error estimator; see
     :ref:`errorestimators`.
+
+**Example** (Gmsh remeshing, see ``tools/unv2oofem/examples/adaptgmsh``)::
+
+    adaptlinearstatic nsteps 1 adapt 1 maxadaptsteps 6 meshpackage 4 eetype 1 normtype 1 requirederror 0.05 minelemsize 0.002 gmshgeo "lshape.geo" gmshctrl "lshape.ctrl" profileopt 1 nmodules 1
 
 .. _AdaptiveNonLinearStatic:
 
@@ -773,15 +808,24 @@ Adaptive nonlinear static
 Adaptive non-linear static problem.  The solution proceeds as a series of
 loading or displacement increments.  The error is estimated at the end of each
 load increment, once equilibrium has been reached; depending on the error
-reached, the computation either continues or generates new mesh densities and
-stops, in which case a new discretization should be generated.
+reached, the computation either continues or remeshing is performed.
 
-The truly adaptive approach is supported: the computation can be restarted from
-the last step (see :ref:`running-the-code`), the solution is mapped onto the new
-mesh in a separate solution step, and a new load increment is applied.  You may
-of course also start the analysis from the beginning with the new mesh.  The
-estimators and indicators currently available are the linear Zienkiewicz-Zhu
-estimator and the scalar error indicator.
+When the mesh generator interface is able to create the new mesh (the built-in
+subdivision, or an external mesh generator run by the interface itself, e.g.
+Gmsh or any mesher given by :param:`remeshcmd`, see :ref:`meshpackages`), the
+primary unknowns and internal variables are mapped onto the new mesh, the
+equilibrium of the mapped configuration is optionally restored
+(:param:`equilmc`) and the analysis continues with the next load increment
+within the same run.
+
+Otherwise, the required mesh densities are written by the interface and the
+computation stops; a new discretization has to be generated externally.  The
+computation can then be restarted from the last step (see
+:ref:`running-the-code`): the solution is mapped onto the new mesh in a separate
+solution step, and a new load increment is applied.  You may of course also
+start the analysis from the beginning with the new mesh.  The estimators and
+indicators currently available are the linear Zienkiewicz-Zhu estimator and the
+scalar error indicator.
 
 .. note::
 
@@ -794,6 +838,7 @@ estimator and the scalar error indicator.
    :descitem:`Adaptnlinearstatic` :elemparam:`Nonlinearstaticparams{...}`
    :elemparam:`errorestimatorparams{...}` :optelemparam:`equilmc{in}`
    :optelemparam:`meshpackage{in}` :optelemparam:`eetype{in}`
+   :optelemparam:`meshpackageparams{...}`
 
 **Parameters**
 
@@ -808,9 +853,14 @@ estimator and the scalar error indicator.
     be restored before the new step is applied.
 
 :optparam:`meshpackage{in}`
-    Mesh package interface used to generate the required mesh density for
-    remeshing.  The supported interfaces are described in :ref:`meshpackages`.
-    The T3d interface is used by default.
+    Mesh package interface used to generate the required mesh density and,
+    optionally, the new mesh.  The supported interfaces are described in
+    :ref:`meshpackages`.  The T3d interface is used by default.
+
+:optparam:`meshpackageparams{...}`
+    Parameters of the mesh package interface (for example :param:`remeshcmd`,
+    or :param:`gmshgeo` and :param:`gmshctrl` for Gmsh); see
+    :ref:`meshpackages`.
 
 :optparam:`eetype{in}`
     Type of error estimator or indicator to be used; see
@@ -819,6 +869,11 @@ estimator and the scalar error indicator.
 :param:`errorestimatorparams{...}`
     The set of parameters belonging to the selected error estimator; see
     :ref:`errorestimators`.
+
+**Example** (notched beam, nonlocal damage driven refinement with Gmsh remeshing and state mapping, see
+``tools/unv2oofem/examples/adaptgmsh``)::
+
+    adaptnlinearstatic nsteps 25 controlmode 1 rtolv 1.e-3 maxiter 300 stiffmode 1 renumber 1 equilmc 1 eetype 0 vartype 1 minlim 0.05 maxlim 0.9 mindens 12.0 maxdens 5.0 defdens 25.0 meshpackage 4 gmshgeo "beam.geo" gmshctrl "beam_nl.ctrl" profileopt 1 nmodules 1
 
 .. _FreeWarping:
 

@@ -82,7 +82,7 @@ void BTSigTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolati
     int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(dndx, interpol, cell, coords);
 
     if ((mmode == _3dMat)|| (mmode == _3dUP) || (mmode == _3dUPV)) {
         // 3D mode only now
@@ -152,7 +152,7 @@ void gNTfTerm::initializeCell(Element& cell) const  {}
 void gNTfTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolation* interpol, const Element& cell, const FloatArray& coords) const {
     FloatMatrix at;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(at, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(at, interpol, cell, coords);
     answer.beTranspositionOf(at);
 }
 
@@ -190,7 +190,7 @@ void BTamNTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolati
     int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(dndx, interpol, cell, coords);
 
     if ((mmode == _3dUP) || (mmode == _3dMat)) {
         // 3D mode only now
@@ -261,7 +261,7 @@ void NTamTBTerm::grad(FloatMatrix& answer, const Variable *v, const FEInterpolat
     int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(dndx, interpol, cell, coords);
 
     if ((mmode == _3dUP) || (mmode == _3dMat)) {
         // 3D mode only now

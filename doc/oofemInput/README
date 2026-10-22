@@ -1,0 +1,72 @@
+Welcome to OOFEM Input manual README.
+
+What is here
+------------
+The input manual: the structure and format of the OOFEM text input file, every
+record and every attribute, with worked examples.
+
+The reference is split by record group under ``pages/``.  ``quickstart.rst``
+walks through a complete working input file record by record and is the place
+to start reading; ``introduction.rst`` defines the notation the reference uses.
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org) and the MyST parser, which this manual uses for its
+Markdown pages::
+
+    pip install -U sphinx myst-parser
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
+
+Building documentation
+----------------------
+1) Change working directory to doc/oofemInput inside your oofem source tree
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Writing a record
+----------------
+A record is documented with the ``record`` directive from
+``doc/_ext/oofemroles.py``, followed by a parameter list::
+
+    .. record::
+
+       :descitem:`StaticStructural` :elemparam:`nsteps{in}`
+       :optelemparam:`deltat{rn}`
+
+    **Parameters**
+
+    :param:`nsteps{in}`
+        Number of solution steps.
+
+    :optparam:`deltat{rn}`
+        Length of the time step.  Default ``1.0``.
+
+``:descitem:`` is the record keyword, ``:elemparam:`` a mandatory attribute and
+``:optelemparam:`` an optional one, which renders bracketed.  The type goes in
+braces after the name.  Use ``:param:``/``:optparam:`` for the same attribute
+mentioned in running text, where it renders with the same light background a
+plain ``literal`` gets.
+
+The directive takes an optional caption, which replaces the default "Record
+syntax"; pass ``none`` to leave the block uncaptioned.
+
+Keep the keyword spelling the one the solver actually registers, which is not
+always the class name -- ``incrlinearstatic`` rather than
+``IncrementalLinearStatic``.  The authority is the ``_IFT_<Class>_Name`` define
+in the corresponding header.
+
+Shared configuration
+--------------------
+Project metadata and the shared html settings come from ``doc/global_conf.py``,
+and the page width, figure sizing and record styling from
+``doc/_static/oofem.css``.  Do not set these per manual; see section [4] of
+doc/README.
+
+Happy contributing!

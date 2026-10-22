@@ -18,3 +18,4 @@ module.
     app-init-modules
     app-export-modules
     app-mpm-symbolic
+    app-symbolic-term

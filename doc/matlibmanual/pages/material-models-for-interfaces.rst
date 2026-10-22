@@ -23,23 +23,24 @@ A simple interface material with generally different stiffness in compression, t
 .. math::
    :label: eq:cohint1
 
-   t_n &=& \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} \bar\delta + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} \bar\delta\\
-   s_m &=& \mathit{smoothMag}\\
-   \delta_0 &=& \mathit{transitionOpening}\\
-   \bar\delta &=& \delta_n + \delta_0\\
-   k_t &=& k_n \cdot \mathit{stiffCoeffKn}
+   t_n &= \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} \bar\delta + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} \bar\delta\\
+   s_m &= \mathit{smoothMag}\\
+   \delta_0 &= \mathit{transitionOpening}\\
+   \bar\delta &= \delta_n + \delta_0\\
+   k_t &= k_n \cdot \mathit{stiffCoeffKn}
 
 where :param:`smoothMag` controls smoothing magnitude. Tangential stiffness for normal direction is found by differentiating Eq.~(:eq:`eq:cohint1`)
 
 .. math::
 
-   k_{nn} &=& \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} +\\
-   &+& \frac{s_m \cdot k_t \bar\delta}{\pi(s_m^2\bar\delta^2+1)} - \frac{s_m \cdot k_n \bar\delta}{\pi(s_m^2\bar\delta^2+1)}
+   k_{nn} &= \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} +\\
+   &+ \frac{s_m \cdot k_t \bar\delta}{\pi(s_m^2\bar\delta^2+1)} - \frac{s_m \cdot k_n \bar\delta}{\pi(s_m^2\bar\delta^2+1)}
 
 Shear stiffness remains constant during all possible loadings and there is no influence of normal direction.
 
 .. table:: Cohesive interface material -- summary.
    :name: cohint_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Cohesive interface material                                                                  |
@@ -97,9 +98,9 @@ If :param:`regularized` is set to true, the regularized version of the model is 
 
 .. math::
 
-   \sigma_N &=& 0.5 k_n(\delta_0+\delta_n)-
+   \sigma_N &= 0.5 k_n(\delta_0+\delta_n)-
                \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n))|)+\\
-            &+&c\left(0.5 k_n(\delta_0+\delta_n)+
+            &+c\left(0.5 k_n(\delta_0+\delta_n)+
                \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n)))|)\right)
 
 where :math:`c` is the ratio of tensile/compressive stiffness (:param:`stiffcoeff`), :math:`\delta_0` is the normal clearance, :math:`\delta_n` is the normal strain (jump), and :math:`m` denotes the regularization coefficient. Consistent tangent stiffness is computed by differentiating the above relation.
@@ -112,6 +113,7 @@ The model description and parameters are summarized in :numref:`simpleinterfacem
 
 .. table:: Simple interface material
    :name: simpleinterfacemat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Simple interface material                                                                    |
@@ -184,6 +186,7 @@ Model description and the input parameters are summarized in :numref:`bondceb_ta
 
 .. table:: Bond-slip model for reinforced concrete -- summary.
    :name: bondceb_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Bond-slip model for reinforced concrete                                                      |
@@ -228,6 +231,7 @@ There are three types of constitutive relations supported which are shown in :re
 
 .. table:: Slip model for truss and beam elements -- summary
    :name: linkslip_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Slip model                                                                                   |

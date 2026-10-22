@@ -42,7 +42,8 @@ namespace oofem {
     ENUM_ITEM(MPT_T3D) \
     ENUM_ITEM(MPT_TARGE2) \
     ENUM_ITEM(MPT_FREEM) \
-    ENUM_ITEM(MPT_SUBDIVISION)
+    ENUM_ITEM(MPT_SUBDIVISION) \
+    ENUM_ITEM(MPT_GMSH)
 
 /**
  * Enumerative type used to classify supported mesh packages.

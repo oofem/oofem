@@ -1,0 +1,28 @@
+lshape.out
+L-shaped plate - adaptive linear static analysis with Gmsh remeshing
+adaptlinearstatic nsteps 1 adapt 1 maxadaptsteps 6 meshpackage 4 eetype 1 normtype 1 requirederror 0.05 minelemsize 0.002 gmshgeo "lshape.geo" gmshctrl "lshape.ctrl" profileopt 1 nmodules 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+SimpleCS 1 thick 1.0 material 1 set 1
+IsoLE 1 E 210.e3 n 0.3 d 1.0 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 2
+ConstantEdgeLoad 2 loadTimeFunction 1 loadtype 2 dofs 2 1 2 Components 2 0.0 -1.0 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elements
+Set 2 nodes
+Set 3 elementedges
+
+# Gmsh physical groups -> oofem properties
+group Domain
+elemprop set 1
+etype[91] TrPlaneStress2D
+
+group Clamped
+nodeprop set 2
+
+group Load
+elemprop set 3
+etype[21]
+

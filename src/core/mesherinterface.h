@@ -38,6 +38,13 @@
 #include "oofemenv.h"
 #include "inputrecord.h"
 
+#include <string>
+
+///@name Input fields for MesherInterface
+//@{
+#define _IFT_MesherInterface_remeshcmd "remeshcmd"
+//@}
+
 namespace oofem {
 class Domain;
 class TimeStep;
@@ -48,11 +55,30 @@ class TimeStep;
  * - to create input mesher file, containing all information including the mesh density informations
  *   based on informations from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input
+ *
+ * All mesher specific details are hidden behind this interface. The client (typically adaptive
+ * engineering model) only calls createMesh and receives either a new domain (MI_OK)
+ * or information, that the mesh density file has been written and the mesh has to be
+ * generated externally (MI_NEEDS_EXTERNAL_ACTION).
+ *
+ * Meshers, that write a mesh density file for an external mesh generator, can run
+ * the external mesher and the converter to oofem format themselves, when the remesh command
+ * is provided (keyword remeshcmd). The command is expected to create the new domain
+ * file (in oofem .din format, i.e. starting with domain record) and may contain following
+ * placeholders, that are substituted before execution:
+ * - %d mesh density file written by the mesher
+ * - %o domain file to be created
+ * - %s serial number of the new domain
+ * - %n solution step number
+ * - %% the percent character
  */
 class OOFEM_EXPORT MesherInterface
 {
 protected:
     Domain *domain;
+    /// External remeshing command (template), empty if not provided.
+    std :: string remeshCmd;
+
 public:
     enum returnCode { MI_OK, MI_NEEDS_EXTERNAL_ACTION, MI_FAILED };
     /// Constructor
@@ -77,7 +103,22 @@ public:
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
      */
-    virtual void initializeFrom(const std::shared_ptr<InputRecord> &ir) { }
+    virtual void initializeFrom(const std::shared_ptr<InputRecord> &ir);
+    /// Sets the domain the receiver operates on (used when the domain is replaced by a new one).
+    virtual void setDomain(Domain *d) { domain = d; }
+
+protected:
+    /**
+     * Runs the external remesh command (if provided) and instanciates the new domain from the
+     * domain file created by the command.
+     * @param densityFile Name of the mesh density file written by the mesher.
+     * @param tStep Time step.
+     * @param domainNumber New domain number.
+     * @param domainSerNum New domain serial number.
+     * @param dNew Newly allocated domain or NULL.
+     * @return MI_OK if new domain created, MI_NEEDS_EXTERNAL_ACTION if no remesh command given, MI_FAILED otherwise.
+     */
+    returnCode remeshExternally(const std :: string &densityFile, TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 };
 } // end namespace oofem
 #endif // mesherinterface_h

@@ -122,6 +122,8 @@ public:
 
     int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
     RemeshingCriteria *giveRemeshingCrit() override;
+    void reinitialize() override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
     const char *giveClassName() const override { return "ZZErrorEstimator"; }
@@ -211,6 +213,8 @@ public:
     RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) override;
     int estimateMeshDensities(TimeStep *tStep) override;
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
+    void reinitialize() override { stateCounter = -1; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     const char *giveInputRecordName() const override { return nullptr; }
     const char *giveClassName() const override { return "ZZErrorEstimator"; }

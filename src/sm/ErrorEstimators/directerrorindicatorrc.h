@@ -109,6 +109,7 @@ public:
     void giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity);
     double giveZeroIndicatorDensity() { return zeroIndicatorDensity; }
     void reinitialize() override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void setDomain(Domain *d) override;
 

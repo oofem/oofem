@@ -371,6 +371,8 @@ set (core_mapping
     )
 
 set (core_mesher
+    mesherinterface.C
+    gmshinterface.C
     t3dinterface.C
     targe2interface.C
     freeminterface.C
@@ -413,6 +415,8 @@ endif ()
 
 # OOFEMCFG_C_COMPILE_DEFINITIONS are defined in the main CMakeLists.txt
 set_source_files_properties(oofemcfg.C PROPERTIES COMPILE_DEFINITIONS "${OOFEMCFG_C_COMPILE_DEFINITIONS}")
+# default location of the gmsh -> oofem conversion script used by GmshInterface
+set_source_files_properties(gmshinterface.C PROPERTIES COMPILE_DEFINITIONS "OOFEM_GMSH2OOFEM_SCRIPT=\"${oofem_SOURCE_DIR}/tools/unv2oofem/gmsh2oofem.py\"")
 
 add_library (core
     ${LIB_TYPE}

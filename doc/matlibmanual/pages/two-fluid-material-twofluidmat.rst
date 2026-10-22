@@ -10,6 +10,7 @@ The model parameters are summarized in :numref:`TwoFluidMaterial_table`.
 
 .. table:: Two-Fluid material - summary.
    :name: TwoFluidMaterial_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Two-Fluid material                                                                           |

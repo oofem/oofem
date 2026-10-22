@@ -13,6 +13,7 @@ anti-clockwise (positive rotation around z-axis). The element features are summa
 
 .. table:: DKTplate element summary
    :name: dktplatesummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | dktplate                                                                                     |
@@ -72,6 +73,7 @@ summarized in :numref:`qdktplatesummary`.
 
 .. table:: QDKTplate element summary
    :name: qdktplatesummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | qdktplate                                                                                    |
@@ -124,6 +126,7 @@ z-axis). The element features are summarized in :numref:`cctplatesummary`.
 
 .. table:: cctplate element summary
    :name: cctplatesummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | cctplate                                                                                     |
@@ -175,6 +178,7 @@ rotation around element normal).  The element features are summarized in Table
 
 .. table:: cctplate3d element summary
    :name: cctplate3dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | cctplate3d                                                                                   |
@@ -226,6 +230,7 @@ features are summarized in :numref:`rershellsummary`.
 
 .. table:: rershell element summary
    :name: rershellsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | rershell                                                                                     |
@@ -310,6 +315,7 @@ complete set of 6 DOFs per node.  The element features are summarized in Table
 
 .. table:: tr_shell01 element summary
    :name: trshell01summary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | tr_shell11                                                                                   |
@@ -361,6 +367,7 @@ per node.  The element features are summarized in :numref:`trshell02summary`.
 
 .. table:: tr_shell02 element summary
    :name: trshell02summary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | tr_shell02                                                                                   |
@@ -399,7 +406,7 @@ per node.  The element features are summarized in :numref:`trshell02summary`.
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Note                     | Works only with linear material models, as bending and membrane actions are uncoupled        |
    +--------------------------+----------------------------------------------------------------------------------------------+
@@ -419,6 +426,7 @@ the lumped mass matrix. The element features are summarized in Table
 
 .. table:: quad1mindlin element summary
    :name: quad1mindlinsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | quad1mindlin                                                                                 |
@@ -480,6 +488,7 @@ The element features are summarized in :numref:`quad1mindlinsummary`.
 
 .. table:: tr2shell7 element summary
    :name: tr2shell7summary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | tr2shell7                                                                                    |
@@ -529,6 +538,7 @@ summarized in :numref:`mitc4shellsummary`.
 
 .. table:: mitc4shell element summary
    :name: mitc4shellsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | mitc4shell                                                                                   |
@@ -585,7 +595,7 @@ summarized in :numref:`mitc4shellsummary`.
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples           | `sm/scordelis_mitc4.in                                                                       |
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/scordelis_mitc4.in>`_         |
@@ -607,6 +617,7 @@ summarized in :numref:`quad1platesubsoilsummary`.
 
 .. table:: quad1platesubsoil element summary
    :name: quad1platesubsoilsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | quad1plateSubsoil                                                                            |
@@ -647,6 +658,7 @@ summarized in :numref:`quad1platesubsoilsummary`.
 
 .. table:: tria1platesubsoil element summary
    :name: tria1platesubsoilsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | tria1platesubsoil                                                                            |

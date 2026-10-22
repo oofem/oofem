@@ -12,6 +12,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+# doc/_ext holds the extensions shared by the OOFEM manuals.
+sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
 # Import shared settings
 from global_conf import *
@@ -24,7 +26,7 @@ project = 'OOFEM Developer guide'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['oofemlatex']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

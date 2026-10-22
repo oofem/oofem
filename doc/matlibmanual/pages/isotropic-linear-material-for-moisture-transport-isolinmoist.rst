@@ -29,6 +29,7 @@ The model parameters are summarized in :numref:`IsoLinmoistureMat_table`.
 
 .. table:: Linear isotropic material for moisture transport - summary.
    :name: IsoLinmoistureMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Linear isotropic material for moisture transport                                             |

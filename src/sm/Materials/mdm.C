@@ -34,6 +34,8 @@
 
 #include "mdm.h"
 #include "gausspoint.h"
+#include "crosssection.h"
+#include "domain.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"
@@ -1177,12 +1179,14 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     toMap.at(1) = ( int ) IST_MicroplaneDamageValues;
 
     // Set up source element set if not set up by user
-    if ( !sourceElemSet ) {
+    // (re)create source set, when not created yet or created for a different (previous) domain
+    if ( !sourceElemSet || sourceElemSet->giveDomain() != oldd || sourceElemSetDomainSerNum != oldd->giveSerialNumber() ) {
         sourceElemSet = std::make_unique<Set>(0, oldd);
+        sourceElemSetDomainSerNum = oldd->giveSerialNumber();
         IntArray el;
         // compile source list to contain all elements on old odmain with the same material id
         for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {
-            if ( oldd->giveElement(i)->giveMaterial()->giveNumber() == this->giveNumber() ) {
+            if ( oldd->giveElement(i)->giveCrossSection()->giveMaterial(gp)->giveNumber() == this->giveNumber() ) {
                 // add oldd domain element to source list
                 el.followedBy(i, 10);
             }

@@ -38,6 +38,7 @@
 #include "sm/Elements/structural2delement.h"
 #include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "sm/ErrorEstimators/huertaerrorestimator.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -55,7 +56,7 @@ class FEI2dQuadLin;
  */
 class PlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public HuertaErrorEstimatorInterface
+public HuertaErrorEstimatorInterface, public ZZErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interpolation;

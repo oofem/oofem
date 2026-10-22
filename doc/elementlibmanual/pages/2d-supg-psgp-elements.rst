@@ -45,6 +45,7 @@ pressure). The node numbering is anti-clockwise. The element features are summar
 
 .. table:: Tr1SUPG element summary
    :name: Tr1SUPGsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Tr1SUPG                                                                                      |
@@ -111,6 +112,7 @@ summarized in :numref:`Tr21SUPGsummary`.
 
 .. table:: Tr21SUPG element summary
    :name: Tr21SUPGsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Tr21SUPG                                                                                     |
@@ -177,6 +179,7 @@ node numbering is anti-clockwise. The element features are summarized in Table
 
 .. table:: Tr1SUPGAxi element summary
    :name: Tr1SUPGAxisummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | Tr1SUPGAxi                                                                                   |

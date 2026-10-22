@@ -49,14 +49,14 @@ The model is described by the equations
 
 .. math::
 
-   \bsig & = &\mbf{D} : \left(\eps - \epsp \right)
+   \bsig & = \mbf{D} : \left(\eps - \epsp \right)
    \\
-   \tauY & = & h(\kappa)
+   \tauY & =  h(\kappa)
    \\
-   \epspd = \dot{\lambda} \frac{\partial g}{\partial \bsig} & = &
+   \epspd = \dot{\lambda} \frac{\partial g}{\partial \bsig} & = 
    \dot{\lambda} \left( \alphaPsi \mbf{\delta} + \frac{\mbf{s}}{2\sqrt{J_2}} \right)
    \\
-   \dot{\kappa} & = & \sqrt{\frac{2}{3}} \; \| \epspd \|
+   \dot{\kappa} & =  \sqrt{\frac{2}{3}} \; \| \epspd \|
 
 and
 
@@ -116,6 +116,7 @@ The algorithmic tangent stiffness matrix is implemented for both the regular cas
 
 .. table:: DP material - summary
    :name: DP_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | DP material                                                                                  |
@@ -203,6 +204,7 @@ overestimates the dilatancy of concrete. Hence, the dilatancy coefficient is usu
 
 .. table:: Drucker Prager material with tension cut-off - summary
    :name: DP_table_cut
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Drucker Prager material with tension cut-off                                                 |
@@ -317,6 +319,7 @@ The model description and parameters are summarized in :numref:`misesMat_table`.
 
 .. table:: Mises plasticity -- summary.
    :name: misesMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Mises plasticity model with isotropic hardening                                              |
@@ -424,6 +427,7 @@ The model description and parameters are summarized in :numref:`misesMatNl_table
 
 .. table:: Nonlocal integral Mises plasticity -- summary.
    :name: misesMatNl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal Mises plasticity with isotropic hardening                                           |
@@ -459,6 +463,7 @@ The model description and parameters are summarized in :numref:`misesMatNl_table
 
 .. table:: Gradient-enhanced Mises plasticity -- summary.
    :name: misesMatGrad_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Gradient-enhanced Mises plasticity with isotropic damage                                     |
@@ -530,6 +535,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Rankine plasticity -- summary.
    :name: rankineMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Rankine plasticity with isotropic hardening and damage                                       |
@@ -557,6 +563,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Nonlocal integral Rankine plasticity -- summary.
    :name: rankineMatNl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal Rankine plasticity with isotropic hardening and damage                              |
@@ -597,6 +604,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Gradient-enhanced Rankine plasticity -- summary.
    :name: rankineMatGrad_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Gradient-enhanced Rankine plasticity with isotropic hardening and damage                     |
@@ -637,6 +645,7 @@ described in Section~:samp:`ref{sec:misplast}`.
 
 .. table:: Perfectly plastic material with Mises condition -- summary
    :name: Steel1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Perfectly plastic material with Mises condition                                              |
@@ -714,7 +723,7 @@ where the yield value :math:`f_t` is defined as
 
 .. _tensfig:
 
-.. figure:: /figures/tension.svg
+.. figure:: /figures/tension.*
    :width: 70%
    :alt: Tensile behavior of proposed model (:math:`f_t=0.2` MPa, :math:`G_f^I=0.018` N/mm)
 
@@ -747,7 +756,7 @@ where :math:`c_0` is initial cohesion of joint, :math:`\phi_0` initial friction 
 
    g_2=\vert\tau\vert+\sigma\tan\Phi-c
 
-.. figure:: /figures/shearconf.svg
+.. figure:: /figures/shearconf.*
    :width: 70%
    :alt: Shear behavior of proposed model for different confinement levels in MPa (:math:`c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}`)
 
@@ -821,6 +830,7 @@ the input parameters accordingly (one can modify dilatancy angle, for example).
 
 .. table:: Composite model for masonry - summary.
    :name: compomasonry1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Composite plasticity model for masonry                                                       |
@@ -870,6 +880,7 @@ in :numref:`Rer_table`.
 
 .. table:: Nonlinear elasto-plastic material model for concrete - summary.
    :name: Rer_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlinear elasto-plastic material model for concrete plates and shells                       |

@@ -61,7 +61,7 @@ ParamKey LSpace::IPK_LSpace_reducedShearIntegration("reducedshearint");
 
 LSpace :: LSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface(), ZZErrorEstimatorInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -85,6 +85,8 @@ LSpace :: giveInterface(InterfaceType interface)
         return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
+    } else if ( interface == ZZErrorEstimatorInterfaceType ) {
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     }
 
     return NULL;

@@ -36,6 +36,7 @@
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "material.h"
+#include "crosssection.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
 #include "classfactory.h"
@@ -68,7 +69,7 @@ MMAClosestIPTransfer :: __mapVariable(FloatArray &answer, const Coordinates &coo
                                       InternalStateType type, TimeStep *tStep)
 {
     if ( source ) {
-        source->giveMaterial()->giveIPValue(answer, source, type, tStep);
+        source->giveCrossSection()->giveMaterial(source)->giveIPValue(answer, source, type, tStep);
         return 1;
     }
 

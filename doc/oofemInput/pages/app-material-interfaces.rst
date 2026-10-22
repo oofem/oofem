@@ -10,6 +10,7 @@ of the analysis record; see :ref:`supgIncomp`.
 
 .. table:: Available material interface representations.
    :name: materialinterfacetable
+   :widths: 10 14 15
 
    +----------+--------------+---------------+
    | MI       | ``miflag``   | Compatibility |

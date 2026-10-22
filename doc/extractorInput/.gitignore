@@ -1,0 +1,12 @@
+# Output of "make pdf" / "make ps" / "make html" in this directory.
+extractorInput.pdf
+extractorInput.ps
+extractorInput.dvi
+html/
+
+# LaTeX intermediates
+*.aux
+*.log
+*.toc
+*.lot
+*.out

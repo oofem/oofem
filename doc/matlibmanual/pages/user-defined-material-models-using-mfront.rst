@@ -21,6 +21,7 @@ See /tests/smmfront/readme_install.txt for more detailed instructions.
 
 .. table:: MFrontUserMaterial material model -- summary.
    :name: MFrontUserMaterial_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | MFrontUserMaterial allows use of user-defined material models based on MFront                |

@@ -16,6 +16,7 @@ features are summarized in :numref:`truss1dsummary`.
 
 .. table:: truss1d element summary
    :name: truss1dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | truss1d                                                                                      |
@@ -79,6 +80,7 @@ specified in (x,z), (x,y), or (y,z) plane. The element features are summarized i
 
 .. table:: truss2d element summary
    :name: truss2dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | truss2d                                                                                      |
@@ -160,6 +162,7 @@ specified in (x,y,z) space. The element features are summarized in Table
 
 .. table:: truss3d element summary
    :name: truss3dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | truss3d                                                                                      |

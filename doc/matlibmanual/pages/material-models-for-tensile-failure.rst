@@ -36,6 +36,7 @@ in :numref:`rcm_table`.
 
 .. table:: Rotating crack model for concrete - summary.
    :name: rcm_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Rotating crack model for concrete                                                            |
@@ -78,6 +79,7 @@ Virgin material is modeled as isotropic linear elastic material (described by Yo
 
 .. table:: RC-SD model for concrete - summary.
    :name: rcsd_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Smeared rotating crack model with transition to scalar damage - linear softening             |
@@ -110,6 +112,7 @@ The description and model summary (:numref:`rcsde_table`) are the same as for th
 
 .. table:: RC-SD model for concrete - summary.
    :name: rcsde_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Smeared rotating crack model with transition to scalar damage - exponential softening        |
@@ -140,6 +143,7 @@ The model description and parameters are summarized in :numref:`rcsdnl_table`.
 
 .. table:: RCSDNL model for concrete - summary.
    :name: rcsdnl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal smeared rotating crack model with transition to scalar damage for concrete          |
@@ -538,6 +542,7 @@ The model parameters are summarized in :numref:`id_table`. Figure :numref:`idm_s
 
 .. table:: Isotropic damage model for concrete in tension
    :name: id_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Isotropic damage model for concrete in tension                                               |
@@ -795,6 +800,7 @@ The model parameters are summarized in :numref:`idnl_table` and :numref:`idnl_ta
 
 .. table:: Nonlocal isotropic damage model for tensile failure -- summary.
    :name: idnl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal isotropic damage model for concrete in tension                                      |
@@ -855,6 +861,7 @@ The model parameters are summarized in :numref:`idnl_table` and :numref:`idnl_ta
 
 .. table:: Nonlocal isotropic damage model for tensile failure -- continued.
    :name: idnl_table_cont
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal isotropic damage model for concrete in tension                                      |
@@ -985,6 +992,7 @@ state of the intact material between defects such as microcracks or voids.
 
 .. table:: Basic equations of microplane-based anisotropic damage model
    :name: tab2
+   :widths: 92 41 80
 
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
    |                                                                                            |                                         |                                                                                |
@@ -1131,6 +1139,7 @@ in :numref:`mdm_table`.
 
 .. table:: MDM model - summary
    :name: mdm_table
+   :widths: 23 94
 
    +-----------------------+----------------------------------------------------------------------------------------------+
    | Description           | MDM Anisotropic damage model                                                                 |
@@ -1233,6 +1242,7 @@ The model parameters are summarized in :numref:`iid_table`.
 
 .. table:: Isotropic damage model for interface elements -- summary.
    :name: iid_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Isotropic damage model for concrete in tension                                               |
@@ -1278,6 +1288,7 @@ The model parameters are summarized in :numref:`iidTabulated_table`.
 
 .. table:: Isotropic damage model for interface elements using tabulated data for damage -- summary.
    :name: iidTabulated_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Isotropic damage model for concrete in tension                                               |

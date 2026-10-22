@@ -103,6 +103,9 @@ PythonMaterial::PythonMaterial(int n, Domain *d) : Material(n, d)
 
 PythonMaterial::~PythonMaterial()
 {
+    // Every python handle has to be dropped here, while the GIL is held: one left to its own
+    // destructor is released after the guard below has gone, without a thread state, and the
+    // deallocation of the bound method it holds then crashes the interpreter.
 #if defined(_USE_NANOBIND)
     nb::gil_scoped_acquire gil;
     pyObject.reset();
@@ -111,6 +114,8 @@ PythonMaterial::~PythonMaterial()
     pyGiveCharacteristicVector.reset();
     pyGiveCharacteristicValue.reset();
     pyPrintOutputAt.reset();
+    pyUpdateTempState.reset();
+    pyGiveStateVariableIDs.reset();
 #elif defined(_PYBIND_BINDINGS)
     py::gil_scoped_acquire gil;
     pyObject.release().dec_ref();
@@ -119,6 +124,8 @@ PythonMaterial::~PythonMaterial()
     pyGiveCharacteristicVector.release().dec_ref();
     pyGiveCharacteristicValue.release().dec_ref();
     pyPrintOutputAt.release().dec_ref();
+    pyUpdateTempState.release().dec_ref();
+    pyGiveStateVariableIDs.release().dec_ref();
 #endif
 }
 

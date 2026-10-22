@@ -42,6 +42,7 @@
 #include "element.h"
 #include "node.h"
 #include "domain.h"
+#include "outputmanager.h"
 #include "datareader.h"
 #include "oofemtxtdatareader.h"
 #include "remeshingcrit.h"
@@ -107,6 +108,13 @@ AdaptiveNonLinearStatic :: initializeFrom(const std::shared_ptr<InputRecord> &ir
     if (this->defaultErrEstimator == NULL) {
       OOFEM_ERROR ("AdaptiveNonLinearStatic :: initializeFrom: Error estimator not defined [eetype missing]");
     }
+
+    // mesher specific parameters are part of this record
+    mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+    if ( !mesher ) {
+        throw ValueInputException(ir, _IFT_AdaptiveNonLinearStatic_meshpackage, "unknown mesh package");
+    }
+    mesher->initializeFrom(ir);
 }
 
 void
@@ -143,11 +151,9 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
         this->terminate( this->giveCurrentStep() ); // make output 
 
-        // do remeshing
-        auto mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
-
+        // do remeshing (new domain is inserted as domain 2 during remapping)
         Domain *newDomain;
-        MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 1,
+        MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 2,
                                                                   this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
         if ( result == MesherInterface :: MI_OK ) {
@@ -186,6 +192,18 @@ AdaptiveNonLinearStatic :: updateYourself(TimeStep *tStep)
     timeStepLoadLevels.at( tStep->giveNumber() ) = loadLevel;
 
     NonLinearStatic :: updateYourself(tStep);
+}
+
+
+void
+AdaptiveNonLinearStatic :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    NonLinearStatic :: printOutputAt(file, tStep);
+    if ( this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
+        fprintf(file, "\nMesh: %d nodes, %d elements (domain serial number %d)\n", this->giveDomain(1)->giveNumberOfDofManagers(),
+                this->giveDomain(1)->giveNumberOfElements(), this->giveDomain(1)->giveSerialNumber() );
+        this->defaultErrEstimator->printOutputAt(file, tStep);
+    }
 }
 
 
@@ -443,6 +461,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
     this->initStepIncrements();
 
+    // new domain is temporarily domain 2 (see giveUnknownComponent)
+    dNew->setNumber(2);
     this->ndomains = 2;
     this->domainNeqs.resize(2);
     this->domainPrescribedNeqs.resize(2);
@@ -755,6 +775,9 @@ AdaptiveNonLinearStatic :: updateDomainLinks()
 {
     NonLinearStatic :: updateDomainLinks();
     this->defaultErrEstimator->setDomain( this->giveDomain(1) );
+    if ( mesher ) {
+        mesher->setDomain( this->giveDomain(1) );
+    }
 }
 
 

@@ -130,6 +130,7 @@ The model parameters are summarized in :numref:`NlIsoMoistureMat`.
 
 .. table:: Nonlinear isotropic material for moisture transport
    :name: NlIsoMoistureMat
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlinear isotropic material for moisture transport                                          |
@@ -220,6 +221,7 @@ examples was published [Smilauer:09]_. :numref:`Cemhydmat_table` summarizes inpu
 
 .. table:: Cemhydmat - summary
    :name: Cemhydmat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Cemhyd - hydrating material                                                                  |
@@ -312,13 +314,14 @@ The :param:`hydrationmodeltype` = 2 is inspired by Cervera et al. [Cervera:99]_,
 .. math::
    :label: eq:affinity2
 
-   \frac{\partial \alpha}{\partial t} &=& \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) f_s \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate}\\
-   \alpha &>& DoH_1 \Rightarrow f_s = 1+P_1(\alpha - DoH_1)~\mathrm{else}~f_s = 1 
+   \frac{\partial \alpha}{\partial t} &= \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) f_s \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate}\\
+   \alpha &> DoH_1 \Rightarrow f_s = 1+P_1(\alpha - DoH_1)~\mathrm{else}~f_s = 1 
 
 where :math:`B_1, B_2` are coefficients to be calibrated, :math:`\alpha_\infty` is the ultimate hydration degree and :math:`\bar{\eta}` represents microdiffusion of free water through formed hydrates. The function :math:`f_s` adds additional peak which may occur in slag-rich blended cements with two parameters :math:`DoH_1,P_1`. The solution proceeds incrementally, where :math:`\alpha` is the unknown. During one macroscopic time step, :eq:`eq:affinity2` needs to be integrated in finer inner steps. This is controlled with two optional variables; :param:`maxmodelintegrationtime` specifies maximum integration time in the loop while :param:`minmodeltimestepintegrations` specifies minimum number of integration steps.
 
 .. table:: HydratingConcreteMat - summary of affinity hydration models.
    :name: Affinity1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | HydratingConcreteMat                                                                         |
