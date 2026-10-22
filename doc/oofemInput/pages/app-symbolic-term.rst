@@ -272,7 +272,7 @@ through :param:`dualto`.
 .. seealso::
 
    The state push and the declared state layout — what a material advertises
-   through ``giveStateVariableIDs``, the ``(field, operator)`` pairs and the
+   through ``giveStateVariableIDs``, the ``(field, operator[, value mode])`` entries and the
    available state operators — are described in the **Theory Manual**, in the
    symbolic MPM chapter.  The design rationale for the split and for the
    push/pull contract is in ``doc/unified_material_interface.md``.
