@@ -118,6 +118,16 @@ the `Task_5.3` reactive-transport decks. The existing `FT_HumidityConcentration`
 reused for the species: in `b3mat`, `mps` and the transport problems it means humidity, and
 overloading it further is what made it useless as an identity in the first place.
 
+A third, optional axis selects *which value* of the field the operator is applied to: each entry
+carries a `ValueModeType mode`, defaulting to `VM_TotalIntrinsic` (the value at the intrinsic time
+of the step, which is what every layout read before the axis existed). The default is a member
+initializer of the aggregate, so `{field, op}` entries — in C++ and as 2-tuples in python — keep
+their meaning, and only a material that needs something else says so: a rate-dependent material asks
+for `{FT_Displacements, SO_SymmetricGradient, VM_Velocity}`, the strain rate; `VM_Incremental` and
+`VM_Total` give the increment over the step and the end-of-step value. It is an axis of its own for
+the same reason as the other two: fused into the operator it would need a rate variant of every
+operator.
+
 Declared layouts:
 
 | material | layout |
@@ -126,6 +136,7 @@ Declared layouts:
 | `TransportMaterial` | `{FT_Temperature, Grad}, {FT_Temperature, Value}` |
 | `UPSimpleMaterial` | `{FT_Displacements, SymGrad}, {FT_Pressure, Grad}, {FT_Pressure, Value}` |
 | `TMSimpleMaterial` | `{FT_Displacements, SymGrad}, {FT_Temperature, Grad}, {FT_Temperature, Value}` |
+| `StateDependentTangentMaterial` (test, with `eta`) | `{FT_Displacements, SymGrad}, {FT_Displacements, SymGrad, VM_Velocity}` |
 | Liakopoulos (python) | `{FT_Displacements, SymGrad}, {FT_Pressure, Value}, {FT_Pressure2, Value}` |
 
 `InternalStateType` was the first choice and was rejected on exactly this ground. It is the

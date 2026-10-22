@@ -227,10 +227,12 @@ material rather than fixed by convention:
 
    virtual StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const;
 
-Each entry of the returned layout is a ``{FieldType field, StateOperator op}``
-pair, in packing order: *which* primary field, and *what is taken of it*.
-For each entry the assembly finds the unknown variable whose *quantity* is
-``field``, reads its nodal unknowns on the cell, applies the operator at the
+Each entry of the returned layout is a
+``{FieldType field, StateOperator op, ValueModeType mode}`` triple, in packing
+order: *which* primary field, *what is taken of it*, and *of which value* of
+the field; the value mode may be omitted (see below). For each entry the
+assembly finds the unknown variable whose *quantity* is ``field``, reads its
+nodal unknowns of the given value mode on the cell, applies the operator at the
 integration point and appends the resulting block. Four operators are
 available:
 
@@ -267,8 +269,32 @@ pressure declares
 
 and receives :math:`[\,\varepsilon,\ \nabla p,\ p\,]` packed in that order.
 
-The nodal unknowns are read as total values (``VM_TotalIntrinsic``), and the
-field axis is matched against the deck's *quantity* keyword rather than
+The value mode selects the nodal unknowns the operator is applied to. It
+defaults to ``VM_TotalIntrinsic``, so an entry written as ``{ field, op }``
+reads the values at the intrinsic time of the step, as before. With the
+generalized trapezoidal rule of the nonstationary problem the modes are
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``ValueModeType``
+     - Nodal values
+   * - ``VM_TotalIntrinsic`` (default)
+     - :math:`\alpha x_{n+1} + (1-\alpha) x_n`
+   * - ``VM_Total``
+     - :math:`x_{n+1}`
+   * - ``VM_Velocity``
+     - :math:`(x_{n+1} - x_n)/\Delta t`
+   * - ``VM_Incremental``
+     - :math:`x_{n+1} - x_n`
+
+The operators are linear, so a rate-dependent material obtains, for example,
+the strain rate with ``{ FT_Displacements, SO_SymmetricGradient, VM_Velocity }``
+(see the Kelvin–Voigt option of the test material ``statedeptangentmat`` and
+``tests/regression/mpm/mpms_staterate.in``).
+
+The field axis is matched against the deck's *quantity* keyword rather than
 against dof ids, so a material never obliges a deck to renumber its dofs.
 Any ``FieldType`` of ``src/core/field.h`` may be named; these formulations
 use ``FT_Displacements``, ``FT_Pressure``, ``FT_Pressure2``,
@@ -291,8 +317,9 @@ unset rather than returning stale data.
 
 The same interface is available to materials implemented in python, where
 ``giveStateVariableIDs(mmode)`` returns a sequence of
-``(FieldType, StateOperator)`` pairs, both enumerations being exported by the
-``oofem`` module:
+``(FieldType, StateOperator)`` pairs or ``(FieldType, StateOperator,
+ValueModeType)`` triples, the enumerations being exported by the ``oofem``
+module:
 
 .. code-block:: python
 
@@ -303,11 +330,16 @@ The same interface is available to materials implemented in python, where
            return [(oofem.FieldType.FT_Displacements,
                     oofem.StateOperator.SO_SymmetricGradient),
                    (oofem.FieldType.FT_Pressure, oofem.StateOperator.SO_Value),
-                   (oofem.FieldType.FT_Pressure2, oofem.StateOperator.SO_Value)]
+                   (oofem.FieldType.FT_Pressure2, oofem.StateOperator.SO_Value),
+                   # strain rate
+                   (oofem.FieldType.FT_Displacements,
+                    oofem.StateOperator.SO_SymmetricGradient,
+                    oofem.ValueModeType.VM_Velocity)]
 
        def updateTempState(self, stateVector, gp, tStep, stateDict, tempStateDict):
            eps = stateVector[0:6]
            pw, pa = stateVector[6], stateVector[7]
+           epsRate = stateVector[8:14]
            ...   # all constitutive work here, results into tempStateDict
 
 A python material that defines ``updateTempState`` but no
