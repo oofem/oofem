@@ -132,7 +132,11 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(MomentumBalance_ThermalCouplingMatrix, 307) \
     ENUM_ITEM_WITH_VALUE(EnergyBalance_ConvectionBCMatrix, 308) \
     ENUM_ITEM_WITH_VALUE(EnergyBalance_ConvectionBCResidual, 309) \
-    ENUM_ITEM_WITH_VALUE(EnergyBalance_InternalSourceVector, 310) 
+    ENUM_ITEM_WITH_VALUE(EnergyBalance_InternalSourceVector, 310) \
+    /* MPM generic (term-table driven) elements */ \
+    ENUM_ITEM_WITH_VALUE(MPM_LhsMatrix, 320) /* tangent of the rate-independent terms (weighted by alpha) */ \
+    ENUM_ITEM_WITH_VALUE(MPM_LhsDotMatrix, 321) /* tangent of the rate terms (weighted by 1/dt) */ \
+    ENUM_ITEM_WITH_VALUE(MPM_InternalResidual, 322) /* residual of the rate-independent and rate terms */
 
 
     

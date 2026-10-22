@@ -39,6 +39,7 @@
 #include "material.h"
 #include "internalstatetype.h"
 #include "dofiditem.h"
+#include "unknownnumberingscheme.h"
 
 namespace oofem {
 
@@ -136,6 +137,57 @@ Term::initializeFrom(const std::shared_ptr<InputRecord> &ir, EngngModel* problem
 
 
 void
+MPElement::evaldNdx(FloatMatrix &answer, const FEInterpolation *interpol, const Element &cell, const FloatArray &lcoords)
+{
+    FEIElementGeometryWrapper cellgeo(&cell);
+    const MPElement *mpcell = dynamic_cast< const MPElement * >( &cell );
+    if ( !mpcell || !mpcell->hasHigherOrderGeometry() || interpol->giveInterpolationOrder() == 0 ) {
+        interpol->evaldNdx(answer, lcoords, cellgeo);
+        return;
+    }
+
+    // derivatives with respect to the local coordinates, mapped by the Jacobian of the cell geometry
+    FloatMatrix dn, dg;
+    interpol->evaldNdxi(dn, lcoords, cellgeo);
+    mpcell->getGeometryInterpolation()->evaldNdxi(dg, lcoords, cellgeo);
+    int n = dn.giveNumberOfRows(), nlocal = dg.giveNumberOfColumns();
+    if ( nlocal == 1 ) {
+        // a line in the xy plane: derivatives along the line, resolved into x and y (as the line
+        // interpolations do)
+        double tx = 0., ty = 0.;
+        for ( int i = 1; i <= dg.giveNumberOfRows(); i++ ) {
+            const auto &x = cellgeo.giveVertexCoordinates(i);
+            tx += dg.at(i, 1) * x.at(1);
+            ty += dg.at(i, 1) * x.at(2);
+        }
+        double j = sqrt(tx * tx + ty * ty);
+        answer.resize(n, 2);
+        for ( int i = 1; i <= n; i++ ) {
+            answer.at(i, 1) = dn.at(i, 1) / j * tx / j;
+            answer.at(i, 2) = dn.at(i, 1) / j * ty / j;
+        }
+    } else if ( nlocal == 2 ) {
+        // a cell in the xy plane: jac(a, b) = dx_b/dxi_a
+        FloatMatrix jac(2, 2), inv;
+        jac.zero();
+        for ( int i = 1; i <= dg.giveNumberOfRows(); i++ ) {
+            const auto &x = cellgeo.giveVertexCoordinates(i);
+            for ( int a = 1; a <= 2; a++ ) {
+                for ( int b = 1; b <= 2; b++ ) {
+                    jac.at(a, b) += dg.at(i, a) * x.at(b);
+                }
+            }
+        }
+        // dN/dx_b = sum_a dN/dxi_a dxi_a/dx_b, dxi_a/dx_b = inv(jac)(b, a)
+        inv.beInverseOf(jac);
+        answer.beProductTOf(dn, inv);
+    } else {
+        OOFEM_ERROR("higher order geometry of %d-dimensional cells not supported", nlocal);
+    }
+}
+
+
+void
 MPElement::computeGradSymMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint *gp) const
 {
     const FEInterpolation *interpol = v->interpolation;
@@ -145,7 +197,7 @@ MPElement::computeGradSymMatrixAt(FloatMatrix &answer, const Variable *v, GaussP
 
     // matrix of shape function derivatives; entry (i,j) is dNi/dxj
     FloatMatrix dndx;
-    interpol->evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    MPElement::evaldNdx( dndx, interpol, *this, gp->giveNaturalCoordinates() );
 
     if ( ( mmode == _3dUP ) || ( mmode == _3dUPV ) || ( mmode == _3dMat ) ) {
         answer.resize(6, nnodes * ndofs);
@@ -222,7 +274,7 @@ MPElement::computeGradMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoin
     const MaterialMode mmode = gp->giveMaterialMode();
 
     FloatMatrix dndx;
-    interpol->evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    MPElement::evaldNdx( dndx, interpol, *this, gp->giveNaturalCoordinates() );
     const int nnodes = interpol->giveNumberOfNodes( this->giveGeometryType() );
     const int nsd = 1 * mmodeIs1D(mmode) + 2 * mmodeIs2D(mmode) + 3 * mmodeIs3D(mmode);
 
@@ -254,7 +306,7 @@ MPElement::computeDivMatrixAt(FloatMatrix &answer, const Variable *v, GaussPoint
     const MaterialMode mmode = gp->giveMaterialMode();
 
     FloatMatrix dndx;
-    interpol->evaldNdx( dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    MPElement::evaldNdx( dndx, interpol, *this, gp->giveNaturalCoordinates() );
     const int nnodes = interpol->giveNumberOfNodes( this->giveGeometryType() );
     const int nsd = 1 * mmodeIs1D(mmode) + 2 * mmodeIs2D(mmode) + 3 * mmodeIs3D(mmode);
 
@@ -373,6 +425,22 @@ MPElement::updateTempState(TimeStep *tStep)
             mat->updateTempState(state, gp, tStep);
         }
     }
+}
+
+
+void
+MPElement::assembleResidualNorms(FloatArray &answer, const FloatArray &dofScale, TimeStep *tStep)
+{
+    FloatArray r;
+    IntArray loc, dofids;
+    this->giveCharacteristicVector(r, MPM_InternalResidual, VM_Total, tStep);
+    this->giveLocationArray(loc, EModelDefaultEquationNumbering(), & dofids);
+    for ( int i = 1; i <= dofids.giveSize(); i++ ) {
+        if ( dofids.at(i) <= dofScale.giveSize() ) {
+            r.at(i) *= dofScale.at( dofids.at(i) );
+        }
+    }
+    answer.assembleSquared(r, dofids);
 }
 
 

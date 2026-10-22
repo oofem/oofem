@@ -70,7 +70,7 @@ void dnTaN::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* gp, Tim
     FloatArray n, lc,a;
     Coordinates gc;
     FloatMatrix dndx;
-    this->testField->interpolation->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    MPElement::evaldNdx(dndx, this->testField->interpolation, e, gp->giveNaturalCoordinates());
     this->field->interpolation->evalN(n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     FloatMatrix nm=FloatMatrix::fromArray(n, true), anm;
     int nsd = this->field->interpolation->giveNsd(e.giveGeometryType());
