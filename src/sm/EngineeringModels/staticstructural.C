@@ -244,7 +244,19 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->internalForces.resize(neq);
 
     FloatArray incrementOfSolution(neq);
+    incrementOfSolution.zero();
+
+    SparseLinearSystemNM *linSolver = nullptr;
     if ( this->initialGuessType == IG_Tangent ) {
+        linSolver = nMethod->giveLinearSolver();
+        if ( !linSolver ) {
+            OOFEM_WARNING("Nonlinear solver %s does not provide a linear solver; "
+                          "skipping tangent initial guess (use 'initialguess 0' "
+                          "to select this explicitly)", nMethod->giveClassName());
+        }
+    }
+
+    if ( this->initialGuessType == IG_Tangent && linSolver ) {
 
         if ( this->giveProblemScale() == macroScale ) {
             OOFEM_LOG_RELEVANT("Computing initial guess\n");
@@ -277,7 +289,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
             }
 
             this->updateMatrix(*stiffnessMatrix, tStep, this->giveDomain(di));
-            SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
 
             if( this->giveProblemScale() == macroScale ) {
                 OOFEM_LOG_RELEVANT("Solving for increment\n");
@@ -295,10 +306,8 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 	    this->initForNewIteration(this->giveDomain(di), tStep, 0, this->solution);
 
         }
-    } else if ( this->initialGuessType != IG_None ) {
+    } else if ( this->initialGuessType != IG_Tangent && this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
-    } else {
-        incrementOfSolution.zero();
     }
 
     // Build initial/external load

@@ -106,6 +106,11 @@ endfunction()
 if (USE_SM)
     oofem_regression_ctest(sm "sm" BARE_CMD "adapt02.in")
     oofem_regression_ctest(sm/NAFEMS "sm")
+    if (USE_PETSC)
+        # PETSc-only inputs live below the general SM directory so builds
+        # without PETSc do not discover solvers and matrix types they lack.
+        oofem_regression_ctest(sm/petsc "sm")
+    endif()
 
 
     if (NOT WIN32)

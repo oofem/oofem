@@ -1,0 +1,76 @@
+snes_zero_equation.out
+PETSc SNES zero-equation regression: fully prescribed Brick element with nlgeo 1 loaded by pure shear
+StaticStructural nsteps 5 nmodules 1 smtype 7 solvertype "petscsnes" snesrtol 1.e-10 snesatol 1.e-12 initialguess 0
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  1.0   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  0.0   1.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  1.0   0.0   1.0
+node 7 coords 3  1.0   1.0   1.0
+node 8 coords 3  0.0   1.0   1.0
+lspace  1 nodes 8 1 2 3 4 5 6 7 8 nlgeo 1
+SimpleCS 1 material 1 set 1
+IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.5 0.0 0.0 set 3
+PiecewiseLinFunction 1 t 2 1. 1001. f(t) 2 0. 1000.
+Set 1 elementranges {1}
+Set 2 nodes 4 1 2 5 6
+Set 3 nodes 4 3 4 7 8
+
+#%BEGIN_CHECK% tolerance 1.e-12
+## check Green-Lagrange strain tensor
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 2 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 3 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 4 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 5 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 6 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 7 keyword 4 component 6  value 5.0000e-01
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 1  value 0.0
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 2  value 1.2500e-01
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 3  value 0.0
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 4  value 0.0
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 5  value 0.0
+#ELEMENT tStep 2 number 1 gp 8 keyword 4 component 6  value 5.0000e-01
+#%END_CHECK%
