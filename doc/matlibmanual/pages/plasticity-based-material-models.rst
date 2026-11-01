@@ -674,7 +674,7 @@ Composite plasticity model for masonry - Masonry02
 
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots [Rots]_. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(:numref:`compyieldsurffig`)). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices.
 
-.. figure:: /figures/constmodel.png
+.. figure:: ../figures/constmodel.png
    :width: 80%
    :alt: Composite yield surface model for masonry
    :name: compyieldsurffig
@@ -683,7 +683,7 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
 
 The approach used in this work is based on the idea of concentrating all the damage in the relatively weak joints and, if necessary, in potential tension cracks in the bricks. The joint interface constitutive model should include all important damage mechanisms. Here, the concept of interface elements is used. An interface element allows to incorporate discontinuities in the displacement field and its behavior is described in terms of a relation between the tractions and relative displacement across the interface. In the present work, these quantities will be denoted as :math:`\sig`, generalized stress, and :math:`\e`, generalized strain. For 2D configuration, :math:`\sig=\{\sigma, \tau\}^T` and :math:`\e=\{u_n, u_s\}^T`, where :math:`\sigma` and :math:`\tau` are the normal and shear components of the traction interface vector and :math:`n` and :math:`s` subscripts distinguish between normal and shear components of displacement vector.
 
-.. figure:: /figures/mmodel.png
+.. figure:: ../figures/mmodel.png
    :width: 70%
    :alt: Modeling strategy for masonry
 
@@ -723,7 +723,7 @@ where the yield value :math:`f_t` is defined as
 
 .. _tensfig:
 
-.. figure:: /figures/tension.*
+.. figure:: ../figures/tension.*
    :width: 70%
    :alt: Tensile behavior of proposed model (:math:`f_t=0.2` MPa, :math:`G_f^I=0.018` N/mm)
 
@@ -756,7 +756,7 @@ where :math:`c_0` is initial cohesion of joint, :math:`\phi_0` initial friction 
 
    g_2=\vert\tau\vert+\sigma\tan\Phi-c
 
-.. figure:: /figures/shearconf.*
+.. figure:: ../figures/shearconf.*
    :width: 70%
    :alt: Shear behavior of proposed model for different confinement levels in MPa (:math:`c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}`)
 
@@ -813,7 +813,7 @@ An associated flow and strain hardening hypothesis are being considered. This yi
 
    \dot\kappa_3=\lambda_3\sqrt{(2C_{nn}\sigma+C_n)*(2C_{nn}\sigma+C_n) + (2C_{ss}\tau)*(2C_{ss}\tau)}
 
-.. figure:: /figures/capmode.png
+.. figure:: ../figures/capmode.png
    :width: 70%
    :alt: Hardening/softening law for cap mode
    :name: hs3fig

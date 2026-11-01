@@ -1,7 +1,7 @@
 """Sphinx roles mirroring the OOFEM manual LaTeX macros.
 
-The LaTeX sources define a handful of markup commands for describing input
-records (see the preamble of matlibmanual.tex and ../include/include.tex)::
+The original LaTeX sources of the manuals defined a handful of markup commands
+for describing input records::
 
     \\descitem{name}            bold keyword introducing a record
     \\elemparam{name}{type}     mandatory parameter, rendered as "name (type)"

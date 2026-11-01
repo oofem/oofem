@@ -1,7 +1,9 @@
 OOFEM Element Library Manual
 ############################
 
-Version:
+Authors: |author|
+
+Version: |version|, Date: |today|
 
 This manual is part of `OOFEM <https://oofem.org>`_, a parallel,
 object-oriented finite element solver for mechanical, transport and fluid
@@ -41,9 +43,13 @@ however, must be made available under the LGPL.
 
 .. |copy| unicode:: 0xA9 .. copyright sign
 
-Indices and tables
-==================
+.. The index and search pages exist in the HTML only; in the PDF this would be
+   an empty chapter.
 
-* :ref:`genindex`
-* :ref:`search`
+.. only:: html
+
+   .. rubric:: Indices and tables
+
+   * :ref:`genindex`
+   * :ref:`search`
 

@@ -1120,7 +1120,7 @@ The evolution of the yield surface during hardening is presented in :numref:`fig
 
 The eccentricity parameter :math:`e` that appears in this function, as well as the friction parameter :math:`m_0`, are calibrated from the values of uniaxial and equibiaxial compressive strengths and uniaxial tensile strength.
 
-.. figure:: /figures/meridians.png
+.. figure:: ../figures/meridians.png
    :align: center
    :width: 100%
    :alt: Evolution of the yield surface during hardening

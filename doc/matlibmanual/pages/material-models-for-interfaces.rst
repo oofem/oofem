@@ -137,7 +137,7 @@ The model description and parameters are summarized in :numref:`simpleinterfacem
 
 :name: `simpleinterfacemat_table`
 
-.. figure:: /figures/Simple_interface_material_diag.png
+.. figure:: ../figures/Simple_interface_material_diag.png
    :width: 70%
    :alt: Working diagram of SimpleInterfaceMat.
    :name: SimpleInterfaceMat
@@ -177,7 +177,7 @@ For an exponent :math:`\alpha` smaller than 1 (default value 0.4), the initial t
 
 Model description and the input parameters are summarized in :numref:`bondceb_table`.
 
-.. figure:: /figures/bondceb_diag.png
+.. figure:: ../figures/bondceb_diag.png
    :width: 50%
    :alt: Bond stress (:math:`\tau`) - reinforcement slip (:math:`s`) diagram for BondCEB model.
    :name: BondCEB
@@ -222,7 +222,7 @@ This is an elasto-plastic model for slip between reinforcement modelled as three
 
 There are three types of constitutive relations supported which are shown in :ref:`linkslip`, which are chosen by means of the input parameter :param:`type`.
 
-.. figure:: /figures/linkslip.png
+.. figure:: ../figures/linkslip.png
    :width: 80%
    :alt: Bond stress (:math:`\tau`) - slip (:math:`s`) diagram for link slip model.
 

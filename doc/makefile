@@ -1,14 +1,12 @@
 SHELL = /bin/sh
 export ROBOT = /usr/bin/perl -I/home/bp/oofem-doc/www/en /home/bp/oofem-doc/www/robot.pl
 
-# The manuals are Sphinx projects.  Sphinx has no "pdf" or "ps" builder, so the
+# The manuals are Sphinx projects.  Sphinx has no "pdf" builder, so the
 # pdf target builds the LaTeX sources and then runs all-pdf in them, which is
 # the same as "make latex; make all-pdf" by hand in a manual directory.
+# python is a symlink to bindings/python/docs, where the bindings manual lives.
 SPHINX_MANUALS = oofemInput usermanual theorymanual2 developerGuide \
-                 matlibmanual elementlibmanual
-
-# Still built from plain LaTeX, and so still able to make ps.
-LATEX_MANUALS  = extractorInput
+                 matlibmanual elementlibmanual extractorInput python
 
 # paper-actap is a conference paper rather than part of the documentation set,
 # and it still uses latex2html constructs (\begin{htmlonly}), so pdflatex stops
@@ -21,16 +19,17 @@ DOXYGEN_MANUALS = refman
 
 # Only these define a www-install target of their own.
 WWW_MANUALS = oofemInput usermanual theorymanual2 developerGuide \
-              $(LATEX_MANUALS) $(DOXYGEN_MANUALS)
+              extractorInput elementlibmanual matlibmanual python \
+              $(DOXYGEN_MANUALS)
 
-.PHONY: sphinx-html html pdf ps www-install clean
+.PHONY: sphinx-html html pdf www-install clean
 
 # The top-level documentation index.
 sphinx-html:
 	$(MAKE) -f Makefile-sphinx html
 
 html:
-	@for d in $(SPHINX_MANUALS) $(LATEX_MANUALS) $(DOXYGEN_MANUALS); do \
+	@for d in $(SPHINX_MANUALS) $(DOXYGEN_MANUALS); do \
 	    echo "=== $$d (html)"; $(MAKE) -C $$d html || exit 1; \
 	done
 
@@ -39,14 +38,6 @@ pdf:
 	    echo "=== $$d (pdf)"; \
 	    $(MAKE) -C $$d latex || exit 1; \
 	    $(MAKE) -C $$d/_build/latex all-pdf || exit 1; \
-	done
-	@for d in $(LATEX_MANUALS); do \
-	    echo "=== $$d (pdf)"; $(MAKE) -C $$d pdf || exit 1; \
-	done
-
-ps:
-	@for d in $(LATEX_MANUALS); do \
-	    echo "=== $$d (ps)"; $(MAKE) -C $$d ps || exit 1; \
 	done
 
 www-install:
@@ -60,6 +51,6 @@ else
 endif
 
 clean:
-	@for d in $(SPHINX_MANUALS) $(LATEX_MANUALS) $(DOXYGEN_MANUALS); do \
+	@for d in $(SPHINX_MANUALS) $(DOXYGEN_MANUALS); do \
 	    echo "=== $$d (clean)"; $(MAKE) -C $$d clean || exit 1; \
 	done

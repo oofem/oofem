@@ -1,10 +1,8 @@
 /* Presentation shared by every OOFEM manual.
  *
- * This is the single place for the HTML page width and figure sizing: the
- * manuals differ in theme (classic, alabaster, pydata), so the rules below
- * name the content container of each one and the blocks that do not apply
- * simply do nothing.  Keep presentation here rather than in per-manual
- * html_theme_options, which are theme-specific and drift apart.
+ * This is the single place for the HTML page width and figure sizing.  Every
+ * manual uses the alabaster theme (set in global_conf.py); keep presentation
+ * here rather than in per-manual html_theme_options.
  */
 
 /* ---- Page width ---------------------------------------------------------
@@ -13,9 +11,8 @@
  * the wide record-syntax blocks and tables these manuals are full of.
  */
 
-/* classic and alabaster themes.  "width: auto" is needed because alabaster
-   gives div.document a fixed pixel width, which max-width alone cannot
-   widen. */
+/* "width: auto" is needed because alabaster gives div.document a fixed pixel
+   width, which max-width alone cannot widen. */
 div.document {
     width: auto;
     max-width: 80%;
@@ -28,16 +25,10 @@ div.body {
     max-width: none;
 }
 
-/* pydata-sphinx-theme (the top-level documentation index) */
-.bd-page-width {
-    max-width: 80%;
-}
-
 /* On a narrow screen there is nothing to gain from a gutter, so give the text
    the whole width back.  875px is alabaster's own breakpoint. */
 @media screen and (max-width: 875px) {
-    div.document,
-    .bd-page-width {
+    div.document {
         max-width: 100%;
     }
 }
@@ -48,8 +39,7 @@ div.body {
  * stretched across the whole column, where a rasterised source would only
  * look blurry.
  */
-div.body img,
-.bd-content img {
+div.body img {
     max-width: min(100%, 46em);
     height: auto;
 }
@@ -128,7 +118,7 @@ div.oofem-record code.docutils.literal {
 }
 
 strong.oofem-descitem {
-    font-family: var(--pst-font-family-monospace, var(--oofem-mono));
+    font-family: var(--oofem-mono);
 }
 
 /* The summary tables are two columns of very different width; let the
@@ -148,7 +138,6 @@ table.docutils td:first-child {
 
 /* A table wider than the window scrolls on its own rather than stretching the
    page, so the body never scrolls horizontally. */
-.table-wrapper,
 div.body > table.docutils {
     display: block;
     overflow-x: auto;

@@ -107,7 +107,7 @@ the meaning of average strains in the periodic cell. The specific input paramete
 this element in addition to those used for lattice2d are shown in Table
 ``lattice2dboundarysummary``.
 
-.. figure:: /figures/lattice2dboundaryfig.*
+.. figure:: ../figures/lattice2dboundaryfig.*
    :width: 40%
    :name: lattice2dboundaryfig
 
@@ -151,7 +151,7 @@ the global coordinate sytem. Displacement jumps are computed at the mid-cross-se
 which are smeared out over the element length in the form of strains. The input
 parameters for this element are shown in :numref:`lattice3dsummary`.
 
-.. figure:: /figures/lattice3d.*
+.. figure:: ../figures/lattice3d.*
    :width: 30%
    :name: lattice3dfig
 
@@ -226,7 +226,7 @@ respectively, and :math:`\mathbf{M}` is the translation matrix, for which the in
 provided in the form of a location parameter as shown in Table
 :numref:`lattice3dboundarysummary`.
 
-.. figure:: /figures/lattice3dboundaryfig.*
+.. figure:: ../figures/lattice3dboundaryfig.*
    :width: 60%
    :name: lattice3dboundaryfig
 

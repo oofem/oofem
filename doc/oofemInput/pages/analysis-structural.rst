@@ -171,7 +171,7 @@ their corresponding eigenvectors are computed.
 .. record::
 
    :descitem:`EigenValueDynamic` :elemparam:`nroot{in}`
-   :elemparam:`rtolv{rn}` :optelemparam:`eigensolverparams{...}`
+   :elemparam:`rtolv{rn}` :optelemparam:`shift{rn}` :optelemparam:`eigensolverparams{...}`
 
 **Parameters**
 
@@ -180,6 +180,13 @@ their corresponding eigenvectors are computed.
 
 :param:`rtolv{rn}`
     Relative convergence criterion.
+
+:optparam:`shift{rn}`
+    Spectral shift :math:`\sigma`; the solver works with
+    :math:`\boldsymbol{K} + \sigma\boldsymbol{M}`, which is regular also for
+    unsupported structures (rigid body modes), and the eigenvalues are shifted
+    back. If not given, a small shift is estimated from the diagonals of
+    :math:`\boldsymbol{K}` and :math:`\boldsymbol{M}`; ``shift 0`` disables it.
 
 :optparam:`eigensolverparams{...}`
     Attributes of the eigenvalue solver; see :ref:`eigensolverssection`.

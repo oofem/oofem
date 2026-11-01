@@ -9,5 +9,8 @@ oofemInput/index.rst
 theorymanual2/index.rst
 developerGuide/index.rst
 python/index.rst
+extractorInput/index.rst
+elementlibmanual/index.rst
+matlibmanual/index.rst
 :::
 

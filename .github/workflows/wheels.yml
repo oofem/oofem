@@ -18,14 +18,14 @@ jobs:
         # macos-14, macos-13: compiles okay, tests segfault at import time
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         if: runner.os=='Windows'
         with:
           arch: x64
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.2
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -33,12 +33,12 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build sdist
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -46,12 +46,16 @@ jobs:
     name: Pyodide (wasm32) wheels
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
+    # host python must match the pyodide python version (see .justfile)
+    - uses: actions/setup-python@v7
+      with:
+          python-version: '3.13'
     - name: Python
       run: |
           # skip this step if already installed (such as locally re-using container with naktos/act)
-          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
-          pip install pyodide-build py-build-cmake
+          command -v ninja || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
+          python3 -m pip install pyodide-build py-build-cmake
     - name: Pyodide build
       run: |
           [ -d emsdk ] || git clone https://github.com/emscripten-core/emsdk.git emsdk
@@ -69,7 +73,7 @@ jobs:
           pip install dist/oofem-*_wasm32.whl
           pip install pytest numpy
           python -m pytest bindings/python/tests
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         # called cibw-* so that download-artifacts can collect it
         name: cibw-notreally-pyodide
@@ -87,7 +91,7 @@ jobs:
     ## or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
     # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           # unpacks all CIBW artifacts into dist/
           pattern: cibw-*

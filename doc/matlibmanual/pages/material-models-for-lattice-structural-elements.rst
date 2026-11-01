@@ -147,7 +147,7 @@ where :math:`\boldsymbol{\sigma}` is a vector of tractions and rotational compon
 
 The plasticity part is based on the effective stresses and uses only a subset of the strains and stresses which are the normal stress :math:`\sigma_{\rm n}` and the two shear stresses :math:`\sigma_{\rm s}` and :math:`\sigma_{\rm t}`. The yield surface is composed of two ellipse which are arranged so that the transition of the two ellipses is smooth (Figure ``plastdamyieldfig``).
 
-.. figure:: /figures/plastdamyieldfig.*
+.. figure:: ../figures/plastdamyieldfig.*
    :width: 60%
    :alt: Latticeplastdam yield surface, which is composed of ellipse with a smooth transition.
 

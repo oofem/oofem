@@ -1,20 +1,20 @@
 name: Linux
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build-minimal:
     name: Minimal build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
       with:
           submodules: recursive
           fetch-depth: 0
     - name: Install dependencies
       run: |
           # for naktos-act (not needed with GitHub CI)
-          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
+          command -v ninja || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
     - name: Configure
       run: cmake -GNinja -B ./build -S. -DCMAKE_BUILD_TYPE=Release
     - name: Build
@@ -24,12 +24,12 @@ jobs:
     - name: CPack
       working-directory: ./build
       run: cpack -G "DEB;TGZ"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: oofem-linux-deb
         path: |
           build/oofem_*.deb
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: oofem-linux-tgz
         path: |
@@ -39,14 +39,18 @@ jobs:
     name: Python build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
       with:
           submodules: recursive
+    # pin python (system python differs between runner images and is externally managed)
+    - uses: actions/setup-python@v7
+      with:
+          python-version: '3.12'
     - name: Python
       run: |
           # skip this step if already installed (such as locally re-using container with naktos/act)
-          [ -f /usr/bin/ninja ] || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build python3.12 python3-all-dev python3-pip )
-          pip install pyodide-build py-build-cmake pytest numpy
+          command -v ninja || ( sudo apt-get update; sudo apt-get --yes install cmake git build-essential ninja-build )
+          python3 -m pip install build pytest numpy
     - name: Wheel build
       run: python3 -m build .
     - name: Wheel test

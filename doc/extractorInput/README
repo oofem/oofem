@@ -1,0 +1,52 @@
+Welcome to OOFEM Extractor manual README.
+
+What is here
+------------
+The manual of the extractor tool (``tools/extractor.py``), which reads selected
+values from an oofem output file and either prints them step by step or checks
+them against reference values.  It also documents how the record syntax of the
+``errorcheck`` export module, used by the regression tests, differs from that
+of the tool.
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org).
+Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
+
+Building documentation
+----------------------
+1) Change working directory to doc/extractorInput inside your oofem source tree
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Conventions
+-----------
+Record and parameter names are written as plain ``literals``, so that they
+carry the tinted background the stylesheet gives them, and actual input is
+shown in a ``.. code-block:: none``.  The parameters of a record are listed in a
+``list-table`` with an explicit ``:widths:`` option.  The other manuals follow
+the same conventions, so keep to them when adding text here.
+
+The manual describes what ``tools/extractor.py`` and
+``src/core/errorcheckingexportmodule.C`` actually accept; when either of them
+changes, update the corresponding page.
+
+Links to the other manuals are plain absolute URLs to the published HTML on
+www.oofem.org; there is no intersphinx inventory shared between the manuals.
+
+Shared configuration
+--------------------
+Project metadata and the shared html settings come from ``doc/global_conf.py``,
+and the page width and figure sizing from ``doc/_static/oofem.css``.
+``html_static_path`` must keep ``../_static``, so that the shared stylesheet is
+still copied.  See section [4] of doc/README.
+
+Happy contributing!

@@ -5,6 +5,11 @@
 
 import os
 import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+# Import shared settings (theme, stylesheet, numfig); the project
+# information below overrides the generic one.
+from global_conf import *
 
 # -- Project information -----------------------------------------------------
 
@@ -42,17 +47,7 @@ numfig = True
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'alabaster'
-# doc/_static is shared by the OOFEM manuals.
-html_static_path = ['../_static']
-html_css_files = ['oofem.css']
-
-# The element summary tables are wide, so the text column is widened to 80% of
-# the browser window.  That, and the figure sizing, is set once for every
-# manual in doc/_static/oofem.css -- do not add page_width or body_max_width
-# here, as the stylesheet loads after the theme and would override them.
-html_theme_options = {
-    'sidebar_width': '250px',
-}
+# The theme, the shared stylesheet and the page width come from global_conf.py
+# and doc/_static/oofem.css, so nothing is set here.
 
 master_doc = 'index'

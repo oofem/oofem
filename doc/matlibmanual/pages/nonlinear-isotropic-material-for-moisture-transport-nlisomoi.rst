@@ -385,7 +385,7 @@ where :math:`B_1, B_2` are coefficients to be calibrated, :math:`\alpha_\infty` 
 
 .. _hydration_comparison:
 
-.. figure:: /figures/Mokra_OOFEM_affinity_time.png
+.. figure:: ../figures/Mokra_OOFEM_affinity_time.png
    :width: 70%
    :alt: Performance of implemented hydration models
 

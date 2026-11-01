@@ -148,6 +148,9 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 # endif
 
     //ish = 0;
+    if ( shift > 0. ) {
+        a.add(shift, b);
+    }
     a.factorized();
     //
     // start of iteration loop
@@ -378,7 +381,7 @@ label400:
     _r.resize(nn, nroot);
     _eigv.resize(nroot);
     for ( int i = 1; i <= nroot; i++ ) {
-        _eigv.at(i) = eigv.at(i);
+        _eigv.at(i) = eigv.at(i) - shift;
         for ( int j = 1; j <= nn; j++ ) {
             _r.at(j, i) = r.at(j, i);
         }

@@ -414,7 +414,7 @@ Trilinear softening
 
 It is formulated for an embedded crack model and it is expressed in terms of crack opening (:math:`w`). This approach uses a trilinear softening diagram that helps reproducing the FRC behaviour; this diagram is defined by four points: :math:`t`, :math:`k`, :math:`r` and :math:`f` that are related to specific properties of concrete, fibres and the fibre proportion. In order to adapt the original formulation to the ``idm1``, which uses damage :math:`\omega` as the driving parameter of fracture, instead of crack opening :math:`w`, the correspondence between both must be taken into account. Figure :numref:`fig:diagram_sigmaVSw_and_sigmaVSepsilon` shows the trilinear diagram expressed in terms of the crack opening :math:`w` (left) and in terms of the equivalent strain :math:`\varepsilon` (right).
 
-.. figure:: /figures/trilinear_diagram_sigmaVSw_and_sigmaVSepsilon.png
+.. figure:: ../figures/trilinear_diagram_sigmaVSw_and_sigmaVSepsilon.png
    :align: center
    :alt: Trilinear softening diagram expressed in terms of the crack opening (w) and expressed in terms of strain.
    :name: fig:diagram_sigmaVSw_and_sigmaVSepsilon
@@ -532,7 +532,7 @@ Note that parameter :math:`\it{damlaw}` determines which type of damage law shou
 
 The model parameters are summarized in :numref:`id_table`. Figure :numref:`idm_softening` shows three modes of a softening law with corresponding variables.
 
-.. figure:: /figures/Damage_material_diag.png
+.. figure:: ../figures/Damage_material_diag.png
    :width: 99%
    :alt: Implemented stress-strain diagrams for isotropic damage material. Fracturing strain :math:`\varepsilon_f` and crack opening at zero stress :math:`w_f` are interrelated through effective thickness :math:`h` of the crack band. Note that exponential softening approach based on an exponential cohesive law is not exactly equivalent to the approach based on an exponential softening branch of the stress-strain diagram; see the detailed discussion of the damage laws.
    :name: idm_softening
@@ -1004,7 +1004,7 @@ state of the intact material between defects such as microcracks or voids.
    | :math:`\vsigt = \frac{3}{2\pi} \int_\Omega (\vst \otimes \mbf{n}) \sym \; d\Omega`         | :math:`ě = \psi \vet`                   | :math:`\veps = \frac{3}{2\pi} \int_\Omega (ě \otimes \mbf{n}) \sym \; d\Omega` |
    +--------------------------------------------------------------------------------------------+-----------------------------------------+--------------------------------------------------------------------------------+
 
-.. figure:: /figures/dm_comp.png
+.. figure:: ../figures/dm_comp.png
    :width: 80%
    :alt: Structure of microplane-based anisotropic damage model
    :align: center
