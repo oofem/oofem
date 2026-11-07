@@ -652,6 +652,19 @@ public:
         RT_Auxiliary
     };
 
+    /**
+     * Haigh-Westergaard invariants of the in-plane principal effective stress
+     * {s1, s2, 0} (s3 = 0, plane stress) and their derivatives with respect to
+     * the two in-plane principal stresses. Used by the plane-stress stress
+     * return algorithm only.
+     */
+    struct PlaneStressInvariants {
+        double s1 = 0., s2 = 0., sig = 0., rho = 0., theta = 0.;
+        FloatArrayF< 2 >dRho;        ///< d rho / d s_i
+        FloatMatrixF< 2, 2 >ddRho;   ///< d2 rho / d s_i d s_j
+        FloatArrayF< 2 >dTheta;      ///< d theta / d s_i  (sgn(0) = 0 convention)
+    };
+
 
 protected:
     /// Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
@@ -1136,6 +1149,80 @@ public:
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
+    /**
+     * @name Plane stress stress return.
+     * Stress evaluation and update of the internal (plastic and damage) variables
+     * for the plane stress case. The algorithmic tangent stiffness is not provided;
+     * givePlaneStressStiffMtrx falls back to an elastic-times-secant-damage estimate.
+     * See doc/... or the hand-off note for the derivation of the formulas below.
+     */
+    //@{
+    FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const override;
+
+    FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+
+    FloatArrayF< 3 >performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
+
+    double performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
+                                            ConcreteDPM2_ReturnResult &returnResult,
+                                            double kappaP) const;
+
+    FloatMatrixF< 4, 4 >computeJacobian_PlaneStress(const PlaneStressInvariants &inv, double kappa, double deltaLambda) const;
+
+    /// Haigh-Westergaard invariants sig, rho, theta of {s1, s2, 0} and their derivatives w.r.t. s1, s2.
+    PlaneStressInvariants computeInvariants_PlaneStress(double s1, double s2) const;
+
+    /// Derivative of the yield function with respect to the Lode angle theta.
+    double computeDFDTheta(double sig, double rho, double theta, double kappa) const;
+
+    /// Same as computeDFDKappa, but without clipping positive values to zero.
+    double computeDFDKappa_NoCutoff(double sig, double rho, double theta, double kappa) const;
+
+    /// Derivative of function k (evolution law of kappa) with respect to the Lode angle theta.
+    double computeDKDTheta(double sig, double rho, double theta, double kappa) const;
+
+    /// f_1, f_2: derivatives of the yield function with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDFDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// g_1, g_2: derivatives of the plastic potential with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDGDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// G_ij: second derivatives of the plastic potential with respect to the in-plane principal stresses.
+    FloatMatrixF< 2, 2 >computeDDGDDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// G_i-kappa: mixed derivatives of the plastic potential with respect to the in-plane principal stresses and kappa.
+    FloatArrayF< 2 >computeDDGDPrincipalDKappa_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// k_1, k_2: derivatives of function k with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDKDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// g_3: derivative of the plastic potential with respect to the (zero) out-of-plane principal stress, needed for the out-of-plane plastic strain only.
+    double computeDGDSigmaZ_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// Computes the in-plane principal values s1 >= s2 and the cosine/sine of the angle defining their directions.
+    void computePrincipalStress_PlaneStress(const FloatArrayF< 3 > &s, double &s1, double &s2, double &c, double &sn) const;
+
+    /// Transforms in-plane principal stresses back to the Cartesian plane-stress components, using the directions given by c = cos(phi), sn = sin(phi).
+    FloatArrayF< 3 >transformPrincipalToGlobal_PlaneStress(double s1, double s2, double c, double sn) const;
+
+    /// Elastic plane stress stiffness matrix D* built from eM, nu.
+    FloatMatrixF< 3, 3 >givePlaneStressElasticStiffness() const;
+
+    /// Elastic plane stress compliance matrix C* built from eM, nu.
+    FloatMatrixF< 3, 3 >givePlaneStressElasticCompliance() const;
+
+    /// Embeds a plane-stress triplet {x, y, xy} into the full 6-component Voigt form {x, y, zz, 0, 0, xy}.
+    static FloatArrayF< 6 >embedPlaneStress(const FloatArrayF< 3 > &v, double zz = 0.);
+
+    /// Applies the damage split (computeAlpha + computeDamage + damageFlag switch) to obtain the nominal stress from the effective stress. Shared by the 3d and plane stress drivers.
+    FloatArrayF< 6 >computeNominalStress(const FloatArrayF< 6 > &strain6,
+                                         const FloatArrayF< 6 > &effStress6,
+                                         const FloatMatrixF< 6, 6 > &D,
+                                         double dt,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep,
+                                         double &alpha) const;
+    //@}
 
 protected:
     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;

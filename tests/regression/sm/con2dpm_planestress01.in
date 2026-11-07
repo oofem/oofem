@@ -1,0 +1,44 @@
+con2dpm_planestress01.out
+Concrete Plasticity Uniaxial Tension, PlaneStress2d element
+StaticStructural nsteps 8 rtolf 1.e-6 maxiter 100 nmodules 1
+errorcheck
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 4
+node 1 coords 3 0.0 0.0 0.0
+node 2 coords 3 1.0 0.0 0.0
+node 3 coords 3 1.0 1.0 0.0
+node 4 coords 3 0.0 1.0 0.0
+#
+PlaneStress2d 1 nodes 4 1 2 3 4 mat 1
+#
+SimpleCS 1 thick 1.0 material 1 set 1
+#
+con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-4 fc 3.e6 ft 1.e6 hp 0.01 yieldtol 1.e-5 asoft 5. stype 1 helem 0.1 kinit 0.3
+#
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 1 values 1 1.0e-4 set 4
+#
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 9 0. 1. 2. 3. 4. 5. 6. 7. 8. f(t) 9 0. 0.125 0.25 0.375 0.5 0.625 0.75 0.875 1.0
+#
+Set 1 elementranges {1}
+Set 2 nodes 2 1 4
+Set 3 nodes 1 1
+Set 4 nodes 2 2 3
+#
+#%BEGIN_CHECK% tolerance 1.e-3
+## tStep 1: elastic
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1 value 1.25000000e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1 value 3.75000000e+05
+## tStep 2: plastic, no damage yet
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 1 value 2.50000000e-05
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1 value 7.41947239e+05
+## tStep 3: plastic and damage, near peak stress
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1 value 3.75000000e-05
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1 value 9.99789595e+05
+## tStep 8: well into tension softening
+#ELEMENT tStep 8 number 1 gp 1 keyword 4 component 1 value 1.00000000e-04
+#ELEMENT tStep 8 number 1 gp 1 keyword 1 component 1 value 9.68159871e+05
+#%END_CHECK%
