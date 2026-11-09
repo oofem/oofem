@@ -500,6 +500,11 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     this->damageFlag = 1; //Default value using damage in tension and compression according to IJSS CDPM2 paper.
     IR_GIVE_OPTIONAL_FIELD(ir, this->damageFlag, _IFT_ConcreteDPM2_damflag);
 
+    // plane stress algorithm selector (0: dedicated return mapping, 1: legacy
+    // generic 3d + out-of-plane-strain iteration), for comparative studies.
+    this->oldPlaneStressFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->oldPlaneStressFlag, _IFT_ConcreteDPM2_oldps);
+
     // elastic parameters
     IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
     IR_GIVE_FIELD(ir, this->nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -616,6 +621,9 @@ ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
         if ( !stream.write(damageFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        if ( !stream.write(oldPlaneStressFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
         if ( !stream.write(e0) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -721,6 +729,9 @@ ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(damageFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(oldPlaneStressFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(e0) ) {
@@ -3437,19 +3448,64 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
         if ( normOfResiduals > yieldTol ) {
             auto jacobian = computeJacobian_PlaneStress(inv, tempKappa, deltaLambda);
 
-            FloatArrayF< 4 >delta;
-            try {
-                delta = solve(jacobian, residuals);
-            } catch ( ... ) {
-                returnResult = RR_NotConverged;
-                return kappaP;
-            }
+            // If kappa is still below 1 but the current stress estimate already
+            // violates the FULLY HARDENED (kappa=1) surface, hardening alone
+            // cannot resolve the violation: dF/dKappa is then typically positive
+            // (see hand-off note / algoCDPM.tex), which makes the coupled 4x4
+            // solve predict a spurious negative deltaLambda in the kappa-Delta
+            // Lambda block and can derail the Newton iteration entirely. In that
+            // regime, freeze kappa and solve the reduced 3x3 system (s1, s2,
+            // deltaLambda only; rows/cols 1, 2, 4) instead, then bring kappa back
+            // into consistency with the now-known deltaLambda using the 3rd
+            // equation, capped at 1 so kappa cannot itself overshoot past the
+            // point where the ordinary coupled iteration takes back over.
+            const bool pathological = ( tempKappa < 1. ) &&
+                                      ( computeYieldValue(inv.sig, inv.rho, inv.theta, 1.) > 0. );
 
-            s1 -= delta[0];
-            s2 -= delta[1];
-            tempKappa -= delta[2];
-            deltaLambda -= delta[3];
-            deltaLambda = max(deltaLambda, 0.);
+            if ( pathological ) {
+                FloatMatrixF< 3, 3 >jacobian3;
+                FloatArrayF< 3 >residuals3;
+                static const int idx[3] = { 1, 2, 4 };
+                for ( int ii = 0; ii < 3; ii++ ) {
+                    residuals3[ii] = residuals[idx[ii] - 1];
+                    for ( int jj = 0; jj < 3; jj++ ) {
+                        jacobian3.at(ii + 1, jj + 1) = jacobian.at(idx[ii], idx[jj]);
+                    }
+                }
+
+                FloatArrayF< 3 >delta3;
+                try {
+                    delta3 = solve(jacobian3, residuals3);
+                } catch ( ... ) {
+                    returnResult = RR_NotConverged;
+                    return kappaP;
+                }
+
+                s1 -= delta3[0];
+                s2 -= delta3[1];
+                deltaLambda -= delta3[2];
+                deltaLambda = max(deltaLambda, 0.);
+
+                if ( deltaLambda > 0. ) {
+                    auto invNew = computeInvariants_PlaneStress(s1, s2);
+                    double kOldKappa = computeDKappaDDeltaLambda(invNew.sig, invNew.rho, invNew.theta, tempKappa);
+                    tempKappa = min(kappaTr + deltaLambda * kOldKappa, 1.);
+                }
+            } else {
+                FloatArrayF< 4 >delta;
+                try {
+                    delta = solve(jacobian, residuals);
+                } catch ( ... ) {
+                    returnResult = RR_NotConverged;
+                    return kappaP;
+                }
+
+                s1 -= delta[0];
+                s2 -= delta[1];
+                tempKappa -= delta[2];
+                deltaLambda -= delta[3];
+                deltaLambda = max(deltaLambda, 0.);
+            }
 
             inv = computeInvariants_PlaneStress(s1, s2);
 
@@ -3563,6 +3619,14 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
 FloatArrayF< 3 >
 ConcreteDPM2::giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &fullStrainVector, GaussPoint *gp, TimeStep *tStep) const
 {
+    if ( oldPlaneStressFlag ) {
+        // Legacy generic approach (pre-existing in OOFEM): iterate the
+        // out-of-plane strain on top of the full 3d return mapping, instead
+        // of the dedicated plane-stress algorithm below. Selectable from the
+        // input file (oldps 1) for comparative studies.
+        return StructuralMaterial::giveRealStressVector_PlaneStress(fullStrainVector, gp, tStep);
+    }
+
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     status->initTempStatus();
@@ -3618,6 +3682,12 @@ ConcreteDPM2::giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &fullStrai
 FloatMatrixF< 3, 3 >
 ConcreteDPM2::givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
+    if ( oldPlaneStressFlag ) {
+        // Companion to the legacy giveRealStressVector_PlaneStress branch above:
+        // static condensation of the full 3d tangent/secant matrix.
+        return StructuralMaterial::givePlaneStressStiffMtrx(mode, gp, tStep);
+    }
+
     // Stopgap: the plane stress algorithmic tangent is out of scope (see hand-off
     // note). Returns the elastic plane stress stiffness, scaled by the secant
     // damage factor for the stress formulas that reduce to a single scalar factor

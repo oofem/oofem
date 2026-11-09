@@ -73,6 +73,7 @@
 #define _IFT_ConcreteDPM2_deltatime "deltat"
 #define _IFT_ConcreteDPM2_helem "helem"
 #define _IFT_ConcreteDPM2_damflag "damflag"
+#define _IFT_ConcreteDPM2_oldps "oldps"
 //@}
 
 namespace oofem {
@@ -675,6 +676,13 @@ protected:
      */
     int damageFlag = 0;
 
+    /** Selects the plane stress algorithm, for comparative studies.
+     * 0: dedicated plane-stress return mapping (default).
+     * 1: legacy generic approach, iterating the out-of-plane strain on top
+     *    of the 3d return mapping (StructuralMaterial::giveRealStressVector_PlaneStress).
+     */
+    int oldPlaneStressFlag = 0;
+
     double e0 = 0.;
 
     /// Parameter of the ductilityMeasure of the plasticity model.
@@ -1155,6 +1163,9 @@ public:
      * for the plane stress case. The algorithmic tangent stiffness is not provided;
      * givePlaneStressStiffMtrx falls back to an elastic-times-secant-damage estimate.
      * See doc/... or the hand-off note for the derivation of the formulas below.
+     * The legacy generic approach (3d return mapping + out-of-plane strain
+     * iteration) can be selected instead via the "oldps 1" input record
+     * field (oldPlaneStressFlag), for comparative studies without rebuilding.
      */
     //@{
     FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const override;

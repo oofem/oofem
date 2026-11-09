@@ -37,8 +37,8 @@ Set 4 nodes 2 2 3
 #ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1 value 7.41947239e+05
 ## tStep 3: plastic and damage, near peak stress
 #ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1 value 3.75000000e-05
-#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1 value 9.99789595e+05
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1 value 9.99789590e+05
 ## tStep 8: well into tension softening
 #ELEMENT tStep 8 number 1 gp 1 keyword 4 component 1 value 1.00000000e-04
-#ELEMENT tStep 8 number 1 gp 1 keyword 1 component 1 value 9.68159871e+05
+#ELEMENT tStep 8 number 1 gp 1 keyword 1 component 1 value 9.68159866e+05
 #%END_CHECK%
