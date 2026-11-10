@@ -635,7 +635,7 @@ public:
  *
  * @author Peter Grassl, Dimitrios Xenos
  */
-class ConcreteDPM2 : public StructuralMaterial
+class OOFEM_EXPORT ConcreteDPM2 : public StructuralMaterial
 {
 public:
 
