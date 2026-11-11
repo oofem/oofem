@@ -99,5 +99,46 @@ public:
 };
 
 
+/**
+ * Scales the rows of an element contribution by the scaling of the equations they belong to.
+ * @param dofScale Scale factor by dof id; dof ids beyond its size are not scaled.
+ */
+void mpmScaleElementRows(FloatMatrix &answer, const Element &element, const FloatArray &dofScale);
+/// @copydoc mpmScaleElementRows
+void mpmScaleElementRows(FloatArray &answer, const Element &element, const FloatArray &dofScale);
+
+/**
+ * Callback class assembling the effective tangent alpha*K + C/dt of elements responding to the
+ * generic MPM characteristic types (MPM_LhsMatrix for K, MPM_LhsDotMatrix for C), with the
+ * equations scaled.
+ */
+class MPMElementLhsAssembler : public MatrixAssembler
+{
+protected:
+    double alpha;
+    double deltaT;
+    const FloatArray &dofScale;
+
+public:
+    MPMElementLhsAssembler(double alpha, double deltaT, const FloatArray &dofScale) :
+        MatrixAssembler(), alpha(alpha), deltaT(deltaT), dofScale(dofScale) {}
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+};
+
+/**
+ * Callback class assembling the residual (MPM_InternalResidual) of elements responding to the
+ * generic MPM characteristic types, with the equations scaled.
+ */
+class MPMElementResidualAssembler : public VectorAssembler
+{
+protected:
+    const FloatArray &dofScale;
+
+public:
+    MPMElementResidualAssembler(const FloatArray &dofScale) : VectorAssembler(), dofScale(dofScale) {}
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+};
+
+
 } // end namespace oofem
 #endif // mpmassemblers_h

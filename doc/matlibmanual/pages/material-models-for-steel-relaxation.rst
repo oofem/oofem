@@ -64,6 +64,7 @@ The material model has one internal variable which has a meaning of cumulative p
 
 .. table:: SteelRelaxMat material model for relaxation of prestressing reinforcement
    :name: steelRelax_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | SteelRelaxMat model for relaxation of prestressing reinforcement                             |

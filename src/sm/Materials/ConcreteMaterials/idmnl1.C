@@ -34,6 +34,7 @@
 
 #include "idmnl1.h"
 #include "gausspoint.h"
+#include "crosssection.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"
@@ -421,7 +422,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( auto &lir : *list ) {
-        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
+        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveCrossSection()->giveMaterial(lir.nearGp) );
         if ( rmat ) {
             rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
             coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / status->giveIntegrationScale();
@@ -509,7 +510,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     int n, m;
     auto list = status->giveIntegrationDomainList();
     for ( auto &lir : *list ) {
-        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
+        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveCrossSection()->giveMaterial(lir.nearGp) );
         if ( rmat ) {
             lir.nearGp->giveElement()->giveLocationArray( rloc, EModelDefaultEquationNumbering() );
         } else {

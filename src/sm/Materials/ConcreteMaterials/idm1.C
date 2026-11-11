@@ -1413,8 +1413,11 @@ IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tSte
     toMap.at(3) = ( int ) IST_StrainTensor;
 
 
-    if ( sourceElemSet == NULL ) {
+    // (re)create source set, when not created yet or created for a different (previous) domain
+    if ( sourceElemSet == NULL || sourceElemSet->giveDomain() != oldd || sourceElemSetDomainSerNum != oldd->giveSerialNumber() ) {
+        delete sourceElemSet;
         sourceElemSet = new Set(0, oldd);
+        sourceElemSetDomainSerNum = oldd->giveSerialNumber();
         IntArray el;
         // compile source list to contain all elements on old odmain with the same material id
         for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {

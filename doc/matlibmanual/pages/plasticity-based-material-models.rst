@@ -116,6 +116,7 @@ The algorithmic tangent stiffness matrix is implemented for both the regular cas
 
 .. table:: DP material - summary
    :name: DP_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | DP material                                                                                  |
@@ -203,6 +204,7 @@ overestimates the dilatancy of concrete. Hence, the dilatancy coefficient is usu
 
 .. table:: Drucker Prager material with tension cut-off - summary
    :name: DP_table_cut
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Drucker Prager material with tension cut-off                                                 |
@@ -317,6 +319,7 @@ The model description and parameters are summarized in :numref:`misesMat_table`.
 
 .. table:: Mises plasticity -- summary.
    :name: misesMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Mises plasticity model with isotropic hardening                                              |
@@ -424,6 +427,7 @@ The model description and parameters are summarized in :numref:`misesMatNl_table
 
 .. table:: Nonlocal integral Mises plasticity -- summary.
    :name: misesMatNl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal Mises plasticity with isotropic hardening                                           |
@@ -459,6 +463,7 @@ The model description and parameters are summarized in :numref:`misesMatNl_table
 
 .. table:: Gradient-enhanced Mises plasticity -- summary.
    :name: misesMatGrad_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Gradient-enhanced Mises plasticity with isotropic damage                                     |
@@ -530,6 +535,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Rankine plasticity -- summary.
    :name: rankineMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Rankine plasticity with isotropic hardening and damage                                       |
@@ -557,6 +563,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Nonlocal integral Rankine plasticity -- summary.
    :name: rankineMatNl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal Rankine plasticity with isotropic hardening and damage                              |
@@ -597,6 +604,7 @@ The approximate solution of Helmholtz equation :math:`(``\ implicitGradient``)` 
 
 .. table:: Gradient-enhanced Rankine plasticity -- summary.
    :name: rankineMatGrad_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Gradient-enhanced Rankine plasticity with isotropic hardening and damage                     |
@@ -637,6 +645,7 @@ described in Section~:samp:`ref{sec:misplast}`.
 
 .. table:: Perfectly plastic material with Mises condition -- summary
    :name: Steel1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Perfectly plastic material with Mises condition                                              |
@@ -665,7 +674,7 @@ Composite plasticity model for masonry - Masonry02
 
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots [Rots]_. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(:numref:`compyieldsurffig`)). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices.
 
-.. figure:: /figures/constmodel.png
+.. figure:: ../figures/constmodel.png
    :width: 80%
    :alt: Composite yield surface model for masonry
    :name: compyieldsurffig
@@ -674,7 +683,7 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
 
 The approach used in this work is based on the idea of concentrating all the damage in the relatively weak joints and, if necessary, in potential tension cracks in the bricks. The joint interface constitutive model should include all important damage mechanisms. Here, the concept of interface elements is used. An interface element allows to incorporate discontinuities in the displacement field and its behavior is described in terms of a relation between the tractions and relative displacement across the interface. In the present work, these quantities will be denoted as :math:`\sig`, generalized stress, and :math:`\e`, generalized strain. For 2D configuration, :math:`\sig=\{\sigma, \tau\}^T` and :math:`\e=\{u_n, u_s\}^T`, where :math:`\sigma` and :math:`\tau` are the normal and shear components of the traction interface vector and :math:`n` and :math:`s` subscripts distinguish between normal and shear components of displacement vector.
 
-.. figure:: /figures/mmodel.png
+.. figure:: ../figures/mmodel.png
    :width: 70%
    :alt: Modeling strategy for masonry
 
@@ -804,7 +813,7 @@ An associated flow and strain hardening hypothesis are being considered. This yi
 
    \dot\kappa_3=\lambda_3\sqrt{(2C_{nn}\sigma+C_n)*(2C_{nn}\sigma+C_n) + (2C_{ss}\tau)*(2C_{ss}\tau)}
 
-.. figure:: /figures/capmode.png
+.. figure:: ../figures/capmode.png
    :width: 70%
    :alt: Hardening/softening law for cap mode
    :name: hs3fig
@@ -821,6 +830,7 @@ the input parameters accordingly (one can modify dilatancy angle, for example).
 
 .. table:: Composite model for masonry - summary.
    :name: compomasonry1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Composite plasticity model for masonry                                                       |
@@ -870,6 +880,7 @@ in :numref:`Rer_table`.
 
 .. table:: Nonlinear elasto-plastic material model for concrete - summary.
    :name: Rer_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlinear elasto-plastic material model for concrete plates and shells                       |

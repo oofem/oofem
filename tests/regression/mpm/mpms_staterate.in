@@ -1,0 +1,37 @@
+mpms_staterate.out
+Value mode in the material state layout: a Kelvin-Voigt bar (statedeptangentmat with eta) asks for the strain rate (VM_Velocity) next to the strain.
+# Creep under a constant load F = 0.2 on a unit bar, E = 1, eta = 2, dt = 1, backward Euler
+# (alpha 1): eps_{n+1} = (F + eta/dt * eps_n) / (E + eta/dt), the end displacement equals eps.
+# eps_1 = 0.0666667, eps_2 = 0.1111111, eps_5 = 0.1736626, eps_10 = 0.1965317 (limit F/E = 0.2).
+#
+mpmnonstationaryproblem nsteps 10 deltat 1.0 alpha 1.0 nmodules 1 ptype "symbolic" smtype 1 nvariables 2 nterms 1 nintegrals 1 lhsterms 1 1 lhsdotterms 0 rhsterms 0
+errorcheck
+Variable name "u" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 # displacement
+Variable name "w" interpolation "feilin" type 1 quantity "Displacements" size 1 dofs 1 1 dualto "u" # test function
+SymbolicTerm 1 variable "u" testvariable "w" mmode 10 lexpression "Grad_s(w,gp).T*MDer(gp,ts,MatResponseMode::TangentStiffness)*Grad_s(u,gp)" rexpression "Grad_s(w,gp).T*MVec(gp,ts,MatResponseMode::Stress)"
+Integral 1 domain 1 set 1 term 1
+#
+domain HeatTransfer
+outputmanager tstep_all dofman_all element_all
+ndofman 2 nelem 1 nbc 2 ncrosssect 1 nic 0 nltf 1 nmat 1 nset 3
+node 1 coords 3 0.            0.           0.
+node 2 coords 3 1.0           0.           0.
+#
+l1 1 nodes 2 1 2     mat 1 crosssect 1
+#
+simplecs 1 thick 1.0
+statedeptangentmat 1 d 1 e 1.0 eta 2.0
+# x-displacement
+boundarycondition 1 loadtimefunction 1 set 2 values 1 0   dofs 1 1
+nodalload 2 loadtimefunction 1 set 3 components 1 0.2 dofs 1 1
+#
+constantfunction 1 f(t) 1
+set 1 elements 1 1
+set 2 nodes 1 1
+set 3 nodes 1 2
+#%BEGIN_CHECK%
+#NODE tStep 1 number 2 dof 1 unknown d value 6.66666667e-02 tolerance 1.e-8
+#NODE tStep 2 number 2 dof 1 unknown d value 1.11111111e-01 tolerance 1.e-8
+#NODE tStep 5 number 2 dof 1 unknown d value 1.73662551e-01 tolerance 1.e-8
+#NODE tStep 10 number 2 dof 1 unknown d value 1.96531694e-01 tolerance 1.e-8
+#%END_CHECK%

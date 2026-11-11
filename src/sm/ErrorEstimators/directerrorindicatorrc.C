@@ -217,7 +217,31 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
 
     // remember time stamp
     stateCounter = tStep->giveSolutionStateCounter();
+
+    int nrefine = 0;
+    double maxIndicator = 0.0, minRequired = 0.0;
+    for ( inode = 1; inode <= nnodes; inode++ ) {
+        this->giveNodeChar(inode, tStep, indicatorVal, currDensity);
+        maxIndicator = max(maxIndicator, indicatorVal);
+        // only nodes with indicator over the limit trigger remeshing (see above)
+        if ( indicatorVal >= minIndicatorLimit && this->nodalDensities.at(inode) < currDensity * this->remeshingDensityRatioToggle ) {
+            nrefine++;
+        }
+        minRequired = ( inode == 1 ) ? this->nodalDensities.at(inode) : min(minRequired, this->nodalDensities.at(inode) );
+    }
+    OOFEM_LOG_INFO("DirectErrorIndicatorRC: max. indicator %e, min. required size %e, %d nodes require refinement, %s\n",
+                   maxIndicator, minRequired, nrefine, __RemeshingStrategyToString(this->currStrategy) );
     return 1;
+}
+
+
+void
+DirectErrorIndicatorRC :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    fprintf(file, "  Indicator limits (min, max) : %e, %e\n", minIndicatorLimit, maxIndicatorLimit);
+    fprintf(file, "  Size at limits (min, max)   : %e, %e (default %e)\n", minIndicatorDensity, maxIndicatorDensity, zeroIndicatorDensity);
+    fprintf(file, "  Remeshing size ratio        : %e\n", remeshingDensityRatioToggle);
+    RemeshingCriteria :: printOutputAt(file, tStep);
 }
 
 

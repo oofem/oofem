@@ -41,7 +41,9 @@ Describes a variable, that is a field appearing in the weak form.
     ``feilin``
         Linear interpolation.
     ``feiquad``
-        Quadratic interpolation.
+        Quadratic interpolation.  It needs the inner nodes of the cells, which
+        can be given in the cell records or are generated; see
+        :ref:`MPMCellsSec`.
     ``fei1dlin_x``, ``fei1dlin_y``, ``fei1dlin_z``
         Linear interpolation on a 1D cell aligned with the given global axis.
 
@@ -52,8 +54,10 @@ Describes a variable, that is a field appearing in the weak form.
 :param:`quantity{et}`
     What the variable physically is, as a ``FieldType`` value.  Either the name
     or the number may be written, and the ``FT_`` prefix may be dropped — so
-    ``quantity "Temperature"`` and ``quantity 5`` are the same thing.  The
-    values are defined in ``src/core/field.h``:
+    ``quantity "Temperature"`` and ``quantity 5`` are the same thing.  A name
+    has to be **quoted**: names are matched case-sensitively and the parser
+    lower-cases everything outside double quotes.  The values are defined in
+    ``src/core/field.h``:
 
     .. list-table::
        :header-rows: 1
@@ -222,8 +226,7 @@ Supported term types
 
     The expression language — its functions ``Grad_s``, ``Grad``, ``Div``,
     ``N``, ``Sig``, ``Sig_dev``, ``MDer``, ``MVec``, ``MProp`` and the rest, and
-    the full list of attributes — is documented separately in
-    ``doc/symbolic_term.md``.
+    the full list of attributes — is documented in :ref:`SymbolicTermSec`.
 
 .. _IntegralsSec:
 
@@ -261,3 +264,65 @@ record; see :ref:`StationaryMPMSProblem`.
 
    Despite their names, :param:`lhsterms` and :param:`rhsterms` list
    *integral* numbers, not term numbers.
+
+.. _MPMCellsSec:
+
+Cell records
+------------
+
+The integrals are evaluated on generic cells, ordinary element records of the
+domain (see :ref:`ElementsRecords`) that carry no fields of their own: the
+variables acting on a cell decide its unknowns and dofs.
+
+.. record::
+
+   :descitem:`l1` :elemparam:`num{in}` :elemparam:`nodes{ia}` ...
+
+   :descitem:`q1` :elemparam:`num{in}` :elemparam:`nodes{ia}` ...
+
+``l1``
+    Line cell.  :param:`nodes` lists either the two end nodes, or three nodes:
+    the two end nodes followed by the inner node.
+
+``q1``
+    Quadrilateral cell.  :param:`nodes` lists either the four corner nodes, in
+    counter-clockwise order, or eight nodes: the corners followed by the inner
+    nodes of the edges, node :math:`4+i` lying on the edge from corner
+    :math:`i` to corner :math:`i \bmod 4 + 1`.
+
+A quadratic variable (``feiquad``) has an unknown at the inner nodes as well.
+Inner nodes given in the cell record are used as given.  An inner node not
+given, or given as ``0``, is generated: at the midpoint of an ``l1`` cell, or at
+the midpoint of a ``q1`` edge, where it is shared with the neighbouring cell.
+An edge node of ``q1`` cells is therefore given in all the cells sharing the
+edge, or in none.  Generated nodes are numbered after the nodes of the input
+file, in the order of the cells; they are not known when the input is read, so
+sets, boundary conditions and loads cannot refer to them.  To prescribe, load or
+select an inner node, give it in the cell record.
+
+The geometry of a cell follows its nodes:
+
+* An ``l1`` cell given with its inner node has a quadratic geometry through all
+  three nodes, and the inner node can lie anywhere between the end nodes (not
+  only at the midpoint).  The gradients of all variables, linear ones included,
+  and the integration over the cell follow this geometry.
+* An ``l1`` cell given by its end nodes, and every ``q1`` cell, has a linear
+  geometry through the end (corner) nodes; the inner nodes of a ``q1`` cell are
+  therefore to be placed at the edge midpoints.
+
+**Example**
+
+.. code-block:: none
+
+   node 1 coords 3 0.0 0.0 0.0
+   node 2 coords 3 1.0 0.0 0.0
+   node 3 coords 3 2.0 0.0 0.0
+   node 4 coords 3 1.3 0.0 0.0
+   l1 1 nodes 2 1 2   mat 1 crosssect 1
+   l1 2 nodes 3 2 3 4 mat 1 crosssect 1
+
+A quadratic variable gets a generated inner node at :math:`x=0.5` on cell 1,
+and uses node 4, at :math:`x=1.3`, on cell 2, whose geometry is quadratic.  See
+``tests/regression/mpm/mpms_l1inner.in`` for a complete input file, and
+``tests/regression/mpm/mpms02.in`` for a ``q1`` cell with one edge node given
+and the others generated.

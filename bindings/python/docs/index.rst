@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-OOFEM Python bindings
+OOFEM Python Bindings
 =================================================
 
 Authors: |author|
@@ -23,9 +23,13 @@ Version: |version|, Date: |today|
 
    postprocessing
 
-Indices and tables
-==================
+.. The index and search pages exist in the HTML only; in the PDF this would be
+   an empty chapter.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. only:: html
+
+   .. rubric:: Indices and tables
+
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

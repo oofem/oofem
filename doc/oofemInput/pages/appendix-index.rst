@@ -10,6 +10,7 @@ module.
     :maxdepth: 2
 
     app-sparse-solvers
+    app-nonlinear-solvers
     app-eigen-solvers
     app-load-balancing
     app-error-estimators
@@ -18,3 +19,4 @@ module.
     app-init-modules
     app-export-modules
     app-mpm-symbolic
+    app-symbolic-term

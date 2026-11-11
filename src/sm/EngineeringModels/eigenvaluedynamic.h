@@ -49,6 +49,7 @@
 #define _IFT_EigenValueDynamic_nroot "nroot"
 #define _IFT_EigenValueDynamic_rtolv "rtolv"
 #define _IFT_EigenValueDynamic_stype "stype"
+#define _IFT_EigenValueDynamic_shift "shift"
 //@}
 
 namespace oofem {
@@ -74,6 +75,9 @@ private:
     int numberOfRequiredEigenValues;
     /// Relative tolerance.
     double rtolv;
+    /// Spectral shift given in input (used when explicitShift is set, otherwise estimated from K and M).
+    double shift = 0.;
+    bool explicitShift = false;
     std :: unique_ptr< SparseGeneralEigenValueSystemNM > nMethod;
     GenEigvalSolverType solverType;
 

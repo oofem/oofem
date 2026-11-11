@@ -130,6 +130,7 @@ The model parameters are summarized in :numref:`NlIsoMoistureMat`.
 
 .. table:: Nonlinear isotropic material for moisture transport
    :name: NlIsoMoistureMat
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlinear isotropic material for moisture transport                                          |
@@ -220,6 +221,7 @@ examples was published [Smilauer:09]_. :numref:`Cemhydmat_table` summarizes inpu
 
 .. table:: Cemhydmat - summary
    :name: Cemhydmat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Cemhyd - hydrating material                                                                  |
@@ -319,6 +321,7 @@ where :math:`B_1, B_2` are coefficients to be calibrated, :math:`\alpha_\infty` 
 
 .. table:: HydratingConcreteMat - summary of affinity hydration models.
    :name: Affinity1_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | HydratingConcreteMat                                                                         |
@@ -382,7 +385,7 @@ where :math:`B_1, B_2` are coefficients to be calibrated, :math:`\alpha_\infty` 
 
 .. _hydration_comparison:
 
-.. figure:: /figures/Mokra_OOFEM_affinity_time.png
+.. figure:: ../figures/Mokra_OOFEM_affinity_time.png
    :width: 70%
    :alt: Performance of implemented hydration models
 

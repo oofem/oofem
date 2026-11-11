@@ -40,6 +40,7 @@ Shear stiffness remains constant during all possible loadings and there is no in
 
 .. table:: Cohesive interface material -- summary.
    :name: cohint_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Cohesive interface material                                                                  |
@@ -101,7 +102,7 @@ If :param:`regularized` is set to true, the regularized version of the model is 
                \del{0.5 k_n}{m}\log(|\cosh(m(\delta_0+\delta_n))|) \\
             &\quad + c\left(0.5 k_n(\delta_0+\delta_n)+
                \del{0.5 k_n}{m}\log(|\cosh(m(\delta_0+\delta_n))|)\right)
-               
+
 where :math:`c` is the ratio of tensile/compressive stiffness (:param:`stiffcoeff`), :math:`\delta_0` is the normal clearance, :math:`\delta_n` is the normal strain (jump), and :math:`m` denotes the regularization coefficient. Consistent tangent stiffness is computed by differentiating the above relation.
 
 The shear elastic stiffness is assumed to be :param:`kn` (i.e., equal to the normal stiffness). If the normal traction is tensile or zero, no shear traction can be transmitted by the interface. In the future, this law will be enriched by a cohesion-like term.
@@ -112,6 +113,7 @@ The model description and parameters are summarized in :numref:`simpleinterfacem
 
 .. table:: Simple interface material
    :name: simpleinterfacemat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Simple interface material                                                                    |
@@ -135,7 +137,7 @@ The model description and parameters are summarized in :numref:`simpleinterfacem
 
 :name: `simpleinterfacemat_table`
 
-.. figure:: /figures/Simple_interface_material_diag.png
+.. figure:: ../figures/Simple_interface_material_diag.png
    :width: 70%
    :alt: Working diagram of SimpleInterfaceMat.
    :name: SimpleInterfaceMat
@@ -175,7 +177,7 @@ For an exponent :math:`\alpha` smaller than 1 (default value 0.4), the initial t
 
 Model description and the input parameters are summarized in :numref:`bondceb_table`.
 
-.. figure:: /figures/bondceb_diag.png
+.. figure:: ../figures/bondceb_diag.png
    :width: 50%
    :alt: Bond stress (:math:`\tau`) - reinforcement slip (:math:`s`) diagram for BondCEB model.
    :name: BondCEB
@@ -184,6 +186,7 @@ Model description and the input parameters are summarized in :numref:`bondceb_ta
 
 .. table:: Bond-slip model for reinforced concrete -- summary.
    :name: bondceb_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Bond-slip model for reinforced concrete                                                      |
@@ -219,7 +222,7 @@ This is an elasto-plastic model for slip between reinforcement modelled as three
 
 There are three types of constitutive relations supported which are shown in :ref:`linkslip`, which are chosen by means of the input parameter :param:`type`.
 
-.. figure:: /figures/linkslip.png
+.. figure:: ../figures/linkslip.png
    :width: 80%
    :alt: Bond stress (:math:`\tau`) - slip (:math:`s`) diagram for link slip model.
 
@@ -228,6 +231,7 @@ There are three types of constitutive relations supported which are shown in :re
 
 .. table:: Slip model for truss and beam elements -- summary
    :name: linkslip_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Slip model                                                                                   |

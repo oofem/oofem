@@ -954,20 +954,8 @@ if (DOXYGEN_FOUND)
         DEPENDS)
 endif (DOXYGEN_FOUND)
 
-configure_file (
-    "${oofem_SOURCE_DIR}/doc/include.tex.in"
-    "${oofem_SOURCE_DIR}/doc/include/include.tex"
-    )
-message (STATUS "Generating include.tex for manuals")
-
-# TODO: Manuals not done yet
-add_custom_target (
-    elementlibmanual
-    COMMAND pdflatex elementlibmanual --output=${oofem_BINARY_DIR}/doc/
-    COMMAND pdflatex elementlibmanual --output=${oofem_BINARY_DIR}/doc/
-    #COMMAND tex4ht elementlibmanual --output=${oofem_BINARY_DIR}/doc/
-    WORKING_DIRECTORY ${oofem_SOURCE_DIR}/doc/elementlibmanual/
-    )
+# The manuals are Sphinx projects built with "make" in doc/ (see doc/README),
+# not from CMake.
 
 #######################################################################
 ######################## Tests ########################################

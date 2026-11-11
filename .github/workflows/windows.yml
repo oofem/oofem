@@ -1,10 +1,10 @@
 name: Windows MSVC
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
       with:
           submodules: recursive
           fetch-depth: 0
@@ -30,12 +30,12 @@ jobs:
       shell: bash
       working-directory: ./build
       run: cpack -G "ZIP;NSIS"
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: oofem-windows-zip
         path: |
           build/oofem_*.zip
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: oofem-windows-installer
         path: |

@@ -219,9 +219,64 @@ void TMResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element,
                 }
             }
         }
-    
+
     }
 
+}
+
+
+void
+mpmScaleElementRows(FloatMatrix &answer, const Element &element, const FloatArray &dofScale)
+{
+    if ( dofScale.isEmpty() ) {
+        return;
+    }
+    IntArray loc, dofids;
+    element.giveLocationArray(loc, EModelDefaultEquationNumbering(), & dofids);
+    for ( int i = 1; i <= dofids.giveSize(); i++ ) {
+        if ( dofids.at(i) <= dofScale.giveSize() ) {
+            double s = dofScale.at( dofids.at(i) );
+            for ( int j = 1; j <= answer.giveNumberOfColumns(); j++ ) {
+                answer.at(i, j) *= s;
+            }
+        }
+    }
+}
+
+
+void
+mpmScaleElementRows(FloatArray &answer, const Element &element, const FloatArray &dofScale)
+{
+    if ( dofScale.isEmpty() ) {
+        return;
+    }
+    IntArray loc, dofids;
+    element.giveLocationArray(loc, EModelDefaultEquationNumbering(), & dofids);
+    for ( int i = 1; i <= dofids.giveSize(); i++ ) {
+        if ( dofids.at(i) <= dofScale.giveSize() ) {
+            answer.at(i) *= dofScale.at( dofids.at(i) );
+        }
+    }
+}
+
+
+void
+MPMElementLhsAssembler :: matrixFromElement(FloatMatrix &answer, Element &el, TimeStep *tStep) const
+{
+    FloatMatrix contrib;
+    el.giveCharacteristicMatrix(answer, MPM_LhsMatrix, tStep);
+    answer.times(this->alpha);
+    el.giveCharacteristicMatrix(contrib, MPM_LhsDotMatrix, tStep);
+    answer.add(1. / tStep->giveTimeIncrement(), contrib);
+    mpmScaleElementRows(answer, el, this->dofScale);
+}
+
+
+void
+MPMElementResidualAssembler :: vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const
+{
+    element.giveCharacteristicVector(vec, MPM_InternalResidual, mode, tStep);
+    mpmScaleElementRows(vec, element, this->dofScale);
 }
 
 } // end namespace oofem

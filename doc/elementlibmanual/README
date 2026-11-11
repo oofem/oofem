@@ -1,0 +1,76 @@
+Welcome to OOFEM Element Library manual README.
+
+What is here
+------------
+The element library manual: the supported element types, their degrees of
+freedom, the numbering of their edges and surfaces, and the parameters of each.
+One page per element group under ``pages/``.
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org).
+Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
+
+The element figures are drawn with TikZ.  They are rendered properly when
+``sphinxcontrib-tikz`` is installed (``pip install -U sphinxcontrib-tikz``);
+without it the build still succeeds and shows the TikZ source as a captioned
+literal block, which is what ``doc/_ext/oofemtikz.py`` falls back to.
+
+Building documentation
+----------------------
+1) Change working directory to doc/elementlibmanual inside your oofem source
+   tree
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Math macros
+-----------
+The equations use ``\mbf``, ``\del``, ``\der`` and ``\pard``, inherited from
+``elementlibmanual.tex``.  All four are common to the manuals and come from
+``doc/_ext/oofemmath.py``, which defines them for MathJax (html) and in the
+LaTeX preamble (pdf) alike, so nothing has to be declared here.  Anything
+specific to this manual goes in an ``oofem_math_macros`` dict in ``conf.py`` --
+never in ``mathjax3_config`` alone, which renders in the browser but breaks the
+pdf build.
+
+Writing equations
+-----------------
+A ``.. math::`` block is wrapped by Sphinx in a ``split`` environment, which
+allows a single alignment ``&`` per row.  Write ``a &= b``, not the ``eqnarray``
+form ``a &=& b``: MathJax tolerates the second, LaTeX does not.
+
+Figures
+-------
+pdflatex cannot include SVG.  Where a figure is an SVG, put a PDF of it next to
+the SVG in ``figures/`` and reference it without an extension::
+
+    .. figure:: /figures/lattice3d.*
+
+Sphinx then uses the SVG for html and the PDF for the pdf build.
+
+Tables
+------
+Sphinx only honours the column widths drawn in a grid table when the table
+carries an explicit ``:widths:`` option; without it every column gets an equal
+share, which gives the label column far too much room.  Keep the ``:widths:``
+line on the table directive, matching the geometry drawn below it.
+
+A cell holding a lone ``-`` is read as an empty bullet list, not a dash.  Write
+``\-``.
+
+Shared configuration
+--------------------
+The page width, figure sizing and record styling come from
+``doc/_static/oofem.css``, and the author list on the title page from
+``doc/_ext/oofemlatex.py``.  Do not set page_width or body_max_width in
+html_theme_options; see section [4] of doc/README.
+
+Happy contributing!

@@ -114,6 +114,7 @@ The model description and parameters are summarized in :numref:`trabbone_table`.
 
 .. table:: Anisotropic elastoplastic model with isotropic damage - summary.
    :name: trabbone_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Anisotropic elastoplastic model with isotropic damage                                        |
@@ -173,6 +174,7 @@ The model description and parameters are summarized in :numref:`trabboneNl_table
 
 .. table:: Nonlocal formulation of anisotropic elastoplastic model with isotropic damage -- summary.
    :name: trabboneNl_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlocal anisotropic elastoplastic model with isotropic damage                               |

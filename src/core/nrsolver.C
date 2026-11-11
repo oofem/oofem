@@ -774,7 +774,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 OOFEM_LOG_INFO( "  %s:", DofIDItemToString( ( DofIDItem ) dg ).c_str() );
             }
 
-            bool current_dg_converged_force = false;
             if ( rtolf.at(1) > 0.0 || atolf.at(1) > 0.0 ) {
                 current_force_err_abs = sqrt( dg_forceErr.at(dg) );
                 //  compute a relative error norm
@@ -793,9 +792,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
 
                 // Check convergence for force
-                if ( (rtolf.at(1) > 0.0 && forceErr <= rtolf.at(1)) || (atolf.at(1) > 0.0 && current_force_err_abs <= atolf.at(1)) ) {
-                    current_dg_converged_force = true;
-                } else {
+                if ( !( (rtolf.at(1) > 0.0 && forceErr <= rtolf.at(1)) || (atolf.at(1) > 0.0 && current_force_err_abs <= atolf.at(1)) ) ) {
                     converged_force = false;
                 }
 
@@ -816,7 +813,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
             }
 
-            bool current_dg_converged_disp = false;
             if ( rtold.at(1) > 0.0 || atold.at(1) > 0.0 ) {
                 current_disp_err_abs = sqrt( dg_dispErr.at(dg) );
                 // compute displacement error
@@ -830,9 +826,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 }
 
                 // Check convergence for displacement
-                if ( (rtold.at(1) > 0.0 && dispErr <= rtold.at(1)) || (atold.at(1) > 0.0 && current_disp_err_abs <= atold.at(1)) ) {
-                    current_dg_converged_disp = true;
-                } else {
+                if ( !( (rtold.at(1) > 0.0 && dispErr <= rtold.at(1)) || (atold.at(1) > 0.0 && current_disp_err_abs <= atold.at(1)) ) ) {
                     converged_disp = false;
                 }
 

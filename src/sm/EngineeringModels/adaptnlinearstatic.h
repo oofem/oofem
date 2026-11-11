@@ -39,6 +39,9 @@
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "meshpackagetype.h"
+#include "mesherinterface.h"
+
+#include <memory>
 
 ///@name Input fields for AdaptiveNonLinearStatic
 //@{
@@ -76,6 +79,8 @@ class AdaptiveNonLinearStatic : public NonLinearStatic
 protected:
     FloatArray d2_totalDisplacement, d2_incrementOfDisplacement;
     MeshPackageType meshPackage;
+    /// Mesher interface (created once, mesher specific parameters are part of the analysis record).
+    std :: unique_ptr< MesherInterface >mesher;
     /// Flag indication whether to restore equilibrium after adaptive remapping
     int equilibrateMappedConfigurationFlag;
     /**
@@ -101,6 +106,7 @@ public:
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;

@@ -8,6 +8,7 @@ Implementation of 2D Winkler-Pasternak model for plate (and potentially beam) su
 
 .. table:: Winkler Pasternak material - summary.
    :name: WinklerPasternak_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Winkler Pasternak isotropic material for subsoil interaction                                 |

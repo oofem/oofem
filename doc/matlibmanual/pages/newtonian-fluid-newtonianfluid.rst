@@ -7,6 +7,7 @@ in :numref:`NewtonianFluidMaterial_table`.
 
 .. table:: Newtonian Fluid material - summary.
    :name: NewtonianFluidMaterial_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Newtonian Fluid material                                                                     |

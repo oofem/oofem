@@ -53,6 +53,7 @@ element features are summarized in :numref:`TET1SUPGsummary`.
 
 .. table:: TET1SUPG element summary
    :name: TET1SUPGsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | TET1SUPG                                                                                     |

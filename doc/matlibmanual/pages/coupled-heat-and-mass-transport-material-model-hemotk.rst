@@ -13,6 +13,7 @@ in :numref:`hemotk_table`.
 
 .. table:: Coupled heat and mass transfer material model - summary.
    :name: hemotk_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Coupled heat and mass transfer material model                                                |

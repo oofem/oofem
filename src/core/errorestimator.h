@@ -149,7 +149,15 @@ public:
      * @return True if region should be skipped.
      */
     bool skipRegion(int reg);
+    /// Invalidates cached values (of receiver and of its remeshing criteria), e.g. after domain change.
     virtual void reinitialize();
+    /**
+     * Prints the error estimator/indicator statistics (and statistics of corresponding
+     * remeshing criteria) into the output file.
+     * @param file Output stream.
+     * @param tStep Time step.
+     */
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
 };

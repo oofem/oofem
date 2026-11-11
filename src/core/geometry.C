@@ -316,8 +316,8 @@ void Line :: computeIntersectionPoints(Element *element, std :: vector< Coordina
         if ( lsn1 * lsn2 <= 0 && lst1 <= 0 && lst2 <= 0 ) {
             double r = lsn1 / ( lsn1 - lsn2 );
             if ( i <= element->giveNumberOfDofManagers() ) {
-                FloatArray answer(2);
-                for ( int j = 1; j <= answer.giveSize(); j++ ) {
+                Coordinates answer;
+                for ( int j = 1; j <= 2; j++ ) {
                     answer.at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
                     + r *element->giveDofManager(n2)->giveCoordinate(j);
                 }

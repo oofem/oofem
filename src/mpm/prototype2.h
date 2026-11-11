@@ -52,6 +52,9 @@ namespace oofem {
         double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->evaldNdx(answer, lcoords, cellgeo);
         }
+        void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
+            return this->getCellInterpolation(cellgeo.giveGeometryType())->evaldNdxi(answer, lcoords, cellgeo);
+        }
         void local2global(Coordinates &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const override {
             return this->getCellInterpolation(cellgeo.giveGeometryType())->local2global(answer, lcoords, cellgeo);
         }
@@ -355,7 +358,9 @@ namespace oofem {
             Element_Geometry_Type egt=e->giveGeometryType();
             if (egt == EGT_line_1) {
                 if (e->giveNumberOfDofManagers() < 3) {
-                    IntArray enodes = {e->giveDofManagerNumber(1), e->giveDofManagerNumber(2), 0};
+                    // keep the inner node, if given (0: to be generated)
+                    const IntArray &given = e->giveDofManArray();
+                    IntArray enodes = {e->giveDofManagerNumber(1), e->giveDofManagerNumber(2), given.giveSize() > 2 ? given.at(3) : 0};
                     e->setNumberOfDofManagers(3);
                     e->setDofManagers(enodes);
                 }
@@ -446,7 +451,7 @@ namespace oofem {
             int ndofs = v->size;
             // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
 
-            interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));   // won't work for cells with lower geometry intyerpolation than unknown interpolation
+            MPElement::evaldNdx(dndx, interpol, cell, coords);
             // use cell geometry interpolation to evaluate jacobian 
             // @TODO would be better if this is handled by interpolation class internally by passing geometry interpolation somhow (part of FEIElementGeometryWrapper?)
             //interpol->evaldNdxi(dn, coords, FEIElementGeometryWrapper(&cell));
@@ -729,6 +734,13 @@ namespace oofem {
             }
             const char *giveInputRecordName() const override {return "Q1";}
             const char *giveClassName() const override {return "Q1";}
+            /**
+             * The cell is given by its 4 corner nodes, or by 8 nodes, the corners followed by the
+             * inner nodes of the edges (node 4+i on the edge from corner i to corner i%4+1). The
+             * corners define the geometry; a quadratic interpolation uses the given edge nodes and
+             * generates those not given (or given as 0) at the edge midpoints.
+             */
+            void initializeFinish() override;
             const FEInterpolation* getGeometryInterpolation() const override {return &this->gInterpol;}
   
             Element_Geometry_Type giveGeometryType() const override {
@@ -776,15 +788,29 @@ namespace oofem {
     class L1Element : public MPElement  {
         protected:
             const static FEInterpolation & gInterpol;
+            const static FEInterpolation & gQuadInterpol;
+            /// Whether the cell is given with its inner node, which makes its geometry quadratic.
+            bool quadraticGeometry = false;
         public:
             L1Element (int n, Domain* d): MPElement(n,d) {
                 numberOfDofMans  = 2; 
             }
             const char *giveInputRecordName() const override {return "L1";}
             const char *giveClassName() const override {return "L1";}
+            /**
+             * The cell is given by its 2 end nodes, or by 3 nodes, the end nodes followed by the
+             * inner node. A quadratic interpolation uses the given inner node, and generates one at
+             * the midpoint when not given (or given as 0). The geometry of a cell given with its
+             * inner node is quadratic, through all three nodes (anywhere between the end nodes);
+             * the gradients of all fields, linear ones included, and the volume measure follow it.
+             * Otherwise the geometry is the straight line through the end nodes (a generated inner
+             * node is at its midpoint, where the two coincide).
+             */
+            void initializeFinish() override;
             const FEInterpolation* getGeometryInterpolation() const override {
-                return &this->gInterpol;
+                return this->quadraticGeometry ? &this->gQuadInterpol : &this->gInterpol;
             }
+            bool hasHigherOrderGeometry() const override { return this->quadraticGeometry; }
   
             Element_Geometry_Type giveGeometryType() const override {
                return EGT_line_1;

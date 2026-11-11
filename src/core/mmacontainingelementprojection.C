@@ -37,6 +37,7 @@
 #include "domain.h"
 #include "element.h"
 #include "material.h"
+#include "crosssection.h"
 #include "integrationrule.h"
 #include "gausspoint.h"
 
@@ -77,7 +78,7 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, const Coordi
                                                 InternalStateType type, TimeStep *tStep)
 {
     if ( source ) {
-        source->giveMaterial()->giveIPValue(answer, source, type, tStep);
+        source->giveCrossSection()->giveMaterial(source)->giveIPValue(answer, source, type, tStep);
         return 1;
     }
 

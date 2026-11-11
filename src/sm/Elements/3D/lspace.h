@@ -37,6 +37,7 @@
 
 #include "sm/Elements/structural3delement.h"
 #include "sm/ErrorEstimators/huertaerrorestimator.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -61,7 +62,7 @@ class ParamKey;
 class LSpace  : public Structural3DElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface,
-    public HuertaErrorEstimatorInterface
+    public HuertaErrorEstimatorInterface, public ZZErrorEstimatorInterface
 {
 protected:
     static FEI3dHexaLin interpolation;

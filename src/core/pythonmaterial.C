@@ -103,6 +103,9 @@ PythonMaterial::PythonMaterial(int n, Domain *d) : Material(n, d)
 
 PythonMaterial::~PythonMaterial()
 {
+    // Every python handle has to be dropped here, while the GIL is held: one left to its own
+    // destructor is released after the guard below has gone, without a thread state, and the
+    // deallocation of the bound method it holds then crashes the interpreter.
 #if defined(_USE_NANOBIND)
     nb::gil_scoped_acquire gil;
     pyObject.reset();
@@ -111,6 +114,8 @@ PythonMaterial::~PythonMaterial()
     pyGiveCharacteristicVector.reset();
     pyGiveCharacteristicValue.reset();
     pyPrintOutputAt.reset();
+    pyUpdateTempState.reset();
+    pyGiveStateVariableIDs.reset();
 #elif defined(_PYBIND_BINDINGS)
     py::gil_scoped_acquire gil;
     pyObject.release().dec_ref();
@@ -119,6 +124,8 @@ PythonMaterial::~PythonMaterial()
     pyGiveCharacteristicVector.release().dec_ref();
     pyGiveCharacteristicValue.release().dec_ref();
     pyPrintOutputAt.release().dec_ref();
+    pyUpdateTempState.release().dec_ref();
+    pyGiveStateVariableIDs.release().dec_ref();
 #endif
 }
 
@@ -364,14 +371,31 @@ StateVariableLayout PythonMaterial::giveStateVariableIDs(MaterialMode mmode) con
         py::gil_scoped_acquire gil;
         py::object result = pyGiveStateVariableIDs(mmode);
 #endif
-        // The python side returns a sequence of (field, operator) pairs. Converted element by
+        // The python side returns a sequence of (field, operator[, value mode]) entries; without
+        // the value mode, the entry takes the default of StateVariableSpec. Converted element by
         // element: handing the sequence straight to a caster would ask pybind to materialize a
         // temporary, which it refuses outside a bound function.
         StateVariableLayout layout;
+        int index = 0;
         for ( auto item : result ) {
-            auto pair = item;
-            layout.push_back( { (FieldType) pair[ py::int_(0) ].template cast<int>(),
-                                (StateOperator) pair[ py::int_(1) ].template cast<int>() } );
+            index++;
+#ifdef _USE_NANOBIND
+            size_t size = nb::len(item);
+            auto component = [ & ](int i) { return nb::cast< int >( item [ i ] ); };
+#else
+            size_t size = py::len(item);
+            auto component = [ & ](int i) { return item [ py::int_(i) ].template cast< int >(); };
+#endif
+            if ( size != 2 && size != 3 ) {
+                OOFEM_ERROR("PythonMaterial: entry %d of the state layout of '%s' has %d components; "
+                            "(field, operator) or (field, operator, value mode) expected",
+                            index, objectName.c_str(), (int) size);
+            }
+            StateVariableSpec spec { (FieldType) component(0), (StateOperator) component(1) };
+            if ( size == 3 ) {
+                spec.mode = (ValueModeType) component(2);
+            }
+            layout.push_back(spec);
         }
         return layout;
     }

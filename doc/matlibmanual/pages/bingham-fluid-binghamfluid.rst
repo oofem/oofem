@@ -54,6 +54,7 @@ constitutive equation :eq:`eq:bigham-model` is obtained.
 
 .. table:: Bingham Fluid material - summary.
    :name: BinghamFluidMaterial_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Bingham fluid material                                                                       |

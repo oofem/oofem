@@ -27,6 +27,7 @@ Two-node 2D lattice mass-transport element. The element features are summarised 
 
 .. table:: latticemt2d element summary
    :name: latticemt2dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | latticemt2d                                                                                  |
@@ -72,6 +73,7 @@ facet supplied via :param:`polycoords`. The element features are summarised in T
 
 .. table:: latticemt3d element summary
    :name: latticemt3dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | latticemt3d                                                                                  |
@@ -122,6 +124,7 @@ summarised in :numref:`latticemt3dboundarysummary`.
 
 .. table:: latticemt3dboundary element summary
    :name: latticemt3dboundarysummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | latticemt3dboundary                                                                          |

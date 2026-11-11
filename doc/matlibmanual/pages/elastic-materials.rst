@@ -12,6 +12,7 @@ in :numref:`IsoLE_table`.
 
 .. table:: Linear Isotropic Material - summary.
    :name: IsoLE_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Linear isotropic elastic material                                                            |
@@ -110,7 +111,7 @@ where :math:`\xi=1-(\nu_{xy}*\nu_{yx}+\nu_{yz}*\nu_{zy}+\nu_{zx}*\nu_{xz})-(\nu_
 
 .. math::
 
-   
+ 
    d_{xx}&=E_X(1-\nu_{yz}*\nu_{zy})/\xi,\\
    d_{xy}&=E_y*(\nu_{xy}+\nu_{xz}*\nu_{zy})/\xi,\\
    d_{xz}&=E_z*(\nu_{xz}+\nu_{yz}*\nu_{xy})/\xi,\\
@@ -133,6 +134,7 @@ in :numref:`OrthoLE_table`.
 
 .. table:: Orthotropic, linear elastic material -- summary.
    :name: OrthoLE_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Orthotropic, linear elastic material                                                         |
@@ -179,6 +181,7 @@ Linear elastic material model with completely general material stiffness (21 ind
 
 .. table:: Anisotropic, linear elastic material -- summary.
    :name: AnisoLE_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Anisotropic, linear elastic material                                                         |
@@ -219,6 +222,7 @@ Bi-linear material model for 1D elasticity, with different elastic moduli in ten
 
 .. table:: Bi-Linear Elastic Material - summary.
    :name: isoaxysymm1d_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Bi-Linear elastic material                                                                   |
@@ -263,6 +267,7 @@ The model description and parameters are summarized in :numref:`hyperElMat_table
 
 .. table:: Hyperelastic material - summary.
    :name: hyperElMat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Hyperelastic material                                                                        |
@@ -337,6 +342,7 @@ The model description and parameters are summarized in :numref:`MooneyRivlin_tab
 
 .. table:: Compressible Mooney-Rivlin - summary.
    :name: MooneyRivlin_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Mooney-Rivlin                                                                                |
@@ -391,6 +397,7 @@ The model description and parameters are summarized in :numref:`CompressibleOgde
 
 .. table:: Compressible Ogden material - summary.
    :name: CompressibleOgden_table
+   :widths: 43 94
 
    +-------------------------------------------+----------------------------------------------------------------------------------------------+
    | Description                               | Ogden material                                                                               |
@@ -430,6 +437,7 @@ The model description and parameters are summarized in :numref:`BlatzKo_table`.
 
 .. table:: Blatz-Ko material - summary.
    :name: BlatzKo_table
+   :widths: 32 94
 
    +--------------------------------+----------------------------------------------------------------------------------------------+
    | Description                    | Blatz-Ko material                                                                            |

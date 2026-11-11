@@ -103,9 +103,11 @@ namespace oofem {
                     // ->need to querry/store/identify element IR based on NIP.
                     IntegrationRule* ir =  this->term->giveElementIntegrationRule(e);
                     e->integrateTerm_dw(contrib, *this->term, ir, tStep); // @todo IR 
-                    contrib.times(this->factor * factor2);
-                    // assemble
-                    dest.assemble (locr, locc, contrib);
+                    if (contrib.isNotEmpty()) {
+                        contrib.times(this->factor * factor2);
+                        // assemble
+                        dest.assemble (locr, locc, contrib);
+                    }
                 }
             }
         }

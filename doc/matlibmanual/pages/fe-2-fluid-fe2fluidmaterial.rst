@@ -17,6 +17,7 @@ The model parameters are summarized in :numref:`FE2FluidMaterial_table`.
 
 .. table:: FE² fluid material - summary.
    :name: FE2FluidMaterial_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | FE\ :sup:`2` Fluid material                                                                  |

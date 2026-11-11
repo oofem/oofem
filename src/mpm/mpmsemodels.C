@@ -88,7 +88,7 @@ NonStationaryMPMSProblem :: initializeFrom(const std::shared_ptr<InputRecord> &i
     IR_GIVE_FIELD(ir, alpha, "alpha");
     problemType = "up"; // compatibility mode @TODO Remove default value
     IR_GIVE_OPTIONAL_FIELD(ir, problemType, "ptype");
-    if (!((problemType == "up")||(problemType == "tm")||(problemType == "symbolic"))) {
+    if (!((problemType == "up")||(problemType == "tm")||(problemType == "symbolic")||(problemType == "element"))) {
       throw ValueInputException(ir, "none", "Problem type not recognized");
     }
     OOFEM_LOG_RELEVANT("MPM: %s formulation\n", problemType.c_str());
@@ -97,6 +97,27 @@ NonStationaryMPMSProblem :: initializeFrom(const std::shared_ptr<InputRecord> &i
         IR_GIVE_FIELD(ir, lhsIntegrals, "lhsterms");
         IR_GIVE_FIELD(ir, lhsdotIntegrals, "lhsdotterms");
         IR_GIVE_FIELD(ir, rhsIntegrals, "rhsterms");
+    }
+
+    // equation scaling: the equations of the dofs listed in eqscaledofs are multiplied by the
+    // corresponding factors of eqscale
+    this->dofScale.clear();
+    if ( ir->hasField("eqscale") ) {
+        IntArray dofs;
+        FloatArray factors;
+        IR_GIVE_FIELD(ir, dofs, "eqscaledofs");
+        IR_GIVE_FIELD(ir, factors, "eqscale");
+        if ( dofs.giveSize() != factors.giveSize() ) {
+            throw ValueInputException(ir, "eqscale", "eqscale and eqscaledofs differ in size");
+        }
+        if ( problemType != "element" ) {
+            throw ValueInputException(ir, "eqscale", "equation scaling is supported by the element formulation only");
+        }
+        this->dofScale.resize( dofs.giveSize() ? dofs.maximum() : 0 );
+        this->dofScale.add(1.0);
+        for ( int i = 1; i <= dofs.giveSize(); i++ ) {
+            this->dofScale.at( dofs.at(i) ) = factors.at(i);
+        }
     }
     
     this->keepTangent = ir->hasField("keeptangent");
@@ -217,6 +238,9 @@ void NonStationaryMPMSProblem :: solveYourselfAt(TimeStep *tStep)
                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     } else {
         this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
+        if ( this->problemType == "element" ) {
+            this->scaleEquations(externalForces, d);
+        }
     }
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 
@@ -302,10 +326,39 @@ NonStationaryMPMSProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tSte
             Integral* integral = this->integralList[i-1].get();
             integral->assemble_rhs (answer, EModelDefaultEquationNumbering(), tStep, eNorm);
         }
+    } else if (this->problemType == "element") {
+        this->assembleVector(answer, tStep, MPMElementResidualAssembler(this->dofScale), VM_Total, EModelDefaultEquationNumbering(), d);
+        if ( eNorm ) {
+            // the elements define the reference norms themselves, see MPElement::assembleResidualNorms
+            for ( auto &elem : d->giveElements() ) {
+                if ( auto *cell = dynamic_cast< MPElement * >( elem.get() ) ) {
+                    cell->assembleResidualNorms(*eNorm, this->dofScale, tStep);
+                }
+            }
+        }
     } else {
       OOFEM_ERROR ("unsupported problemType");
     }
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void
+NonStationaryMPMSProblem :: scaleEquations(FloatArray &answer, Domain *d)
+{
+    if ( this->dofScale.isEmpty() ) {
+        return;
+    }
+    EModelDefaultEquationNumbering dn;
+    for ( auto &dman : d->giveDofManagers() ) {
+        for ( Dof *dof : *dman ) {
+            int eq = dof->giveEquationNumber(dn);
+            int id = dof->giveDofID();
+            if ( eq && id <= this->dofScale.giveSize() ) {
+                answer.at(eq) *= this->dofScale.at(id);
+            }
+        }
+    }
 }
 
 
@@ -322,9 +375,12 @@ NonStationaryMPMSProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domai
                           EModelDefaultEquationNumbering(), d );
         } else if (this->problemType == "tm") {
             TMLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement());
-            //Assembling left hand side 
+            //Assembling left hand side
             this->assemble( *effectiveMatrix, tStep, jacobianAssembler,
                             EModelDefaultEquationNumbering(), d );
+        } else if (this->problemType == "element") {
+            MPMElementLhsAssembler jacobianAssembler(this->alpha, tStep->giveTimeIncrement(), this->dofScale);
+            this->assemble( mat, tStep, jacobianAssembler, EModelDefaultEquationNumbering(), d );
         } else if (this->problemType == "symbolic") {
             for (auto i: lhsIntegrals) {
                 Integral* integral = this->integralList[i-1].get();
@@ -437,7 +493,7 @@ NonStationaryMPMSProblem :: printOutputAt(FILE *file, TimeStep *tStep)
         sprintf(filename, "time_%lf.csv", t);
         FILE *file1 = fopen(filename, "w");
         fprintf(file1, "t=%lf[s]\nx, pw, pa, T, u\n", t);
-        for ( int i =1; i<= 141; i++) {
+        for ( int i =1; i<= d->giveNumberOfDofManagers(); i++) {
             DofManager *dm = d->giveDofManager(i);
             double x = dm->giveCoordinate(1);
             FloatArray pw,pa,u,T,Sw;

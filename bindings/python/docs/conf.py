@@ -20,7 +20,7 @@ from global_conf import *
 
 # -- Project information -----------------------------------------------------
 
-project = 'OOFEM Python bindings'
+project = 'OOFEM Python Bindings'
 
 # -- General configuration ---------------------------------------------------
 
@@ -41,14 +41,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'classic'
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# The theme (alabaster), the page width and the figure sizing come from
+# global_conf.py and doc/_static/oofem.css; do not set them per manual here.
+# This directory is not a sibling of doc/_static (doc/python is a symlink to
+# it), so the shared static directory is named explicitly.
+html_static_path = [os.path.abspath('../../../doc/_static')]
 
 master_doc = 'index'

@@ -325,6 +325,14 @@ void mpmUpdateMaterialTempState(EngngModel *problem, TimeStep *tStep);
         IntArray lhsdotIntegrals;  // terms involving time derivative of unknowns at current time step
         IntArray rhsIntegrals;
 
+        /**
+         * Scaling of the equations, by dof id (problemType = "element" only). The balance equations
+         * of a multiphysics problem can differ by orders of magnitude; multiplying the equations of
+         * a dof type by a common factor improves the conditioning of the system without changing
+         * its solution. Empty if no equation is scaled.
+         */
+        FloatArray dofScale;
+
         bool debug = false;
 
     public:
@@ -360,6 +368,8 @@ void mpmUpdateMaterialTempState(EngngModel *problem, TimeStep *tStep);
         void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
         void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
         void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+        /// Scales the entries of a global vector by the scaling of their equations (see dofScale).
+        void scaleEquations(FloatArray &answer, Domain *d);
         double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
         void saveContext(DataStream &stream, ContextMode mode) override;
         void restoreContext(DataStream &stream, ContextMode mode) override;

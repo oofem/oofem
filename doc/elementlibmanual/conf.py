@@ -5,6 +5,11 @@
 
 import os
 import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+# Import shared settings (theme, stylesheet, numfig); the project
+# information below overrides the generic one.
+from global_conf import *
 
 # -- Project information -----------------------------------------------------
 
@@ -20,7 +25,7 @@ release = '3.0'
 # provides the "tikz" directive used by the element figures.
 sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
-extensions = ['oofemroles', 'oofemtikz']
+extensions = ['oofemroles', 'oofemtikz', 'oofemmath', 'oofemlatex']
 
 # The source directory also holds the LaTeX sources and the latex2html output.
 exclude_patterns = [
@@ -34,33 +39,15 @@ exclude_patterns = [
 # ":numref:" is used throughout to reference tables and figures by number.
 numfig = True
 
-# The manual's equations use the macros defined in elementlibmanual.tex,
-# so MathJax has to be taught the same definitions.  They are not all
-# in the preamble: several are declared part-way through the text.
-mathjax3_config = {
-    'tex': {
-        'macros': {
-            'del':       [r'\displaystyle\frac{#1}{#2}', 2],
-            'der':       [r'\frac{{\rm d}{#1}}{{\rm d}{#2}}', 2],
-            'mbf':       [r'\boldsymbol{#1}', 1],
-            'pard':      [r'\frac{\partial{#1}}{\partial{#2}}', 2],
-        },
-    },
-}
+# The equations of this manual use \mbf, \del, \der and \pard, inherited from
+# elementlibmanual.tex.  All four are common to the OOFEM manuals and come from
+# oofemmath, which defines them for MathJax (HTML) and in the LaTeX preamble
+# (PDF) alike, so no macros need to be declared here.  Anything specific to this
+# manual would go in an "oofem_math_macros" dict.
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'alabaster'
-# doc/_static is shared by the OOFEM manuals.
-html_static_path = ['../_static']
-html_css_files = ['oofem.css']
-
-# The element summary tables are wide, so the text column is widened to 80% of
-# the browser window.  That, and the figure sizing, is set once for every
-# manual in doc/_static/oofem.css -- do not add page_width or body_max_width
-# here, as the stylesheet loads after the theme and would override them.
-html_theme_options = {
-    'sidebar_width': '250px',
-}
+# The theme, the shared stylesheet and the page width come from global_conf.py
+# and doc/_static/oofem.css, so nothing is set here.
 
 master_doc = 'index'

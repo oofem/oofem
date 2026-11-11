@@ -91,6 +91,10 @@ InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &eigv, FloatM
     }
 #endif
 
+    if ( shift > 0. ) {
+        a.add(shift, b);
+    }
+
     int it;
     for ( it = 0; it < nitem; it++ ) {
         /*  copy zz=z  */
@@ -161,7 +165,7 @@ InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &eigv, FloatM
     eigv.resize(nroot);
     r.resize(nn, nroot);
     for ( int i = 1; i <= nroot; i++ ) {
-        eigv.at(i) = w.at(order.at(i));
+        eigv.at(i) = w.at(order.at(i)) - shift;
         r.setColumn(x[order.at(i) - 1], i);
     }
 

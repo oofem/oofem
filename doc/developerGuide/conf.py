@@ -12,6 +12,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+# doc/_ext holds the extensions shared by the OOFEM manuals.
+sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
 # Import shared settings
 from global_conf import *
@@ -19,12 +21,12 @@ from global_conf import *
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'OOFEM Developer guide'
+project = 'OOFEM Developer Guide'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['oofemlatex']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -34,5 +36,6 @@ master_doc = 'index'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'classic'
+# The theme (alabaster), the page width and the figure sizing come from
+# global_conf.py and doc/_static/oofem.css; do not set them per manual here.
 html_static_path = ['../_static']

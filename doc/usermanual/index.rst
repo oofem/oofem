@@ -28,9 +28,13 @@ welcome on the `OOFEM forum <https://www.oofem.org/forum/>`_.
    python
 
 
-Indices and tables
-==================
+.. The index and search pages exist in the HTML only; in the PDF this would be
+   an empty chapter.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. only:: html
+
+   .. rubric:: Indices and tables
+
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

@@ -1,0 +1,86 @@
+mpms_l1inner.out
+Symbolic formulation on l1 cells given with their inner node (3 nodes, inner node at 0.3 of the cell): quadratic displacement uses the given node; 1D consolidation (u-p); checks that the given inner nodes are used (not regenerated); the geometry is quadratic, through the inner nodes
+# 
+mpmnonstationaryproblem nsteps 20 deltat 1.0 alpha 0.5 nmodules 1 manrmsteps 0 keeptangent ptype "symbolic" smtype 1 nvariables 6 nterms 5 nintegrals 5 lhsterms 3 1 2  4 lhsdotterms 2 3 5 rhsterms 0
+errorcheck
+#vtkxml primvars 1 1 tstep_all
+#errorcheck
+# displacement
+Variable name "u" interpolation "feiquad" type 1 quantity "Displacements" size 1 dofs 1 1
+# test function
+Variable name "du" interpolation "feiquad" type 1 quantity "Displacements" size 1 dofs 1 1 dualto "u"
+# fluid 1 (resin) pressure
+Variable name "p1" interpolation "feilin"  type 0 quantity "Pressure" size 1 dofs 1 11
+# test function
+Variable name "dp1" interpolation "feilin" type 0 quantity "Pressure" size 1 dofs 1 11 dualto "p1"
+# fluid 2 (gas) pressure
+Variable name "p2" interpolation "feilin"  type 0 quantity "Pressure2" size 1 dofs 1 55
+# test function
+Variable name "dp2" interpolation "feilin" type 0 quantity "Pressure2" size 1 dofs 1 55 dualto "p2"
+#########################  Symbolic term definitions ############################################################
+#Term 1: Solid Matrix Compaction (The $\mathbf{K}_{ep}$ Block)
+SymbolicTerm 1 variable "u" testvariable "du" mmode 10 lexpression "Grad_s(du,gp).T * [[13461538.461538462]] * Grad_s(u,gp)" rexpression "Grad_s(du,gp).T * [[13461538.461538462]] * Grad_s(u,gp) * ru(u, cell, ts)" nip 2
+#Term 2: Mechanical Load Sharing (The $-\mathbf{Q}_r$ Block)
+SymbolicTerm 2 variable "p1" testvariable "du" mmode 10 lexpression "-Div(du,gp).T * [[1.0]] * N(p1,gp)" rexpression "-Div(du,gp).T * [[1.0]] * N(p1,gp) * ru(p1, cell, ts)" nip 2
+#Term 3: Kinematic / Fluid Squeezing Coupling (The $\mathbf{\tilde{Q}}_r^T$ Block)
+SymbolicTerm 3 variable "u" testvariable "dp1" mmode 10 lexpression "N(dp1,gp).T * [[1.0]] * Div(u,gp)" rexpression "N(dp1,gp).T * [[1.0]] * Div(u,gp) * rv(u, cell, ts)" nip 2
+#Term 4: Fluid Permeability / Darcy Flow (The $H=\mathbf{H}_r$ Block)
+SymbolicTerm 4 variable "p1" testvariable "dp1" mmode 10 lexpression "Grad(dp1,gp).T * [[1.e-15]] * Grad(p1,gp)" rexpression "Grad(dp1,gp).T * [[1.e-15]] * Grad(p1,gp) * ru(p1, cell, ts)" nip 2 
+#Term 5: Fluid Compressibility & Storage (The $\mathbf{S}_{rr}$ Block)
+SymbolicTerm 5 variable "p1" testvariable "dp1" mmode 10 lexpression "N(dp1,gp).T * [[3.33333333e-10]] * N(p1,gp)" rexpression "N(dp1,gp).T * [[3.33333333e-10]] * N(p1,gp) * rv(p1, cell, ts)" nip 2
+Integral 1 domain 1 set 1 term 1 
+Integral 2 domain 1 set 1 term 2 
+Integral 3 domain 1 set 1 term 3 
+Integral 4 domain 1 set 1 term 4 
+Integral 5 domain 1 set 1 term 5 
+domain HeatTransfer
+outputmanager tstep_all dofman_all
+ndofman 9 nelem 4 nbc 3 ncrosssect 1 nic 0 nltf 2 nmat 1 nset 4
+Node 1 coords 3 0.00100000005 0.0 0.0
+Node 2 coords 3 0.000750000007 0.0 0.0
+Node 3 coords 3 0.000500000024 0.0 0.0
+Node 4 coords 3 0.000250000012 0.0 0.0
+Node 5 coords 3 0.0 0.0 0.0
+node 6 coords 3 0.0009250000371 0.0 0.0
+node 7 coords 3 0.0006750000121 0.0 0.0
+node 8 coords 3 0.0004250000204 0.0 0.0
+node 9 coords 3 0.0001750000084 0.0 0.0
+#
+l1 1 nodes 3 1 2 6 mat 1 crosssect 1
+l1 2 nodes 3 2 3 7 mat 1 crosssect 1
+l1 3 nodes 3 3 4 8 mat 1 crosssect 1
+l1 4 nodes 3 4 5 9 mat 1 crosssect 1
+simplecs 1 area 1.e-8
+isole 1 d 1 e 250 n 0.49999 talpha 1.
+# clamped-displacement
+boundarycondition 1 loadtimefunction 1 set 3 values 1 0    dofs 1 1 
+# pressure top (bleeding=pressure set to zero?)
+boundarycondition 2 loadtimefunction 1 set 4 values 1 0.0 dofs 1 11 
+# pressure load top
+nodalload 3 loadtimefunction 2 dofs 1 1 Components 1 1.0 set 4
+#
+#
+constantfunction 1 f(t) 1
+PiecewiseLinFunction 2 nPoints 4 t 4 -10. 0. 100. 500. f(t) 4 0. 0. 1000000.0 1000000.0 
+set 1 elementranges  {(1 4)}
+set 2 
+set 3 nodes 1 4
+set 4 nodes 1 1
+#%BEGIN_CHECK%
+#NODE tStep 10 number 2 dof 1 unknown d value 1.60224981e-06 tolerance 6.8e-10
+#NODE tStep 10 number 2 dof 11 unknown d value -4.53809626e+04 tolerance 2.2e+00
+#NODE tStep 10 number 3 dof 1 unknown d value 7.81954344e-07 tolerance 6.8e-10
+#NODE tStep 10 number 3 dof 11 unknown d value -6.18798232e+04 tolerance 2.2e+00
+#NODE tStep 10 number 5 dof 1 unknown d value 8.91825177e-07 tolerance 6.8e-10
+#NODE tStep 10 number 5 dof 11 unknown d value -4.36408769e+04 tolerance 2.2e+00
+#NODE tStep 10 number 6 dof 1 unknown d value 2.44573908e-06 tolerance 6.8e-10
+#NODE tStep 10 number 9 dof 1 unknown d value 2.89364603e-07 tolerance 6.8e-10
+#NODE tStep 20 number 2 dof 1 unknown d value 4.14827802e-06 tolerance 6.8e-10
+#NODE tStep 20 number 2 dof 11 unknown d value -6.23220998e+04 tolerance 2.2e+00
+#NODE tStep 20 number 3 dof 1 unknown d value 1.95171255e-06 tolerance 6.8e-10
+#NODE tStep 20 number 3 dof 11 unknown d value -9.29557153e+04 tolerance 2.2e+00
+#NODE tStep 20 number 5 dof 1 unknown d value 1.68679871e-06 tolerance 6.8e-10
+#NODE tStep 20 number 5 dof 11 unknown d value -8.78111164e+04 tolerance 2.2e+00
+#NODE tStep 20 number 6 dof 1 unknown d value 6.12134771e-06 tolerance 6.8e-10
+#NODE tStep 20 number 9 dof 1 unknown d value 5.21063360e-07 tolerance 6.8e-10
+#%END_CHECK%

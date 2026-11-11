@@ -46,6 +46,7 @@
 #define _IFT_StateDependentTangentMaterial_Name "statedeptangentmat"
 #define _IFT_StateDependentTangentMaterial_E "e"
 #define _IFT_StateDependentTangentMaterial_beta "beta"
+#define _IFT_StateDependentTangentMaterial_eta "eta"
 //@}
 
 namespace oofem {
@@ -97,25 +98,43 @@ public:
  *     sigma = E * eps ,     dsigma/deps = E * (1 + beta * eps)
  *
  * With beta = 0 it is ordinary linear elasticity.
+ *
+ * Given a viscosity eta, a Kelvin-Voigt dashpot acts in parallel, sigma = E * eps + eta * deps/dt,
+ * and the material asks for the strain rate in its state layout (value mode VM_Velocity), which
+ * exercises value modes other than the default in the push. The tangent adds eta/dt, the
+ * derivative of the rate with respect to the end-of-step strain, so it is consistent for
+ * alpha = 1 (backward Euler).
  */
 class StateDependentTangentMaterial : public Material
 {
 protected:
     double e = 1.0;
     double beta = 0.0;
+    double eta = 0.0;
 
 public:
     StateDependentTangentMaterial(int n, Domain *d) : Material(n, d) {}
 
     StateVariableLayout giveStateVariableIDs(MaterialMode mmode) const override {
+        if ( this->eta != 0.0 ) {
+            return { { FT_Displacements, SO_SymmetricGradient }, { FT_Displacements, SO_SymmetricGradient, VM_Velocity } };
+        }
         return { { FT_Displacements, SO_SymmetricGradient } };
     }
 
     void updateTempState(const FloatArray &stateVector, GaussPoint *gp, TimeStep *tStep) override {
         auto status = static_cast< StateDependentTangentMaterialStatus * >( this->giveStatus(gp) );
-        FloatArray sig = stateVector;
-        sig.times(this->e);
-        status->letTempStrainVectorBe(stateVector);
+        // strain, followed by the strain rate when the dashpot is present
+        int n = this->eta != 0.0 ? stateVector.giveSize() / 2 : stateVector.giveSize();
+        FloatArray eps(n), sig(n);
+        for ( int i = 1; i <= n; i++ ) {
+            eps.at(i) = stateVector.at(i);
+            sig.at(i) = this->e * eps.at(i);
+            if ( this->eta != 0.0 ) {
+                sig.at(i) += this->eta * stateVector.at(n + i);
+            }
+        }
+        status->letTempStrainVectorBe(eps);
         status->letTempStressVectorBe(sig);
     }
 
@@ -132,6 +151,9 @@ public:
         }
         answer.resize(1, 1);
         answer.at(1, 1) = this->e * ( 1.0 + this->beta * eps.at(1) );
+        if ( this->eta != 0.0 ) {
+            answer.at(1, 1) += this->eta / tStep->giveTimeIncrement();
+        }
     }
 
     void giveCharacteristicVector(FloatArray &answer, MatResponseMode type, GaussPoint *gp, TimeStep *tStep) const override {
@@ -153,6 +175,7 @@ public:
         Material::initializeFrom(ir);
         IR_GIVE_OPTIONAL_FIELD(ir, e, _IFT_StateDependentTangentMaterial_E);
         IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_StateDependentTangentMaterial_beta);
+        IR_GIVE_OPTIONAL_FIELD(ir, eta, _IFT_StateDependentTangentMaterial_eta);
     }
     void giveInputRecord(DynamicInputRecord &input) override {}
 

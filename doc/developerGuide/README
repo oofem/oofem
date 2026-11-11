@@ -1,0 +1,39 @@
+Welcome to OOFEM Developer guide README.
+
+What is here
+------------
+The programmer's manual: the internal structure of oofem, the roles of the main
+classes, and how to extend the code with a new element, material model or
+engineering model.
+
+This is the manual the old doc/README referred to as "programmer".  The
+generated class reference is separate, in ``doc/refman``, and is produced by
+Doxygen rather than Sphinx.
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org).
+Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
+
+Building documentation
+----------------------
+1) Change working directory to doc/developerGuide inside your oofem source tree
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Shared configuration
+--------------------
+Project metadata and the shared html settings come from ``doc/global_conf.py``,
+and the page width and figure sizing from ``doc/_static/oofem.css``.  The
+author list is split over the title page by ``doc/_ext/oofemlatex.py``.  Do not
+set these per manual; see section [4] of doc/README.
+
+Happy contributing!

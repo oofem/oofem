@@ -1,0 +1,46 @@
+Welcome to OOFEM User manual README.
+
+What is here
+------------
+The user manual: installing and configuring oofem, running it, and
+understanding its input and output.  It is the starting point for a new user;
+the detail of every input record is in the input manual (``doc/oofemInput``).
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org).
+Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
+
+Building documentation
+----------------------
+1) Change working directory to doc/usermanual inside your oofem source tree
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Conventions
+-----------
+Keywords and parameter names are written as plain ``literals``, so that they
+carry the tinted background the stylesheet gives them, and actual input is
+shown in a ``.. code-block::``.  The other manuals follow the same convention,
+so keep to it when adding text here.
+
+Links to the other manuals are plain absolute URLs to the published HTML on
+www.oofem.org; there is no intersphinx inventory shared between the manuals.
+
+Shared configuration
+--------------------
+Project metadata and the shared html settings come from ``doc/global_conf.py``,
+and the page width and figure sizing from ``doc/_static/oofem.css``.  The
+``figs`` directory is listed in ``html_static_path`` alongside ``../_static``,
+which has to stay there so that the shared stylesheet is still copied.  See
+section [4] of doc/README.
+
+Happy contributing!

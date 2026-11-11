@@ -125,21 +125,9 @@ namespace oofem {
         const Variable* v = static_cast<const Variable*>(raw_ptr0);
         GaussPoint* gp = static_cast<GaussPoint*>(raw_ptr1);
         const MPElement* cell = static_cast<const MPElement*>(gp->giveElement());
-        const MaterialMode mmode = gp->giveMaterialMode();
         // functor logic
         FloatMatrix answer;
-        const FEInterpolation* interpol = v->interpolation;
-
-        FloatMatrix dndx;
-        interpol->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(cell));
-        int nnodes = interpol->giveNumberOfNodes(cell->giveGeometryType());
-        answer.resize(1, nnodes*v->size);
-        int nsd = 1*mmodeIs1D(mmode) + 2*mmodeIs2D(mmode) + 3*mmodeIs3D(mmode);
-        for (int i = 0; i< nnodes; i++) {
-            for (int j = 0; j< nsd; j++) {
-                answer(0, i*v->size+j) = dndx(i, j);
-            }
-        }
+        cell->computeDivMatrixAt(answer, v, gp);
         out.value = answer;
         out.type = VarSlot::Type::MATRIX;   
     };

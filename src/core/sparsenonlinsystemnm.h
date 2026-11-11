@@ -57,6 +57,7 @@
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
+class UnknownNumberingScheme;
 class FloatArray;
 class TimeStep;
 class SparseLinearSystemNM;
@@ -74,6 +75,9 @@ class SparseLinearSystemNM;
 class OOFEM_EXPORT SparseNonLinearSystemNM : public NumericalMethod
 {
 protected:
+    /// Runtime switch for the nonlinear solver's per-iteration console log.
+    bool iterationLogEnabled = true;
+
     /// Load level
     double deltaL=0.0;
 
@@ -100,6 +104,29 @@ public:
     SparseNonLinearSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m), igp_PertDmanDofSrcArray(), igp_PertWeightArray(), igp_Map(), igp_Weight() { pert_init_needed = false; }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
+
+    /// Returns whether per-iteration console logging is enabled.
+    bool giveIterationLogEnabled() const noexcept { return this->iterationLogEnabled; }
+    /// Temporarily enables or disables per-iteration console logging.
+    void setIterationLogEnabled(bool enabled) noexcept { this->iterationLogEnabled = enabled; }
+
+    /// Supply the accepted step base before predictors or staggered subsolves.
+    virtual void setStepReferenceSolution(const FloatArray &, TimeStep *) { }
+
+    /** Prepare an internal-minus-external residual for an outer convergence
+     * check.  Returns true if the residual has been normalized by a solver
+     * field metric.  Bound solvers also remove admissible reaction forces on
+     * their active bounds.
+     */
+    virtual bool prepareConvergenceResidual(FloatArray &, const FloatArray &,
+                                            const FloatArray &, const FloatArray &) { return false; }
+
+    /** Whether the solver can assemble and solve on a caller-supplied equation
+     * numbering, i.e. on a compacted subset of the global system.
+     */
+    virtual bool supportsCustomEquationNumbering() const { return false; }
+    /// Install a caller-supplied numbering; nullptr restores the default one.
+    virtual void setCustomEquationNumbering(const UnknownNumberingScheme *) { }
 
     /**
      * Solves the given sparse linear system of equations @f$ s  R + R_0 - F(X) = 0 @f$.
@@ -147,7 +174,8 @@ public:
     virtual void printState(FILE *outputStream) { }
 
     /**
-     * Constructs (if necessary) and returns a linear solver.
+     * Constructs (if necessary) and returns a linear solver, or nullptr when
+     * this nonlinear method does not expose one.
      * Public method because some problems require it for sensitivity analysis, etc. even for nonlinear problems (e.g. tangent relations in multiscale simulations).
      */
     virtual SparseLinearSystemNM *giveLinearSolver() { return nullptr; }

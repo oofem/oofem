@@ -30,6 +30,7 @@ The model parameters are summarized in :numref:`BazantNajjarMoistureMat`.
 
 .. table:: Model parameters
    :name: BazantNajjarMoistureMat
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Nonlinear isotropic material for moisture transport                                          |

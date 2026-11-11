@@ -13,6 +13,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+# doc/_ext holds the extensions shared by the OOFEM manuals.
+sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
 # Import shared settings
 from global_conf import *
@@ -20,15 +22,14 @@ from global_conf import *
 
 # -- Project information -----------------------------------------------------
 
-project = 'OOFEM Theory manual'
+project = 'OOFEM Theory Manual'
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-]
+extensions = ['oofemlatex']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,10 +42,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'classic'
+# The theme (alabaster), the page width and the figure sizing come from
+# global_conf.py and doc/_static/oofem.css; do not set them per manual here.
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

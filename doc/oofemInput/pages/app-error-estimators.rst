@@ -9,6 +9,7 @@ the parameters belonging to it.
 
 .. table:: Supported error estimators and indicators.
    :name: eetypestable
+   :widths: 27 14
 
    +---------------------------+--------------+
    | Error estimator/indicator | ``eetype``   |

@@ -50,6 +50,7 @@ end forces are printed. The element features are summarized in Table
 
 .. table:: beam2d element summary
    :name: beam2dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | beam2d                                                                                       |
@@ -187,6 +188,7 @@ The element features are summarized in :numref:`beam3dsummary`.
 
 .. table:: beam3d element summary
    :name: beam3dsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | beam3d                                                                                       |

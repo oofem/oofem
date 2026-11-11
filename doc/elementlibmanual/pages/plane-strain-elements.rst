@@ -45,6 +45,7 @@ summarized in :numref:`quad1planestrainsummary`.
 
 .. table:: quad1planestrain element summary
    :name: quad1planestrainsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | quad1planestrain                                                                             |
@@ -133,6 +134,7 @@ features are summarized in :numref:`trplanestrainsummary`.
 
 .. table:: trplanestrain element summary
    :name: trplanestrainsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | trplanestrain                                                                                |

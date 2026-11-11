@@ -638,7 +638,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //computing point on zero level set curve: [xM, yM]
             // this point lies on line from the "si" vertex, the condition is fi([xM, yM]) = 0, M = [xM, yM]
 
-            FloatArray _l(4), _Mid(2), line(6), _X1(2), Coeff(3), loc_Mid(3), loc_X1(3), N_Mid, N_X1;
+            FloatArray _l(4), _Mid(3), line(6), _X1(3), Coeff(3), loc_Mid(3), loc_X1(3), N_Mid, N_X1;
             Coordinates Mid1, Mid2, X_si, M;
             double x1, xsi, y1, ysi, t, fi_X1, fi_Mid, r1, r11, r12;
 
@@ -754,7 +754,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             OOFEM_LOG_INFO("case 2 - second type of element deviation by LS, element no. %d", second_control2);
 
 
-            Coordinates inter1(2), inter2(2);
+            Coordinates inter1, inter2;
             FloatArray crosssect(4);
             crosssect.zero();
 
@@ -783,7 +783,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             //computing point on zero level set curve: [xM, yM]
             // this point lies on line from the "si" vertex, the condition is fi([xM, yM]) = 0
-            FloatArray _Mid(2), line(6), _X1(2), Coeff(3), loc_Mid, loc_X1, N_Mid, N_X1;
+            FloatArray _Mid(3), line(6), _X1(3), Coeff(3), loc_Mid, loc_X1, N_Mid, N_X1;
             Coordinates X_si, M, Mid1, X_qsi;
             double x1, xsi, y1, ysi, t, fi_X1, fi_Mid, r1, r11, r12;
             this->computeCenterOf(_Mid, crosssect, 1);
@@ -937,7 +937,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             OOFEM_LOG_INFO("case 3 - third type of element deviation by LS, element no. %d", second_control3);
 
 
-            Coordinates inter1(2), inter2(2);
+            Coordinates inter1, inter2;
             FloatArray crosssect(4);
             crosssect.zero();
 
@@ -968,7 +968,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             //computing point on zero level set curve: [xM, yM]
             // this point lies on line from the "si" vertex, the condition is fi([xM, yM]) = 0
-            FloatArray  _Mid(2), line(6), _X1(2), Mid1(2), Coeff(3), loc_Mid, loc_X1, N_Mid, N_X1;
+            FloatArray  _Mid(3), line(6), _X1(3), Mid1(2), Coeff(3), loc_Mid, loc_X1, N_Mid, N_X1;
             Coordinates X_si, M;
             double x1, xsi, y1, ysi, t, fi_X1, fi_Mid, r1, r11, r12;
             this->computeCenterOf(_Mid, crosssect, 1);

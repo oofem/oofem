@@ -14,6 +14,7 @@ element features are summarized in :numref:`TrWarpsummary`.
 
 .. table:: TrWarp element summary
    :name: TrWarpsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | TrWarp                                                                                       |
@@ -35,7 +36,7 @@ element features are summarized in :numref:`TrWarpsummary`.
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Nlgeo                    | 0.                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Status                   | -                                                                                            |
+   | Status                   | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples           | `sm/freewarpingtest2.in                                                                      |
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/freewarpingtest2.in>`_        |

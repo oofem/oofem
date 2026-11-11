@@ -38,6 +38,8 @@
 #include "femcmpnn.h"
 #include "interface.h"
 
+#include <cstdio>
+
 namespace oofem {
 class Domain;
 class Element;
@@ -48,6 +50,9 @@ class ProblemCommunicator;
 
 /// Type representing the remeshing strategy
 enum RemeshingStrategy { NoRemeshing_RS, RemeshingFromCurrentState_RS, RemeshingFromPreviousState_RS };
+
+/// Returns the name of given remeshing strategy.
+OOFEM_EXPORT const char *__RemeshingStrategyToString(RemeshingStrategy s);
 
 /**
  * The base class for all remeshing criteria.
@@ -103,7 +108,20 @@ public:
      */
     virtual int estimateMeshDensities(TimeStep *tStep) = 0;
 
+    /**
+     * Invalidates cached values (e.g. after the domain has been changed),
+     * so that the densities are reevaluated when requested.
+     */
     virtual void reinitialize() { }
+
+    /**
+     * Prints the remeshing criteria statistics into the output file: the remeshing strategy,
+     * the ranges of current and required element sizes and the number of nodes, where
+     * refinement (or coarsening) is required.
+     * @param file Output stream.
+     * @param tStep Time step.
+     */
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // remeshingcrit_h

@@ -30,7 +30,7 @@ project = 'OOFEM Input Manual'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.imgconverter', 'myst_parser', 'oofemroles']
+extensions = ['sphinx.ext.imgconverter', 'myst_parser', 'oofemroles', 'oofemlatex']
 myst_enable_extensions = ['colon_fence' ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,13 +44,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'classic'
-
-# The page width and the figure sizing come from doc/_static/oofem.css, which
-# global_conf wires in for every manual; do not set them per manual here.
+# The theme (alabaster), the page width and the figure sizing come from
+# global_conf.py and doc/_static/oofem.css; do not set them per manual here.
 
 master_doc = 'index'
 

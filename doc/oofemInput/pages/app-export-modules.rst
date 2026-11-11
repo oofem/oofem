@@ -391,7 +391,12 @@ The individual rules are defined in a separate section with a dedicated syntax,
 which can be part of the input file itself or live in an external file.  The
 syntax follows that of the Extractor package, specifically its
 `Value records section
-<https://www.oofem.org/resources/doc/extractorInput/html/node2.html>`_.
+<https://www.oofem.org/resources/doc/extractorInput/html/inputformat.html#value-records-section>`_.
+The module reads a stricter dialect of that syntax (fixed parameter order,
+solution step numbers, integer keywords) with some additional records; see
+`The errorcheck export module
+<https://www.oofem.org/resources/doc/extractorInput/html/errorcheck.html>`_ in
+the Extractor manual.
 
 .. record::
 

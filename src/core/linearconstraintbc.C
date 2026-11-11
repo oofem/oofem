@@ -127,7 +127,7 @@ void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
             contrib.at(_i, 1) = this->weights.at(_i) * factor;
         }
 
-        contribt.times(scale);
+        contrib.times(scale);
         contribt.beTranspositionOf(contrib);
 #ifdef _OPENMP
         if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));

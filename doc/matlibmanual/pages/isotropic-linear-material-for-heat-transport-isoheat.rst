@@ -18,6 +18,7 @@ in :numref:`Isoheat_table`.
 
 .. table:: Linear isotropic material for heat transport - summary.
    :name: Isoheat_table
+   :widths: 20 94
 
    +--------------------+----------------------------------------------------------------------------------------------+
    | Description        | Linear isotropic elastic material                                                            |

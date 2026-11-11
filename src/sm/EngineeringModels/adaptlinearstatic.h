@@ -37,32 +37,58 @@
 
 #include "sm/EngineeringModels/linearstatic.h"
 #include "meshpackagetype.h"
+#include "remeshingcrit.h"
+#include "mesherinterface.h"
+
+#include <memory>
 
 ///@name Input fields for AdaptiveLinearStatic
 //@{
 #define _IFT_AdaptiveLinearStatic_Name "adaptlinearstatic"
 #define _IFT_AdaptiveLinearStatic_meshpackage "meshpackage"
+#define _IFT_AdaptiveLinearStatic_adapt "adapt"
+#define _IFT_AdaptiveLinearStatic_maxadaptsteps "maxadaptsteps"
 //@}
 
 namespace oofem {
 /**
  * This class implements an adaptive linear static engineering problem.
- * Multiple loading cases are not supported.
- * Due to linearity of a problem, the complete reanalysis from the beginning
- * is done after adaptive remeshing.
- * Solution steps represent a series of adaptive analyses.
+ * Only single loading case is supported.
+ *
+ * The problem is analyzed on the initial mesh, the error is estimated and the required
+ * mesh density is evaluated by the remeshing criteria and passed to the mesher
+ * (typically written into mesher specific density file). This is the default behavior.
+ *
+ * When adaptivity is enabled (adapt 1) and the error exceeds the required threshold, the
+ * mesher is asked to create the new mesh. If the mesher can provide the new mesh
+ * (directly, as Subdivision, or by running external mesher and converter, see MesherInterface),
+ * the new solution step is created on the new mesh, and the analysis followed by error
+ * estimation is repeated, until the error is acceptable or the maximum number of adaptive
+ * steps is reached. Due to linearity of a problem, the complete reanalysis is done on
+ * each new mesh, no mapping of the solution is needed.
+ * Solution steps represent a series of adaptive analyses (all steps have the same target time).
  */
 class AdaptiveLinearStatic : public LinearStatic
 {
 protected:
     /// Meshing package used for refinements.
     MeshPackageType meshPackage;
+    /// Mesher interface.
+    std :: unique_ptr< MesherInterface >mesher;
+    /// Flag indicating whether the adaptive remeshing loop is enabled.
+    bool adaptFlag;
+    /// Maximum number of adaptive remeshings.
+    int maxAdaptSteps;
+    /// Remeshing strategy determined by the remeshing criteria in the current step.
+    RemeshingStrategy remeshingStrategy;
 
 public:
-    AdaptiveLinearStatic(int i, EngngModel *master = nullptr) : LinearStatic(i, master) { }
-    virtual ~AdaptiveLinearStatic() { }
+    AdaptiveLinearStatic(int i, EngngModel *master = nullptr);
+    virtual ~AdaptiveLinearStatic();
 
+    void solveYourself() override;
     void updateYourself(TimeStep *tStep) override;
+    TimeStep *giveNextStep() override;
 
     /**
      * Initializes the newly generated discretization state according to previous solution.
@@ -81,6 +107,10 @@ public:
     // identification
     const char *giveClassName() const override { return "AdaptiveLinearStatic"; }
     const char *giveInputRecordName() const override { return _IFT_AdaptiveLinearStatic_Name; }
+
+protected:
+    /// Replaces the current domain by the new one (the old domain is deleted).
+    void replaceDomain(Domain *dNew);
 };
 } // end namespace oofem
 #endif // adaptlinearstatic_h

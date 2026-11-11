@@ -1,17 +1,38 @@
 Welcome to OOFEM Theory manual README.
 
+What is here
+------------
+The theory manual: the formulations OOFEM implements and the solution
+procedures it uses, including the symbolic MPM module.
+
 Prerequisities
 ----------------
-To build the documentation, you need Sphinx (Python documentation generator, https://www.sphinx-doc.org).
+To build the documentation, you need Sphinx (Python documentation generator,
+https://www.sphinx-doc.org).
 Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building the PDF additionally needs a LaTeX installation; see doc/README for
+the list of packages.
 
 Building documentation
 ----------------------
 1) Change working directory to doc/theorymanual2 inside your oofem source tree
-2) run ``make html`` or ``make latexpdf`` to build html or pdf versions
+2) run ``make html`` to build the html version, in ``_build/html``
+3) for the pdf version run ``make latex``, then ``make all-pdf`` in
+   ``_build/latex``
+
+If a change does not seem to take effect, run ``make clean`` first: the build
+reuses the parsed documents cached in ``_build/doctrees``.
+
+Shared configuration
+--------------------
+Project metadata and the shared html settings come from ``doc/global_conf.py``,
+and the page width and figure sizing from ``doc/_static/oofem.css``.  The
+author list is split over the title page by ``doc/_ext/oofemlatex.py``.  Do not
+set these per manual; see section [4] of doc/README.
 
 Contributing
 -------------
-The philosophy and contributing guide is part of manual. 
+The philosophy and contributing guide is part of manual.
 
 Happy contributing!

@@ -1,0 +1,29 @@
+lshape3d_tet.out
+3D L-shaped beam (tetrahedra) - adaptive linear static analysis with Gmsh remeshing
+adaptlinearstatic nsteps 1 adapt 1 maxadaptsteps 3 meshpackage 4 eetype 1 normtype 1 requirederror 0.15 minelemsize 0.03 gmshgeo "lshape3d.geo" gmshctrl "lshape3d_tet.ctrl" profileopt 1 nmodules 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+SimpleCS 1 material 1 set 1
+IsoLE 1 E 210.e3 n 0.3 d 1.0 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 2
+ConstantSurfaceLoad 2 loadTimeFunction 1 loadtype 3 dofs 3 1 2 3 Components 3 0.0 -1.0 0.0 set 3
+ConstantFunction 1 f(t) 1.0
+Set 1 elements
+Set 2 nodes
+Set 3 elementboundaries
+
+# Gmsh physical groups -> oofem properties
+# (gmsh UNV element types: 111 linear tetrahedron, 91 linear triangle)
+group Domain
+elemprop set 1
+etype[111] LTRSpace
+
+group Clamped
+nodeprop set 2
+
+group Load
+elemprop set 3
+etype[91]
+

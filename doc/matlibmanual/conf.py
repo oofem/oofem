@@ -5,6 +5,11 @@
 
 import os
 import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+# Import shared settings (theme, stylesheet, numfig); the project
+# information below overrides the generic one.
+from global_conf import *
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -22,7 +27,7 @@ release = '3.0'
 # \descitem, ...).
 sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
-extensions = ['oofemroles', 'sphinx_simplepdf']
+extensions = ['oofemroles', 'sphinx_simplepdf', 'oofemmath', 'oofemlatex']
 
 # The source directory also holds the LaTeX sources and the latex2html output,
 # so keep the builder away from everything that is not part of this manual.
@@ -39,8 +44,11 @@ exclude_patterns = [
 # ":numref:" is used throughout to reference tables and figures by number.
 numfig = True
 
-#Define macros for html and latexpdf
-macros = {
+# Math macros of this manual, inherited from matlibmanual.tex.  The shared ones
+# (\mbf, \del, \der, \pard) come from oofemmath; declared here are the
+# ones specific to this manual.  oofemmath feeds them to MathJax for the
+# HTML and to the LaTeX preamble for the PDF, so the two cannot drift.
+oofem_math_macros = {
     'alphaPsi':  r'\alpha_{\psi}',
     'bsig':      r'\mbf{\sigma}',
     'del':       [r'\displaystyle\frac{#1}{#2}', 2],
@@ -82,15 +90,11 @@ macros = {
     'vxi':       r'\mbf{\xi}',
 }
 
-
-
-
-
-# The manual's equations use the macros defined in matlibmanual.tex,
+# The manual's equations use the oofem_math_macros defined in matlibmanual.tex,
 # so MathJax has to be taught the same definitions.  They are not all
 # in the preamble: several are declared part-way through the text.
 # HTML (MathJax)
-mathjax3_config = {'tex': {'macros': macros}}
+mathjax3_config = {'tex': {'oofem_math_macros': oofem_math_macros}}
 
 # PDF (LaTeX): generate \newcommand lines from the same dict
 def _latex_def(name, spec):
@@ -98,22 +102,12 @@ def _latex_def(name, spec):
     args = f'[{nargs}]' if nargs else ''
     return f'\\newcommand{{\\{name}}}{args}{{{body}}}'
 
-latex_elements = {'preamble': '\n'.join(_latex_def(k, v) for k, v in macros.items()),}
+latex_elements = {'preamble': '\n'.join(_latex_def(k, v) for k, v in oofem_math_macros.items()),}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-# doc/_static is shared by the OOFEM manuals.
-html_static_path = ['../_static']
-html_css_files = ['oofem.css']
-
-# The material model tables are wide, so the text column is widened to 80% of
-# the browser window.  That, and the figure sizing, is set once for every
-# manual in doc/_static/oofem.css -- do not add page_width or body_max_width
-# here, as the stylesheet loads after the theme and would override them.
-html_theme_options = {
-    'sidebar_width': '250px',
-}
+# The theme, the shared stylesheet and the page width come from global_conf.py
+# and doc/_static/oofem.css, so nothing is set here.
 
 master_doc = 'index'

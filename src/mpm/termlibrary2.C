@@ -46,7 +46,7 @@ void deltaB(FloatMatrix& answer, const Variable *v, const FEInterpolation* inter
     int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(dndx, interpol, cell, coords);
     answer.resize(1, nnodes*ndofs);
     answer.zero();
 
@@ -71,7 +71,7 @@ void evalB(FloatMatrix& answer, const Variable *v, const FEInterpolation* interp
     int nnodes = interpol->giveNumberOfNodes(cell.giveGeometryType());
     int ndofs = v->size;
     // evaluate matrix of derivatives, the member at i,j position contains value of dNi/dxj
-    interpol->evaldNdx(dndx, coords, FEIElementGeometryWrapper(&cell));
+    MPElement::evaldNdx(dndx, interpol, cell, coords);
     answer.resize(6, nnodes*ndofs);
     answer.zero();
     if ((mmode == _3dUPV)||(mmode == _3dMat)) {
@@ -173,7 +173,7 @@ void NdTdvfNpTerm::evaluate_lin (FloatMatrix& answer, MPElement& e, GaussPoint* 
     this->testField->interpolation->evalN(nvec, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
     N.beNMatrixOf(nvec, testField->size);
     // evaluate derivatives of volume fraction
-    this->volumeFraction->interpolation->evaldNdx(dndx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));
+    MPElement::evaldNdx(dndx, this->volumeFraction->interpolation, e, gp->giveNaturalCoordinates());
     e.getUnknownVector(rvf, this->volumeFraction, VM_TotalIntrinsic, tstep);
     dvf.beTProductOf(dndx, rvf);
     this->field->interpolation->evalN(Np, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(&e));

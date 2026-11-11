@@ -257,7 +257,7 @@ FEI3dQuadLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray
 }
 
 void
-FEI3dQuadLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
+FEI3dQuadLin :: surfaceEvalBaseVectorsAtG1G2(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     // Note: These are not normalized. Returns the two tangent vectors to the surface.
     FloatMatrix dNdxi;
@@ -275,7 +275,7 @@ double
 FEI3dQuadLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) const
 {
     FloatArray G1, G2; // local curvilinear base vectors
-    this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
+    this->surfaceEvalBaseVectorsAtG1G2(G1, G2, lcoords, cellgeo);
     answer.beVectorProductOf(G1, G2);
     double J = answer.computeNorm();
     answer.times(1 / J);
@@ -288,7 +288,7 @@ FEI3dQuadLin :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const F
     // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
     // Note! The base vectors are not normalized except the third (normal)
     FloatArray G1, G2, G3;
-    this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
+    this->surfaceEvalBaseVectorsAtG1G2(G1, G2, lcoords, cellgeo);
     G3.beVectorProductOf(G1, G2);
 
     jacobianMatrix.resize(3, 3);

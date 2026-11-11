@@ -111,7 +111,7 @@ class CTRLParser:
             if not line: break
             if line.startswith('#'):
                 continue
-            match=re.search('^group(([\-\w]| )+)', line, re.IGNORECASE)
+            match=re.search(r'^group(([\-\w]| )+)', line, re.IGNORECASE)
             if match:
                 groups = match.group(1).split()
                 print ("\tFound properties for group(s):", groups)
@@ -196,7 +196,7 @@ class CTRLParser:
                                     str = "WARNING: Group of elements \"%s\" does no exist" % (igroup)
                                     print (str)
                     elif lineSplit[0][:5].lower() == 'etype':
-                        etmatch=re.search('^etype\[(\d+)\]', lineSplit[0], re.IGNORECASE)
+                        etmatch=re.search(r'^etype\[(\d+)\]', lineSplit[0], re.IGNORECASE)
                         unvetype = int(etmatch.group(1))
                         for igroup in groups:
                             __gr=self.getElementGroup(FEM,igroup)
@@ -337,6 +337,9 @@ class CTRLParser:
                 self.addGroupToComponent(nodemap[inode], igroup)
         for igroup in FEM.elemsets:
             for ielem in igroup.items:
+                if ielem not in elemmap:
+                    # element not exported (e.g. gmsh point elements of physical points)
+                    continue
                 self.addGroupToComponent(elemmap[ielem], igroup)
                 #resolve elemtype
                 if elemmap[ielem].type in igroup.oofem_etypemap:

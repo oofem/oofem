@@ -1,0 +1,41 @@
+beam_nl.out
+Notched 3-point bending beam (2D) - adaptive nonlinear analysis (nonlocal damage) with Gmsh remeshing
+adaptnlinearstatic nsteps 25 controlmode 1 rtolv 1.e-3 maxiter 300 stiffmode 1 renumber 1 equilmc 1 eetype 0 vartype 1 minlim 0.05 maxlim 0.9 mindens 12.0 maxdens 5.0 defdens 25.0 meshpackage 4 gmshgeo "beam.geo" gmshctrl "beam_nl.ctrl" profileopt 1 nmodules 1
+vtkxml tstep_all domain_all primvars 1 1 cellvars 2 1 52
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ncrosssect 2 nmat 2 nbc 3 nic 0 nltf 2 nset 5
+SimpleCS 1 thick 1.0 material 1 set 1
+SimpleCS 2 thick 1.0 material 2 set 2
+IsoLE 1 E 20.e3 n 0.2 d 0.0 talpha 0.0
+idmnl1 2 E 20.e3 n 0.2 e0 1.25e-4 ef 1.e-3 damlaw 0 equivstraintype 4 r 40.0 wft 1 regionmap 2 1 0 d 0.0 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.0 0.0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 4
+BoundaryCondition 3 loadTimeFunction 2 dofs 1 2 values 1 -0.025 set 5
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 2 t 2 0.0 200.0 f(t) 2 0.0 200.0
+Set 1 elements
+Set 2 elements
+Set 3 nodes
+Set 4 nodes
+Set 5 nodes
+
+# Gmsh physical groups -> oofem properties
+# (gmsh UNV element type 91: linear triangle)
+group Elastic
+elemprop set 1
+etype[91] TrPlaneStress2D
+
+group Concrete
+elemprop set 2
+etype[91] TrPlaneStress2D
+
+group SupportL
+nodeprop set 3
+
+group SupportR
+nodeprop set 4
+
+group Load
+nodeprop set 5
+

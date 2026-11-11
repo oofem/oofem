@@ -16,6 +16,7 @@ faces. The element features are summarized in :numref:`QBrick1htsummary`.
 
 .. table:: QBrick1ht element summary
    :name: QBrick1htsummary
+   :widths: 26 94
 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Keyword                  | QBrick1ht                                                                                    |
@@ -34,11 +35,11 @@ faces. The element features are summarized in :numref:`QBrick1htsummary`.
    | Integration              | Integration using gauss integration formula in 8, 27 (default), or 64 integration points.    |
    |                          | The default number of integration point used can be overloaded using :param:`NIP` parameter. |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Loads                    | -                                                                                            |
+   | Loads                    | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | Features                 | -                                                                                            |
+   | Features                 | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
-   | CS properties            | -                                                                                            |
+   | CS properties            | \-                                                                                           |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Status                   |                                                                                              |
    +--------------------------+----------------------------------------------------------------------------------------------+

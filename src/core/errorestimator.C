@@ -52,6 +52,8 @@ ErrorEstimator :: setDomain(Domain *d)
 {
     FEMComponent :: setDomain(d);
     this->giveRemeshingCrit()->setDomain(d);
+    // cached values refer to previous domain
+    this->reinitialize();
 }
 
 
@@ -69,7 +71,17 @@ ErrorEstimator :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
 
 void ErrorEstimator :: reinitialize()
 {
-    this->rc->reinitialize();
+    if ( this->rc ) {
+        this->rc->reinitialize();
+    }
+}
+
+
+void
+ErrorEstimator :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    fprintf(file, "\nError estimator/indicator (%s):\n", this->giveClassName() );
+    this->giveRemeshingCrit()->printOutputAt(file, tStep);
 }
 
 bool ErrorEstimator :: skipRegion(int reg)

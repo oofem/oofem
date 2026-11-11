@@ -97,15 +97,15 @@ public:
 
     /// Copy ctor
     FloatArrayF(const FloatArrayF<N> &x) : values{x.values} { }
-    /// Ctor from dynamic array (size must match)
-    FloatArrayF(const FloatArray &x)
+    /// Ctor from dynamic array (size must match; in release builds a shorter array is zero padded)
+    FloatArrayF(const FloatArray &x) : values{}
     {
 #ifndef NDEBUG
         if ( x.giveSize() != N ) {
             OOFEM_ERROR("Can't convert dynamic float array of size %d to fixed size %ld\n", x.giveSize(), N);
         }
 #endif
-        std::copy_n(x.begin(), N, values.begin());
+        std::copy_n(x.begin(), std::min<std::size_t>(x.giveSize(), N), values.begin());
     }
     /// Direct value ctor
     template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N>>

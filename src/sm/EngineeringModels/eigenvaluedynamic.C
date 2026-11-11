@@ -98,6 +98,11 @@ EigenValueDynamic :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
         rtolv =  0.01;
     }
 
+    explicitShift = ir->hasField(_IFT_EigenValueDynamic_shift);
+    if ( explicitShift ) {
+        IR_GIVE_FIELD(ir, shift, _IFT_EigenValueDynamic_shift);
+    }
+
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EigenValueDynamic_stype);
     solverType = ( GenEigvalSolverType ) val;
@@ -174,7 +179,24 @@ void EigenValueDynamic :: solveYourself()
         this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assemble( *massMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
+        double s = this->shift;
+        if ( !explicitShift ) {
+            // small shift relative to the stiffness/mass diagonal ratio, makes K + s*M regular for free bodies
+            bool hasMass = false;
+            double rmin = 0.;
+            for ( int i = 1; i <= stiffnessMatrix->giveNumberOfColumns(); i++ ) {
+                double mii = fabs( massMatrix->at(i, i) );
+                if ( mii > 0. ) { // massless dofs have exactly zero diagonal
+                    double r = fabs( stiffnessMatrix->at(i, i) ) / mii;
+                    rmin = hasMass ? std :: min(rmin, r) : r;
+                    hasMass = true;
+                }
+            }
+            s = hasMass ? 1.e-8 * rmin : 0.;
+        }
+
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+        nMethod->setShift(s);
         OOFEM_LOG_INFO("Solving ...\n");
         nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
     }

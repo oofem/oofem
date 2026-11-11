@@ -54,6 +54,10 @@ class SparseMtrx;
  */
 class OOFEM_EXPORT SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
+protected:
+    /// Spectral shift; solvers iterate with A + shift*B and return the eigenvalues shifted back.
+    double shift = 0.;
+
 public:
     /// Constructor.
     SparseGeneralEigenValueSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { }
@@ -74,6 +78,12 @@ public:
      * @return NM_Status value.
      */
     virtual ConvergedReason solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot) = 0;
+
+    /**
+     * Sets the spectral shift, which makes A + shift*B regular when A is singular (e.g. rigid body modes).
+     * Only meaningful when B is positive semidefinite (mass matrix); A is overwritten by solve anyway.
+     */
+    void setShift(double s) { shift = s; }
 };
 } // end namespace oofem
 #endif // sparsegeneigenvalsystemnm_h
