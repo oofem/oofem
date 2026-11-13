@@ -152,9 +152,13 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
             hardeningModuliInverse.clear();
         }
 
+        // fullStressSpaceHardeningVars is NULL when the material has no hardening;
+        // bind an empty array instead of dereferencing null (UB the optimizer exploits).
+        FloatArray emptyHardeningVars;
         this->computeConsistentModuli(consistentModuli, gp, elasticModuliInverse,
                                       hardeningModuliInverse, Gamma,
-                                      fullStressVector, * fullStressSpaceHardeningVars);
+                                      fullStressVector,
+                                      fullStressSpaceHardeningVars ? * fullStressSpaceHardeningVars : emptyHardeningVars);
 
         // obtain increment to consistency parameter
         helpMtrx=FloatMatrix::fromArray(* gradientVectorR, 1);
@@ -427,12 +431,15 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(MatResponseMode mode,
     strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     stressSpaceHardeningVars = this->ComputeStressSpaceHardeningVars(gp, & strainSpaceHardeningVariables);
 
+    // stressSpaceHardeningVars is NULL when the material has no hardening;
+    // bind an empty array instead of dereferencing null (UB the optimizer exploits).
+    FloatArray emptyHardeningVars;
     this->computeConsistentModuli(consistentModuli, gp,
                                   elasticModuliInverse,
                                   hardeningModuliInverse,
                                   Gamma,
                                   fullStressVector,
-                                  * stressSpaceHardeningVars);
+                                  stressSpaceHardeningVars ? * stressSpaceHardeningVars : emptyHardeningVars);
 
     gradientVector = this->ComputeGradientVector(gp, & fullStressVector, stressSpaceHardeningVars);
     helpVector.beProductOf(consistentModuli, * gradientVector);
