@@ -179,7 +179,10 @@ protected:
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
 
-    double giveInitialTime() override {return 1;}
+    // Explicit dynamics runs in physical time starting at t = 0 (unlike the
+    // static solvers, whose "time" is a 1-based step counter). The time-driven
+    // metastep loop uses finalTime - initialTime, so initialTime must be 0 here.
+    double giveInitialTime() override {return 0;}
 
 public:
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
