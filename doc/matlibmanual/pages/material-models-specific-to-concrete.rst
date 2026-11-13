@@ -1103,11 +1103,11 @@ The yield function
 .. math::
    :label: eq:yieldSurface
 
-   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
-   & 
-   +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
+   f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p}) &=
+   \left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 \\
+   &\quad + m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
 
-depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable :math:`\kappa_{\rm p}` (which enters through a dimensionless variable :math:`q_{\rm h}`). Parameter :math:`\fc` is the uniaxial compressive strength. 
+depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable :math:`\kappa_{\rm p}` (which enters through a dimensionless variable :math:`q_{\rm h}`). Parameter :math:`\fc` is the uniaxial compressive strength.
 
 Note that, under uniaxial compression characterized by axial stress :math:`\bar{\sigma}<0`, we have :math:`\bar{\sigma}_{\rm V}=\bar{\sigma}/3`, :math:`\bar{\rho}=-\sqrt{2/3}\,\bar{\sigma}` and :math:`\bar{\theta}=60^o`. The yield function then reduces to :math:`f_{\rm p}=(\bar{\sigma}/\fc)^2-q_{\rm{h}}^2`. This means that function :math:`q_{\rm{h}}` describes the evolution of the uniaxial compressive yield stress normalized by its maximum value, :math:`\fc`.
 

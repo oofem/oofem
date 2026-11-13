@@ -27,7 +27,7 @@ release = '3.0'
 # \descitem, ...).
 sys.path.insert(0, os.path.abspath(os.path.join('..', '_ext')))
 
-extensions = ['oofemroles', 'oofemmath', 'oofemlatex']
+extensions = ['oofemroles', 'sphinx_simplepdf', 'oofemmath', 'oofemlatex']
 
 # The source directory also holds the LaTeX sources and the latex2html output,
 # so keep the builder away from everything that is not part of this manual.
@@ -51,6 +51,7 @@ numfig = True
 oofem_math_macros = {
     'alphaPsi':  r'\alpha_{\psi}',
     'bsig':      r'\mbf{\sigma}',
+    'del':       [r'\displaystyle\frac{#1}{#2}', 2],
     'dO':        r'\,\mbox{d}\Omega',
     'dvepst':    r'\delta\tilde{\veps}',
     'dvet':      r'\delta\vet',
@@ -67,6 +68,7 @@ oofem_math_macros = {
     'ft':        r'\bar{f}_t',
     'kap':       r'\mbf{\kappa}',
     'kappac':    r'\kappa_{\mathrm{c}}',
+    'mbf':       [r'\boldsymbol{#1}', 1],
     'mD':        r'\mbf{D}',
     'qh':        r'q_{\rm h}',
     'quarter':   r'\frac{1}{4}',
@@ -88,6 +90,19 @@ oofem_math_macros = {
     'vxi':       r'\mbf{\xi}',
 }
 
+# The manual's equations use the oofem_math_macros defined in matlibmanual.tex,
+# so MathJax has to be taught the same definitions.  They are not all
+# in the preamble: several are declared part-way through the text.
+# HTML (MathJax)
+mathjax3_config = {'tex': {'oofem_math_macros': oofem_math_macros}}
+
+# PDF (LaTeX): generate \newcommand lines from the same dict
+def _latex_def(name, spec):
+    body, nargs = spec if isinstance(spec, list) else (spec, 0)
+    args = f'[{nargs}]' if nargs else ''
+    return f'\\newcommand{{\\{name}}}{args}{{{body}}}'
+
+latex_elements = {'preamble': '\n'.join(_latex_def(k, v) for k, v in oofem_math_macros.items()),}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

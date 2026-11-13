@@ -27,3 +27,9 @@ endif
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+#Create pdf from html. Need python module sphinx-simplepdf, i.e. pip install sphinx-simplepdf
+#Quite UGLY
+#.PHONY: simplepdf
+#simplepdf:
+#	@$(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

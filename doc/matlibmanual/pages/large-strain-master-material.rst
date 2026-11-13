@@ -12,7 +12,6 @@ In the first step, strain measure is computed from equation :eq:`generalizedStra
 
    \boldsymbol{E}^{(m)} = \begin{cases}
     \displaystyle{\frac{1}{2m}}\left(\boldsymbol{C}^m-\boldsymbol{I}\right), & \text{if }m \neq 0 \\
-    \\
     \displaystyle{\frac{1}{2}}\ln\boldsymbol{C}, & \text{if }m = 0
    \end{cases}
 

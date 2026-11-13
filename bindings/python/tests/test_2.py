@@ -69,6 +69,7 @@ def test_2():
     
 
     problem.terminateAnalysis()
+    problem.getLogger().printStatistics()
     print("\nProblem solved")
 
 if __name__ == "__main__":

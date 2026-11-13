@@ -33,8 +33,8 @@ where :param:`smoothMag` controls smoothing magnitude. Tangential stiffness for 
 
 .. math::
 
-   k_{nn} &= \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} +\\
-   &+ \frac{s_m \cdot k_t \bar\delta}{\pi(s_m^2\bar\delta^2+1)} - \frac{s_m \cdot k_n \bar\delta}{\pi(s_m^2\bar\delta^2+1)}
+   k_{nn} &= \left (\frac{\pi}{2} + \arctan (s_m \bar\delta)\right) \frac{k_t}{\pi} + \left (\frac{\pi}{2} - \arctan (s_m \bar\delta)\right) \frac{k_n}{\pi} \\
+   &\quad + \frac{s_m \cdot k_t \bar\delta}{\pi(s_m^2\bar\delta^2+1)} - \frac{s_m \cdot k_n \bar\delta}{\pi(s_m^2\bar\delta^2+1)}
 
 Shear stiffness remains constant during all possible loadings and there is no influence of normal direction.
 
@@ -99,9 +99,9 @@ If :param:`regularized` is set to true, the regularized version of the model is 
 .. math::
 
    \sigma_N &= 0.5 k_n(\delta_0+\delta_n)-
-               \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n))|)+\\
-            &+c\left(0.5 k_n(\delta_0+\delta_n)+
-               \del{0.5 k_n}{m}\log(|(\cosh(m(\delta_0+\delta_n)))|)\right)
+               \del{0.5 k_n}{m}\log(|\cosh(m(\delta_0+\delta_n))|) \\
+            &\quad + c\left(0.5 k_n(\delta_0+\delta_n)+
+               \del{0.5 k_n}{m}\log(|\cosh(m(\delta_0+\delta_n))|)\right)
 
 where :math:`c` is the ratio of tensile/compressive stiffness (:param:`stiffcoeff`), :math:`\delta_0` is the normal clearance, :math:`\delta_n` is the normal strain (jump), and :math:`m` denotes the regularization coefficient. Consistent tangent stiffness is computed by differentiating the above relation.
 

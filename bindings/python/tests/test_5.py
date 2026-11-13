@@ -111,6 +111,7 @@ def test_5():
     assert (round (t1-48.0000, 4) == 0), "Export of primary field failed"
     
     problem.terminateAnalysis()
+    problem.getLogger().printStatistics()
     print("\nProblem solved")
 
 
