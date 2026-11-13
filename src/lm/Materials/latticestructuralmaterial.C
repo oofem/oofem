@@ -125,7 +125,7 @@ LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
             answer.at(3) = help.at(6);
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return Material :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
