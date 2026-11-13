@@ -1794,7 +1794,7 @@ By default, two damage variables are used, i.e., the effective stress is transfo
    |                    | - :param:`newtoniter` maximum number of iterations in the implicit stress return algorithm,  |
    |                    |   optional, default value 100                                                                |
    +--------------------+----------------------------------------------------------------------------------------------+
-   | Supported modes    | 3dMat, PlaneStrain, 1dMat                                                                    |
+   | Supported modes    | 3dMat, PlaneStress, PlaneStrain, 1dMat                                                       |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples     | `sm/con2dpm1.in                                                                              |
    |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/con2dpm1.in>`_,               |
@@ -1817,6 +1817,43 @@ By default, two damage variables are used, i.e., the effective stress is transfo
    |                    | `sm/con2dpm9.in                                                                              |
    |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/con2dpm9.in>`_ (and 2 more)   |
    +--------------------+----------------------------------------------------------------------------------------------+
+
+.. _sec:cdpm2planestress:
+
+Plane stress
+~~~~~~~~~~~~
+
+The stress-strain law and the stress-evaluation algorithm presented above for the general 3D case remain valid for plane stress, provided that the number of stress and strain components is reduced to three and :math:`\boldsymbol{D}_e` is interpreted as the 3x3 elastic stiffness matrix for plane stress. This follows from inverting the compliance relation and eliminating the out-of-plane stress component, which is set to zero.
+
+Unlike the full 3D case, the Lode angle :math:`\bar\theta` is not known in advance for plane stress and cannot be kept fixed during the return, because the out-of-plane strain is not part of the input (it is replaced by the condition :math:`\bar\sigma_3=0`). The implicit stress-return algorithm therefore works with the in-plane principal effective stresses, :math:`\bar\sigma_1` and :math:`\bar\sigma_2`, together with :math:`\kappa_{\rm p}` and :math:`\Delta\lambda` as the four unknowns of the Newton iteration:
+
+.. math::
+   :label: cdpm2:psflow
+
+   \bar\sigma_1 + \Delta\lambda E^*\left(g_1+\nu g_2\right) &= \bar\sigma_1^{\rm (tr)} \\
+   \bar\sigma_2 + \Delta\lambda E^*\left(\nu g_1+g_2\right) &= \bar\sigma_2^{\rm (tr)}
+
+where :math:`E^*=E/(1-\nu^2)`, :math:`\bar\sigma_1^{\rm (tr)}` and :math:`\bar\sigma_2^{\rm (tr)}` are the in-plane principal values of the trial stress, and :math:`g_1=\partial g/\partial\bar\sigma_1`, :math:`g_2=\partial g/\partial\bar\sigma_2` follow from the same plastic potential as in the 3D case, evaluated at :math:`\bar\sigma_3=0`. Equations :eq:`cdpm2:psflow` are solved together with the evolution equation for :math:`\kappa_{\rm p}` and the yield condition :math:`f_{\rm p}=0`. A dedicated reduced iteration is used for the case where :math:`\kappa_{\rm p}` is still below 1 but the trial stress already lies outside the yield surface corresponding to :math:`\kappa_{\rm p}=1`. Subincrementation of the strain increment is applied when the return does not converge in a single step.
+
+The apex (vertex) of the yield surface cannot be reached in plane stress, because it would require all three principal stresses to vanish, which is impossible once the stress state is outside the (always non-empty) elastic domain. The special vertex return needed for some stress states in the 3D case is therefore never required for plane stress.
+
+Once the principal stresses have converged, they are transformed back to Cartesian components using the (fixed) principal directions of the trial stress, and the out-of-plane strain is recovered from
+
+.. math::
+   :label: cdpm2:epsz
+
+   \varepsilon_z = -\frac{\nu}{E}\left(\sigma_x+\sigma_y\right) + \varepsilon_{pz}
+
+where :math:`\varepsilon_{pz}` is the out-of-plane plastic strain, accumulated from the flow rule evaluated at the converged state. The damage part of the model, including the tension/compression split and the two damage variables, is applied in exactly the same way as for the 3D case, by embedding the plane-stress effective stress and strain into the usual six-component form with :math:`\sigma_z=0`.
+
+The plane-stress algorithm is implemented for ``con2dpm`` using the same keyword and parameters of Table :numref:`cdpm2_table` as for the 3D case, plus one optional parameter, :em:`oldps`, which selects between the two available plane-stress implementations:
+
+- :em:`oldps` 0 (default): the dedicated plane-stress return mapping described above.
+- :em:`oldps` 1: a generic, pre-existing fallback that instead iterates the out-of-plane strain on top of the full 3D return mapping until the out-of-plane stress vanishes. It is slower, but useful as an independent cross-check of the dedicated algorithm.
+
+The algorithmic (consistent) tangent stiffness for plane stress is not yet implemented for the dedicated algorithm (:em:`oldps` 0). ``givePlaneStressStiffMtrx`` currently returns the elastic plane-stress stiffness, scaled by the secant damage factor when :em:`damflag` is 2 or 3 (for the default :em:`damflag` of 1, the tension/compression split cannot be represented as a single scalar factor, so the unscaled elastic stiffness is returned instead). This is sufficient to drive the Newton-Raphson solver to the correct equilibrium state but is not a consistent tangent, so convergence may require more iterations than with the full 3D tangent. With :em:`oldps` 1, the stiffness is instead obtained by static condensation of the full 3D tangent/secant matrix.
+
+An example of ``con2dpm`` used in plane stress is given in `sm/con2dpm_planestress01.in <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/con2dpm_planestress01.in>`_.
 
 .. _sec:cdpm2f:
 
