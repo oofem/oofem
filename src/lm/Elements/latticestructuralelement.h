@@ -60,6 +60,9 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
+    /// Passes IP values to the material, skipping StructuralElement (no N matrix for lattice elements).
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+
     /**
      * Returns the cross-sectional area of the lattice element.
      * @return Cross-section area.

@@ -45,6 +45,14 @@ LatticeStructuralElement :: LatticeStructuralElement(int n, Domain *aDomain) : S
 { }
 
 
+int
+LatticeStructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    // Bypass StructuralElement: lattice elements have no N matrix for IST_DisplacementVector.
+    return Element :: giveIPValue(answer, gp, type, tStep);
+}
+
+
 void
 LatticeStructuralElement :: computeGlobalRotationMatrix(FloatMatrix &answer, const FloatArray &psi)
 {
