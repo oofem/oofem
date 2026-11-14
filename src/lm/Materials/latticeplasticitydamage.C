@@ -641,7 +641,7 @@ LatticePlasticityDamage::give(int aProperty, GaussPoint *gp) const
 
     double answer;
     if ( RandomMaterialExtensionInterface::give(aProperty, gp, answer) ) {
-        // Same cut off as LatticeLinearElastic to avoid numerical problems
+        // Same limits as LatticeLinearElastic
         return min(max(answer, 0.1), 10.);
     } else if ( aProperty == fc_strength ) {
         return 1.;

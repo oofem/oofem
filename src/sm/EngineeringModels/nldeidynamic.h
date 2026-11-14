@@ -179,9 +179,7 @@ protected:
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
 
-    // Explicit dynamics runs in physical time starting at t = 0 (unlike the
-    // static solvers, whose "time" is a 1-based step counter). The time-driven
-    // metastep loop uses finalTime - initialTime, so initialTime must be 0 here.
+    // Physical time starts at t = 0
     double giveInitialTime() override {return 0;}
 
 public:

@@ -846,8 +846,6 @@ VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(i, ielem);
             for ( int c = 1; c <= ncomponents; ++c ) {
-                // Zero-pad: an element that does not support this IST returns a short/empty
-                // array (mixed solid+lattice mesh), so guard against an out-of-bounds read.
                 double v = ( c <= valueArray.giveSize() ) ? valueArray.at(c) : 0.0;
                 cellVarsArray->SetComponent(ielem - 1, c - 1, v);
             }
@@ -859,7 +857,7 @@ VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
         this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(type, ielem);
-            valueArray.resizeWithValues(ncomponents);   // zero-pad short/empty arrays to the declared component count
+            valueArray.resizeWithValues(ncomponents);
             this->writeVTKCellData(valueArray);
         }
         this->fileStream << "</DataArray>\n";
@@ -1124,8 +1122,7 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( value.giveSize() == 0 ) {
-                        // Element does not support this IST (mixed solid+lattice mesh): zero-pad
-                        // to the declared component count so the column stays well-formed.
+                        // IST not supported by this element
                         value.resizeWithValues(nc);
                     } else if ( vtype == ISVT_VECTOR ) {
                         // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
@@ -1138,7 +1135,7 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                         FloatArray help = value;
                         this->makeFullTensorForm(value, help, vtype);
                     } else {
-                        value.resizeWithValues(nc);       // scalar / other: match the declared count
+                        value.resizeWithValues(nc);
                     }
 
                     for ( double v : value ) {

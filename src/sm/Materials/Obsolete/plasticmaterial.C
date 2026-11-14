@@ -152,8 +152,6 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
             hardeningModuliInverse.clear();
         }
 
-        // fullStressSpaceHardeningVars is NULL when the material has no hardening;
-        // bind an empty array instead of dereferencing null (UB the optimizer exploits).
         FloatArray emptyHardeningVars;
         this->computeConsistentModuli(consistentModuli, gp, elasticModuliInverse,
                                       hardeningModuliInverse, Gamma,
@@ -431,8 +429,6 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(MatResponseMode mode,
     strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     stressSpaceHardeningVars = this->ComputeStressSpaceHardeningVars(gp, & strainSpaceHardeningVariables);
 
-    // stressSpaceHardeningVars is NULL when the material has no hardening;
-    // bind an empty array instead of dereferencing null (UB the optimizer exploits).
     FloatArray emptyHardeningVars;
     this->computeConsistentModuli(consistentModuli, gp,
                                   elasticModuliInverse,

@@ -60,7 +60,7 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    /// Passes IP values to the material, skipping StructuralElement (no N matrix for lattice elements).
+    /// Skips StructuralElement::giveIPValue (lattice elements have no N matrix).
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /**
