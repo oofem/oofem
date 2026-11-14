@@ -395,7 +395,12 @@ itself carry the rotations, use a plain ``HangingNode`` instead.
 .. note::
 
    The continuum rotational constraint is currently implemented for the linear
-   tetrahedron only; a non-tetrahedral master element raises an error.
+   tetrahedron and the linear triangle; any other master element raises an
+   error.  A triangle host lies in the :math:`x`-:math:`y` plane, so only
+   ``R_w`` can be linked, to
+   :math:`\theta_z = \tfrac12\,(\partial v/\partial x - \partial u/\partial y)`;
+   ``R_u`` and ``R_v`` must be primary or fixed.  This is the 2d case of a
+   frame (``lattice2d``) embedded in a plane stress or plane strain mesh.
 
 .. record::
 

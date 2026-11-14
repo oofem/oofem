@@ -1,0 +1,71 @@
+linkslip04.out
+Test case for BondLink2dTruss with LinkSlip - truss rebar pull-out in 2D, bar along x and bar at 45 degrees
+NonLinearStatic nsteps 1 nmsteps 1 nmodules 1 contextoutputstep 10000
+nsteps 20 controlmode 1 rtolf 1.e-6 MaxIter 200 stiffMode 0
+errorcheck
+domain 2dplanestress
+OutputManager tstep_all dofman_all element_all
+ndofman 16 nelem 14 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 2 nset 5
+node 1 coords 3 0 0 0.
+node 2 coords 3 0.1 0 0.
+node 3 coords 3 0.2 0 0.
+node 4 coords 3 0.3 0 0.
+node 5 coords 3 0 0 0.
+node 6 coords 3 0.1 0 0.
+node 7 coords 3 0.2 0 0.
+node 8 coords 3 0.3 0 0.
+node 9 coords 3 1 0 0.
+node 10 coords 3 1.07071067812 0.0707106781187 0.
+node 11 coords 3 1.14142135624 0.141421356237 0.
+node 12 coords 3 1.21213203436 0.212132034356 0.
+node 13 coords 3 1 0 0.
+node 14 coords 3 1.07071067812 0.0707106781187 0.
+node 15 coords 3 1.14142135624 0.141421356237 0.
+node 16 coords 3 1.21213203436 0.212132034356 0.
+truss2d 1 nodes 2 1 2 cs 1
+truss2d 2 nodes 2 2 3 cs 1
+truss2d 3 nodes 2 3 4 cs 1
+truss2d 4 nodes 2 9 10 cs 1
+truss2d 5 nodes 2 10 11 cs 1
+truss2d 6 nodes 2 11 12 cs 1
+bondlink2dtruss 7 nodes 2 1 5 length 0.05 diameter 0.02 dirvector 3 1 0 0
+bondlink2dtruss 8 nodes 2 2 6 length 0.1 diameter 0.02 dirvector 3 1 0 0
+bondlink2dtruss 9 nodes 2 3 7 length 0.1 diameter 0.02 dirvector 3 1 0 0
+bondlink2dtruss 10 nodes 2 4 8 length 0.05 diameter 0.02 dirvector 3 1 0 0
+bondlink2dtruss 11 nodes 2 9 13 length 0.05 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
+bondlink2dtruss 12 nodes 2 10 14 length 0.1 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
+bondlink2dtruss 13 nodes 2 11 15 length 0.1 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
+bondlink2dtruss 14 nodes 2 12 16 length 0.05 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
+Set 1 elements 6 1 2 3 4 5 6
+Set 2 elements 8 7 8 9 10 11 12 13 14
+Set 3 nodes 8 5 6 7 8 13 14 15 16
+Set 4 nodes 1 4
+Set 5 nodes 1 12
+simpleCS 1 area 3.1416e-4 material 1 set 1
+interfacecs 2 material 2 set 2
+IsoLE 1 d 1.0 E 2e11 n 0.3 tAlpha 1.0
+linkslip 2 kn 6.135e10 kl 6.135e13 type 2 alpha 0.4 s1 1.e-3 s2 2e-3 s3 6.5e-3 tf 6.164e6 t0 1.541e7
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 3
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 1 values 1 2.e-3 set 4
+BoundaryCondition 3 loadTimeFunction 2 dofs 2 1 2 values 2 0.00141421356237 0.00141421356237 set 5
+BoundaryCondition 4 loadTimeFunction 1 dofs 1 2 values 1 0. set 4
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 t 2 0.0 20.0 f(t) 2 0.0 1.0
+
+#%BEGIN_CHECK% tolerance 1.e3
+## bond stress, bar along x (el 7, 10) and at 45 degrees (el 11, 14): must be equal
+#ELEMENT tStep 2 number 7 gp 1 keyword 99 component 1 value 1.2257e+06
+#ELEMENT tStep 2 number 10 gp 1 keyword 99 component 1 value 6.1348e+06
+#ELEMENT tStep 2 number 11 gp 1 keyword 99 component 1 value 1.2257e+06
+#ELEMENT tStep 2 number 14 gp 1 keyword 99 component 1 value 6.1348e+06
+#ELEMENT tStep 6 number 7 gp 1 keyword 99 component 1 value 7.1008e+06
+#ELEMENT tStep 6 number 10 gp 1 keyword 99 component 1 value 1.1679e+07
+#ELEMENT tStep 6 number 11 gp 1 keyword 99 component 1 value 7.1008e+06
+#ELEMENT tStep 6 number 14 gp 1 keyword 99 component 1 value 1.1679e+07
+#ELEMENT tStep 20 number 7 gp 1 keyword 99 component 1 value 1.5410e+07
+#ELEMENT tStep 20 number 10 gp 1 keyword 99 component 1 value 1.5410e+07
+#ELEMENT tStep 20 number 11 gp 1 keyword 99 component 1 value 1.5410e+07
+#ELEMENT tStep 20 number 14 gp 1 keyword 99 component 1 value 1.5410e+07
+## lateral traction in the 45 degree bar: zero
+#ELEMENT tStep 20 number 14 gp 1 keyword 99 component 2 value 0.0
+#%END_CHECK%

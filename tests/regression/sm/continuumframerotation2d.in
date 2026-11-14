@@ -1,0 +1,33 @@
+continuumframerotation2d.out
+Continuum frame node with R_w embedded in a linear triangle (plane stress, x-y plane). The corners get u = 0.025 + 0.02x - 0.09y, v = -0.05 + 0.11x + 0.03y: a rigid rotation of 0.1 plus a uniform strain, which has no curl. The frame node must show R_w = 0.1 and the interpolated translation.
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 2dplanestress
+OutputManager
+#
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 3 nltf 1 nic 0 nset 4
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 1. 0. 0.
+node 3 coords 3 0. 1. 0.
+continuumframenode 4 coords 3 0.25 0.25 0. dofType 3 2 2 2 dofidmask 3 1 2 6
+#
+trplanestress2d 1 nodes 3 1 2 3 crossSect 1 mat 1
+#
+SimpleCS 1 thick 1.0 material 1 set 1
+#
+IsoLE 1 d 0. E 30.e9 n 0.15 talpha 0.
+#
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0.025 -0.05 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 2 1 2 values 2 0.045 0.06 set 3
+BoundaryCondition 3 loadTimeFunction 1 dofs 2 1 2 values 2 -0.065 -0.02 set 4
+ConstantFunction 1 f(t) 1.
+set 1 elements 1 1
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+
+#%BEGIN_CHECK% tolerance 1e-10
+#NODE tStep 1 number 4 dof 1 unknown d value 0.0075
+#NODE tStep 1 number 4 dof 2 unknown d value -0.015
+#NODE tStep 1 number 4 dof 6 unknown d value 0.1
+#%END_CHECK%

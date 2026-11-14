@@ -36,6 +36,7 @@
 #define lattice2d_h
 
 #include "lm/Elements/latticestructuralelement.h"
+#include "crosssection.h"
 
 ///@name Input fields for Lattice2d
 //@{
@@ -82,9 +83,14 @@ public:
 
     int hasBeenUpdated() override;
 
-    double giveArea(GaussPoint *gp) override { return this->width * this->thickness; }
-
-  double giveI2(GaussPoint *gp) override { return pow(this->width,3.)*this->thickness/12; }
+    /// Section properties: circular from LatticeCS radius (shape 1), else rectangle width x thick.
+    double giveArea(GaussPoint *gp) override;
+    double giveI1(GaussPoint *gp) override;
+    double giveI2(GaussPoint *gp) override;
+    double giveJ(GaussPoint *gp) override;
+    double giveShearArea1(GaussPoint *gp) override;
+    double giveShearArea2(GaussPoint *gp) override { return giveShearArea1(gp); }
+    bool giveRectangularSectionDimensions(double &by, double &bz, GaussPoint *gp) const override;
 
     int computeNumberOfDofs() override { return 6; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
@@ -105,6 +111,8 @@ public:
     //
     const char *giveInputRecordName() const override { return _IFT_Lattice2d_Name; }
     const char *giveClassName() const override { return "Lattice2d"; }
+    /// Sets gpCoords to the element midpoint if not given (e.g. frame elements).
+    void postInitialize() override;
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
     
     static ParamKey IPK_Lattice2d_thick;
@@ -137,6 +145,10 @@ protected:
   
     int giveNumberOfCrossSectionNodes() override { return 2; }
     double givePitch();
+    /// Returns the LatticeCS radius if the section is circular (shape 1), else 0.
+    double giveCircularRadius() const;
+    /// Returns a user-given LatticeCS property if positive, else the fallback.
+    double giveSectionProperty(CrossSectionProperty key, double fallback) const;
     void computeGaussPoints() override;
     integrationDomain giveIntegrationDomain() const override { return _Line; }
     void giveGpCoordinates(FloatArray &coords, GaussPoint *gp) override;

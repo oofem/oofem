@@ -76,8 +76,9 @@ void ContinuumFrameNode :: postInitialize()
     // order no longer has to match the continuum. Only slaved rotational DOFs are treated here:
     // if the rotational DOFs are free (master) or fixed - e.g. a frame node whose torsion is
     // fixed and whose bending rotations are carried by the beam element itself - they are left
-    // untouched. Implemented for the linear tetrahedron, whose constant shape-function gradients
-    // give a constant rotation.
+    // untouched. Implemented for the linear tetrahedron and, in 2d (x-y plane, rotation R_w
+    // only), for the linear triangle, whose constant shape-function gradients give a constant
+    // rotation.
     SlaveDof *rotU = this->hasDofID(R_u) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_u) ) : nullptr;
     SlaveDof *rotV = this->hasDofID(R_v) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_v) ) : nullptr;
     SlaveDof *rotW = this->hasDofID(R_w) ? dynamic_cast< SlaveDof * >( this->giveDofWithID(R_w) ) : nullptr;
@@ -90,11 +91,18 @@ void ContinuumFrameNode :: postInitialize()
     if ( !e ) {
         OOFEM_ERROR("Master element %d doesn't exist.", this->masterElement);
     }
-    if ( e->giveGeometryType() != EGT_tetra_1 ) {
-        OOFEM_ERROR("Continuum frame node %d has slaved rotational DOFs, but master element %d is not a "
-                    "linear tetrahedron (EGT_tetra_1); the continuum rotational constraint is only "
-                    "implemented for linear tetrahedra. Use a plain hangingnode (with the rotational DOFs "
-                    "free or fixed) to embed a frame node without this constraint.",
+    const bool is2d = ( e->giveGeometryType() == EGT_triangle_1 );
+    if ( e->giveGeometryType() != EGT_tetra_1 && !is2d ) {
+        OOFEM_ERROR("Continuum frame node %d has slaved rotational DOFs, but master element %d is neither a "
+                    "linear tetrahedron (EGT_tetra_1) nor a linear triangle (EGT_triangle_1); the continuum "
+                    "rotational constraint is only implemented for these. Use a plain hangingnode (with the "
+                    "rotational DOFs free or fixed) to embed a frame node without this constraint.",
+                    this->giveNumber(), this->masterElement);
+    }
+    // A 2d host lies in the x-y plane, so only the rotation about z exists.
+    if ( is2d && ( rotU || rotV ) ) {
+        OOFEM_ERROR("Continuum frame node %d: master element %d is a 2d triangle (x-y plane); only the "
+                    "rotation R_w can be slaved, R_u and R_v must be free or fixed.",
                     this->giveNumber(), this->masterElement);
     }
 

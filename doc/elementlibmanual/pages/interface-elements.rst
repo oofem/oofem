@@ -115,6 +115,41 @@ in :numref:`bondlink3dtrusssummary`.
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/linkslip02.in>`_              |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
+Bondlink2dtruss element
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This class implements the 2D counterpart of :param:`bondlink3dtruss`: a bond link connecting a truss
+node (first node) and a continuum node (second node) at the same position, typically a hanging node
+inside the continuum element. The displacement jump between the two nodes is expressed in a local
+system with the first axis along :param:`dirvector` (slip) and the second axis perpendicular to it in
+the x-y plane (lateral). The interface material is evaluated with a zero out-of-plane component, so the
+same materials as for :param:`bondlink3dtruss` can be used, e.g. :param:`linkslip` with the bond-slip
+law for the slip and the lateral stiffness :param:`kl` for the lateral jump. The bond area is
+calculated as :math:`A_{\mathrm{bond}} = \pi d l`. The input parameters for this element are shown in
+:numref:`bondlink2dtrusssummary`.
+
+.. table:: bondlink2dtruss element summary
+   :name: bondlink2dtrusssummary
+
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Keyword                  | bondlink2dtruss                                                                              |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Description              | 2d bond link element for trusses                                                             |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Specific parameters      | :elemparam:`length{rn}` :elemparam:`diameter{rn}` :elemparam:`dirvector{ra}`                 |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Parameters               | :param:`length`: bond length :param:`diameter`: diameter of rebar modelled by truss element  |
+   |                          | :param:`dirvector`: direction vector in which bond-slip occurs (3 components, the x-y part   |
+   |                          | is used).                                                                                    |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Unknowns                 | Two dofs (:math:`u`-displacement, :math:`v`-displacement) are required in each node.         |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Note                     | Element is used together with the :param:`linkslip` bond-slip material.                      |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `sm/linkslip04.in                                                                            |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/linkslip04.in>`_              |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+
 IntElLine1, Interface2dlin elements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

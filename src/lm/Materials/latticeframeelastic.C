@@ -55,7 +55,7 @@ REGISTER_Material(LatticeFrameElastic);
 bool
 LatticeFrameElastic::hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( mode == _3dLattice );
+    return ( mode == _3dLattice || mode == _2dLattice );
 }
 
 
@@ -151,6 +151,24 @@ LatticeFrameElastic::give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoi
 //
 {
     return this->give3dFrameStiffnessMatrix(mode, gp, tStep);      
+}
+
+
+FloatMatrixF < 3, 3 >
+LatticeFrameElastic::give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint * gp, TimeStep * tStep) const
+//
+// 2d lattice components (N, V, M) are the 3d components (1, 2, 6)
+//
+{
+    auto d3 = this->give3dFrameStiffnessMatrix(mode, gp, tStep);
+    const int idx[ 3 ] = { 1, 2, 6 };
+    FloatMatrixF < 3, 3 > answer;
+    for ( int i = 0; i < 3; i++ ) {
+        for ( int j = 0; j < 3; j++ ) {
+            answer.at(i + 1, j + 1) = d3.at(idx [ i ], idx [ j ]);
+        }
+    }
+    return answer;
 }
 
 
