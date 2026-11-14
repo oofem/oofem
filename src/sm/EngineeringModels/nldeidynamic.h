@@ -179,7 +179,8 @@ protected:
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
 
-    double giveInitialTime() override {return 1;}
+    // Physical time starts at t = 0
+    double giveInitialTime() override {return 0;}
 
 public:
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;

@@ -845,8 +845,9 @@ VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
         cellVarsArray->SetNumberOfTuples(numCells);
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(i, ielem);
-            for ( int i = 1; i <= ncomponents; ++i ) {
-                cellVarsArray->SetComponent(ielem - 1, i - 1, valueArray.at(i) );
+            for ( int c = 1; c <= ncomponents; ++c ) {
+                double v = ( c <= valueArray.giveSize() ) ? valueArray.at(c) : 0.0;
+                cellVarsArray->SetComponent(ielem - 1, c - 1, v);
             }
         }
 
@@ -854,9 +855,9 @@ VTKXMLExportModule::writeCellVars(ExportRegion &vtkPiece)
 
 #else
         this->fileStream << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
-        valueArray.resize(ncomponents);
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(type, ielem);
+            valueArray.resizeWithValues(ncomponents);
             this->writeVTKCellData(valueArray);
         }
         this->fileStream << "</DataArray>\n";
@@ -1120,7 +1121,10 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 for ( GaussPoint *gp : * d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
-                    if ( vtype == ISVT_VECTOR ) {
+                    if ( value.giveSize() == 0 ) {
+                        // IST not supported by this element
+                        value.resizeWithValues(nc);
+                    } else if ( vtype == ISVT_VECTOR ) {
                         // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
                         if ( isttype == IST_BeamForceMomentTensor ) {
                             value.resizeWithValues(6);
@@ -1130,6 +1134,8 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                     } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                         FloatArray help = value;
                         this->makeFullTensorForm(value, help, vtype);
+                    } else {
+                        value.resizeWithValues(nc);
                     }
 
                     for ( double v : value ) {
