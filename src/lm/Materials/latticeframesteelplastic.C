@@ -60,7 +60,7 @@ REGISTER_Material(LatticeFrameSteelPlastic);
 bool
 LatticeFrameSteelPlastic::hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( mode == _3dLattice );
+    return ( mode == _3dLattice || mode == _2dLattice );
 }
 
 

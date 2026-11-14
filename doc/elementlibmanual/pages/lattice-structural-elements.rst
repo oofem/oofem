@@ -66,8 +66,11 @@ element length in the form of strains. The element is defined in x,y plane (see 
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Parameters               | :param:`thick`: defines the out of plane (:math:`z`-direction) thickness :param:`width`:     |
    |                          | defines the width of the midpoint cross-section in the :math:`x`-:math:`y` plane with the    |
-   |                          | point :math:`C` at its centre :param:`gpCooords`: array of the coordinates of the            |
-   |                          | integration point :math:`C` in the global coordinate system                                  |
+   |                          | point :math:`C` at its centre :param:`gpCoords`: array of the coordinates of the integration |
+   |                          | point :math:`C` in the global coordinate system. :param:`gpCoords` is optional; if it is not |
+   |                          | given, :math:`C` is the midpoint of the element, so the eccentricity is zero (frame          |
+   |                          | elements). For a circular ``LatticeCS`` (``shape 1``) the section properties are taken from  |
+   |                          | the cross section and :param:`thick` and :param:`width` do not affect the response.          |
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Unknowns                 | Three dofs (:math:`u`-displacement, :math:`v`-displacement, :math:`w`-rotation) are required |
    |                          | in each node.                                                                                |
@@ -82,13 +85,26 @@ element length in the form of strains. The element is defined in x,y plane (see 
    |                          | ofem/oofem/blob/devel/tests/regression/lm/latticedamagevisco_mps_1.in>`_,                    |
    |                          | `lm/latticeplastdamvisco3drandom.in <https://github.com/oofem/oofem/blob/devel/tests/regress |
    |                          | ion/lm/latticeplastdamvisco3drandom.in>`_, `lm/latticeviscoelastic_mps_1.in <https://github. |
-   |                          | com/oofem/oofem/blob/devel/tests/regression/lm/latticeviscoelastic_mps_1.in>`_               |
+   |                          | com/oofem/oofem/blob/devel/tests/regression/lm/latticeviscoelastic_mps_1.in>`_, `lm/lattice2 |
+   |                          | dframecircle.in <https://github.com/oofem/oofem/blob/devel/tests/regression/lm/lattice2dfram |
+   |                          | ecircle.in>`_, `lm/lattice2dframesteelplastic.in <https://github.com/oofem/oofem/blob/devel/ |
+   |                          | tests/regression/lm/lattice2dframesteelplastic.in>`_                                         |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
-The theory of lattice2d is described in the paper “P. Grassl and M. Jirásek. Meso-scale
-approach to modelling the fracture process zone of concrete subjected to uniaxial
-tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp.
-957-968, 2010.”
+The theory of lattice2d is described in [GraJir10]_
+
+Used with a circular ``LatticeCS`` (``shape 1``, :param:`radius`), lattice2d acts as
+a Timoshenko frame element in the :math:`x`-:math:`y` plane. The area
+:math:`A = \pi r^2`, the second moment of area :math:`I = \pi r^4/4` and the shear
+area :math:`0.9 A` are computed from the radius, and each can be overridden by
+:param:`area`, :param:`iz` and :param:`shearareay` of the cross section. Together with
+the frame materials ``latticeframeelastic`` and ``latticeframesteelplastic``, this
+allows modelling, for example, yielding reinforcement bars in 2d. The generalised
+strains are the axial strain, the shear strain and the curvature at point :math:`C`,
+and the corresponding generalised stresses are the normal force :math:`N`, the shear
+force :math:`V` and the bending moment :math:`M_z`. The element has a single
+integration point, so the bending moment is constant within each element and
+several elements per member are needed where yielding is expected.
 
 latticeboundary2D element
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,6 +272,41 @@ provided in the form of a location parameter as shown in Table
    +--------------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples           | `lm/lattice3d1.in                                                                            |
    |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/lm/lattice3d1.in>`_              |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+
+LatticeLink2d element
+~~~~~~~~~~~~~~~~~~~~~
+
+This element is the 2d counterpart of latticelink3d. It is a two-node link in the
+:math:`x`-:math:`y` plane with three degrees of freedom per node (:math:`u`, :math:`v` and
+the rotation about :math:`z`), for example between a frame node (lattice2d) and a node
+embedded in a 2d continuum. The jump of the second node relative to the first, including
+a rigid arm from the first node to the second, is expressed in a local system with the
+first axis along :param:`dirvector`: slip along the bar, lateral jump across it and
+relative rotation. The material is evaluated in 2d lattice mode, i.e. as the components
+1, 2 and 6 of the 3d lattice material, so the same bond materials (e.g. ``latticeslip``,
+with :param:`a1` scaling the lateral and :param:`a2` the rotational stiffness) can be used
+in 2d and 3d. The bond area is :math:`\pi` :param:`diameter` :param:`length`. The input
+parameters are shown in :numref:`latticelink2dsummary`.
+
+.. table:: latticelink2d element summary
+   :name: latticelink2dsummary
+
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Keyword                  | latticelink2d                                                                                |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Description              | 2d lattice link element                                                                      |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Specific parameters      | :elemparam:`length{rn}` :elemparam:`diameter{rn}` :elemparam:`dirvector{ra}`                 |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Parameters               | :param:`length`: bond length :param:`diameter`: diameter :param:`dirvector`: direction       |
+   |                          | vector in which bond-slip occurs (2 components; a third component is ignored).               |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Unknowns                 | Three dofs (:math:`u`-displacement, :math:`v`-displacement and :math:`w`-rotation) are       |
+   |                          | required in each node.                                                                       |
+   +--------------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples           | `lm/latticelink2d01.in                                                                       |
+   |                          | <https://github.com/oofem/oofem/blob/devel/tests/regression/lm/latticelink2d01.in>`_         |
    +--------------------------+----------------------------------------------------------------------------------------------+
 
 Latticelink3d
