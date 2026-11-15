@@ -111,6 +111,11 @@ ConcreteDPM2Status::updateYourself(TimeStep *tStep)
 
     this->deletionFlag = this->tempDeletionFlag;
 
+    // The step has converged, so the subdivision depth reached while solving
+    // it is no longer binding: let the next step start from the full strain
+    // increment again.
+    this->subdivisionDepth = 0;
+
     // update variables defined in ConcreteDPM2Status
 
     alpha = tempAlpha;
@@ -515,6 +520,14 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
         OOFEM_ERROR("psreturn must be 0, 1, 2 or 3");
     }
 
+    // Strain-subdivision control. 0: depth inherited across global iterations
+    // and substep never grows within a call (default), 1: within-call only,
+    // 2: neither (the previously released behaviour).
+    this->psSubControlFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psSubControlFlag, _IFT_ConcreteDPM2_pssubcontrol);
+    if ( this->psSubControlFlag < 0 || this->psSubControlFlag > 2 ) {
+        OOFEM_ERROR("pssubcontrol must be 0, 1 or 2");
+    }
 
 
     // elastic parameters
@@ -639,6 +652,9 @@ ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
         if ( !stream.write(psReturnFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        if ( !stream.write(psSubControlFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
         if ( !stream.write(e0) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -750,6 +766,9 @@ ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(psReturnFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(psSubControlFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(e0) ) {
@@ -3554,8 +3573,118 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
 
 
 FloatArrayF< 3 >
+ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const FloatArrayF< 3 > &strain) const
+{
+    // Same return mapping as performPlasticityReturn_PlaneStress, but the
+    // strain subdivision is parametrised by a scalar fraction of the total
+    // increment, so that "depth" is well defined and can be held monotone:
+    //
+    //   eps(t) = epsStart + t * (strain - epsStart),   t in [0, 1]
+    //
+    // The subincrement size h = 0.5^depth never grows, neither within this
+    // call nor relative to the depth this Gauss point needed at the previous
+    // global iteration of the same time step (held in the status). The
+    // default routine instead restarts from depth 0 every global iteration
+    // and jumps back to the full remaining increment after each successful
+    // subincrement, both of which let the depth fall again.
+    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+
+    const auto &epsP6 = status->givePlasticStrain();
+    double kappa = status->giveKappaP();
+
+    FloatArrayF< 3 >epsP = {
+        epsP6[0], epsP6[1], epsP6[5]
+    };
+    double epsPz = epsP6[2];
+
+    const auto &reducedStrain6 = status->giveReducedStrain();
+    const FloatArrayF< 3 >epsStart = {
+        reducedStrain6[0], reducedStrain6[1], reducedStrain6[5]
+    };
+    const auto dEps = strain - epsStart;
+
+    auto Dps = givePlaneStressElasticStiffness();
+    auto Cps = givePlaneStressElasticCompliance();
+
+    double dLambdaTot = 0.;
+
+    // pssubcontrol 0 starts no coarser than the depth already needed in this
+    // time step; pssubcontrol 1 always starts from the full increment and only
+    // the within-call monotonicity is kept. The difference isolates the two
+    // mechanisms: holding the substep size within one call, versus carrying
+    // the depth across global iterations.
+    int depth = ( this->psSubControlFlag == 0 ) ? status->giveSubdivisionDepth() : 0;
+    double h = pow(0.5, depth);
+    double tConv = 0.;
+
+    FloatArrayF< 3 >sigma = dot(Dps, epsStart - epsP);
+
+    while ( tConv < 1. ) {
+        const double tTarget = min(tConv + h, 1.);
+        const auto epsTarget = epsStart + dEps * tTarget;
+
+        auto sigTr = dot(Dps, epsTarget - epsP);
+
+        double s1, s2, c, sn;
+        computePrincipalStress_PlaneStress(sigTr, s1, s2, c, sn);
+        auto inv = computeInvariants_PlaneStress(s1, s2);
+
+        double yieldValue = computeYieldValue(inv.sig, inv.rho, inv.theta, kappa);
+
+        ConcreteDPM2_ReturnResult returnResult = RR_NotConverged;
+        double dLambda = 0.;
+        double kappaNew = kappa;
+
+        if ( yieldValue <= 0. ) {
+            sigma = sigTr;
+            returnResult = RR_Converged;
+        } else {
+            kappaNew = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa);
+            if ( returnResult == RR_Converged ) {
+                sigma = transformPrincipalToGlobal_PlaneStress(s1, s2, c, sn);
+                inv = computeInvariants_PlaneStress(s1, s2);
+            }
+        }
+
+        if ( returnResult == RR_Converged ) {
+            kappa = kappaNew;
+            epsP = epsTarget - dot(Cps, sigma);
+            epsPz += dLambda * computeDGDSigmaZ_PlaneStress(inv, kappa);
+            dLambdaTot += dLambda;
+            tConv = tTarget;
+            // h deliberately unchanged: the subincrement never grows again.
+        } else {
+            depth++;
+            h *= 0.5;
+            if ( depth > 10 ) {
+                OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn_PlaneStress: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                status->setSubdivisionDepth(depth);
+                status->setTempDeletionFlag(1);
+                status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+                status->letTempKappaPBe(kappa);
+                status->letDeltaLambdaBe(dLambdaTot);
+                return FloatArrayF< 3 >();
+            }
+        }
+    }
+
+    status->setSubdivisionDepth(depth);
+
+    status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+    status->letTempKappaPBe(kappa);
+    status->letDeltaLambdaBe(dLambdaTot);
+
+    return sigma;
+}
+
+
+FloatArrayF< 3 >
 ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArrayF< 3 > &strain) const
 {
+    if ( this->psSubControlFlag != 2 ) {
+        return performPlasticityReturn_PlaneStress_Monotone(gp, strain);
+    }
+
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     const auto &epsP6 = status->givePlasticStrain();

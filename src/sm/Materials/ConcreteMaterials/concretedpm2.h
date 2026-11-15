@@ -75,6 +75,7 @@
 #define _IFT_ConcreteDPM2_damflag "damflag"
 #define _IFT_ConcreteDPM2_oldps "oldps"
 #define _IFT_ConcreteDPM2_psreturn "psreturn"
+#define _IFT_ConcreteDPM2_pssubcontrol "pssubcontrol"
 //@}
 
 namespace oofem {
@@ -133,6 +134,25 @@ protected:
     int deletionFlag = 0;
     int tempDeletionFlag = 1;
 
+    /**
+     * Strain-subdivision depth of the plane-stress return at this point.
+     *
+     * Deliberately NOT a temp/committed pair: it has to survive from one
+     * global equilibrium iteration to the next *within* a time step, and
+     * initTempStatus() runs at every one of those. It is cleared instead in
+     * updateYourself(), i.e. once the step has converged.
+     *
+     * Without it, every global iteration re-derives the depth from zero, so
+     * the depth at a given Gauss point can change between iterations. Since
+     * subdivision is path dependent, that makes the returned stress a
+     * discontinuous function of the input strain and can stall the global
+     * Newton iteration. See ConcreteDPM2::psSubControlFlag.
+     *
+     * Being part of the status it is private to one integration point, so the
+     * subdivision control needs no synchronisation in a shared-memory
+     * parallel build.
+     */
+    int subdivisionDepth = 0;
 
     double alpha = 0.;
     double tempAlpha = 0.;
@@ -265,6 +285,10 @@ public:
     void setTempDeletionFlag(int newFlag) { this->tempDeletionFlag = newFlag; }
     int giveDeletionFlag() const { return this->deletionFlag; }
     int giveTempDeletionFlag() const { return this->tempDeletionFlag; }
+
+    /// Subdivision depth carried across global iterations within a time step.
+    int giveSubdivisionDepth() const { return this->subdivisionDepth; }
+    void setSubdivisionDepth(int d) { this->subdivisionDepth = d; }
 
     /**
      * Get the hardening variable of the damage model from the
@@ -717,6 +741,36 @@ protected:
      */
     int psReturnFlag = 0;
 
+    /**
+     * Controls the strain subdivision around the plane-stress return. When a
+     * return fails the strain increment is halved and retried; the number of
+     * halvings is the depth. The depth can shrink again in two independent
+     * ways, and this flag selects which of them are suppressed:
+     *
+     * - *within a call*: after each successful subincrement the plain
+     *   algorithm goes back to attempting the whole remaining increment, so
+     *   the substep size grows again and only shrinks on the next failure.
+     * - *across global iterations*: the depth is re-derived from zero at
+     *   every global equilibrium iteration, because the return always starts
+     *   from the last converged state.
+     *
+     * Subdivision is path dependent, so integrating one strain increment in
+     * 2^n versus 2^(n+1) subincrements gives slightly different stresses. If n
+     * is free to change between global iterations, the returned stress is a
+     * discontinuous function of the strain, the global residual jumps, and
+     * Newton can stall badly.
+     *
+     * 0 (default): both suppressed. The substep never grows during a call,
+     *    and the depth reached is remembered per Gauss point
+     *    (ConcreteDPM2Status::subdivisionDepth) and reused at the next global
+     *    iteration of the same step. Recommended.
+     * 1: only the within-call growth is suppressed; every global iteration
+     *    still starts from the full increment. Measured to behave almost
+     *    exactly like 2, so it is of interest only for further study.
+     * 2: neither suppressed. This is the behaviour released before these
+     *    options were introduced.
+     */
+    int psSubControlFlag = 0;
 
 
     double e0 = 0.;
@@ -1209,6 +1263,9 @@ public:
     FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatArrayF< 3 >performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
+
+    /// Variant of the above with controlled subdivision depth (pssubcontrol 0 and 1).
+    FloatArrayF< 3 >performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
 
     double performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
                                             ConcreteDPM2_ReturnResult &returnResult,
