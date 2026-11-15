@@ -529,6 +529,19 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
         OOFEM_ERROR("pssubcontrol must be 0, 1 or 2");
     }
 
+    // Per-step local-return statistics, off by default.
+    this->psStatsFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psStatsFlag, _IFT_ConcreteDPM2_psstats);
+#ifdef _OPENMP
+    if ( this->psStatsFlag ) {
+        // The counters are shared by all integration points and are not
+        // atomic, so the reported figures would be understated here. The
+        // analysis itself is unaffected: nothing reads them back.
+        OOFEM_WARNING("psstats: the plane-stress local-return statistics are not "
+                      "synchronised and will be understated in a shared-memory "
+                      "parallel build; computed results are unaffected");
+    }
+#endif
 
     // elastic parameters
     IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
@@ -3452,7 +3465,8 @@ ConcreteDPM2::computeNominalStress(const FloatArrayF< 6 > &strain6,
 double
 ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
                                                ConcreteDPM2_ReturnResult &returnResult,
-                                               double kappaP) const
+                                               double kappaP,
+                                               int *iterationsOut) const
 {
     const double s1Tr = s1;
     const double s2Tr = s2;
@@ -3475,6 +3489,7 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
         iterationCount++;
         if ( iterationCount >= newtonIter ) {
             returnResult = RR_NotConverged;
+            if ( iterationsOut ) { *iterationsOut = iterationCount; }
             return kappaP;
         }
 
@@ -3485,6 +3500,7 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
 
         if ( std::isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
+            if ( iterationsOut ) { *iterationsOut = iterationCount; }
             return kappaP;
         }
 
@@ -3526,7 +3542,8 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
                     delta3 = solve(jacobian3, residuals3);
                 } catch ( ... ) {
                     returnResult = RR_NotConverged;
-                            return kappaP;
+                    if ( iterationsOut ) { *iterationsOut = iterationCount; }
+                    return kappaP;
                 }
 
                 s1 -= delta3[0];
@@ -3545,7 +3562,8 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
                     delta = solve(jacobian, residuals);
                 } catch ( ... ) {
                     returnResult = RR_NotConverged;
-                            return kappaP;
+                    if ( iterationsOut ) { *iterationsOut = iterationCount; }
+                    return kappaP;
                 }
 
                 s1 -= delta[0];
@@ -3568,6 +3586,7 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
     }
 
     returnResult = RR_Converged;
+    if ( iterationsOut ) { *iterationsOut = iterationCount; }
     return tempKappa;
 }
 
@@ -3614,8 +3633,12 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const
     // mechanisms: holding the substep size within one call, versus carrying
     // the depth across global iterations.
     int depth = ( this->psSubControlFlag == 0 ) ? status->giveSubdivisionDepth() : 0;
+    const int depthAtEntry = status->giveSubdivisionDepth();
     double h = pow(0.5, depth);
     double tConv = 0.;
+
+    int callIterations = 0;
+    this->psStatsReturnCalls++;
 
     FloatArrayF< 3 >sigma = dot(Dps, epsStart - epsP);
 
@@ -3639,7 +3662,9 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const
             sigma = sigTr;
             returnResult = RR_Converged;
         } else {
-            kappaNew = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa);
+            int returnIterations = 0;
+            kappaNew = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa, &returnIterations);
+            callIterations += returnIterations;
             if ( returnResult == RR_Converged ) {
                 sigma = transformPrincipalToGlobal_PlaneStress(s1, s2, c, sn);
                 inv = computeInvariants_PlaneStress(s1, s2);
@@ -3658,6 +3683,12 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const
             h *= 0.5;
             if ( depth > 10 ) {
                 OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn_PlaneStress: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                this->psStatsIterTotal += callIterations;
+                this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+                this->psStatsSubdivCalls++;
+                this->psStatsSubincTotal += depth;
+                this->psStatsSubdivMax = max(this->psStatsSubdivMax, depth);
+                this->psStatsDeleted++;
                 status->setSubdivisionDepth(depth);
                 status->setTempDeletionFlag(1);
                 status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
@@ -3668,6 +3699,16 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const
         }
     }
 
+    this->psStatsIterTotal += callIterations;
+    this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+    if ( depth > 0 ) {
+        this->psStatsSubdivCalls++;
+        this->psStatsSubincTotal += depth;
+        this->psStatsSubdivMax = max(this->psStatsSubdivMax, depth);
+    }
+    if ( depth != depthAtEntry ) {
+        this->psStatsDepthChanges++;
+    }
     status->setSubdivisionDepth(depth);
 
     status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
@@ -3710,6 +3751,12 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
     int subIncrementFlag = 0;
     int subincrementcounter = 0;
 
+    // Per-call local iteration total, folded into the per-step statistics
+    // below. Counts every Newton iteration this Gauss point spends, including
+    // those in subincrements that were later discarded.
+    int callIterations = 0;
+    this->psStatsReturnCalls++;
+
     FloatArrayF< 3 >sigma;
 
 
@@ -3731,7 +3778,9 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
             sigma = sigTr;
             returnResult = RR_Converged;
         } else {
-            kappa = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa);
+            int returnIterations = 0;
+            kappa = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa, &returnIterations);
+            callIterations += returnIterations;
             if ( returnResult == RR_Converged ) {
                 sigma = transformPrincipalToGlobal_PlaneStress(s1, s2, c, sn);
                 inv = computeInvariants_PlaneStress(s1, s2);
@@ -3748,6 +3797,13 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
             subincrementcounter++;
             if ( subincrementcounter > 10 ) {
                 OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn_PlaneStress: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                this->psStatsIterTotal += callIterations;
+                this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+                this->psStatsSubdivCalls++;
+                this->psStatsSubincTotal += subincrementcounter;
+                this->psStatsSubdivMax = max(this->psStatsSubdivMax, subincrementcounter);
+                this->psStatsDeleted++;
+
                 status->setTempDeletionFlag(1);
                 status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
                 status->letTempKappaPBe(kappa);
@@ -3768,6 +3824,20 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
     }
 
 
+    this->psStatsIterTotal += callIterations;
+    this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+    if ( subincrementcounter > 0 ) {
+        this->psStatsSubdivCalls++;
+        this->psStatsSubincTotal += subincrementcounter;
+        this->psStatsSubdivMax = max(this->psStatsSubdivMax, subincrementcounter);
+    }
+    // Diagnostic only: does the depth differ from the one this Gauss point
+    // used at the previous global iteration of this step? That change is what
+    // makes the returned stress discontinuous in the strain.
+    if ( subincrementcounter != status->giveSubdivisionDepth() ) {
+        this->psStatsDepthChanges++;
+    }
+    status->setSubdivisionDepth(subincrementcounter);
 
     status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
     status->letTempKappaPBe(kappa);
@@ -3777,9 +3847,47 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
 }
 
 
+void
+ConcreteDPM2::reportPlaneStressStats(int stepNumber) const
+{
+    if ( this->psStatsFlag && this->psStatsReturnCalls > 0 ) {
+        OOFEM_LOG_INFO("CDPM2 plane-stress local return, step %d: "
+                       "calls %ld, iterations %ld (mean %.2f, worst call %d), "
+                       "subdividing calls %ld, subincrements %ld (deepest %d), depth changes %ld, deleted %ld\n",
+                       this->psStatsStep,
+                       this->psStatsReturnCalls,
+                       this->psStatsIterTotal,
+                       (double) this->psStatsIterTotal / (double) this->psStatsReturnCalls,
+                       this->psStatsIterMaxCall,
+                       this->psStatsSubdivCalls,
+                       this->psStatsSubincTotal,
+                       this->psStatsSubdivMax,
+                       this->psStatsDepthChanges,
+                       this->psStatsDeleted);
+    }
+
+    this->psStatsReturnCalls = 0;
+    this->psStatsIterTotal = 0;
+    this->psStatsIterMaxCall = 0;
+    this->psStatsSubdivCalls = 0;
+    this->psStatsSubincTotal = 0;
+    this->psStatsSubdivMax = 0;
+    this->psStatsDepthChanges = 0;
+    this->psStatsDeleted = 0;
+    this->psStatsStep = stepNumber;
+}
+
+
 FloatArrayF< 3 >
 ConcreteDPM2::giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &fullStrainVector, GaussPoint *gp, TimeStep *tStep) const
 {
+    // Flush the previous step's local-return statistics on the first Gauss
+    // point call of a new step. tStep is already to hand, so this costs one
+    // integer comparison per call.
+    if ( tStep && tStep->giveNumber() != this->psStatsStep ) {
+        this->reportPlaneStressStats(tStep->giveNumber() );
+    }
+
     if ( oldPlaneStressFlag ) {
         // Legacy generic approach (pre-existing in OOFEM): iterate the
         // out-of-plane strain on top of the full 3d return mapping, instead

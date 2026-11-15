@@ -76,6 +76,7 @@
 #define _IFT_ConcreteDPM2_oldps "oldps"
 #define _IFT_ConcreteDPM2_psreturn "psreturn"
 #define _IFT_ConcreteDPM2_pssubcontrol "pssubcontrol"
+#define _IFT_ConcreteDPM2_psstats "psstats"
 //@}
 
 namespace oofem {
@@ -150,7 +151,8 @@ protected:
      *
      * Being part of the status it is private to one integration point, so the
      * subdivision control needs no synchronisation in a shared-memory
-     * parallel build.
+     * parallel build; only the aggregate statistics on the material do (see
+     * ConcreteDPM2::psStatsReturnCalls).
      */
     int subdivisionDepth = 0;
 
@@ -772,6 +774,15 @@ protected:
      */
     int psSubControlFlag = 0;
 
+    /**
+     * Emit one line of plane-stress local-return statistics per time step
+     * (call counts, local Newton iterations, subdivision and depth changes).
+     * Off by default: it is diagnostic output for algorithm studies, not
+     * something an ordinary analysis needs. The underlying counters are not
+     * synchronised, so the reported figures are only reliable in a
+     * single-threaded build; computed results are unaffected either way.
+     */
+    int psStatsFlag = 0;
 
     double e0 = 0.;
 
@@ -1267,10 +1278,56 @@ public:
     /// Variant of the above with controlled subdivision depth (pssubcontrol 0 and 1).
     FloatArrayF< 3 >performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
 
+    /**
+     * One Newton solve of the plane-stress return at a fixed trial stress.
+     * If iterationsOut is given, it receives the number of iterations the
+     * solve took (the loop counter, so a converged solve reports one more
+     * than the number of updates actually applied).
+     */
     double performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
                                             ConcreteDPM2_ReturnResult &returnResult,
-                                            double kappaP) const;
+                                            double kappaP,
+                                            int *iterationsOut = nullptr) const;
 
+    /**
+     * Per-step statistics of the plane-stress local return, accumulated over
+     * every Gauss point and reported once per time step. Successful strain
+     * subdivision is otherwise completely silent, so without these counters
+     * the only visible local signal is outright element deletion, which says
+     * nothing about how close the return came to failing.
+     *
+     * Reset and reported from giveRealStressVector_PlaneStress when the time
+     * step number changes, which costs nothing: tStep is already a parameter
+     * there, so no lookup through the element/domain/engng-model chain is
+     * needed.
+     *
+     * These counters live on the material and are therefore shared by every
+     * integration point, unlike ConcreteDPM2Status::subdivisionDepth. They are
+     * plain integers rather than atomics, so in a shared-memory parallel build
+     * the increments race and the reported numbers can be too low (and the
+     * maxima wrong). Only the statistics are affected: the analysis itself
+     * does not depend on them, so results stay correct. Making them atomic or
+     * thread local would be needed before the figures could be trusted there;
+     * initializeFrom warns if they are switched on in such a build.
+     */
+    mutable long psStatsReturnCalls = 0;   ///< calls to the stress return
+    mutable long psStatsIterTotal = 0;     ///< local Newton iterations, summed
+    mutable int psStatsIterMaxCall = 0;    ///< worst single call (all its subincrements)
+    mutable long psStatsSubdivCalls = 0;   ///< calls that needed subdivision
+    mutable long psStatsSubincTotal = 0;   ///< subdivision events, summed
+    mutable int psStatsSubdivMax = 0;      ///< deepest subdivision reached
+    mutable long psStatsDeleted = 0;       ///< calls that exhausted subdivision
+    mutable int psStatsStep = -1;          ///< step the counters belong to
+    /**
+     * Calls whose subdivision depth differed from the depth the same Gauss
+     * point used at the previous global iteration of this step. This is the
+     * quantity that makes the stress discontinuous in the strain; it should
+     * fall to (near) zero under pssubcontrol 0.
+     */
+    mutable long psStatsDepthChanges = 0;
+
+    /// Emit and reset the per-step plane-stress local return statistics.
+    void reportPlaneStressStats(int stepNumber) const;
 
     FloatMatrixF< 4, 4 >computeJacobian_PlaneStress(const PlaneStressInvariants &inv, double kappa, double deltaLambda) const;
 
