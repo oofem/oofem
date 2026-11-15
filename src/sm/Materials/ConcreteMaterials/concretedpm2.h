@@ -74,6 +74,7 @@
 #define _IFT_ConcreteDPM2_helem "helem"
 #define _IFT_ConcreteDPM2_damflag "damflag"
 #define _IFT_ConcreteDPM2_oldps "oldps"
+#define _IFT_ConcreteDPM2_psreturn "psreturn"
 //@}
 
 namespace oofem {
@@ -131,6 +132,7 @@ protected:
     /// Element deletion flags: the element is marked for deletion when the plastic return fails.
     int deletionFlag = 0;
     int tempDeletionFlag = 1;
+
 
     double alpha = 0.;
     double tempAlpha = 0.;
@@ -683,6 +685,40 @@ protected:
      */
     int oldPlaneStressFlag = 0;
 
+    /**
+     * Selects the Newton formulation inside the dedicated plane-stress return
+     * mapping. Ignored when oldPlaneStressFlag != 0.
+     *
+     * Two independent mechanisms are available, which fix different things:
+     *
+     * - *reduced 3x3 branch*: when kappa_p < 1 but the trial stress already
+     *   violates the fully hardened (kappa_p = 1) surface, hardening alone
+     *   cannot resolve the violation and dF/dKappa is then typically positive,
+     *   which makes the coupled 4x4 solve predict a spurious negative plastic
+     *   multiplier. The branch freezes kappa_p, solves the reduced system in
+     *   (sigma_1, sigma_2, deltaLambda) only, and then restores kappa_p
+     *   consistently, capped at 1. It triggers wherever the trial stress lies
+     *   outside the kappa_p = 1 surface, which includes compression.
+     * - *clipped derivative*: dF/dKappa is set to zero whenever the formula
+     *   returns a positive value, the convention the 3d algorithm already
+     *   uses (computeDFDKappa rather than computeDFDKappa_NoCutoff). It
+     *   triggers where the larger principal stress exceeds roughly ft, i.e.
+     *   in tension.
+     *
+     * The triggers differ, so the mechanisms are complementary rather than
+     * alternatives:
+     *
+     * 0 (default): both. Recommended.
+     * 1: clipped derivative only.
+     * 2: reduced 3x3 branch only. This is the behaviour released before
+     *    these options were introduced.
+     * 3: neither. Known to fail (it deletes elements on ordinary
+     *    three-point-bending meshes); retained only for comparison.
+     */
+    int psReturnFlag = 0;
+
+
+
     double e0 = 0.;
 
     /// Parameter of the ductilityMeasure of the plasticity model.
@@ -1177,6 +1213,7 @@ public:
     double performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
                                             ConcreteDPM2_ReturnResult &returnResult,
                                             double kappaP) const;
+
 
     FloatMatrixF< 4, 4 >computeJacobian_PlaneStress(const PlaneStressInvariants &inv, double kappa, double deltaLambda) const;
 

@@ -46,6 +46,7 @@
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "element.h"
 #include <limits>
 
 namespace oofem {
@@ -505,6 +506,17 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     this->oldPlaneStressFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->oldPlaneStressFlag, _IFT_ConcreteDPM2_oldps);
 
+    // Newton formulation inside the dedicated plane-stress return mapping.
+    // 0: reduced 3x3 branch + clipped dF/dKappa (default), 1: clip only,
+    // 2: branch only (the previously released behaviour), 3: neither.
+    this->psReturnFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psReturnFlag, _IFT_ConcreteDPM2_psreturn);
+    if ( this->psReturnFlag < 0 || this->psReturnFlag > 3 ) {
+        OOFEM_ERROR("psreturn must be 0, 1, 2 or 3");
+    }
+
+
+
     // elastic parameters
     IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
     IR_GIVE_FIELD(ir, this->nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -624,6 +636,9 @@ ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
         if ( !stream.write(oldPlaneStressFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        if ( !stream.write(psReturnFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
         if ( !stream.write(e0) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -732,6 +747,9 @@ ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(oldPlaneStressFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(psReturnFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(e0) ) {
@@ -3270,7 +3288,13 @@ ConcreteDPM2::computeJacobian_PlaneStress(const PlaneStressInvariants &inv, doub
     auto G = computeDDGDDPrincipal_PlaneStress(inv, kappa);
     auto Gk = computeDDGDPrincipalDKappa_PlaneStress(inv, kappa);
     auto f = computeDFDPrincipal_PlaneStress(inv, kappa);
-    double fKappa = computeDFDKappa_NoCutoff(inv.sig, inv.rho, inv.theta, kappa);
+    // psreturn 0 and 1 clip a positive dF/dKappa to zero (the pre-existing 3d
+    // convention); 2 and 3 use the uncut formula of the hand-off note.
+    const bool clipDFDKappa = ( this->psReturnFlag == 0 ) ||
+                              ( this->psReturnFlag == 1 );
+    double fKappa = clipDFDKappa ?
+                    computeDFDKappa(inv.sig, inv.rho, inv.theta, kappa) :
+                    computeDFDKappa_NoCutoff(inv.sig, inv.rho, inv.theta, kappa);
     double k = computeDKappaDDeltaLambda(inv.sig, inv.rho, inv.theta, kappa);
     auto kPrincipal = computeDKDPrincipal_PlaneStress(inv, kappa);
     double kKappa = computeDDKappaDDeltaLambdaDKappa(inv.sig, inv.rho, inv.theta, kappa);
@@ -3459,7 +3483,12 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
             // into consistency with the now-known deltaLambda using the 3rd
             // equation, capped at 1 so kappa cannot itself overshoot past the
             // point where the ordinary coupled iteration takes back over.
-            const bool pathological = ( tempKappa < 1. ) &&
+            // psreturn 0 and 2 take this branch; 1 and 3 always use the
+            // coupled 4x4 solve (see psReturnFlag).
+            const bool branchEnabled = ( this->psReturnFlag == 0 ) ||
+                                       ( this->psReturnFlag == 2 );
+            const bool pathological = branchEnabled &&
+                                      ( tempKappa < 1. ) &&
                                       ( computeYieldValue(inv.sig, inv.rho, inv.theta, 1.) > 0. );
 
             if ( pathological ) {
@@ -3478,7 +3507,7 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
                     delta3 = solve(jacobian3, residuals3);
                 } catch ( ... ) {
                     returnResult = RR_NotConverged;
-                    return kappaP;
+                            return kappaP;
                 }
 
                 s1 -= delta3[0];
@@ -3497,7 +3526,7 @@ ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &d
                     delta = solve(jacobian, residuals);
                 } catch ( ... ) {
                     returnResult = RR_NotConverged;
-                    return kappaP;
+                            return kappaP;
                 }
 
                 s1 -= delta[0];
@@ -3554,6 +3583,7 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
 
     FloatArrayF< 3 >sigma;
 
+
     while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
         auto sigTr = dot(Dps, epsTarget - epsP);
 
@@ -3607,6 +3637,8 @@ ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArr
             epsTarget = strain;
         }
     }
+
+
 
     status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
     status->letTempKappaPBe(kappa);

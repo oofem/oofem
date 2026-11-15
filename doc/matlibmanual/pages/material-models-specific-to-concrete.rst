@@ -1846,10 +1846,24 @@ Once the principal stresses have converged, they are transformed back to Cartesi
 
 where :math:`\varepsilon_{pz}` is the out-of-plane plastic strain, accumulated from the flow rule evaluated at the converged state. The damage part of the model, including the tension/compression split and the two damage variables, is applied in exactly the same way as for the 3D case, by embedding the plane-stress effective stress and strain into the usual six-component form with :math:`\sigma_z=0`.
 
-The plane-stress algorithm is implemented for ``con2dpm`` using the same keyword and parameters of Table :numref:`cdpm2_table` as for the 3D case, plus one optional parameter, :em:`oldps`, which selects between the two available plane-stress implementations:
+The plane-stress algorithm is implemented for ``con2dpm`` using the same keyword and parameters of Table :numref:`cdpm2_table` as for the 3D case, plus several optional parameters. The first of them, :em:`oldps`, selects between the two available plane-stress implementations:
 
 - :em:`oldps` 0 (default): the dedicated plane-stress return mapping described above.
 - :em:`oldps` 1: a generic, pre-existing fallback that instead iterates the out-of-plane strain on top of the full 3D return mapping until the out-of-plane stress vanishes. It is slower, but useful as an independent cross-check of the dedicated algorithm.
+
+A further optional parameter controls the dedicated plane-stress algorithm (it is ignored when :em:`oldps` is 1). The value 0 is the recommended setting, and increasing values progressively switch off safeguards; the behaviour of OOFEM before this parameter was introduced corresponds to :em:`psreturn` 2.
+
+:em:`psreturn` selects the Newton formulation used inside one stress return. The difficulty it addresses is that when :math:`\kappa_p<1` but the trial stress already violates the fully hardened (:math:`\kappa_p=1`) surface, hardening alone cannot resolve the violation and :math:`\partial f/\partial\kappa_p` is then typically positive, which can derail the coupled Newton iteration. Two independent remedies are available:
+
+- a *reduced solve*: freeze :math:`\kappa_p`, solve a reduced 3x3 system in :math:`\sigma_1`, :math:`\sigma_2` and :math:`\Delta\lambda` only, then restore consistency of :math:`\kappa_p`, capped at 1;
+- a *clipped derivative*: set :math:`\partial f/\partial\kappa_p` to zero whenever the formula returns a positive value, the convention already used by the 3D algorithm.
+
+The two are triggered by different conditions and are therefore complementary rather than alternatives. The clip acts where the larger principal stress exceeds roughly :math:`f_t`, a tensile condition, whereas the reduced solve acts wherever the trial stress lies outside the :math:`\kappa_p=1` surface, a magnitude condition which also arises in compression.
+
+- :em:`psreturn` 0 (default): both the reduced solve and the clipped derivative.
+- :em:`psreturn` 1: clipped derivative only.
+- :em:`psreturn` 2: reduced solve only. This is the behaviour of earlier versions.
+- :em:`psreturn` 3: neither. This naive formulation is known to fail for trial states on the tensile side, to the point of deleting elements in ordinary three-point-bending analyses. It is retained only for comparison and should not be used in production.
 
 The algorithmic (consistent) tangent stiffness for plane stress is not yet implemented for the dedicated algorithm (:em:`oldps` 0). ``givePlaneStressStiffMtrx`` currently returns the elastic plane-stress stiffness, scaled by the secant damage factor when :em:`damflag` is 2 or 3 (for the default :em:`damflag` of 1, the tension/compression split cannot be represented as a single scalar factor, so the unscaled elastic stiffness is returned instead). This is sufficient to drive the Newton-Raphson solver to the correct equilibrium state but is not a consistent tangent, so convergence may require more iterations than with the full 3D tangent. With :em:`oldps` 1, the stiffness is instead obtained by static condensation of the full 3D tangent/secant matrix.
 
