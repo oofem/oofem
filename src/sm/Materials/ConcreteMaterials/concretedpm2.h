@@ -73,6 +73,10 @@
 #define _IFT_ConcreteDPM2_deltatime "deltat"
 #define _IFT_ConcreteDPM2_helem "helem"
 #define _IFT_ConcreteDPM2_damflag "damflag"
+#define _IFT_ConcreteDPM2_oldps "oldps"
+#define _IFT_ConcreteDPM2_psreturn "psreturn"
+#define _IFT_ConcreteDPM2_pssubcontrol "pssubcontrol"
+#define _IFT_ConcreteDPM2_psstats "psstats"
 //@}
 
 namespace oofem {
@@ -130,6 +134,27 @@ protected:
     /// Element deletion flags: the element is marked for deletion when the plastic return fails.
     int deletionFlag = 0;
     int tempDeletionFlag = 1;
+
+    /**
+     * Strain-subdivision depth of the plane-stress return at this point.
+     *
+     * Deliberately NOT a temp/committed pair: it has to survive from one
+     * global equilibrium iteration to the next *within* a time step, and
+     * initTempStatus() runs at every one of those. It is cleared instead in
+     * updateYourself(), i.e. once the step has converged.
+     *
+     * Without it, every global iteration re-derives the depth from zero, so
+     * the depth at a given Gauss point can change between iterations. Since
+     * subdivision is path dependent, that makes the returned stress a
+     * discontinuous function of the input strain and can stall the global
+     * Newton iteration. See ConcreteDPM2::psSubControlFlag.
+     *
+     * Being part of the status it is private to one integration point, so the
+     * subdivision control needs no synchronisation in a shared-memory
+     * parallel build; only the aggregate statistics on the material do (see
+     * ConcreteDPM2::psStatsReturnCalls).
+     */
+    int subdivisionDepth = 0;
 
     double alpha = 0.;
     double tempAlpha = 0.;
@@ -262,6 +287,10 @@ public:
     void setTempDeletionFlag(int newFlag) { this->tempDeletionFlag = newFlag; }
     int giveDeletionFlag() const { return this->deletionFlag; }
     int giveTempDeletionFlag() const { return this->tempDeletionFlag; }
+
+    /// Subdivision depth carried across global iterations within a time step.
+    int giveSubdivisionDepth() const { return this->subdivisionDepth; }
+    void setSubdivisionDepth(int d) { this->subdivisionDepth = d; }
 
     /**
      * Get the hardening variable of the damage model from the
@@ -634,7 +663,7 @@ public:
  *
  * @author Peter Grassl, Dimitrios Xenos
  */
-class ConcreteDPM2 : public StructuralMaterial
+class OOFEM_EXPORT ConcreteDPM2 : public StructuralMaterial
 {
 public:
 
@@ -652,6 +681,19 @@ public:
         RT_Auxiliary
     };
 
+    /**
+     * Haigh-Westergaard invariants of the in-plane principal effective stress
+     * {s1, s2, 0} (s3 = 0, plane stress) and their derivatives with respect to
+     * the two in-plane principal stresses. Used by the plane-stress stress
+     * return algorithm only.
+     */
+    struct PlaneStressInvariants {
+        double s1 = 0., s2 = 0., sig = 0., rho = 0., theta = 0.;
+        FloatArrayF< 2 >dRho;        ///< d rho / d s_i
+        FloatMatrixF< 2, 2 >ddRho;   ///< d2 rho / d s_i d s_j
+        FloatArrayF< 2 >dTheta;      ///< d theta / d s_i  (sgn(0) = 0 convention)
+    };
+
 
 protected:
     /// Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
@@ -661,6 +703,86 @@ protected:
      * 0: tensile and compression damage based on split of stress state
      */
     int damageFlag = 0;
+
+    /** Selects the plane stress algorithm, for comparative studies.
+     * 0: dedicated plane-stress return mapping (default).
+     * 1: legacy generic approach, iterating the out-of-plane strain on top
+     *    of the 3d return mapping (StructuralMaterial::giveRealStressVector_PlaneStress).
+     */
+    int oldPlaneStressFlag = 0;
+
+    /**
+     * Selects the Newton formulation inside the dedicated plane-stress return
+     * mapping. Ignored when oldPlaneStressFlag != 0.
+     *
+     * Two independent mechanisms are available, which fix different things:
+     *
+     * - *reduced 3x3 branch*: when kappa_p < 1 but the trial stress already
+     *   violates the fully hardened (kappa_p = 1) surface, hardening alone
+     *   cannot resolve the violation and dF/dKappa is then typically positive,
+     *   which makes the coupled 4x4 solve predict a spurious negative plastic
+     *   multiplier. The branch freezes kappa_p, solves the reduced system in
+     *   (sigma_1, sigma_2, deltaLambda) only, and then restores kappa_p
+     *   consistently, capped at 1. It triggers wherever the trial stress lies
+     *   outside the kappa_p = 1 surface, which includes compression.
+     * - *clipped derivative*: dF/dKappa is set to zero whenever the formula
+     *   returns a positive value, the convention the 3d algorithm already
+     *   uses (computeDFDKappa rather than computeDFDKappa_NoCutoff). It
+     *   triggers where the larger principal stress exceeds roughly ft, i.e.
+     *   in tension.
+     *
+     * The triggers differ, so the mechanisms are complementary rather than
+     * alternatives:
+     *
+     * 0 (default): both. Recommended.
+     * 1: clipped derivative only.
+     * 2: reduced 3x3 branch only. This is the behaviour released before
+     *    these options were introduced.
+     * 3: neither. Known to fail (it deletes elements on ordinary
+     *    three-point-bending meshes); retained only for comparison.
+     */
+    int psReturnFlag = 0;
+
+    /**
+     * Controls the strain subdivision around the plane-stress return. When a
+     * return fails the strain increment is halved and retried; the number of
+     * halvings is the depth. The depth can shrink again in two independent
+     * ways, and this flag selects which of them are suppressed:
+     *
+     * - *within a call*: after each successful subincrement the plain
+     *   algorithm goes back to attempting the whole remaining increment, so
+     *   the substep size grows again and only shrinks on the next failure.
+     * - *across global iterations*: the depth is re-derived from zero at
+     *   every global equilibrium iteration, because the return always starts
+     *   from the last converged state.
+     *
+     * Subdivision is path dependent, so integrating one strain increment in
+     * 2^n versus 2^(n+1) subincrements gives slightly different stresses. If n
+     * is free to change between global iterations, the returned stress is a
+     * discontinuous function of the strain, the global residual jumps, and
+     * Newton can stall badly.
+     *
+     * 0 (default): both suppressed. The substep never grows during a call,
+     *    and the depth reached is remembered per Gauss point
+     *    (ConcreteDPM2Status::subdivisionDepth) and reused at the next global
+     *    iteration of the same step. Recommended.
+     * 1: only the within-call growth is suppressed; every global iteration
+     *    still starts from the full increment. Measured to behave almost
+     *    exactly like 2, so it is of interest only for further study.
+     * 2: neither suppressed. This is the behaviour released before these
+     *    options were introduced.
+     */
+    int psSubControlFlag = 0;
+
+    /**
+     * Emit one line of plane-stress local-return statistics per time step
+     * (call counts, local Newton iterations, subdivision and depth changes).
+     * Off by default: it is diagnostic output for algorithm studies, not
+     * something an ordinary analysis needs. The underlying counters are not
+     * synchronised, so the reported figures are only reliable in a
+     * single-threaded build; computed results are unaffected either way.
+     */
+    int psStatsFlag = 0;
 
     double e0 = 0.;
 
@@ -1136,6 +1258,133 @@ public:
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
+    /**
+     * @name Plane stress stress return.
+     * Stress evaluation and update of the internal (plastic and damage) variables
+     * for the plane stress case. The algorithmic tangent stiffness is not provided;
+     * givePlaneStressStiffMtrx falls back to an elastic-times-secant-damage estimate.
+     * See doc/... or the hand-off note for the derivation of the formulas below.
+     * The legacy generic approach (3d return mapping + out-of-plane strain
+     * iteration) can be selected instead via the "oldps 1" input record
+     * field (oldPlaneStressFlag), for comparative studies without rebuilding.
+     */
+    //@{
+    FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const override;
+
+    FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+
+    FloatArrayF< 3 >performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
+
+    /// Variant of the above with controlled subdivision depth (pssubcontrol 0 and 1).
+    FloatArrayF< 3 >performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const FloatArrayF< 3 > &strain) const;
+
+    /**
+     * One Newton solve of the plane-stress return at a fixed trial stress.
+     * If iterationsOut is given, it receives the number of iterations the
+     * solve took (the loop counter, so a converged solve reports one more
+     * than the number of updates actually applied).
+     */
+    double performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
+                                            ConcreteDPM2_ReturnResult &returnResult,
+                                            double kappaP,
+                                            int *iterationsOut = nullptr) const;
+
+    /**
+     * Per-step statistics of the plane-stress local return, accumulated over
+     * every Gauss point and reported once per time step. Successful strain
+     * subdivision is otherwise completely silent, so without these counters
+     * the only visible local signal is outright element deletion, which says
+     * nothing about how close the return came to failing.
+     *
+     * Reset and reported from giveRealStressVector_PlaneStress when the time
+     * step number changes, which costs nothing: tStep is already a parameter
+     * there, so no lookup through the element/domain/engng-model chain is
+     * needed.
+     *
+     * These counters live on the material and are therefore shared by every
+     * integration point, unlike ConcreteDPM2Status::subdivisionDepth. They are
+     * plain integers rather than atomics, so in a shared-memory parallel build
+     * the increments race and the reported numbers can be too low (and the
+     * maxima wrong). Only the statistics are affected: the analysis itself
+     * does not depend on them, so results stay correct. Making them atomic or
+     * thread local would be needed before the figures could be trusted there;
+     * initializeFrom warns if they are switched on in such a build.
+     */
+    mutable long psStatsReturnCalls = 0;   ///< calls to the stress return
+    mutable long psStatsIterTotal = 0;     ///< local Newton iterations, summed
+    mutable int psStatsIterMaxCall = 0;    ///< worst single call (all its subincrements)
+    mutable long psStatsSubdivCalls = 0;   ///< calls that needed subdivision
+    mutable long psStatsSubincTotal = 0;   ///< subdivision events, summed
+    mutable int psStatsSubdivMax = 0;      ///< deepest subdivision reached
+    mutable long psStatsDeleted = 0;       ///< calls that exhausted subdivision
+    mutable int psStatsStep = -1;          ///< step the counters belong to
+    /**
+     * Calls whose subdivision depth differed from the depth the same Gauss
+     * point used at the previous global iteration of this step. This is the
+     * quantity that makes the stress discontinuous in the strain; it should
+     * fall to (near) zero under pssubcontrol 0.
+     */
+    mutable long psStatsDepthChanges = 0;
+
+    /// Emit and reset the per-step plane-stress local return statistics.
+    void reportPlaneStressStats(int stepNumber) const;
+
+    FloatMatrixF< 4, 4 >computeJacobian_PlaneStress(const PlaneStressInvariants &inv, double kappa, double deltaLambda) const;
+
+    /// Haigh-Westergaard invariants sig, rho, theta of {s1, s2, 0} and their derivatives w.r.t. s1, s2.
+    PlaneStressInvariants computeInvariants_PlaneStress(double s1, double s2) const;
+
+    /// Derivative of the yield function with respect to the Lode angle theta.
+    double computeDFDTheta(double sig, double rho, double theta, double kappa) const;
+
+    /// Same as computeDFDKappa, but without clipping positive values to zero.
+    double computeDFDKappa_NoCutoff(double sig, double rho, double theta, double kappa) const;
+
+    /// Derivative of function k (evolution law of kappa) with respect to the Lode angle theta.
+    double computeDKDTheta(double sig, double rho, double theta, double kappa) const;
+
+    /// f_1, f_2: derivatives of the yield function with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDFDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// g_1, g_2: derivatives of the plastic potential with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDGDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// G_ij: second derivatives of the plastic potential with respect to the in-plane principal stresses.
+    FloatMatrixF< 2, 2 >computeDDGDDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// G_i-kappa: mixed derivatives of the plastic potential with respect to the in-plane principal stresses and kappa.
+    FloatArrayF< 2 >computeDDGDPrincipalDKappa_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// k_1, k_2: derivatives of function k with respect to the in-plane principal stresses.
+    FloatArrayF< 2 >computeDKDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// g_3: derivative of the plastic potential with respect to the (zero) out-of-plane principal stress, needed for the out-of-plane plastic strain only.
+    double computeDGDSigmaZ_PlaneStress(const PlaneStressInvariants &inv, double kappa) const;
+
+    /// Computes the in-plane principal values s1 >= s2 and the cosine/sine of the angle defining their directions.
+    void computePrincipalStress_PlaneStress(const FloatArrayF< 3 > &s, double &s1, double &s2, double &c, double &sn) const;
+
+    /// Transforms in-plane principal stresses back to the Cartesian plane-stress components, using the directions given by c = cos(phi), sn = sin(phi).
+    FloatArrayF< 3 >transformPrincipalToGlobal_PlaneStress(double s1, double s2, double c, double sn) const;
+
+    /// Elastic plane stress stiffness matrix D* built from eM, nu.
+    FloatMatrixF< 3, 3 >givePlaneStressElasticStiffness() const;
+
+    /// Elastic plane stress compliance matrix C* built from eM, nu.
+    FloatMatrixF< 3, 3 >givePlaneStressElasticCompliance() const;
+
+    /// Embeds a plane-stress triplet {x, y, xy} into the full 6-component Voigt form {x, y, zz, 0, 0, xy}.
+    static FloatArrayF< 6 >embedPlaneStress(const FloatArrayF< 3 > &v, double zz = 0.);
+
+    /// Applies the damage split (computeAlpha + computeDamage + damageFlag switch) to obtain the nominal stress from the effective stress. Shared by the 3d and plane stress drivers.
+    FloatArrayF< 6 >computeNominalStress(const FloatArrayF< 6 > &strain6,
+                                         const FloatArrayF< 6 > &effStress6,
+                                         const FloatMatrixF< 6, 6 > &D,
+                                         double dt,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep,
+                                         double &alpha) const;
+    //@}
 
 protected:
     std::unique_ptr<MaterialStatus> CreateStatus(GaussPoint *gp) const override;

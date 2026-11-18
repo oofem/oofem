@@ -46,6 +46,7 @@
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "element.h"
 #include <limits>
 
 namespace oofem {
@@ -109,6 +110,11 @@ ConcreteDPM2Status::updateYourself(TimeStep *tStep)
     StructuralMaterialStatus::updateYourself(tStep);
 
     this->deletionFlag = this->tempDeletionFlag;
+
+    // The step has converged, so the subdivision depth reached while solving
+    // it is no longer binding: let the next step start from the full strain
+    // increment again.
+    this->subdivisionDepth = 0;
 
     // update variables defined in ConcreteDPM2Status
 
@@ -485,7 +491,7 @@ ConcreteDPM2::hasMaterialModeCapability(MaterialMode mode) const
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat;
+    return mode == _3dMat || mode == _PlaneStress;
 }
 
 
@@ -499,6 +505,43 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     //damage flag
     this->damageFlag = 1; //Default value using damage in tension and compression according to IJSS CDPM2 paper.
     IR_GIVE_OPTIONAL_FIELD(ir, this->damageFlag, _IFT_ConcreteDPM2_damflag);
+
+    // plane stress algorithm selector (0: dedicated return mapping, 1: legacy
+    // generic 3d + out-of-plane-strain iteration), for comparative studies.
+    this->oldPlaneStressFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->oldPlaneStressFlag, _IFT_ConcreteDPM2_oldps);
+
+    // Newton formulation inside the dedicated plane-stress return mapping.
+    // 0: reduced 3x3 branch + clipped dF/dKappa (default), 1: clip only,
+    // 2: branch only (the previously released behaviour), 3: neither.
+    this->psReturnFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psReturnFlag, _IFT_ConcreteDPM2_psreturn);
+    if ( this->psReturnFlag < 0 || this->psReturnFlag > 3 ) {
+        OOFEM_ERROR("psreturn must be 0, 1, 2 or 3");
+    }
+
+    // Strain-subdivision control. 0: depth inherited across global iterations
+    // and substep never grows within a call (default), 1: within-call only,
+    // 2: neither (the previously released behaviour).
+    this->psSubControlFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psSubControlFlag, _IFT_ConcreteDPM2_pssubcontrol);
+    if ( this->psSubControlFlag < 0 || this->psSubControlFlag > 2 ) {
+        OOFEM_ERROR("pssubcontrol must be 0, 1 or 2");
+    }
+
+    // Per-step local-return statistics, off by default.
+    this->psStatsFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->psStatsFlag, _IFT_ConcreteDPM2_psstats);
+#ifdef _OPENMP
+    if ( this->psStatsFlag ) {
+        // The counters are shared by all integration points and are not
+        // atomic, so the reported figures would be understated here. The
+        // analysis itself is unaffected: nothing reads them back.
+        OOFEM_WARNING("psstats: the plane-stress local-return statistics are not "
+                      "synchronised and will be understated in a shared-memory "
+                      "parallel build; computed results are unaffected");
+    }
+#endif
 
     // elastic parameters
     IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
@@ -616,6 +659,15 @@ ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
         if ( !stream.write(damageFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        if ( !stream.write(oldPlaneStressFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(psReturnFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(psSubControlFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
         if ( !stream.write(e0) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -721,6 +773,15 @@ ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(damageFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(oldPlaneStressFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(psReturnFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(psSubControlFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream.read(e0) ) {
@@ -3041,6 +3102,887 @@ ConcreteDPM2::computeDDRhoDDStress(const FloatArrayF< 6 > &stress) const
     ddJ2ddstress.at(3, 2) = -1. / 3.;
 
     return ddJ2ddstress * ( 1. / rho ) + dyad(dJ2dstress, dJ2dstress) * ( -1. / ( rho * rho * rho ) );
+}
+
+//   ***********************************************
+//   *** PLANE STRESS STRESS RETURN (ConcreteDPM2) ***
+//   ***********************************************
+//
+// See the hand-off note / algoCDPM.tex, section "Suggested algorithm for plane
+// stress conditions". The return works with the in-plane principal effective
+// stresses (s1, s2), with kappa and deltaLambda as the other two unknowns of a
+// 4x4 Newton system. Everything is stored back in the existing 6-component
+// status fields (sigma_z = 0, epsPz kept in component zz of plasticStrain), so
+// the damage part of the model (computeDamage, checkForUnAndReloading, ...) is
+// reused completely unchanged.
+
+namespace {
+// Dedicated sign function with sgn(0) = 0 (average of the one-sided derivatives).
+// Needed for the Lode angle derivatives below: using std::copysign-like +-1 at
+// zero was found (see hand-off note) to not converge for an equibiaxial trial state.
+double
+sgn_PlaneStress(double x, double tol)
+{
+    if ( x > tol ) {
+        return 1.;
+    } else if ( x < -tol ) {
+        return -1.;
+    } else {
+        return 0.;
+    }
+}
+}
+
+ConcreteDPM2::PlaneStressInvariants
+ConcreteDPM2::computeInvariants_PlaneStress(double s1, double s2) const
+{
+    PlaneStressInvariants inv;
+    inv.s1 = s1;
+    inv.s2 = s2;
+    inv.sig = ( s1 + s2 ) / 3.;
+    inv.rho = sqrt(2. / 3. * ( s1 * s1 + s2 * s2 - s1 * s2 ) );
+
+    double denomTheta = s1 * s1 - s1 * s2 + s2 * s2;
+    double cos3theta = 0.;
+    if ( denomTheta > 0. ) {
+        cos3theta = ( 2. * pow(s1, 3.) - 3. * s1 * s1 * s2 - 3. * s1 * s2 * s2 + 2. * pow(s2, 3.) ) /
+                    ( 2. * pow(denomTheta, 1.5) );
+    }
+    cos3theta = max(-1., min(1., cos3theta) );
+    inv.theta = acos(cos3theta) / 3.;
+
+    if ( inv.rho > 0. ) {
+        double tol = CDPM2_TOL * inv.rho;
+
+        inv.dRho[0] = ( 2. * s1 - s2 ) / ( 3. * inv.rho );
+        inv.dRho[1] = ( 2. * s2 - s1 ) / ( 3. * inv.rho );
+
+        double rho3 = pow(inv.rho, 3.);
+        inv.ddRho.at(1, 1) = 2. / ( 3. * inv.rho ) - pow(2. * s1 - s2, 2.) / ( 9. * rho3 );
+        inv.ddRho.at(1, 2) = -1. / ( 3. * inv.rho ) - ( 2. * s1 - s2 ) * ( 2. * s2 - s1 ) / ( 9. * rho3 );
+        inv.ddRho.at(2, 1) = inv.ddRho.at(1, 2);
+        inv.ddRho.at(2, 2) = 2. / ( 3. * inv.rho ) - pow(2. * s2 - s1, 2.) / ( 9. * rho3 );
+
+        double sgnS1 = sgn_PlaneStress(s1, tol);
+        double sgnS2 = sgn_PlaneStress(s2, tol);
+        double sgnS1MinusS2 = sgn_PlaneStress(s1 - s2, tol);
+        double sgnS2MinusS1 = sgn_PlaneStress(s2 - s1, tol);
+
+        inv.dTheta[0] = -sqrt(3.) / 2. * sgnS1 * sgnS1MinusS2 * fabs(s2) / denomTheta;
+        inv.dTheta[1] = -sqrt(3.) / 2. * sgnS2 * sgnS2MinusS1 * fabs(s1) / denomTheta;
+    }
+
+    return inv;
+}
+
+
+double
+ConcreteDPM2::computeDFDTheta(double sig, double rho, double theta, double kappa) const
+{
+    double yieldHardOne = computeHardeningOne(kappa);
+    double yieldHardTwo = computeHardeningTwo(kappa);
+
+    double dRDCosTheta = computeDRDCosTheta(theta, this->ecc);
+    double rPrime = -sin(theta) * dRDCosTheta;
+
+    return this->m * pow(yieldHardOne, 2.) * yieldHardTwo * rho * rPrime / ( sqrt(6.) * fc );
+}
+
+
+double
+ConcreteDPM2::computeDFDKappa_NoCutoff(double sig, double rho, double theta, double tempKappa) const
+{
+    // Same formula as computeDFDKappa, but without clipping positive values to
+    // zero (the document this is based on has no such cut-off).
+    double yieldHardOne = computeHardeningOne(tempKappa);
+    double yieldHardTwo = computeHardeningTwo(tempKappa);
+    double dYieldHardOneDKappa = computeHardeningOnePrime(tempKappa);
+    double dYieldHardTwoDKappa = computeHardeningTwoPrime(tempKappa);
+
+    double rFunction =
+        ( 4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + pow( ( 2. * ecc - 1. ), 2 ) ) /
+        ( 2 * ( 1. - pow(ecc, 2) ) * cos(theta) + ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2) ) * pow(cos(theta), 2) + 5. * pow(ecc, 2) - 4. * ecc) );
+
+    double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2.) + sqrt(3. / 2.) * rho / fc;
+    double Bl = sig / fc + rho / ( fc * sqrt(6.) );
+
+    double dFDYieldHardOne = -2. * Al * pow(Bl, 2.)
+                             + 2. * yieldHardOne * yieldHardTwo * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardOne * pow(yieldHardTwo, 2.);
+
+    double dFDYieldHardTwo = pow(yieldHardOne, 2.) * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) ) - 2. * yieldHardTwo * pow(yieldHardOne, 2.);
+
+    return dFDYieldHardOne * dYieldHardOneDKappa + dFDYieldHardTwo * dYieldHardTwoDKappa;
+}
+
+
+double
+ConcreteDPM2::computeDKDTheta(double sig, double rho, double theta, double kappa) const
+{
+    // k = h(sig,theta)*Gamma(sig,rho,kappa), h = (2 cos theta)^2 / x_h(sig)
+    // dh/dtheta = -8 cos theta sin theta / x_h = -2 h tan theta  =>  dk/dtheta = -2 k tan theta
+    double k = computeDKappaDDeltaLambda(sig, rho, theta, kappa);
+    return -2. * k * tan(theta);
+}
+
+
+FloatArrayF< 2 >
+ConcreteDPM2::computeDFDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    auto dFDInv = computeDFDInv(inv.sig, inv.rho, inv.theta, kappa);
+    double dFDTheta = computeDFDTheta(inv.sig, inv.rho, inv.theta, kappa);
+
+    FloatArrayF< 2 >answer;
+    answer[0] = dFDInv.at(1) / 3. + inv.dRho[0] * dFDInv.at(2) + inv.dTheta[0] * dFDTheta;
+    answer[1] = dFDInv.at(1) / 3. + inv.dRho[1] * dFDInv.at(2) + inv.dTheta[1] * dFDTheta;
+    return answer;
+}
+
+
+FloatArrayF< 2 >
+ConcreteDPM2::computeDGDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    auto dGDInv = computeDGDInv(inv.sig, inv.rho, kappa);
+
+    FloatArrayF< 2 >answer;
+    answer[0] = dGDInv.at(1) / 3. + inv.dRho[0] * dGDInv.at(2);
+    answer[1] = dGDInv.at(1) / 3. + inv.dRho[1] * dGDInv.at(2);
+    return answer;
+}
+
+
+FloatMatrixF< 2, 2 >
+ConcreteDPM2::computeDDGDDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    auto dDGDDInv = computeDDGDDInv(inv.sig, inv.rho, kappa);
+    auto dGDInv = computeDGDInv(inv.sig, inv.rho, kappa);
+
+    double gVV = dDGDDInv.at(1, 1);
+    double gVRho = dDGDDInv.at(1, 2);
+    double gRhoRho = dDGDDInv.at(2, 2);
+    double gRho = dGDInv.at(2);
+
+    FloatMatrixF< 2, 2 >answer;
+    for ( int i = 0; i < 2; i++ ) {
+        for ( int j = 0; j < 2; j++ ) {
+            answer.at(i + 1, j + 1) = gVV / 9. +
+                                      ( inv.dRho[i] + inv.dRho[j] ) / 3. * gVRho +
+                                      inv.dRho[i] * inv.dRho[j] * gRhoRho +
+                                      inv.ddRho.at(i + 1, j + 1) * gRho;
+        }
+    }
+    return answer;
+}
+
+
+FloatArrayF< 2 >
+ConcreteDPM2::computeDDGDPrincipalDKappa_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    auto dDGDInvDKappa = computeDDGDInvDKappa(inv.sig, inv.rho, kappa);
+
+    FloatArrayF< 2 >answer;
+    answer[0] = dDGDInvDKappa.at(1) / 3. + inv.dRho[0] * dDGDInvDKappa.at(2);
+    answer[1] = dDGDInvDKappa.at(1) / 3. + inv.dRho[1] * dDGDInvDKappa.at(2);
+    return answer;
+}
+
+
+FloatArrayF< 2 >
+ConcreteDPM2::computeDKDPrincipal_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    auto dKDInv = computeDDKappaDDeltaLambdaDInv(inv.sig, inv.rho, inv.theta, kappa);
+    double dKDTheta = computeDKDTheta(inv.sig, inv.rho, inv.theta, kappa);
+
+    FloatArrayF< 2 >answer;
+    answer[0] = dKDInv.at(1) / 3. + inv.dRho[0] * dKDInv.at(2) + inv.dTheta[0] * dKDTheta;
+    answer[1] = dKDInv.at(1) / 3. + inv.dRho[1] * dKDInv.at(2) + inv.dTheta[1] * dKDTheta;
+    return answer;
+}
+
+
+double
+ConcreteDPM2::computeDGDSigmaZ_PlaneStress(const PlaneStressInvariants &inv, double kappa) const
+{
+    // Needed only for the out-of-plane plastic strain increment. Must be derived
+    // from the full 3D invariants (differentiate w.r.t. sigma_3, then set sigma_3 = 0),
+    // not from the sigma_3 = 0 reduced forms of rho/theta used elsewhere here.
+    auto dGDInv = computeDGDInv(inv.sig, inv.rho, kappa);
+    if ( inv.rho <= 0. ) {
+        return dGDInv.at(1) / 3.;
+    }
+    return dGDInv.at(1) / 3. - ( inv.s1 + inv.s2 ) / ( 3. * inv.rho ) * dGDInv.at(2);
+}
+
+
+FloatMatrixF< 4, 4 >
+ConcreteDPM2::computeJacobian_PlaneStress(const PlaneStressInvariants &inv, double kappa, double deltaLambda) const
+{
+    auto g = computeDGDPrincipal_PlaneStress(inv, kappa);
+    auto G = computeDDGDDPrincipal_PlaneStress(inv, kappa);
+    auto Gk = computeDDGDPrincipalDKappa_PlaneStress(inv, kappa);
+    auto f = computeDFDPrincipal_PlaneStress(inv, kappa);
+    // psreturn 0 and 1 clip a positive dF/dKappa to zero (the pre-existing 3d
+    // convention); 2 and 3 use the uncut formula of the hand-off note.
+    const bool clipDFDKappa = ( this->psReturnFlag == 0 ) ||
+                              ( this->psReturnFlag == 1 );
+    double fKappa = clipDFDKappa ?
+                    computeDFDKappa(inv.sig, inv.rho, inv.theta, kappa) :
+                    computeDFDKappa_NoCutoff(inv.sig, inv.rho, inv.theta, kappa);
+    double k = computeDKappaDDeltaLambda(inv.sig, inv.rho, inv.theta, kappa);
+    auto kPrincipal = computeDKDPrincipal_PlaneStress(inv, kappa);
+    double kKappa = computeDDKappaDDeltaLambdaDKappa(inv.sig, inv.rho, inv.theta, kappa);
+
+    double Estar = this->eM / ( 1. - this->nu * this->nu );
+
+    FloatMatrixF< 4, 4 >J;
+    J.at(1, 1) = 1. + deltaLambda * Estar * ( G.at(1, 1) + this->nu * G.at(2, 1) );
+    J.at(1, 2) = deltaLambda * Estar * ( G.at(1, 2) + this->nu * G.at(2, 2) );
+    J.at(1, 3) = deltaLambda * Estar * ( Gk[0] + this->nu * Gk[1] );
+    J.at(1, 4) = Estar * ( g[0] + this->nu * g[1] );
+
+    J.at(2, 1) = deltaLambda * Estar * ( this->nu * G.at(1, 1) + G.at(2, 1) );
+    J.at(2, 2) = 1. + deltaLambda * Estar * ( this->nu * G.at(1, 2) + G.at(2, 2) );
+    J.at(2, 3) = deltaLambda * Estar * ( this->nu * Gk[0] + Gk[1] );
+    J.at(2, 4) = Estar * ( this->nu * g[0] + g[1] );
+
+    J.at(3, 1) = -deltaLambda * kPrincipal[0];
+    J.at(3, 2) = -deltaLambda * kPrincipal[1];
+    J.at(3, 3) = 1. - deltaLambda * kKappa;
+    J.at(3, 4) = -k;
+
+    J.at(4, 1) = f[0];
+    J.at(4, 2) = f[1];
+    J.at(4, 3) = fKappa;
+    J.at(4, 4) = 0.;
+
+    return J;
+}
+
+
+void
+ConcreteDPM2::computePrincipalStress_PlaneStress(const FloatArrayF< 3 > &s, double &s1, double &s2, double &c, double &sn) const
+{
+    // Closed form 2x2 eigenvalue problem. Deliberately not sorted by magnitude:
+    // s1 = cm + R is always >= s2 = cm - R, which the sign-function based Lode
+    // angle derivatives above rely on implicitly (do not reorder downstream).
+    double sx = s[0], sy = s[1], txy = s[2];
+    double cm = 0.5 * ( sx + sy );
+    double R = sqrt(0.25 * ( sx - sy ) * ( sx - sy ) + txy * txy);
+    s1 = cm + R;
+    s2 = cm - R;
+
+    double phi = 0.5 * atan2(2. * txy, sx - sy);
+    c = cos(phi);
+    sn = sin(phi);
+}
+
+
+FloatArrayF< 3 >
+ConcreteDPM2::transformPrincipalToGlobal_PlaneStress(double s1, double s2, double c, double sn) const
+{
+    return {
+        s1 * c * c + s2 * sn * sn,
+        s1 * sn * sn + s2 * c * c,
+        ( s1 - s2 ) * sn * c
+    };
+}
+
+
+FloatMatrixF< 3, 3 >
+ConcreteDPM2::givePlaneStressElasticStiffness() const
+{
+    double Estar = this->eM / ( 1. - this->nu * this->nu );
+
+    FloatMatrixF< 3, 3 >D;
+    D.at(1, 1) = Estar;
+    D.at(1, 2) = Estar * this->nu;
+    D.at(2, 1) = Estar * this->nu;
+    D.at(2, 2) = Estar;
+    D.at(3, 3) = Estar * ( 1. - this->nu ) / 2.;
+    return D;
+}
+
+
+FloatMatrixF< 3, 3 >
+ConcreteDPM2::givePlaneStressElasticCompliance() const
+{
+    FloatMatrixF< 3, 3 >C;
+    C.at(1, 1) = 1. / this->eM;
+    C.at(1, 2) = -this->nu / this->eM;
+    C.at(2, 1) = -this->nu / this->eM;
+    C.at(2, 2) = 1. / this->eM;
+    C.at(3, 3) = 2. * ( 1. + this->nu ) / this->eM;
+    return C;
+}
+
+
+FloatArrayF< 6 >
+ConcreteDPM2::embedPlaneStress(const FloatArrayF< 3 > &v, double zz)
+{
+    return {
+        v[0], v[1], zz, 0., 0., v[2]
+    };
+}
+
+
+FloatArrayF< 6 >
+ConcreteDPM2::computeNominalStress(const FloatArrayF< 6 > &strain6,
+                                   const FloatArrayF< 6 > &effStress6,
+                                   const FloatMatrixF< 6, 6 > &D,
+                                   double dt,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep,
+                                   double &alpha) const
+{
+    // Same damage split as in giveRealStressVector_3d, shared so the plane
+    // stress driver does not duplicate the damFlag switch.
+    FloatArrayF< 6 >effectiveStressTension;
+    FloatArrayF< 6 >effectiveStressCompression;
+    FloatArrayF< 6 >stress;
+
+    alpha = 0.;
+
+    if ( this->damageFlag != 0 ) {
+        alpha = computeAlpha(effectiveStressTension, effectiveStressCompression, effStress6);
+        auto damages = computeDamage(strain6, D, dt, gp, tStep, alpha, effStress6);
+
+        if ( this->damageFlag == 1 ) {
+            stress = effectiveStressTension * ( 1. - damages.at(1) ) + effectiveStressCompression * ( 1. - damages.at(2) );
+        } else if ( this->damageFlag == 2 ) {
+            stress = effStress6 * ( 1. - ( 1. - alpha ) * damages.at(1) ) * ( 1. - alpha * damages.at(2) );
+        } else if ( this->damageFlag == 3 ) {
+            stress = effStress6 * ( 1. - damages.at(1) );
+        } else {
+            OOFEM_ERROR("Unknown value of damage flag. Must be 0, 1, 2 or 3");
+        }
+    } else {
+        stress = effStress6;
+    }
+
+    return stress;
+}
+
+
+double
+ConcreteDPM2::performRegularReturn_PlaneStress(double &s1, double &s2, double &deltaLambda,
+                                               ConcreteDPM2_ReturnResult &returnResult,
+                                               double kappaP,
+                                               int *iterationsOut) const
+{
+    const double s1Tr = s1;
+    const double s2Tr = s2;
+    const double kappaTr = kappaP;
+
+    double tempKappa = kappaP;
+    deltaLambda = 0.;
+
+    const double Estar = this->eM / ( 1. - this->nu * this->nu );
+
+    auto inv = computeInvariants_PlaneStress(s1, s2);
+
+    FloatArrayF< 4 >residuals;
+    residuals[3] = computeYieldValue(inv.sig, inv.rho, inv.theta, tempKappa);
+
+    double normOfResiduals = 1.;
+    int iterationCount = 0;
+
+    while ( normOfResiduals > yieldTol ) {
+        iterationCount++;
+        if ( iterationCount >= newtonIter ) {
+            returnResult = RR_NotConverged;
+            if ( iterationsOut ) { *iterationsOut = iterationCount; }
+            return kappaP;
+        }
+
+        auto residualsNorm = residuals;
+        residualsNorm[0] /= this->fc;
+        residualsNorm[1] /= this->fc;
+        normOfResiduals = norm(residualsNorm);
+
+        if ( std::isnan(normOfResiduals) ) {
+            returnResult = RR_NotConverged;
+            if ( iterationsOut ) { *iterationsOut = iterationCount; }
+            return kappaP;
+        }
+
+        if ( normOfResiduals > yieldTol ) {
+            auto jacobian = computeJacobian_PlaneStress(inv, tempKappa, deltaLambda);
+
+            // If kappa is still below 1 but the current stress estimate already
+            // violates the FULLY HARDENED (kappa=1) surface, hardening alone
+            // cannot resolve the violation: dF/dKappa is then typically positive
+            // (see hand-off note / algoCDPM.tex), which makes the coupled 4x4
+            // solve predict a spurious negative deltaLambda in the kappa-Delta
+            // Lambda block and can derail the Newton iteration entirely. In that
+            // regime, freeze kappa and solve the reduced 3x3 system (s1, s2,
+            // deltaLambda only; rows/cols 1, 2, 4) instead, then bring kappa back
+            // into consistency with the now-known deltaLambda using the 3rd
+            // equation, capped at 1 so kappa cannot itself overshoot past the
+            // point where the ordinary coupled iteration takes back over.
+            // psreturn 0 and 2 take this branch; 1 and 3 always use the
+            // coupled 4x4 solve (see psReturnFlag).
+            const bool branchEnabled = ( this->psReturnFlag == 0 ) ||
+                                       ( this->psReturnFlag == 2 );
+            const bool pathological = branchEnabled &&
+                                      ( tempKappa < 1. ) &&
+                                      ( computeYieldValue(inv.sig, inv.rho, inv.theta, 1.) > 0. );
+
+            if ( pathological ) {
+                FloatMatrixF< 3, 3 >jacobian3;
+                FloatArrayF< 3 >residuals3;
+                static const int idx[3] = { 1, 2, 4 };
+                for ( int ii = 0; ii < 3; ii++ ) {
+                    residuals3[ii] = residuals[idx[ii] - 1];
+                    for ( int jj = 0; jj < 3; jj++ ) {
+                        jacobian3.at(ii + 1, jj + 1) = jacobian.at(idx[ii], idx[jj]);
+                    }
+                }
+
+                FloatArrayF< 3 >delta3;
+                try {
+                    delta3 = solve(jacobian3, residuals3);
+                } catch ( ... ) {
+                    returnResult = RR_NotConverged;
+                    if ( iterationsOut ) { *iterationsOut = iterationCount; }
+                    return kappaP;
+                }
+
+                s1 -= delta3[0];
+                s2 -= delta3[1];
+                deltaLambda -= delta3[2];
+                deltaLambda = max(deltaLambda, 0.);
+
+                if ( deltaLambda > 0. ) {
+                    auto invNew = computeInvariants_PlaneStress(s1, s2);
+                    double kOldKappa = computeDKappaDDeltaLambda(invNew.sig, invNew.rho, invNew.theta, tempKappa);
+                    tempKappa = min(kappaTr + deltaLambda * kOldKappa, 1.);
+                }
+            } else {
+                FloatArrayF< 4 >delta;
+                try {
+                    delta = solve(jacobian, residuals);
+                } catch ( ... ) {
+                    returnResult = RR_NotConverged;
+                    if ( iterationsOut ) { *iterationsOut = iterationCount; }
+                    return kappaP;
+                }
+
+                s1 -= delta[0];
+                s2 -= delta[1];
+                tempKappa -= delta[2];
+                deltaLambda -= delta[3];
+                deltaLambda = max(deltaLambda, 0.);
+            }
+
+            inv = computeInvariants_PlaneStress(s1, s2);
+
+            auto g = computeDGDPrincipal_PlaneStress(inv, tempKappa);
+            double k = computeDKappaDDeltaLambda(inv.sig, inv.rho, inv.theta, tempKappa);
+
+            residuals[0] = s1 + deltaLambda * Estar * ( g[0] + this->nu * g[1] ) - s1Tr;
+            residuals[1] = s2 + deltaLambda * Estar * ( this->nu * g[0] + g[1] ) - s2Tr;
+            residuals[2] = tempKappa - deltaLambda * k - kappaTr;
+            residuals[3] = computeYieldValue(inv.sig, inv.rho, inv.theta, tempKappa);
+        }
+    }
+
+    returnResult = RR_Converged;
+    if ( iterationsOut ) { *iterationsOut = iterationCount; }
+    return tempKappa;
+}
+
+
+FloatArrayF< 3 >
+ConcreteDPM2::performPlasticityReturn_PlaneStress_Monotone(GaussPoint *gp, const FloatArrayF< 3 > &strain) const
+{
+    // Same return mapping as performPlasticityReturn_PlaneStress, but the
+    // strain subdivision is parametrised by a scalar fraction of the total
+    // increment, so that "depth" is well defined and can be held monotone:
+    //
+    //   eps(t) = epsStart + t * (strain - epsStart),   t in [0, 1]
+    //
+    // The subincrement size h = 0.5^depth never grows, neither within this
+    // call nor relative to the depth this Gauss point needed at the previous
+    // global iteration of the same time step (held in the status). The
+    // default routine instead restarts from depth 0 every global iteration
+    // and jumps back to the full remaining increment after each successful
+    // subincrement, both of which let the depth fall again.
+    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+
+    const auto &epsP6 = status->givePlasticStrain();
+    double kappa = status->giveKappaP();
+
+    FloatArrayF< 3 >epsP = {
+        epsP6[0], epsP6[1], epsP6[5]
+    };
+    double epsPz = epsP6[2];
+
+    const auto &reducedStrain6 = status->giveReducedStrain();
+    const FloatArrayF< 3 >epsStart = {
+        reducedStrain6[0], reducedStrain6[1], reducedStrain6[5]
+    };
+    const auto dEps = strain - epsStart;
+
+    auto Dps = givePlaneStressElasticStiffness();
+    auto Cps = givePlaneStressElasticCompliance();
+
+    double dLambdaTot = 0.;
+
+    // pssubcontrol 0 starts no coarser than the depth already needed in this
+    // time step; pssubcontrol 1 always starts from the full increment and only
+    // the within-call monotonicity is kept. The difference isolates the two
+    // mechanisms: holding the substep size within one call, versus carrying
+    // the depth across global iterations.
+    int depth = ( this->psSubControlFlag == 0 ) ? status->giveSubdivisionDepth() : 0;
+    const int depthAtEntry = status->giveSubdivisionDepth();
+    double h = pow(0.5, depth);
+    double tConv = 0.;
+
+    int callIterations = 0;
+    this->psStatsReturnCalls++;
+
+    FloatArrayF< 3 >sigma = dot(Dps, epsStart - epsP);
+
+    while ( tConv < 1. ) {
+        const double tTarget = min(tConv + h, 1.);
+        const auto epsTarget = epsStart + dEps * tTarget;
+
+        auto sigTr = dot(Dps, epsTarget - epsP);
+
+        double s1, s2, c, sn;
+        computePrincipalStress_PlaneStress(sigTr, s1, s2, c, sn);
+        auto inv = computeInvariants_PlaneStress(s1, s2);
+
+        double yieldValue = computeYieldValue(inv.sig, inv.rho, inv.theta, kappa);
+
+        ConcreteDPM2_ReturnResult returnResult = RR_NotConverged;
+        double dLambda = 0.;
+        double kappaNew = kappa;
+
+        if ( yieldValue <= 0. ) {
+            sigma = sigTr;
+            returnResult = RR_Converged;
+        } else {
+            int returnIterations = 0;
+            kappaNew = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa, &returnIterations);
+            callIterations += returnIterations;
+            if ( returnResult == RR_Converged ) {
+                sigma = transformPrincipalToGlobal_PlaneStress(s1, s2, c, sn);
+                inv = computeInvariants_PlaneStress(s1, s2);
+            }
+        }
+
+        if ( returnResult == RR_Converged ) {
+            kappa = kappaNew;
+            epsP = epsTarget - dot(Cps, sigma);
+            epsPz += dLambda * computeDGDSigmaZ_PlaneStress(inv, kappa);
+            dLambdaTot += dLambda;
+            tConv = tTarget;
+            // h deliberately unchanged: the subincrement never grows again.
+        } else {
+            depth++;
+            h *= 0.5;
+            if ( depth > 10 ) {
+                OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn_PlaneStress: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                this->psStatsIterTotal += callIterations;
+                this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+                this->psStatsSubdivCalls++;
+                this->psStatsSubincTotal += depth;
+                this->psStatsSubdivMax = max(this->psStatsSubdivMax, depth);
+                this->psStatsDeleted++;
+                status->setSubdivisionDepth(depth);
+                status->setTempDeletionFlag(1);
+                status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+                status->letTempKappaPBe(kappa);
+                status->letDeltaLambdaBe(dLambdaTot);
+                return FloatArrayF< 3 >();
+            }
+        }
+    }
+
+    this->psStatsIterTotal += callIterations;
+    this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+    if ( depth > 0 ) {
+        this->psStatsSubdivCalls++;
+        this->psStatsSubincTotal += depth;
+        this->psStatsSubdivMax = max(this->psStatsSubdivMax, depth);
+    }
+    if ( depth != depthAtEntry ) {
+        this->psStatsDepthChanges++;
+    }
+    status->setSubdivisionDepth(depth);
+
+    status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+    status->letTempKappaPBe(kappa);
+    status->letDeltaLambdaBe(dLambdaTot);
+
+    return sigma;
+}
+
+
+FloatArrayF< 3 >
+ConcreteDPM2::performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArrayF< 3 > &strain) const
+{
+    if ( this->psSubControlFlag != 2 ) {
+        return performPlasticityReturn_PlaneStress_Monotone(gp, strain);
+    }
+
+    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+
+    const auto &epsP6 = status->givePlasticStrain();
+    double kappa = status->giveKappaP();
+
+    FloatArrayF< 3 >epsP = {
+        epsP6[0], epsP6[1], epsP6[5]
+    };
+    double epsPz = epsP6[2];
+
+    const auto &reducedStrain6 = status->giveReducedStrain();
+    FloatArrayF< 3 >epsConv = {
+        reducedStrain6[0], reducedStrain6[1], reducedStrain6[5]
+    };
+
+    auto epsTarget = strain;
+    double dLambdaTot = 0.;
+
+    auto Dps = givePlaneStressElasticStiffness();
+    auto Cps = givePlaneStressElasticCompliance();
+
+    ConcreteDPM2_ReturnResult returnResult = RR_NotConverged;
+    int subIncrementFlag = 0;
+    int subincrementcounter = 0;
+
+    // Per-call local iteration total, folded into the per-step statistics
+    // below. Counts every Newton iteration this Gauss point spends, including
+    // those in subincrements that were later discarded.
+    int callIterations = 0;
+    this->psStatsReturnCalls++;
+
+    FloatArrayF< 3 >sigma;
+
+
+    while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
+        auto sigTr = dot(Dps, epsTarget - epsP);
+
+        double s1, s2, c, sn;
+        computePrincipalStress_PlaneStress(sigTr, s1, s2, c, sn);
+        auto inv = computeInvariants_PlaneStress(s1, s2);
+
+        double yieldValue = computeYieldValue(inv.sig, inv.rho, inv.theta, kappa);
+
+        double dLambda = 0.;
+        if ( yieldValue <= 0. ) {
+            // Elastic (sub)step: accept it directly. Unlike the 3d loop, which
+            // resets the plastic strain and breaks (discarding the rest of the
+            // increment) when a sub-step turns out elastic, this is treated here
+            // as a converged (sub)step so the remaining strain is not dropped.
+            sigma = sigTr;
+            returnResult = RR_Converged;
+        } else {
+            int returnIterations = 0;
+            kappa = performRegularReturn_PlaneStress(s1, s2, dLambda, returnResult, kappa, &returnIterations);
+            callIterations += returnIterations;
+            if ( returnResult == RR_Converged ) {
+                sigma = transformPrincipalToGlobal_PlaneStress(s1, s2, c, sn);
+                inv = computeInvariants_PlaneStress(s1, s2);
+            }
+        }
+
+        if ( returnResult == RR_Converged ) {
+            epsP = epsTarget - dot(Cps, sigma);
+            epsPz += dLambda * computeDGDSigmaZ_PlaneStress(inv, kappa);
+            dLambdaTot += dLambda;
+        }
+
+        if ( returnResult == RR_NotConverged ) {
+            subincrementcounter++;
+            if ( subincrementcounter > 10 ) {
+                OOFEM_LOG_INFO("ConcreteDPM2::performPlasticityReturn_PlaneStress: element %d deleted, plastic return did not converge.\n", gp->giveElement()->giveNumber() );
+                this->psStatsIterTotal += callIterations;
+                this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+                this->psStatsSubdivCalls++;
+                this->psStatsSubincTotal += subincrementcounter;
+                this->psStatsSubdivMax = max(this->psStatsSubdivMax, subincrementcounter);
+                this->psStatsDeleted++;
+
+                status->setTempDeletionFlag(1);
+                status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+                status->letTempKappaPBe(kappa);
+                status->letDeltaLambdaBe(dLambdaTot);
+                return FloatArrayF< 3 >();
+            }
+
+            subIncrementFlag = 1;
+            epsTarget = epsConv + ( epsTarget - epsConv ) * 0.5;
+        } else if ( subIncrementFlag == 0 ) {
+            break;
+        } else {
+            subIncrementFlag = 0;
+            returnResult = RR_NotConverged;
+            epsConv = epsTarget;
+            epsTarget = strain;
+        }
+    }
+
+
+    this->psStatsIterTotal += callIterations;
+    this->psStatsIterMaxCall = max(this->psStatsIterMaxCall, callIterations);
+    if ( subincrementcounter > 0 ) {
+        this->psStatsSubdivCalls++;
+        this->psStatsSubincTotal += subincrementcounter;
+        this->psStatsSubdivMax = max(this->psStatsSubdivMax, subincrementcounter);
+    }
+    // Diagnostic only: does the depth differ from the one this Gauss point
+    // used at the previous global iteration of this step? That change is what
+    // makes the returned stress discontinuous in the strain.
+    if ( subincrementcounter != status->giveSubdivisionDepth() ) {
+        this->psStatsDepthChanges++;
+    }
+    status->setSubdivisionDepth(subincrementcounter);
+
+    status->letTempPlasticStrainBe(embedPlaneStress(epsP, epsPz) );
+    status->letTempKappaPBe(kappa);
+    status->letDeltaLambdaBe(dLambdaTot);
+
+    return sigma;
+}
+
+
+void
+ConcreteDPM2::reportPlaneStressStats(int stepNumber) const
+{
+    if ( this->psStatsFlag && this->psStatsReturnCalls > 0 ) {
+        OOFEM_LOG_INFO("CDPM2 plane-stress local return, step %d: "
+                       "calls %ld, iterations %ld (mean %.2f, worst call %d), "
+                       "subdividing calls %ld, subincrements %ld (deepest %d), depth changes %ld, deleted %ld\n",
+                       this->psStatsStep,
+                       this->psStatsReturnCalls,
+                       this->psStatsIterTotal,
+                       (double) this->psStatsIterTotal / (double) this->psStatsReturnCalls,
+                       this->psStatsIterMaxCall,
+                       this->psStatsSubdivCalls,
+                       this->psStatsSubincTotal,
+                       this->psStatsSubdivMax,
+                       this->psStatsDepthChanges,
+                       this->psStatsDeleted);
+    }
+
+    this->psStatsReturnCalls = 0;
+    this->psStatsIterTotal = 0;
+    this->psStatsIterMaxCall = 0;
+    this->psStatsSubdivCalls = 0;
+    this->psStatsSubincTotal = 0;
+    this->psStatsSubdivMax = 0;
+    this->psStatsDepthChanges = 0;
+    this->psStatsDeleted = 0;
+    this->psStatsStep = stepNumber;
+}
+
+
+FloatArrayF< 3 >
+ConcreteDPM2::giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &fullStrainVector, GaussPoint *gp, TimeStep *tStep) const
+{
+    // Flush the previous step's local-return statistics on the first Gauss
+    // point call of a new step. tStep is already to hand, so this costs one
+    // integer comparison per call.
+    if ( tStep && tStep->giveNumber() != this->psStatsStep ) {
+        this->reportPlaneStressStats(tStep->giveNumber() );
+    }
+
+    if ( oldPlaneStressFlag ) {
+        // Legacy generic approach (pre-existing in OOFEM): iterate the
+        // out-of-plane strain on top of the full 3d return mapping, instead
+        // of the dedicated plane-stress algorithm below. Selectable from the
+        // input file (oldps 1) for comparative studies.
+        return StructuralMaterial::giveRealStressVector_PlaneStress(fullStrainVector, gp, tStep);
+    }
+
+    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
+
+    status->initTempStatus();
+
+    if ( status->giveTempDeletionFlag() == 1 ) {
+        FloatArrayF< 3 >stress;
+        status->letTempStressVectorBe(embedPlaneStress(stress) );
+        return stress;
+    }
+
+    FloatArray strainR;
+    this->giveStressDependentPartOfStrainVector(strainR, gp, FloatArray(fullStrainVector), tStep, VM_Total);
+    FloatArrayF< 3 >strainVector(strainR);
+
+    double dt = deltaTime;
+    if ( dt == -1 ) {
+        if ( tStep->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
+            dt = 1.;
+        } else {
+            dt = tStep->giveTimeIncrement();
+        }
+    }
+
+    auto effectiveStress3 = performPlasticityReturn_PlaneStress(gp, strainVector);
+
+    double epsZ = -this->nu / this->eM * ( effectiveStress3[0] + effectiveStress3[1] ) + status->giveTempPlasticStrain()[2];
+    auto strain6 = embedPlaneStress(strainVector, epsZ);
+    status->letTempReducedStrainBe(strain6);
+
+    auto effectiveStress6 = embedPlaneStress(effectiveStress3);
+
+    auto D6 = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
+    double alpha = 0.;
+    auto stress6 = computeNominalStress(strain6, effectiveStress6, D6, dt, gp, tStep, alpha);
+
+    FloatArrayF< 3 >stress = {
+        stress6[0], stress6[1], stress6[5]
+    };
+
+    status->letTempStrainVectorBe(embedPlaneStress(fullStrainVector, epsZ) );
+    status->letTempAlphaBe(alpha);
+    status->letTempStressVectorBe(stress6);
+    status->letTempEffectiveStressBe(effectiveStress6);
+#ifdef keep_track_of_dissipated_energy
+    double gf = pow(ft, 2) / this->eM; //rough estimation only for this purpose
+    status->computeWork(gp, gf);
+#endif
+    assignStateFlag(gp);
+    return stress;
+}
+
+
+FloatMatrixF< 3, 3 >
+ConcreteDPM2::givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+{
+    if ( oldPlaneStressFlag ) {
+        // Companion to the legacy giveRealStressVector_PlaneStress branch above:
+        // static condensation of the full 3d tangent/secant matrix.
+        return StructuralMaterial::givePlaneStressStiffMtrx(mode, gp, tStep);
+    }
+
+    // Stopgap: the plane stress algorithmic tangent is out of scope (see hand-off
+    // note). Returns the elastic plane stress stiffness, scaled by the secant
+    // damage factor for the stress formulas that reduce to a single scalar factor
+    // (damFlag 2 and 3). damFlag 0 and 1 (the default tension/compression split)
+    // is not representable as a scalar multiple of the elastic matrix, so the
+    // unscaled elastic matrix is returned in that case, same limitation as the
+    // existing ConcreteDPM2::compute3dSecantStiffness.
+    auto D = givePlaneStressElasticStiffness();
+
+    if ( mode == ElasticStiffness ) {
+        return D;
+    }
+
+    auto status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
+
+    double omegaTension = min(status->giveTempDamageTension(), 0.999999);
+    double omegaCompression = min(status->giveTempDamageCompression(), 0.999999);
+    double alpha = status->giveTempAlpha();
+
+    if ( damageFlag == 2 ) {
+        D *= ( 1. - ( 1. - alpha ) * omegaTension ) * ( 1. - alpha * omegaCompression );
+    } else if ( damageFlag == 3 ) {
+        D *= ( 1. - omegaTension );
+    }
+
+    return D;
 }
 
 int
