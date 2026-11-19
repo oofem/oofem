@@ -11,13 +11,13 @@ node 3 coords 3 0.04 0. 0. bc 3 2 1 1
 lattice3d 1 nodes 2 1 2 crossSect 1 mat 1 polycoords 12 0.01 -0.01 -0.01 0.01 -0.01 0.01 0.01 0.01 0.01 0.01 0.01 -0.01 
 lattice3d 2 nodes 2 2 3 crossSect 1 mat 1 polycoords 12 0.03 -0.01 -0.01 0.03 -0.01 0.01 0.03 0.01 0.01 0.03 0.01 -0.01
 LatticeCS 1 material 1
-latticelinearelastic 1 d 7600 e 200.00e9 talpha 0.
+latticelinearelastic 1 d 7600 e 200.00e9 talpha 0. a2 0. a3 0.
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 BoundaryCondition  2 loadTimeFunction 2 prescribedvalue 0.00015 
 ConstantFunction 1 f(t) 1.0  
 PiecewiseLinFunction 2 t 2 0. 0.1 f(t) 2 0.0 1.0
 
 #%BEGIN_CHECK% 
-#NODE tStep 22 number 3 dof 3 unknown d value 6.61634340e-09 tolerance 1.e-12
-#REACTION tStep 22 number 1 dof 3 value 1.3303e+01 tolerance 1.e-3
+#NODE tStep 23 number 3 dof 1 unknown d value 1.52175898e-07 tolerance 1.e-12
+#REACTION tStep 23 number 1 dof 1 value -3.17727290e+02 tolerance 1.e-1
 #%END_CHECK%
