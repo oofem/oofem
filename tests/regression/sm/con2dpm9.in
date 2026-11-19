@@ -2,7 +2,7 @@ con2dpm9.out
 #
 CDPM2 (Concretedpm2) Test of strain rate effect in tension second slope
 NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1000 nmodules 1
-nsteps 10 rtolv 1.e-3 reqIterations 4000 stiffMode 2 maxiter 4000 controllmode 0 stepLength 5.e-4 minsteplength 5.e-4 Psi 0. hpcmode 2 hpc 2 3 2 hpcw 1 1. donotfixload
+nsteps 30 rtolv 1.e-3 reqIterations 4000 stiffMode 2 maxiter 4000 controllmode 0 stepLength 5.e-5 minsteplength 5.e-5 Psi 0. hpcmode 2 hpc 2 3 2 hpcw 1 1. donotfixload
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
@@ -16,7 +16,7 @@ ltrspace 1 nodes 4 1 2 3 4 mat 1 crossSect 1
 #
 SimpleCS 1
 #
-con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-5 fc 47.4e6 ft 4.74e6 hp 0.5 yieldtol 1.e-10 asoft 15. stype 2 helem 0.1 sratetype 2 eratetype 2 deltat 1.e-6
+con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-5 fc 47.4e6 ft 4.74e6 hp 0.5 yieldtol 1.e-10 asoft 15. stype 2 helem 0.1 sratetype 2 erateexp 0.5 deltat 1.e-7
 #
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 3 0.e6 0. 0.
@@ -25,6 +25,6 @@ NodalLoad 4 loadTimeFunction 1 Components 3 0. 0. 0.e6
 #
 ConstantFunction 1 f(t) 1. 
 #%BEGIN_CHECK% tolerance 1e-1
-#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 2 value 1.5e-3
-#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 2 value 1.94788251e+07
+#ELEMENT tStep 30 number 1 gp 1 keyword 4 component 2 value 1.5e-3
+#ELEMENT tStep 30 number 1 gp 1 keyword 1 component 2 value 7.57397115e+05
 #%END_CHECK%

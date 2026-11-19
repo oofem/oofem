@@ -1734,6 +1734,8 @@ where :math:`X` is the continuous compression measure (= 1 means only compressio
 
 The dynamic increase factor (DIF) for strength is computed according to Model Code 2010.
 
+If :em:`sratetype` is greater than zero, the strengths depend on the strain rate, following the approach developed by Xiaowei Liu in her PhD thesis "Modelling the failure process of concrete subjected to shock". A rate factor :math:`r` is computed at the end of each step from the rates of the maximum and minimum principal strains, using the dynamic increase factors of the Model Code 2010 for tension (:math:`r_{\rm t}`) and compression (:math:`r_{\rm c}`), which are combined as :math:`r = (1-\alpha) r_{\rm t} + \alpha r_{\rm c}`. This rate factor is used in the next step. During unloading, the rate factors in tension and compression are kept constant, and once damage has started, the rate factor is no longer changed. Both :math:`f_{\rm t}` and :math:`f_{\rm c}` are multiplied by :math:`r`, which expands the yield surface without changing its shape. This is implemented by evaluating the model for the strains divided by :math:`r` and multiplying the resulting stress by :math:`r`. Consequently, damage starts when the effective stress reaches the expanded yield surface, and the strains at peak stress increase with :math:`r`. The fracture energy is increased by :math:`r^n`, where :math:`n` is given by :em:`erateexp`. Since the strength increase is obtained by the plasticity part, the hardening modulus :math:`H_p` does not need to be increased for rate dependent analyses.
+
 The :math:`\bf{parameters of CDPM2}` for OOFEM input file are summarised in :numref:`cdpm2_table`.
 By default, two damage variables are used, i.e., the effective stress is transformed into nominal stress using equation (:eq:`cdpm2:efftonominal`). If parameter :em:`damflag` is set to 3, only :math:`\omega_t` is used and the effective stress is reduced by :math:`1-\omega_t`.
 
@@ -1751,8 +1753,11 @@ By default, two damage variables are used, i.e., the effective stress is transfo
    |                    | [:elemparam:`Ahard{rn}`] [:elemparam:`Bhard{rn}`] [:elemparam:`Chard{rn}`]                   |
    |                    | [:elemparam:`Dhard{rn}`] [:elemparam:`Asoft{rn}`] [:elemparam:`helem{rn}`]                   |
    |                    | [:elemparam:`dilation{rn}`] [:elemparam:`hp{rn}`] [:elemparam:`damflag{in}`]                 |
-   |                    | [:elemparam:`sratetype{in}`] :elemparam:`eratetype{in}` [:elemparam:`yieldtol{rn}`]          |
+   |                    | [:elemparam:`sratetype{in}`] [:elemparam:`eratetype{in}`] [:elemparam:`erateexp{rn}`]        |
+   |                    | [:elemparam:`deltat{rn}`] [:elemparam:`yieldtol{rn}`]                                        |
    |                    | [:elemparam:`newtoniter{in}`]                                                                |
+   |                    | [:elemparam:`symtangent{in}`] [:elemparam:`numtangent{in}`]                                  |
+   |                    | [:elemparam:`numtangentpert{rn}`]                                                            |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Parameters         | - :param:`d` material density                                                                |
    |                    | - :param:`E` Young modulus                                                                   |
@@ -1779,20 +1784,33 @@ By default, two damage variables are used, i.e., the effective stress is transfo
    |                    | - :param:`helem` element size :math:`h`, optional (if not specified, the actual element size |
    |                    |   is used)                                                                                   |
    |                    | - :param:`dilation` dilation factor, optional, default value 0.85                            |
-   |                    | - :param:`hp` hardening modulus, optional, default value 0.5                                 |
+   |                    | - :param:`hp` hardening modulus, optional, default value 0.5. A small value such as 0.01     |
+   |                    |   is recommended, also if the strain rate effect is used                                     |
    |                    | - :param:`damflag` flag which allows for the use of different damage formulations. Default   |
    |                    |   value is 1. If set to zero, no damage is used. If set to 3, only the tensile damage        |
    |                    |   varialbe is used.                                                                          |
    |                    | - :param:`sratetype` Dynamic increase factor (DIF) for strength ; 0 - DIF = 1 (no rate       |
    |                    |   effect) ; 1 - First branch of Model Code 2010 DIF for strength. ; 2 - First and second     |
    |                    |   branch of Model Code 2010 DIF for strength                                                 |
-   |                    | - :param:`eratetype` Dynamic increase factor (DIF) for fracture energy. Only used if         |
-   |                    |   sratetype is not equal to 0. ; 0 - DIF = 1 ; 1 - DIF from sratetype ; 2 - DIF squared from |
-   |                    |   sratetype                                                                                  |
+   |                    | - :param:`erateexp` exponent :math:`n` of the rate dependence of the fracture energy, which  |
+   |                    |   is multiplied by :math:`r^n`, where :math:`r` is the rate factor. Only used if sratetype is|
+   |                    |   not equal to 0. Must be between 0 and 1, optional, default value 0 (constant fracture      |
+   |                    |   energy)                                                                                    |
+   |                    | - :param:`eratetype` older input for erateexp, optional. 0 corresponds to erateexp 0 and 1 to|
+   |                    |   erateexp 1                                                                                 |
+   |                    | - :param:`deltat` time increment used for the strain rate instead of the time step of the    |
+   |                    |   analysis, optional                                                                         |
    |                    | - :param:`yieldtol` tolerance for the implicit stress return algorithm, optional, default    |
    |                    |   value :math:`1 \times 10^{-6}`                                                             |
    |                    | - :param:`newtoniter` maximum number of iterations in the implicit stress return algorithm,  |
    |                    |   optional, default value 100                                                                |
+   |                    | - :param:`symtangent` symmetrise the tangent stiffness so it can be used with symmetric      |
+   |                    |   solvers, optional, default value 1; set to 0 to keep the exact non-symmetric tangent       |
+   |                    |   (requires a non-symmetric solver)                                                          |
+   |                    | - :param:`numtangent` compute the tangent stiffness numerically by central differences of    |
+   |                    |   the full plastic-damage response, optional, default value 0                                |
+   |                    | - :param:`numtangentpert` strain perturbation used for the numerical tangent, optional,      |
+   |                    |   default value :math:`1 \times 10^{-6}`                                                     |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Supported modes    | 3dMat, PlaneStress, PlaneStrain, 1dMat                                                       |
    +--------------------+----------------------------------------------------------------------------------------------+
@@ -1888,7 +1906,11 @@ CDPM2F is a fibre extension of CDPM2 in :ref:`sec:cdpm2`. The theory of CDPM2F i
 
 The main idea of CDPM2F is to adjust the damage part of CDPM2 to predict the effect of fibres.
 
-Below in Table :numref:`cdpm2f_table` the input parameters of CDPM2F in addition to those required for CDPM2 are described.
+Below in Table :numref:`cdpm2f_table` the input parameters of CDPM2F in addition to those required for CDPM2 are described. CDPM2F requires exponential softening of the matrix (:param:`stype` 2).
+
+The dispersion factor :math:`\alpha` describes how uniformly the fibres are distributed. It reduces the effective fibre volume fraction to :math:`v_{\rm f} = (1 + \ln \alpha)\, v_{\rm f0}`, so :math:`\alpha = 1` corresponds to a uniform distribution. :math:`\alpha` must lie between a lower limit :math:`\alpha_{\rm min}`, which follows from the other parameters (at :math:`\alpha_{\rm min}` the fibres just carry the tensile strength of the matrix, so the response no longer hardens), and 1. If the input :param:`alpha` is smaller than :math:`\alpha_{\rm min}`, the analysis stops with an error message that gives :math:`\alpha_{\rm min}`.
+
+The dispersion factor can vary in space through the optional parameters :optparam:`randvars{ia}` and :optparam:`randgen{ia}` with the property identifier 1001, for example ``randvars 1 1001 randgen 1 2``. When the material status of an integration point is created, function 2 (typically an ``InterpolatingFunction`` reading a random field from a file) is evaluated at the global coordinates of the point, and the result is used as a factor on the mean value :param:`alpha`, as for the random fields of the lattice materials. The field should therefore have a mean of 1, and the coefficient of variation of the field is the coefficient of variation of :math:`\alpha`. Outside the grid of an ``InterpolatingFunction`` the factor is 1. Since :math:`\alpha_{\rm min}` and 1 bound :math:`\alpha`, values of the product outside this range are set to the nearest limit at each integration point; for a wide distribution this changes the effective mean and coefficient of variation of :math:`\alpha`.
 
 .. table:: CDPM2F -- summary.
    :name: cdpm2f_table
@@ -1898,21 +1920,30 @@ Below in Table :numref:`cdpm2f_table` the input parameters of CDPM2F in addition
    | Description        | CDPM2F                                                                                       |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Record Format      | :descitem:`cdpm2f` :elemparam:`lf{rn}` :elemparam:`vf0{rn}` :elemparam:`df{rn}`              |
-   |                    | :elemparam:`tau0{rn}` :elemparam:`beta{rn}` [:elemparam:`f{rn}`] :elemparam:`ef{rn}`         |
+   |                    | :elemparam:`tau0{rn}` [:elemparam:`beta{rn}`] [:elemparam:`f{rn}`] :elemparam:`ef{rn}`       |
    |                    | :elemparam:`sm{rn}` [:elemparam:`alpha{rn}`] [:elemparam:`xi{rn}`]                           |
+   |                    | [:elemparam:`randvars{ia}` :elemparam:`randgen{ia}`]                                         |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Parameters         | - :param:`lf` length of fibre                                                                |
    |                    | - :param:`vf0` base volume fraction of fibres                                                |
    |                    | - :param:`df` diameter of fibre                                                              |
    |                    | - :param:`tau0` initial bond strength of interface between fibre and matrix                  |
-   |                    | - :param:`beta` hardening parameter of interface between fibre and matrix                    |
-   |                    | - :param:`f` snubbing factor                                                                 |
+   |                    | - :param:`beta` hardening parameter of interface between fibre and matrix, default 0.015     |
+   |                    | - :param:`f` snubbing factor, default 0.8                                                    |
    |                    | - :param:`ef` Young's modulus of fibre material                                              |
-   |                    | - :param:`sm` staturated crack spacing                                                       |
-   |                    | - :param:`alpha` parameter related to dispersion                                             |
-   |                    | - :param:`xi` parameter controling hardening of fibre stress strain response                 |
+   |                    | - :param:`sm` saturated crack spacing                                                        |
+   |                    | - :param:`alpha` dispersion factor (mean value if random), between                           |
+   |                    |   :math:`\alpha_{\rm min}` and 1, default 1                                                  |
+   |                    | - :param:`xi` parameter controlling hardening of fibre stress strain response, default 10    |
+   |                    | - :param:`randvars` property identifiers of random variables; 1001 for the dispersion factor |
+   |                    | - :param:`randgen` numbers of the functions generating the random factors                    |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Supported modes    | 3dMat, PlaneStrain, 1DMat                                                                    |
+   +--------------------+----------------------------------------------------------------------------------------------+
+   | Tests/Examples     | `sm/cdpm2fTest1.in                                                                           |
+   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fTest1.in>`_,       |
+   |                    | `sm/cdpm2fRandom.in                                                                          |
+   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fRandom.in>`_       |
    +--------------------+----------------------------------------------------------------------------------------------+
 
 .. _concreteFCM:

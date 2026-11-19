@@ -16,6 +16,7 @@ set (sm_material
     ConcreteMaterials/concrete3.C 
     ConcreteMaterials/concretedpm.C 
     ConcreteMaterials/concretedpm2.C
+    ConcreteMaterials/cdpm2f.C
     ConcreteMaterials/idm1.C 
     ConcreteMaterials/idmnl1.C 
     ConcreteMaterials/idmgrad.C

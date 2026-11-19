@@ -1,0 +1,35 @@
+cdpm2fTest1.out
+#
+cdpm2f2 test 1 tension with fibres
+NonLinearStatic nmsteps 2 nsteps 1 contextOutputStep 200 nmodules 1
+nsteps 5 rtolv 1.e-3 reqIterations 20 stiffMode 1 maxiter 200 controllmode 0 stepLength 40.e-6 minsteplength 40.e-6 Psi 0. hpcmode 2 hpc 2 3 2 hpcw 1 1. donotfixload
+nsteps 5 rtolv 1.e-3 reqIterations 20 stiffMode 1 maxiter 200 controllmode 0 stepLength 3.e-3 minsteplength 3.e-3 Psi 0. hpcmode 2 hpc 2 3 2 hpcw 1 1. donotfixload
+errorcheck
+domain 3d
+OutputManager
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 4 nltf 1 nic 0
+node 1 coords 3 0. 0. 0. bc 3 1 1 1
+node 2 coords 3 0.1 0. 0. bc 3 0 1 1
+node 3 coords 3 0. 0.1 0. bc 3 0 0 1 load 1 3
+node 4 coords 3 0. 0. 0.1 bc 3 1 1 0 
+#
+ltrspace 1 nodes 4 1 2 3 4 mat 1 crossSect 1
+#
+SimpleCS 1
+#
+cdpm2f 1 d 0. talpha 0. stype 2 E 15.9e9 n 0.2 ft 1.12e6 fc 15.5e6 wf 2.22e-7 ef 60.e9 lf 12.0e-3 vf0 0.02 df 40.e-6 beta 0.015 f 0.5 tau0 0.9e6 sm 0.005 hp 0.7 alpha 0.8
+#
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 Components 3 0.0 0. 0.
+NodalLoad 3 loadTimeFunction 1 Components 3 0. 2.5e6 0.
+NodalLoad 4 loadTimeFunction 1 Components 3 0. 0. 0.0
+#
+ConstantFunction 1 f(t) 1. 
+#%BEGIN_CHECK%
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2 value 4.e-4 tolerance 1.e-12
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2 value 1.29293787e+06 tolerance 1.e-2
+#ELEMENT tStep 5 number 1 gp 1 keyword 4 component 2 value 2.e-03 tolerance 1.e-12
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 2 value 2.58023793e+06 tolerance 1.e-2
+#ELEMENT tStep 10 number 1 gp 1 keyword 4 component 2 value 1.22400000e-01 tolerance 1.e-12
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 2 value 0.00000000e+00 tolerance 1.e-2
+#%END_CHECK%
