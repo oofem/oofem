@@ -19,6 +19,7 @@ mechanics problems.  The sources live on
    pages/sec-material-models-for-transport-problems
    pages/sec-material-models-for-fluid-dynamic
    pages/sec-material-models-for-lattice-analysis
+   pages/references
 
 License
 =======

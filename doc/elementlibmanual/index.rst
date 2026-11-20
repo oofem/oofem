@@ -21,6 +21,7 @@ mechanics problems.  The sources live on
    pages/sec-elements-for-fluid-dynamics-problems-fm-module
    pages/sec-mpm-symbolic-elements-mpm-module
    pages/sec-elements-for-lattice-analysis
+   pages/references
 
 License
 =======
