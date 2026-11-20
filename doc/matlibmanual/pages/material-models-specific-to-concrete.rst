@@ -1940,9 +1940,9 @@ The dispersion factor can vary in space through the optional parameters :optpara
    | Supported modes    | 3dMat, PlaneStrain, 1DMat                                                                    |
    +--------------------+----------------------------------------------------------------------------------------------+
    | Tests/Examples     | `sm/cdpm2fTest1.in                                                                           |
-   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fTest1.in>`_,       |
+   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fTest1.in>`_,            |
    |                    | `sm/cdpm2fRandom.in                                                                          |
-   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fRandom.in>`_       |
+   |                    | <https://github.com/oofem/oofem/blob/devel/tests/regression/sm/cdpm2fRandom.in>`_            |
    +--------------------+----------------------------------------------------------------------------------------------+
 
 .. _concreteFCM:
