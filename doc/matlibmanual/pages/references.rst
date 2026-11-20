@@ -72,6 +72,3 @@ References
 .. [SciGraLarRun20] A. Sciegaj and P. Grassl and F. Larsson and K. Runesson and K. Lundgren. “Upscaling of three-dimensional reinforced concrete representative volume elements to effective beam and plate models”, International Journal of Solids and Structures, vol. 202, pp. 835-853, 2020.
 
 .. [ZhoMarGra24] C. Zhou and A. Marlot and P. Grassl: CDPM2F: A Damage-Plasticity Approach to Modelling the Failure of Engineered Cementitious Composites, Available at SSRN 4819173, 2024.
-
-   :labelprefix: ref
-   :style: plain
