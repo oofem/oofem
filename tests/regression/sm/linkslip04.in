@@ -1,5 +1,5 @@
 linkslip04.out
-Test case for BondLink2dTruss with LinkSlip - truss rebar pull-out in 2D, bar along x and bar at 45 degrees
+Test case for IntElPoint with LinkSlip - truss rebar pull-out in 2D, bar along x and bar at 45 degrees
 NonLinearStatic nsteps 1 nmsteps 1 nmodules 1 contextoutputstep 10000
 nsteps 20 controlmode 1 rtolf 1.e-6 MaxIter 200 stiffMode 0
 errorcheck
@@ -28,14 +28,14 @@ truss2d 3 nodes 2 3 4 cs 1
 truss2d 4 nodes 2 9 10 cs 1
 truss2d 5 nodes 2 10 11 cs 1
 truss2d 6 nodes 2 11 12 cs 1
-bondlink2dtruss 7 nodes 2 1 5 length 0.05 diameter 0.02 dirvector 3 1 0 0
-bondlink2dtruss 8 nodes 2 2 6 length 0.1 diameter 0.02 dirvector 3 1 0 0
-bondlink2dtruss 9 nodes 2 3 7 length 0.1 diameter 0.02 dirvector 3 1 0 0
-bondlink2dtruss 10 nodes 2 4 8 length 0.05 diameter 0.02 dirvector 3 1 0 0
-bondlink2dtruss 11 nodes 2 9 13 length 0.05 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
-bondlink2dtruss 12 nodes 2 10 14 length 0.1 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
-bondlink2dtruss 13 nodes 2 11 15 length 0.1 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
-bondlink2dtruss 14 nodes 2 12 16 length 0.05 diameter 0.02 dirvector 3 0.707106781187 0.707106781187 0
+intelpoint 7 nodes 2 5 1 area 3.141593e-03 normal 3 1 0 0
+intelpoint 8 nodes 2 6 2 area 6.283185e-03 normal 3 1 0 0
+intelpoint 9 nodes 2 7 3 area 6.283185e-03 normal 3 1 0 0
+intelpoint 10 nodes 2 8 4 area 3.141593e-03 normal 3 1 0 0
+intelpoint 11 nodes 2 13 9 area 3.141593e-03 normal 3 0.707106781187 0.707106781187 0
+intelpoint 12 nodes 2 14 10 area 6.283185e-03 normal 3 0.707106781187 0.707106781187 0
+intelpoint 13 nodes 2 15 11 area 6.283185e-03 normal 3 0.707106781187 0.707106781187 0
+intelpoint 14 nodes 2 16 12 area 3.141593e-03 normal 3 0.707106781187 0.707106781187 0
 Set 1 elements 6 1 2 3 4 5 6
 Set 2 elements 8 7 8 9 10 11 12 13 14
 Set 3 nodes 8 5 6 7 8 13 14 15 16
