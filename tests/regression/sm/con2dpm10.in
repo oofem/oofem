@@ -16,7 +16,7 @@ ltrspace 1 nodes 4 1 2 3 4 mat 1 crossSect 1
 #
 SimpleCS 1
 #
-con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-5 fc 47.4e6 ft 4.74e6 hp 0.5 yieldtol 1.e-10 asoft 15. stype 2 helem 0.1 sratetype 1 erateexp 1. deltat 1.e-4
+con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-5 fc 47.4e6 ft 4.74e6 hp 0.01 yieldtol 1.e-10 asoft 15. stype 2 helem 0.1 sratetype 1 erateexp 1. deltat 1.e-4
 #
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 3 0.e6 0. 0.
@@ -26,5 +26,5 @@ NodalLoad 4 loadTimeFunction 1 Components 3 0. 0. 0.e6
 ConstantFunction 1 f(t) 1. 
 #%BEGIN_CHECK% tolerance 1e-1
 #ELEMENT tStep 30 number 1 gp 1 keyword 4 component 2 value 1.5e-3
-#ELEMENT tStep 30 number 1 gp 1 keyword 1 component 2 value 1.27334081e+06
+#ELEMENT tStep 30 number 1 gp 1 keyword 1 component 2 value 1.28398661e+06
 #%END_CHECK%

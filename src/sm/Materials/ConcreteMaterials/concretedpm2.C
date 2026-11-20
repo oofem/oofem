@@ -612,7 +612,7 @@ ConcreteDPM2::initializeFrom(const std::shared_ptr<InputRecord> &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->yieldHardInitial, _IFT_ConcreteDPM2_kinit);
 
     //Inclination at transition point
-    this->yieldHardPrimePeak = 0.5;
+    this->yieldHardPrimePeak = 0.01;
     IR_GIVE_OPTIONAL_FIELD(ir, this->yieldHardPrimePeak, _IFT_ConcreteDPM2_hp);
 
     if ( this->yieldHardPrimePeak < 0 ) {

@@ -1677,7 +1677,7 @@ from which :math:`\varepsilon_{\rm i}` can be evaluated iteratively if the total
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
    | :math:`q_{h0}`           | kinit            | \-   | 0.3             | initial value of hardening variable :math:`q_{h1}`, eq.~(:eq:`eq:hardeningLawOne`)     |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
-   | :math:`H_p`              | hp               | \-   | 0.5             | hardening modulus (for the last stage, eq.~(:eq:`eq:hardeningLawTwo`))                 |
+   | :math:`H_p`              | hp               | \-   | 0.01            | hardening modulus (for the last stage, eq.~(:eq:`eq:hardeningLawTwo`))                 |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
    | :math:`D_f`              | dilation         | \-   | 0.85            | dilation factor, eq.~(:eq:`cdpm2:betac`)                                               |
    +--------------------------+------------------+------+-----------------+----------------------------------------------------------------------------------------+
@@ -1718,7 +1718,7 @@ where
 
 The default value is not mentioned in  [GraXenNys13]_; in OOFEM it is taken as :math:`e=0.525`. 
 
-Parameter :math:`H_p` is a dimensionless hardening modulus that sets the ratio between the increments of variables :math:`q_{h2}` and :math:`\kappa_p` during the last stage of the plastic hardening process. The value recommended in  [GraXenNys13]_ is :math:`H_p=0.01`, but the default value used in OOFEM is 0.5.
+Parameter :math:`H_p` is a dimensionless hardening modulus that sets the ratio between the increments of variables :math:`q_{h2}` and :math:`\kappa_p` during the last stage of the plastic hardening process. The value recommended in  [GraXenNys13]_ is :math:`H_p=0.01`, which is also the default value used in OOFEM.
 
 The dilation parameter :math:`D_f` controls the ratio between the transversal and axial plastic strain rates in uniaxial compression and thus can be used to control the volumetric expansion in the softening regime. The default value is set to 0.85, as suggested in [GraJir]_, which means that the transversal plastic strain rate will be :math:`-0.85` times the (negative) axial plastic strain rate. 
 
@@ -1784,8 +1784,7 @@ By default, two damage variables are used, i.e., the effective stress is transfo
    |                    | - :param:`helem` element size :math:`h`, optional (if not specified, the actual element size |
    |                    |   is used)                                                                                   |
    |                    | - :param:`dilation` dilation factor, optional, default value 0.85                            |
-   |                    | - :param:`hp` hardening modulus, optional, default value 0.5. A small value such as 0.01     |
-   |                    |   is recommended, also if the strain rate effect is used                                     |
+   |                    | - :param:`hp` hardening modulus, optional, default value 0.01                                |
    |                    | - :param:`damflag` flag which allows for the use of different damage formulations. Default   |
    |                    |   value is 1. If set to zero, no damage is used. If set to 3, only the tensile damage        |
    |                    |   varialbe is used.                                                                          |
