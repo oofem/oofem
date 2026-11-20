@@ -1,0 +1,57 @@
+lattice2dframesteelplastic.out
+lattice2d with circular latticecs and LatticeFrameSteelPlastic (sigmay, perfect plasticity). Three independent structures: (A) pure bending, (B) proportional axial + bending, (C) 4-element cantilever under tip displacement.
+NonLinearStatic nmsteps 1 nsteps 11 nmodules 1
+nsteps 11 controlmode 1 rtolv 1.e-6 maxiter 200 stiffmode 1
+errorcheck
+domain 2dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 9 nelem 6 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 2 nset 4
+# A: single element, prescribed tip rotation
+node 1 coords 2 0.0 0.0
+node 2 coords 2 0.1 0.0
+# B: single element, prescribed tip axial displacement and rotation
+node 3 coords 2 0.0 1.0
+node 4 coords 2 0.1 1.0
+# C: 4-element cantilever, prescribed tip deflection
+node 5 coords 2 0.0 2.0
+node 6 coords 2 0.1 2.0
+node 7 coords 2 0.2 2.0
+node 8 coords 2 0.3 2.0
+node 9 coords 2 0.4 2.0
+#
+lattice2d 1 nodes 2 1 2 crossSect 1 mat 1 gpCoords 2 0.05 0.0 width 1.0 thick 1.0
+lattice2d 2 nodes 2 3 4 crossSect 1 mat 1 gpCoords 2 0.05 1.0 width 1.0 thick 1.0
+lattice2d 3 nodes 2 5 6 crossSect 1 mat 1 gpCoords 2 0.05 2.0 width 1.0 thick 1.0
+lattice2d 4 nodes 2 6 7 crossSect 1 mat 1 gpCoords 2 0.15 2.0 width 1.0 thick 1.0
+lattice2d 5 nodes 2 7 8 crossSect 1 mat 1 gpCoords 2 0.25 2.0 width 1.0 thick 1.0
+lattice2d 6 nodes 2 8 9 crossSect 1 mat 1 gpCoords 2 0.35 2.0 width 1.0 thick 1.0
+#
+latticecs 1 material 1 shape 1 radius 0.01
+LatticeFrameSteelPlastic 1 d 1. e 2.e11 n 0.3 talpha 0. sigmay 500.e6 tol 1.e-8 iter 100 sub 10
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 6 values 3 0. 0. 0. set 1
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 6 values 1 0.1 set 2
+BoundaryCondition 3 loadTimeFunction 2 dofs 2 1 6 values 2 5.e-4 0.08 set 3
+BoundaryCondition 4 loadTimeFunction 2 dofs 1 2 values 1 0.06 set 4
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 t 2 0. 10. f(t) 2 0. 1.
+Set 1 nodes 3 1 3 5
+Set 2 nodes 1 2
+Set 3 nodes 1 4
+Set 4 nodes 1 9
+#
+# Np = sigmay pi r^2 = 1.5708e5, Mp = sigmay 4 r^3/3 = 666.667 (step 1 is at t = 0)
+# A: M = min(EI phi/L, Mp)
+# B: backward-Euler return on (N/Np)^2 + (M/Mp)^2 = 1, first yield at tStep 5
+# C: elastic tip stiffness 7.4697e4, collapse V = Mp/(L - le/2) = 1904.76
+#%BEGIN_CHECK%
+#REACTION tStep 3 number 2 dof 6 value 3.14159265e+02 tolerance 1.e-3
+#REACTION tStep 11 number 2 dof 6 value 6.66666667e+02 tolerance 1.e-3
+#REACTION tStep 4 number 4 dof 1 value 9.42477796e+04 tolerance 1.e-1
+#REACTION tStep 4 number 4 dof 6 value 3.76991118e+02 tolerance 1.e-3
+#REACTION tStep 5 number 4 dof 1 value 1.15894534e+05 tolerance 1.e-1
+#REACTION tStep 5 number 4 dof 6 value 4.50007441e+02 tolerance 1.e-3
+#REACTION tStep 11 number 4 dof 1 value 1.27147593e+05 tolerance 1.e-1
+#REACTION tStep 11 number 4 dof 6 value 3.91462224e+02 tolerance 1.e-3
+#REACTION tStep 3 number 9 dof 2 value 8.96364807e+02 tolerance 1.e-3
+#REACTION tStep 11 number 9 dof 2 value 1.90476190e+03 tolerance 1.e-2
+#%END_CHECK%

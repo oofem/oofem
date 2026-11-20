@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2026   Borek Patzak
  *
  *
  *
@@ -32,27 +32,33 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef bondlink3dtruss_h
-#define bondlink3dtruss_h
+#ifndef latticelink2d_h
+#define latticelink2d_h
 
-#include "../structuralelement.h"
+#include "latticestructuralelement.h"
 
-///@name Input fields for BondLink3dTruss
+///@name Input fields for LatticeLink2d
 //@{
-#define _IFT_BondLink3dTruss_Name "bondlink3dtruss"
-#define _IFT_BondLink3dTruss_length "length"
-#define _IFT_BondLink3dTruss_diameter "diameter"
-#define _IFT_BondLink3dTruss_dirvector "dirvector"
+#define _IFT_LatticeLink2d_Name "latticelink2d"
+#define _IFT_LatticeLink2d_length "length"
+#define _IFT_LatticeLink2d_diameter "diameter"
+#define _IFT_LatticeLink2d_dirvector "dirvector"
 //@}
 
 namespace oofem {
 /**
- * This class implements a bond link for connecting truss and continuum elements with coinciding nodes.
+ * This class implements a 2-dimensional link element, the 2D counterpart of LatticeLink3d.
+ * It connects two nodes with u, v and the rotation about z (e.g. a frame node and a node
+ * embedded in a continuum). The jump of node 2 relative to node 1 (with a rigid arm from
+ * node 1 to node 2) is expressed in a local system with the first axis along dirvector:
+ * slip along the bar, lateral jump across it and relative rotation. The material is
+ * evaluated in _2dLattice mode, so the same lattice bond materials (e.g. latticeslip)
+ * can be used in 2D and 3D.
  *
  * @author: Peter Grassl
  */
 
-class BondLink3dTruss : public StructuralElement
+class LatticeLink2d : public LatticeStructuralElement
 {
 protected:
     double bondLength = 0.;
@@ -65,39 +71,42 @@ protected:
     FloatArray globalCentroid;
 
 public:
-    BondLink3dTruss(int n, Domain *);
+    LatticeLink2d(int n, Domain *);
+    virtual ~LatticeLink2d();
 
     double computeVolumeAround(GaussPoint *aGaussPoint) override;
 
-    double giveLength();
+    double giveLength() override;
 
-    MaterialMode giveMaterialMode() override { return _3dInterface; }
+    double giveArea(GaussPoint *gp) override
+    { return this->computeVolumeAround(gp) / this->giveLength(); }
 
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    /**
-     * This function is different from the standard computeGlobalCordinates
-     * function as it returns the global coordinates of the gausspoint
-     * independent to the value of the lcoords.
-     */
     int computeGlobalCoordinates(Coordinates &answer, const FloatArray &lcoords) override;
 
-    virtual double giveBondLength();
+    double giveBondLength() override;
 
-    virtual double giveBondDiameter();
+    double giveBondDiameter() override;
 
     int computeNumberOfDofs() override { return 6; }
 
     void giveDofManDofIDMask(int inode, IntArray &) const override;
 
+    void giveGpCoordinates(FloatArray &coords, GaussPoint *gp) override;
+
     virtual void computeGeometryProperties();
 
-    void giveInternalForcesVector(FloatArray &answer,
-                                  TimeStep *tStep, int useUpdatedGpRecord) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
-    const char *giveInputRecordName() const override { return _IFT_BondLink3dTruss_Name; }
-    const char *giveClassName()  const override { return "BondLink3dTruss"; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeLink2d_Name; }
+    const char *giveClassName()  const override { return "LatticeLink2d"; }
     void initializeFrom(const std::shared_ptr<InputRecord> &ir, int priority) override;
+    void postInitialize() override;
+
+    static ParamKey IPK_LatticeLink2d_length;
+    static ParamKey IPK_LatticeLink2d_diameter;
+    static ParamKey IPK_LatticeLink2d_dirvector;
 
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
@@ -119,13 +128,8 @@ protected:
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    /**
-     * This computes the geometrical properties of the element. It is called only once.
-     */
-    void computePropertiesOfCrossSection();
-
     void computeGaussPoints() override;
-    integrationDomain  giveIntegrationDomain() const override { return _Line; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
 };
 } // end namespace oofem
 #endif

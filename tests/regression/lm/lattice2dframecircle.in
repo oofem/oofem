@@ -1,0 +1,26 @@
+lattice2dframecircle.out
+Single lattice2d element with circular latticecs section and latticeframeelastic. Cantilever with tip N, V and M.
+LinearStatic nsteps 1 nmodules 1
+errorcheck
+domain 2dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 2 0.0 0.0
+node 2 coords 2 1.0 0.0
+#
+lattice2d 1 nodes 2 1 2 crossSect 1 mat 1 gpCoords 2 0.5 0.0 width 1.0 thick 1.0
+#
+latticecs 1 material 1 shape 1 radius 0.01
+latticeframeelastic 1 d 1. e 2.e11 n 0.3 talpha 0.
+BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 6 values 3 0. 0. 0. set 1
+NodalLoad 2 loadTimeFunction 1 dofs 3 1 2 6 components 3 1000. 10. 5. set 2
+ConstantFunction 1 f(t) 1.
+Set 1 nodes 1 1
+Set 2 nodes 1 2
+#
+# One-point element: u = NL/EA, phi = (M + VL/2)L/EI, v = VL/(G 0.9A) + L phi/2
+#%BEGIN_CHECK% tolerance 1.e-10
+#NODE tStep 1 number 2 dof 1 unknown d value 1.59154943e-05
+#NODE tStep 1 number 2 dof 2 unknown d value 3.18355864e-03
+#NODE tStep 1 number 2 dof 6 unknown d value 6.36619772e-03
+#%END_CHECK%
