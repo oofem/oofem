@@ -1,7 +1,8 @@
 con2dpm5.out
 Test of 1D CDPM2 on a 1D truss element
-NonLinearStatic nmsteps 1 nsteps 50 contextOutputStep 10000000 nmodules 0
-nsteps 3 rtolv 1.e-3 controllmode 0 stepLength 5.e-5 minsteplength 1.e-5 Psi 0. hpcmode 2  hpc 2 2 1 hpcw 1 1. reqIterations 100000 stiffMode 1 maxiter 100000 donotfixload 
+NonLinearStatic nmsteps 1 nsteps 50 contextOutputStep 10000000 nmodules 1
+nsteps 3 rtolv 1.e-3 controllmode 0 stepLength 5.e-5 minsteplength 1.e-5 Psi 0. hpcmode 2  hpc 2 2 1 hpcw 1 1. reqIterations 100000 stiffMode 1 maxiter 100000 donotfixload
+errorcheck
 domain 1DTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
@@ -13,9 +14,11 @@ con2dpm 1 d 0 E 20.e9 n 0.2 talpha 0. wf 800.e-6  fc 35e6 ft 2.e6 hp 0.025 yield
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0
-###### Used for Extractor
-###
-#%BEGIN_CHECK% 
-#NODE number 2 dof 1 unknown d
-#LOADLEVEL
+#%BEGIN_CHECK% tolerance 1.e1
+## uniaxial tension: axial strain (keyword 4) and axial stress (keyword 1)
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1 value 2.00000000e-04 tolerance 1.e-7
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1 value 1.97686780e+06
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1 value 1.85351968e+06
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1 value 6.00000000e-04 tolerance 1.e-7
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1 value 1.73808278e+06
 #%END_CHECK%

@@ -96,6 +96,9 @@ namespace oofem {
 #define exponent_ID 902
 #define rf_ID 903
 
+/* fibre reinforced concrete parameters */
+#define alphaDispersion_ID 1001
+
 /* lattice parameters */
 #define eNormal_ID 1101
 
