@@ -517,11 +517,8 @@ DGProblem::CreateBoundaryElement( Element_Geometry_Type egt, int elemNum, Domain
 void
 DGProblem :: postInitialize()
 {
-    // set meta step bounds
-    int istep = this->giveNumberOfFirstStep(true);
-    for ( auto &metaStep: metaStepList ) {
-        istep = metaStep.setStepBounds(istep);
-    }
+    // set meta step bounds and final times
+    this->timeStepController->postInitialize();
 
     // initialize boundary entities
     if ( preprocessFEM2DG ) {
