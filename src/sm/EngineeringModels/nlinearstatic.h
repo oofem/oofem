@@ -199,7 +199,7 @@ protected:
 
     void packMigratingData(TimeStep *tStep) override;
     void unpackMigratingData(TimeStep *tStep) override;
-    double giveInitialTime() override {return 1;}
+    void postInitialize() override;
 
 };
 } // end namespace oofem

@@ -329,6 +329,34 @@ TimeStep *NonLinearStatic :: giveNextStep()
     return currentStep.get();
 }
 
+void
+NonLinearStatic :: postInitialize()
+{
+    LinearStatic :: postInitialize();
+
+    // The first step is placed at t=0 and step n adds dt(n), with deltat or deltatfunction
+    // taken from the active meta step, see updateAttributes and giveNextStep.
+    // The meta steps get the time of their last step as final time, accumulated in the same
+    // order, so the time-controlled solution loop ends after nsteps.
+    double time = 0.;
+    int firstStep = this->giveNumberOfFirstStep(true);
+    for ( int i = 1; i <= this->giveNumberOfMetaSteps(); i++ ) {
+        MetaStep *mStep = this->giveMetaStep(i);
+        auto &ir = mStep->giveAttributesRecord();
+        double dt = 1.0;
+        int dtFunc = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, dt, _IFT_NonLinearStatic_deltat);
+        IR_GIVE_OPTIONAL_FIELD(ir, dtFunc, _IFT_NonLinearStatic_deltatfunction);
+        for ( int n = std::max(firstStep + 1, mStep->giveFirstStepNumber()); n <= mStep->giveLastStepNumber(); n++ ) {
+            time += dtFunc ? this->giveDomain(1)->giveFunction(dtFunc)->evaluateAtTime(n) : dt;
+        }
+        if ( !mStep->isFinalTimeGiven() ) {
+            mStep->setFinalTime(time);
+        }
+    }
+}
+
+
 Function *
 NonLinearStatic :: giveDtFunction()
 // Returns the load-time function of the receiver.
