@@ -70,6 +70,8 @@ protected:
     double tolerance = 0.;
     double value = 0.; // expected value
     double computedValue = 0.;
+    /// True once the rule has been checked in its solution step
+    bool evaluated = false;
 
 public:
     ErrorCheckingRule(double tol) : tolerance(tol) { }
@@ -81,6 +83,9 @@ public:
     virtual bool getValue(double& value, Domain* domain, TimeStep *tStep)=0;
 
     bool checkValue(double computedValue);
+    /// Returns true if the rule's solution step has been reached and checked
+    bool wasEvaluated() const { return evaluated; }
+    int giveTimeStepNumber() const { return tstep; }
     virtual const char *giveClassName() const = 0;
 };
 

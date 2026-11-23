@@ -139,9 +139,9 @@ Set 14 nodes 4 5 30 25 50
 Set 15 nodes 6 10 15 20 35 40 45
 #%BEGIN_CHECK%
 #TIME
-#NODE tStep 500 number 5  dof 2 unknown d value -3.71428703e-05  tolerance 1.e-10
-#NODE tStep 500 number 10 dof 2 unknown d value -3.71428332e-05  tolerance 1.
-#NODE tStep 500 number 15 dof 2 unknown d value -3.71427829e-05  tolerance 1.e-10
-#NODE tStep 500 number 20 dof 2 unknown d value -3.71427455e-05  tolerance 1.e-5
-#NODE tStep 500 number 25 dof 2 unknown d value -3.71427321e-05  tolerance 1.e-5
+#NODE tStep 50 number 5  dof 2 unknown d value -3.71428703e-05  tolerance 1.e-10
+#NODE tStep 50 number 10 dof 2 unknown d value -3.71428332e-05  tolerance 1.
+#NODE tStep 50 number 15 dof 2 unknown d value -3.71427829e-05  tolerance 1.e-10
+#NODE tStep 50 number 20 dof 2 unknown d value -3.71427455e-05  tolerance 1.e-5
+#NODE tStep 50 number 25 dof 2 unknown d value -3.71427321e-05  tolerance 1.e-5
 #%END_CHECK%

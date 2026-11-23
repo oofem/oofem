@@ -24,6 +24,6 @@ Set 3 nodes 1 2
 #%BEGIN_CHECK% tolerance 1.e-4
 #ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1  value 6.5455e+00
 #ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value 1.9264e+00
-#ELEMENT tStep 20 number 1 gp 1 keyword 4 component 1  value 2.1818e+01
-#ELEMENT tStep 20 number 1 gp 1 keyword 1 component 1  value 1.1991e+00
+#ELEMENT tStep 10 number 1 gp 1 keyword 4 component 1  value 2.18181818e+01
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1  value 1.1991e+00
 #%END_CHECK%

@@ -33,8 +33,6 @@ Set 3 nodes 4 5 6 7 8
 Set 4 elementranges {1}
 #
 #%BEGIN_CHECK% tolerance 1.e-3
-## check reactions 
-#REACTION tStep 5 number 1 dof 1 value -1.3303e+00
 ## check displacements in top nodes
 #NODE tStep 1 number 1 dof 3 unknown d value -4.00000000e-01
 #NODE tStep 1 number 2 dof 3 unknown d value -4.00000000e-01

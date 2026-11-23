@@ -1,7 +1,7 @@
 deactivate_2.out
 Patch test of Truss2d elements -> simple structure with activated and deactivated element
-nonlinearstatic nsteps 3 controlmode 1 rtolf 1.e-8 nmodules 1
-#staticstructural nsteps 3 rtolf 1.e-8 nmodules 1
+nonlinearstatic nsteps 5 controlmode 1 rtolf 1.e-8 nmodules 1
+#staticstructural nsteps 5 rtolf 1.e-8 nmodules 1
 errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
