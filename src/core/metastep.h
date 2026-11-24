@@ -81,6 +81,8 @@ protected:
     double deltaT = 1;
     /// final time of the metastep
     double finalTime = 0;
+    /// True if the final time was given explicitly in the input (finalt)
+    bool finalTimeGiven = false;
     /// Engineering model attributes.
     std::shared_ptr<InputRecord> attributes;
     /// Start solution step number for which receiver is responsible.
@@ -144,6 +146,7 @@ public:
     /// Returns final time of the meta step
     double giveFinalTime(){return finalTime;}
     void setFinalTime(double ft){finalTime = ft;}
+    bool isFinalTimeGiven() const {return finalTimeGiven;}
     void recomputeFinalTime(int nSteps) {finalTime =  nSteps * deltaT;}
     void setPreviousMetaStepFinalTime(double ft){previousMetaStepFinalTime = ft;}
 

@@ -67,14 +67,14 @@ enrfrontdonothing
 
 #%BEGIN_CHECK% tolerance 1.e-6
 ## Node displacements
-#NODE tStep 0 number 14 dof 1 unknown d value 1.00000000e-02
-#NODE tStep 0 number 14 dof 2 unknown d value 2.00000000e-02
-#NODE tStep 0 number 14 dof 23 unknown d value 0.0
-#NODE tStep 0 number 14 dof 24 unknown d value 0.0
-#NODE tStep 0 number 14 dof 31 unknown d value 1.00000000e-02
-#NODE tStep 0 number 14 dof 32 unknown d value 2.00000000e-02
-#NODE tStep 0 number 14 dof 39 unknown d value 0.0
-#NODE tStep 0 number 14 dof 40 unknown d value 0.0
+#NODE tStep 1 number 14 dof 1 unknown d value 1.00000000e-02
+#NODE tStep 1 number 14 dof 2 unknown d value 2.00000000e-02
+#NODE tStep 1 number 14 dof 500 unknown d value 0.0
+#NODE tStep 1 number 14 dof 501 unknown d value 0.0
+#NODE tStep 1 number 14 dof 508 unknown d value 1.00000000e-02
+#NODE tStep 1 number 14 dof 509 unknown d value 2.00000000e-02
+#NODE tStep 1 number 14 dof 516 unknown d value 0.0
+#NODE tStep 1 number 14 dof 517 unknown d value 0.0
 #%END_CHECK%
 
 

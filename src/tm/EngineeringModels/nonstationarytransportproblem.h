@@ -151,6 +151,7 @@ public:
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
     void initializeFrom(const std::shared_ptr<InputRecord> &ir) override;
+    void postInitialize() override;
     int checkConsistency() override;
 
     // identification

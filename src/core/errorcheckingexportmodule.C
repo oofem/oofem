@@ -159,6 +159,7 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
+    evaluated = true;
 
     DofManager *dman = domain->giveGlobalDofManager(number);
     if ( !dman ) {
@@ -231,6 +232,7 @@ InternalElementDofManErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
+    evaluated = true;
 
     Element *element = domain->giveGlobalElement(number);
     if ( !element ) {
@@ -334,6 +336,7 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
      if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
+    evaluated = true;
 
     FloatArray ipval;
     Element *element = domain->giveGlobalElement(number);
@@ -443,6 +446,7 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
+    evaluated = true;
 
     FloatArray val;
     Element *element = domain->giveGlobalElement(number);
@@ -571,6 +575,7 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
+    evaluated = true;
 
 #ifdef __SM_MODULE
     //EngngModel *emodel = domain->giveEngngModel();
@@ -681,6 +686,7 @@ LoadLevelErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep ) {
         return true;
     }
+    evaluated = true;
 
     double loadLevel = domain->giveEngngModel()->giveLoadLevel();
     bool check = checkValue(loadLevel);
@@ -725,6 +731,7 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if ( tStep->giveNumber() != tstep ) {
         return true;
     }
+    evaluated = true;
 
     double eig = domain->giveEngngModel()->giveEigenValue(number);
     bool check = checkValue(eig);
@@ -746,9 +753,14 @@ EigenValueErrorCheckingRule :: getValue(double&answer, Domain *domain, TimeStep 
 TimeCheckingRule :: TimeCheckingRule(const std :: string &line, double tol) :
     ErrorCheckingRule(tol)
 {
+    // Extractor-only rule, not bound to a solution step
+    evaluated = true;
 }
 
-TimeCheckingRule::TimeCheckingRule(const std::shared_ptr<InputRecord>& ir, double tol): ErrorCheckingRule(tol){ }
+TimeCheckingRule::TimeCheckingRule(const std::shared_ptr<InputRecord>& ir, double tol): ErrorCheckingRule(tol)
+{
+    evaluated = true;
+}
 
 bool
 TimeCheckingRule :: check(Domain *domain, TimeStep *tStep)
@@ -907,7 +919,28 @@ ErrorCheckingExportModule::initialize()
 void ErrorCheckingExportModule::terminate()
 {
     if (this->extractorMode) {
-        fclose (this->outputFile);   
+        fclose (this->outputFile);
+        return;
+    }
+
+    // Rules whose step was never reached would otherwise pass silently,
+    // e.g. when the analysis ends before the requested step.
+    int nNotEvaluated = 0;
+    for ( auto &rule: this->errorCheckingRules ) {
+        if ( !rule->wasEvaluated() ) {
+            OOFEM_LOG_ERROR("%s for tStep %d was never evaluated\n", rule->giveClassName(), rule->giveTimeStepNumber() );
+            nNotEvaluated++;
+        }
+    }
+
+    if ( nNotEvaluated > 0 ) {
+        OOFEM_ERROR("%d rule(s) not evaluated, analysis ended at step %d", nNotEvaluated,
+                    this->emodel->giveCurrentStep() ? this->emodel->giveCurrentStep()->giveNumber() : 0);
+    }
+
+    // Covers runs where the last step by count (nsteps) is not the final one
+    if ( !this->allPassed ) {
+        OOFEM_ERROR("Rule not passed, exiting with error");
     }
 }
 

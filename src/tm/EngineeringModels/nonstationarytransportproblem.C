@@ -200,6 +200,28 @@ NonStationaryTransportProblem :: giveSolutionStepWhenIcApply(bool force)
 }
 
 
+void
+NonStationaryTransportProblem :: postInitialize()
+{
+    StationaryTransportProblem :: postInitialize();
+
+    // The first step is placed at initT and step n adds giveDeltaT(n), see giveNextStep.
+    // The meta steps get the same final time, accumulated in the same order, so the
+    // time-controlled solution loop ends after nsteps also for deltatfunction and prescribedtimes.
+    double time = this->initT;
+    int firstStep = this->giveNumberOfFirstStep(true);
+    for ( int i = 1; i <= this->giveNumberOfMetaSteps(); i++ ) {
+        MetaStep *mStep = this->giveMetaStep(i);
+        for ( int n = std::max(firstStep + 1, mStep->giveFirstStepNumber()); n <= mStep->giveLastStepNumber(); n++ ) {
+            time += this->giveDeltaT(n);
+        }
+        if ( !mStep->isFinalTimeGiven() ) {
+            mStep->setFinalTime(time);
+        }
+    }
+}
+
+
 Function *
 NonStationaryTransportProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.

@@ -32,12 +32,12 @@ Set 4 nodes 1 3
 #
 #%BEGIN_CHECK% tolerance 1.e-12
 ## check nodal values at the end of time interest
-#NODE tStep 1000 number 2 dof 3 unknown d value 1.00000000e-03
-#NODE tStep 1000 number 3 dof 3 unknown d value 2.00000000e-03
+#NODE tStep 30 number 2 dof 3 unknown d value 1.00000000e-03
+#NODE tStep 30 number 3 dof 3 unknown d value 2.00000000e-03
 ## check element no. 1 strain vector
-#ELEMENT tStep 1000 number 1 gp 1 keyword 4 component 1  value 1.0000e-03
-#ELEMENT tStep 1000 number 1 gp 1 keyword 1 component 1  value 1.1055e+01
-#ELEMENT tStep 1000 number 2 gp 1 keyword 4 component 1  value 1.0000e-03
-#ELEMENT tStep 1000 number 2 gp 1 keyword 1 component 1  value 1.1055e+01
+#ELEMENT tStep 30 number 1 gp 1 keyword 4 component 1  value 1.0000e-03
+#ELEMENT tStep 30 number 1 gp 1 keyword 1 component 1  value 1.10549687e+01 tolerance 1.e-6
+#ELEMENT tStep 30 number 2 gp 1 keyword 4 component 1  value 1.0000e-03
+#ELEMENT tStep 30 number 2 gp 1 keyword 1 component 1  value 1.10549687e+01 tolerance 1.e-6
 #%END_CHECK%
 #

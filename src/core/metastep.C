@@ -64,6 +64,7 @@ MetaStep :: initializeFrom(const std::shared_ptr<InputRecord> &ir)
     deltaT = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_MetaStep_deltaT);
     prescribedTimes.clear();
+    finalTimeGiven = ir->hasField(_IFT_MetaStep_finalT);
     IR_GIVE_OPTIONAL_FIELD(ir, finalTime, _IFT_MetaStep_finalT);
     // compute minDeltaT as min of deltaT and mindeltaT form timeStepReudctionStrategy
     minDeltaT = std::min(deltaT, timeStepReductionStrategy->giveMinDeltaT());
@@ -93,9 +94,9 @@ MetaStep :: postInitialize()
     if ( finalTime == 0 ) {
       if ( dtFunction ) {
         // loop over steps and sum up time increments
-        double time = 0;
-        for ( int i = 1; i <= numberOfSteps; i++ ) {
-          //time += giveDtFunction()->evaluateAtTime(i);
+        double time = this->previousMetaStepFinalTime;
+        for ( int i = sindex; i < sindex + numberOfSteps; i++ ) {
+          time += giveDtFunction()->evaluateAtTime(i);
         }
         finalTime = time;
       } else if ( prescribedTimes.giveSize() > 0 ) {

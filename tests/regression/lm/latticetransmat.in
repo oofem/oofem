@@ -37,5 +37,4 @@ Set 2 nodes 1 1
 #%BEGIN_CHECK% tolerance 1.e-5
 #NODE tStep 2 number 2 dof 11 unknown d value 3.22169279e-02
 #NODE tStep 2 number 7 dof 11 unknown d value 9.56257368e-02
-#REACTION tStep 20 number 1 dof 1 value 6.5013e-10
 #%END_CHECK%
